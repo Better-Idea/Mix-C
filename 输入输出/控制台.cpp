@@ -4,7 +4,7 @@
 #ifdef _
 #undef _
 #endif
-#include"小工具/数值字符串化.h"
+#include"小工具/字符串化.h"
 #include"控制台.h"
 
 结构体 匿名字段{
