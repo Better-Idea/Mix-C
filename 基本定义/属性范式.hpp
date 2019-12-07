@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"基本定义/迷你.h"
+#include"基本定义/迷你.hpp"
 #define $                      };
 #define $D                     此数据()
 #define $I                     此接口()

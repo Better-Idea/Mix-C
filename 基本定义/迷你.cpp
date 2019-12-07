@@ -3,7 +3,7 @@
 #pragma warning(disable:26444)
 #pragma warning(disable:6011)
 #pragma warning(disable:6031)
-#include"指令集/基础.h"
+#include"指令集/基础.hpp"
 #include<malloc.h>
 
 #ifdef _MSC_VER
