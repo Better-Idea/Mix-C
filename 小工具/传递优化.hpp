@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"基本定义/迷你.h"
+#include"基本定义/迷你.hpp"
 
 #define 转交给 ,
 

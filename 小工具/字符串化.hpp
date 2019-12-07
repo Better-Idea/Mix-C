@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"基本定义/迷你.h"
+#include"基本定义/迷你.hpp"
 
 模板<类 甲, 类 乙>
 自然数 字符串化(乙 * 缓冲区, 甲 值, 甲 基数, 常量 阿斯克码 * 查找表 = "0123456789abcdefghijklmnopqrstuvwxyz") {
