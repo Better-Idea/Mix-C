@@ -1,5 +1,5 @@
-﻿#include"文字/万国码.h"
-#include"基本定义/模板元.h"
+﻿#include"文字/万国码.hpp"
+#include"基本定义/模板元.hpp"
 
 文字 他的本意(整数 值) {
     自然数 藏着 = 1;
