@@ -1,4 +1,4 @@
-#include"基本定义/模板元.h"
+#include"基本定义/模板元.hpp"
 
 模板<U32 种子>
 结构体 HASH{
