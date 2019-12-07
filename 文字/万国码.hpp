@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"基本定义/属性范式.h"
+#include"基本定义/属性范式.hpp"
 
 命名空间 万国码空间 {
     三体(类 元素);

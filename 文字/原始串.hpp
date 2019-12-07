@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"基本定义/属性范式.h"
+#include"基本定义/属性范式.hpp"
 #define  _                 (原始串) u""
 
 命名空间 原始串空间{
