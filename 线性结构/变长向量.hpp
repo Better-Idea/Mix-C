@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include"指令集/基础.h"
-#include"基本定义/属性范式.h"
+#include"指令集/基础.hpp"
+#include"基本定义/属性范式.hpp"
 
 命名空间 变长向量空间 {
     三体(类 元素类型, 自然数 页长度);
