@@ -1,5 +1,5 @@
-﻿#include"数学/随机数.h"
-#include"输入输出/控制台.h"
+﻿#include"数学/随机数.hpp"
+#include"输入输出/控制台.hpp"
 I32 重复1BIT[32];
 I32 重复8BIT[256];
 I32 正反频数[2];

@@ -1,5 +1,5 @@
-﻿#include"数学/随机数.h"
-#include"输入输出/控制台.h"
+﻿#include"数学/随机数.hpp"
+#include"输入输出/控制台.hpp"
 
 定义 常量 文字 * 文字串;
 文字串 列表[] = {
