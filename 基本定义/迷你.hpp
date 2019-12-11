@@ -63,6 +63,7 @@
 #define 对齐(n)                __attribute((aligned(n)))
 #endif
 
+#define $                      };
 #define 再初始化(类型,引用)    new (取址(引用)) 类型
 #define 拼接宏(甲,乙)          甲 ## 乙
 #define 二次拼接宏(甲,乙)      拼接宏(甲,乙)
