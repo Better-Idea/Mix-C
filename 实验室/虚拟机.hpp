@@ -245,13 +245,7 @@
                 STA.ZF = B.I == C.I;
                 STA.GT = B.I >  C.I;
                 STA.AB = B.U >  C.U;
-
-                若 (带借位){
-                    STA.CF = ::指令集::减法(A.U, B.U, C.U);
-                }
-                非{
-                    STA.CF = ::指令集::减法(A.U, B.U, C.U, STA.CF);
-                }
+                STA.CF = ::指令集::减法(A.U, B.U, C.U, STA.CF & 带借位);
             });
         };
         $M(除法      ){
