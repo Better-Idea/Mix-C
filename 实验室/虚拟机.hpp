@@ -453,21 +453,21 @@
             R[CMD.B] = B;
         };
         $M(PSH){
-            若 (CMD.A <= CMD.B) 循环(整数 I = CMD.A; I <= CMD.B; I++) {
+            若 (CMD.A <= CMD.B) 循环(整数 I = CMD.A; I <= 整数(CMD.B); I++) {
                 内存写入(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
                 R[SP].U += 空间量(整数寄存器);
             }
-            非 循环(整数 I = CMD.A; I >= CMD.B; I--) {
+            非 循环(整数 I = CMD.A + 1; I-- > 整数(CMD.B);) {
                 内存写入(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
                 R[SP].U += 空间量(整数寄存器);
             }
         };
         $M(POP){
-            若 (CMD.A <= CMD.B) 循环(整数 I = CMD.A; I <= CMD.B; I++) {
+            若 (CMD.A <= CMD.B) 循环(整数 I = CMD.A; I <= 整数(CMD.B); I++) {
                 R[SP].U -= 空间量(整数寄存器);
                 内存读取(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
             }
-            非 循环(整数 I = CMD.A; I >= CMD.B; I--) {
+            非 循环(整数 I = CMD.A + 1; I-- > 整数(CMD.B);) {
                 R[SP].U -= 空间量(整数寄存器);
                 内存读取(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
             }
