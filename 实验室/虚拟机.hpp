@@ -3,7 +3,7 @@
 #include"指令集/基础.hpp"
 
 枚举 指令区间 : U08{
-    PSI  = 0                  , PSI指令条数  = 16, // 立即数填充
+    PSI  = 0                  , PSI指令条数  = 16, // 立即数装载
     MRW  = PSI  + PSI指令条数 , MRW指令条数  = 16, // 内存读写
     SUB  = MRW  + MRW指令条数 , SUB指令条数  = 16, // 加法
     SBB  = SUB  + SUB指令条数 / 2                , // 加法
@@ -40,8 +40,10 @@
     MOV  = JAL  + JAL指令条数 , MOV指令条数  =  2, // 赋值
     SWP  = MOV  + MOV指令条数 , SWP指令条数  =  1, // 交换
     PSH  = SWP  + SWP指令条数 , PSH指令条数  =  1, // 压栈
-    POP  = PSH  + PSH指令条数 , POP指令条数  =  1, // 退栈
-    RET  = POP  + POP指令条数 , RET指令条数  =  1, // 返回
+    PSHS = PSH  + PSH指令条数 , PSHS指令条数 =  1, // 状态寄存器压栈
+    POP  = PSHS + PSHS指令条数, POP指令条数  =  1, // 退栈
+    POPS = POP  + POP指令条数 , POPS指令条数 =  1, // 状态寄存器退栈
+    RET  = POPS + POPS指令条数, RET指令条数  =  1, // 返回
 
     DOWN = 0                                     , // 向上跳转
     UP   = 1                                     , // 向下跳转
@@ -109,7 +111,7 @@
             复制(C, 值);
         }
         运算重载 U08(){
-            回递 C;
+            回递 U08(C);
         }
         指令区间 C;
     } OPC;
@@ -137,31 +139,33 @@
 
 结构体 处理器{
     枚举{
-        整数寄存器个数 = 16,
+        整数器个数     = 16,
         指令个数       = 256,
         SP             = 0,
     };
 
-    联合体 整数寄存器{
+    联合体 整数器{
         U64 U;
         I64 I;
-        整数寄存器() :I{} {}
-        整数寄存器(I64 I) : I(I){}
-        整数寄存器(U64 U) : U(U){}
-    } R[整数寄存器个数], TMP;
+        整数器() :I{} {}
+        整数器(I64 I) : I(I){}
+        整数器(U64 U) : U(U){}
+    };
 
-
-    结构体 立即数结构{
-        立即数结构(){
+    结构体 立即数{
+        立即数(){
             位宽 = 0;
             值 = 0;
         }
-        空 填充(U08 W, U16 V){
+        空 装载(U08 W, U16 V){
             值 |= I64(V) << 位宽;
             位宽 += W;
         }
+        运算重载 整数器(){
+            回递 整数器(运算重载 I64());
+        }
         运算重载 I64(){
-            布尔 状态 = ::指令集::位测试(U64(值), 位宽 - 1);
+            布尔 状态 = 指令集::位测试(U64(值), 位宽 - 1);
             I64  T = 值;
             若 (状态 == 置位态){
                 值 |= U64(-1) << 位宽;
@@ -173,25 +177,30 @@
         }
         I64 值;
         U08 位宽;
-    } IMM;
+    };
 
     结构体 标志位{
-        U08  CF : 1;
-        U08  OF : 1;
-        U08  ZF : 1;
-        U08  AB : 1;
-        U08  GT : 1;
-        U08  整数字宽;
-    } STA;
+        U64  CF : 1;
+        U64  OF : 1;
+        U64  ZF : 1;
+        U64  AB : 1;
+        U64  GT : 1;
+    };
 
-    INS   CMD;
-    U08 * MEM;
-    U64   BYTES;
-    U64   PC;
-    U64   PCS;
+    结构体 段偏式{
+        U32 OFS;            //偏移
+        U32 SEG;            //段
+        运算重载 U64 & () {
+            回递 *(U64 *)此指针;
+        }
+        空 运算重载 = (U64 值){
+            此.运算重载 U64 & () = 值;
+        }
+    };
+
     定义 空 (处理器::* 指令)();
 
-    结构体 指令集结构{
+    结构体 命令集{
         指令 函数;
 
         模板<类 匿名函数>
@@ -203,11 +212,34 @@
             处理器 * 匿名参数化 = (处理器 *)(& 指针); //别问为啥, C++ Lambda是这样实现的
             (匿名参数化->*函数)();
         }
-    } 指令集[指令个数];
+    };
 
-    #define $M(指令)     循环(自然数 __ = 指令; __ < 指令 + 自然数(指令 ## 指令条数); __++) 指令集[__] = [此指针]()
-    #define $X(...)      [此指针](整数寄存器 & A, 整数寄存器 常量 & B, 整数寄存器 常量 & C, U08 __VA_ARGS__)
-    #define $J(条件)     IMM.填充(9, CMD & 0x1ff); I64 OFFSET = IMM << 1; 若 (条件){ PC += OFFSET; }
+
+    命令集 SET[指令个数];     //命令集合
+    整数器 R[整数器个数];     //通用整数器
+    整数器 TMP;               //临时寄存器
+    立即数 IMM;               //立即数寄存器,读取后清零
+    标志位 STA;               //状态寄存器
+    段偏式 PC;                //程序计数器
+    段偏式 PCS;               //调用栈
+    INS    CMD;               //当前指令
+    U08 *  MEM;               //内存起始地址
+    U64    BYTES;             //总内存字节数
+
+    #define $M(指令)     循环(自然数 __ = 指令; __ < 指令 + 自然数(指令 ## 指令条数); __++) SET[__] = [此指针]()
+    #define $X(...)      [此指针](整数器 & A, 整数器 B, 整数器 C, U08 __VA_ARGS__)
+    #define $J(条件)     IMM.装载(9, CMD & 0x1ff); U32 OFFSET = U32(IMM) << 1; 若 (条件){ PC.OFS += OFFSET; }
+    #define $F1(类型,比较符,移位符,测试位,...)                         \
+            若 (C.U 比较符 空间量(整数器)){                            \
+                A.U    = 0;                                            \
+                STA.CF = 0;                                            \
+                STA.ZF = 1;                                            \
+            }                                                          \
+            非{                                                        \
+                A.类型 = B.类型 移位符 C.U __VA_ARGS__;                \
+                STA.CF = C.U ? 指令集::位测试(B.U, (测试位)) : 0;      \
+                STA.ZF = A.类型 == 0;                                  \
+            }
 
     // FAKE
     空 内存写入(空指针 A, U64 B, U64 偏移, U08 字节数) {
@@ -235,9 +267,9 @@
     空 二相运算(运算回调 回调) {
         U08  F = (CMD.OPC & 0x2) != 0;
         开关(F2(CMD.OPC & 0x1)) {
-        通向 AI2: IMM.填充(4, CMD.B);
-                  回调(R[CMD.A], 整数寄存器(IMM), 整数寄存器(0ull), F); 跳出;
-        通向 AB2: 回调(R[CMD.A], R[CMD.B],        整数寄存器(0ull), F); 跳出;
+        通向 AI2: IMM.装载(4, CMD.B);
+                  回调(R[CMD.A], IMM     , 整数器(0ull), F); 跳出;
+        通向 AB2: 回调(R[CMD.A], R[CMD.B], 整数器(0ull), F); 跳出;
         }
     }
 
@@ -245,10 +277,10 @@
     空 四相运算(运算回调 回调) {
         U08  F = (CMD.OPC & 0x4) != 0;
         开关(F4(CMD.OPC & 0x3)) {
-        通向 ABI4: 回调(R[CMD.A], R[CMD.B], 整数寄存器(IMM), F); 跳出;
-        通向 AAB4: 回调(R[CMD.A], R[CMD.A], R[CMD.B],        F); 跳出;
-        通向 ABT4: 回调(R[CMD.A], R[CMD.B], R[CMD.T],        F); 跳出;
-        通向 TAB4: 回调(R[CMD.T], R[CMD.A], R[CMD.B],        F); 跳出;
+        通向 ABI4: 回调(R[CMD.A], R[CMD.B], IMM     , F); 跳出;
+        通向 AAB4: 回调(R[CMD.A], R[CMD.A], R[CMD.B], F); 跳出;
+        通向 ABT4: 回调(R[CMD.A], R[CMD.B], R[CMD.T], F); 跳出;
+        通向 TAB4: 回调(R[CMD.T], R[CMD.A], R[CMD.B], F); 跳出;
         }
     }
 
@@ -256,15 +288,15 @@
     空 八相运算(运算回调 回调) {
         U08  F = (CMD.OPC & 0x8) != 0;
         开关(F8(CMD.OPC & 0x7)) {
-        通向 AAI8: IMM.填充(4, CMD.B);
-                   回调(R[CMD.A], R[CMD.A],        整数寄存器(IMM), F); 跳出;
-        通向 ABI8: 回调(R[CMD.A], R[CMD.B],        整数寄存器(IMM), F); 跳出;
-        通向 AIA8: 回调(R[CMD.A], 整数寄存器(IMM), R[CMD.A],        F); 跳出;
-        通向 AIB8: 回调(R[CMD.A], 整数寄存器(IMM), R[CMD.B],        F); 跳出;
-        通向 AAB8: 回调(R[CMD.A], R[CMD.A],        R[CMD.B],        F); 跳出;
-        通向 ABT8: 回调(R[CMD.A], R[CMD.B],        R[CMD.T],        F); 跳出;
-        通向 ATB8: 回调(R[CMD.A], R[CMD.T],        R[CMD.B],        F); 跳出;
-        通向 TAB8: 回调(R[CMD.T], R[CMD.A],        R[CMD.B],        F); 跳出;
+        通向 AAI8: IMM.装载(4, CMD.B);
+                   回调(R[CMD.A], R[CMD.A], IMM     , F); 跳出;
+        通向 ABI8: 回调(R[CMD.A], R[CMD.B], IMM     , F); 跳出;
+        通向 AIA8: 回调(R[CMD.A], IMM     , R[CMD.A], F); 跳出;
+        通向 AIB8: 回调(R[CMD.A], IMM     , R[CMD.B], F); 跳出;
+        通向 AAB8: 回调(R[CMD.A], R[CMD.A], R[CMD.B], F); 跳出;
+        通向 ABT8: 回调(R[CMD.A], R[CMD.B], R[CMD.T], F); 跳出;
+        通向 ATB8: 回调(R[CMD.A], R[CMD.T], R[CMD.B], F); 跳出;
+        通向 TAB8: 回调(R[CMD.T], R[CMD.A], R[CMD.B], F); 跳出;
         }
     }
 
@@ -273,7 +305,7 @@
         此.MEM   = (U08 *)MEM;
         此.BYTES = (U64)BYTES;
         $M(PSI){
-            IMM.填充(12, CMD & 0xfff);
+            IMM.装载(12, CMD & 0xfff);
         };
         $M(MRW){
             内存修饰符 F = CMD.OPC;
@@ -295,7 +327,7 @@
                 STA.ZF = B.I == C.I;
                 STA.GT = B.I >  C.I;
                 STA.AB = B.U >  C.U;
-                STA.CF = ::指令集::减法(A.U, B.U, C.U, STA.CF & 带借位);
+                STA.CF = 指令集::减法(A.U, B.U, C.U, STA.CF & 带借位);
             });
         };
         $M(DIV){
@@ -304,10 +336,10 @@
                     回递;
                 }
                 若 (有符号){
-                    TMP.I = ::指令集::除法(A.I, B.I, C.I);
+                    TMP.I = 指令集::除法(A.I, B.I, C.I);
                 }
                 非{
-                    TMP.U = ::指令集::除法(A.U, B.U, C.U);
+                    TMP.U = 指令集::除法(A.U, B.U, C.U);
                 }
                 STA.CF = TMP.U != 0;
                 STA.ZF = A.U == 0;
@@ -315,41 +347,32 @@
         };
         $M(SHL){
             八相运算($X(带进位){
-                推导类型 CF = ::指令集::位测试(B.U, 比特数(C.U) - C.U);
-                A.U    = (B.U << C.U) | (带进位 & STA.CF);
-                STA.CF = CF;
-                STA.ZF = A.U == 0;
+                $F1(U, >, <<, 空间量(C) - C.U, | STA.CF);
             });
         };
         $M(SHR){
             八相运算($X(){
-                推导类型 CF = ::指令集::位测试(B.U, C.U - 1);
-                A.U    = B.U >> C.U;
-                STA.CF = CF;
-                STA.ZF = A.U == 0;
+                $F1(U, >, >>, C.U - 1);
             });
         };
         $M(SAR){
             八相运算($X(){
-                推导类型 CF = ::指令集::位测试(B.U, C.U - 1);
-                A.I    = B.I >> C.I;
-                STA.CF = CF;
-                STA.ZF = A.I == 0;
+                $F1(I, >=, >>, C.U - 1);
             });
         };
         $M(ADD){
             四相运算($X(带进位){
-                STA.CF = ::指令集::加法(A.U, B.U, C.U, 带进位 & STA.CF);
+                STA.CF = 指令集::加法(A.U, B.U, C.U, STA.CF & 带进位);
                 STA.ZF = A.U == 0;
             });
         };
         $M(MUL){
             四相运算($X(有符号) {
                 若 (有符号){
-                    TMP.I  = ::指令集::乘法(A.I, B.I, C.I);
+                    TMP.I  = 指令集::乘法(A.I, B.I, C.I);
                 }
                 非{
-                    TMP.U  = ::指令集::乘法(A.U, B.U, C.U);
+                    TMP.U  = 指令集::乘法(A.U, B.U, C.U);
                 }
                 STA.CF = TMP.U != 0;
                 STA.ZF = A.U == 0;
@@ -381,22 +404,22 @@
         };
         $M(BT){
             二相运算($X() {
-                STA.CF = ::指令集::位测试(A.U, B.U);
+                STA.CF = 指令集::位测试(A.U, B.U);
             });
         };
         $M(BTS){
             二相运算($X() {
-                STA.CF = ::指令集::位测试后位置位(A.U, B.U);
+                STA.CF = 指令集::位测试后位置位(A.U, B.U);
             });
         };
         $M(BTR){
             二相运算($X() {
-                STA.CF = ::指令集::位测试后位复位(A.U, B.U);
+                STA.CF = 指令集::位测试后位复位(A.U, B.U);
             });
         };
         $M(BTN){
             二相运算($X() {
-                STA.CF = ::指令集::位测试后位取反(A.U, B.U);
+                STA.CF = 指令集::位测试后位取反(A.U, B.U);
             });
         };
         $M(JIA){
@@ -428,18 +451,17 @@
         };
         $M(JAL){
             U32 OFFSET;
-            若 (CMD.OPC & 1){
+            若 (CMD.OPC & AB2){
                 IMM.运算重载 I64();
                 OFFSET = U32(R[CMD.B].U);
             }
             非{
-                IMM.填充(8 + 1, 0 << 8 | CMD & 0xff);
+                IMM.装载(8 + 1, 0 << 8 | CMD & 0xff);
                 OFFSET = 0xffffffff & IMM;
             }
-            内存写入(& PC, PCS, 0, 空间量(PC));
-            PCS += 空间量(PC);
-            PC  &= U64(0xffffffff) << 32;
-            PC  |= U32(OFFSET - 2);
+            内存写入(& PC.OFS, PCS, 0, 空间量(PC.OFS));
+            PCS   += 空间量(PC.OFS);
+            PC.OFS = U32(OFFSET - 空间量(CMD));
         };
         $M(MOV){
             二相运算($X() {
@@ -453,24 +475,42 @@
             R[CMD.B] = B;
         };
         $M(PSH){
-            若 (CMD.A <= CMD.B) 循环(整数 I = CMD.A; I <= 整数(CMD.B); I++) {
-                内存写入(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
-                R[SP].U += 空间量(整数寄存器);
+            若 (CMD.A <= CMD.B) {
+                循环(整数 I = CMD.A; I <= 整数(CMD.B); I++) {
+                    内存写入(& R[I].U, R[SP].U, 0, 空间量(整数器));
+                    R[SP].U += 空间量(整数器);
+                }
             }
-            非 循环(整数 I = CMD.A + 1; I-- > 整数(CMD.B);) {
-                内存写入(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
-                R[SP].U += 空间量(整数寄存器);
+            非 {
+                循环(整数 I = CMD.A + 1; I-- > 整数(CMD.B);) {
+                    内存写入(& R[I].U, R[SP].U, 0, 空间量(整数器));
+                    R[SP].U += 空间量(整数器);
+                }
             }
         };
         $M(POP){
-            若 (CMD.A <= CMD.B) 循环(整数 I = CMD.A; I <= 整数(CMD.B); I++) {
-                R[SP].U -= 空间量(整数寄存器);
-                内存读取(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
+            若 (CMD.A <= CMD.B) {
+                循环(整数 I = CMD.A; I <= 整数(CMD.B); I++) {
+                    R[SP].U -= 空间量(整数器);
+                    内存读取(& R[I].U, R[SP].U, 0, 空间量(整数器));
+                }
             }
-            非 循环(整数 I = CMD.A + 1; I-- > 整数(CMD.B);) {
-                R[SP].U -= 空间量(整数寄存器);
-                内存读取(& R[I].U, R[SP].U, 0, 空间量(整数寄存器));
+            非 {
+                循环(整数 I = CMD.A + 1; I-- > 整数(CMD.B);) {
+                    R[SP].U -= 空间量(整数器);
+                    内存读取(& R[I].U, R[SP].U, 0, 空间量(整数器));
+                }
             }
+        };
+        $M(PSHS) {
+            内存写入(& STA, R[SP].U, 0, 空间量(整数器));
+            R[SP].U += 空间量(整数器);
+            静态断言(空间量(整数器) == 空间量(STA), "ERROR");
+        };
+        $M(POPS) {
+            R[SP].U -= 空间量(整数器);
+            内存读取(& STA, R[SP].U, 0, 空间量(整数器));
+            静态断言(空间量(整数器) == 空间量(STA), "ERROR");
         };
         $M(RET){
             PCS -= 空间量(PC);
@@ -481,8 +521,8 @@
     空 运行() {
         只要(是) {
             内存读取(& CMD, PC, 0, 空间量(CMD));
-            指令集[CMD.OPC].执行(此指针);
-            PC += 2;
+            SET[CMD.OPC].执行(此指针);
+            PC += 空间量(CMD);
         }
     }
 };
@@ -490,5 +530,5 @@
 #undef $M
 #undef $X
 #undef $J
-
+#undef $F1
 
