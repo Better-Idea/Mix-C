@@ -83,7 +83,7 @@
         打印(串);
     }
     模板<> 空 接口<哑元结构>::打印(原始串 串) {
-        WriteConsoleW(句柄.输出, 串->指针, (DWORD)串->长度, NULL, NULL);
+        WriteConsoleW(句柄.输出, 串->元素, (DWORD)串->长度, NULL, NULL);
     }
 }
 
