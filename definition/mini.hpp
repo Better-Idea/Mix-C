@@ -281,9 +281,10 @@ $;
 template<class a>
 xstruct(implicit_value)
     template<class b>
-    xini(implicit_value(b const & value))
-        value = ((a)(b &)value);
-    $
+    xini(
+        implicit_value(b const & value) :
+        value((a)(b &)value)
+    ) $
 
     xcvtc(a &)
         return value;
