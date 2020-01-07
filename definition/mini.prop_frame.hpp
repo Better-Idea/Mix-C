@@ -1,11 +1,11 @@
 #pragma once
 #define thes                            __skeleton__()
 #define thei                            __interface__()
-#define xprop_meta(the_firend)                              \
+#define xprop_meta(the_friend)                              \
 public:                                                     \
     typedef skeleton<xargs>  __ske;                         \
     typedef interface<xargs> __itf;                         \
-    friend the_firend;                                      \
+    friend the_friend;                                      \
 private:                                                    \
     __ske & __skeleton__() const {                          \
         return *(__ske *)(this);                            \
