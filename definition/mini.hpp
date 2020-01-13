@@ -6,6 +6,7 @@
 #define xlink2(a,b)                     xlink(a, b)
 #define xline(name)                     xlink2(name, __LINE__)
 #define _redirection(...)
+#define xr32(bits)                      private: u32 xlink2(rsv, __COUNTER__) : bits; public:
 #define xnew(type,ref)                  new (& (ref)) type
 #define xforword(item,items,...)                                                                \
     for(auto const & _0 = items, * _1 = & _0; _1 != nullptr; _1 = nullptr)                      \
@@ -61,6 +62,17 @@ typedef float               f32;
 typedef double              f64;
 typedef char16_t            word;
 typedef const char *        asciis;
+
+typedef const i08           ci08;
+typedef const i16           ci16;
+typedef const i32           ci32;
+typedef const i64           ci64;
+typedef const u08           cu08;
+typedef const u16           cu16;
+typedef const u32           cu32;
+typedef const u64           cu64;
+typedef const f32           cf32;
+typedef const f64           cf64;
 
 typedef i08     *           i08p;
 typedef i16     *           i16p;
