@@ -96,7 +96,7 @@
     xr32(2);
     xx(spi2     , 1);
     xx(spi3     , 1);
-    xx(spdifrx  , 1);
+    xx(spdif_rx , 1);
     xx(uart2    , 1);
     xx(uart3    , 1);
     xx(uart4    , 1);
@@ -154,5 +154,6 @@
     #undef xis_rst_part
     #undef xis_en_part
     #undef xis_lpen_part
+    #undef xarg
 #endif
 
