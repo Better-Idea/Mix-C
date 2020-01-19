@@ -1,6 +1,8 @@
 #pragma once
 #include"definition/mini.hpp"
+#define xvref         3.3
 #define xflush        asm("":::"memory");
+#define xfield        (*(field *)this)
 #define xro(type,name,target)                   \
     union {                                     \
         operator type(){                        \
@@ -1098,39 +1100,36 @@ private:
         u32 bsr;
     $ items;
 public:
-    template<class ... args>
-    xdefr(_gpio &, config, io_mode mode, uxx port, args ... rest)
-        implicit_value<uxx> ports[] = { port, rest... };
-        mode_t props = mode;
-        u32    modes = items.mode;
-        u32    otype = items.otype;
-        u32    speed = items.speed;
-        u32    pupds = items.pupd;
+    xunion(_config)
+        template<class ... args>
+        xini(_config(io_mode mode, uxx port, args ... rest))
+            implicit_value<uxx> ports[] = { port, rest... };
+            mode_t props = mode;
+            u32    modes = xfield.mode;
+            u32    otype = xfield.otype;
+            u32    speed = xfield.speed;
+            u32    pupds = xfield.pupd;
 
-        xfor(u32 i = 0; i < 1 + sizeof...(args); i++)
-            u32 p1 = ports[i];
-            u32 p2 = p1 << 1;
-            modes &= ~(0x3 << p2);
-            speed &= ~(0x3 << p2);
-            pupds &= ~(0x3 << p2);
-            otype &= ~(0x1 << p1);
-            modes |= u32(props.mode) << p2;
-            speed |= u32(props.speed) << p2;
-            pupds |= u32(props.up_down) << p2;
-            otype |= u32(props.od) << p1;
+            xfor(u32 i = 0; i < 1 + sizeof...(args); i++)
+                u32 p1 = ports[i];
+                u32 p2 = p1 << 1;
+                modes &= ~(0x3 << p2);
+                speed &= ~(0x3 << p2);
+                pupds &= ~(0x3 << p2);
+                otype &= ~(0x1 << p1);
+                modes |= u32(props.mode) << p2;
+                speed |= u32(props.speed) << p2;
+                pupds |= u32(props.up_down) << p2;
+                otype |= u32(props.od) << p1;
+            $
+
+            xfield.mode  = modes;
+            xfield.otype = otype;
+            xfield.speed = speed;
+            xfield.pupd  = pupds;
         $
+    $ config;
 
-        items.mode  = modes;
-        items.otype = otype;
-        items.speed = speed;
-        items.pupd  = pupds;
-        return thex;
-    $
-
-    template<class ... args>
-    xopr(_gpio &, (), io_mode mode, uxx port, args ... rest)
-        return config(mode, port, rest...);
-    $
 
     xunion()
         xcvtc(u32)
@@ -1144,10 +1143,9 @@ public:
         $
     $ ipt;
 
-    xunion(_ipt)
+    xunion()
         xcvtc(u32 &)
-            field * ptr = (field *)this;
-            return ptr->idr;
+            return xfield.odr;
         $
 
         xopc([], uxx index)
@@ -1168,286 +1166,526 @@ public:
 
                 u32   bit;
                 u32 * ptr;
-            $ value { ptr->odr, index };
+            $ value { thex, index };
 
             return value;
         $
 
-        xdef(parallel, set group_set, reset group_reset)
-            field * ptr = (field *)this;
-            ptr->bsr = group_reset << 16 | group_set;
-        $
+        xunion(_parallel)
+            xini(_parallel(set group_set))
+                u32 group_reset = xfield.bsr & 0xffff0000;
+                xfield.bsr = group_reset << 16 | group_set;
+            $
 
-        xdef(parallel, set group_set)
-            field * ptr = (field *)this;
-            u32 group_reset = ptr->bsr & 0xffff0000;
-            ptr->bsr = group_reset << 16 | group_set;
-        $
+            xini(_parallel(reset group_reset))
+                u32 group_set = xfield.bsr & 0xffff;
+                xfield.bsr = group_reset << 16 | group_set;
+            $
 
-        xdef(parallel, reset group_reset)
-            field * ptr = (field *)this;
-            u32 group_set = ptr->bsr & 0xffff;
-            ptr->bsr = group_reset << 16 | group_set;
-        $
+            xini(_parallel(set group_set, reset group_reset))
+                xfield.bsr = group_reset << 16 | group_set;
+            $
+        $ parallel;
     $ opt;
+$;
+
+
+
+xenumc(source_for_channel_trigger)
+    from_tim6,
+    from_tim8,
+    from_tim7,
+    from_tim5,
+    from_tim2,
+    from_tim4,
+    from_exti_line9,
+    from_software,
+$;
+
+xenumc(ware_type)
+    none_ware,
+    noise_ware,
+    triangle_ware,
+$;
+
+xenumc(triangle_ware_amplitude)
+    equals_to_1, equals_to_3, equals_to_7, equals_to_15, equals_to_31, equals_to_63, equals_to_127, equals_to_255, equals_to_511, equals_to_1023, equals_to_2047, equals_to_4095,
+$;
+
+xenumc(noise_ware_range)
+    less_than_2, less_than_4, less_than_8, less_than_16, less_than_32, less_than_64, less_than_128, less_than_256, less_than_512, less_than_1024, less_than_2048, less_than_4096,
+$;
+
+xstruct(not_t)
+    xini(not_t(bool value = false) : value(value)) $
+    xcvt(bool)
+        return !value;
+    $
+    xop(=, bool value)
+        thex.value = !value;
+    $
+private:
+    bool value;
+$;
+
+constexpr source_for_channel_trigger from_tim6          = source_for_channel_trigger::from_tim6;
+constexpr source_for_channel_trigger from_tim8          = source_for_channel_trigger::from_tim8;
+constexpr source_for_channel_trigger from_tim7          = source_for_channel_trigger::from_tim7;
+constexpr source_for_channel_trigger from_tim5          = source_for_channel_trigger::from_tim5;
+constexpr source_for_channel_trigger from_tim2          = source_for_channel_trigger::from_tim2;
+constexpr source_for_channel_trigger from_tim4          = source_for_channel_trigger::from_tim4;
+constexpr source_for_channel_trigger from_exti_line9    = source_for_channel_trigger::from_exti_line9;
+constexpr source_for_channel_trigger from_software      = source_for_channel_trigger::from_software;
+constexpr ware_type                  none_ware          = ware_type::none_ware;
+constexpr ware_type                  noise_ware         = ware_type::noise_ware;
+constexpr ware_type                  triangle_ware      = ware_type::triangle_ware;
+constexpr triangle_ware_amplitude    equals_to_1        = triangle_ware_amplitude::equals_to_1;
+constexpr triangle_ware_amplitude    equals_to_3        = triangle_ware_amplitude::equals_to_3;
+constexpr triangle_ware_amplitude    equals_to_7        = triangle_ware_amplitude::equals_to_7;
+constexpr triangle_ware_amplitude    equals_to_15       = triangle_ware_amplitude::equals_to_15;
+constexpr triangle_ware_amplitude    equals_to_31       = triangle_ware_amplitude::equals_to_31;
+constexpr triangle_ware_amplitude    equals_to_63       = triangle_ware_amplitude::equals_to_63;
+constexpr triangle_ware_amplitude    equals_to_127      = triangle_ware_amplitude::equals_to_127;
+constexpr triangle_ware_amplitude    equals_to_255      = triangle_ware_amplitude::equals_to_255;
+constexpr triangle_ware_amplitude    equals_to_511      = triangle_ware_amplitude::equals_to_511;
+constexpr triangle_ware_amplitude    equals_to_1023     = triangle_ware_amplitude::equals_to_1023;
+constexpr triangle_ware_amplitude    equals_to_2047     = triangle_ware_amplitude::equals_to_2047;
+constexpr triangle_ware_amplitude    equals_to_4095     = triangle_ware_amplitude::equals_to_4095;
+constexpr noise_ware_range           less_than_2        = noise_ware_range::less_than_2;
+constexpr noise_ware_range           less_than_4        = noise_ware_range::less_than_4;
+constexpr noise_ware_range           less_than_8        = noise_ware_range::less_than_8;
+constexpr noise_ware_range           less_than_16       = noise_ware_range::less_than_16;
+constexpr noise_ware_range           less_than_32       = noise_ware_range::less_than_32;
+constexpr noise_ware_range           less_than_64       = noise_ware_range::less_than_64;
+constexpr noise_ware_range           less_than_128      = noise_ware_range::less_than_128;
+constexpr noise_ware_range           less_than_256      = noise_ware_range::less_than_256;
+constexpr noise_ware_range           less_than_512      = noise_ware_range::less_than_512;
+constexpr noise_ware_range           less_than_1024     = noise_ware_range::less_than_1024;
+constexpr noise_ware_range           less_than_2048     = noise_ware_range::less_than_2048;
+constexpr noise_ware_range           less_than_4096     = noise_ware_range::less_than_4096;
+
+// NOTE:
+// - dac1 & dac2 combine operation register is leave out
+// - 8bit precision is leave out
+// - left align mode is leave out
+xunion(_dac)
+private:
+    xstruct(field)
+        u32 en1         : 1;
+        u32 boff1       : 1;
+        u32 ten1        : 1;
+        u32 tsel1       : 3;
+        u32 ware1       : 2;
+        u32 mamp1       : 4;
+        u32 dmaen1      : 1;
+        u32 dmaudrie1   : 1;
+        xr32(2);
+        u32 en2         : 1;
+        u32 boff2       : 1;
+        u32 ten2        : 1;
+        u32 tsel2       : 3;
+        u32 ware2       : 2;
+        u32 mamp2       : 4;
+        u32 dmaen2      : 1;
+        u32 dmaudrie2   : 1;
+        xr32(2);
+
+        u32 swtrig1     : 1;
+        u32 swtrig2     : 1;
+        xr32(30);
+
+        u32 dhr12r1     : 12;
+        xr32(20);
+
+        xr32(4);
+        u32 dhr12l1     : 12;
+        xr32(16);
+
+        u32 dhr8r1      : 8;
+        xr32(24);
+
+        u32 dhr12r2     : 12;
+        xr32(20);
+
+        xr32(4);
+        u32 dhr12l2     : 12;
+        xr32(16);
+
+        u32 dhr8r2      : 8;
+        xr32(24);
+
+        u32 dhr12rd1    : 12;
+        xr32(4);
+        u32 dhr12rd2    : 12;
+        xr32(4);
+
+        xr32(4);
+        u32 dhr12ld1    : 12;
+        xr32(4);
+        u32 dhr12ld2    : 12;
+        
+        u32 hdr8rd1     : 8;
+        u32 hdr8rd2     : 8;
+        xr32(16);
+
+        u32 dor1        : 12;
+        xr32(20);
+
+        u32 dor2        : 12;
+        xr32(20);
+
+        xr32(13);
+        u32 dmaudr1     : 1;
+        xr32(2);
+        xr32(13);
+        u32 dmaudr2     : 1;
+        xr32(2);
+    $ items;
+
+public:
+    xunion()
+        /* - 0 : diable dac channel */
+        /* - 1 : enable dac channel */
+        xrw(bool, enable, en1);
+
+        /* - 0 : disable dac output buffer */
+        /* - 1 : enable dac output buffer */
+        xrw(not_t, output_buffer, boff1);
+
+        /* - 0 : wrtie data to data hold register whill move to data output register after 1 apb1 clock */
+        /* - 1 : wrtie data to data hold register whill move to data output register after 3 apb1 clock */
+        xunion(_triggle)
+            xini(_triggle(bool enable = false))
+                xfield.ten1  = enable;
+            $
+
+            xini(_triggle(source_for_channel_trigger source))
+                xfield.tsel1 = u32(source);
+                xfield.ten1  = u32(1);
+            $
+
+            xini(_triggle(source_for_channel_trigger source, triangle_ware_amplitude amplitude))
+                xfield.mamp1 = u32(amplitude);
+                xfield.ware1 = u32(2); /* triangle_ware  */
+                xfield.tsel1 = u32(source);
+                xfield.ten1  = u32(1);
+            $
+
+            xini(_triggle(source_for_channel_trigger source, noise_ware_range range))
+                xfield.mamp1 = u32(range);
+                xfield.ware1 = u32(1); /* noise_ware  */
+                xfield.tsel1 = u32(source);
+                xfield.ten1  = u32(1);
+            $
+
+            xrw(bool, enable, en1);
+            xrw(source_for_channel_trigger, source, ten1);
+            xrw(ware_type, type, ware1);
+            xrw(::triangle_ware_amplitude, triangle_ware_amplitude, mamp1);
+            xrw(::noise_ware_range, noise_ware_range, mamp1);
+        $ triggle;
+
+        xunion()
+            xrw(bool, enable, dmaen1);
+            xrw(bool, underrun_interrupt, dmaudrie1);
+
+            xunion()
+                xcvt(bool)
+                    return xfield.dmaudr1 == 1;
+                $
+                xop(=, clear_t)
+                    xfield.dmaudr1 = 1; /* write 1 to clear */
+                $
+            $ underrun;
+        $ dma;
+
+        /* this bit is clear by hardware(one APB1 clock cycle later)
+           once the data hold register value has been loaded into data output register */
+        xrw(bool, software_triggler, swtrig1);
+
+        /* 12bit precision */
+        xunion()
+            xop(=, float value)
+                mf32 ref = xvref;
+                mf32 val = value;
+                u32    r = ref.decimal | 1 << 23;
+                u32    v = val.decimal | 1 << 23;
+                r      >>= (ref.real_exp - val.real_exp) + 4; // 4 + 8 -> 12bit
+                v      <<= 8;
+                v       /= r;
+                xfield.dhr12r1 = v;
+            $
+            xcvt(u32)
+                return u32(xfield.dhr12r1);
+            $
+        $ voltage;
+
+        xunion()
+            xcvt(float)
+                return (xfield.dor1);
+            $
+        $ opt;
+    $ one;
 $;
 
 #define xirq(name)        void __attribute__((interrupt("irq"))) name() {
 #define xseg(name)        __attribute__((section(#name)))
 #define xextc             extern "C" {
 
-int main();
-xirq(reset_handler) 
+xirq(itr_reset) 
+    int main();
     xwhile(true)
         main(); 
     $
 $
-xirq(nmi_handler) $
-xirq(hardfault_handler) $
-xirq(memmanage_handler) $
-xirq(busfault_handler) $
-xirq(usagefault_handler) $
+xirq(itr_nmi) $
+xirq(itr_hardfault) $
+xirq(itr_memmanage) $
+xirq(itr_busfault) $
+xirq(itr_usagefault) $
 // xirq(0) $
 // xirq(0) $
 // xirq(0) $
 // xirq(0) $
-xirq(svc_handler) $
-xirq(debugmon_handler) $
+xirq(itr_svc) $
+xirq(itr_debugmon) $
 // xirq(0) $
-xirq(pendsv_handler) $
-xirq(systick_handler) $
-xirq(wwdg_irqhandler) $
-xirq(pvd_irqhandler) $
-xirq(tamp_stamp_irqhandler) $
-xirq(rtc_wkup_irqhandler) $
-xirq(flash_irqhandler) $
-xirq(rcc_irqhandler) $
-xirq(exti0_irqhandler) $
-xirq(exti1_irqhandler) $
-xirq(exti2_irqhandler) $
-xirq(exti3_irqhandler) $
-xirq(exti4_irqhandler) $
-xirq(dma1_stream0_irqhandler) $
-xirq(dma1_stream1_irqhandler) $
-xirq(dma1_stream2_irqhandler) $
-xirq(dma1_stream3_irqhandler) $
-xirq(dma1_stream4_irqhandler) $
-xirq(dma1_stream5_irqhandler) $
-xirq(dma1_stream6_irqhandler) $
-xirq(adc_irqhandler) $
-xirq(can1_tx_irqhandler) $
-xirq(can1_rx0_irqhandler) $
-xirq(can1_rx1_irqhandler) $
-xirq(can1_sce_irqhandler) $
-xirq(exti9_5_irqhandler) $
-xirq(tim1_brk_tim9_irqhandler) $
-xirq(tim1_up_tim10_irqhandler) $
-xirq(tim1_trg_com_tim11_irqhandler) $
-xirq(tim1_cc_irqhandler) $
-xirq(tim2_irqhandler) $
-xirq(tim3_irqhandler) $
-xirq(tim4_irqhandler) $
-xirq(i2c1_ev_irqhandler) $
-xirq(i2c1_er_irqhandler) $
-xirq(i2c2_ev_irqhandler) $
-xirq(i2c2_er_irqhandler) $
-xirq(spi1_irqhandler) $
-xirq(spi2_irqhandler) $
-xirq(usart1_irqhandler) $
-xirq(usart2_irqhandler) $
-xirq(usart3_irqhandler) $
-xirq(exti15_10_irqhandler) $
-xirq(rtc_alarm_irqhandler) $
-xirq(otg_fs_wkup_irqhandler) $
-xirq(tim8_brk_tim12_irqhandler) $
-xirq(tim8_up_tim13_irqhandler) $
-xirq(tim8_trg_com_tim14_irqhandler) $
-xirq(tim8_cc_irqhandler) $
-xirq(dma1_stream7_irqhandler) $
-xirq(fmc_irqhandler) $
-xirq(sdmmc1_irqhandler) $
-xirq(tim5_irqhandler) $
-xirq(spi3_irqhandler) $
-xirq(uart4_irqhandler) $
-xirq(uart5_irqhandler) $
-xirq(tim6_dac_irqhandler) $
-xirq(tim7_irqhandler) $
-xirq(dma2_stream0_irqhandler) $
-xirq(dma2_stream1_irqhandler) $
-xirq(dma2_stream2_irqhandler) $
-xirq(dma2_stream3_irqhandler) $
-xirq(dma2_stream4_irqhandler) $
-xirq(eth_irqhandler) $
-xirq(eth_wkup_irqhandler) $
-xirq(can2_tx_irqhandler) $
-xirq(can2_rx0_irqhandler) $
-xirq(can2_rx1_irqhandler) $
-xirq(can2_sce_irqhandler) $
-xirq(otg_fs_irqhandler) $
-xirq(dma2_stream5_irqhandler) $
-xirq(dma2_stream6_irqhandler) $
-xirq(dma2_stream7_irqhandler) $
-xirq(usart6_irqhandler) $
-xirq(i2c3_ev_irqhandler) $
-xirq(i2c3_er_irqhandler) $
-xirq(otg_hs_ep1_out_irqhandler) $
-xirq(otg_hs_ep1_in_irqhandler) $
-xirq(otg_hs_wkup_irqhandler) $
-xirq(otg_hs_irqhandler) $
-xirq(dcmi_irqhandler) $
+xirq(itr_pendsv) $
+xirq(itr_systick) $
+xirq(irq_wwdg) $
+xirq(irq_pvd) $
+xirq(irq_tamp_stamp) $
+xirq(irq_rtc_wkup) $
+xirq(irq_flash) $
+xirq(irq_rcc) $
+xirq(irq_exti0) $
+xirq(irq_exti1) $
+xirq(irq_exti2) $
+xirq(irq_exti3) $
+xirq(irq_exti4) $
+xirq(irq_dma1_stream0) $
+xirq(irq_dma1_stream1) $
+xirq(irq_dma1_stream2) $
+xirq(irq_dma1_stream3) $
+xirq(irq_dma1_stream4) $
+xirq(irq_dma1_stream5) $
+xirq(irq_dma1_stream6) $
+xirq(irq_adc) $
+xirq(irq_can1_tx) $
+xirq(irq_can1_rx0) $
+xirq(irq_can1_rx1) $
+xirq(irq_can1_sce) $
+xirq(irq_exti9_5) $
+xirq(irq_tim1_brk_tim9) $
+xirq(irq_tim1_up_tim10) $
+xirq(irq_tim1_trg_com_tim11) $
+xirq(irq_tim1_cc) $
+xirq(irq_tim2) $
+xirq(irq_tim3) $
+xirq(irq_tim4) $
+xirq(irq_i2c1_ev) $
+xirq(irq_i2c1_er) $
+xirq(irq_i2c2_ev) $
+xirq(irq_i2c2_er) $
+xirq(irq_spi1) $
+xirq(irq_spi2) $
+xirq(irq_usart1) $
+xirq(irq_usart2) $
+xirq(irq_usart3) $
+xirq(irq_exti15_10) $
+xirq(irq_rtc_alarm) $
+xirq(irq_otg_fs_wkup) $
+xirq(irq_tim8_brk_tim12) $
+xirq(irq_tim8_up_tim13) $
+xirq(irq_tim8_trg_com_tim14) $
+xirq(irq_tim8_cc) $
+xirq(irq_dma1_stream7) $
+xirq(irq_fmc) $
+xirq(irq_sdmmc1) $
+xirq(irq_tim5) $
+xirq(irq_spi3) $
+xirq(irq_uart4) $
+xirq(irq_uart5) $
+xirq(irq_tim6_dac) $
+xirq(irq_tim7) $
+xirq(irq_dma2_stream0) $
+xirq(irq_dma2_stream1) $
+xirq(irq_dma2_stream2) $
+xirq(irq_dma2_stream3) $
+xirq(irq_dma2_stream4) $
+xirq(irq_eth) $
+xirq(irq_eth_wkup) $
+xirq(irq_can2_tx) $
+xirq(irq_can2_rx0) $
+xirq(irq_can2_rx1) $
+xirq(irq_can2_sce) $
+xirq(irq_otg_fs) $
+xirq(irq_dma2_stream5) $
+xirq(irq_dma2_stream6) $
+xirq(irq_dma2_stream7) $
+xirq(irq_usart6) $
+xirq(irq_i2c3_ev) $
+xirq(irq_i2c3_er) $
+xirq(irq_otg_hs_ep1_out) $
+xirq(irq_otg_hs_ep1_in) $
+xirq(irq_otg_hs_wkup) $
+xirq(irq_otg_hs) $
+xirq(irq_dcmi) $
 // xirq(0) $
-xirq(rng_irqhandler) $
-xirq(fpu_irqhandler) $
-xirq(uart7_irqhandler) $
-xirq(uart8_irqhandler) $
-xirq(spi4_irqhandler) $
-xirq(spi5_irqhandler) $
-xirq(spi6_irqhandler) $
-xirq(sai1_irqhandler) $
+xirq(irq_rng) $
+xirq(irq_fpu) $
+xirq(irq_uart7) $
+xirq(irq_uart8) $
+xirq(irq_spi4) $
+xirq(irq_spi5) $
+xirq(irq_spi6) $
+xirq(irq_sai1) $
 // xirq(0) $
 // xirq(0) $
-xirq(dma2d_irqhandler) $
-xirq(sai2_irqhandler) $
-xirq(quadspi_irqhandler) $
-xirq(lptim1_irqhandler) $
-xirq(cec_irqhandler) $
-xirq(i2c4_ev_irqhandler) $
-xirq(i2c4_er_irqhandler) $
-xirq(spdif_rx_irqhandler) $
+xirq(irq_dma2d) $
+xirq(irq_sai2) $
+xirq(irq_quadspi) $
+xirq(irq_lptim1) $
+xirq(irq_cec) $
+xirq(irq_i2c4_ev) $
+xirq(irq_i2c4_er) $
+xirq(irq_spdif_rx) $
 
 extern int __stack_top;
 typedef void(* irq_t)();
 
 xseg(.irqs) irq_t irq_vector[] = {
     irq_t(& __stack_top),
-    reset_handler,
-    nmi_handler,
-    hardfault_handler,
-    memmanage_handler,
-    busfault_handler,
-    usagefault_handler,
+    itr_reset,
+    itr_nmi,
+    itr_hardfault,
+    itr_memmanage,
+    itr_busfault,
+    itr_usagefault,
     0,
     0,
     0,
     0,
-    svc_handler,
-    debugmon_handler,
+    itr_svc,
+    itr_debugmon,
     0,
-    pendsv_handler,
-    systick_handler,
+    itr_pendsv,
+    itr_systick,
     
     /* external interrupts */
-    wwdg_irqhandler,                   /* window watchdog              */                                        
-    pvd_irqhandler,                    /* pvd through exti line detection */                        
-    tamp_stamp_irqhandler,             /* tamper and timestamps through the exti line */            
-    rtc_wkup_irqhandler,               /* rtc wakeup through the exti line */                      
-    flash_irqhandler,                  /* flash                        */                                          
-    rcc_irqhandler,                    /* rcc                          */                                            
-    exti0_irqhandler,                  /* exti line0                   */                        
-    exti1_irqhandler,                  /* exti line1                   */                          
-    exti2_irqhandler,                  /* exti line2                   */                          
-    exti3_irqhandler,                  /* exti line3                   */                          
-    exti4_irqhandler,                  /* exti line4                   */                          
-    dma1_stream0_irqhandler,           /* dma1 stream 0                */                  
-    dma1_stream1_irqhandler,           /* dma1 stream 1                */                   
-    dma1_stream2_irqhandler,           /* dma1 stream 2                */                   
-    dma1_stream3_irqhandler,           /* dma1 stream 3                */                   
-    dma1_stream4_irqhandler,           /* dma1 stream 4                */                   
-    dma1_stream5_irqhandler,           /* dma1 stream 5                */                   
-    dma1_stream6_irqhandler,           /* dma1 stream 6                */                   
-    adc_irqhandler,                    /* adc1, adc2 and adc3s         */                   
-    can1_tx_irqhandler,                /* can1 tx                      */                         
-    can1_rx0_irqhandler,               /* can1 rx0                     */                          
-    can1_rx1_irqhandler,               /* can1 rx1                     */                          
-    can1_sce_irqhandler,               /* can1 sce                     */                          
-    exti9_5_irqhandler,                /* external line[9:5]s          */                          
-    tim1_brk_tim9_irqhandler,          /* tim1 break and tim9          */         
-    tim1_up_tim10_irqhandler,          /* tim1 update and tim10        */         
-    tim1_trg_com_tim11_irqhandler,     /* tim1 trigger and commutation and tim11 */
-    tim1_cc_irqhandler,                /* tim1 capture compare         */                          
-    tim2_irqhandler,                   /* tim2                         */                   
-    tim3_irqhandler,                   /* tim3                         */                   
-    tim4_irqhandler,                   /* tim4                         */                   
-    i2c1_ev_irqhandler,                /* i2c1 event                   */                          
-    i2c1_er_irqhandler,                /* i2c1 error                   */                          
-    i2c2_ev_irqhandler,                /* i2c2 event                   */                          
-    i2c2_er_irqhandler,                /* i2c2 error                   */                            
-    spi1_irqhandler,                   /* spi1                         */                   
-    spi2_irqhandler,                   /* spi2                         */                   
-    usart1_irqhandler,                 /* usart1                       */                   
-    usart2_irqhandler,                 /* usart2                       */                   
-    usart3_irqhandler,                 /* usart3                       */                   
-    exti15_10_irqhandler,              /* external line[15:10]s        */                          
-    rtc_alarm_irqhandler,              /* rtc alarm (a and b) through exti line */                 
-    otg_fs_wkup_irqhandler,            /* usb otg fs wakeup through exti line */                       
-    tim8_brk_tim12_irqhandler,         /* tim8 break and tim12         */         
-    tim8_up_tim13_irqhandler,          /* tim8 update and tim13        */         
-    tim8_trg_com_tim14_irqhandler,     /* tim8 trigger and commutation and tim14 */
-    tim8_cc_irqhandler,                /* tim8 capture compare         */                          
-    dma1_stream7_irqhandler,           /* dma1 stream7                 */                          
-    fmc_irqhandler,                    /* fmc                          */                   
-    sdmmc1_irqhandler,                 /* sdmmc1                       */                   
-    tim5_irqhandler,                   /* tim5                         */                   
-    spi3_irqhandler,                   /* spi3                         */                   
-    uart4_irqhandler,                  /* uart4                        */                   
-    uart5_irqhandler,                  /* uart5                        */                   
-    tim6_dac_irqhandler,               /* tim6 and dac1&2 underrun errors */                   
-    tim7_irqhandler,                   /* tim7                         */
-    dma2_stream0_irqhandler,           /* dma2 stream 0                */                   
-    dma2_stream1_irqhandler,           /* dma2 stream 1                */                   
-    dma2_stream2_irqhandler,           /* dma2 stream 2                */                   
-    dma2_stream3_irqhandler,           /* dma2 stream 3                */                   
-    dma2_stream4_irqhandler,           /* dma2 stream 4                */                   
-    eth_irqhandler,                    /* ethernet                     */                   
-    eth_wkup_irqhandler,               /* ethernet wakeup through exti line */                     
-    can2_tx_irqhandler,                /* can2 tx                      */                          
-    can2_rx0_irqhandler,               /* can2 rx0                     */                          
-    can2_rx1_irqhandler,               /* can2 rx1                     */                          
-    can2_sce_irqhandler,               /* can2 sce                     */                          
-    otg_fs_irqhandler,                 /* usb otg fs                   */                   
-    dma2_stream5_irqhandler,           /* dma2 stream 5                */                   
-    dma2_stream6_irqhandler,           /* dma2 stream 6                */                   
-    dma2_stream7_irqhandler,           /* dma2 stream 7                */                   
-    usart6_irqhandler,                 /* usart6                       */                    
-    i2c3_ev_irqhandler,                /* i2c3 event                   */                          
-    i2c3_er_irqhandler,                /* i2c3 error                   */                          
-    otg_hs_ep1_out_irqhandler,         /* usb otg hs end point 1 out   */                   
-    otg_hs_ep1_in_irqhandler,          /* usb otg hs end point 1 in    */                   
-    otg_hs_wkup_irqhandler,            /* usb otg hs wakeup through exti */                         
-    otg_hs_irqhandler,                 /* usb otg hs                   */                   
-    dcmi_irqhandler,                   /* dcmi                         */                   
-    0,                                 /* reserved                     */                   
-    rng_irqhandler,                    /* rng                          */
-    fpu_irqhandler,                    /* fpu                          */
-    uart7_irqhandler,                  /* uart7                        */      
-    uart8_irqhandler,                  /* uart8                        */
-    spi4_irqhandler,                   /* spi4                         */
-    spi5_irqhandler,                   /* spi5	 		              */
-    spi6_irqhandler,                   /* spi6   			          */
-    sai1_irqhandler,                   /* sai1						  */
-    0,                                 /* reserved                     */
-    0,                                 /* reserved                     */
-    dma2d_irqhandler,                  /* dma2d    				      */
-    sai2_irqhandler,                   /* sai2                         */
-    quadspi_irqhandler,                /* quadspi                      */
-    lptim1_irqhandler,                 /* lptim1                       */
-    cec_irqhandler,                    /* hdmi_cec                     */
-    i2c4_ev_irqhandler,                /* i2c4 event                   */
-    i2c4_er_irqhandler,                /* i2c4 error                   */
-    spdif_rx_irqhandler,               /* spdif_rx                     */  
+    irq_wwdg,                   /* window watchdog                               */
+    irq_pvd,                    /* pvd through exti line detection               */
+    irq_tamp_stamp,             /* tamper and timestamps through the exti line   */
+    irq_rtc_wkup,               /* rtc wakeup through the exti line              */
+    irq_flash,                  /* flash                                         */
+    irq_rcc,                    /* rcc                                           */
+    irq_exti0,                  /* exti line0                                    */
+    irq_exti1,                  /* exti line1                                    */
+    irq_exti2,                  /* exti line2                                    */
+    irq_exti3,                  /* exti line3                                    */
+    irq_exti4,                  /* exti line4                                    */
+    irq_dma1_stream0,           /* dma1 stream 0                                 */
+    irq_dma1_stream1,           /* dma1 stream 1                                 */
+    irq_dma1_stream2,           /* dma1 stream 2                                 */
+    irq_dma1_stream3,           /* dma1 stream 3                                 */
+    irq_dma1_stream4,           /* dma1 stream 4                                 */
+    irq_dma1_stream5,           /* dma1 stream 5                                 */
+    irq_dma1_stream6,           /* dma1 stream 6                                 */
+    irq_adc,                    /* adc1, adc2 and adc3s                          */
+    irq_can1_tx,                /* can1 tx                                       */
+    irq_can1_rx0,               /* can1 rx0                                      */
+    irq_can1_rx1,               /* can1 rx1                                      */
+    irq_can1_sce,               /* can1 sce                                      */
+    irq_exti9_5,                /* external line[9:5]s                           */
+    irq_tim1_brk_tim9,          /* tim1 break and tim9                           */
+    irq_tim1_up_tim10,          /* tim1 update and tim10                         */
+    irq_tim1_trg_com_tim11,     /* tim1 trigger and commutation and tim11        */
+    irq_tim1_cc,                /* tim1 capture compare                          */
+    irq_tim2,                   /* tim2                                          */
+    irq_tim3,                   /* tim3                                          */
+    irq_tim4,                   /* tim4                                          */
+    irq_i2c1_ev,                /* i2c1 event                                    */
+    irq_i2c1_er,                /* i2c1 error                                    */
+    irq_i2c2_ev,                /* i2c2 event                                    */
+    irq_i2c2_er,                /* i2c2 error                                    */
+    irq_spi1,                   /* spi1                                          */
+    irq_spi2,                   /* spi2                                          */
+    irq_usart1,                 /* usart1                                        */
+    irq_usart2,                 /* usart2                                        */
+    irq_usart3,                 /* usart3                                        */
+    irq_exti15_10,              /* external line[15:10]s                         */
+    irq_rtc_alarm,              /* rtc alarm (a and b) through exti line         */
+    irq_otg_fs_wkup,            /* usb otg fs wakeup through exti line           */
+    irq_tim8_brk_tim12,         /* tim8 break and tim12                          */
+    irq_tim8_up_tim13,          /* tim8 update and tim13                         */
+    irq_tim8_trg_com_tim14,     /* tim8 trigger and commutation and tim14        */
+    irq_tim8_cc,                /* tim8 capture compare                          */
+    irq_dma1_stream7,           /* dma1 stream7                                  */
+    irq_fmc,                    /* fmc                                           */
+    irq_sdmmc1,                 /* sdmmc1                                        */
+    irq_tim5,                   /* tim5                                          */
+    irq_spi3,                   /* spi3                                          */
+    irq_uart4,                  /* uart4                                         */
+    irq_uart5,                  /* uart5                                         */
+    irq_tim6_dac,               /* tim6 and dac1&2 underrun errors               */
+    irq_tim7,                   /* tim7                                          */
+    irq_dma2_stream0,           /* dma2 stream 0                                 */
+    irq_dma2_stream1,           /* dma2 stream 1                                 */
+    irq_dma2_stream2,           /* dma2 stream 2                                 */
+    irq_dma2_stream3,           /* dma2 stream 3                                 */
+    irq_dma2_stream4,           /* dma2 stream 4                                 */
+    irq_eth,                    /* ethernet                                      */
+    irq_eth_wkup,               /* ethernet wakeup through exti line             */
+    irq_can2_tx,                /* can2 tx                                       */
+    irq_can2_rx0,               /* can2 rx0                                      */
+    irq_can2_rx1,               /* can2 rx1                                      */
+    irq_can2_sce,               /* can2 sce                                      */
+    irq_otg_fs,                 /* usb otg fs                                    */
+    irq_dma2_stream5,           /* dma2 stream 5                                 */
+    irq_dma2_stream6,           /* dma2 stream 6                                 */
+    irq_dma2_stream7,           /* dma2 stream 7                                 */
+    irq_usart6,                 /* usart6                                        */
+    irq_i2c3_ev,                /* i2c3 event                                    */
+    irq_i2c3_er,                /* i2c3 error                                    */
+    irq_otg_hs_ep1_out,         /* usb otg hs end point 1 out                    */
+    irq_otg_hs_ep1_in,          /* usb otg hs end point 1 in                     */
+    irq_otg_hs_wkup,            /* usb otg hs wakeup through exti                */
+    irq_otg_hs,                 /* usb otg hs                                    */
+    irq_dcmi,                   /* dcmi                                          */
+    0,                          /* reserved                                      */
+    irq_rng,                    /* rng                                           */
+    irq_fpu,                    /* fpu                                           */
+    irq_uart7,                  /* uart7                                         */
+    irq_uart8,                  /* uart8                                         */
+    irq_spi4,                   /* spi4                                          */
+    irq_spi5,                   /* spi5	 		                                 */
+    irq_spi6,                   /* spi6   			                             */
+    irq_sai1,                   /* sai1						                     */
+    0,                          /* reserved                                      */
+    0,                          /* reserved                                      */
+    irq_dma2d,                  /* dma2d    				                     */
+    irq_sai2,                   /* sai2                                          */
+    irq_quadspi,                /* quadspi                                       */
+    irq_lptim1,                 /* lptim1                                        */
+    irq_cec,                    /* hdmi_cec                                      */
+    irq_i2c4_ev,                /* i2c4 event                                    */
+    irq_i2c4_er,                /* i2c4 error                                    */
+    irq_spdif_rx,               /* spdif_rx                                      */
 };
 
-
-#define rcc     (*(_rcc * )0x40023800)
-#define ioa     (*(_gpio *)0x40020000)
-#define iob     (*(_gpio *)0x40020400)
-#define ioc     (*(_gpio *)0x40020800)
-#define iod     (*(_gpio *)0x40020c00)
-#define ioe     (*(_gpio *)0x40021000)
-#define iof     (*(_gpio *)0x40021400)
-#define iog     (*(_gpio *)0x40021800)
-#define ioh     (*(_gpio *)0x40021c00)
-#define ioi     (*(_gpio *)0x40022000)
-#define ioj     (*(_gpio *)0x40022400)
-#define iok     (*(_gpio *)0x40022800)
+xspace()
+    auto & rcc      = (*(_rcc * )0x40023800);
+    auto & ioa      = (*(_gpio *)0x40020000);
+    auto & iob      = (*(_gpio *)0x40020400);
+    auto & ioc      = (*(_gpio *)0x40020800);
+    auto & iod      = (*(_gpio *)0x40020c00);
+    auto & ioe      = (*(_gpio *)0x40021000);
+    auto & iof      = (*(_gpio *)0x40021400);
+    auto & iog      = (*(_gpio *)0x40021800);
+    auto & ioh      = (*(_gpio *)0x40021c00);
+    auto & ioi      = (*(_gpio *)0x40022000);
+    auto & ioj      = (*(_gpio *)0x40022400);
+    auto & iok      = (*(_gpio *)0x40022800);
+    auto & dac      = (*(_dac  *)0x40007400);
+$
 
