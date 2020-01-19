@@ -1100,7 +1100,7 @@ private:
 public:
     template<class ... args>
     xdefr(_gpio &, config, io_mode mode, uxx port, args ... rest)
-        implicit_value<uxx> ports[] = { mode, rest... };
+        implicit_value<uxx> ports[] = { port, rest... };
         mode_t props = mode;
         u32    modes = items.mode;
         u32    otype = items.otype;
@@ -1151,6 +1151,7 @@ public:
         $
 
         xopc([], uxx index)
+            field * ptr = (field *)this;
             xstruct(bind_bit)
                 xini(bind_bit(u32 & value, u32 index))
                     thex.ptr = & value;
@@ -1167,7 +1168,7 @@ public:
 
                 u32   bit;
                 u32 * ptr;
-            $ value { thex, index };
+            $ value { ptr->odr, index };
 
             return value;
         $
@@ -1196,7 +1197,11 @@ $;
 #define xextc             extern "C" {
 
 int main();
-xirq(reset_handler) main(); $
+xirq(reset_handler) 
+    xwhile(true)
+        main(); 
+    $
+$
 xirq(nmi_handler) $
 xirq(hardfault_handler) $
 xirq(memmanage_handler) $
