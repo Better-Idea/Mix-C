@@ -1658,12 +1658,12 @@ xseg(.irqs) irq_t irq_vector[] = {
     irq_uart7,                  /* uart7                                         */
     irq_uart8,                  /* uart8                                         */
     irq_spi4,                   /* spi4                                          */
-    irq_spi5,                   /* spi5	 		                                 */
-    irq_spi6,                   /* spi6   			                             */
-    irq_sai1,                   /* sai1						                     */
+    irq_spi5,                   /* spi5                                          */
+    irq_spi6,                   /* spi6                                          */
+    irq_sai1,                   /* sai1                                          */
     0,                          /* reserved                                      */
     0,                          /* reserved                                      */
-    irq_dma2d,                  /* dma2d    				                     */
+    irq_dma2d,                  /* dma2d                                         */
     irq_sai2,                   /* sai2                                          */
     irq_quadspi,                /* quadspi                                       */
     irq_lptim1,                 /* lptim1                                        */
