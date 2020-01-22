@@ -541,7 +541,7 @@ $;
 xstruct(source_from_lse)
     constexpr source_from_lse(){}
     xassume(source_for_mco1, 1);
-    xassume(source_for_rtc, 1);
+    xassume(source_for_rtc , 1);
 $;
 
 constexpr port                  keep_variable           = port::keep_variable;
@@ -1426,6 +1426,83 @@ public:
             $
         $ opt;
     $ one;
+$;
+
+
+
+
+xenumc(latch_when)
+    falling_edge,
+    rising_edge,
+$;
+
+xenumc(when_spi_idle)
+    clock_stay_low_level,
+    clock_stay_high_level,
+$;
+
+xenumc(spi_role)
+    as_slaver,
+    as_master,
+$;
+
+xenumc(spi_bits_order)
+    msb_first,
+    lsb_first,
+$;
+
+xenumc(spi_baud_rate)
+    from_apb_div2, from_apb_div4, from_apb_div8, from_apb_div16, from_apb_div32, from_apb_div64, from_apb_div128, from_apb_div256,
+$;
+
+xunion(_spi)
+private:
+    xstruct(field)
+        u32 cpha        : 1;
+        u32 cpol        : 1;
+        u32 mstr        : 1;
+        u32 br          : 3;
+        u32 spe         : 1;
+        u32 lsbfirst    : 1;
+        u32 ssi         : 1;
+        u32 ssm         : 1;
+        u32 rxonly      : 1;
+        u32 crcl        : 1;
+        u32 crcnext     : 1;
+        u32 crcen       : 1;
+        u32 bidioe      : 1;
+        u32 bidimode    : 1;
+        xr32(16);
+
+        u32 rxdmaen     : 1;
+        u32 txdmaen     : 1;
+        u32 ssoe        : 1;
+        u32 nssp        : 1;
+        u32 frf         : 1;
+        u32 errie       : 1;
+        u32 rxneie      : 1;
+        u32 txeie       : 1;
+        u32 ds          : 4;
+        u32 frxth       : 1;
+        u32 ldma_rx     : 1;
+        u32 ldma_tx     : 1;
+        xr32(17);
+        u32 : 1;
+        u32 : 1;
+        u32 : 1;
+        u32 : 1;
+        u32 : 1;
+        u32 : 1;
+        u32 : 1;
+        u32 : 1;
+    $ items;
+public:
+    xrw(::latch_when, latch_when, cpha);
+    xrw(::when_spi_idle, when_idle, cpol);
+    xrw(::spi_role, role, mstr);
+    xrw(::spi_baud_rate, source, br);
+    xrw(bool, enable, spe);
+    xrw(::spi_bits_order, bits_order, lsbfirst);
 $;
 
 #define xirq(name)        void __attribute__((interrupt("irq"))) name() {
