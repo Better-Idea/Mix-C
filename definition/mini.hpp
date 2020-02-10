@@ -1,5 +1,4 @@
 #pragma once
-#define xmixc_space(...)                namespace mixc { namespace __VA_ARGS__ {
 #define xweak                           __attribute__((weak))
 #define xvar(...)                       __VA_ARGS__
 #define xlink(a,b)                      a ## b
@@ -298,7 +297,7 @@ xstruct(implicit_value)
         value((a)(b &)value)
     ) $
 
-    xcvtc(a &)
+    xcvtc(a)
         return value;
     $
 
@@ -429,17 +428,10 @@ xspace(mixc)
     $
 $
 
-#define __PLACEMENT_NEW_INLINE
-#ifdef _MSC_VER
-    xopr(void *, new, size_t bytes, voidp ptr)
-        return ptr;
-    $
-#else
-    xopr(void *, new, unsigned long bytes, voidp ptr)
-        return ptr;
-    $
-#endif
+xopr(void *, new, size_t bytes, voidp ptr)
+    return ptr;
+$
 
-#include"definition/mini.test_frame.hpp"
-#include"definition/mini.prop_frame.hpp"
+#include"definition/mini.test_frame.inc"
+#include"definition/mini.prop_frame.inc"
 
