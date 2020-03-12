@@ -1,11 +1,12 @@
 #pragma once
-#include"utility/memop/cast.hpp"
+#include"define/base_type.hpp"
+#include"memop/cast.hpp"
 
 namespace mixc{
     template<uxx count>
     struct mirror{
         u08 bytes[count];
-        static constexpr size_t length = count;
+        static constexpr uxx length = count;
 
         mirror(): 
             bytes{0}{
