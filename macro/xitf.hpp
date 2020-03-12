@@ -1,14 +1,12 @@
 #pragma once
 #include"macro/xlink.hpp"
 #include"macro/xmake_var_list.hpp"
-#include"meta/is_same.hpp"
 #include"memop/cast.hpp"
+#include"meta/is_same.hpp"
+#include"utility/type/place_holder.hpp"
 
 namespace mixc{
     template<int i> struct interface{};
-    template<int i> struct place_holder{
-        static constexpr int index = i;
-    };
 }
 
 #define xitf(name)                                                                                  \
