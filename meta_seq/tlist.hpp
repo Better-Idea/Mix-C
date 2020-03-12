@@ -1,4 +1,5 @@
 #pragma once
+#include"define/base_type.hpp"
 
 namespace mixc {
     template<class ... args>
