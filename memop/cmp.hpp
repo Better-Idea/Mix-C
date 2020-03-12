@@ -1,5 +1,5 @@
 #pragma once
-#include"utility/memop/base_seqlize.hpp"
+#include"memop/base_seqlize.hpp"
 
 namespace mixc{
     template<class a>
