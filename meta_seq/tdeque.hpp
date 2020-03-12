@@ -7,12 +7,12 @@ namespace mixc {
     template<class first, class ... args>
     struct tdeque<tlist<first, args...>>{
         using item = first;
-        using new_tlist = tlist<args...>;
+        using new_list = tlist<args...>;
     };
     
     template<>
     struct tdeque<tlist<>>{
         using item = tnull;
-        using new_tlist = tlist<>;
+        using new_list = tlist<>;
     };
 }
