@@ -16,7 +16,7 @@ namespace mixc::inner_gc{
     private:
         template<class current_kvlist, class result_list, class first, class ... args>
         static auto invoke(current_kvlist kv, tlist<first, args...> childrens, result_list result){
-            if constexpr(tin<result_list, typename first::val){
+            if constexpr(tin<result_list, typename first::val>){
                 return invoke(kv, tlist<args...>(), result);
             }
             else{
