@@ -1,6 +1,7 @@
 #pragma once
 #include"macro/xlink.hpp"
-#include"macro/xmake_var_list.hpp"
+#include"macro/xvaargs.hpp"
+#include"macro/xlist+.hpp"
 #include"memop/cast.hpp"
 #include"meta/is_same.hpp"
 #include"utility/type/place_holder.hpp"
@@ -19,30 +20,30 @@ private:                                                                        
 public:                                                                                             \
 
 #define __xitf_item__(index,name,ret,...)                                                           \
-    ret name(xmake_var_list_type_name(__VA_ARGS__)){                                                \
-        using action = ret(__self__::*)(xmake_var_list_type(__VA_ARGS__));                          \
+    ret name(xlist_args(__VA_ARGS__)){                                                              \
+        using action = ret(__self__::*)(xlist_type(__VA_ARGS__));                                   \
         auto func = mixc::cast<action>(funcs[index]);                                               \
         if constexpr(mixc::is_same<void, ret>){                                                     \
-            (object->*func)(xmake_var_list_name(__VA_ARGS__));                                      \
+            (object->*func)(xlist_name(__VA_ARGS__));                                               \
         }                                                                                           \
         else{                                                                                       \
-            return (object->*func)(xmake_var_list_name(__VA_ARGS__));                               \
+            return (object->*func)(xlist_name(__VA_ARGS__));                                        \
         }                                                                                           \
     }                                                                                               \
 private:                                                                                            \
-    xmake_var_list_check(__VA_ARGS__);                                                              \
     template<class type>                                                                            \
     interface(                                                                                      \
         type const & impl,                                                                          \
         void **,                                                                                    \
         mixc::place_holder<index>                                                                   \
     ):  interface(impl, nullptr, mixc::place_holder<index + 1>()){                                  \
-        using action = ret(type::*)(xmake_var_list_type(__VA_ARGS__));                              \
+        using action = ret(type::*)(xlist_type(__VA_ARGS__));                                       \
         funcs[index] = mixc::cast<void *>(action(& type::name));                                    \
     }                                                                                               \
 public:                                                                                             \
 
-#define xitf_item(name,ret,...)  __xitf_item__(xarg(__COUNTER__ - __start__),name,ret,__VA_ARGS__)
+#define xitf_item(name,ret,...)                                                                     \
+    __xitf_item__(xvaargs(__COUNTER__ - __start__),name,ret,__VA_ARGS__)
 
 #define xitf_end()                                                                                  \
     template<class type>                                                                            \
