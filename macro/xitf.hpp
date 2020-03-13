@@ -6,6 +6,45 @@
 #include"meta/is_same.hpp"
 #include"utility/type/place_holder.hpp"
 
+/*
+#include<stdio.h>
+
+xitf(can_fly)
+    xitf_item(fly, void,
+        xnt(arg, int)
+    );
+xitf_end();
+
+struct bird{
+    void fly(int a){
+        printf("i'm bird, i can fly %d!\n", a);
+    }
+};
+
+void fly(can_fly ufo){
+    ufo.fly(2020);
+}
+
+int main(){
+    // correct
+    bird b;
+    can_fly cf = b;
+    cf.fly(2020);
+
+    // correct
+    fly(b);
+
+    // correct
+    fly(bird());
+    
+    // NOTICE:
+    // can_fly cf = bird();
+    // error ========================================================
+    // xitf interface (can_fly) need a alive implement instance (bird)
+    return 0;
+}
+*/
+
 namespace mixc{
     template<int i> struct interface{};
 }
