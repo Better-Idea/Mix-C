@@ -1,6 +1,6 @@
 #pragma once
 #include"meta/is_class.hpp"
-#include"meta_seq/tdistinct_marge.hpp"
+#include"meta_seq/tdistinct_append.hpp"
 #include"meta_seq/tfilter.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tkv.hpp"
@@ -16,7 +16,7 @@ namespace mixc::inner_gc{
     private:
         template<class current_kvlist, class result_list, class first, class ... args>
         static auto invoke(current_kvlist kv, tlist<first, args...> childrens, result_list result){
-            if constexpr(tin<result_list, typename first::val>){
+            if constexpr(tin<result_list, first>){
                 return invoke(kv, tlist<args...>(), result);
             }
             else{
@@ -25,7 +25,7 @@ namespace mixc::inner_gc{
                 using item_kvlist       = typename pair::item_list;
                 using parents_list      = typename tfilter<item_kvlist, tselector_val>::new_list;
                 using new_children_list = typename tmarge<tlist<args...>, parents_list>::new_list;
-                using new_result        = typename tdistinct_marge<result_list, parents_list>::new_list;
+                using new_result        = typename tdistinct_append<result_list, first>::new_list;
                 return invoke(
                     rest_kvlist(),
                     new_children_list(),
