@@ -1,6 +1,7 @@
 #pragma once
 #include"gc/private/routing.hpp"
 #include"gc/private/collect.hpp"
+#include"meta/is_class.hpp"
 
 namespace mixc::inner_gc{
     template<class root>
