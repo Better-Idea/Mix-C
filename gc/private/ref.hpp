@@ -156,10 +156,7 @@ namespace mixc::inner_gc{
 namespace mixc::inner_gc{
     template<class impl, class item, class attribute, bool is_array>
     inline meta<impl, item, attribute, is_array>::meta(self const & value){
-        self & share = (self &)value;
-        mem = share.mem;
-
-        if (mem) {
+        if (mem = value.mem; mem != nullptr) {
             mixc::atom_add(& mem->owners, step);
         }
     }
