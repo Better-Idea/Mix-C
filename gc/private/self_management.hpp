@@ -3,7 +3,8 @@
 
 namespace mixc{
     struct self_management{
-        template<class guide> uxx routing(void * root);
-        template<class guide> void clear_footmark();
+    protected:
+        template<class guide> uxx routing(guide, void * root);
+        template<class guide> void clear_footmark(guide);
     };
 }
