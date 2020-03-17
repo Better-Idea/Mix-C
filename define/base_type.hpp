@@ -95,3 +95,4 @@ using uxx               = mixc::uxx;
 using ixxp              = ixx   *;
 using uxxp              = uxx   *;
 constexpr uxx           not_exist = uxx(-1);
+constexpr uxx           magic_number = 19961212;
