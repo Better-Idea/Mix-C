@@ -28,13 +28,20 @@ namespace mixc{
 
     template<class type>
     inline type * alloc(memory_size bytes = memory_size(0)){
-        auto ptr = (type *)malloc(bytes == 0 ? sizeof(type) : bytes);
+        auto size = bytes == 0 ? sizeof(type) : bytes;
+        auto ptr = (type *)malloc(size);
         return ptr;
     }
 
     template<class type>
     inline void free(type * ptr, memory_size bytes = memory_size(0)){
         ::free(ptr);
+    }
+
+    template<class type>
+    inline void free_with_destroy(type * ptr, memory_size bytes = memory_size(0)){
+        ptr->~type();
+        mixc::free(ptr, bytes);
     }
 
     namespace memory_inner{
@@ -49,7 +56,6 @@ namespace mixc{
     }
 }
 
-
-inline void * operator new(decltype(mixc::memory_inner::the_size_t()) bytes, void * ptr){
+inline void * operator new(decltype(mixc::memory_inner::the_size_t()) bytes, void * ptr) {
     return ptr;
 }
