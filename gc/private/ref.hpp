@@ -1,6 +1,7 @@
 #pragma once
 #include"define/base_type.hpp"
 #include"gc/private/self_management.hpp"
+#include"gc/private/routing_result.hpp"
 #include"memop/memory.hpp"
 #include"memop/copy.hpp"
 #include"meta_ctr/cif.hpp"
@@ -23,17 +24,45 @@ namespace mixc {
 }
 
 namespace mixc::inner_gc{
+    constexpr uxx mark_visited          = uxx(1) << (sizeof(uxx) * 8 - 1);
+    constexpr uxx mark_can_arrive_root  = uxx(1) << (sizeof(uxx) * 8 - 2);
+    constexpr uxx mark_in_free          = uxx(1) << (sizeof(uxx) * 8 - 3);
+    constexpr uxx mask_owners           = uxx(-1) >> 3;
+    constexpr uxx step                  = uxx(1);
+    constexpr bool can_release          = true;
+
     template<class list> struct tuple;
     template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
 
     struct empty_length {
-        empty_length(uxx length) : owners(1) { }
+        empty_length(uxx length) : record(1) { }
     protected:
         constexpr auto this_length() { return uxx(0); }
         constexpr auto this_length(uxx value) { }
     private:
         template<class impl, class item, class attribute, bool is_array> friend struct meta;
-        uxx owners;
+        template<class list> friend struct tuple;
+        uxx record;
+        uxx owners(){
+            return record & mask_owners;
+        }
+        uxx owners_inc();
+        uxx owners_dec();
+        bool visited(){
+            return (record & mark_visited) != 0;
+        }
+        bool can_arrive_root(){
+            return (record & mark_can_arrive_root) != 0;
+        }
+        bool in_free(){
+            return (record & mark_in_free) != 0;
+        }
+        void set_visit();
+        void reset_visit();
+        void set_can_arrive_root();
+        void reset_can_arrive_root();
+        void set_in_free();
+        void reset_in_free();
     };
 
     struct plus_length : empty_length {
@@ -55,11 +84,11 @@ namespace mixc::inner_gc{
             addition(length), attribute(list...) {}
     private:
         ~header() {
+            // printf("%s free\n", typeid(attribute).name());
             for (uxx i = 0; i < addition::this_length(); i++) {
                 (*this)[i].~type();
             }
         }
-
         auto * ptr(uxx index){
             return ((type *)(this + 1)) + index;
         }
@@ -67,6 +96,7 @@ namespace mixc::inner_gc{
             return ptr(index)[0];
         }
         template<class impl, class a, class b, bool is_array> friend struct meta;
+        template<class t> friend void mixc::free_with_destroy(t *, memory_size);
     };
 
     template<class impl, class item, class attribute, bool is_array>
@@ -112,23 +142,27 @@ namespace mixc::inner_gc{
             return mem[0][index];
         }
     private:
-        template<class list> friend struct tuple;
-        static constexpr uxx mask_in_visited    = uxx(1) << (sizeof(uxx) * 8 - 1);
-        static constexpr uxx mask_in_gc_queue   = uxx(1) << (sizeof(uxx) * 8 - 2);
-        static constexpr uxx step               = uxx(1);
         header_t * mem;
 
-        template<class guide> uxx routing(guide);
-        template<class guide> uxx routing(guide, voidp root);
-        template<class guide> uxx subrouting(guide, voidp root);
+        template<class list> friend struct tuple;
         template<class guide> void clear_footmark(guide);
-        bool visited();
-        void inversion_visit_state();
+        template<class guide> void clear_footmark(guide, voidp root);
+        template<class guide> bool routing_entry(guide);
+        template<class guide> routing_result routing(guide);
+        template<class guide> routing_result subrouting(guide);
 
         auto alloc(uxx length) {
             return mixc::alloc<header_t>(
                 memory_size(
                     sizeof(header_t) + length * sizeof(item)
+                )
+            );
+        }
+
+        void free(){
+            mixc::free_with_destroy(mem,
+                memory_size(
+                    sizeof(header_t) + mem->this_length() * sizeof(item)
                 )
             );
         }
@@ -139,6 +173,7 @@ namespace mixc::inner_gc{
 
 #include"define/base_type.hpp"
 #include"lock/atom_add.hpp"
+#include"lock/atom_and.hpp"
 #include"lock/atom_fetch_or.hpp"
 #include"lock/atom_or.hpp"
 #include"lock/atom_sub.hpp"
@@ -153,110 +188,169 @@ namespace mixc::inner_gc{
 #include"gc/private/collect.hpp"
 #include"gc/private/tuple.hpp"
 
+#define xtemp       template<class impl, class item, class attribute, bool is_array>
+#define xself       meta<impl, item, attribute, is_array>
+
 namespace mixc::inner_gc{
-    template<class impl, class item, class attribute, bool is_array>
-    inline meta<impl, item, attribute, is_array>::meta(self const & value){
+    inline uxx empty_length::owners_inc(){
+        return mixc::atom_add(& record, step) & mask_owners;
+    }
+
+    inline uxx empty_length::owners_dec(){
+        return mixc::atom_sub(& record, step) & mask_owners;
+    }
+
+    inline void empty_length::set_visit(){
+        mixc::atom_or(& record, mark_visited);
+    }
+
+    inline void empty_length::reset_visit(){
+        mixc::atom_and(& record, ~mark_visited);
+    }
+
+    inline void empty_length::set_can_arrive_root(){
+        mixc::atom_or(& record, mark_can_arrive_root);
+    }
+
+    inline void empty_length::reset_can_arrive_root(){
+        mixc::atom_and(& record, ~mark_can_arrive_root);
+    }
+
+    inline void empty_length::set_in_free(){
+        mixc::atom_or(& record, mark_in_free);
+    }
+
+    inline void empty_length::reset_in_free(){
+        mixc::atom_and(& record, ~mark_in_free);
+    }
+
+    xtemp inline xself::meta(self const & value){
         if (mem = value.mem; mem != nullptr) {
-            mixc::atom_add(& mem->owners, step);
+            mem->owners_inc();
         }
     }
 
-    template<class impl, class item, class attribute, bool is_array>
-    inline
-    meta<impl, item, attribute, is_array> & 
-    meta<impl, item, attribute, is_array>::operator = (self const & value){
+    xtemp inline xself & xself::operator = (self const & value){
         if (value.mem){ 
-            mixc::atom_add(& value->owners, step);
+            value->owners_inc();
         }
-        auto ptr = mixc::atom_swap(& mem, value.mem);
-        mixc::cast<self>(ptr).~meta();
+        mixc::cast<self>(
+            mixc::atom_swap(& mem, value.mem)
+        ).~meta();
         return this[0];
     }
 
-    template<class impl, class item, class attribute, bool is_array>
-    inline meta<impl, item, attribute, is_array>::~meta(){
+    xtemp inline xself::~meta(){
         using guide = decltype(make_guide<impl>());
         constexpr bool      need_gc = not is_same<guide, tlist<>>;
+        header_t *          tmp = nullptr;
         guide               gui;
-        header_t *          tmp;
         uxx                 cnt;
-        uxx                 byp = false; // bypass when not in gc-queue
-
-        if (tmp = mixc::atom_swap(& mem, tmp); tmp != nullptr) { // enter only once
-            cnt = mixc::atom_sub(& tmp->owners, step); // decease meta count
-
-            if constexpr (need_gc){ 
-                byp = mixc::atom_fetch_or(& tmp->owners, mask_in_gc_queue) & mask_in_gc_queue;
-            }
-            if (byp){
-                return;
-            }
-            if (cnt == 0 || cnt <= mixc::cast<self>(tmp).routing(gui)) {
-                tmp->~header();
-                mixc::free(tmp, 
-                    memory_size(
-                        sizeof(header_t) + tmp->this_length() * sizeof(item)
-                    )
-                );
-            }
-            else{
-                mixc::atom_xor(& tmp->owners, mask_in_gc_queue);
-            }
-        }
-    }
-
-    template<class impl, class item, class attribute, bool is_array>
-    inline bool meta<impl, item, attribute, is_array>::visited(){
-        return (mem->owners & mask_in_visited) != 0;
-    }
-
-    template<class impl, class item, class attribute, bool is_array>
-    inline void meta<impl, item, attribute, is_array>::inversion_visit_state(){
-        mixc::atom_xor(& mem->owners, mask_in_visited);
-    }
-
-    template<class impl, class item, class attribute, bool is_array>
-    template<class guide>
-    inline uxx meta<impl, item, attribute, is_array>::routing(guide gui){
-        // inside reference count (irc)
-        uxx irc = subrouting(gui, mem);
-        clear_footmark(gui);
-        return irc;
-    }
-
-    template<class impl, class item, class attribute, bool is_array>
-    template<class guide>
-    inline uxx meta<impl, item, attribute, is_array>::routing(guide gui, voidp root){
-        if (root == voidp(mem)){
-            return 1;
-        }
-        else if (mem == nullptr || visited()){
-            return 0;
+        
+        if (tmp = mixc::atom_swap(& mem, tmp); tmp == nullptr) { // enter only once
+            return;
         }
         else{
-            return subrouting(gui, root);
+            cnt = tmp->owners_dec();
+        }
+
+        // printf("%s | routing ref:%llu root:%p\n", typeid(attribute).name(), cnt, tmp);
+        auto & old = mixc::cast<self>(tmp);
+
+        if constexpr (not need_gc){
+            if (cnt == 0){
+                old.free();
+            }
+        }
+        else if (old->in_free()){
+            return;
+        }
+        else if (old.routing_entry(gui) == can_release){
+            old.clear_footmark(gui);
+            old->set_in_free();
+            old.free();
+        }
+        else{
+            old.clear_footmark(gui);
         }
     }
 
-    template<class impl, class item, class attribute, bool is_array>
-    template<class guide>
-    inline uxx meta<impl, item, attribute, is_array>::subrouting(guide gui, voidp root){
+    xtemp template<class guide> inline bool
+    xself::routing_entry(guide gui){
         using tuplep = tuple<typename attribute::gc_candidate_list> *;
-        inversion_visit_state();
-        attribute * ptr = mem; // lis convert
-        return tuplep(ptr)->routing(gui, root);
+        attribute *     ptr = mem; // lis convert
+        routing_result  r;
+        mem->set_visit();
+        mem->set_can_arrive_root();
+
+        if (r = tuplep(ptr)->routing(gui); r.can_arrive_root){
+            r.degree_dvalue += mem->owners();
+        }
+        mem->reset_can_arrive_root();
+        // printf("%s | routing io:%lld\n", typeid(attribute).name(), r.degree_dvalue);
+        return r.degree_dvalue <= 0 ? can_release : not can_release;
     }
 
-    template<class impl, class item, class attribute, bool is_array>
-    template<class guide>
-    inline void meta<impl, item, attribute, is_array>::clear_footmark(guide gui){
+    xtemp template<class guide> inline routing_result
+    xself::routing(guide gui){
+        routing_result r;
+        if (mem == nullptr){
+            return { 0 }; // no way
+        }
+        // printf("%s | routing visited:%llu can:%llu ref:%llu mem:%p\n", typeid(attribute).name(), (uxx) mem->visited(), (uxx) mem->can_arrive_root(), mem->owners(), mem);
+        if (not mem->visited()){
+            if (r = subrouting(gui); r.can_arrive_root){
+                r.degree_dvalue += mem->owners();
+            }
+            return r;
+        }
+        if (mem->can_arrive_root()){
+            return { 1 }; // has a way can arrive root
+        }
+        else{
+            mem->owners_dec(); // no way (maybe, but not absolutely)
+            // printf("%s | routing visited:%llu can:%llu ref:%llu mem:%p\n", typeid(attribute).name(), (uxx) mem->visited(), (uxx) mem->can_arrive_root(), mem->owners(), mem);
+            return { 0 };
+        }
+    }
+
+    xtemp template<class guide> inline routing_result
+    xself::subrouting(guide gui){
         using tuplep = tuple<typename attribute::gc_candidate_list> *;
-        if (mem != nullptr && visited()){
-            using tuplep = tuple<typename attribute::gc_candidate_list> *;
-            inversion_visit_state();
+        attribute *     ptr = mem; // lis convert
+        routing_result  r;
+        mem->set_visit();
+
+        if (r = tuplep(ptr)->routing(gui); r.can_arrive_root){
+            mem->set_can_arrive_root();
+        }
+        return r;
+    }
+
+    xtemp template<class guide>
+    inline void xself::clear_footmark(guide gui){
+        using tuplep = tuple<typename attribute::gc_candidate_list> *;
+        // printf("%s | clear visited:%llu can:%llu ref:%llu mem:%p\n", typeid(attribute).name(), (uxx) mem->visited(), (uxx) mem->can_arrive_root(), mem->owners(), mem);
+        if (mem->visited()){
+            mem->reset_visit();
             attribute * ptr = mem; // lis convert
-            tuplep(ptr)->clear_footmark(gui);
+            tuplep(ptr)->clear_footmark(gui, mem);
+            mem->reset_can_arrive_root();
         }
+        else if (mem->can_arrive_root()){
+            mem->owners_inc();
+            // printf("%s | clear ref:%llu mem:%p\n", typeid(attribute).name(), mem->owners(), mem);
+        }
+    }
+
+    xtemp template<class guide>
+    inline void xself::clear_footmark(guide gui, voidp root){
+        if (mem == nullptr || root == voidp(mem)){
+            return;
+        }
+        clear_footmark(gui);
     }
 }
 
+#undef xtemp
+#undef xself

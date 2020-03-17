@@ -1,6 +1,7 @@
 #pragma once
 #include"define/base_type.hpp"
-#include"self_management.hpp"
+#include"gc/private/self_management.hpp"
+#include"gc/private/routing_result.hpp"
 #include"memop/addressof.hpp"
 #include"meta/is_class.hpp"
 #include"meta/is_based_on.hpp"
@@ -21,47 +22,56 @@ namespace mixc::inner_gc{
         }
 
         template<class guide>
-        uxx routing(guide gui, voidp root){
-            uxx irc = 0;
+        routing_result routing(guide gui){
+            routing_result r = { 0, 0 };
             if constexpr (is_class<first>){
                 if constexpr (is_based_on<self_management, first>){
                     if constexpr (tin<guide, first>){
-                        irc = item.routing(gui, root);
+                        // printf("%s | routing\n", typeid(first).name());
+                        if (r = item.routing(gui); r.can_arrive_root) {
+                            r.degree_dvalue -= 1;
+                            // printf("%s | routing io:%lld\n", typeid(first).name(), r.degree_dvalue);
+                        }
                     }
                 }
                 else{
                     using tuplep = tuple<typename first::gc_candidate_list> *;
-                    irc = tuplep(addressof(item))->routing(gui, root);
+                    r = tuplep(addressof(item))->routing(gui);
                 }
             }
-            return irc + next.routing(gui,root);
+            
+            routing_result n = next.routing(gui);
+            r.can_arrive_root |= n.can_arrive_root;
+            r.degree_dvalue += n.degree_dvalue;
+            return r;
         }
 
         template<class guide>
-        void clear_footmark(guide gui){
+        void clear_footmark(guide gui, voidp root){
             if constexpr (is_class<first>){
                 if constexpr (is_based_on<self_management, first>){
                     if constexpr (tin<guide, first>){
-                        item.clear_footmark(gui);
+                        // printf("%s | clear\n", typeid(first).name());
+                        item.clear_footmark(gui, root);
                     }
                 }
                 else{
                     using tuplep = tuple<typename first::gc_candidate_list> *;
-                    tuplep(addressof(item))->clear_footmark(gui);
+                    tuplep(addressof(item))->clear_footmark(gui, root);
                 }
             }
-            next.clear_footmark(gui);
+            next.clear_footmark(gui, root);
         }
     };
 
     template<>
     struct tuple<tlist<>>{
         template<class guide>
-        constexpr uxx routing(guide, void *){
-            return 0;
+        constexpr routing_result routing(guide){
+            return { 0, 0 };
         }
 
         template<class guide>
-        constexpr void clear_footmark(guide){}
+        constexpr void clear_footmark(guide, voidp){}
     };
 }
