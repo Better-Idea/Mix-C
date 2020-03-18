@@ -18,12 +18,14 @@ namespace mixc{
     template<class type, class ... args>
     inline type * alloc_with_initial(args const & ... list){
         auto ptr = (type *)malloc(sizeof(type));
+        xdebug(im_memory_alloc_with_initial, "alloc mem:%p  size:%llu\n", ptr, u64(sizeof(type)));
         return new(ptr) type(list...);
     }
 
     template<class type, class ... args>
     inline type * alloc_with_initial(memory_size bytes, args const & ... list){
         auto ptr = (type *)malloc(bytes);
+        xdebug(im_memory_alloc_with_initial, "alloc mem:%p  size:%llu\n", ptr, u64(bytes));
         return new(ptr) type(list...);
     }
 
@@ -31,19 +33,19 @@ namespace mixc{
     inline type * alloc(memory_size bytes = memory_size(0)){
         auto size = bytes == 0 ? sizeof(type) : bytes;
         auto ptr = (type *)malloc(size);
-        xdebug("alloc mem:%p  size:%llu\n", ptr, u64(bytes));
+        xdebug(im_memory_alloc, "alloc mem:%p  size:%llu\n", ptr, u64(bytes));
         return ptr;
     }
 
     template<class type>
     inline void free(type * ptr, memory_size bytes = memory_size(0)){
-        xdebug("free  mem:%p  size:%llu\n", ptr, u64(bytes));
+        xdebug(im_memory_free, "free  mem:%p  size:%llu\n", ptr, u64(bytes));
         ::free(ptr);
     }
 
     template<class type>
     inline void free_with_destroy(type * ptr, memory_size bytes = memory_size(0)){
-        xdebug("free  mem:%p  size:%llu\n", ptr, u64(bytes));
+        xdebug(im_memory_free_with_destroy, "free  mem:%p  size:%llu\n", ptr, u64(bytes));
         ptr->~type();
         ::free(ptr);
     }

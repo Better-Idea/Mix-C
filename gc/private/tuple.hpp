@@ -29,6 +29,7 @@ tuple<foo::member_list> xx;
 #include"define/base_type.hpp"
 #include"gc/private/self_management.hpp"
 #include"gc/private/routing_result.hpp"
+#include"macro/xdebug.hpp"
 #include"memop/cast.hpp"
 #include"meta/is_class.hpp"
 #include"meta/is_based_on.hpp"
@@ -57,10 +58,15 @@ namespace mixc::inner_gc{
             if constexpr (is_class<first>){
                 if constexpr (is_based_on<self_management, first>){
                     if constexpr (tin<guide, first>){
-                        // printf("%s | routing\n", typeid(first).name());
+                        xdebug(im_inner_gc_tuple_routing, "%s | routing\n", typeid(first).name());
+
                         if (r = item.routing(gui); r.can_arrive_root) {
                             r.degree_dvalue -= 1; // 如果 item 可以到达根节点，那么该 tuple 就存在 1 条出度
-                            // printf("%s | routing io:%lld\n", typeid(first).name(), r.degree_dvalue);
+
+                            xdebug(im_inner_gc_tuple_routing, "%s | routing io:%lld\n", 
+                                typeid(first).name(), 
+                                r.degree_dvalue
+                            );
                         }
                     }
                 }
@@ -79,7 +85,7 @@ namespace mixc::inner_gc{
             if constexpr (is_class<first>){
                 if constexpr (is_based_on<self_management, first>){
                     if constexpr (tin<guide, first>){
-                        // printf("%s | clear\n", typeid(first).name());
+                        xdebug(im_inner_gc_tuple_clear_footmark, "%s | clear\n", typeid(first).name());
                         item.clear_footmark(gui, root);
                     }
                 }
