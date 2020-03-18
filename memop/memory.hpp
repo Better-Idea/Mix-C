@@ -1,5 +1,6 @@
 #pragma once
 #include"define/base_type.hpp"
+#include"macro/xdebug.hpp"
 #include<malloc.h>
 
 namespace mixc{
@@ -30,18 +31,21 @@ namespace mixc{
     inline type * alloc(memory_size bytes = memory_size(0)){
         auto size = bytes == 0 ? sizeof(type) : bytes;
         auto ptr = (type *)malloc(size);
+        xdebug("alloc mem:%p  size:%llu\n", ptr, u64(bytes));
         return ptr;
     }
 
     template<class type>
     inline void free(type * ptr, memory_size bytes = memory_size(0)){
+        xdebug("free  mem:%p  size:%llu\n", ptr, u64(bytes));
         ::free(ptr);
     }
 
     template<class type>
     inline void free_with_destroy(type * ptr, memory_size bytes = memory_size(0)){
+        xdebug("free  mem:%p  size:%llu\n", ptr, u64(bytes));
         ptr->~type();
-        mixc::free(ptr, bytes);
+        ::free(ptr);
     }
 
     namespace memory_inner{
