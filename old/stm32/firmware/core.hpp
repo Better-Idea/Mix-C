@@ -55,7 +55,7 @@
 
 #define xgroup_set()                            \
     template<class a, class b, class ... args>  \
-    void operator()(a a0, b a1, args ... rest) {\
+    void operator()(a a0, b a1, args... rest) {\
         thex(a0);                               \
         thex(a1, rest...);                      \
     }                                           \
@@ -1060,7 +1060,7 @@ constexpr io_mode analog                            = io_mode::analog;
 #define xgen(name)                                          \
 xstruct(name)                                               \
     template<class ... args>                                \
-    name(uxx port, args ... rest){                          \
+    name(uxx port, args... rest){                          \
         implicit_value<uxx> ports[] = { port, rest... };    \
         value = 0;                                          \
         xfor(uxx i = 0; i < 1 + sizeof...(args); i++)       \
@@ -1102,7 +1102,7 @@ private:
 public:
     xunion(_config)
         template<class ... args>
-        xini(_config(io_mode mode, uxx port, args ... rest))
+        xini(_config(io_mode mode, uxx port, args... rest))
             implicit_value<uxx> ports[] = { port, rest... };
             mode_t props = mode;
             u32    modes = xfield.mode;

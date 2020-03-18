@@ -122,7 +122,7 @@
     
     xspace(mixc)
         xspace(mini_test_frame_private)
-            template<class ... args> xdef(error, asciis fmt, args ... list)
+            template<class ... args> xdef(error, asciis fmt, args... list)
                 printf("+      | ");
                 printf(fmt, list...);
                 printf("\n");
