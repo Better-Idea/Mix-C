@@ -117,9 +117,7 @@ namespace mixc::inner_gc{
 
         template<class ... args>
         meta(mixc::length length, args const & ... list) {
-            new (
-                mem = alloc(length)
-            ) header_t(length, list...);
+            mem = alloc(length, list...);
 
             for (uxx i = 0; i < length; i++) {
                 new (mem->ptr(i)) item();
@@ -153,11 +151,13 @@ namespace mixc::inner_gc{
         template<class guide> routing_result routing(guide);
         template<class guide> routing_result subrouting(guide);
 
-        auto alloc(uxx length) {
-            return mixc::alloc<header_t>(
+        template<class ... args>
+        auto alloc(uxx length, args const & ... list) {
+            return mixc::alloc_with_initial<header_t>(
                 memory_size(
                     sizeof(header_t) + length * sizeof(item)
-                )
+                ),
+                length, list...
             );
         }
 
