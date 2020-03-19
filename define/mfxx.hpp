@@ -33,11 +33,13 @@ namespace mixc{
             return value;
         }
     };
+    using mf32  = mixc::mfxx<f32, u32, 23, 8, 127 >;
+    using mf64  = mixc::mfxx<f64, u64, 52, 11, 1023>;
+
+    constexpr mf64                      pos_inf { 0ull, 0x7ffull, 0ull };
+    constexpr mf64                      neg_inf { 1ull, 0x7ffull, 0ull };
 }
 
-using mf32  = mixc::mfxx<f32, u32, 23, 8, 127 >;
-using mf64  = mixc::mfxx<f64, u64, 52, 11, 1023>;
-
-constexpr mf64                      pos_inf { 0ull, 0x7ffull, 0ull };
-constexpr mf64                      neg_inf { 1ull, 0x7ffull, 0ull };
+using mf32  = mixc::mf32;
+using mf64  = mixc::mf64;
 

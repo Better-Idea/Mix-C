@@ -35,6 +35,5 @@ namespace mixc{
             return (value == value);
         }
     };
+    constexpr mixc::nan_t        nan {};
 }
-
-constexpr mixc::nan_t        nan {};

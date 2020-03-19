@@ -88,11 +88,12 @@ namespace mixc{
     
     using ixx           = env<sizeof(void *)>::ixx;
     using uxx           = env<sizeof(void *)>::uxx;
+
+    constexpr uxx       not_exist = uxx(-1);
+    constexpr uxx       magic_number = 19961212;
 }
 
 using ixx               = mixc::ixx;
 using uxx               = mixc::uxx;
 using ixxp              = ixx   *;
 using uxxp              = uxx   *;
-constexpr uxx           not_exist = uxx(-1);
-constexpr uxx           magic_number = 19961212;

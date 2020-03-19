@@ -27,6 +27,5 @@ namespace mixc{
         inline static volatile voidp * tempp = & temp;
         inline static voidp value = tempp[0]; // 以防显示的 *(type *)nullptr会被一些编译器翻译成错误的指令
     };
+    constexpr mixc::nullref_t    nullref {};
 }
-
-constexpr mixc::nullref_t    nullref {};
