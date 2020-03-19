@@ -6,7 +6,7 @@
 namespace mixc{
     template<class item> struct cxx;
     template<class item>
-    cxx<item> fill_bends(cxx<item> self, uxx left_count, uxx right_count, item value, alloc_callback<item> alloc){
+    inline cxx<item> fill_bends(cxx<item> self, uxx left_count, uxx right_count, item value, alloc_callback<item> alloc){
         uxx             total_length = left_count + right_count + self.length;
         cxx<item>       r(alloc(total_length), total_length);
         mixc::fill<item>(r, value, left_count);
@@ -16,7 +16,7 @@ namespace mixc{
     }
 
     template<class item>
-    cxx<item> fill_bends(cxx<item> self, uxx left_count, uxx right_count, alloc_callback<item> alloc){
+    inline cxx<item> fill_bends(cxx<item> self, uxx left_count, uxx right_count, alloc_callback<item> alloc){
         return fill_bends(self, left_count, right_count, ' ', alloc);
     }
 }
