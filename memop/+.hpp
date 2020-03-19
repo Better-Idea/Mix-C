@@ -5,6 +5,5 @@
 #include"memop/cmp.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"
-#include"memop/memory.hpp"
 #include"memop/swap.hpp"
 #include"memop/zeros.hpp"

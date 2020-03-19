@@ -6,10 +6,10 @@
     #define xsw(token,...)            constexpr bool token = { __VA_ARGS__ + 0 };
 
     // memop/memory.hpp
-    xsw(im_memory_alloc_with_initial, true);
-    xsw(im_memory_alloc, true);
-    xsw(im_memory_free, true);
-    xsw(im_memory_free_with_destroy, true);
+    xsw(im_alloc_with_initial, true);
+    xsw(im_alloc, true);
+    xsw(im_free, true);
+    xsw(im_free_with_destroy, true);
 
     // gc/private/ref
     xsw(im_inner_gc_$header, true);

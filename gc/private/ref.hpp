@@ -3,7 +3,7 @@
 #include"gc/private/self_management.hpp"
 #include"gc/private/routing_result.hpp"
 #include"macro/xdebug.hpp"
-#include"memop/memory.hpp"
+#include"memory/allocator.hpp"
 #include"memop/copy.hpp"
 #include"meta_ctr/cif.hpp"
 #include"meta_seq/tlist.hpp"
@@ -183,7 +183,7 @@ namespace mixc::inner_gc{
 #include"lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
 #include"memop/cast.hpp"
-#include"memop/memory.hpp"
+#include"memory/allocator.hpp"
 #include"meta/is_same.hpp"
 #include"meta_seq/tlist.hpp"
 
