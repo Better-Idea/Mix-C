@@ -7,9 +7,16 @@
 
 namespace mixc{
     namespace inner_random{
-        inline u64 x = mixc::time_stamp();
-        inline u64 y = mixc::time_stamp() * magic_number;
-        
+        inline u64 x;
+        inline u64 y;
+
+        struct __ini__{
+            __ini__(){
+                x = mixc::time_stamp();
+                y = mixc::time_stamp() * magic_number;
+            }
+        } __ini__;
+
         inline u64 random() {
             constexpr u64 change_period = 0x3f;
 

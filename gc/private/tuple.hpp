@@ -101,11 +101,11 @@ namespace mixc::inner_gc{
     template<>
     struct tuple<tlist<>>{
         template<class guide>
-        constexpr routing_result routing(guide){
+        routing_result routing(guide){
             return { 0 };
         }
 
         template<class guide>
-        constexpr void clear_footmark(guide, voidp){}
+        void clear_footmark(guide, voidp){}
     };
 }

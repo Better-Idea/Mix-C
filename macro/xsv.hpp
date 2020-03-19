@@ -21,4 +21,4 @@ return *(ret *)(& __tmp__)
         __xsv__(ret, item, padding, str);                                       \
     }                                                                           \
     static_assert(sizeof(plus_length) == (is_64bit ? 16 : 8));                  \
-}())                                                                            \
+}())
