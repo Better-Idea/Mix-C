@@ -19,20 +19,24 @@ namespace mixc{
             return ptr;
         }
 
-        cxx backward(uxx value){
+        operator const item *() const {
+            return ptr;
+        }
+
+        cxx backward(uxx value) const {
             cxx tmp = this[0];
             tmp.ptr += value;
             tmp.length -= uxx(value);
             return tmp;
         }
 
-        cxx forward(uxx value){
+        cxx forward(uxx value) const {
             return backward(
                 uxx(-ixx(value))
             );
         }
 
-        cxx shorten(uxx length){
+        cxx shorten(uxx length) const {
             cxx tmp = this[0];
             tmp.length -= length;
             return tmp;
