@@ -1,5 +1,6 @@
 #pragma once
 #include"macro/private/xlist.hpp"
+#include"macro/private/xprefix.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tmarge.hpp"
 #include"utility/type/dummy_t.hpp"
@@ -20,7 +21,9 @@ namespace mixc{
 }
 
 #define xgc(name,...)                                                               \
-struct name : mixc::place_holder<__COUNTER__> __xlist__(base_,base_,__VA_ARGS__) {  \
+struct name :                                                                       \
+    private mixc::dummy_t                                                           \
+    __xlist__(base_,base_,__VA_ARGS__) {                                            \
 private:                                                                            \
     using __self__ =  name __xlist__(none_, none_, __VA_ARGS__);                    \
     using __expand_member_list__ =                                                  \
@@ -29,7 +32,12 @@ private:                                                                        
                 __xlist__(member_header_,member_,__VA_ARGS__)                       \
             >()                                                                     \
         );                                                                          \
-public:
+public:                                                                             \
+    template<class expand>                                                          \
+    operator expand &() const {                                                     \
+        static_assert(__is_base_of(__self__, expand));                              \
+        return *(expand *)this;                                                     \
+    }
 
 #define xgc_fields(...)                                                             \
     __xlist__(field_,field_,__VA_ARGS__);                                           \
