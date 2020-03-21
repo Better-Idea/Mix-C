@@ -20,5 +20,5 @@
 #define __xprefix_xheader_fields_
 #define __xprefix_xheader_fields_xnt__(first,...)       __VA_ARGS__ first
 
-#define __xprefix__xget_fields_
-#define __xprefix__xget_fields_xnt__(first,...)         ; __VA_ARGS__ first
+#define __xprefix_xget_fields_
+#define __xprefix_xget_fields_xnt__(first,...)         ; __VA_ARGS__ first
