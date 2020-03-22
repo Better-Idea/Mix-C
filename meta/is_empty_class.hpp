@@ -1,30 +1,41 @@
-#pragma once
+#ifndef xpack_meta_is_empty_class
+#define xpack_meta_is_empty_class
+    #pragma push_macro("xuser")
+        #undef  xuser
+        #define xuser mixc::meta_is_empty_class
+        #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-namespace mixc{
-    namespace inner_is_empty_class{
-        template<class a> struct meta {
-        private:
-            static auto invoke(){
-                if constexpr (__is_class(a)){
-                    return *(a *)nullptr;
+    namespace mixc::meta_is_empty_class{
+        namespace inner_is_empty_class{
+            template<class a> struct meta {
+            private:
+                static auto invoke(){
+                    if constexpr (__is_class(a)){
+                        return *(a *)nullptr;
+                    }
+                    else{
+                        struct solid_class{
+                            double item;
+                        };
+                        return solid_class();
+                    }
                 }
-                else{
-                    struct solid_class{
-                        double item;
-                    };
-                    return solid_class();
-                }
-            }
 
-            struct test : decltype(meta<a>::invoke()){
-                char dummy;
+                struct test : decltype(meta<a>::invoke()){
+                    char dummy;
+                };
+            public:
+                static constexpr bool result = sizeof(test) == 1;
             };
-        public:
-            static constexpr bool result = sizeof(test) == 1;
-        };
+        }
 
+        template<class a>
+        constexpr bool is_empty_class = inner_is_empty_class::meta<a>::result;
     }
 
-    template<class a>
-    constexpr bool is_empty_class = mixc::inner_is_empty_class::meta<a>::result;
+#endif
+
+namespace xuser::inc{
+    using namespace mixc::meta_is_empty_class;
 }
