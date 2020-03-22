@@ -1,4 +1,3 @@
-#pragma once
 #include"memop/addressof.hpp"
 #include"memop/base_seqlize.hpp"
 #include"memop/cast.hpp"
