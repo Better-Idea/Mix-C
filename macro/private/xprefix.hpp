@@ -6,7 +6,7 @@
 
 #define __xprefix_
 #define __xprefix_base_
-#define __xprefix_base_tmpl__(...)
+#define __xprefix_base_tmpl__(...)                      
 #define __xprefix_base_pub__(...)                       , public      __VA_ARGS__
 #define __xprefix_base_pro__(...)                       , protected   __VA_ARGS__
 #define __xprefix_base_pri__(...)                       , private     __VA_ARGS__
@@ -38,9 +38,9 @@
 #define __xprefix_member_list_pro__(name,...)           , decltype(& __self__::name)
 #define __xprefix_member_list_pri__(name,...)           , decltype(& __self__::name)
 
-
 #define __xprefix_none_
-#define __xprefix_none_tmpl__(...)  <__VA_ARGS__>
+#define __xprefix_none_tmpl__(...)                      <__VA_ARGS__>
+#define __xprefix_none_xtmpl(...)                       <__VA_ARGS__>
 #define __xprefix_none_pub__(...)
 #define __xprefix_none_pro__(...)
 #define __xprefix_none_pri__(...)
