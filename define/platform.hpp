@@ -7,11 +7,14 @@
 */
 #pragma once
 
-constexpr static bool is_64bit          = sizeof(void *) == 8;
-constexpr static bool is_32bit          = sizeof(void *) == 4;
+constexpr bool is_64bit          = sizeof(void *) == 8;
+constexpr bool is_32bit          = sizeof(void *) == 4;
+
 
 #ifndef xis_x86
     #define xis_86          0
+#else
+    constexpr bool stack_down_group = true;
 #endif
 
 #ifndef xis_arm

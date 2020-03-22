@@ -1,31 +1,38 @@
-#pragma once
-#include"define/base_type.hpp"
+#ifndef xpack_define_nullref_t
+#define xpack_define_nullref_t
+    #pragma push_macro("xuser")
+        #undef  xuser
+        #define xuser mixc::define_nullref_t
+        #include"define/base_type.hpp"
+        #include"macro/xgc.hpp"
+    #pragma pop_macro("xuser")
 
-namespace mixc{
-    struct nullref_t {
-        template<class a> friend auto operator == (a const & value, nullref_t) {
-            return voidp(& value) == nullref_t::value;
-        }
+    namespace mixc::define_nullref_t{
+        xgc(nullref_t)
+            xgc_fields();
 
-        template<class a> friend auto operator == (nullref_t, a const & value) {
-            return voidp(& value) == nullref_t::value;
-        }
+            template<class a> friend auto operator == (a const & value, nullref_t) {
+                return voidp(& value) == nullref_t::value;
+            }
 
-        template<class a> friend auto operator != (a const & value, nullref_t) {
-            return voidp(& value) != nullref_t::value;
-        }
+            template<class a> friend auto operator == (nullref_t, a const & value) {
+                return voidp(& value) == nullref_t::value;
+            }
 
-        template<class a> friend auto operator != (nullref_t, a const & value) {
-            return voidp(& value) != nullref_t::value;
-        }
+            template<class a> friend auto operator != (a const & value, nullref_t) {
+                return voidp(& value) != nullref_t::value;
+            }
 
-        template<class a> operator a & () const {
-            return *(a *)value;
-        }
-    private:
-        inline static voidp temp = nullptr;
-        inline static volatile voidp * tempp = & temp;
-        inline static voidp value = tempp[0]; // 以防显示的 *(type *)nullptr会被一些编译器翻译成错误的指令
-    };
-    constexpr mixc::nullref_t    nullref {};
+            template<class a> friend auto operator != (nullref_t, a const & value) {
+                return voidp(& value) != nullref_t::value;
+            }
+        xgc_end();
+        
+        inline const nullref_t & nullref = *(nullref_t *)nullptr;
+    }
+
+#endif
+
+namespace xuser::inc{
+    using namespace mixc::define_nullref_t;
 }

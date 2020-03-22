@@ -1,45 +1,77 @@
-#pragma once
-#include"define/base_type.hpp"
+#ifndef xpack_define_mfxx
+#define xpack_define_mfxx
+    #pragma push_macro("xuser")
+        #undef  xuser
+        #define xuser mixc::define_mfxx
+        #include"define/base_type.hpp"
+        #include"macro/xgc.hpp"
+    #pragma pop_macro("xuser")
 
-namespace mixc{
-    template<class float_type, class equivalent_type, uxx decimal_bits, uxx exp_bits, uxx exp_offset>
-    union mfxx {
-        typedef mfxx<float_type, equivalent_type, decimal_bits, exp_bits, exp_offset> * mfxxp;
-        struct {
-            equivalent_type decimal : decimal_bits;
-            equivalent_type exp : exp_bits;
-            equivalent_type sign : 1;
-        };
+    namespace mixc::define_mfxx{
+        template<
+            class   float_type, 
+            class   equivalent_type, 
+            uxx     decimal_bits, 
+            uxx     exp_bits, 
+            uxx     exp_offset>
+        xgc(mfxx, 
+            xtmpl(
+                float_type, 
+                equivalent_type, 
+                decimal_bits, 
+                exp_bits, 
+                exp_offset
+            )
+        )
+            using mfxxp = mfxx<
+                float_type, 
+                equivalent_type, 
+                decimal_bits, 
+                exp_bits, 
+                exp_offset
+            >;
 
-        float_type value;
+            union {
+                struct {
+                    equivalent_type decimal : decimal_bits;
+                    equivalent_type exp     : exp_bits;
+                    equivalent_type sign    : 1;
+                };
+                float_type value;
 
-        struct {
-            operator ixx () const {
-                return ixx(mfxxp(this)->exp) - exp_offset;
+                struct {
+                    operator ixx () const {
+                        return ixx(mfxxp(this)->exp) - exp_offset;
+                    }
+                } real_exp;
+            };
+
+            xgc_fields();
+
+            mfxx() : value(0) { }
+            mfxx(float_type value) : value(value) { }
+
+            constexpr mfxx(equivalent_type sign, equivalent_type exp, equivalent_type decimal) : 
+                sign(sign), exp(exp), decimal(decimal) {}
+
+            operator float_type () const {
+                return value;
             }
-        } real_exp;
 
-        mfxx() : value(0) { }
-        mfxx(float_type value) : value(value) { }
+            operator float_type & () const {
+                return value;
+            }
+        xgc_end();
 
-        constexpr mfxx(equivalent_type sign, equivalent_type exp, equivalent_type decimal) : 
-            sign(sign), exp(exp), decimal(decimal) {}
+        using mf32 = mfxx<f32, u32, 23, 8, 127 >;
+        using mf64 = mfxx<f64, u64, 52, 11, 1023>;
 
-        operator float_type () const {
-            return value;
-        }
+        constexpr mf64 pos_inf { 0ull, 0x7ffull, 0ull };
+        constexpr mf64 neg_inf { 1ull, 0x7ffull, 0ull };
+    }
 
-        operator float_type & () const {
-            return value;
-        }
-    };
-    using mf32  = mixc::mfxx<f32, u32, 23, 8, 127 >;
-    using mf64  = mixc::mfxx<f64, u64, 52, 11, 1023>;
+#endif
 
-    constexpr mf64                      pos_inf { 0ull, 0x7ffull, 0ull };
-    constexpr mf64                      neg_inf { 1ull, 0x7ffull, 0ull };
+namespace xuser::inc{
+    using namespace mixc::define_mfxx;
 }
-
-using mf32  = mixc::mf32;
-using mf64  = mixc::mf64;
-
