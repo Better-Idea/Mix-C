@@ -20,7 +20,7 @@
     namespace mixc::lang_cxx_index_of_first_miss{
         template<class item>
         struct cxx : inc::cxx<item>::partial {
-            auto index_of_first_miss(item const * values, uxx count){
+            auto index_of_first_miss(item const * values, uxx count) const {
                 inc::cxx<item> & self = xthe;
                 inc::cxx<item>   token = { values, count };
 
@@ -53,7 +53,7 @@ namespace xuser::lang_cxx_index_of_first_miss{
         }
 
         template<class ... args>
-        auto index_of_first_miss(item value, args const & ... list){
+        auto index_of_first_miss(item value, args const & ... list) const {
             inc::implicit<item> group[] = { value, list... };
             return index_of_first_miss((item *)group, 1 + sizeof...(args));
         }
