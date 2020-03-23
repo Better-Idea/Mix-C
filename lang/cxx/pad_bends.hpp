@@ -2,13 +2,13 @@
     #include"lang/cxx/cxx.hpp"
 #endif
 
-#ifndef xpack_lang_cxx_fill_bends
-#define xpack_lang_cxx_fill_bends
+#ifndef xpack_lang_cxx_pad_bends
+#define xpack_lang_cxx_pad_bends
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
         #undef  xusing_lang_cxx
         #undef  xuser
-        #define xuser mixc::lang_cxx_fill_bends
+        #define xuser mixc::lang_cxx_pad_bends
         #include"define/base_type.hpp"
         #include"lang/cxx.hpp"
         #include"memop/cast.hpp"
@@ -18,10 +18,10 @@
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_fill_bends{
+    namespace mixc::lang_cxx_pad_bends{
         template<class item>
         struct cxx : inc::cxx<item>::partial {
-            auto fill_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
+            auto pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
                 inc::cxx<item> & self = xthe;
                 uxx              total_length = left_count + right_count + self.length;
                 inc::cxx<item>   r(alloc(total_length), total_length);
@@ -34,9 +34,9 @@
     }
 #endif
 
-namespace xuser::lang_cxx_fill_bends{
+namespace xuser::lang_cxx_pad_bends{
     namespace cur{
-        using namespace mixc::lang_cxx_fill_bends;
+        using namespace mixc::lang_cxx_pad_bends;
     }
     namespace inc{
         using namespace cur::inc;
@@ -47,11 +47,11 @@ namespace xuser::lang_cxx_fill_bends{
         using xusing_lang_cxx::cxx<item, final>::cxx;
         using fun = cur::cxx<item>;
 
-        final fill_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
-            return inc::cast<fun>(xthe).fill_bends(left_count, right_count, value, alloc);
+        final pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
+            return inc::cast<fun>(xthe).pad_bends(left_count, right_count, value, alloc);
         }
     };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::lang_cxx_fill_bends
+#define xusing_lang_cxx xuser::lang_cxx_pad_bends
