@@ -21,7 +21,7 @@ namespace mixc{
     namespace mixc::dumb_dummy_t{
         struct dummy_t{
             template<class ... args>
-            dummy_t(args const & ...){}
+            constexpr dummy_t(args const & ...){}
             using member_list = mixc::tlist<>;
         };
     }
