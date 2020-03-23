@@ -1,13 +1,13 @@
-#ifndef xpack_meta_can_cast
-#define xpack_meta_can_cast
+#ifndef xpack_meta_has_cast
+#define xpack_meta_has_cast
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::meta_can_cast
+        #define xuser mixc::meta_has_cast
         #include"define/base_type.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::meta_can_cast{
-        namespace inner_can_cast{
+    namespace mixc::meta_has_cast{
+        namespace inner_has_cast{
             template<class source, class target>
             struct meta{
             private:
@@ -25,11 +25,11 @@
         }
 
         template<class source, class target>
-        constexpr bool can_cast = inner_can_cast::meta<source, target>::result;
+        constexpr bool has_cast = inner_has_cast::meta<source, target>::result;
     }
 
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_can_cast;
+    using namespace mixc::meta_has_cast;
 }
