@@ -72,7 +72,7 @@ int main(){
         }                                                                                               \
 
     #define __xitf_item__(index,name,ret,...)                                                           \
-        ret name(xlist_args(__VA_ARGS__)){                                                              \
+        ret name(xlist_args(__VA_ARGS__)) const {                                                              \
             using action = ret(__self__::*)(xlist_type(__VA_ARGS__));                                   \
             auto func = mixc::memop_cast::cast<action>(__func_list[index]);                             \
             if constexpr(mixc::meta_is_same::is_same<void, ret>){                                       \
