@@ -1,4 +1,3 @@
-#pragma once
 #include"lock/atom_add.hpp"
 #include"lock/atom_and.hpp"
 #include"lock/atom_fetch_add.hpp"
