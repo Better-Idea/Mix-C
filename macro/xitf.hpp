@@ -65,9 +65,9 @@ int main(){
         void    **  __func_list;                                                                        \
         enum { __start__ = __COUNTER__ + 1, };                                                          \
     public:                                                                                             \
-        template<class type>                                                                            \
-        name(type const & impl) {                                                                       \
-            __func_list = __func_list__<type>;                                                          \
+        template<class __type__>                                                                        \
+        name(__type__ const & impl) {                                                                   \
+            __func_list = __func_list__<__type__>;                                                      \
             __build__(impl, mixc::dumb_place_holder::place_holder<0>());                                \
         }                                                                                               \
 
@@ -83,11 +83,11 @@ int main(){
             }                                                                                           \
         }                                                                                               \
     private:                                                                                            \
-        template<class type>                                                                            \
-        void __build__(type const & impl, mixc::dumb_place_holder::place_holder<index>){                \
+        template<class __type__>                                                                        \
+        void __build__(__type__ const & impl, mixc::dumb_place_holder::place_holder<index>){            \
             __build__(impl, mixc::dumb_place_holder::place_holder<index + 1>());                        \
-            using action = ret(type::*)(xlist_type(__VA_ARGS__));                                       \
-            __func_list[index] = mixc::memop_cast::cast<void *>(action(& type::name));                  \
+            using action = ret(__type__::*)(xlist_type(__VA_ARGS__));                                   \
+            __func_list[index] = mixc::memop_cast::cast<void *>(action(& __type__::name));              \
         }                                                                                               \
     public:                                                                                             \
 
@@ -96,11 +96,11 @@ int main(){
 
     #define xitf_end()                                                                                  \
     private:                                                                                            \
-        template<class type>                                                                            \
+        template<class __type__>                                                                        \
         void __build__(                                                                                 \
-            type const & impl,                                                                          \
+            __type__ const & impl,                                                                      \
             mixc::dumb_place_holder::place_holder<__COUNTER__ - __start__>) {}                          \
-        template<class type>                                                                            \
+        template<class __type__>                                                                        \
         inline static void * __func_list__[__COUNTER__ - __start__ - 1];                                \
     }
 
