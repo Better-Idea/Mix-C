@@ -1,6 +1,15 @@
-#pragma once
-#include"meta_seq/tappend.hpp"
+#ifndef xpack_meta_seq_tpush
+#define xpack_meta_seq_tpush
+    #pragma push_macro("xuser")
+        #undef  xuser
+        #define xuser mixc::meta_seq_tpush
+        #include"define/base_type.hpp"
+        #include"meta_seq/tappend.hpp"
+    #pragma pop_macro("xuser")
 
-namespace mixc{
-    template<class tlist, class item> using tpush = tappend<tlist, item>;
+#endif
+
+namespace xuser::inc{
+    template<class tlist, class item>
+    using tpush = inc::tappend<tlist, item>;
 }
