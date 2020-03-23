@@ -1,4 +1,5 @@
 #pragma once
+#define xnt             xnt__
 #define xpub(...)       pub__(__VA_ARGS__)
 #define xpro(...)       pro__(__VA_ARGS__)
 #define xpri(...)       pri__(__VA_ARGS__)
@@ -38,9 +39,32 @@
 #define __xprefix_member_list_pro__(name,...)           , decltype(& __self__::name)
 #define __xprefix_member_list_pri__(name,...)           , decltype(& __self__::name)
 
-#define __xprefix_none_
-#define __xprefix_none_tmpl__(...)                      <__VA_ARGS__>
-#define __xprefix_none_xtmpl(...)                       <__VA_ARGS__>
-#define __xprefix_none_pub__(...)
-#define __xprefix_none_pro__(...)
-#define __xprefix_none_pri__(...)
+#define __xprefix_keep_tmpl_
+#define __xprefix_keep_tmpl_tmpl__(...)                      <__VA_ARGS__>
+#define __xprefix_keep_tmpl_xtmpl(...)                       <__VA_ARGS__>
+#define __xprefix_keep_tmpl_pub__(...)
+#define __xprefix_keep_tmpl_pro__(...)
+#define __xprefix_keep_tmpl_pri__(...)
+
+#define __xprefix_header_1st_
+#define __xprefix_header_1st_xnt__(first,...)           first
+
+#define __xprefix_header_2nd_
+#define __xprefix_header_2nd_xnt__(first,...)           __VA_ARGS__
+
+#define __xprefix_1st_
+#define __xprefix_1st_xnt__(first,...)                  , first
+
+#define __xprefix_2nd_
+#define __xprefix_2nd_xnt__(first,...)                  , __VA_ARGS__
+
+#define __xprefix_header_arg_
+#define __xprefix_header_arg_xnt__(first,...)           __VA_ARGS__ first
+#define __xprefix_arg_
+#define __xprefix_arg_xnt__(first,...)                  , __VA_ARGS__ first
+
+#define __xprefix_header_fields_
+#define __xprefix_header_fields_xnt__(first,...)        __VA_ARGS__ first
+
+#define __xprefix_fields_
+#define __xprefix_fields_xnt__(first,...)               ; __VA_ARGS__ first

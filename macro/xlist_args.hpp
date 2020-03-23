@@ -1,5 +1,5 @@
 #pragma once
-#include"macro/xnt.hpp"
 #include"macro/private/xlist.hpp"
+#include"macro/private/xprefix.hpp"
 
-#define xlist_args(...)   __xlist__(xheader_arg_,xget_arg_,__VA_ARGS__)
+#define xlist_args(...)   __xlist__(header_arg_,arg_,__VA_ARGS__)

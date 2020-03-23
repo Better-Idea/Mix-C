@@ -60,7 +60,7 @@ int main(){
     #define xitf(name,...)                                                                              \
     struct name{                                                                                        \
     private:                                                                                            \
-        using __self__ = name __xprefix_none_ ## __VA_ARGS__;                                           \
+        using __self__ = name __xprefix_keep_tmpl_ ## __VA_ARGS__;                                      \
         __self__ *  __object;                                                                           \
         void    **  __func_list;                                                                        \
         enum { __start__ = __COUNTER__ + 1, };                                                          \
@@ -87,7 +87,7 @@ int main(){
         void __build__(type const & impl, mixc::dumb_place_holder::place_holder<index>){                \
             __build__(impl, mixc::dumb_place_holder::place_holder<index + 1>());                        \
             using action = ret(type::*)(xlist_type(__VA_ARGS__));                                       \
-            __func_list[index] = mixc::memop_cast::cast<void *>(action(& type::name));                \
+            __func_list[index] = mixc::memop_cast::cast<void *>(action(& type::name));                  \
         }                                                                                               \
     public:                                                                                             \
 

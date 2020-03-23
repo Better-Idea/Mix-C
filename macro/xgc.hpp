@@ -31,7 +31,7 @@
         mixc::dumb_dummy_t::dummy_t                                                     \
         __xlist__(base_,base_,__VA_ARGS__) {                                            \
     private:                                                                            \
-        using __self__ = name __xlist__(none_,none_,__VA_ARGS__);                       \
+        using __self__ = name __xlist__(keep_tmpl_,keep_tmpl_,__VA_ARGS__);             \
         using __expand_member_list__ =                                                  \
             decltype(                                                                   \
                 mixc::macro_xitf::expand_member_list<mixc::dumb_dummy_t::dummy_t        \
