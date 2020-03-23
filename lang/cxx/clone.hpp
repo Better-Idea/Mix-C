@@ -1,5 +1,5 @@
 #ifndef xusing_lang_cxx
-    #include"lang/cxx/cxx.hpp"
+    #include"lang/private/cxx.hpp"
 #endif
 
 #ifndef xpack_lang_cxx_clone

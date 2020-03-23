@@ -1,6 +1,6 @@
 #ifdef xuser
     #ifndef xusing_lang_cxx
-        #include"lang/cxx/cxx.hpp"
+        #include"lang/private/cxx.hpp"
     #endif
 
     namespace xuser::inc{
