@@ -8,47 +8,63 @@ search_list 期初是一个只有根类型 root 的集合。
 4.  跳到操作 1
 */
 
-#pragma once
-#include"meta_seq/tdistinct_append.hpp"
-#include"meta_seq/tfilter.hpp"
-#include"meta_seq/tin.hpp"
-#include"meta_seq/tlist.hpp"
-#include"meta_seq/tmarge.hpp"
-#include"meta_seq/tpop_by.hpp"
-#include"meta_seq/tselector_key.hpp"
-#include"meta_seq/tselector_val.hpp"
+#ifndef xpack_gc_collect
+#define xpack_gc_collect
+    #pragma push_macro("xuser")
+        #undef  xuser
+        #define xuser mixc::gc_collect
+        #include"define/base_type.hpp"
+        #include"meta/remove_membership.hpp"
+        #include"meta_seq/tdistinct_append.hpp"
+        #include"meta_seq/tfilter.hpp"
+        #include"meta_seq/tin.hpp"
+        #include"meta_seq/tlist.hpp"
+        #include"meta_seq/tmarge.hpp"
+        #include"meta_seq/tpop_by.hpp"
+        #include"meta_seq/tselector_key.hpp"
+        #include"meta_seq/tselector_val.hpp"
+    #pragma pop_macro("xuser")
 
-namespace mixc::inner_gc{
+    namespace mixc::gc_collect{
+        using namespace inc;
+
+        template<class root, class kvlist>
+        struct collect{
+        private:
+            template<class current_kvlist, class result_list, class first, class ... args>
+            static auto invoke(current_kvlist kv, tlist<first, args...> search_list, result_list result){
+                if constexpr(tin<result_list, first>){
+                    return invoke(kv, tlist<args...>(), result);
+                }
+                else{
+                    using pair              = tpop_by<current_kvlist, first, tselector_key>;
+                    using rest_kvlist       = typename pair::new_list;
+                    using item_kvlist       = typename pair::item_list;
+                    using parents_list      = typename tfilter<item_kvlist, tselector_val>::new_list;
+                    using new_children_list = typename tmarge<tlist<args...>, parents_list>::new_list;
+                    using new_result        = typename tdistinct_append<result_list, first>::new_list;
+                    return invoke(
+                        rest_kvlist(),
+                        new_children_list(),
+                        new_result()
+                    );
+                }
+            }
+
+            template<class current_kvlist, class result_list>
+            static auto invoke(current_kvlist, tlist<>, result_list r){
+                return r;
+            }
+        public:
+            using result_list = decltype(
+                invoke(kvlist(), tlist<root>(), tlist<>())
+            );
+        };
+    }
+
+#endif
+
+namespace xuser::inc{
     template<class root, class kvlist>
-    struct collect{
-    private:
-        template<class current_kvlist, class result_list, class first, class ... args>
-        static auto invoke(current_kvlist kv, tlist<first, args...> search_list, result_list result){
-            if constexpr(tin<result_list, first>){
-                return invoke(kv, tlist<args...>(), result);
-            }
-            else{
-                using pair              = tpop_by<current_kvlist, first, tselector_key>;
-                using rest_kvlist       = typename pair::new_list;
-                using item_kvlist       = typename pair::item_list;
-                using parents_list      = typename tfilter<item_kvlist, tselector_val>::new_list;
-                using new_children_list = typename tmarge<tlist<args...>, parents_list>::new_list;
-                using new_result        = typename tdistinct_append<result_list, first>::new_list;
-                return invoke(
-                    rest_kvlist(),
-                    new_children_list(),
-                    new_result()
-                );
-            }
-        }
-
-        template<class current_kvlist, class result_list>
-        static auto invoke(current_kvlist, tlist<>, result_list r){
-            return r;
-        }
-    public:
-        using result_list = decltype(
-            invoke(kvlist(), tlist<root>(), tlist<>())
-        );
-    };
+    using collect = mixc::gc_collect::collect<root, kvlist>;
 }

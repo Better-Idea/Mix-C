@@ -25,87 +25,103 @@ tuple<foo::member_list> xx;
     auto [xx] = foo(); // error
 */
 
-#pragma once
-#include"define/base_type.hpp"
-#include"gc/private/self_management.hpp"
-#include"gc/private/routing_result.hpp"
-#include"macro/xdebug.hpp"
-#include"memop/cast.hpp"
-#include"meta/is_class.hpp"
-#include"meta/is_based_on.hpp"
-#include"meta_seq/tlist.hpp"
-#include"meta_seq/tin.hpp"
+#ifndef xpack_gc_tuple
+#define xpack_gc_tuple
+    #pragma push_macro("xuser")
+        #undef  xuser
+        #define xuser mixc::gc_tuple
+        #include"define/base_type.hpp"
+        #include"gc/private/self_management.hpp"
+        #include"gc/private/routing_result.hpp"
+        #include"macro/xdebug.hpp"
+        #include"memop/cast.hpp"
+        #include"meta/is_class.hpp"
+        #include"meta/is_based_on.hpp"
+        #include"meta/remove_membership.hpp"
+        #include"meta_seq/tlist.hpp"
+        #include"meta_seq/vlist.hpp"
+        #include"meta_seq/tin.hpp"
+    #pragma pop_macro("xuser")
 
-namespace mixc::inner_gc{
-    template<class member_list> struct tuple;
-    template<class first, class ... args>
-    struct tuple<tlist<first, args...>>{
-    private:
-        first item;
-        tuple<tlist<args...>> next;
-    public:
-        template<class ... args_dummy>
-        tuple(args_dummy const & ... list) : 
-            item(list...), next(list...){
-        }
+    #define xroot   ((*(root_t *)this).*first)
 
-        // 重点 ======================================================================================
-        // 因为在 GC 路由时的状态依赖于路径，所以需要保证 routing 和 clear_footmark 的路由路径是一致的
-        // 这里统一先经过 item 在经过 next
-        template<class guide>
-        routing_result routing(guide gui){
-            routing_result r = { 0 };
-            if constexpr (is_class<first>){
-                if constexpr (is_based_on<self_management, first>){
-                    if constexpr (tin<guide, first>){
-                        xdebug(im_inner_gc_tuple_routing, "%s | routing\n", typeid(first).name());
+    namespace mixc::gc_tuple{
+        using namespace inc;
 
-                        if (r = item.routing(gui); r.can_arrive_root) {
-                            r.degree_dvalue -= 1; // 如果 item 可以到达根节点，那么该 tuple 就存在 1 条出度
+        template<class root_t, class member_list> union tuple;
+        template<class root_t, auto first, auto ... values>
+        union tuple<root_t, vlist<first, values...>>{
+        private:
+            tuple<root_t, vlist<values...>> next;
+        public:
+            // 重点 ======================================================================================
+            // 因为在 GC 路由时的状态依赖于路径，所以需要保证 routing 和 clear_footmark 的路由路径是一致的
+            // 这里统一先经过 item 在经过 next
+            template<class guide>
+            routing_result routing(guide gui){
+                using origin = typename remove_membership<decltype(first)>::result;
+                routing_result                  r = { 0 };
 
-                            xdebug(im_inner_gc_tuple_routing, "%s | routing io:%lld\n", 
-                                typeid(first).name(), 
-                                r.degree_dvalue
-                            );
+                if constexpr (is_class<origin>){
+                    if constexpr (is_based_on<self_management, origin>){
+                        if constexpr (tin<guide, origin>){
+                            xdebug(im_inner_gc_tuple_routing, "%s | routing\n", xtypeid(origin).name());
+
+                            if (r = xroot.routing(gui); r.can_arrive_root) {
+                                r.degree_dvalue -= 1; // 如果 item 可以到达根节点，那么该 tuple 就存在 1 条出度
+
+                                xdebug(im_inner_gc_tuple_routing, "%s | routing io:%lld\n", 
+                                    xtypeid(origin).name(), 
+                                    r.degree_dvalue
+                                );
+                            }
                         }
                     }
-                }
-                else{
-                    using member_tuple = tuple<typename first::member_list>;
-                    r = mixc::cast<member_tuple>(item).routing(gui);
-                }
-            }
-            
-            r += next.routing(gui);
-            return r;
-        }
-
-        template<class guide>
-        void clear_footmark(guide gui, voidp root){
-            if constexpr (is_class<first>){
-                if constexpr (is_based_on<self_management, first>){
-                    if constexpr (tin<guide, first>){
-                        xdebug(im_inner_gc_tuple_clear_footmark, "%s | clear\n", typeid(first).name());
-                        item.clear_footmark(gui, root);
+                    else{
+                        using member_tuple = tuple<origin, typename origin::member_list>;
+                        r = cast<member_tuple>(xroot).routing(gui);
                     }
                 }
-                else{
-                    using member_tuple = tuple<typename first::member_list>;
-                    mixc::cast<member_tuple>(item).clear_footmark(gui, root);
-                }
+                
+                r += next.routing(gui);
+                return r;
             }
-            next.clear_footmark(gui, root);
-        }
-    };
 
-    template<>
-    struct tuple<tlist<>>{
-        template<class guide>
-        routing_result routing(guide){
-            return { 0 };
-        }
+            template<class guide>
+            void clear_footmark(guide gui, voidp root){
+                using origin = typename remove_membership<decltype(first)>::result;
 
-        template<class guide>
-        void clear_footmark(guide, voidp){}
-    };
+                if constexpr (is_class<origin>){
+                    if constexpr (is_based_on<self_management, origin>){
+                        if constexpr (tin<guide, origin>){
+                            xdebug(im_inner_gc_tuple_clear_footmark, "%s | clear\n", xtypeid(origin).name());
+                            xroot.clear_footmark(gui, root);
+                        }
+                    }
+                    else{
+                        using member_tuple = tuple<root_t, typename origin::member_list>;
+                        cast<member_tuple>(xroot).clear_footmark(gui, root);
+                    }
+                }
+                next.clear_footmark(gui, root);
+            }
+        };
+
+        template<class root_t>
+        union tuple<root_t, vlist<>>{
+            template<class guide>
+            inc::routing_result routing(guide){
+                return { 0 };
+            }
+
+            template<class guide>
+            void clear_footmark(guide, voidp){}
+        };
+    }
+
+#endif
+
+namespace xuser::inc{
+    template<class root_t, class member_list>
+    using tuple = mixc::gc_tuple::tuple<root_t, member_list>;
 }
