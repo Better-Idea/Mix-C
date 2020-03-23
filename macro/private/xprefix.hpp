@@ -40,8 +40,8 @@
 #define __xprefix_member_list_pri__(name,...)           , decltype(& __self__::name)
 
 #define __xprefix_keep_tmpl_
-#define __xprefix_keep_tmpl_tmpl__(...)                      <__VA_ARGS__>
-#define __xprefix_keep_tmpl_xtmpl(...)                       <__VA_ARGS__>
+#define __xprefix_keep_tmpl_tmpl__(...)                 <__VA_ARGS__>
+#define __xprefix_keep_tmpl_xtmpl(...)                  <__VA_ARGS__>
 #define __xprefix_keep_tmpl_pub__(...)
 #define __xprefix_keep_tmpl_pro__(...)
 #define __xprefix_keep_tmpl_pri__(...)
