@@ -8,8 +8,9 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::define_nan{
-        xgc(nan)
+        xgc(nan_t)
             xgc_fields();
+            constexpr nan_t(){}
 
             friend inline auto operator == (f32 value, nan_t) {
                 return !(value == value);
