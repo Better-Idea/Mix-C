@@ -5,7 +5,6 @@
         #define xuser mixc::memory_alloctor
         #include"define/base_type.hpp"
         #include"macro/xdebug.hpp"
-        #include<malloc.h>
     #pragma pop_macro("xuser")
 
     namespace mixc::memory_alloctor{
@@ -69,13 +68,15 @@
 
 #endif
 
-inline void * operator new(
-    decltype(
-        mixc::memory_alloctor::memory_inner::the_size_t()
-    ) bytes, void * ptr
-) {
-    return ptr;
-}
+#ifndef _NEW
+    inline void * operator new(
+        decltype(
+            mixc::memory_alloctor::memory_inner::the_size_t()
+        ) bytes, void * ptr
+    ) {
+        return ptr;
+    }
+#endif
 
 namespace xuser::inc{
     using namespace mixc::memory_alloctor;
