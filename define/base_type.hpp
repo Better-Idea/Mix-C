@@ -1,11 +1,5 @@
 #ifndef xpack_define_base_type
 #define xpack_define_base_type
-    #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::define_base_type
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
-
     using mixc_i08      = signed char;
     using mixc_i16      = signed short;
     using mixc_i32      = signed int;
@@ -75,6 +69,7 @@
     #define f64p        mixc_f64p
     #define w16p        mixc_w16p
     #define voidp       mixc_voidp
+    #define the         (*(the_t *)this)
 
     namespace mixc{
         template<int> struct env{};
@@ -114,9 +109,12 @@
     using uxx               = mixc::uxx;
     using ixxp              = ixx *;
     using uxxp              = uxx *;
-
 #endif
 
 namespace xuser::inc{
-    using namespace mixc;
+    using mixc::length;
+    using mixc::ini;
+    using mixc::ini_now;
+    using mixc::not_exist;
+    using mixc::magic_number;
 }

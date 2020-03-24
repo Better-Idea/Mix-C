@@ -51,5 +51,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::define_nan;
+    using mixc::define_nan::nan;
 }

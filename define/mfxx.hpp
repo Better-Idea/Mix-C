@@ -66,12 +66,15 @@
         using mf32 = mfxx<f32, u32, 23, 8, 127 >;
         using mf64 = mfxx<f64, u64, 52, 11, 1023>;
 
-        constexpr mf64 pos_inf { 0ull, 0x7ffull, 0ull };
-        constexpr mf64 neg_inf { 1ull, 0x7ffull, 0ull };
+        constexpr mf64 inf_pos { 0ull, 0x7ffull, 0ull };
+        constexpr mf64 inf_neg { 1ull, 0x7ffull, 0ull };
     }
 
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::define_mfxx;
+    using mixc::define_mfxx::mf32;
+    using mixc::define_mfxx::mf64;
+    using mixc::define_mfxx::inf_pos;
+    using mixc::define_mfxx::inf_neg;
 }
