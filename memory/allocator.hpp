@@ -5,6 +5,7 @@
         #define xuser mixc::memory_alloctor
         #include"define/base_type.hpp"
         #include"macro/xdebug.hpp"
+        #include<malloc.h>
     #pragma pop_macro("xuser")
 
     namespace mixc::memory_alloctor{
@@ -34,51 +35,46 @@
         }
 
         template<class type>
-        inline type * alloc(memory_size bytes = memory_size(0)){
-            auto size = bytes == 0 ? sizeof(type) : bytes;
-            auto ptr = (type *)malloc(size);
+        inline type * alloc(memory_size bytes){
+            auto ptr = (type *)malloc(bytes);
             xdebug(im_alloc, "alloc mem:%p  size:%llu\n", ptr, u64(bytes));
             return ptr;
         }
 
         template<class type>
-        inline void free(type * ptr, memory_size bytes = memory_size(0)){
+        inline type * alloc(){
+            return alloc<type>(memory_size(sizeof(type)));
+        }
+
+        template<class type>
+        inline void free(type * ptr, memory_size bytes){
             xdebug(im_free, "free  mem:%p  size:%llu\n", ptr, u64(bytes));
             ::free(ptr);
         }
 
         template<class type>
-        inline void free_with_destroy(type * ptr, memory_size bytes = memory_size(0)){
+        inline void free(type * ptr){
+            free(ptr, memory_size(0));
+        }
+
+        template<class type>
+        inline void free_with_destroy(type * ptr, memory_size bytes){
             xdebug(im_free_with_destroy, "free  mem:%p  size:%llu\n", ptr, u64(bytes));
             ptr->~type();
             ::free(ptr);
         }
 
-        namespace memory_inner{
-            inline auto the_size_t(){
-                if constexpr (sizeof(void *) == 4){
-                    return (unsigned int)(0);
-                }
-                else{
-                    return (unsigned long int)(0);
-                }
-            }
-        }        
-    }
-
-#endif
-
-#ifndef _NEW
-    inline void * operator new(
-        decltype(
-            mixc::memory_alloctor::memory_inner::the_size_t()
-        ) bytes, void * ptr
-    ) {
-        return ptr;
+        template<class type>
+        inline void free_with_destroy(type * ptr){
+            free_with_destroy(ptr, memory_size(sizeof(type)));
+        }
     }
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::memory_alloctor;
+    using mixc::memory_alloctor::alloc;
+    using mixc::memory_alloctor::alloc_with_initial;
+    using mixc::memory_alloctor::free;
+    using mixc::memory_alloctor::free_with_destroy;
+    using mixc::memory_alloctor::memory_size;
 }
-
