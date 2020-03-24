@@ -18,5 +18,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::memory_alloc_callback;
+    using mixc::memory_alloc_callback::alloc_callback;
 }
