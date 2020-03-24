@@ -19,5 +19,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::dumb_dummy_t;
+    using mixc::dumb_dummy_t::dummy_t;
 }
