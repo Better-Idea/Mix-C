@@ -12,6 +12,19 @@
 #define __xprefix_base_pro__(...)                       , protected   __VA_ARGS__
 #define __xprefix_base_pri__(...)                       , private     __VA_ARGS__
 
+#define __link(a,b)                                     a ## b
+#define __link2(a,b)                                    __link(a,b)
+
+#define __xprefix_using_base_pubx__(i,...)              using __link2(base, i) = __VA_ARGS__; using __link2(base, i) :: __link2(base, i);
+#define __xprefix_using_base_prox__(i,...)              using __link2(base, i) = __VA_ARGS__; using __link2(base, i) :: __link2(base, i);
+#define __xprefix_using_base_prix__(i,...)              using __link2(base, i) = __VA_ARGS__; using __link2(base, i) :: __link2(base, i);
+
+#define __xprefix_using_base_
+#define __xprefix_using_base_tmpl__(...)
+#define __xprefix_using_base_pub__(...)                 __xprefix_using_base_pubx__(__COUNTER__,__VA_ARGS__)
+#define __xprefix_using_base_pro__(...)                 __xprefix_using_base_prox__(__COUNTER__,__VA_ARGS__)
+#define __xprefix_using_base_pri__(...)                 __xprefix_using_base_prix__(__COUNTER__,__VA_ARGS__)
+
 #define __xprefix_member_header_
 #define __xprefix_member_header_tmpl__(...)
 #define __xprefix_member_header_pub__(...)              __VA_ARGS__
