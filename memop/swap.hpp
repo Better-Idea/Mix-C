@@ -22,5 +22,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::memop_swap;
+    using mixc::memop_swap::swap;
 }

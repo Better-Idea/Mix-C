@@ -34,6 +34,6 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::memop_cmp;
+    using mixc::memop_cmp::cmp;
 }
 

@@ -25,5 +25,6 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::memop_fill;
+    using mixc::memop_fill::fill;
+    using mixc::memop_fill::fill_with_operator;
 }

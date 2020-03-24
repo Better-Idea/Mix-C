@@ -22,5 +22,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::memop_zeros;
+    using mixc::memop_zeros::zeros;
 }
