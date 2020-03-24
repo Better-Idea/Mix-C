@@ -21,5 +21,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_ctr_cif;
+    using mixc::meta_ctr_cif::cif;
 }
