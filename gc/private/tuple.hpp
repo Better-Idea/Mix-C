@@ -122,6 +122,5 @@ tuple<foo::member_list> xx;
 #endif
 
 namespace xuser::inc{
-    template<class root_t, class member_list>
-    using tuple = mixc::gc_tuple::tuple<root_t, member_list>;
+    using mixc::gc_tuple::tuple;
 }

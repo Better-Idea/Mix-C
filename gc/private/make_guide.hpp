@@ -33,5 +33,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::gc_make_guide;
+    using mixc::gc_make_guide::make_guide;
 }

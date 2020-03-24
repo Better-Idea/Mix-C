@@ -99,6 +99,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class root>
-    using routing = mixc::gc_routing::routing<root>;
+    using mixc::gc_routing::routing;
 }
