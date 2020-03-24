@@ -14,5 +14,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_seq_vnull;
+    using mixc::meta_seq_vnull::vnull;
 }

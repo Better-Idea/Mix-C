@@ -20,6 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class vlist_a, class vlist_b>
-    using vmarge = mixc::meta_seq_vmarge::vmarge<vlist_a, vlist_b>;
+    using mixc::meta_seq_vmarge::vmarge;
 }

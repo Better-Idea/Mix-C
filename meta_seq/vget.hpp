@@ -39,6 +39,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist, ixx index>
-    using vget = mixc::meta_seq_vget::vget<tlist, index>; 
+    using mixc::meta_seq_vget::vget;
 }

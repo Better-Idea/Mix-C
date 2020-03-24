@@ -13,5 +13,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_seq_tnull;
+    using mixc::meta_seq_tnull::tnull;
 }

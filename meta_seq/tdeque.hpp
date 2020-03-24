@@ -29,7 +29,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist>
-    using tdeque = 
-        mixc::meta_seq_tdeque::tdeque<tlist>;
+    using mixc::meta_seq_tdeque::tdeque;
 }

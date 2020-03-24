@@ -59,9 +59,5 @@
 #endif
 
 namespace xuser::inc{
-    template<
-        class tlist, 
-        class key, 
-        template<class> class selector = mixc::meta_seq_tpop_by::tselector_key>
-    using tpop_by = mixc::meta_seq_tpop_by::tpop_by<tlist, key, selector>;
+    using mixc::meta_seq_tpop_by::tpop_by;
 }

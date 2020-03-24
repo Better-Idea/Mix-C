@@ -17,5 +17,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_seq_tkv;
+    using mixc::meta_seq_tkv::tkv;
 }

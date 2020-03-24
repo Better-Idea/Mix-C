@@ -47,7 +47,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist>
-    using tdistinct = 
-        typename mixc::meta_seq_tdistinct::tdistinct<tlist>;
+    using mixc::meta_seq_tdistinct::tdistinct;
 }

@@ -27,7 +27,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist, class item> 
-    using tdistinct_append = 
-        mixc::meta_seq_tdistinct_append::tdistinct_append<tlist, item>;
+    using mixc::meta_seq_tdistinct_append::tdistinct_append;
 }

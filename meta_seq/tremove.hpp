@@ -36,6 +36,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist, class item>
-    using tremove = mixc::meta_seq_tremove::tremove<tlist, item>;
+    using mixc::meta_seq_tremove::tremove;
 }

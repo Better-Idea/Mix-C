@@ -68,6 +68,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist>
-    using tpop = mixc::meta_seq_tpop::tpop<tlist>;
+    using mixc::meta_seq_tpop::tpop;
 }

@@ -39,6 +39,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist_a, class tlist_b> 
-    using tsub = mixc::meta_seq_tsub::tsub<tlist_a, tlist_b>;
+    using mixc::meta_seq_tsub::tsub;
 }

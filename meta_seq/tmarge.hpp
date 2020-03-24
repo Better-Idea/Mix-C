@@ -20,6 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist_a, class tlist_b>
-    using tmarge = mixc::meta_seq_tmarge::tmarge<tlist_a, tlist_b>;
+    using mixc::meta_seq_tmarge::tmarge;
 }

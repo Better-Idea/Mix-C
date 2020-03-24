@@ -20,7 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist, class item> 
-    using tappend = 
-        mixc::meta_seq_tappend::tappend<tlist, item>;
+    using mixc::meta_seq_tappend::tappend;
 }

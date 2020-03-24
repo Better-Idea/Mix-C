@@ -16,5 +16,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_seq_tlist;
+    using mixc::meta_seq_tlist::tlist;
 }

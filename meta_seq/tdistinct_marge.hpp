@@ -44,7 +44,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class tlist_a, class tlist_b>
-    using tdistinct_marge = 
-        mixc::meta_seq_tdistinct_marge::tdistinct_marge<tlist_a, tlist_b>;
+    using mixc::meta_seq_tdistinct_marge::tdistinct_marge;
 }

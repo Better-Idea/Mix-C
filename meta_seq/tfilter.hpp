@@ -36,6 +36,5 @@
 #endif
 
 namespace xuser::inc{
-    template<class list, template <class> class selector>
-    using tfilter = mixc::meta_seq_tfilter::tfilter<list, selector>;
+    using mixc::meta_seq_tfilter::tfilter;
 }

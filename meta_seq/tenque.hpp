@@ -11,5 +11,5 @@
 
 namespace xuser::inc{
     template<class tlist, class item>
-    using tenque = inc::tappend<tlist, item>;
+    using tenque = mixc::meta_seq_tenque::tappend<tlist, item>;
 }
