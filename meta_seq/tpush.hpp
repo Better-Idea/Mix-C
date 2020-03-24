@@ -11,5 +11,5 @@
 
 namespace xuser::inc{
     template<class tlist, class item>
-    using tpush = mixc::meta_seq_tpush::tappend<tlist, item>;
+    using tpush = mixc::meta_seq_tappend::tappend<tlist, item>;
 }
