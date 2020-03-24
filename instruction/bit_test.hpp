@@ -21,5 +21,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::instruction_bit_test;
+    using mixc::instruction_bit_test::bit_test;
 }

@@ -21,5 +21,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::instruction_time_stamp;
+    using mixc::instruction_time_stamp::time_stamp;
 }

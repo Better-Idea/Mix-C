@@ -23,5 +23,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::instruction_ring_shift_right;
+    using mixc::instruction_ring_shift_right::ring_shift_right;
 }
