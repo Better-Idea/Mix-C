@@ -51,8 +51,9 @@ int main(){
         #define xuser mixc::macro_xitf
         #include"dumb/place_holder.hpp"
         #include"macro/private/xprefix.hpp"
-        #include"macro/xvaargs.hpp"
         #include"macro/xlist+.hpp"
+        #include"macro/xvaargs.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/cast.hpp"
         #include"meta/is_same.hpp"
     #pragma pop_macro("xuser")
@@ -68,11 +69,12 @@ int main(){
         template<class __type__>                                                                        \
         name(__type__ const & impl) {                                                                   \
             __func_list = __func_list__<__type__>;                                                      \
+            __object    = (__self__ *) mixc::memop_addressof::addressof(impl);                          \
             __build__(impl, mixc::dumb_place_holder::place_holder<0>());                                \
         }                                                                                               \
 
     #define __xitf_item__(index,name,ret,...)                                                           \
-        ret name(xlist_args(__VA_ARGS__)) const {                                                              \
+        ret name(xlist_args(__VA_ARGS__)) const {                                                       \
             using action = ret(__self__::*)(xlist_type(__VA_ARGS__));                                   \
             auto func = mixc::memop_cast::cast<action>(__func_list[index]);                             \
             if constexpr(mixc::meta_is_same::is_same<void, ret>){                                       \
