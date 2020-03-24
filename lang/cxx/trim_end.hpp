@@ -14,7 +14,6 @@
         #include"lang/cxx/index_of_last_miss.hpp"
         #include"lang/cxx.hpp"
         #include"lang/private/layout_args.hpp"
-        #include"memop/cast.hpp"
         #include"memory/alloc_callback.hpp"
         #include"meta/is_same.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -22,31 +21,37 @@
 
     namespace mixc::lang_cxx_trim_end{
         template<class item>
-        struct cxx : inc::cxx<item>::partial {
+        xgc(core,
+            xtmpl(item),
+            xpub(inc::cxx<item>)
+        )
+            using inc::cxx<item>::cxx;
+            using the_t = __self__;
+
             template<class ... args>
             auto trim_end(item value, args const & ... list) {
-                item             group[sizeof...(args) + 1];
-                inc::cxx<item> & self       = xthe;
-                auto             may_alloc  = inc::layout_args(group, value, list...);
-                constexpr auto   need_alloc = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
-                auto          && token      = inc::cxx<item> { group, sizeof...(args) + 1 - need_alloc };
+                item           group[sizeof...(args) + 1];
+                auto           temp       = the;
+                auto           may_alloc  = inc::layout_args(group, value, list...);
+                constexpr auto need_alloc = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
+                auto           token      = the_t(group, sizeof...(args) + 1 - need_alloc);
 
-                self.length = self.index_of_last_miss(
+                temp.length = temp.index_of_last_miss(
                     token,
                     token.length
                 );
 
                 if constexpr (not need_alloc){
-                    return self;
+                    return temp;
                 }
-                else if (self.length == not_exist){
-                    return inc::cxx<item>();
+                else if (temp.length == not_exist){
+                    return the_t();
                 }
                 else{
-                    return self.clone(may_alloc);
+                    return temp.clone(may_alloc);
                 }
             }
-        };
+        xgc_end();
     }
 #endif
 
@@ -59,15 +64,18 @@ namespace xuser::lang_cxx_trim_end{
     }
 
     template<class item, class final>
-    struct cxx : xusing_lang_cxx::cxx<item, final> {
+    xgc(cxx,  
+        xtmpl(item, final),
+        xpub(xusing_lang_cxx::cxx<item, final>)
+    )
         using xusing_lang_cxx::cxx<item, final>::cxx;
-        using fun = cur::cxx<item>;
+        using the_t = cur::core<item>;
 
         template<class ... args>
         final trim_end(item first, args const & ... list) const {
-            return inc::cast<fun>(xthe).trim_end(first, list...);
+            return the.trim_end(first, list...);
         }
-    };
+    xgc_end();
 }
 
 #undef  xusing_lang_cxx

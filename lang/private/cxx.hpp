@@ -4,8 +4,8 @@
         #undef  xuser
         #define xuser mixc::lang_cxx
         #include"define/base_type.hpp"
-        #include"meta/is_based_on.hpp"
         #include"macro/xgc.hpp"
+        #include"macro/xsv.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx{
@@ -22,9 +22,9 @@
                 ptr((item *)ptr), length(length) {
             }
 
-            template<class expand>
-            core(expand const & self) : core((core &)(expand &)self) {
-                static_assert(inc::is_based_on<__self__, expand>);
+            core(mixc::static_string_holder<item> holder){
+                ptr = holder.ptr();
+                length = holder.length();
             }
 
             operator item *(){
@@ -53,15 +53,20 @@
                 tmp.length -= length;
                 return tmp;
             }
+
+            auto elongate(uxx length) const {
+                return shorten(
+                    uxx(-ixx(length))
+                );
+            }
         private:
             inline static item empty = item(0);
         xgc_end();
-    }
 
-    namespace mixc::lang_cxx::inc{
-        template<class item, class final = core<item>>
+        template<class item, class final>
         struct cxx : core<item> {
             using core<item>::core;
+            using core<item>::length;
 
             cxx(core<item> const & self) : 
                 core<item>(self) {
@@ -78,12 +83,14 @@
             final shorten(uxx length) const {
                 return core<item>::shorten(length);
             }
+
+            final elongate(uxx length) const {
+                return core<item>::elongate(length);
+            }
         };
     }
+
+    #define xc08(str)      xsv(char, "\0\0\0\0\0\0\0\0", str)
 #endif
 
-namespace xuser::inc{
-    using namespace mixc::lang_cxx::inc;
-}
-
-#define xusing_lang_cxx     mixc::lang_cxx::inc
+#define xusing_lang_cxx     mixc::lang_cxx

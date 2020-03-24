@@ -12,7 +12,6 @@
         #include"define/base_type.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xindex_rollback.hpp"
-        #include"memop/cast.hpp"
         #include"memop/copy.hpp"
         #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -20,18 +19,23 @@
 
     namespace mixc::lang_cxx_insert{
         template<class item>
-        struct cxx : inc::cxx<item>::partial {
-            auto insert(ixx index, inc::cxx<item> value, inc::alloc_callback<item> alloc) const {
-                inc::cxx<item> & self = xthe;
-                xindex_rollback(self.length, index, + 1);
-                uxx             target_length = self.length + value.length;
-                inc::cxx<item>  r { alloc(target_length), target_length };
-                inc::copy<item>(r, self, index);
+        xgc(core, 
+            xtmpl(item),
+            xpub(inc::cxx<item>)
+        )
+            using inc::cxx<item>::cxx;
+            using the_t = __self__;
+
+            auto insert(ixx index, the_t value, inc::alloc_callback<item> alloc) const {
+                xindex_rollback(the.length, index, + 1);
+                uxx             target_length = the.length + value.length;
+                the_t            r { alloc(target_length), target_length };
+                inc::copy<item>(r, the, index);
                 inc::copy<item>(r.backward(index), value, value.length);
-                inc::copy<item>(r.backward(index + value.length), self.backward(index), self.length - index);
+                inc::copy<item>(r.backward(index + value.length), the.backward(index), the.length - index);
                 return r;
             }
-        };
+        xgc_end();
     }
 #endif
 
@@ -44,13 +48,17 @@ namespace xuser::lang_cxx_insert{
     }
 
     template<class item, class final>
-    struct cxx : xusing_lang_cxx::cxx<item, final> {
+    xgc(cxx,  
+        xtmpl(item, final),
+        xpub(xusing_lang_cxx::cxx<item, final>)
+    )
         using xusing_lang_cxx::cxx<item, final>::cxx;
+        using the_t = cur::core<item>;
 
-        final insert(ixx index, inc::cxx<item> value, inc::alloc_callback<item> alloc) const {
-            return inc::cast<cur::cxx<item>>(xthe).insert(index, value, alloc);
+        final insert(ixx index, final value, inc::alloc_callback<item> alloc) const {
+            return the.insert(index, value, alloc);
         }
-    };
+    xgc_end();
 }
 
 #undef  xusing_lang_cxx

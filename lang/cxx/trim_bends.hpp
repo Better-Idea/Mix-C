@@ -15,7 +15,6 @@
         #include"lang/cxx/index_of_last_miss.hpp"
         #include"lang/cxx.hpp"
         #include"lang/private/layout_args.hpp"
-        #include"memop/cast.hpp"
         #include"memory/alloc_callback.hpp"
         #include"meta/is_same.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -23,16 +22,21 @@
 
     namespace mixc::lang_cxx_trim_bends{
         template<class item>
-        struct cxx : inc::cxx<item>::partial {
+        xgc(core,
+            xtmpl(item),
+            xpub(inc::cxx<item>)
+        )
+            using inc::cxx<item>::cxx;
+            using the_t = __self__;
+
             template<class ... args>
             auto trim_bends(item first, args const & ... list) const {
-                inc::cxx<item> & self = xthe;
                 item group[sizeof...(args) + 1]; // 包含'\0'
 
                 auto            may_alloc   = inc::layout_args(group, first, list...);
                 constexpr auto  need_alloc  = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
-                auto            token       = inc::cxx<item>(group, sizeof...(args) + 1 - need_alloc);
-                auto            offset      = self.index_of_first_miss(token, token.length);
+                auto            token       = the_t(group, sizeof...(args) + 1 - need_alloc);
+                auto            offset      = the.index_of_first_miss(token, token.length);
 
                 if constexpr (need_alloc){
                     if (offset == not_exist){
@@ -40,18 +44,18 @@
                     }
                 }
 
-                self        = self.backward(offset);
-                self.length = self.index_of_last_miss(
+                auto temp   = the.backward(offset);
+                temp.length = temp.index_of_last_miss(
                     token,
                     token.length
                 );
 
                 if constexpr (need_alloc){
-                    self = self.clone(may_alloc);
+                    temp = temp.clone(may_alloc);
                 }
-                return self;
+                return temp;
             }
-        };
+        xgc_end();
     }
 #endif
 
@@ -64,15 +68,18 @@ namespace xuser::lang_cxx_trim_bends{
     }
 
     template<class item, class final>
-    struct cxx : xusing_lang_cxx::cxx<item, final> {
+    xgc(cxx,  
+        xtmpl(item, final),
+        xpub(xusing_lang_cxx::cxx<item, final>)
+    )
         using xusing_lang_cxx::cxx<item, final>::cxx;
-        using fun = cur::cxx<item>;
+        using the_t = cur::core<item>;
 
         template<class ... args>
         final trim_bends(item first, args const & ... list) const {
-            return inc::cast<fun>(xthe).trim_bends(first, list...);
+            return the.trim_bends(first, list...);
         }
-    };
+    xgc_end();
 }
 
 #undef  xusing_lang_cxx

@@ -11,7 +11,6 @@
         #define xuser mixc::lang_cxx_pad_left
         #include"define/base_type.hpp"
         #include"lang/cxx.hpp"
-        #include"memop/cast.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
         #include"memory/alloc_callback.hpp"
@@ -20,16 +19,21 @@
 
     namespace mixc::lang_cxx_pad_left{
         template<class item>
-        struct cxx : inc::cxx<item>::partial {
+        xgc(core,
+            xtmpl(item),
+            xpub(inc::cxx<item>)
+        )
+            using inc::cxx<item>::cxx;
+            using the_t = __self__;
+
             auto pad_left(uxx count, item value, inc::alloc_callback<item> alloc) const {
-                inc::cxx<item> & self = xthe;
-                uxx              length = self.length + count;
-                inc::cxx<item>   r(alloc(length), length);
+                uxx             length = the.length + count;
+                the_t            r(alloc(length), length);
                 inc::fill<item>(r, value, count);
-                inc::copy<item>(r.backward(count), self, self.length);
+                inc::copy<item>(r.backward(count), the, the.length);
                 return r;
             }
-        };
+        xgc_end();
     }
 #endif
 
@@ -42,14 +46,17 @@ namespace xuser::lang_cxx_pad_left{
     }
 
     template<class item, class final>
-    struct cxx : xusing_lang_cxx::cxx<item, final> {
+    xgc(cxx,  
+        xtmpl(item, final),
+        xpub(xusing_lang_cxx::cxx<item, final>)
+    )
         using xusing_lang_cxx::cxx<item, final>::cxx;
-        using fun = cur::cxx<item>;
+        using the_t = cur::core<item>;
 
         final pad_left(uxx count, item value, inc::alloc_callback<item> alloc) const {
-            return inc::cast<fun>(xthe).pad_left(count, value, alloc);
+            return the.pad_left(count, value, alloc);
         }
-    };
+    xgc_end();
 }
 
 #undef  xusing_lang_cxx

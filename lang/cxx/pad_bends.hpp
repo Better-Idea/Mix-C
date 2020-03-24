@@ -11,7 +11,6 @@
         #define xuser mixc::lang_cxx_pad_bends
         #include"define/base_type.hpp"
         #include"lang/cxx.hpp"
-        #include"memop/cast.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
         #include"memory/alloc_callback.hpp"
@@ -20,17 +19,22 @@
 
     namespace mixc::lang_cxx_pad_bends{
         template<class item>
-        struct cxx : inc::cxx<item>::partial {
+        xgc(core,
+            xtmpl(item),
+            xpub(inc::cxx<item>)
+        )
+            using inc::cxx<item>::cxx;
+            using the_t = __self__;
+
             auto pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
-                inc::cxx<item> & self = xthe;
-                uxx              total_length = left_count + right_count + self.length;
-                inc::cxx<item>   r(alloc(total_length), total_length);
+                uxx             total_length = left_count + right_count + the.length;
+                the_t            r(alloc(total_length), total_length);
                 inc::fill<item>(r, value, left_count);
-                inc::copy<item>(r.backward(left_count), self, self.length);
-                inc::fill<item>(r.backward(left_count + self.length), value, right_count);
+                inc::copy<item>(r.backward(left_count), the, the.length);
+                inc::fill<item>(r.backward(left_count + the.length), value, right_count);
                 return r;
             }
-        };
+        xgc_end();
     }
 #endif
 
@@ -38,19 +42,23 @@ namespace xuser::lang_cxx_pad_bends{
     namespace cur{
         using namespace mixc::lang_cxx_pad_bends;
     }
+
     namespace inc{
         using namespace cur::inc;
     }
 
     template<class item, class final>
-    struct cxx : xusing_lang_cxx::cxx<item, final> {
+    xgc(cxx,  
+        xtmpl(item, final),
+        xpub(xusing_lang_cxx::cxx<item, final>)
+    )
         using xusing_lang_cxx::cxx<item, final>::cxx;
-        using fun = cur::cxx<item>;
+        using the_t = cur::core<item>;
 
         final pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
-            return inc::cast<fun>(xthe).pad_bends(left_count, right_count, value, alloc);
+            return the.pad_bends(left_count, right_count, value, alloc);
         }
-    };
+    xgc_end();
 }
 
 #undef  xusing_lang_cxx

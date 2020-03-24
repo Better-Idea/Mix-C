@@ -31,5 +31,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::lang_private_layout;
+    using mixc::lang_private_layout::layout_args;
 }

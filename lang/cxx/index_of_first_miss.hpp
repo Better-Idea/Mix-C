@@ -13,25 +13,29 @@
         #include"dumb/implicit.hpp"
         #include"lang/cxx/index_of_first.hpp"
         #include"lang/cxx.hpp"
-        #include"memop/cast.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_index_of_first_miss{
         template<class item>
-        struct cxx : inc::cxx<item>::partial {
-            auto index_of_first_miss(item const * values, uxx count) const {
-                inc::cxx<item> & self = xthe;
-                inc::cxx<item>   token = { values, count };
+        xgc(core,
+            xtmpl(item),
+            xpub(inc::cxx<item>)
+        )
+            using inc::cxx<item>::cxx;
+            using the_t = __self__;
 
-                for (uxx i = 0; i < self.length; i++){
-                    if (token.index_of_first(self[i]) == not_exist){
+            auto index_of_first_miss(item const * values, uxx count) const {
+                the_t token = { values, count };
+
+                for (uxx i = 0; i < the.length; i++){
+                    if (token.index_of_first(the[i]) == not_exist){
                         return i;
                     }
                 }
                 return not_exist;
             }
-        };
+        xgc_end();
     }
 #endif
 
@@ -39,17 +43,21 @@ namespace xuser::lang_cxx_index_of_first_miss{
     namespace cur{
         using namespace mixc::lang_cxx_index_of_first_miss;
     }
+
     namespace inc{
         using namespace cur::inc;
     }
 
     template<class item, class final>
-    struct cxx : xusing_lang_cxx::cxx<item, final> {
+    xgc(cxx,  
+        xtmpl(item, final),
+        xpub(xusing_lang_cxx::cxx<item, final>)
+    )
         using xusing_lang_cxx::cxx<item, final>::cxx;
-        using fun = cur::cxx<item>;
+        using the_t = cur::core<item>;
 
         auto index_of_first_miss(item const * values, uxx count) const {
-            return inc::cast<fun>(xthe).index_of_first_miss(values, count);
+            return the.index_of_first_miss(values, count);
         }
 
         template<class ... args>
@@ -57,7 +65,7 @@ namespace xuser::lang_cxx_index_of_first_miss{
             inc::implicit<item> group[] = { value, list... };
             return index_of_first_miss((item *)group, 1 + sizeof...(args));
         }
-    };
+    xgc_end();
 }
 
 #undef  xusing_lang_cxx

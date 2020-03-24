@@ -8,5 +8,7 @@
         struct cxx : xusing_lang_cxx::cxx<item, cxx<item>>{
             using xusing_lang_cxx::cxx<item, cxx<item>>::cxx;
         };
+
+        using c08 = cxx<char>;
     }
 #endif
