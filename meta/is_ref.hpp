@@ -24,5 +24,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_is_ref;
+    using mixc::meta_is_ref::is_ref;
 }

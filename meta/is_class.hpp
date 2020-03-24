@@ -14,5 +14,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_is_class;
+    using mixc::meta_is_class::is_class;
 }

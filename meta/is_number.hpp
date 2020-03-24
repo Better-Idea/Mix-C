@@ -23,5 +23,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_is_number;
+    using mixc::meta_is_number::is_number;
 }

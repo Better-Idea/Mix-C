@@ -21,5 +21,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_remove_ref;
+    using mixc::meta_remove_ref::remove_ref;
 }

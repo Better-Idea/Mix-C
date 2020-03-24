@@ -7,34 +7,32 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_is_unsigned{
-        namespace inner_is_unsigned{
-            template<class a> struct meta {
-                static constexpr bool result = false;
-            };
+        template<class a> struct meta {
+            static constexpr bool result = false;
+        };
 
-            template<> struct meta<u08> {
-                static constexpr bool result = true;
-            };
+        template<> struct meta<u08> {
+            static constexpr bool result = true;
+        };
 
-            template<> struct meta<u16> {
-                static constexpr bool result = true;
-            };
+        template<> struct meta<u16> {
+            static constexpr bool result = true;
+        };
 
-            template<> struct meta<u32> {
-                static constexpr bool result = true;
-            };
+        template<> struct meta<u32> {
+            static constexpr bool result = true;
+        };
 
-            template<> struct meta<u64> {
-                static constexpr bool result = true;
-            };
-        }
+        template<> struct meta<u64> {
+            static constexpr bool result = true;
+        };
 
         template<class a>
-        constexpr bool is_unsigned = mixc::inner_is_unsigned::meta<a>::result;
+        constexpr bool is_unsigned = meta<a>::result;
     }
 
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_is_unsigned;
+    using mixc::meta_is_unsigned::is_unsigned;
 }

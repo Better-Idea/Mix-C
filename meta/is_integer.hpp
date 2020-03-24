@@ -9,19 +9,17 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_is_integer{
-        namespace inner_is_integer{
-            template<class a>
-            struct meta {
-                static constexpr bool result = mixc::is_signed<a> || mixc::is_unsigned<a>;
-            };
-        }
+        template<class a>
+        struct meta {
+            static constexpr bool result = inc::is_signed<a> or inc::is_unsigned<a>;
+        };
 
         template<class a>
-        constexpr bool is_integer = inner_is_integer::meta<a>::result;
+        constexpr bool is_integer = meta<a>::result;
     }
 
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_is_integer;
+    using mixc::meta_is_integer::is_integer;
 }

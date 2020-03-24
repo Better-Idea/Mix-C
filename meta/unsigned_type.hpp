@@ -18,5 +18,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_unsigned_type;
+    using mixc::meta_unsigned_type::unsigned_type;
 }

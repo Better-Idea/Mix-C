@@ -15,5 +15,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::meta_is_based_on;
+    using mixc::meta_is_based_on::is_based_on;
 }
