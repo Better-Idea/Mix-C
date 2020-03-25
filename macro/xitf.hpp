@@ -58,6 +58,7 @@ int main(){
         #include"meta/is_same.hpp"
     #pragma pop_macro("xuser")
 
+
     #define xitf(name,...)                                                                              \
     struct name{                                                                                        \
     private:                                                                                            \
@@ -75,13 +76,16 @@ int main(){
 
     #define __xitf_item__(index,name,ret,...)                                                           \
         ret name(xlist_args(__VA_ARGS__)) const {                                                       \
-            using action = ret(__self__::*)(xlist_type(__VA_ARGS__));                                   \
-            auto func = mixc::memop_cast::cast<action>(__func_list[index]);                             \
+            union {                                                                                     \
+                void * __func;                                                                          \
+                ret (* __this_call) (xlist_args(xnt(__self, void *), __VA_ARGS__));                     \
+            };                                                                                          \
+            __func = __func_list[index];                                                                \
             if constexpr(mixc::meta_is_same::is_same<void, ret>){                                       \
-                (__object->*func)(xlist_name(__VA_ARGS__));                                             \
+                __this_call(xlist_name(xnt(__object, void *),__VA_ARGS__));                             \
             }                                                                                           \
             else{                                                                                       \
-                return (__object->*func)(xlist_name(__VA_ARGS__));                                      \
+                return __this_call(xlist_name(xnt(__object, void *),__VA_ARGS__));                      \
             }                                                                                           \
         }                                                                                               \
     private:                                                                                            \
@@ -91,7 +95,7 @@ int main(){
             using action = ret(__type__::*)(xlist_type(__VA_ARGS__));                                   \
             __func_list[index] = mixc::memop_cast::cast<void *>(action(& __type__::name));              \
         }                                                                                               \
-    public:                                                                                             \
+    public:
 
     #define xitf_item(name,ret,...)                                                                     \
         __xitf_item__(xvaargs(__COUNTER__ - __start__),name,ret,__VA_ARGS__)
