@@ -70,6 +70,7 @@
     #define w16p        mixc_w16p
     #define voidp       mixc_voidp
     #define the         (*(the_t *)this)
+    #define thex        (*(final *)this)
 
     namespace mixc{
         template<int> struct env{};
