@@ -22,12 +22,9 @@
 
     namespace mixc::lang_cxx_trim_bends{
         template<class item>
-        xgc(core,
-            xtmpl(item),
-            xpub(inc::cxx<item>)
-        )
+        struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
-            using the_t = __self__;
+            using the_t = core<item>;
 
             template<class ... args>
             auto trim_bends(item first, args const & ... list) const {
@@ -36,7 +33,7 @@
                 auto            may_alloc   = inc::layout_args(group, first, list...);
                 constexpr auto  need_alloc  = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
                 auto            token       = the_t(group, sizeof...(args) + 1 - need_alloc);
-                auto            offset      = the.index_of_first_miss(token, token.length);
+                auto            offset      = the.index_of_first_miss(token, token.length());
 
                 if constexpr (need_alloc){
                     if (offset == not_exist){
@@ -45,9 +42,9 @@
                 }
 
                 auto temp   = the.backward(offset);
-                temp.length = temp.index_of_last_miss(
+                temp.length() = temp.index_of_last_miss(
                     token,
-                    token.length
+                    token.length()
                 );
 
                 if constexpr (need_alloc){
@@ -55,32 +52,25 @@
                 }
                 return temp;
             }
-        xgc_end();
+        };
     }
 #endif
 
-namespace xuser::lang_cxx_trim_bends{
-    namespace cur{
-        using namespace mixc::lang_cxx_trim_bends;
-    }
-    namespace inc{
-        using namespace cur::inc;
-    }
+namespace xuser::com::lang_cxx_trim_bends{
+    namespace cur{ using namespace mixc::lang_cxx_trim_bends; }
+    namespace inc{ using namespace cur::inc; }
 
-    template<class item, class final>
-    xgc(cxx,  
-        xtmpl(item, final),
-        xpub(xusing_lang_cxx::cxx<item, final>)
-    )
-        using xusing_lang_cxx::cxx<item, final>::cxx;
+    template<class final, class item>
+    struct cxx : xusing_lang_cxx::cxx<final, item> {
+        using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = cur::core<item>;
 
         template<class ... args>
         final trim_bends(item first, args const & ... list) const {
             return the.trim_bends(first, list...);
         }
-    xgc_end();
+    };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::lang_cxx_trim_bends
+#define xusing_lang_cxx xuser::com::lang_cxx_trim_bends

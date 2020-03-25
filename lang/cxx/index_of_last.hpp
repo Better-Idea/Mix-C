@@ -17,15 +17,12 @@
 
     namespace mixc::lang_cxx_index_of_last{
         template<class item>
-        xgc(core,
-            xtmpl(item),
-            xpub(inc::cxx<item>)
-        )
+        struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
-            using the_t = __self__;
+            using the_t = core<item>;
 
             auto index_of_last(item value, inc::can_compare<item> compare) const {
-                for (uxx i = the.length; i--; ){
+                for (uxx i = the.length(); i--; ){
                     if (compare(the[i], value) == 0){
                         return i;
                     }
@@ -51,21 +48,21 @@
                 uxx miss   = 0;
                 uxx index;
 
-                if (origin.length < substr.length or substr.length == 0) {
+                if (origin.length() < substr.length() or substr.length() == 0) {
                     return not_exist;
                 }
-                for (origin = origin.shorten(substr.length - 1);;){
+                for (origin = origin.shorten(substr.length() - 1);;){
                     if (index = origin.index_of_last(substr[miss], compare); index == not_exist){
                         break;
                     }
 
-                    origin.length = index - miss;
-                    temp          = origin.backward(origin.length);
+                    origin.length() = index - miss;
+                    temp          = origin.backward(origin.length());
                     origin        = origin.elongate(1);
                     
                     for (index = 0; ; index++){
-                        if (index == substr.length) {
-                            return origin.length - 1;
+                        if (index == substr.length()) {
+                            return origin.length() - 1;
                         }
                         if (compare(temp[index], substr[index]) != 0) {
                             miss = index;
@@ -75,24 +72,17 @@
                 }
                 return not_exist;
             }
-        xgc_end();
+        };
     }
 #endif
 
-namespace xuser::lang_cxx_index_of_last{
-    namespace cur{
-        using namespace mixc::lang_cxx_index_of_last;
-    }
-    namespace inc{
-        using namespace cur::inc;
-    }
+namespace xuser::com::lang_cxx_index_of_last{
+    namespace cur{ using namespace mixc::lang_cxx_index_of_last; }
+    namespace inc{ using namespace cur::inc; }
 
-    template<class item, class final>
-    xgc(cxx,  
-        xtmpl(item, final),
-        xpub(xusing_lang_cxx::cxx<item, final>)
-    )
-        using xusing_lang_cxx::cxx<item, final>::cxx;
+    template<class final, class item>
+    struct cxx : xusing_lang_cxx::cxx<final, item> {
+        using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = cur::core<item>;
 
         auto index_of_last(
@@ -106,8 +96,8 @@ namespace xuser::lang_cxx_index_of_last{
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.index_of_last(value, compare);
         }
-    xgc_end();
+    };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::lang_cxx_index_of_last
+#define xusing_lang_cxx xuser::com::lang_cxx_index_of_last

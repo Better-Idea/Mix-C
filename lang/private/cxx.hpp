@@ -10,82 +10,70 @@
 
     namespace mixc::lang_cxx{
         template<class item>
-        xgc(core, xtmpl(item))
+        xgc(core)
             xgc_fields(
-                xpri(ptr, item *),
-                xpub(length, uxx)
+                xpro(ptr, item *),
+                xpro(count, uxx)
             );
 
             core() : core(& empty, 0) {}
             core(core const &) = default;
-            core(item const * ptr, uxx length) : 
-                ptr((item *)ptr), length(length) {
+            core(item const * ptr, uxx count) : 
+                ptr((item *)ptr), count(count) {
             }
 
             core(mixc::static_string_holder<item> holder){
                 ptr = holder.ptr();
-                length = holder.length();
+                count = holder.length();
+            }
+        protected:
+            inline static item empty = item(0);
+        xgc_end();
+
+        template<class final, class item>
+        struct cxx : core<item> {
+            using core<item>::core;
+            using the_t = core<item>;
+
+            auto & operator [](uxx index) const {
+                return core<item>::ptr[index];
             }
 
             operator item *(){
-                return ptr;
+                return core<item>::ptr;
             }
 
             operator const item *() const {
-                return ptr;
+                return core<item>::ptr;
             }
 
-            auto backward(uxx value) const {
-                auto tmp = this[0];
+            final backward(uxx value) const {
+                auto tmp = the;
                 tmp.ptr += value;
-                tmp.length -= uxx(value);
+                tmp.count -= uxx(value);
                 return tmp;
             }
 
-            auto forward(uxx value) const {
+            final forward(uxx value) const {
                 return backward(
                     uxx(-ixx(value))
                 );
             }
 
-            auto shorten(uxx length) const {
-                auto tmp = this[0];
-                tmp.length -= length;
+            final shorten(uxx count) const {
+                auto tmp = the;
+                tmp.count -= count;
                 return tmp;
             }
 
-            auto elongate(uxx length) const {
+            final elongate(uxx count) const {
                 return shorten(
-                    uxx(-ixx(length))
+                    uxx(-ixx(count))
                 );
             }
-        private:
-            inline static item empty = item(0);
-        xgc_end();
 
-        template<class item, class final>
-        struct cxx : core<item> {
-            using core<item>::core;
-            using core<item>::length;
-
-            cxx(core<item> const & self) : 
-                core<item>(self) {
-            }
-
-            final backward(uxx value) const {
-                return core<item>::backward(value);
-            }
-
-            final forward(uxx value) const {
-                return core<item>::forward(value);
-            }
-
-            final shorten(uxx length) const {
-                return core<item>::shorten(length);
-            }
-
-            final elongate(uxx length) const {
-                return core<item>::elongate(length);
+            auto length() const {
+                return core<item>::count;
             }
         };
     }

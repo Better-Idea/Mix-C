@@ -18,20 +18,17 @@
 
     namespace mixc::lang_cxx_substr{
         template<class item>
-        xgc(core,
-            xtmpl(item),
-            xpub(inc::cxx<item>)
-        )
+        struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
-            using the_t = __self__;
+            using the_t = core<item>;
 
             auto substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
-                if (the.length == 0) {
+                if (the.length() == 0) {
                     return the_t();
                 }
 
-                xindex_rollback(the.length, start);
-                xindex_rollback(the.length, end);
+                xindex_rollback(the.length(), start);
+                xindex_rollback(the.length(), end);
 
                 uxx    target_length;
                 item * buf;
@@ -57,25 +54,17 @@
                 }
                 return the_t(buf, target_length);
             }
-        xgc_end();
+        };
     }
 #endif
 
-namespace xuser::lang_cxx_substr{
-    namespace cur{
-        using namespace mixc::lang_cxx_substr;
-    }
+namespace xuser::com::lang_cxx_substr{
+    namespace cur{ using namespace mixc::lang_cxx_substr; }
+    namespace inc{ using namespace cur::inc; }
 
-    namespace inc{
-        using namespace cur::inc;
-    }
-
-    template<class item, class final>
-    xgc(cxx,  
-        xtmpl(item, final),
-        xpub(xusing_lang_cxx::cxx<item, final>)
-    )
-        using xusing_lang_cxx::cxx<item, final>::cxx;
+    template<class final, class item>
+    struct cxx : xusing_lang_cxx::cxx<final, item> {
+        using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = cur::core<item>;
 
         final substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
@@ -85,8 +74,8 @@ namespace xuser::lang_cxx_substr{
         final substr(ixx start, inc::alloc_callback<item> alloc) const {
             return substr(start, -1, alloc);
         }
-    xgc_end();
+    };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::lang_cxx_substr
+#define xusing_lang_cxx xuser::com::lang_cxx_substr

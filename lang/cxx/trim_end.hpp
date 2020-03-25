@@ -21,12 +21,9 @@
 
     namespace mixc::lang_cxx_trim_end{
         template<class item>
-        xgc(core,
-            xtmpl(item),
-            xpub(inc::cxx<item>)
-        )
+        struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
-            using the_t = __self__;
+            using the_t = core<item>;
 
             template<class ... args>
             auto trim_end(item value, args const & ... list) {
@@ -36,47 +33,40 @@
                 constexpr auto need_alloc = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
                 auto           token      = the_t(group, sizeof...(args) + 1 - need_alloc);
 
-                temp.length = temp.index_of_last_miss(
+                temp.length() = temp.index_of_last_miss(
                     token,
-                    token.length
+                    token.length()
                 );
 
                 if constexpr (not need_alloc){
                     return temp;
                 }
-                else if (temp.length == not_exist){
+                else if (temp.length() == not_exist){
                     return the_t();
                 }
                 else{
                     return temp.clone(may_alloc);
                 }
             }
-        xgc_end();
+        };
     }
 #endif
 
-namespace xuser::lang_cxx_trim_end{
-    namespace cur{
-        using namespace mixc::lang_cxx_trim_end;
-    }
-    namespace inc{
-        using namespace cur::inc;
-    }
+namespace xuser::com::lang_cxx_trim_end{
+    namespace cur{ using namespace mixc::lang_cxx_trim_end; }
+    namespace inc{ using namespace cur::inc; }
 
-    template<class item, class final>
-    xgc(cxx,  
-        xtmpl(item, final),
-        xpub(xusing_lang_cxx::cxx<item, final>)
-    )
-        using xusing_lang_cxx::cxx<item, final>::cxx;
+    template<class final, class item>
+    struct cxx : xusing_lang_cxx::cxx<final, item> {
+        using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = cur::core<item>;
 
         template<class ... args>
         final trim_end(item first, args const & ... list) const {
             return the.trim_end(first, list...);
         }
-    xgc_end();
+    };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::lang_cxx_trim_end
+#define xusing_lang_cxx xuser::com::lang_cxx_trim_end

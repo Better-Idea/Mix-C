@@ -17,15 +17,12 @@
 
     namespace mixc::lang_cxx_index_of_first{
         template<class item>
-        xgc(core,
-            xtmpl(item),
-            xpub(inc::cxx<item>)
-        )
+        struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
-            using the_t = __self__;
+            using the_t = core<item>;
 
             auto index_of_first(item value, inc::can_compare<item> compare) const {
-                for (uxx i = 0; i < the.length; i++){
+                for (uxx i = 0; i < the.length(); i++){
                     if (compare(the[i], value) == 0){
                         return i;
                     }
@@ -42,18 +39,18 @@
                 uxx  miss   = 0;
                 uxx  index;
 
-                if (origin.length < substr.length or substr.length == 0) {
+                if (origin.length() < substr.length() or substr.length() == 0) {
                     return not_exist;
                 }
                 while(true){
                     if (index = origin.index_of_first(substr[miss], compare); index == not_exist){
                         break;
                     }
-                    if (origin = origin.backward(index - miss); origin.length < substr.length) {
+                    if (origin = origin.backward(index - miss); origin.length() < substr.length()) {
                         break;
                     }
                     for (index = 0; ; index++){
-                        if (index == substr.length) {
+                        if (index == substr.length()) {
                             return uxx(origin - the);
                         }
                         if (compare(origin[index], substr[index]) != 0) {
@@ -64,25 +61,17 @@
                 }
                 return not_exist;
             }
-        xgc_end();
+        };
     }
 #endif
 
-namespace xuser::lang_cxx_index_of_first{
-    namespace cur{
-        using namespace mixc::lang_cxx_index_of_first;
-    }
+namespace xuser::com::lang_cxx_index_of_first{
+    namespace cur{ using namespace mixc::lang_cxx_index_of_first; }
+    namespace inc{ using namespace cur::inc; }
 
-    namespace inc{
-        using namespace cur::inc;
-    }
-
-    template<class item, class final>
-    xgc(cxx,  
-        xtmpl(item, final),
-        xpub(xusing_lang_cxx::cxx<item, final>)
-    )
-        using xusing_lang_cxx::cxx<item, final>::cxx;
+    template<class final, class item>
+    struct cxx : xusing_lang_cxx::cxx<final, item> {
+        using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = cur::core<item>;
 
         auto index_of_first(
@@ -96,8 +85,8 @@ namespace xuser::lang_cxx_index_of_first{
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.index_of_first(substr, compare);
         }
-    xgc_end();
+    };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::lang_cxx_index_of_first
+#define xusing_lang_cxx xuser::com::lang_cxx_index_of_first
