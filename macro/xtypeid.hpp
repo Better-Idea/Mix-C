@@ -14,7 +14,7 @@
         using namespace inc;
 
         template<class type>
-        union __typeid__ {
+        union __typeid {
             using r0 = typename remove_const<type>::result;
             using r1 = typename remove_ref<r0>::result;
 
@@ -51,5 +51,5 @@
         };
     }
 
-    #define xtypeid(...)      mixc::macro_xtypeid::__typeid__<__VA_ARGS__>()
+    #define xtypeid(...)      mixc::macro_xtypeid::__typeid<__VA_ARGS__>()
 #endif

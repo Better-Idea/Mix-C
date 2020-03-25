@@ -11,7 +11,7 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_xtypeid{
-        template<class type> union __typeid__;
+        template<class type> union __typeid;
     }
 
     namespace mixc::macro_xgc{
@@ -34,29 +34,28 @@
     }
 
     #define xgc(name,...)                                                               \
-    struct name :                                                                       \
-        private mixc::dumb_place_holder::place_holder<__COUNTER__, true>                \
-        __xlist__(base_,base_,__VA_ARGS__) {                                            \
+    struct name __xlist__(first_base_,base_,__VA_ARGS__) {                              \
     private:                                                                            \
-        using __self__ = name __xlist__(keep_tmpl_,keep_tmpl_,__VA_ARGS__);             \
+        using __self__ = name;                                                          \
         using __expand_member_list__ =                                                  \
             decltype(                                                                   \
-                mixc::macro_xgc::expand_member_list<mixc::macro_xgc::none               \
-                    __xlist__(member_header_,member_,__VA_ARGS__)                       \
+                mixc::macro_xgc::expand_member_list<                                    \
+                    __xlist__(first_member_,member_,__VA_ARGS__)                        \
                 >()                                                                     \
             );                                                                          \
-        template<class __type__> friend union mixc::macro_xtypeid::__typeid__;          \
+        template<class __type__> friend union mixc::macro_xtypeid::__typeid;            \
         static constexpr const char * __self_name__ = # name;                           \
     public:
 
     #define xgc_fields(...)                                                             \
         __xlist__(field_,field_,__VA_ARGS__);                                           \
+    public:                                                                             \
         using member_list = typename mixc::meta_seq_vmarge::vmarge<                     \
             __expand_member_list__,                                                     \
             mixc::meta_seq_vlist::vlist<                                                \
-                __xlist__(member_list_header_,member_list_,__VA_ARGS__)                 \
+                __xlist__(first_member_list_,member_list_,__VA_ARGS__)                  \
             >                                                                           \
-        >::new_list
+        >::new_list                                                                     \
 
     #define xgc_end()       }
 #endif

@@ -61,59 +61,50 @@ int main(){
         #include"macro/xvaargs.hpp"
         #include"memop/addressof.hpp"
         #include"memop/cast.hpp"
-        #include"meta/is_same.hpp"
     #pragma pop_macro("xuser")
-
 
     #define xitf(name,...)                                                                              \
     struct name{                                                                                        \
     private:                                                                                            \
-        using __self__ = name __xprefix_keep_tmpl_ ## __VA_ARGS__;                                      \
-        __self__ *  __object;                                                                           \
-        void    **  __func_list;                                                                        \
-        enum { __start__ = __COUNTER__ + 1, };                                                          \
+        void  *   __object;                                                                             \
+        void  **  __func_list;                                                                          \
+        enum { __start = __COUNTER__ + 1, };                                                            \
     public:                                                                                             \
         template<class __type__>                                                                        \
         name(__type__ const & impl) {                                                                   \
             __func_list = __func_list__<__type__>;                                                      \
-            __object    = (__self__ *) mixc::memop_addressof::addressof(impl);                          \
-            __build__(impl, mixc::dumb_place_holder::place_holder<0>());                                \
+            __object    = mixc::memop_addressof::addressof(impl);                                       \
+            __build(impl, mixc::dumb_place_holder::place_holder<0>());                                  \
         }                                                                                               \
 
     #define __xitf_item__(index,name,ret,...)                                                           \
         ret name(xlist_args(__VA_ARGS__)) const {                                                       \
             union {                                                                                     \
                 void * __func;                                                                          \
-                ret (* __this_call) (xlist_args(xnt(__self, void *), __VA_ARGS__));                     \
+                ret (* __this_call) (xlist_args(xnt(__this, void *), __VA_ARGS__));                     \
             };                                                                                          \
             __func = __func_list[index];                                                                \
-            if constexpr(mixc::meta_is_same::is_same<void, ret>){                                       \
-                __this_call(xlist_name(xnt(__object, void *),__VA_ARGS__));                             \
-            }                                                                                           \
-            else{                                                                                       \
-                return __this_call(xlist_name(xnt(__object, void *),__VA_ARGS__));                      \
-            }                                                                                           \
+            return __this_call(xlist_name(xnt(__object, void *),__VA_ARGS__));                          \
         }                                                                                               \
     private:                                                                                            \
         template<class __type__>                                                                        \
-        void __build__(__type__ const & impl, mixc::dumb_place_holder::place_holder<index>){            \
-            __build__(impl, mixc::dumb_place_holder::place_holder<index + 1>());                        \
-            using action = ret(__type__::*)(xlist_type(__VA_ARGS__));                                   \
-            __func_list[index] = mixc::memop_cast::cast<void *>(action(& __type__::name));              \
+        void __build(__type__ const & impl, mixc::dumb_place_holder::place_holder<index>){              \
+            __func_list[index] = mixc::memop_cast::cast<void *>(& __type__::name);                      \
+            __build(impl, mixc::dumb_place_holder::place_holder<index + 1>());                          \
         }                                                                                               \
     public:
 
     #define xitf_item(name,ret,...)                                                                     \
-        __xitf_item__(xvaargs(__COUNTER__ - __start__),name,ret,__VA_ARGS__)
+        __xitf_item__(xvaargs(__COUNTER__ - __start),name,ret,__VA_ARGS__)
 
     #define xitf_end()                                                                                  \
     private:                                                                                            \
         template<class __type__>                                                                        \
-        void __build__(                                                                                 \
+        void __build(                                                                                   \
             __type__ const & impl,                                                                      \
-            mixc::dumb_place_holder::place_holder<__COUNTER__ - __start__>) {}                          \
+            mixc::dumb_place_holder::place_holder<__COUNTER__ - __start>) {}                            \
         template<class __type__>                                                                        \
-        inline static void * __func_list__[__COUNTER__ - __start__ - 1];                                \
+        inline static void * __func_list__[__COUNTER__ - __start - 1];                                  \
     }
 
 #endif
