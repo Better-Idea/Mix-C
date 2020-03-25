@@ -10,7 +10,7 @@
 
     namespace mixc::dumb_mirror{
         template<uxx count>
-        xgc(mirror, xtmpl(count))
+        xgc(mirror)
             using items_t = u08 [count];
             xgc_fields(
                 xpub(bytes, items_t),

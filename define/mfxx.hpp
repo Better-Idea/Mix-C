@@ -14,15 +14,7 @@
             uxx     decimal_bits, 
             uxx     exp_bits, 
             uxx     exp_offset>
-        xgc(mfxx, 
-            xtmpl(
-                float_type, 
-                equivalent_type, 
-                decimal_bits, 
-                exp_bits, 
-                exp_offset
-            )
-        )
+        xgc(mfxx)
             using mfxxp = mfxx<
                 float_type, 
                 equivalent_type, 

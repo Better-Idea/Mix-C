@@ -9,7 +9,7 @@
 
     namespace mixc::memory_alloc_callback{
         template<class item>
-        xitf(alloc_callback, xtmpl(item))
+        xitf(alloc_callback)
             xitf_item(operator(), item *,
                 xnt(count, uxx)
             );

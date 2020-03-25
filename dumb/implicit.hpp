@@ -18,7 +18,7 @@ auto function(args const & ... list){
 
     namespace mixc::dumb_implicit{
         template<class a>
-        xgc(implicit, xtmpl(a))
+        xgc(implicit)
             xgc_fields(
                 xpub(value, a),
             );
