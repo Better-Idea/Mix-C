@@ -65,14 +65,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_index_of_first{
-    namespace cur{ using namespace mixc::lang_cxx_index_of_first; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_index_of_first::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         auto index_of_first(
             item                   value, 
@@ -89,4 +86,4 @@ namespace xuser::com::lang_cxx_index_of_first{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_index_of_first
+#define xusing_lang_cxx ::mixc::lang_cxx_index_of_first::xuser

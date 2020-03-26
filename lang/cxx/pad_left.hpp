@@ -34,14 +34,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_pad_left{
-    namespace cur{ using namespace mixc::lang_cxx_pad_left; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_pad_left::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         final pad_left(uxx count, item value, inc::alloc_callback<item> alloc) const {
             return the.pad_left(count, value, alloc);
@@ -50,4 +47,4 @@ namespace xuser::com::lang_cxx_pad_left{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_pad_left
+#define xusing_lang_cxx ::mixc::lang_cxx_pad_left::xuser

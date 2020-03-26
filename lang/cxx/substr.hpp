@@ -58,14 +58,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_substr{
-    namespace cur{ using namespace mixc::lang_cxx_substr; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_substr::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         final substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
             return the.substr(start, end, alloc);
@@ -78,4 +75,4 @@ namespace xuser::com::lang_cxx_substr{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_substr
+#define xusing_lang_cxx ::mixc::lang_cxx_substr::xuser

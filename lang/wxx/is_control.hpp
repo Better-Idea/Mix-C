@@ -32,13 +32,11 @@
     }
 #endif
 
-namespace xuser::com::lang_wxx_is_control{
-    namespace inc { using namespace mixc::lang_wxx_is_control::inc; }
-
+namespace mixc::lang_wxx_is_control::xuser{
     template<class final, class type>
     struct wxx : xusing_lang_wxx::wxx<final, type> {
         using xusing_lang_wxx::wxx<final, type>::wxx;
-        using the_t = mixc::lang_wxx_is_control::core<type>;
+        using the_t = core<type>;
 
         auto is_control() const {
             return the.is_control();
@@ -56,5 +54,5 @@ namespace xuser::com::lang_wxx_is_control{
 }
 
 #undef  xusing_lang_wxx
-#define xusing_lang_wxx xuser::com::lang_wxx_is_control
+#define xusing_lang_wxx ::mixc::lang_wxx_is_control::xuser
 

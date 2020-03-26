@@ -27,7 +27,7 @@
             using the_t = core<item>;
 
             template<class ... args>
-            auto trim_start(item value, args const & ... list) const {
+            the_t trim_start(item value, args const & ... list) const {
                 item             group[sizeof...(args) + 1]; // 包含'\0'
                 auto             may_alloc  = inc::layout_args(group, value, list...);
                 constexpr auto   need_alloc = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
@@ -50,14 +50,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_trim_start{
-    namespace cur{ using namespace mixc::lang_cxx_trim_start; }
-    namespace inc{ using namespace mixc::lang_cxx_trim_start::inc; }
-
+namespace mixc::lang_cxx_trim_start::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = mixc::lang_cxx_trim_start::core<item>;
+        using the_t = core<item>;
 
         template<class ... args>
         final trim_start(item value, args const & ... list) const {
@@ -67,4 +64,4 @@ namespace xuser::com::lang_cxx_trim_start{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_trim_start
+#define xusing_lang_cxx ::mixc::lang_cxx_trim_start::xuser

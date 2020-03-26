@@ -26,16 +26,18 @@
             using the_t = core<item>;
 
             template<class ... args>
-            auto trim_end(item value, args const & ... list) {
+            the_t trim_end(item value, args const & ... list) {
                 item           group[sizeof...(args) + 1];
                 auto           temp       = the;
                 auto           may_alloc  = inc::layout_args(group, value, list...);
                 constexpr auto need_alloc = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
                 auto           token      = the_t(group, sizeof...(args) + 1 - need_alloc);
 
-                temp.length() = temp.index_of_last_miss(
-                    token,
-                    token.length()
+                temp.length(
+                    temp.index_of_last_miss(
+                        token,
+                        token.length()
+                    )
                 );
 
                 if constexpr (not need_alloc){
@@ -52,14 +54,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_trim_end{
-    namespace cur{ using namespace mixc::lang_cxx_trim_end; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_trim_end::xuser{
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         template<class ... args>
         final trim_end(item first, args const & ... list) const {
@@ -69,4 +68,4 @@ namespace xuser::com::lang_cxx_trim_end{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_trim_end
+#define xusing_lang_cxx ::mixc::lang_cxx_trim_end::xuser

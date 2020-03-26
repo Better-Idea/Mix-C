@@ -35,14 +35,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_pad_bends{
-    namespace cur{ using namespace mixc::lang_cxx_pad_bends; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_pad_bends::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         final pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
             return the.pad_bends(left_count, right_count, value, alloc);
@@ -51,4 +48,4 @@ namespace xuser::com::lang_cxx_pad_bends{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_pad_bends
+#define xusing_lang_cxx ::mixc::lang_cxx_pad_bends::xuser

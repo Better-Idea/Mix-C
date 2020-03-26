@@ -76,14 +76,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_index_of_last{
-    namespace cur{ using namespace mixc::lang_cxx_index_of_last; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_index_of_last::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         auto index_of_last(
             item                   value, 
@@ -100,4 +97,4 @@ namespace xuser::com::lang_cxx_index_of_last{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_index_of_last
+#define xusing_lang_cxx ::mixc::lang_cxx_index_of_last::xuser

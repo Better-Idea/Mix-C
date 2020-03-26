@@ -29,14 +29,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_reverse{
-    namespace cur{ using namespace mixc::lang_cxx_reverse; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_reverse::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         final reverse(inc::alloc_callback<item> alloc) const {
             return the.reverse(alloc);
@@ -45,4 +42,4 @@ namespace xuser::com::lang_cxx_reverse{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_reverse
+#define xusing_lang_cxx ::mixc::lang_cxx_reverse::xuser

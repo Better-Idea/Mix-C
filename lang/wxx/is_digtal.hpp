@@ -27,13 +27,11 @@
     }
 #endif
 
-namespace xuser::com::lang_wxx_is_digtal{
-    namespace inc { using namespace mixc::lang_wxx_is_digtal::inc; }
-
+namespace mixc::lang_wxx_is_digtal::xuser{
     template<class final, class type>
     struct wxx : xusing_lang_wxx::wxx<final, type> {
         using xusing_lang_wxx::wxx<final, type>::wxx;
-        using the_t = mixc::lang_wxx_is_digtal::core<type>;
+        using the_t = core<type>;
 
         auto is_digtal() const {
             return the.is_digtal();
@@ -47,4 +45,4 @@ namespace xuser::com::lang_wxx_is_digtal{
 }
 
 #undef  xusing_lang_wxx
-#define xusing_lang_wxx xuser::com::lang_wxx_is_digtal
+#define xusing_lang_wxx ::mixc::lang_wxx_is_digtal::xuser

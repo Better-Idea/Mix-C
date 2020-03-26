@@ -29,13 +29,11 @@
     }
 #endif
 
-namespace xuser::com::lang_wxx_to_lower{
-    namespace inc { using namespace mixc::lang_wxx_to_lower::inc; }
-
+namespace mixc::lang_wxx_to_lower::xuser{
     template<class final, class type>
     struct wxx : xusing_lang_wxx::wxx<final, type> {
         using xusing_lang_wxx::wxx<final, type>::wxx;
-        using the_t = mixc::lang_wxx_to_lower::core<type>;
+        using the_t = core<type>;
 
         final to_lower() const {
             return the.to_lower();
@@ -49,4 +47,4 @@ namespace xuser::com::lang_wxx_to_lower{
 }
 
 #undef  xusing_lang_wxx
-#define xusing_lang_wxx xuser::com::lang_wxx_to_lower
+#define xusing_lang_wxx ::mixc::lang_wxx_to_lower::xuser

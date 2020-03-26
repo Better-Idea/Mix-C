@@ -10,3 +10,4 @@
 #include"lang/wxx/is_whitespace.hpp"
 #include"lang/wxx/to_lower.hpp"
 #include"lang/wxx/to_upper.hpp"
+#include"lang/wxx.hpp"

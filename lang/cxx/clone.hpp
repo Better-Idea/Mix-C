@@ -31,14 +31,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_clone{
-    namespace cur{ using namespace mixc::lang_cxx_clone; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_clone::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         final clone(inc::alloc_callback<item> alloc) const {
             return the.clone(alloc);
@@ -47,4 +44,4 @@ namespace xuser::com::lang_cxx_clone{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_clone
+#define xusing_lang_cxx ::mixc::lang_cxx_clone::xuser

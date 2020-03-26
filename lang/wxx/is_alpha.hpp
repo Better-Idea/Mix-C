@@ -30,19 +30,17 @@
     }
 #endif
 
-namespace xuser::com::lang_wxx_is_alpha{
-    namespace inc { using namespace mixc::lang_wxx_is_alpha::inc; }
-
+namespace mixc::lang_wxx_is_alpha::xuser {
     template<class final, class type>
     struct wxx : xusing_lang_wxx::wxx<final, type> {
         using xusing_lang_wxx::wxx<final, type>::wxx;
-        using the_t = mixc::lang_wxx_is_alpha::core<type>;
+        using the_t = core<type>;
 
-        bool is_alpha() const {
+        auto is_alpha() const {
             return the.is_alpha();
         }
 
-        final & is_alpha(bool * result) const{
+        final & is_alpha(bool * result) const {
             result[0] = the.is_alpha();
             return thex;
         }
@@ -50,4 +48,4 @@ namespace xuser::com::lang_wxx_is_alpha{
 }
 
 #undef  xusing_lang_wxx
-#define xusing_lang_wxx xuser::com::lang_wxx_is_alpha
+#define xusing_lang_wxx ::mixc::lang_wxx_is_alpha::xuser

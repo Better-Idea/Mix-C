@@ -27,13 +27,11 @@
     }
 #endif
 
-namespace xuser::com::lang_wxx_is_upper_hex{
-    namespace inc { using namespace mixc::lang_wxx_is_upper_hex::inc; }
-
+namespace mixc::lang_wxx_is_upper_hex::xuser{
     template<class final, class type>
     struct wxx : xusing_lang_wxx::wxx<final, type> {
         using xusing_lang_wxx::wxx<final, type>::wxx;
-        using the_t = mixc::lang_wxx_is_upper_hex::core<type>;
+        using the_t = core<type>;
 
         auto is_upper_hex() const {
             return the.is_upper_hex();
@@ -47,4 +45,4 @@ namespace xuser::com::lang_wxx_is_upper_hex{
 }
 
 #undef  xusing_lang_wxx
-#define xusing_lang_wxx xuser::com::lang_wxx_is_upper_hex
+#define xusing_lang_wxx ::mixc::lang_wxx_is_upper_hex::xuser

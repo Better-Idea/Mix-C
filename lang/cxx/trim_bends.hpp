@@ -27,7 +27,7 @@
             using the_t = core<item>;
 
             template<class ... args>
-            auto trim_bends(item first, args const & ... list) const {
+            the_t trim_bends(item first, args const & ... list) const {
                 item group[sizeof...(args) + 1]; // 包含'\0'
 
                 auto            may_alloc   = inc::layout_args(group, first, list...);
@@ -42,9 +42,11 @@
                 }
 
                 auto temp   = the.backward(offset);
-                temp.length() = temp.index_of_last_miss(
-                    token,
-                    token.length()
+                temp.length(
+                    temp.index_of_last_miss(
+                        token,
+                        token.length()
+                    )
                 );
 
                 if constexpr (need_alloc){
@@ -56,14 +58,11 @@
     }
 #endif
 
-namespace xuser::com::lang_cxx_trim_bends{
-    namespace cur{ using namespace mixc::lang_cxx_trim_bends; }
-    namespace inc{ using namespace cur::inc; }
-
+namespace mixc::lang_cxx_trim_bends::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = cur::core<item>;
+        using the_t = core<item>;
 
         template<class ... args>
         final trim_bends(item first, args const & ... list) const {
@@ -73,4 +72,4 @@ namespace xuser::com::lang_cxx_trim_bends{
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx xuser::com::lang_cxx_trim_bends
+#define xusing_lang_cxx ::mixc::lang_cxx_trim_bends::xuser

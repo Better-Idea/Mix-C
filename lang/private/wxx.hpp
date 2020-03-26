@@ -17,13 +17,18 @@
             core() = default;
             core(core const &) = default;
             core(type value) : data(value){}
+            operator type & (){
+                return data;
+            }
         xgc_end();
 
         template<class final, class type>
         struct wxx : core<type> {
             using core<type>::core;
+            wxx(core<type> const & self) : 
+                core<type>(self){}
         };
     }
 #endif
 
-#define xusing_lang_wxx     mixc::lang_wxx
+#define xusing_lang_wxx     ::mixc::lang_wxx
