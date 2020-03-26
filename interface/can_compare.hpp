@@ -5,9 +5,10 @@
         #define xuser mixc::interface_can_compare
         #include"define/base_type.hpp"
         #include"macro/xitf.hpp"
+        #include"macro/xcmp.hpp"
         #include"memop/cmp.hpp"
     #pragma pop_macro("xuser")
-
+    
     namespace mixc::interface_can_compare{
         template<class type>
         xitf(can_compare)
@@ -19,14 +20,13 @@
 
         template<class type>
         inline auto const & default_compare = 
-            [](type const & left, type const & right){
+            [] xcmp(type){
                 return inc::cmp<type>(left, right);
             };
     }
-
 #endif
 
 namespace xuser::inc{
-    using mixc::interface_can_compare::can_compare;
-    using mixc::interface_can_compare::default_compare;
+    using ::mixc::interface_can_compare::can_compare;
+    using ::mixc::interface_can_compare::default_compare;
 }
