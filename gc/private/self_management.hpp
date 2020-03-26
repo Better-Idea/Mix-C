@@ -23,5 +23,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::gc_self_management::self_management;
+    using ::mixc::gc_self_management::self_management;
 }

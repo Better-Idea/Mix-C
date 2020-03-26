@@ -136,7 +136,7 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::gc_token::token;
-    using mixc::gc_token::token_plus;
-    using mixc::gc_token::token_mix;
+    using ::mixc::gc_token::token;
+    using ::mixc::gc_token::token_plus;
+    using ::mixc::gc_token::token_mix;
 }

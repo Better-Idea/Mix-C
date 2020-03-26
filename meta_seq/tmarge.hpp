@@ -20,5 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_tmarge::tmarge;
+    using ::mixc::meta_seq_tmarge::tmarge;
 }

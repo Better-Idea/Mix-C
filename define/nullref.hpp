@@ -34,14 +34,14 @@
             }
         xgc_end();
 
-        // #pragma warning(push)
-        // #pragma GCC diagnostic ignored "-Wnull-dereference"
+        #pragma warning(push)
+        #pragma GCC diagnostic ignored "-Wnull-dereference"
         inline const nullref_t & nullref = *(nullref_t *)nullptr;
-        // #pragma warning(pop)
+        #pragma warning(pop)
     }
 
 #endif
 
 namespace xuser::inc{
-    using mixc::define_nullref_t::nullref;
+    using ::mixc::define_nullref_t::nullref;
 }

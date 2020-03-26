@@ -37,5 +37,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_empty_class::is_empty_class;
+    using ::mixc::meta_is_empty_class::is_empty_class;
 }

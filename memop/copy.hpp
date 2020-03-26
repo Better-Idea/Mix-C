@@ -41,6 +41,6 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::memop_copy::copy;
-    using mixc::memop_copy::copy_with_operator;
+    using ::mixc::memop_copy::copy;
+    using ::mixc::memop_copy::copy_with_operator;
 }

@@ -24,5 +24,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_ptr::is_ptr;
+    using ::mixc::meta_is_ptr::is_ptr;
 }

@@ -34,5 +34,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_function::function;
+    using ::mixc::meta_function::function;
 }

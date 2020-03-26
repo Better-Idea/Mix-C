@@ -31,5 +31,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_has_cast::has_cast;
+    using ::mixc::meta_has_cast::has_cast;
 }

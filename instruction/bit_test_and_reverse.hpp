@@ -25,5 +25,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::instruction_bit_test_and_reverse::bit_test_and_reverse;
+    using ::mixc::instruction_bit_test_and_reverse::bit_test_and_reverse;
 }

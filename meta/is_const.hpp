@@ -24,5 +24,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_const::is_const;
+    using ::mixc::meta_is_const::is_const;
 }

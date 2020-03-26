@@ -40,5 +40,5 @@ auto function(args const & ... list){
 #endif
 
 namespace xuser::inc{
-    using mixc::dumb_implicit::implicit;
+    using ::mixc::dumb_implicit::implicit;
 }

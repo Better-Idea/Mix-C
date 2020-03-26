@@ -25,5 +25,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_float::is_float;
+    using ::mixc::meta_is_float::is_float;
 }

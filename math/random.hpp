@@ -74,5 +74,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::math_random::random;
+    using ::mixc::math_random::random;
 }

@@ -14,5 +14,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_tselector_val::tselector_val;
+    using ::mixc::meta_seq_tselector_val::tselector_val;
 }

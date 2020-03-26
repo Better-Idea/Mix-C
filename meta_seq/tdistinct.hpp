@@ -47,5 +47,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_tdistinct::tdistinct;
+    using ::mixc::meta_seq_tdistinct::tdistinct;
 }

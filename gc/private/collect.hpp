@@ -65,5 +65,5 @@ search_list 期初是一个只有根类型 root 的集合。
 #endif
 
 namespace xuser::inc{
-    using mixc::gc_collect::collect;
+    using ::mixc::gc_collect::collect;
 }

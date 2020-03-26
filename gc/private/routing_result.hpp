@@ -46,5 +46,5 @@ A : 一般是不能的，大多数 cpu 体系结构会按通用寄存器位宽�
 #endif
 
 namespace xuser::inc{
-    using mixc::gc_routing_result::routing_result;
+    using ::mixc::gc_routing_result::routing_result;
 }

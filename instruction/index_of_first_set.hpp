@@ -38,5 +38,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::instruction_index_of_first_set::index_of_first_set;
+    using ::mixc::instruction_index_of_first_set::index_of_first_set;
 }

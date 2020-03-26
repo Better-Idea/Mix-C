@@ -72,9 +72,9 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::memory_alloctor::alloc;
-    using mixc::memory_alloctor::alloc_with_initial;
-    using mixc::memory_alloctor::free;
-    using mixc::memory_alloctor::free_with_destroy;
-    using mixc::memory_alloctor::memory_size;
+    using ::mixc::memory_alloctor::alloc;
+    using ::mixc::memory_alloctor::alloc_with_initial;
+    using ::mixc::memory_alloctor::free;
+    using ::mixc::memory_alloctor::free_with_destroy;
+    using ::mixc::memory_alloctor::memory_size;
 }

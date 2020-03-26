@@ -99,5 +99,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::gc_routing::routing;
+    using ::mixc::gc_routing::routing;
 }

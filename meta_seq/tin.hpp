@@ -33,5 +33,5 @@
 
 namespace xuser::inc{
     template<class tlist, class item>
-    constexpr bool tin = mixc::meta_seq_tin::inner::meta<item>(tlist());
+    constexpr bool tin = ::mixc::meta_seq_tin::inner::meta<item>(tlist());
 }

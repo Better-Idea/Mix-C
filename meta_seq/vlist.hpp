@@ -18,5 +18,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_vlist::vlist;
+    using ::mixc::meta_seq_vlist::vlist;
 }

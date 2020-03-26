@@ -20,5 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_tappend::tappend;
+    using ::mixc::meta_seq_tappend::tappend;
 }

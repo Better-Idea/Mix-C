@@ -113,9 +113,9 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::length;
-    using mixc::ini;
-    using mixc::ini_now;
-    using mixc::not_exist;
-    using mixc::magic_number;
+    using ::mixc::length;
+    using ::mixc::ini;
+    using ::mixc::ini_now;
+    using ::mixc::not_exist;
+    using ::mixc::magic_number;
 }

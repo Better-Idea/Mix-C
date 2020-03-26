@@ -27,5 +27,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_tdistinct_append::tdistinct_append;
+    using ::mixc::meta_seq_tdistinct_append::tdistinct_append;
 }

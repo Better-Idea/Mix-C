@@ -44,5 +44,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_tdistinct_marge::tdistinct_marge;
+    using ::mixc::meta_seq_tdistinct_marge::tdistinct_marge;
 }

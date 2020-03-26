@@ -17,18 +17,28 @@
         };
 
         template<class ret_t, class object, class ... args>
-        struct remove_membership<ret_t (object::*)(args...)>{
+        struct remove_membership<ret_t (object::*)(args...) const>{
             using result = ret_t (*)(args...);
+        };
+
+        template<class ret_t, class object, class ... args>
+        struct remove_membership<ret_t (object::* const)(args...)>{
+            using result = ret_t (* const)(args...);
         };
 
         template<class ret_t, class ... args>
         struct remove_membership<ret_t (*)(args...)>{
             using result = ret_t (*)(args...);
         };
+
+        template<class ret_t, class ... args>
+        struct remove_membership<ret_t (* const)(args...)>{
+            using result = ret_t (* const)(args...);
+        };
     }
 
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_remove_membership::remove_membership;
+    using ::mixc::meta_remove_membership::remove_membership;
 }

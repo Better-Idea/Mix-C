@@ -122,5 +122,5 @@ tuple<foo::member_list> xx;
 #endif
 
 namespace xuser::inc{
-    using mixc::gc_tuple::tuple;
+    using ::mixc::gc_tuple::tuple;
 }

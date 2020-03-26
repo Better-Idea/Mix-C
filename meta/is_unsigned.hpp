@@ -34,5 +34,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_unsigned::is_unsigned;
+    using ::mixc::meta_is_unsigned::is_unsigned;
 }

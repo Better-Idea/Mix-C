@@ -21,5 +21,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_integer::is_integer;
+    using ::mixc::meta_is_integer::is_integer;
 }

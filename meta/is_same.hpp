@@ -24,5 +24,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_same::is_same;
+    using ::mixc::meta_is_same::is_same;
 }

@@ -30,5 +30,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::dumb_mirror::mirror;
+    using ::mixc::dumb_mirror::mirror;
 }

@@ -36,6 +36,6 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::math_limit::max;
-    using mixc::math_limit::min;
+    using ::mixc::math_limit::max;
+    using ::mixc::math_limit::min;
 }

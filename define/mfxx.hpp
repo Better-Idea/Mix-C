@@ -65,8 +65,8 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::define_mfxx::mf32;
-    using mixc::define_mfxx::mf64;
-    using mixc::define_mfxx::inf_pos;
-    using mixc::define_mfxx::inf_neg;
+    using ::mixc::define_mfxx::mf32;
+    using ::mixc::define_mfxx::mf64;
+    using ::mixc::define_mfxx::inf_pos;
+    using ::mixc::define_mfxx::inf_neg;
 }

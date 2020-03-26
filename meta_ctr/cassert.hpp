@@ -22,5 +22,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_ctr_cassert::cassert;
+    using ::mixc::meta_ctr_cassert::cassert;
 }

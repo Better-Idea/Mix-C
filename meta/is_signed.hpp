@@ -34,6 +34,6 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_signed::is_signed;
+    using ::mixc::meta_is_signed::is_signed;
 }
 

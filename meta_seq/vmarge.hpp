@@ -20,5 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_seq_vmarge::vmarge;
+    using ::mixc::meta_seq_vmarge::vmarge;
 }

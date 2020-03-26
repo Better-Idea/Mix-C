@@ -30,5 +30,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::memop_base_seqlize::base_seqlize;
+    using ::mixc::memop_base_seqlize::base_seqlize;
 }

@@ -14,5 +14,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::meta_is_union::is_union;
+    using ::mixc::meta_is_union::is_union;
 }

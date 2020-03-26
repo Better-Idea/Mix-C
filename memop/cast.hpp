@@ -17,5 +17,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::memop_cast::cast;
+    using ::mixc::memop_cast::cast;
 }

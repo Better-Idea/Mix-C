@@ -20,5 +20,5 @@
 #endif
 
 namespace xuser::inc{
-    using mixc::memop_addressof::addressof;
+    using ::mixc::memop_addressof::addressof;
 }
