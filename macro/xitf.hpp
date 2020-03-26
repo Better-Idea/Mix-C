@@ -60,8 +60,35 @@ int main(){
         #include"macro/xlist+.hpp"
         #include"macro/xvaargs.hpp"
         #include"memop/addressof.hpp"
-        #include"memop/cast.hpp"
     #pragma pop_macro("xuser")
+
+    namespace mixc::macro_xitf{
+        template<class ret, class ... args>
+        struct signature{
+            #define xgen(...)                                                           \
+                template<class object>                                                  \
+                static auto check(ret (object::* this_call)(args...) __VA_ARGS__){      \
+                    union {                                                             \
+                        void *              result;                                     \
+                        decltype(this_call) mem;                                        \
+                    };                                                                  \
+                    mem = this_call;                                                    \
+                    return result;                                                      \
+                }
+            xgen()
+            xgen(const)
+            #undef xgen
+
+            static auto call(void * self, void * this_call, args ... list){
+                union {
+                    ret (* result)(void *, args...);
+                    void * mem;
+                };
+                mem = this_call;
+                return result(self, list...);
+            }
+        };
+    }
 
     #define xitf(name,...)                                                                              \
     struct name{                                                                                        \
@@ -79,17 +106,16 @@ int main(){
 
     #define __xitf_item__(index,name,ret,...)                                                           \
         ret name(xlist_args(__VA_ARGS__)) const {                                                       \
-            union {                                                                                     \
-                void * __func;                                                                          \
-                ret (* __this_call) (xlist_args(xnt(__this, void *), __VA_ARGS__));                     \
-            };                                                                                          \
-            __func = __func_list[index];                                                                \
-            return __this_call(xlist_name(xnt(__object, void *),__VA_ARGS__));                          \
+            return mixc::macro_xitf::signature<xlist_type(xnt(__ret, ret), __VA_ARGS__)>::call(         \
+                __object,                                                                               \
+                xlist_name(xnt(__func_list[index], void *), __VA_ARGS__)                                \
+            );                                                                                          \
         }                                                                                               \
     private:                                                                                            \
         template<class __type__>                                                                        \
         void __build(__type__ const & impl, mixc::dumb_place_holder::place_holder<index>){              \
-            __func_list[index] = mixc::memop_cast::cast<void *>(& __type__::name);                      \
+            __func_list[index] = mixc::macro_xitf::signature                                            \
+                <xlist_type(xnt(__ret, ret), __VA_ARGS__)>::check(& __type__::name);                    \
             __build(impl, mixc::dumb_place_holder::place_holder<index + 1>());                          \
         }                                                                                               \
     public:
