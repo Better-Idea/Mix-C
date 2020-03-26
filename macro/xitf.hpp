@@ -79,7 +79,7 @@ int main(){
             xgen(const)
             #undef xgen
 
-            static auto call(void * self, void * this_call, args ... list){
+            static ret call(void * self, void * this_call, args ... list){
                 union {
                     ret (* result)(void *, args...);
                     void * mem;
