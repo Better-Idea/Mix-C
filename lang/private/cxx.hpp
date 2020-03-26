@@ -22,7 +22,7 @@
                 ptr((item *)ptr), count(count) {
             }
 
-            core(mixc::static_string_holder<item> holder){
+            core(inc::static_string_holder<item> holder){
                 ptr = holder.ptr();
                 count = holder.length();
             }
@@ -34,6 +34,7 @@
         struct cxx : core<item> {
             using core<item>::core;
             using the_t = core<item>;
+            cxx(core<item> const & self) : core<item>(self){}
 
             auto & operator [](uxx index) const {
                 return core<item>::ptr[index];
@@ -47,26 +48,26 @@
                 return core<item>::ptr;
             }
 
-            final backward(uxx value) const {
-                auto tmp = the;
+            auto backward(uxx value) const {
+                auto tmp = thex;
                 tmp.ptr += value;
                 tmp.count -= uxx(value);
                 return tmp;
             }
 
-            final forward(uxx value) const {
+            auto forward(uxx value) const {
                 return backward(
                     uxx(-ixx(value))
                 );
             }
 
-            final shorten(uxx count) const {
-                auto tmp = the;
+            auto shorten(uxx count) const {
+                auto tmp = thex;
                 tmp.count -= count;
                 return tmp;
             }
 
-            final elongate(uxx count) const {
+            auto elongate(uxx count) const {
                 return shorten(
                     uxx(-ixx(count))
                 );
@@ -75,10 +76,26 @@
             auto length() const {
                 return core<item>::count;
             }
+
+            auto & length(uxx value) {
+                core<item>::count = value;
+                return thex;
+            }
+
+            auto & length(uxx * result) const {
+                result[0] = length();
+                return thex;
+            }
         };
     }
 
-    #define xc08(str)      xsv(char, "\0\0\0\0\0\0\0\0", str)
+    #ifdef xos64
+        #define xc08(str)      xsv(char, "0123456789abcdef", str)
+    #endif
+
+    #ifdef xos32
+        #define xc08(str)      xsv(char, "01234567", str)
+    #endif
 #endif
 
-#define xusing_lang_cxx     mixc::lang_cxx
+#define xusing_lang_cxx     ::mixc::lang_cxx
