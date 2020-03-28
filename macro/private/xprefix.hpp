@@ -8,18 +8,15 @@
 #define __xprefix_
 #define __xprefix_first_base_
 #define __xprefix_first_base_tmpl__(...)                      
-#define __xprefix_first_base_pub__(...)                 public      __VA_ARGS__
-#define __xprefix_first_base_pro__(...)                 protected   __VA_ARGS__
-#define __xprefix_first_base_pri__(...)                 private     __VA_ARGS__
+#define __xprefix_first_base_pub__(...)                 : public      __VA_ARGS__
+#define __xprefix_first_base_pro__(...)                 : protected   __VA_ARGS__
+#define __xprefix_first_base_pri__(...)                 : private     __VA_ARGS__
 
 #define __xprefix_base_
 #define __xprefix_base_tmpl__(...)                      
 #define __xprefix_base_pub__(...)                       , public      __VA_ARGS__
 #define __xprefix_base_pro__(...)                       , protected   __VA_ARGS__
 #define __xprefix_base_pri__(...)                       , private     __VA_ARGS__
-
-#define __link(a,b)                                     a ## b
-#define __link2(a,b)                                    __link(a,b)
 
 #define __xprefix_first_member_
 #define __xprefix_first_member_tmpl__(...)
