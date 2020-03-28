@@ -5,6 +5,7 @@
         #define xuser mixc::memory_alloctor
         #include"define/base_type.hpp"
         #include"macro/xdebug.hpp"
+        #include"memory/new.hpp"
         #include<malloc.h>
     #pragma pop_macro("xuser")
 
