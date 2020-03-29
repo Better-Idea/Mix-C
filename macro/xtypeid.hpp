@@ -15,15 +15,16 @@
 
         template<class type>
         union __typeid {
-            using r0 = typename remove_const<type>::result;
-            using r1 = typename remove_ref<r0>::result;
+            using the_type = typename remove_ref<
+                typename remove_const<type>::result
+            >::result;
 
             union{
                 operator asciis() const {
-                    #define xgen(type)      else if constexpr (is_same<r1, type>){ return # type; }
+                    #define xgen(type)      else if constexpr (is_same<the_type, type>){ return # type; }
 
-                    if constexpr (is_class<r1>){
-                        return type::__self_name__;
+                    if constexpr (is_class<the_type>){
+                        return the_type::__self_name;
                     }
                     xgen(char)
                     xgen(u08)
@@ -38,16 +39,49 @@
                     xgen(f64)
                     xgen(asciis)
                     else{
-                        return "base_type";
+                        return "wait implement";
                     }
 
                     #undef  xgen
                 }
 
-                auto operator ()(){
+                auto operator ()() const {
                     return operator asciis();
                 }
             }name;
+
+            union{
+                operator uxx () const {
+                    #define xgen(type)      else if constexpr (is_same<the_type, type>){ return __COUNTER__ - __start; }
+                    enum { __start = __COUNTER__ + 1 };
+
+                    if constexpr (is_class<the_type>){
+                        return the_type::__class_id;
+                    }
+                    
+                    xgen(char)
+                    xgen(u08)
+                    xgen(u16)
+                    xgen(u32)
+                    xgen(u64)
+                    xgen(i08)
+                    xgen(i16)
+                    xgen(i32)
+                    xgen(i64)
+                    xgen(f32)
+                    xgen(f64)
+                    xgen(asciis)
+                    else{
+                        return not_exist;
+                    }
+
+                    #undef  xgen
+                }
+
+                auto operator ()() const {
+                    return operator uxx();
+                }
+            } class_id;
         };
     }
 
