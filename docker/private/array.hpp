@@ -35,12 +35,16 @@
             using core<type, count, rest...>::core;
             using the_t = core<type, count, rest...>;
 
-            auto & operator[] (uxx index) const {
+            auto & operator[] (uxx index) {
                 return the_t::data[index];
             }
 
-            constexpr static uxx length() {
-                return the_t::count;
+            const auto & operator[] (uxx index) const {
+                return the_t::data[index];
+            }
+
+            constexpr uxx length() const {
+                return count;
             }
         };
     }
