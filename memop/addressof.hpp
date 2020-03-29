@@ -7,13 +7,13 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::memop_addressof{
-        template<class a> 
-        inline a * addressof(a const & value){
+        template<class type> 
+        inline type * addressof(type const & value){
             struct inner{
-                inner(a const & value) : value(value){ }
-                a const & value;
+                inner(type const & value) : value(value){ }
+                type const & value;
             } got(value);
-            return (*(a **)& got);
+            return (*(type **)& got);
         }
     }
 

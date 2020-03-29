@@ -17,7 +17,7 @@
         
         template<class target, class source>
         inline void fill(target * a, source const & value, uxx count) {
-            using mp = inc::mirror<sizeof(target)> *;
+            using mp = inc::mirror<target> *;
             fill_with_operator(mp(a), value, count);
         }
     }

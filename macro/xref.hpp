@@ -5,5 +5,14 @@
         #define xuser mixc::macro_xref
         #include"memop/addressof.hpp"
     #pragma pop_macro("xuser")
-    #define xref ::mixc::memop_addressof::sugar_addressof() *
+
+    namespace mixc::macro_xref{
+        struct sugar{
+            template<class type>
+            auto * operator * (type const & value){
+                return inc::addressof(value);
+            }
+        };
+    }
+    #define xref ::mixc::macro_xref::sugar() *
 #endif

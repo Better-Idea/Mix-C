@@ -5,13 +5,14 @@
         #define xuser mixc::memop_copy
         #include"define/base_type.hpp"
         #include"dumb/mirror.hpp"
+        #include"macro/xref.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::memop_copy{
         template<class a, class b>
         inline void copy(a * des, b const & src){
-            using m = inc::mirror<sizeof(a)>;
-            ((m *)des)[0] = m(src);
+            using mp = inc::mirror<a> *;
+            *mp(des) = *mp(xref src);
         }
 
         template<class a>
@@ -33,7 +34,7 @@
 
         template<class a>
         inline void copy(a * target, a const * source, uxx count) {
-            using mp = inc::mirror<sizeof(a)> *;
+            using mp = inc::mirror<a> *;
             copy_with_operator(mp(target), mp(source), count);
         }
     }
