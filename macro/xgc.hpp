@@ -31,10 +31,12 @@
                 return set();
             }
         }
+
+        inline u32 __class_id = u32(-1) >> 1;
     }
 
-    #define xgc(name,...)                                                               \
-    struct name __xlist__(first_base_,base_,__VA_ARGS__) {                              \
+    #define xgcx(name,tmpl,...)                                                         \
+    struct name __xprefix_keep_tmpl_ ## tmpl __xlist__(first_base_,base_,__VA_ARGS__) { \
     private:                                                                            \
         using __self__ = name;                                                          \
         using __expand_member_list__ =                                                  \
@@ -44,8 +46,11 @@
                 >()                                                                     \
             );                                                                          \
         template<class __type__> friend union mixc::macro_xtypeid::__typeid;            \
-        static constexpr const char * __self_name__ = # name;                           \
+        static constexpr const char * __self_name = # name;                             \
+        static inline u32             __class_id = ++mixc::macro_xgc::__class_id;       \
     public:
+
+    #define xgc(name,...)  xgcx(name,,__VA_ARGS__)
 
     #define xgc_fields(...)                                                             \
         __xlist__(field_,field_,__VA_ARGS__);                                           \
