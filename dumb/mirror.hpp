@@ -4,27 +4,28 @@
         #undef  xuser
         #define xuser mixc::dumb_mirror
         #include"define/base_type.hpp"
-        #include"memop/cast.hpp"
-        #include"macro/xgc.hpp"
+        #include"macro/xref.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::dumb_mirror{
-        template<uxx count>
-        xgc(mirror)
-            using items_t = u08 [count];
-            xgc_fields(
-                xpub(bytes, items_t),
-            );
-
-            static constexpr uxx length = count;
+        template<class type>
+        struct mirror{
+            using items_t = u08 [sizeof(type)];
+            items_t bytes;
 
             mirror(): bytes{0}{}
-
-            template<class a>
-            mirror(a const & value){
-                this[0] = inc::cast<mirror<length>>(value);
+            mirror(type const & value){
+                this[0] = *(mirror<type> *)(xref value);
             }
-        xgc_end();
+
+            operator type & (){
+                return *(type *)bytes;
+            }
+
+            constexpr uxx length() const {
+                return sizeof(type);
+            }
+        };
     }
 
 #endif
