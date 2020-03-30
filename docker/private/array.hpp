@@ -34,12 +34,13 @@
         struct array : core<type, count, rest...> {
             using core<type, count, rest...>::core;
             using the_t = core<type, count, rest...>;
+            using typename the_t::item;
 
-            auto & operator[] (uxx index) {
+            item & operator[] (uxx index) {
                 return the_t::data[index];
             }
 
-            const auto & operator[] (uxx index) const {
+            const item & operator[] (uxx index) const {
                 return the_t::data[index];
             }
 
