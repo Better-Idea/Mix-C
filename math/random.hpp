@@ -25,12 +25,12 @@
             inline u64 random() {
                 constexpr u64 change_period = 0x3f;
 
-                if ((y & change_period) == 0){
-                    y += inc::time_stamp();
+                if ((x & change_period) == 0){
+                    x += inc::time_stamp();
                 }
 
-                x += inc::ring_shift_left(x, y);
-                y += inc::ring_shift_left(y, x);
+                x += inc::ring_shift_left(y, x);
+                y += inc::ring_shift_left(x, y);
                 return y;
             }
         }
@@ -42,7 +42,7 @@
                 union {
                     u64 u;
                     f32 candidate[2];
-                } v ;
+                } v;
 
                 while(true){
                     if (v.u = inner::random(); v.candidate[0] != inc::nan){
@@ -57,7 +57,7 @@
                 union {
                     u64 u;
                     f64 candidate;
-                } v ;
+                } v;
 
                 while(true){
                     if (v.u = inner::random(); v.candidate != inc::nan){
