@@ -94,6 +94,7 @@
             static uxx match(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
+                uxx                            start, 
                 uxx                            length, 
                 inc::can_compare<item_t>       compare = inc::default_compare<item_t>) {
                 return match_template(seq, length, value, start, compare).match;
