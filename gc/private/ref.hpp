@@ -97,9 +97,6 @@
                 return mem;
             }
 
-            auto & operator [] (uxx index) const{
-                return mem[0][index];
-            }
 
             auto & operator = (self const & value){
                 if (value.mem){ 
@@ -109,6 +106,15 @@
                     atom_swap(& mem, value.mem)
                 ).~meta();
                 return this[0];
+            }
+
+        protected:
+            auto & operator [] (uxx index) const{
+                return mem[0][index];
+            }
+
+            uxx length() const {
+                return mem->this_length();
             }
         private:
             token_mix_t * mem;
