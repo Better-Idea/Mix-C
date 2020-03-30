@@ -1,3 +1,7 @@
+/*
+二分查找 API —— binary_search
+*/
+
 #ifndef xpack_algo_binary_search
 #define xpack_algo_binary_search
     #pragma push_macro("xuser")
@@ -76,6 +80,7 @@
                 return result;
             }
         public:
+            // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
             static auto match(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -83,6 +88,7 @@
                 return match_template(seq, seq.length(), value, 0, compare).match;
             }
 
+            // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
             static uxx match(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -91,6 +97,7 @@
                 return match_template(seq, seq.length(), value, start, compare).match;
             }
 
+            // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
             static uxx match(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -100,6 +107,7 @@
                 return match_template(seq, length, value, start, compare).match;
             }
 
+            // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
             static uxx match_up(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -107,6 +115,7 @@
                 return match_up(seq, value, 0, seq.length(), compare);
             }
 
+            // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
             static uxx match_up(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -115,6 +124,7 @@
                 return match_up(seq, value, start, seq.length(), compare);
             }
 
+            // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
             static uxx match_up(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -125,6 +135,7 @@
                 return result.match == not_exist ? result.less_then_target : result.match;
             }
 
+            // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
             static uxx match_down(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -132,6 +143,7 @@
                 return match_down(seq, value, 0, seq.length(), compare);
             }
 
+            // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
             static uxx match_down(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
@@ -140,6 +152,7 @@
                 return match_down(seq, value, start, seq.length(), compare);
             }
 
+            // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
             static uxx match_down(
                 inc::can_random_access<item_t> seq,
                 item_t const &                 value, 
