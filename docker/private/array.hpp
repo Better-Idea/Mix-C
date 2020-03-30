@@ -21,7 +21,7 @@
 
             template<class ... args>
             core(args const & ... list) : 
-                data { list... } {}
+                data { item(list)... } {}
         xgc_end();
 
         template<class type>
