@@ -18,5 +18,7 @@
 #endif
 
 namespace xuser::inc{
-    using ::mixc::meta_unsigned_type::unsigned_type;
+    template<class type>
+    using unsigned_type = 
+        typename ::mixc::meta_unsigned_type::unsigned_type<sizeof(type)>::result;
 }
