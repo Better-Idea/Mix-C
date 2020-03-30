@@ -15,7 +15,7 @@
             uxx     exp_bits, 
             uxx     exp_offset>
         xgc(mfxx)
-            using mfxxp = mfxx<
+            using the_t = mfxx<
                 float_type, 
                 equivalent_type, 
                 decimal_bits, 
@@ -33,7 +33,11 @@
 
                 struct {
                     operator ixx () const {
-                        return ixx(mfxxp(this)->exp) - exp_offset;
+                        return ixx(the.exp) - exp_offset;
+                    }
+
+                    void operator = (ixx value) const {
+                        the.exp = value + exp_offset;
                     }
                 } real_exp;
             };
@@ -46,11 +50,11 @@
             constexpr mfxx(equivalent_type sign, equivalent_type exp, equivalent_type decimal) : 
                 sign(sign), exp(exp), decimal(decimal) {}
 
-            operator float_type () const {
+            operator float_type & () {
                 return value;
             }
 
-            operator float_type & () const {
+            operator const float_type & () const {
                 return value;
             }
         xgc_end();
