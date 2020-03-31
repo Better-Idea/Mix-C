@@ -20,9 +20,9 @@
 
 #define __xprefix_first_member_
 #define __xprefix_first_member_tmpl__(...)
-#define __xprefix_first_member_pub__(...)              __VA_ARGS__
-#define __xprefix_first_member_pro__(...)              __VA_ARGS__
-#define __xprefix_first_member_pri__(...)              __VA_ARGS__
+#define __xprefix_first_member_pub__(...)               __VA_ARGS__
+#define __xprefix_first_member_pro__(...)               __VA_ARGS__
+#define __xprefix_first_member_pri__(...)               __VA_ARGS__
 
 #define __xprefix_member_
 #define __xprefix_member_tmpl__(...)
@@ -36,9 +36,9 @@
 #define __xprefix_field_pri__(name,...)                 private:    __VA_ARGS__ name;
 
 #define __xprefix_first_member_list_
-#define __xprefix_first_member_list_pub__(name,...)    & __self__::name
-#define __xprefix_first_member_list_pro__(name,...)    & __self__::name
-#define __xprefix_first_member_list_pri__(name,...)    & __self__::name
+#define __xprefix_first_member_list_pub__(name,...)     & __self__::name
+#define __xprefix_first_member_list_pro__(name,...)     & __self__::name
+#define __xprefix_first_member_list_pri__(name,...)     & __self__::name
 
 #define __xprefix_member_list_
 #define __xprefix_member_list_pub__(name,...)           , & __self__::name
