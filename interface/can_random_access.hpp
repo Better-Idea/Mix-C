@@ -21,4 +21,5 @@
 
 namespace xuser::inc{
     using ::mixc::interface_can_random_access::can_random_access;
+    using namespace ::mixc::macro_private_callable;
 }
