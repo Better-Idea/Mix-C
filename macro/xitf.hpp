@@ -59,6 +59,7 @@ int main(){
         #include"macro/private/xprefix.hpp"
         #include"macro/xlist+.hpp"
         #include"macro/xvaargs.hpp"
+        #include"macro/private/callable.hpp"
         #include"memop/addressof.hpp"
     #pragma pop_macro("xuser")
 
@@ -91,12 +92,13 @@ int main(){
     }
 
     #define xitf(name,...)                                                                              \
-    struct name{                                                                                        \
+    struct name __xprefix_keep_tmpl_ ## __VA_ARGS__  : ::mixc::macro_private_callable::callable_t {     \
     private:                                                                                            \
-        void  *   __object;                                                                             \
-        void  **  __func_list;                                                                          \
         enum { __start = __COUNTER__ + 1, };                                                            \
     public:                                                                                             \
+        using base::operator=;                                                                          \
+        using base::operator==;                                                                         \
+        using base::operator!=;                                                                         \
         template<class __type__>                                                                        \
         name(__type__ const & impl) {                                                                   \
             __func_list = __func_list__<__type__>;                                                      \
@@ -134,3 +136,7 @@ int main(){
     }
 
 #endif
+
+namespace xuser::inner{
+    using namespace ::mixc::macro_private_callable;
+}
