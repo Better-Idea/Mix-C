@@ -8,7 +8,7 @@
 
     namespace mixc::lock_atom_fetch_sub{
         template<class a>
-        inline a lock_atom_fetch_sub(a * left, a right){
+        inline a atom_fetch_sub(a * left, a right){
             return __atomic_fetch_sub(left, right, 5);
         }
     }
