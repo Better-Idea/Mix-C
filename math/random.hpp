@@ -65,6 +65,9 @@
                     }
                 }
             }
+            else if constexpr(inc::is_same<type, bool>){
+                return inner::random() % 2 == 0;
+            }
             else{
                 return type(inner::random());
             }
