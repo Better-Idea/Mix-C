@@ -8,6 +8,7 @@
         #include"macro/xgc.hpp"
         #include"macro/xref.hpp"
         #include"memop/copy.hpp"
+        #include"memory/new.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_transmitter{
@@ -35,6 +36,11 @@
                 if (not is_none_v){
                     ((type &)data).~type();
                 }
+            }
+
+            void operator=(type const & value) {
+                this->~transmitter();
+                new (this) transmitter(value);
             }
 
             bool is_none() const {
