@@ -10,8 +10,8 @@
     namespace mixc::docker_array{
         template<class type, uxx count = 0, uxx ... rest>
         xgc(core)
-            using self  = core<type, count, rest...>;
-            using item  = typename core<type, rest...>::self;
+            using the_t = core<type, count, rest...>;
+            using item  = typename core<type, rest...>::the_t;
             using itemp = item *;
             using items = item[count];
 
@@ -22,31 +22,29 @@
             template<class ... args>
             core(args const & ... list) : 
                 data { item(list)... } {}
-        xgc_end();
-
-        template<class type>
-        struct core<type>{
-            using self = type;
-            using item = self;
-        };
-
-        template<class final, class type, uxx count, uxx ... rest>
-        struct array : core<type, count, rest...> {
-            using core<type, count, rest...>::core;
-            using the_t = core<type, count, rest...>;
-            using typename the_t::item;
-
+            
             item & operator[] (uxx index) {
-                return the_t::data[index];
+                return data[index];
             }
 
             const item & operator[] (uxx index) const {
-                return the_t::data[index];
+                return data[index];
             }
 
             constexpr uxx length() const {
                 return count;
             }
+        xgc_end();
+
+        template<class type>
+        struct core<type>{
+            using the_t = type;
+        };
+
+        template<class final, class type, uxx count, uxx ... rest>
+        struct array : core<type, count, rest...> {
+            using the_t = core<type, count, rest...>;
+            using the_t::the_t;
         };
     }
 #endif
