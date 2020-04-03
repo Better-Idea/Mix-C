@@ -15,27 +15,34 @@
         xgc(transmitter)
             xgc_fields(
                 xpri(data, inc::mirror<type>),
-                xpri(is_none, mutable bool)
+                xpri(is_none_v, mutable bool)
             );
+
+            transmitter() : 
+                is_none_v(true) {}
 
             transmitter(type const & value){
                 inc::copy(xref data, value);
-                is_none = false;
+                is_none_v = false;
             }
 
             transmitter(transmitter<type> const & value) {
                 inc::copy(xref data, value.data);
-                value.is_none = true;
+                value.is_none_v = true;
             }
 
             ~transmitter(){
-                if (not is_none){
+                if (not is_none_v){
                     ((type &)data).~type();
                 }
             }
 
+            bool is_none() const {
+                return is_none_v;
+            }
+
             operator type & (){
-                is_none = true;
+                is_none_v = true;
                 return data;
             }
         xgc_end();
