@@ -4,6 +4,8 @@
         #undef  xuser
         #define xuser mixc::gc_ref
         #include"define/base_type.hpp"
+        #include"dumb/dummy_t.hpp"
+        #include"dumb/struct_t.hpp"
         #include"gc/private/make_guide.hpp"
         #include"gc/private/routing_result.hpp"
         #include"gc/private/self_management.hpp"
@@ -18,7 +20,6 @@
         #include"meta_ctr/cif.hpp"
         #include"meta_seq/tlist.hpp"
         #include"meta_seq/vlist.hpp"
-        #include"dumb/dummy_t.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::gc_ref{
@@ -28,12 +29,12 @@
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
         struct meta : self_management {
-            using self        = meta<impl, item, attribute, is_array>;
+            using the_t       = meta<impl, item, attribute, is_array>;
             using the_length  = typename cif<is_array, token_plus, token>::result;
             using token_mix_t = token_mix<item, attribute, the_length>;
 
             // TO BE CONTINUE ========================================================================================
-            using member_list = vlist<(attribute self::*)0>;
+            using member_list = vlist<(attribute the_t::*)0>;
 
             meta() : mem(nullptr) { }
 
@@ -46,8 +47,7 @@
                 }
             }
 
-
-            meta(self const & value){
+            meta(the_t const & value){
                 if (mem = value.mem; mem != nullptr) {
                     mem->owners_inc();
                 }
@@ -68,7 +68,7 @@
                 }
 
                 xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
-                auto & old = cast<self>(tmp);
+                auto & old = cast<the_t>(tmp);
 
                 if constexpr (not need_gc){
                     if (cnt == 0){
@@ -88,7 +88,7 @@
                 }
             }
 
-            operator item & () const{
+            operator attribute & () const{
                 return mem[0];
             }
 
@@ -96,18 +96,18 @@
                 return mem;
             }
 
-            auto & operator = (self const & value){
+            auto & operator = (the_t const & value){
                 if (value.mem){ 
                     value->owners_inc();
                 }
-                cast<self>(
+                cast<the_t>(
                     atom_swap(& mem, value.mem)
                 ).~meta();
                 return this[0];
             }
 
-            friend bool operator == (self const & value, decltype(nullptr)){
-            return value.mem == nullptr;
+            friend bool operator == (the_t const & value, decltype(nullptr)){
+                return value.mem == nullptr;
             }
 
         protected:
@@ -125,7 +125,7 @@
 
             template<class guide> bool routing_entry(guide gui){
                 using tuplep = tuple<attribute, typename attribute::member_list> *;
-                attribute *         ptr = mem; // lis convert
+                attribute *    ptr = mem; // lis convert
                 routing_result r;
                 mem->set_visit();
                 mem->set_can_arrive_root();
@@ -247,9 +247,16 @@
 #endif
 
 namespace xuser::inc{
-    template<class impl, class item>
-    using ref_ptr = mixc::gc_ref::meta<impl, mixc::gc_ref::dummy_t, item, false>;
+    template<class impl, class type>
+    using ref_ptr = 
+        mixc::gc_ref::meta<
+            impl, 
+            mixc::gc_ref::dummy_t, 
+            mixc::gc_ref::inc::struct_t<type>, 
+            false
+        >;
 
     template<class impl, class item, class attribute = mixc::gc_ref::dummy_t>
-    using ref_array = mixc::gc_ref::meta<impl, item, attribute, true>;
+    using ref_array = 
+        mixc::gc_ref::meta<impl, item, attribute, true>;
 }

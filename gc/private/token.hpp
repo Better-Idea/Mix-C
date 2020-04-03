@@ -5,7 +5,6 @@
         #define xuser mixc::gc_token
         #include"define/base_type.hpp"
         #include"dumb/dummy_t.hpp"
-        #include"dumb/struct_t.hpp"
         #include"lock/atom_add.hpp"
         #include"lock/atom_and.hpp"
         #include"lock/atom_or.hpp"
@@ -108,10 +107,10 @@
         };
 
         template<class type, class attribute = inc::dummy_t, class addition = token>
-        struct token_mix : addition, inc::struct_t<attribute> {
+        struct token_mix : addition, attribute {
             template<class ... args>
             token_mix(uxx length, args const ... list) : 
-                addition(length), inc::struct_t<attribute>(list...) {}
+                addition(length), attribute(list...) {}
         private:
             ~token_mix() {
                 xdebug(im_gc_$token_mix, xtypeid(attribute).name);
