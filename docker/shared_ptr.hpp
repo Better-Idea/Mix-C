@@ -15,6 +15,8 @@
             using meta = inc::ref_ptr<shared_ptr<type>, type>;
             using the_t = shared_ptr<type>;
 
+            shared_ptr() = default;
+
             explicit shared_ptr(inc::ini) : 
                 meta(inc::length(0)) {}
 
@@ -22,7 +24,6 @@
             explicit shared_ptr(inc::ini, args const & ... list) : 
                 meta(inc::length(0), list...) {}
 
-            shared_ptr() = default;
 
             template<class ... args>
             shared_ptr<type> & operator()(ini, args const & ... list){
@@ -30,6 +31,15 @@
                 the.~meta();
                 new (metap(this)) meta(inc::length(0), list...);
                 return the;
+            }
+
+            operator type & () const {
+                return meta::attr();
+            }
+
+            type const & operator= (type const & value){
+                operator type & () = value;
+                return value;
             }
         xgc_end();
     }
