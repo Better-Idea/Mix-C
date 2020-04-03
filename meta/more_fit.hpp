@@ -4,27 +4,33 @@
         #undef  xuser
         #define xuser mixc::meta_more_fit
         #include"define/base_type.hpp"
+        #include"dumb/mirror.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_more_fit{
         template<uxx count, class source, class ... target> struct meta;
         template<uxx count, class source, class first, class ... target>
         struct meta<count, source, first, target...> : meta<count, source, target...>{
-            static constexpr uxx index(first){
-                return count - sizeof...(target) - 1;
+            static auto test(first){
+                struct inner { u08 mem[count - sizeof...(target)]; };
+                return inner();
             }
-            using meta<count, source, target...>::index;
+            using meta<count, source, target...>::test;
         };
 
         template<uxx count, class source>
         struct meta<count, source>{
-            static constexpr uxx index(...){
-                return not_exist;
+            static constexpr u08 test(...){
+                return u08();
             }
         };
 
         template<class source, class first, class ... target>
-        constexpr uxx more_fit = meta<1 + sizeof...(target), source, first, target...>::index(source());
+        constexpr uxx more_fit = sizeof(
+            decltype(
+                meta<1 + sizeof...(target), source, first, target...>::test(*(source *)nullptr)
+            )
+        ) - 1;
     }
 
 #endif
