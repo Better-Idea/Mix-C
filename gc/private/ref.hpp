@@ -88,29 +88,44 @@
                 }
             }
 
-            operator attribute & () const{
-                return mem[0];
-            }
-
             auto operator -> () const{
                 return mem;
             }
 
-            auto & operator = (the_t const & value){
+            impl & operator = (the_t const & value){
                 if (value.mem){ 
                     value->owners_inc();
                 }
                 cast<the_t>(
                     atom_swap(& mem, value.mem)
                 ).~meta();
-                return this[0];
+                return (impl &)this[0];
             }
 
             friend bool operator == (the_t const & value, decltype(nullptr)){
                 return value.mem == nullptr;
             }
 
+            friend bool operator == (decltype(nullptr), the_t const & value){
+                return value.mem == nullptr;
+            }
+
+            friend bool operator != (the_t const & value, decltype(nullptr)){
+                return value.mem != nullptr;
+            }
+
+            friend bool operator != (decltype(nullptr), the_t const & value){
+                return value.mem != nullptr;
+            }
+
+            friend bool operator == (the_t const & left, the_t const & right){
+                return left.mem == right.mem;
+            }
         protected:
+            attribute & attr () const{
+                return mem[0];
+            }
+
             auto & operator [] (uxx index) const{
                 return mem[0][index];
             }
