@@ -10,15 +10,15 @@
 
     namespace mixc::algo_hash{
         inline uxx core(voidp mem, uxx blocks, uxx rest){
-            uxxp ptr  = uxxp(mem);
-            uxx  r    = 0;
-            uxx  mask = rest * 8/*bit*/ - 1;
-            rest      = ptr[blocks] & mask;
+            constexpr uxx ax = magic_number * ((uxx(1) << 31) - 1);
+            uxxp ptr  = (uxxp)mem;
+            uxx  mask = (uxx(1) << (rest * 8)) - 1;
+            uxx  val  = (ptr[blocks] & mask);
+            uxx  r    = (val + ax);
 
             for(auto i = 0; i <= blocks; i++){
                 auto plus = i == blocks ? rest : ptr[i];
-                r        += plus;
-                r         = inc::ring_shift_left(r, plus);
+                r        += inc::ring_shift_left(plus, r);
             }
             return r;
         }
