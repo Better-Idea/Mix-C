@@ -23,10 +23,9 @@
 
     namespace mixc::gc_ref{
         using namespace inc;
-        constexpr bool can_release          = true;
+        constexpr bool releaseable = true;
 
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
-
         template<class impl, class item, class attribute, bool is_array>
         struct meta : self_management {
             using self        = meta<impl, item, attribute, is_array>;
@@ -68,7 +67,7 @@
                     cnt = tmp->owners_dec();
                 }
 
-                xdebug(im_inner_gc_$meta, "%s | routing ref:%llu root:%p\n", xtypeid(attribute).name(), cnt, tmp);
+                xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
                 auto & old = cast<self>(tmp);
 
                 if constexpr (not need_gc){
@@ -79,7 +78,7 @@
                 else if (old->in_free()){
                     return;
                 }
-                else if (old.routing_entry(gui) == can_release){
+                else if (old.routing_entry(gui) == releaseable){
                     old.clear_footmark(gui);
                     old->set_in_free();
                     old.free();
@@ -97,7 +96,6 @@
                 return mem;
             }
 
-
             auto & operator = (self const & value){
                 if (value.mem){ 
                     value->owners_inc();
@@ -106,6 +104,10 @@
                     atom_swap(& mem, value.mem)
                 ).~meta();
                 return this[0];
+            }
+
+            friend bool operator == (self const & value, decltype(nullptr)){
+            return value.mem == nullptr;
             }
 
         protected:
@@ -132,14 +134,14 @@
                     r.degree_dvalue += mem->owners();
                 }
 
-                xdebug(im_inner_gc_meta_routing_entry, "%s | routing io:%lld\n", 
-                    xtypeid(attribute).name(), 
+                xdebug(im_gc_meta_routing_entry, 
+                    xtypeid(attribute).name, 
                     r.degree_dvalue
                 );
 
-                auto result = r.degree_dvalue <= 0 ? can_release : not can_release;
+                auto result = r.degree_dvalue <= 0 ? releaseable : not releaseable;
 
-                if (result != can_release){
+                if (result != releaseable){
                     mem->reset_can_arrive_root();
                 }
                 return result;
@@ -153,13 +155,14 @@
                     return { 0 }; // no way
                 }
 
-                xdebug(im_inner_gc_meta_routing, "%s | routing visited:%llu can:%llu ref:%llu mem:%p\n", 
-                    xtypeid(attribute).name(), 
-                    uxx(mem->visited()), 
-                    uxx(mem->can_arrive_root()), 
-                    mem->owners(), 
+                xdebug(im_gc_meta_routing, 
+                    xtypeid(attribute).name,
+                    mem->visited(),
+                    mem->can_arrive_root(),
+                    mem->owners(),
                     mem
                 );
+
                 if (not mem->visited()){
                     if (r = subrouting(gui); r.can_arrive_root){
                         r.degree_dvalue += mem->owners();
@@ -171,8 +174,8 @@
                 }
                 else{
                     mem->owners_dec(); // no way (maybe, but not absolutely)
-                    xdebug(im_inner_gc_meta_routing, "%s | routing ref:%llu\n", 
-                        xtypeid(attribute).name(), 
+                    xdebug(im_gc_meta_routing,
+                        xtypeid(attribute).name, 
                         mem->owners()
                     );
                     return { 0 };
@@ -193,11 +196,11 @@
 
             template<class guide> void clear_footmark(guide gui){
                 using tuplep = tuple<attribute, typename attribute::member_list> *;
-                xdebug(im_inner_gc_meta_clear_footmark, "%s | clear   visited:%llu can:%llu ref:%llu mem:%p\n", 
-                    xtypeid(attribute).name(), 
-                    uxx(mem->visited()), 
-                    uxx(mem->can_arrive_root()), 
-                    mem->owners(), 
+                xdebug(im_gc_meta_clear_footmark,
+                    xtypeid(attribute).name, 
+                    mem->visited(), 
+                    mem->can_arrive_root(),
+                    mem->owners(),
                     mem
                 );
                 if (mem->visited()){
@@ -208,8 +211,8 @@
                 }
                 else if (mem->can_arrive_root()){
                     mem->owners_inc();
-                    xdebug(im_inner_gc_meta_clear_footmark, "%s | clear ref:%llu\n", 
-                        xtypeid(attribute).name(), 
+                    xdebug(im_gc_meta_clear_footmark,
+                        xtypeid(attribute).name, 
                         mem->owners()
                     );
                 }

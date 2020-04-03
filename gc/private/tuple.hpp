@@ -53,27 +53,23 @@ tuple<foo::member_list> xx;
         union tuple<root_t, vlist<first, values...>>{
         private:
             tuple<root_t, vlist<values...>> next;
+            using origin = typename remove_membership<decltype(first)>::result;
         public:
             // 重点 ======================================================================================
             // 因为在 GC 路由时的状态依赖于路径，所以需要保证 routing 和 clear_footmark 的路由路径是一致的
             // 这里统一先经过 item 在经过 next
             template<class guide>
             routing_result routing(guide gui){
-                using origin = typename remove_membership<decltype(first)>::result;
                 routing_result                  r = { 0 };
 
                 if constexpr (is_class<origin>){
                     if constexpr (is_based_on<self_management, origin>){
                         if constexpr (tin<guide, origin>){
-                            xdebug(im_inner_gc_tuple_routing, "%s | routing\n", xtypeid(origin).name());
+                            xdebug(im_gc_tuple_routing, xtypeid(origin).name);
 
                             if (r = xroot.routing(gui); r.can_arrive_root) {
                                 r.degree_dvalue -= 1; // 如果 item 可以到达根节点，那么该 tuple 就存在 1 条出度
-
-                                xdebug(im_inner_gc_tuple_routing, "%s | routing io:%lld\n", 
-                                    xtypeid(origin).name(), 
-                                    r.degree_dvalue
-                                );
+                                xdebug(im_gc_tuple_routing, xtypeid(origin).name, r.degree_dvalue);
                             }
                         }
                     }
@@ -89,12 +85,10 @@ tuple<foo::member_list> xx;
 
             template<class guide>
             void clear_footmark(guide gui, voidp root){
-                using origin = typename remove_membership<decltype(first)>::result;
-
                 if constexpr (is_class<origin>){
                     if constexpr (is_based_on<self_management, origin>){
                         if constexpr (tin<guide, origin>){
-                            xdebug(im_inner_gc_tuple_clear_footmark, "%s | clear\n", xtypeid(origin).name());
+                            xdebug(im_gc_tuple_clear_footmark, xtypeid(origin).name);
                             xroot.clear_footmark(gui, root);
                         }
                     }

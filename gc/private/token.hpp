@@ -114,7 +114,7 @@
                 addition(length), inc::struct_t<attribute>(list...) {}
         private:
             ~token_mix() {
-                xdebug(im_inner_gc_$token_mix, "%s free\n", xtypeid(attribute).name());
+                xdebug(im_gc_$token_mix, xtypeid(attribute).name);
 
                 for (uxx i = 0; i < addition::this_length(); i++) {
                     (*this)[i].~type();

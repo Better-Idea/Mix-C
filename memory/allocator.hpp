@@ -5,6 +5,7 @@
         #define xuser mixc::memory_alloctor
         #include"define/base_type.hpp"
         #include"macro/xdebug.hpp"
+        #include"macro/xtypeid.hpp"
         #include"memory/new.hpp"
         #include<malloc.h>
     #pragma pop_macro("xuser")
@@ -23,23 +24,21 @@
 
         template<class type, class ... args>
         inline type * alloc_with_initial(args const & ... list){
-            auto ptr = (type *)malloc(sizeof(type));
-            xdebug(im_alloc_with_initial, "alloc mem:%p  size:%llu\n", ptr, u64(sizeof(type)));
-            return new(ptr) type(list...);
+            return alloc_with_initial<type>(memory_size(sizeof(type)), list...);
         }
 
         template<class type, class ... args>
         inline type * alloc_with_initial(memory_size bytes, args const & ... list){
-            auto ptr = (type *)malloc(bytes);
-            xdebug(im_alloc_with_initial, "alloc mem:%p  size:%llu\n", ptr, u64(bytes));
-            return new(ptr) type(list...);
+            auto mem = (type *)malloc(bytes);
+            xdebug(im_alloc_with_initial, xtypeid(type).name, mem, bytes);
+            return new(mem) type(list...);
         }
 
         template<class type>
         inline type * alloc(memory_size bytes){
-            auto ptr = (type *)malloc(bytes);
-            xdebug(im_alloc, "alloc mem:%p  size:%llu\n", ptr, u64(bytes));
-            return ptr;
+            auto mem = (type *)malloc(bytes);
+            xdebug(im_alloc, xtypeid(type).name, mem, bytes);
+            return mem;
         }
 
         template<class type>
@@ -48,26 +47,26 @@
         }
 
         template<class type>
-        inline void free(type * ptr, memory_size bytes){
-            xdebug(im_free, "free  mem:%p  size:%llu\n", ptr, u64(bytes));
-            ::free(ptr);
+        inline void free(type * mem, memory_size bytes){
+            xdebug(im_free, xtypeid(type).name, mem, bytes);
+            ::free(mem);
         }
 
         template<class type>
-        inline void free(type * ptr){
-            free(ptr, memory_size(0));
+        inline void free(type * mem){
+            free(mem, memory_size(sizeof(type)));
         }
 
         template<class type>
-        inline void free_with_destroy(type * ptr, memory_size bytes){
-            xdebug(im_free_with_destroy, "free  mem:%p  size:%llu\n", ptr, u64(bytes));
-            ptr->~type();
-            ::free(ptr);
+        inline void free_with_destroy(type * mem, memory_size bytes){
+            xdebug(im_free_with_destroy, xtypeid(type).name, mem, bytes);
+            mem->~type();
+            ::free(mem);
         }
 
         template<class type>
-        inline void free_with_destroy(type * ptr){
-            free_with_destroy(ptr, memory_size(sizeof(type)));
+        inline void free_with_destroy(type * mem){
+            free_with_destroy(mem, memory_size(sizeof(type)));
         }
     }
 #endif
