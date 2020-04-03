@@ -2,35 +2,50 @@
 #ifdef xenable_debug_print
     #include<stdio.h>
     #include"macro/xtypeid.hpp"
-    #define xdebug(token,...)         if (token) printf(__VA_ARGS__)
+    #include"macro/private/mix.hpp"
+    #define xdebug(token,...)                               \
+    if (token) {                                            \
+        mixc::macro_private_mix::mix::print(                \
+        __debug_id += 1,                                    \
+        __FILE__,                                           \
+        __LINE__,                                           \
+        "func, " #__VA_ARGS__ ",", __func__, __VA_ARGS__);   \
+    }                                                       \
+    if (token)
+
     #define xsw(token,...)            constexpr bool token = { __VA_ARGS__ + 0 };
 
-    #pragma warning(push)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpragmas"
     #pragma GCC diagnostic ignored "-Wmacro-redefined"
+    inline uxx __debug_id;
+
+    #define xon    1
+    xsw(im_docker_hashmap_set       , xon);
 
     // memop/memory.hpp
-    #define true    1
-    xsw(im_alloc_with_initial, true);
-    xsw(im_alloc, true);
-    xsw(im_free, true);
-    xsw(im_free_with_destroy, true);
-    #undef true
+    #define xon    1
+    xsw(im_alloc_with_initial       , xon);
+    xsw(im_alloc                    , xon);
+    xsw(im_free                     , xon);
+    xsw(im_free_with_destroy        , xon);
 
     // gc/private/ref
-    #define true    0
-    xsw(im_inner_gc_$header, true);
-    xsw(im_inner_gc_$meta, true);
-    xsw(im_inner_gc_meta_routing_entry, true);
-    xsw(im_inner_gc_meta_routing, true);
-    xsw(im_inner_gc_meta_clear_footmark, true);
+    #define xon    0
+    xsw(im_gc_$token_mix            , xon);
+    xsw(im_gc_$meta                 , xon);
+    xsw(im_gc_meta_routing_entry    , xon);
+    xsw(im_gc_meta_routing          , xon);
+    xsw(im_gc_meta_clear_footmark   , xon);
 
     // gc/private/tuple
-    #define true    0
-    xsw(im_inner_gc_tuple_routing, true);
-    xsw(im_inner_gc_tuple_clear_footmark, true);
-    #undef true
+    #define xon    0
+    xsw(im_gc_tuple_routing         , xon);
+    xsw(im_gc_tuple_clear_footmark  , xon);
+
+    #undef xon
     #undef xsw
-    #pragma warning(pop)
+    #pragma GCC diagnostic pop
 #else
     #define xdebug(...)
 #endif
