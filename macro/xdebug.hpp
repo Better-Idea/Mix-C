@@ -20,11 +20,13 @@
     #pragma GCC diagnostic ignored "-Wmacro-redefined"
     inline uxx __debug_id;
 
-    #define xon    1
+    #define xon    0
+    xsw(im_docker_hashmap_node_set  , xon);
     xsw(im_docker_hashmap_set       , xon);
+    xsw(im_docker_hashmap_get       , xon);
 
     // memop/memory.hpp
-    #define xon    1
+    #define xon    0
     xsw(im_alloc_with_initial       , xon);
     xsw(im_alloc                    , xon);
     xsw(im_free                     , xon);
@@ -33,7 +35,7 @@
     // gc/private/ref
     #define xon    0
     xsw(im_gc_$token_mix            , xon);
-    xsw(im_gc_$meta                 , xon);
+    xsw(im_gc_$meta                 , 1);
     xsw(im_gc_meta_routing_entry    , xon);
     xsw(im_gc_meta_routing          , xon);
     xsw(im_gc_meta_clear_footmark   , xon);
