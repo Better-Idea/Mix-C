@@ -7,25 +7,23 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_has_cast{
-        namespace inner_has_cast{
-            template<class source, class target>
-            struct meta{
-            private:
-                static u08 test(target){
-                    return true;
-                }
-                static u16 test(...){
-                    return false;
-                }
-            public:
-                static constexpr bool result = sizeof(
-                    decltype(test(*(source *)nullptr))
-                ) == 1;
-            };
-        }
+        template<class source, class target>
+        struct meta{
+        private:
+            static u08 test(target){
+                return true;
+            }
+            static u16 test(...){
+                return false;
+            }
+        public:
+            static constexpr bool result = sizeof(
+                decltype(test(*(source *)nullptr))
+            ) == 1;
+        };
 
         template<class source, class target>
-        constexpr bool has_cast = inner_has_cast::meta<source, target>::result;
+        constexpr bool has_cast = meta<source, target>::result;
     }
 
 #endif
