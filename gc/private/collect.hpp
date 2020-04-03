@@ -18,6 +18,7 @@ search_list 期初是一个只有根类型 root 的集合。
         #include"meta_seq/tdistinct_append.hpp"
         #include"meta_seq/tfilter.hpp"
         #include"meta_seq/tin.hpp"
+        #include"meta_seq/tkv.hpp"
         #include"meta_seq/tlist.hpp"
         #include"meta_seq/tmarge.hpp"
         #include"meta_seq/tpop_by.hpp"
@@ -33,13 +34,14 @@ search_list 期初是一个只有根类型 root 的集合。
         private:
             template<class current_kvlist, class result_list, class first, class ... args>
             static auto invoke(current_kvlist kv, tlist<first, args...> search_list, result_list result){
-                if constexpr(tin<result_list, first>){
+                using pair              = tpop_by<current_kvlist, first, tselector_key>;
+                using item_kvlist       = typename pair::item_list;
+
+                if constexpr(tin<result_list, first> or item_kvlist::length == 0){
                     return invoke(kv, tlist<args...>(), result);
                 }
                 else{
-                    using pair              = tpop_by<current_kvlist, first, tselector_key>;
                     using rest_kvlist       = typename pair::new_list;
-                    using item_kvlist       = typename pair::item_list;
                     using parents_list      = typename tfilter<item_kvlist, tselector_val>::new_list;
                     using new_children_list = typename tmarge<tlist<args...>, parents_list>::new_list;
                     using new_result        = typename tdistinct_append<result_list, first>::new_list;
