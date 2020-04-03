@@ -7,7 +7,6 @@
         #include"interface/can_callback.hpp"
         #include"lock/atom_fetch_add.hpp"
         #include"lock/atom_swap.hpp"
-        #include"macro/xvolatile.hpp"
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
@@ -15,13 +14,6 @@
         using release_callback = inc::can_callback<void()>;
 
         struct queue{
-            static constexpr uxx buffer_size = 1024 * 64;
-            static constexpr uxx mask_index  = buffer_size - 1;
-            static constexpr uxx step        = 1;
-            static inline uxx    end         = 0;
-            static inline uxx    begin       = 0;
-            static inline release_callback release_list[buffer_size];
-
             struct node{
                 release_callback exec;
                 node *           next;
@@ -31,11 +23,18 @@
                 }
             };
 
-            static inline node * first  = inc::alloc_with_initial<node>();
-            static inline node * expand = first;
+            static constexpr uxx              buffer_size = 1024 * 64;
+            static constexpr uxx              mask_index  = buffer_size - 1;
+            static constexpr uxx              step        = 1;
+            static inline    uxx              end         = 0;
+            static inline    uxx              begin       = 0;
+            static inline    node *           first       = inc::alloc_with_initial<node>();
+            static inline    node *           expand      = first;
+            static inline    release_callback release_list[buffer_size];
 
             // 前台多线程 并发/并行 推送
             static void push(release_callback item) {
+                static_assert((mask_index & buffer_size) == 0);
                 auto   index = inc::atom_fetch_add(& end, step) & mask_index;
                 auto & cur   = release_list[index];
 
@@ -54,10 +53,13 @@
 
             // 后台单线程 异步 处理
             static void pop() {
-                if (auto index = begin & mask_index; release_list[index] != nullptr){
+                static_assert((mask_index & buffer_size) == 0);
+                auto current = begin++;
+                auto index   = current & mask_index;
+
+                if (release_list[index] != nullptr){
                     release_list[index]();
                     release_list[index] = nullptr;
-                    begin += 1;
                 }
                 else if (first->exec != nullptr){
                     auto cur = first;
