@@ -22,6 +22,13 @@
             uxx size;
         };
 
+        inline uxx __used_mem;
+
+        inline void * malloc(uxx bytes){
+            __used_mem += bytes;
+            return ::malloc(bytes);
+        }
+
         template<class type, class ... args>
         inline type * alloc_with_initial(args const & ... list){
             return alloc_with_initial<type>(memory_size(sizeof(type)), list...);
@@ -50,6 +57,7 @@
         inline void free(type * mem, memory_size bytes){
             xdebug(im_free, xtypeid(type).name, mem, bytes);
             ::free(mem);
+            __used_mem -= bytes;
         }
 
         template<class type>
@@ -59,14 +67,17 @@
 
         template<class type>
         inline void free_with_destroy(type * mem, memory_size bytes){
-            xdebug(im_free_with_destroy, xtypeid(type).name, mem, bytes);
             mem->~type();
-            ::free(mem);
+            free(mem, bytes);
         }
 
         template<class type>
         inline void free_with_destroy(type * mem){
             free_with_destroy(mem, memory_size(sizeof(type)));
+        }
+
+        inline uxx used_bytes(){
+            return __used_mem;
         }
     }
 #endif
@@ -76,5 +87,6 @@ namespace xuser::inc{
     using ::mixc::memory_alloctor::alloc_with_initial;
     using ::mixc::memory_alloctor::free;
     using ::mixc::memory_alloctor::free_with_destroy;
+    using ::mixc::memory_alloctor::used_bytes;
     using ::mixc::memory_alloctor::memory_size;
 }
