@@ -11,6 +11,7 @@
         #include"macro/xdebug.hpp"
         #include"macro/xgc.hpp"
         #include"macro/xref.hpp"
+        #include"math/align.hpp"
         #include"memop/copy.hpp"
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
@@ -156,7 +157,7 @@
             core() = default;
             core(the_t const &) = delete;
             core(uxx start_capcity) : 
-                lines(start_capcity){
+                lines(inc::align(start_capcity)){
             }
         protected:
             ~core(){
@@ -209,7 +210,7 @@
             }
 
             the_t & resize() {
-                if (lines >= count * multi * 2 and lines != start_capcity){
+                if (lines >= count * multi * 2 and lines > start_capcity){
                     resize(lines / multi);
                 }
                 return the;
