@@ -4,6 +4,8 @@
         #undef  xuser
         #define xuser mixc::gc_ref
         #include"define/base_type.hpp"
+        #include"define/nullref.hpp"
+        #include"docker/hashmap.hpp"
         #include"dumb/dummy_t.hpp"
         #include"dumb/struct_t.hpp"
         #include"gc/private/make_guide.hpp"
@@ -13,38 +15,62 @@
         #include"gc/private/tuple.hpp"
         #include"lock/atom_swap.hpp"
         #include"macro/xdebug.hpp"
+        #include"macro/xgc.hpp"
+        #include"macro/xis_nullptr.hpp"
         #include"memory/allocator.hpp"
         #include"memop/cast.hpp"
-        #include"memop/copy.hpp"
         #include"meta/is_same.hpp"
         #include"meta_ctr/cif.hpp"
         #include"meta_seq/tlist.hpp"
+        #include"meta_seq/tin.hpp"
         #include"meta_seq/vlist.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::gc_ref{
         using namespace inc;
-        constexpr bool releaseable = true;
+        using visited_ptr_t = voidp;
+
+        struct info_t {
+            uxx can_arrive_root : 1;
+            uxx visited         : sizeof(uxx) * 8 - 1;
+
+            info_t(){
+                can_arrive_root = 0;
+                visited         = 0;
+            }
+
+            operator uxx (){
+                return uxxp(this)[0];
+            }
+        };
+
+        inline hashmap<visited_ptr_t, info_t> gc_map;
 
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
-        struct meta : self_management {
+        xgc(meta, xpub(self_management))
             using the_t       = meta<impl, item, attribute, is_array>;
             using the_length  = typename cif<is_array, token_plus, token>::result;
             using token_mix_t = token_mix<item, attribute, the_length>;
-
-            // TO BE CONTINUE ========================================================================================
-            using member_list = vlist<(attribute the_t::*)0>;
+            using member_list = vlist<
+                ((attribute the_t::*)nullptr),
+                ((item the_t::*)nullptr)
+            >;
 
             meta() : mem(nullptr) { }
 
             template<class ... args>
             meta(length length, args const & ... list) {
-                mem = alloc(length, list...);
+                mem = alloc(length);
 
                 for (uxx i = 0; i < length; i++) {
-                    new (mem->ptr(i)) item();
+                    new (mem->ptr(i)) item(list...);
                 }
+            }
+
+            template<class ... args>
+            meta(ini, args const & ... list) {
+                mem = alloc(length(0), list...);
             }
 
             meta(the_t const & value){
@@ -55,36 +81,25 @@
 
             ~meta(){
                 using guide = decltype(make_guide<impl>());
-                constexpr bool      need_gc = not is_same<guide, tlist<>>;
-                token_mix_t *       tmp = nullptr;
-                guide               gui;
-                uxx                 cnt;
-                
+                constexpr bool need_gc = not is_same<guide, tlist<>>;
+                token_mix_t *  tmp = nullptr;
+                guide          gui;
+                uxx            cnt;
+
                 if (tmp = atom_swap(& mem, tmp); tmp == nullptr) { // enter only once
                     return;
                 }
-                else{
-                    cnt = tmp->owners_dec();
-                }
 
-                xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
                 auto & old = cast<the_t>(tmp);
 
                 if constexpr (not need_gc){
-                    if (cnt == 0){
+                    if (cnt = tmp->owners_dec(); cnt == 0){
                         old.free();
                     }
+                    xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
                 }
-                else if (old->in_free()){
-                    return;
-                }
-                else if (old.routing_entry(gui) == releaseable){
-                    old.clear_footmark(gui);
-                    old->set_in_free();
-                    old.free();
-                }
-                else{
-                    old.clear_footmark(gui);
+                else if (old.mem->is_under_free() == false){
+                    old.template routing_entry<guide>();
                 }
             }
 
@@ -102,31 +117,25 @@
                 return (impl &)this[0];
             }
 
-            friend bool operator == (the_t const & value, decltype(nullptr)){
-                return value.mem == nullptr;
+            xis_nullptr(mem == nullptr);
+
+            bool operator == (the_t const & value) const {
+                return mem == value.mem;
             }
 
-            friend bool operator == (decltype(nullptr), the_t const & value){
-                return value.mem == nullptr;
-            }
-
-            friend bool operator != (the_t const & value, decltype(nullptr)){
-                return value.mem != nullptr;
-            }
-
-            friend bool operator != (decltype(nullptr), the_t const & value){
-                return value.mem != nullptr;
-            }
-
-            friend bool operator == (the_t const & left, the_t const & right){
-                return left.mem == right.mem;
+            bool operator != (the_t const & value) const {
+                return mem != value.mem;
             }
         protected:
-            attribute & attr () const{
+            attribute & attr () const {
                 return mem[0];
             }
 
-            auto & operator [] (uxx index) const{
+            item & operator [] (uxx index){
+                return mem[0][index];
+            }
+
+            const item & operator [] (uxx index) const {
                 return mem[0][index];
             }
 
@@ -138,106 +147,91 @@
 
             template<class root_t, class list> friend union mixc::gc_tuple::tuple;
 
-            template<class guide> bool routing_entry(guide gui){
+            template<class guide> void routing_entry(){
                 using tuplep = tuple<attribute, typename attribute::member_list> *;
+
+                if (mem->owners_dec() == 0){
+                    the.free();
+                    return;
+                }
+
                 attribute *    ptr = mem; // lis convert
                 routing_result r;
-                mem->set_visit();
-                mem->set_can_arrive_root();
+                info_t         info;
 
-                if (r = tuplep(ptr)->routing(gui); r.can_arrive_root){
-                    r.degree_dvalue += mem->owners();
-                }
+                info.can_arrive_root = true;
+                gc_map.set(mem, info);
+                r                = tuplep(ptr)->template routing<guide>();
+                r.degree_dvalue += mem->owners();
 
                 xdebug(im_gc_meta_routing_entry, 
                     xtypeid(attribute).name, 
                     r.degree_dvalue
                 );
 
-                auto result = r.degree_dvalue <= 0 ? releaseable : not releaseable;
-
-                if (result != releaseable){
-                    mem->reset_can_arrive_root();
+                if (gc_map.clear(); r.degree_dvalue <= 0){
+                    the.free();
                 }
-                return result;
+                else if constexpr (tin<guide, item>){
+                    using tuplep = tuple<item, typename item::member_list> *;
+
+                    for(uxx i = 0; i < length(); i++){
+                        gc_map.set(mem, info);
+                        r                = tuplep(xref the[i])->template routing<guide>();
+                        r.degree_dvalue += mem->owners();
+
+                        if (gc_map.clear(); r.degree_dvalue <= 0){
+                            the.free();
+                            break;
+                        }
+                    }
+                }
             }
 
-            template<class guide> routing_result
-            routing(guide gui){
-                routing_result r;
+            template<class guide> routing_result routing(){
+                using tuplep = tuple<attribute, typename attribute::member_list> *;
 
                 if (mem == nullptr){
                     return { 0 }; // no way
                 }
+                if (auto & info = gc_map.get(mem); info == nullref){
+                    routing_result r;
+                    attribute *    ptr = mem;
+                    info_t    *    i;
 
-                xdebug(im_gc_meta_routing, 
-                    xtypeid(attribute).name,
-                    mem->visited(),
-                    mem->can_arrive_root(),
-                    mem->owners(),
-                    mem
-                );
+                    xdebug(im_gc_meta_routing, 
+                        mem,
+                        xtypeid(attribute).name,
+                        "not visited"
+                    );
 
-                if (not mem->visited()){
-                    if (r = subrouting(gui); r.can_arrive_root){
-                        r.degree_dvalue += mem->owners();
+                    gc_map.set(mem, info_t(), xref i);
+
+                    if (r = tuplep(ptr)->template routing<guide>(); r.can_arrive_root){
+                        i->can_arrive_root = true;
+                        r.degree_dvalue   += mem->owners() - i->visited;
                     }
                     return r;
                 }
-                if (mem->can_arrive_root()){
+                else if (info.can_arrive_root){
+                    xdebug(im_gc_meta_routing, 
+                        mem,
+                        xtypeid(attribute).name,
+                        info.can_arrive_root,
+                        info.visited
+                    );
                     return { 1 }; // has a way can arrive root
                 }
                 else{
-                    mem->owners_dec(); // no way (maybe, but not absolutely)
-                    xdebug(im_gc_meta_routing,
-                        xtypeid(attribute).name, 
-                        mem->owners()
+                    info.visited += 1;
+                    xdebug(im_gc_meta_routing, 
+                        mem,
+                        xtypeid(attribute).name,
+                        info.can_arrive_root,
+                        info.visited
                     );
                     return { 0 };
                 }
-            }
-
-            template<class guide> routing_result subrouting(guide gui){
-                using tuplep = tuple<attribute, typename attribute::member_list> *;
-                attribute *     ptr = mem; // lis convert
-                routing_result  r;
-                mem->set_visit();
-
-                if (r = tuplep(ptr)->routing(gui); r.can_arrive_root){
-                    mem->set_can_arrive_root();
-                }
-                return r;
-            }
-
-            template<class guide> void clear_footmark(guide gui){
-                using tuplep = tuple<attribute, typename attribute::member_list> *;
-                xdebug(im_gc_meta_clear_footmark,
-                    xtypeid(attribute).name, 
-                    mem->visited(), 
-                    mem->can_arrive_root(),
-                    mem->owners(),
-                    mem
-                );
-                if (mem->visited()){
-                    mem->reset_visit();
-                    attribute * ptr = mem; // lis convert
-                    tuplep(ptr)->clear_footmark(gui, mem);
-                    mem->reset_can_arrive_root();
-                }
-                else if (mem->can_arrive_root()){
-                    mem->owners_inc();
-                    xdebug(im_gc_meta_clear_footmark,
-                        xtypeid(attribute).name, 
-                        mem->owners()
-                    );
-                }
-            }
-
-            template<class guide> void clear_footmark(guide gui, voidp root){
-                if (mem == nullptr){
-                    return;
-                }
-                clear_footmark(gui);
             }
 
             template<class ... args> auto alloc(uxx length, args const & ... list) {
@@ -250,13 +244,14 @@
             }
 
             void free(){
+                mem->mark_under_free();
                 free_with_destroy(mem,
                     memory_size(
                         sizeof(token_mix_t) + mem->this_length() * sizeof(item)
                     )
                 );
             }
-        };
+        xgc_end();
     }
 
 #endif
