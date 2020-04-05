@@ -32,33 +32,50 @@
             }
         }
 
+        template<class type>
+        struct fake{
+            type item;
+
+            template<class ... args>
+            fake(args const & ... list) : item(list...) {}
+        };
+
         inline u32 __class_id = u32(-1) >> 1;
     }
 
     #define xgcx(name,tmpl,...)                                                         \
     struct name __xprefix_keep_tmpl_ ## tmpl __xlist__(first_base_,base_,__VA_ARGS__) { \
     private:                                                                            \
-        using __self__ = name;                                                          \
-        using __expand_member_list__ =                                                  \
+        using __self = name;                                                            \
+        using __expand_member_list =                                                    \
             decltype(                                                                   \
-                mixc::macro_xgc::expand_member_list<                                    \
+                ::mixc::macro_xgc::expand_member_list<                                  \
                     __xlist__(first_member_,member_,__VA_ARGS__)                        \
                 >()                                                                     \
             );                                                                          \
-        template<class __type__> friend union mixc::macro_xtypeid::__typeid;            \
+        template<class __type__> friend union ::mixc::macro_xtypeid::__typeid;          \
         static constexpr const char * __self_name = # name;                             \
-        static inline u32             __class_id = ++mixc::macro_xgc::__class_id;       \
+        static inline auto            __class_id = ++::mixc::macro_xgc::__class_id;     \
     public:
 
     #define xgc(name,...)  xgcx(name,,__VA_ARGS__)
 
     #define xgc_fields(...)                                                             \
-        __xlist__(field_,field_,__VA_ARGS__);                                           \
+    __xlist__(field_,field_,__VA_ARGS__);                                               \
     public:                                                                             \
-        using member_list = typename mixc::meta_seq_vmarge::vmarge<                     \
-            __expand_member_list__,                                                     \
-            mixc::meta_seq_vlist::vlist<                                                \
+        using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                   \
+            __expand_member_list,                                                       \
+            ::mixc::meta_seq_vlist::vlist<                                              \
                 __xlist__(first_member_list_,member_list_,__VA_ARGS__)                  \
+            >                                                                           \
+        >::new_list                                                                     \
+
+    #define xgc_self_management(...)                                                    \
+    public:                                                                             \
+        using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                   \
+            __expand_member_list,                                                       \
+            ::mixc::meta_seq_vlist::vlist<                                              \
+                __xlist__(first_self_management_,self_management_,__VA_ARGS__)          \
             >                                                                           \
         >::new_list                                                                     \
 

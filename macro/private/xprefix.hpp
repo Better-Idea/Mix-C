@@ -36,14 +36,24 @@
 #define __xprefix_field_pri__(name,...)                 private:    __VA_ARGS__ name;
 
 #define __xprefix_first_member_list_
-#define __xprefix_first_member_list_pub__(name,...)     & __self__::name
-#define __xprefix_first_member_list_pro__(name,...)     & __self__::name
-#define __xprefix_first_member_list_pri__(name,...)     & __self__::name
+#define __xprefix_first_member_list_pub__(name,...)     & __self::name
+#define __xprefix_first_member_list_pro__(name,...)     & __self::name
+#define __xprefix_first_member_list_pri__(name,...)     & __self::name
 
 #define __xprefix_member_list_
-#define __xprefix_member_list_pub__(name,...)           , & __self__::name
-#define __xprefix_member_list_pro__(name,...)           , & __self__::name
-#define __xprefix_member_list_pri__(name,...)           , & __self__::name
+#define __xprefix_member_list_pub__(name,...)           , & __self::name
+#define __xprefix_member_list_pro__(name,...)           , & __self::name
+#define __xprefix_member_list_pri__(name,...)           , & __self::name
+
+#define __xprefix_first_self_management_
+#define __xprefix_first_self_management_pub__(...)      & mixc::macro_xgc::fake<__VA_ARGS__>::item
+#define __xprefix_first_self_management_pro__(...)      & mixc::macro_xgc::fake<__VA_ARGS__>::item
+#define __xprefix_first_self_management_pri__(...)      & mixc::macro_xgc::fake<__VA_ARGS__>::item
+
+#define __xprefix_self_management_
+#define __xprefix_self_management_pub__(...)            , & mixc::macro_xgc::fake<__VA_ARGS__>::item
+#define __xprefix_self_management_pro__(...)            , & mixc::macro_xgc::fake<__VA_ARGS__>::item
+#define __xprefix_self_management_pri__(...)            , & mixc::macro_xgc::fake<__VA_ARGS__>::item
 
 #define __xprefix_keep_tmpl_
 #define __xprefix_keep_tmpl_tmpl__(...)                 <__VA_ARGS__>
