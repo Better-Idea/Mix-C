@@ -6,9 +6,8 @@
         #include"define/base_type.hpp"
         #include"dumb/dummy_t.hpp"
         #include"lock/atom_add.hpp"
-        #include"lock/atom_and.hpp"
-        #include"lock/atom_or.hpp"
         #include"lock/atom_sub.hpp"
+        #include"lock/atom_or.hpp"
         #include"macro/xdebug.hpp"
     #pragma pop_macro("xuser")
 
@@ -26,11 +25,9 @@
     }
 
     namespace mixc::gc_token{
-        constexpr uxx  mark_visited         = uxx(1) << (sizeof(uxx) * 8 - 1);
-        constexpr uxx  mark_can_arrive_root = uxx(1) << (sizeof(uxx) * 8 - 2);
-        constexpr uxx  mark_in_free         = uxx(1) << (sizeof(uxx) * 8 - 3);
-        constexpr uxx  mask_owners          = uxx(-1) >> 3;
-        constexpr uxx  step                 = uxx(1);
+        constexpr uxx step              = uxx(1);
+        constexpr uxx mark_under_free   = uxx(1) << (sizeof(uxx) * 8 - 1);
+        constexpr uxx mask_owners       = mark_under_free - 1;
 
         struct token {
             token(uxx length) : record(step) { }
@@ -47,48 +44,20 @@
                 return record & mask_owners;
             }
 
-            bool visited(){
-                return (record & mark_visited) != 0;
-            }
-
-            bool can_arrive_root(){
-                return (record & mark_can_arrive_root) != 0;
-            }
-
-            bool in_free(){
-                return (record & mark_in_free) != 0;
-            }
-            
             uxx owners_inc(){
-                return inc::atom_add(& record, step) & mask_owners;
+                return inc::atom_add(& record, step);
             }
 
             uxx owners_dec(){
-                return inc::atom_sub(& record, step) & mask_owners;
+                return inc::atom_sub(& record, step);
             }
 
-            void set_visit(){
-                inc::atom_or(& record, mark_visited);
+            void mark_under_free(){
+                inc::atom_or(& record, mixc::gc_token::mark_under_free);
             }
 
-            void reset_visit(){
-                inc::atom_and(& record, ~mark_visited);
-            }
-
-            void set_can_arrive_root(){
-                inc::atom_or(& record, mark_can_arrive_root);
-            }
-
-            void reset_can_arrive_root(){
-                inc::atom_and(& record, ~mark_can_arrive_root);
-            }
-
-            void set_in_free(){
-                inc::atom_or(& record, mark_in_free);
-            }
-
-            void reset_in_free(){
-                inc::atom_and(& record, ~mark_in_free);
+            bool is_under_free(){
+                return (record & mixc::gc_token::mark_under_free) != 0;
             }
         };
 
@@ -109,7 +78,7 @@
         template<class type, class attribute = inc::dummy_t, class addition = token>
         struct token_mix : addition, attribute {
             template<class ... args>
-            token_mix(uxx length, args const ... list) : 
+            token_mix(uxx length, args const & ... list) : 
                 addition(length), attribute(list...) {}
         private:
             ~token_mix() {
