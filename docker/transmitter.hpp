@@ -6,6 +6,7 @@
         #include"define/base_type.hpp"
         #include"dumb/mirror.hpp"
         #include"macro/xgc.hpp"
+        #include"macro/xis_nullptr.hpp"
         #include"macro/xref.hpp"
         #include"memop/copy.hpp"
         #include"memory/new.hpp"
@@ -16,24 +17,24 @@
         xgc(transmitter)
             xgc_fields(
                 xpri(data, inc::mirror<type>),
-                xpri(is_none_v, mutable bool)
+                xpri(is_none, mutable bool)
             );
 
             transmitter() : 
-                is_none_v(true) {}
+                is_none(true) {}
 
             transmitter(type const & value){
                 inc::copy(xref data, value);
-                is_none_v = false;
+                is_none = false;
             }
 
             transmitter(transmitter<type> const & value) {
                 inc::copy(xref data, value.data);
-                value.is_none_v = true;
+                value.is_none = true;
             }
 
             ~transmitter(){
-                if (not is_none_v){
+                if (not is_none){
                     ((type &)data).~type();
                 }
             }
@@ -43,14 +44,12 @@
                 new (this) transmitter(value);
             }
 
-            bool is_none() const {
-                return is_none_v;
-            }
-
             operator type & (){
-                is_none_v = true;
+                is_none = true;
                 return data;
             }
+
+            xis_nullptr(is_none == true);
         xgc_end();
     }
 
