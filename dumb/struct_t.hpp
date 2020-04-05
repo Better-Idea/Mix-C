@@ -14,6 +14,9 @@
         xgcx(struct_t, xtmpl(type, true), xpub(type))
             xgc_fields();
             using type::type;
+            struct_t() = default;
+            struct_t(type const & self) : 
+                type(self) {}
         xgc_end();
 
         template<class type>
