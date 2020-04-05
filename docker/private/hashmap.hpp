@@ -8,6 +8,8 @@
         #include"define/nullref.hpp"
         #include"docker/transmitter.hpp"
         #include"dumb/mirror.hpp"
+        #include"gc/private/self_management.hpp"
+        #include"gc/private/routing_result.hpp"
         #include"macro/xdebug.hpp"
         #include"macro/xgc.hpp"
         #include"macro/xref.hpp"
@@ -16,20 +18,41 @@
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
+    namespace mixc::gc_tuple{
+        template<class root_t, class member_list> union tuple;
+    }
+
     namespace mixc::docker_hashmap{
         enum class hashmap_remove_result{
             success,
             item_not_exist,
         };
 
-        template<class key_t, class value_t>
-        xgc(core)
-        private:
-            typedef struct pair{
-                key_t   key;
-                value_t value;
+        enum class hashmap_take_out_result{
+            success,
+            item_not_exist,
+        };
 
-                pair(key_t const & key, value_t const & value) : 
+        enum class hashmap_set_result{
+            success,
+            override,
+        };
+
+        template<class key_t, class val_t>
+        xgc(core, xpub(inc::self_management))
+        private:
+            template<class root_t, class member_list> friend union mixc::gc_tuple::tuple;
+
+            template<class guide> inc::routing_result routing(){
+                return inc::routing_result();
+                // TODO:================================================================
+            }
+
+            typedef struct pair{
+                key_t    key;
+                val_t    value;
+
+                pair(key_t const & key, val_t const & value) : 
                     key(key), value(value){}
             } * pairp;
 
@@ -38,41 +61,53 @@
                 node   * next;
                 uxx      hash_code;
                 u08      mirror[sizeof(pair)];
-                xgc_fields();
+
+                xgc_self_management(
+                    xpub(key_t),
+                    xpub(val_t)
+                );
 
                 node() : next(this) {}
-                node(uxx hash_code, key_t const & key, value_t const & value, bool with_copy_operator) : 
+                node(uxx hash_code, key_t const & key, val_t const & value, bool with_copy_operator) : 
                     next(nullptr), hash_code(hash_code) {
                     if (with_copy_operator){
                         new (mirror) pair(key, value);
                     }
                     else{
                         inc::copy<key_t>(xref the->key, key);
-                        inc::copy<value_t>(xref the->value, value);
+                        inc::copy<val_t>(xref the->value, value);
                     }
                 }
 
+                hashmap_set_result set(
+                    uxx             hash, 
+                    key_t const &   key, 
+                    val_t const &   value, 
+                    val_t **        receive, 
+                    bool            with_copy_operator = true){
 
-                void set(uxx hash, key_t const & key, value_t const & value, bool with_copy_operator = true){
                     // 约定 next == this 表示的是空节点
-                    if (next == this){
+                    if (is_empty()){
                         new (this) node(hash, key, value, with_copy_operator);
-                        return;
+                        receive[0] = xref the->value;
+                        return hashmap_set_result::success;
                     }
 
                     for(auto cur = this; ; cur = cur->next){
                         if (cur->hash_code == hash and cur[0]->key == key){
-                            cur[0]->value = value;
-                            return;
+                            cur[0]->value   = value;
+                            receive[0]      = xref cur[0]->value;
+                            return hashmap_set_result::override;
                         }
                         if (cur->next == nullptr){
-                            cur->next = inc::alloc_with_initial<node>(hash, key, value, with_copy_operator);
-                            return;
+                            cur->next       = inc::alloc_with_initial<node>(hash, key, value, with_copy_operator);
+                            receive[0]      = xref cur[0]->value;
+                            return hashmap_set_result::success;
                         }
                     }
                 }
 
-                value_t & get(uxx hash, key_t const & key) const {
+                val_t & get(uxx hash, key_t const & key) const {
                     if (is_empty() == false){
                         for(auto cur = this; cur != nullptr; cur = cur->next){
                             if (cur->hash_code == hash and cur[0]->key == key){
@@ -126,12 +161,13 @@
                         return;
                     }
                     while(next != nullptr){
-                        auto  temp = next;
-                        pairp(temp->mirror)->~pair();
-                        next = next->next;
+                        auto temp = next;
+                        temp[0]->~pair();
+                        next      = next->next;
                         inc::free(temp);
                     }
-                    pairp(mirror)->~pair();
+                    the->~pair();
+                    the.next = this;
                 }
 
                 bool is_empty() const {
@@ -143,14 +179,18 @@
                 }
             xgc_end();
 
-            using the_t = core<key_t, value_t>;
+            using the_t = core<key_t, val_t>;
 
             static constexpr uxx multi         = 4;
             static constexpr uxx start_capcity = 16;
             uxx    lines                       = start_capcity;
             uxx    count                       = 0;
             node * nodes                       = the_t::alloc(lines);
-            xgc_fields();
+
+            xgc_self_management(
+                xpub(node)
+            );
+        public:
 
             /*构造/析构区*/
         public:
@@ -161,6 +201,9 @@
             }
         protected:
             ~core(){
+                if (nodes == nullptr){
+                    return;
+                }
                 for (uxx i = 0; i < lines; i++){
                     nodes[i].free();
                 }
@@ -169,19 +212,19 @@
 
             /*接口区*/
         public:
-            value_t & get(key_t const & key) const {
+            val_t & get(key_t const & key) const {
                 auto hash  = inc::hash(key);
                 auto index = hash & mask();
                 xdebug(im_docker_hashmap_get, hash, index, key);
                 return nodes[index].get(hash, key);
             }
 
-            inc::transmitter<value_t> take_out(key_t const & key) {
+            inc::transmitter<val_t> take_out(key_t const & key) {
                 inc::transmitter<pair>    mem;
-                inc::transmitter<value_t> r;
+                inc::transmitter<val_t> r;
                 auto a = addressing(key);
                 
-                if (nodes[a.index].take_out(a.hash, key, xref mem); mem.is_none() == false){
+                if (nodes[a.index].take_out(a.hash, key, xref mem); mem != nullptr){
                     pair & p = mem; // 取消 mem 的析构操作，使用手动析构
                     r        = p.value;
                     p.key.~key_t(); // 只析构 key。value 的析构交给 r 托管
@@ -190,7 +233,7 @@
             }
 
             the_t & clear() {
-                ~core();
+                this->~core();
                 new (this) core();
                 return the;
             }
@@ -199,13 +242,11 @@
                 inc::transmitter<pair> mem; // 如果存在 key，则自动析构从 take_out 带出来的 pair
                 auto r = addressing(key);
                 
-                if (nodes[r.index].take_out(r.hash, key, xref mem); state == nullptr){
-                    return the;
+                if (nodes[r.index].take_out(r.hash, key, xref mem); state != nullptr){
+                    state[0] = mem == nullptr ? 
+                        hashmap_remove_result::item_not_exist :
+                        hashmap_remove_result::success;
                 }
-
-                state[0] = mem.is_none() ? 
-                    hashmap_remove_result::item_not_exist :
-                    hashmap_remove_result::success;
                 return the;
             }
 
@@ -216,20 +257,34 @@
                 return the;
             }
 
-            the_t & set(key_t const & key, value_t const & value){
+            the_t & set(
+                key_t const &        key, 
+                val_t const &        value, 
+                val_t **             receive, 
+                hashmap_set_result * state = nullptr){
+
                 if (lines == ++count){
                     resize(lines * multi);
                 }
 
                 auto a = addressing(key);
                 xdebug(im_docker_hashmap_set, a.hash, a.index, key, value);
-                nodes[a.index].set(a.hash, key, value);
+
+                if (auto tmp = nodes[a.index].set(a.hash, key, value, receive); state != nullptr){
+                    state[0] = tmp;
+                }
                 return the;
             }
 
-            the_t & take_out(key_t const & key, value_t * value) {
-                if (auto && r = take_out(key); r.is_none() == false){
-                    value[0] = r;
+            the_t & take_out(key_t const & key, val_t * value, hashmap_take_out_result * state = nullptr) {
+                auto tmp = hashmap_take_out_result::item_not_exist;
+
+                if (auto && r = take_out(key); r != nullptr){
+                    value[0]  = r;
+                    tmp       = hashmap_take_out_result::success;
+                }
+                if (state){
+                    state[0]  = tmp;
                 }
                 return the;
             }
@@ -275,10 +330,12 @@
                         continue;
                     }
 
-                    auto & header = nodes[i];
+                    auto &  header = nodes[i];
+                    val_t * dummy;
+
                     map.nodes[
                         header.hash_code & map.mask()
-                    ].set(header.hash_code, header->key, header->value, false/*屏蔽 key/value 的复制构造和赋值重载*/);
+                    ].set(header.hash_code, header->key, header->value, xref dummy, false/*屏蔽 key/value 的复制构造和赋值重载*/);
 
                     for(auto cur = header.next; cur != nullptr;){
                         auto new_hash   = cur->hash_code & map.mask();
@@ -308,10 +365,11 @@
                 return lines - 1;
             }
 
-            void free() const {
+            void free() {
                 inc::free(nodes, inc::memory_size(
                     lines * sizeof(node)
                 ));
+                nodes = nullptr;
             }
 
             static node * alloc(uxx counts){
@@ -327,9 +385,9 @@
             }
         xgc_end();
 
-        template<class final, class key_t, class value_t>
-        struct hashmap : core<key_t, value_t> {
-            using the_t = core<key_t, value_t>;
+        template<class final, class key_t, class val_t>
+        struct hashmap : core<key_t, val_t> {
+            using the_t = core<key_t, val_t>;
             using the_t::the_t;
 
             final & clear() {
@@ -344,15 +402,40 @@
                 return (final &)the.resize();
             }
 
-            final & set(key_t const & key, value_t const & value) {
-                return (final &)the.set(key, value);
+            final & set(
+                key_t const &        key, 
+                val_t const &        value, 
+                hashmap_set_result * state = nullptr) {
+
+                val_t * receive;
+                return (final &)the.set(key, value, xref receive, state);
             }
 
-            final & take_out(key_t const & key, value_t * value) {
-                return (final &)the.take_out(key, value);
+            final & set(
+                key_t const &        key, 
+                val_t const &        value, 
+                val_t **             receive, 
+                hashmap_set_result * state = nullptr) {
+
+                return (final &)the.set(key, value, receive, state);
+            }
+
+            final & take_out(
+                key_t const &           key, 
+                val_t *                 value, 
+                hashmap_remove_result * state = nullptr) {
+
+                return (final &)the.take_out(key, value, state);
             }
         };
     }
 #endif
 
 #define xusing_docker_hashmap     mixc::docker_hashmap
+
+namespace xuser::inc{
+    using xusing_docker_hashmap::hashmap_remove_result;
+    using xusing_docker_hashmap::hashmap_take_out_result;
+    using xusing_docker_hashmap::hashmap_set_result;
+}
+
