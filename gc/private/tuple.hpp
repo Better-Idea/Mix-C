@@ -55,19 +55,15 @@ tuple<foo::member_list> xx;
             tuple<root_t, vlist<values...>> next;
             using origin = typename remove_membership<decltype(first)>::result;
         public:
-            // 重点 ======================================================================================
-            // 因为在 GC 路由时的状态依赖于路径，所以需要保证 routing 和 clear_footmark 的路由路径是一致的
-            // 这里统一先经过 item 在经过 next
-            template<class guide>
-            routing_result routing(guide gui){
-                routing_result                  r = { 0 };
+            template<class guide> routing_result routing(){
+                routing_result r = { 0 };
 
                 if constexpr (is_class<origin>){
                     if constexpr (is_based_on<self_management, origin>){
                         if constexpr (tin<guide, origin>){
                             xdebug(im_gc_tuple_routing, xtypeid(origin).name);
 
-                            if (r = xroot.routing(gui); r.can_arrive_root) {
+                            if (r = xroot.template routing<guide>(); r.can_arrive_root) {
                                 r.degree_dvalue -= 1; // 如果 item 可以到达根节点，那么该 tuple 就存在 1 条出度
                                 xdebug(im_gc_tuple_routing, xtypeid(origin).name, r.degree_dvalue);
                             }
@@ -75,41 +71,20 @@ tuple<foo::member_list> xx;
                     }
                     else{
                         using member_tuple = tuple<origin, typename origin::member_list>;
-                        r = cast<member_tuple>(xroot).routing(gui);
+                        r = cast<member_tuple>(xroot).template routing<guide>();
                     }
                 }
                 
-                r += next.routing(gui);
+                r += next.template routing<guide>();
                 return r;
-            }
-
-            template<class guide>
-            void clear_footmark(guide gui, voidp root){
-                if constexpr (is_class<origin>){
-                    if constexpr (is_based_on<self_management, origin>){
-                        if constexpr (tin<guide, origin>){
-                            xdebug(im_gc_tuple_clear_footmark, xtypeid(origin).name);
-                            xroot.clear_footmark(gui, root);
-                        }
-                    }
-                    else{
-                        using member_tuple = tuple<root_t, typename origin::member_list>;
-                        cast<member_tuple>(xroot).clear_footmark(gui, root);
-                    }
-                }
-                next.clear_footmark(gui, root);
             }
         };
 
         template<class root_t>
         union tuple<root_t, vlist<>>{
-            template<class guide>
-            inc::routing_result routing(guide){
+            template<class guide> routing_result routing(){
                 return { 0 };
             }
-
-            template<class guide>
-            void clear_footmark(guide, voidp){}
         };
     }
 
