@@ -18,12 +18,11 @@
             shared_ptr() = default;
 
             explicit shared_ptr(inc::ini) : 
-                meta(inc::length(0)) {}
+                meta(inc::ini_now) {}
 
             template<class ... args>
             explicit shared_ptr(inc::ini, args const & ... list) : 
-                meta(inc::length(0), list...) {}
-
+                meta(inc::ini_now, list...) {}
 
             template<class ... args>
             shared_ptr<type> & operator()(ini, args const & ... list){
