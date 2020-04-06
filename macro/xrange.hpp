@@ -62,7 +62,7 @@
                 }
             }
 
-            item & operator[](uxx index){
+            item & operator[](uxx index) {
                 return inc::signature<item &, uxx>::call(& dat, func, index);
             }
 
@@ -73,8 +73,8 @@
 
     }
 
-    #define xrange()                                                                    \
-    mixc::macro_xrange::ranger<uxx> range(ixx start, ixx end = -1) const {              \
+    #define xrange(...)                                                                 \
+    mixc::macro_xrange::ranger<__VA_ARGS__> range(ixx start, ixx end = -1) const {      \
         using namespace mixc::macro_xrange;                                             \
         xindex_rollback(length(), start);                                               \
         xindex_rollback(length(), end);                                                 \
