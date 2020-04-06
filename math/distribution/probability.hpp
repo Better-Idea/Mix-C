@@ -44,7 +44,7 @@ int main(){
         #include"define/base_type.hpp"
         #include"docker/darray.hpp"
         #include"docker/array.hpp"
-        #include"interface/can_random_access.hpp"
+        #include"macro/xrange.hpp"
         #include"math/random.hpp"
         #include"meta/is_same.hpp"
         #include"meta/unsigned_type.hpp"
@@ -64,7 +64,7 @@ int main(){
                 probability(inc::array_view { first, second, list... }){
             }
 
-            probability(inc::can_random_access<type> proportion) : 
+            probability(inc::ranger<type> proportion) : 
                 guide(
                     inc::length(proportion.length())
                 ){
@@ -108,7 +108,7 @@ int main(){
                 return v;
             }
 
-            template<class item> item & random(inc::can_random_access<item> items) const {
+            template<class item> item & random(inc::ranger<item> items) const {
                 return items[random()];
             }
         };

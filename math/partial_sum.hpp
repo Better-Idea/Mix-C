@@ -4,14 +4,14 @@
         #undef  xuser
         #define xuser mixc::math_partial_sum
         #include"define/base_type.hpp"
-        #include"interface/can_random_access.hpp"
+        #include"macro/xrange.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::math_partial_sum{
         template<class item_t>
         inline void partial_sum(
-            inc::can_random_access<item_t> des, 
-            inc::can_random_access<item_t> src){
+            inc::ranger<item_t> des, 
+            inc::ranger<item_t> src){
 
             if (src.length() == 0){
                 return;
@@ -27,7 +27,7 @@
         }
 
         template<class item_t>
-        inline void partial_sum(inc::can_random_access<item_t> des_src){
+        inline void partial_sum(inc::ranger<item_t> des_src){
             partial_sum<item_t>(des_src, des_src);
         }
     }
