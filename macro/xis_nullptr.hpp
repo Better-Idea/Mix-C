@@ -1,7 +1,7 @@
 #pragma once
 
 #define xis_nullptr(...)                                                        \
-bool operator==(decltype(nullptr)){                                             \
+bool operator==(decltype(nullptr)) const {                                      \
     return __VA_ARGS__;                                                         \
 }                                                                               \
 friend bool operator==(decltype(nullptr), __self const & self){                 \
