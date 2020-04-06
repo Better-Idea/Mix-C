@@ -35,17 +35,17 @@
         template<uxx small_page_count, uxx step_exp = 8>
         union page_var{
             using the_t = page_var<small_page_count, step_exp>;
-            static auto alloc(uxx capacity){
-                return inc::alloc_with_initial<the_t>(
-                    inc::memory_size(
-                        size(capacity)
-                    ),
-                    capacity
-                );
-            }
-        protected:
-            page_var(uxx capcity) : 
-                capcity(capcity), bytes(0){}
+        //     static auto alloc(uxx capacity){
+        //         return inc::alloc_with_initial<the_t>(
+        //             inc::memory_size(
+        //                 size(capacity)
+        //             ),
+        //             capacity
+        //         );
+        //     }
+        // protected:
+        //     page_var(uxx capcity) : 
+        //         capcity(capcity), bytes(0){}
 
             static uxx size(uxx capacity){
                 uxx     i     = (inc::index_of_last_set(capacity) + 1);

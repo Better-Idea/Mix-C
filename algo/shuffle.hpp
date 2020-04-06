@@ -4,7 +4,7 @@
         #undef  xuser
         #define xuser mixc::algo_shuffle
         #include"define/base_type.hpp"
-        #include"interface/can_random_access.hpp"
+        #include"macro/xrange.hpp"
         #include"macro/xref.hpp"
         #include"math/random.hpp"
         #include"memop/swap.hpp"
@@ -12,13 +12,13 @@
 
     namespace mixc::algo_shuffle{
         template<class item_t>
-        inline void shuffle(inc::can_random_access<item_t> sequence){
-            for (uxx i = 0, length = sequence.length(); i < length; i++){
+        inline void shuffle(inc::ranger<item_t> range){
+            for (uxx i = 0, length = range.length(); i < length; i++){
                 auto a = inc::random<uxx>() % length;
                 auto b = inc::random<uxx>() % length; // 用两次增强随机性
                 inc::swap(
-                    xref sequence[a],
-                    xref sequence[b]
+                    xref range[a],
+                    xref range[b]
                 );
             }
         }

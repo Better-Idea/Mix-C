@@ -6,31 +6,31 @@
         #include"algo/heap_root.hpp"
         #include"define/base_type.hpp"
         #include"interface/can_compare.hpp"
-        #include"interface/can_random_access.hpp"
         #include"macro/xcmp.hpp"
+        #include"macro/xrange.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_sort{
         template<class item_t>
         struct sort{
             static void des(
-                inc::can_random_access<item_t> sequence,
-                inc::can_compare<item_t>       compare = inc::default_compare<item_t>){
+                inc::ranger<item_t>      range,
+                inc::can_compare<item_t> compare = inc::default_compare<item_t>){
 
-                for(uxx i = 1, length = sequence.length(); i < length; i++) {
-                    inc::heap_root<item_t>::push(sequence, i, sequence[i], compare);
+                for(uxx i = 1, length = range.length(); i < length; i++) {
+                    inc::heap_root<item_t>::push(range, i, range[i], compare);
                 }
 
-                for(uxx i = sequence.length(); --i > 0; ) {
-                    sequence[i] = inc::heap_root<item_t>::pop(sequence, i + 1, sequence[i], compare);
+                for(uxx i = range.length(); --i > 0; ) {
+                    range[i] = inc::heap_root<item_t>::pop(range, i + 1, range[i], compare);
                 }
             }
 
             static void asc(
-                inc::can_random_access<item_t> sequence,
-                inc::can_compare<item_t>       compare = inc::default_compare<item_t>){
+                inc::ranger<item_t>      range,
+                inc::can_compare<item_t> compare = inc::default_compare<item_t>){
 
-                des(sequence, [&]xcmp(item_t){
+                des(range, [&]xcmp(item_t){
                     return compare(right, left);
                 });
             }
