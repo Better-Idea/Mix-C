@@ -61,35 +61,8 @@ int main(){
         #include"macro/xvaargs.hpp"
         #include"macro/private/callable.hpp"
         #include"memop/addressof.hpp"
+        #include"memop/signature.hpp"
     #pragma pop_macro("xuser")
-
-    namespace mixc::macro_xitf{
-        template<class ret, class ... args>
-        struct signature{
-            #define xgen(...)                                                           \
-                template<class object>                                                  \
-                static auto check(ret (object::* this_call)(args...) __VA_ARGS__){      \
-                    union {                                                             \
-                        void *              result;                                     \
-                        decltype(this_call) mem;                                        \
-                    };                                                                  \
-                    mem = this_call;                                                    \
-                    return result;                                                      \
-                }
-            xgen()
-            xgen(const)
-            #undef xgen
-
-            static ret call(void * self, void * this_call, args ... list){
-                union {
-                    ret (* result)(void *, args...);
-                    void * mem;
-                };
-                mem = this_call;
-                return result(self, list...);
-            }
-        };
-    }
 
     #define xitf(name,...)                                                                              \
     struct name __xprefix_keep_tmpl_ ## __VA_ARGS__  : ::mixc::macro_private_callable::callable_t {     \
@@ -98,7 +71,6 @@ int main(){
     public:                                                                                             \
         using base::operator=;                                                                          \
         using base::operator==;                                                                         \
-        using base::operator!=;                                                                         \
         template<class __type__>                                                                        \
         name(__type__ const & impl) {                                                                   \
             __func_list = __func_list__<__type__>;                                                      \
@@ -108,7 +80,7 @@ int main(){
 
     #define __xitf_item__(index,name,ret,...)                                                           \
         ret name(xlist_args(__VA_ARGS__)) const {                                                       \
-            return mixc::macro_xitf::signature<xlist_type(xnt(__ret, ret), __VA_ARGS__)>::call(         \
+            return mixc::memop_signature::signature<xlist_type(xnt(__ret, ret), __VA_ARGS__)>::call(    \
                 __object,                                                                               \
                 xlist_name(xnt(__func_list[index], void *), __VA_ARGS__)                                \
             );                                                                                          \
@@ -116,7 +88,7 @@ int main(){
     private:                                                                                            \
         template<class __type__>                                                                        \
         void __build(__type__ const & impl, mixc::dumb_place_holder::place_holder<index>){              \
-            __func_list[index] = mixc::macro_xitf::signature                                            \
+            __func_list[index] = mixc::memop_signature::signature                                       \
                 <xlist_type(xnt(__ret, ret), __VA_ARGS__)>::check(& __type__::name);                    \
             __build(impl, mixc::dumb_place_holder::place_holder<index + 1>());                          \
         }                                                                                               \
@@ -137,6 +109,6 @@ int main(){
 
 #endif
 
-namespace xuser::inner{
+namespace xuser::inc{
     using namespace ::mixc::macro_private_callable;
 }
