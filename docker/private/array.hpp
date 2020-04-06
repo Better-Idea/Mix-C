@@ -5,6 +5,7 @@
         #define xuser mixc::docker_array
         #include"define/base_type.hpp"
         #include"macro/xgc.hpp"
+        #include"macro/xrange.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_array{
@@ -18,6 +19,7 @@
             xgc_fields(
                 xpro(data, items)
             );
+            xrange(item);
 
             template<class ... args>
             core(args const & ... list) : 

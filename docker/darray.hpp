@@ -6,6 +6,7 @@
         #include"define/base_type.hpp"
         #include"gc/private/ref.hpp"
         #include"macro/xgc.hpp"
+        #include"macro/xrange.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_darray{
@@ -24,6 +25,8 @@
             using the_t  = darray<type, rank>;
             using meta::length;
             using meta::operator[];
+
+            xrange(item);
 
             explicit darray(inc::length length) :
                 meta(length) {}
