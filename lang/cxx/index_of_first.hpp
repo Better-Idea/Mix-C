@@ -10,12 +10,18 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_index_of_first
         #include"define/base_type.hpp"
+        #include"interface/can_callback.hpp"
         #include"interface/can_compare.hpp"
         #include"lang/cxx.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_index_of_first{
+        // using item = char;
+        // template<class item> struct core;
+        // template<>
+        // struct core<item> : inc::cxx<item> {
+
         template<class item>
         struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
@@ -32,34 +38,50 @@
 
             template<class compare_invoke>
             uxx index_of_first(
-                the_t                  substr,
+                the_t                  value,
                 compare_invoke const & compare) const {
 
                 the_t origin = the;
                 uxx  miss   = 0;
                 uxx  index;
 
-                if (origin.length() < substr.length() or substr.length() == 0) {
+                if (origin.length() < value.length() or value.length() == 0) {
                     return not_exist;
                 }
                 while(true){
-                    if (index = origin.index_of_first(substr[miss], compare); index == not_exist){
+                    if (index = origin.index_of_first(value[miss], compare); index == not_exist){
                         break;
                     }
-                    if (origin = origin.backward(index - miss); origin.length() < substr.length()) {
+                    if (origin = origin.backward(index - miss); origin.length() < value.length()) {
                         break;
                     }
                     for (index = 0; ; index++){
-                        if (index == substr.length()) {
+                        if (index == value.length()) {
                             return uxx(origin - the);
                         }
-                        if (compare(origin[index], substr[index]) != 0) {
+                        if (compare(origin[index], value[index]) != 0) {
                             miss = index;
                             break;
                         }
                     }
                 }
                 return not_exist;
+            }
+
+            void index_of_first(
+                the_t                              value, 
+                inc::can_callback<void(uxx index)> match,
+                inc::can_compare<item>             compare) const {
+
+                for(auto cur = the;;){
+                    if (uxx i = cur.index_of_first(value, compare); i == not_exist){
+                        return;
+                    }
+                    else{
+                        cur = cur.backward(i + value.length());
+                        match(i);
+                    }
+                }
             }
         };
     }
@@ -74,15 +96,20 @@ namespace mixc::lang_cxx_index_of_first::xuser {
         uxx index_of_first(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-
             return the.index_of_first(value, compare);
         }
 
         uxx index_of_first(
-            final                  substr, 
+            final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
+            return the.index_of_first(value, compare);
+        }
 
-            return the.index_of_first(substr, compare);
+        void index_of_first(
+            the_t                              value, 
+            inc::can_callback<void(uxx index)> match,
+            inc::can_compare<item>             compare = inc::default_compare<item>) const {
+            the.index_of_first(value, match, compare);
         }
     };
 }

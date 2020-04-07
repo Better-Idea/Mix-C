@@ -10,6 +10,7 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_index_of_last
         #include"define/base_type.hpp"
+        #include"interface/can_callback.hpp"
         #include"interface/can_compare.hpp"
         #include"lang/cxx.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -72,6 +73,22 @@
                 }
                 return not_exist;
             }
+
+            void index_of_last(
+                the_t                              value, 
+                inc::can_callback<void(uxx index)> match,
+                inc::can_compare<item>             compare) const {
+
+                for(auto cur = the;;){
+                    if (uxx i = cur.index_of_last(value, compare); i == not_exist){
+                        return;
+                    }
+                    else{
+                        cur = cur.length(i);
+                        match(i);
+                    }
+                }
+            }
         };
     }
 #endif
@@ -85,15 +102,20 @@ namespace mixc::lang_cxx_index_of_last::xuser {
         uxx index_of_last(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-
             return the.index_of_last(value, compare);
         }
 
         uxx index_of_last(
             final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-
             return the.index_of_last(value, compare);
+        }
+
+        void index_of_last(
+            the_t                              value, 
+            inc::can_callback<void(uxx index)> match,
+            inc::can_compare<item>             compare = inc::default_compare<item>) const {
+            the.index_of_last(value, match, compare);
         }
     };
 }
