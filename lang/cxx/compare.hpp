@@ -45,7 +45,6 @@ namespace mixc::lang_cxx_compare::xuser{
         ixx compare(
             final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-
             return the.compare(value, compare);
         }
     };

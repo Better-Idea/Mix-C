@@ -45,7 +45,6 @@ namespace mixc::lang_cxx_compare_fastly::xuser{
         ixx compare_fastly(
             final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-
             return the.compare_fastly(value, compare);
         }
     };
