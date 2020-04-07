@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto pad_right(uxx count, item value, inc::alloc_callback<item> alloc) const {
+            the_t pad_right(uxx count, item value, inc::alloc_callback<item> alloc) const {
                 uxx             length = the.length() + count;
                 the_t           r = { alloc(length), length };
                 inc::copy<item>(r, the, the.length());

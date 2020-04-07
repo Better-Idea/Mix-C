@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
+            the_t pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
                 uxx             total_length = left_count + right_count + the.length();
                 the_t           r(alloc(total_length), total_length);
                 inc::fill<item>(r, value, left_count);

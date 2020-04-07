@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto insert(ixx index, the_t value, inc::alloc_callback<item> alloc) const {
+            the_t insert(ixx index, the_t value, inc::alloc_callback<item> alloc) const {
                 xindex_rollback(the.length(), index, + 1);
                 uxx             target_length = the.length() + value.length();
                 the_t           r { alloc(target_length), target_length };

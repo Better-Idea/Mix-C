@@ -22,8 +22,8 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
-                if (the.length() == 0) {
+            the_t substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
+                if (the.is_empty()) {
                     return the_t();
                 }
 

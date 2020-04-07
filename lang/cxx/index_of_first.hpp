@@ -21,7 +21,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto index_of_first(item value, inc::can_compare<item> compare) const {
+            uxx index_of_first(item value, inc::can_compare<item> compare) const {
                 for (uxx i = 0; i < the.length(); i++){
                     if (compare(the[i], value) == 0){
                         return i;
@@ -31,8 +31,8 @@
             }
 
             template<class compare_invoke>
-            auto index_of_first(
-                the_t                    substr,
+            uxx index_of_first(
+                the_t                  substr,
                 compare_invoke const & compare) const {
 
                 the_t origin = the;
@@ -71,13 +71,13 @@ namespace mixc::lang_cxx_index_of_first::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        auto index_of_first(
+        uxx index_of_first(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.index_of_first(value, compare);
         }
 
-        auto index_of_first(
+        uxx index_of_first(
             final                  substr, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.index_of_first(substr, compare);

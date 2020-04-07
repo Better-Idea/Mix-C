@@ -23,7 +23,7 @@
             }
 
             core(inc::static_string_holder<item> holder){
-                ptr = holder.ptr();
+                ptr   = holder.ptr();
                 count = holder.length();
             }
         protected:
@@ -36,7 +36,11 @@
             using the_t = core<item>;
             cxx(core<item> const & self) : core<item>(self){}
 
-            auto & operator [](uxx index) const {
+            item & operator [](uxx index) {
+                return core<item>::ptr[index];
+            }
+
+            const item & operator [](uxx index) const {
                 return core<item>::ptr[index];
             }
 
@@ -48,43 +52,49 @@
                 return core<item>::ptr;
             }
 
-            auto backward(uxx value) const {
+            final backward(uxx value) const {
                 auto tmp = thex;
                 tmp.ptr += value;
                 tmp.count -= uxx(value);
                 return tmp;
             }
 
-            auto forward(uxx value) const {
+            final forward(uxx value) const {
                 return backward(
                     uxx(-ixx(value))
                 );
             }
 
-            auto shorten(uxx count) const {
+            final shorten(uxx count) const {
                 auto tmp = thex;
                 tmp.count -= count;
                 return tmp;
             }
 
-            auto elongate(uxx count) const {
+            final elongate(uxx count) const {
                 return shorten(
                     uxx(-ixx(count))
                 );
             }
 
-            auto length() const {
+            /*属性区*/
+        public:
+            uxx length() const {
                 return core<item>::count;
             }
 
-            auto & length(uxx value) {
+            final & length(uxx value) {
                 core<item>::count = value;
                 return thex;
             }
 
-            auto & length(uxx * result) const {
+            final & length(uxx * result) const {
                 result[0] = length();
                 return thex;
+            }
+
+            bool is_empty() const {
+                return length() == 0;
             }
         };
     }

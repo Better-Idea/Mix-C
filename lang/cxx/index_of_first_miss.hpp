@@ -22,7 +22,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto index_of_first_miss(item const * values, uxx count) const {
+            uxx index_of_first_miss(item const * values, uxx count) const {
                 the_t token = { values, count };
 
                 for (uxx i = 0; i < the.length(); i++){
@@ -42,12 +42,12 @@ namespace mixc::lang_cxx_index_of_first_miss::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        auto index_of_first_miss(item const * values, uxx count) const {
+        uxx index_of_first_miss(item const * values, uxx count) const {
             return the.index_of_first_miss(values, count);
         }
 
         template<class ... args>
-        auto index_of_first_miss(item value, args const & ... list) const {
+        uxx index_of_first_miss(item value, args const & ... list) const {
             inc::implicit<item> group[] = { value, list... };
             return index_of_first_miss((item *)group, 1 + sizeof...(args));
         }

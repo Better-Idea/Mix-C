@@ -21,7 +21,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto index_of_last(item value, inc::can_compare<item> compare) const {
+            uxx index_of_last(item value, inc::can_compare<item> compare) const {
                 for (uxx i = the.length(); i--; ){
                     if (compare(the[i], value) == 0){
                         return i;
@@ -31,7 +31,7 @@
             }
 
             template<class compare_invoke>
-            auto index_of_last(
+            uxx index_of_last(
                 the_t                   substr,
                 compare_invoke const & compare) const {
 
@@ -45,8 +45,8 @@
                 // substr        "34"
                 the_t origin = the;
                 the_t temp   = the;
-                uxx miss   = 0;
-                uxx index;
+                uxx   miss   = 0;
+                uxx   index;
 
                 if (origin.length() < substr.length() or substr.length() == 0) {
                     return not_exist;
@@ -82,13 +82,13 @@ namespace mixc::lang_cxx_index_of_last::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        auto index_of_last(
+        uxx index_of_last(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.index_of_last(value, compare);
         }
 
-        auto index_of_last(
+        uxx index_of_last(
             final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.index_of_last(value, compare);
