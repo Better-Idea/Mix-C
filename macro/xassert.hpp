@@ -10,12 +10,12 @@ namespace mixc::macro_xassert{
 
         result(asciis name, uxx error_threshold = 128) : 
             error_threshold(error_threshold){
-            printf("TEST  | %-24s", name);
+            printf(" TEST | %-24s", name);
         }
 
         ~result(){
             if (error_count == 0){
-                printf(" [PASS | CASE:%u]\n", case_count);
+                printf(" [PASS | CASE:%-9u]\n", case_count);
             }
             else{
                 putchar('\n');
@@ -45,7 +45,7 @@ if (([&](){                                                                     
     }                                                                                               \
 })())
 
-#define xassert_equals(the_wanted,...)                                                              \
+#define xassert_eq(the_wanted,...)                                                                  \
 if (auto const & wanted = (the_wanted), & actually = (__VA_ARGS__); false) {}                       \
 else xassert(wanted == actually, wanted, actually)
 
