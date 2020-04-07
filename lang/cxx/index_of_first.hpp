@@ -74,12 +74,14 @@ namespace mixc::lang_cxx_index_of_first::xuser {
         uxx index_of_first(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
+
             return the.index_of_first(value, compare);
         }
 
         uxx index_of_first(
             final                  substr, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
+
             return the.index_of_first(substr, compare);
         }
     };

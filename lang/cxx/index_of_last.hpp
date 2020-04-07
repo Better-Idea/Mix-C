@@ -32,7 +32,7 @@
 
             template<class compare_invoke>
             uxx index_of_last(
-                the_t                   substr,
+                the_t                  substr,
                 compare_invoke const & compare) const {
 
                 // miss 为未匹配项的索引
@@ -56,7 +56,7 @@
                         break;
                     }
 
-                    origin.length() = index - miss;
+                    origin.length(index - miss);
                     temp          = origin.backward(origin.length());
                     origin        = origin.elongate(1);
                     
@@ -85,12 +85,14 @@ namespace mixc::lang_cxx_index_of_last::xuser {
         uxx index_of_last(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
+
             return the.index_of_last(value, compare);
         }
 
         uxx index_of_last(
             final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
+
             return the.index_of_last(value, compare);
         }
     };
