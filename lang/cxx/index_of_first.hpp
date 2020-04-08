@@ -42,8 +42,8 @@
                 compare_invoke const & compare) const {
 
                 the_t origin = the;
-                uxx  miss   = 0;
-                uxx  index;
+                uxx   miss   = 0;
+                uxx   index;
 
                 if (origin.length() < value.length() or value.length() == 0) {
                     return not_exist;
@@ -68,14 +68,14 @@
                 return not_exist;
             }
 
-            void index_of_first(
+            the_t & index_of_first(
                 the_t                              value, 
                 inc::can_callback<void(uxx index)> match,
                 inc::can_compare<item>             compare) const {
 
                 for(auto cur = the;;){
                     if (uxx i = cur.index_of_first(value, compare); i == not_exist){
-                        return;
+                        return the;
                     }
                     else{
                         cur = cur.backward(i + value.length());
@@ -105,11 +105,11 @@ namespace mixc::lang_cxx_index_of_first::xuser {
             return the.index_of_first(value, compare);
         }
 
-        void index_of_first(
-            the_t                              value, 
+        final & index_of_first(
+            final                              value, 
             inc::can_callback<void(uxx index)> match,
             inc::can_compare<item>             compare = inc::default_compare<item>) const {
-            the.index_of_first(value, match, compare);
+            return (final &)the.index_of_first(value, match, compare);
         }
     };
 }

@@ -74,14 +74,14 @@
                 return not_exist;
             }
 
-            void index_of_last(
+            the_t & index_of_last(
                 the_t                              value, 
                 inc::can_callback<void(uxx index)> match,
                 inc::can_compare<item>             compare) const {
 
                 for(auto cur = the;;){
                     if (uxx i = cur.index_of_last(value, compare); i == not_exist){
-                        return;
+                        return the;
                     }
                     else{
                         cur = cur.length(i);
@@ -111,11 +111,11 @@ namespace mixc::lang_cxx_index_of_last::xuser {
             return the.index_of_last(value, compare);
         }
 
-        void index_of_last(
+        final & index_of_last(
             the_t                              value, 
             inc::can_callback<void(uxx index)> match,
             inc::can_compare<item>             compare = inc::default_compare<item>) const {
-            the.index_of_last(value, match, compare);
+            return (final &)the.index_of_last(value, match, compare);
         }
     };
 }
