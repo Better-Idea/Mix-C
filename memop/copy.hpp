@@ -37,6 +37,13 @@
             using mp = inc::mirror<a> *;
             copy_with_operator(mp(target), mp(source), count);
         }
+
+        template<class a>
+        inline void copy(a & target, a const & source, uxx length) {
+            for(uxx i = 0; i < length; i++){
+                copy(xref target[i], source[i]);
+            }
+        }
     }
 
 #endif
