@@ -19,6 +19,10 @@
         template<class impl, class a, class b, bool is_array> struct meta;
     }
 
+    namespace mixc::macro_xsv{
+        template<class item> struct static_string_holder;
+    }
+
     namespace mixc::memory_alloctor{
         struct memory_size;
         template<class t> void free_with_destroy(t *, mixc::memory_alloctor::memory_size);
@@ -65,7 +69,9 @@
         struct token_plus : token {
             token_plus(uxx length) : length(length), token(0) { }
         protected:
+            template<class item> friend struct mixc::macro_xsv::static_string_holder;
             uxx length;
+
             auto this_length() {
                 return length;
             }

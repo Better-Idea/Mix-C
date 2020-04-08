@@ -34,10 +34,8 @@
             uxx can_arrive_root : 1;
             uxx visited         : sizeof(uxx) * 8 - 1;
 
-            info_t(){
-                can_arrive_root = 0;
-                visited         = 0;
-            }
+            info_t() : 
+                can_arrive_root(0), visited(0){}
 
             operator uxx (){
                 return uxxp(this)[0];
