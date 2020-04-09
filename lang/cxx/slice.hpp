@@ -2,33 +2,48 @@
     #include"lang/private/cxx.hpp"
 #endif
 
-#ifndef xpack_lang_cxx_substr
-#define xpack_lang_cxx_substr
+#ifndef xpack_lang_cxx_slice
+#define xpack_lang_cxx_slice
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
     #undef  xusing_lang_cxx
         #undef  xuser
-        #define xuser mixc::lang_cxx_substr
+        #define xuser mixc::lang_cxx_slice
         #include"define/base_type.hpp"
         #include"lang/cxx.hpp"
+        #include"macro/xdebug_fail.hpp"
         #include"macro/xindex_rollback.hpp"
         #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_substr{
+    namespace mixc::lang_cxx_slice{
+        // using item = char;
+        // template<class item> struct core;
+        // template<>
+        // struct core<item> : inc::cxx<item> {
+
         template<class item>
         struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            the_t substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
-                if (the.is_empty()) {
-                    return the_t();
-                }
-
+            void rollback(ixx & start, ixx & end) const {
                 xindex_rollback(the.length(), start);
                 xindex_rollback(the.length(), end);
+
+                xdebug_fail(start >= the.length());
+                xdebug_fail(end   >= the.length());
+            }
+
+            the_t slice(ixx start, ixx end) const {
+                rollback(start, end);
+                xdebug_fail(start > end);
+                return the.backward(start).length(end - start + 1);
+            }
+
+            the_t slice(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
+                rollback(start, end);
 
                 uxx    target_length;
                 item * buf;
@@ -58,21 +73,25 @@
     }
 #endif
 
-namespace mixc::lang_cxx_substr::xuser {
+namespace mixc::lang_cxx_slice::xuser {
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final substr(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
-            return the.substr(start, end, alloc);
+        final slice(ixx start, ixx end) const {
+            return the.slice(start, end);
         }
 
-        final substr(ixx start, inc::alloc_callback<item> alloc) const {
-            return substr(start, -1, alloc);
+        final slice(ixx start, inc::alloc_callback<item> alloc) const {
+            return slice(start, -1, alloc);
+        }
+
+        final slice(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
+            return the.slice(start, end, alloc);
         }
     };
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx ::mixc::lang_cxx_substr::xuser
+#define xusing_lang_cxx ::mixc::lang_cxx_slice::xuser
