@@ -10,6 +10,11 @@
 constexpr bool is_64bit          = sizeof(void *) == 8;
 constexpr bool is_32bit          = sizeof(void *) == 4;
 
+#ifdef __linux__
+    #define xis_linux       1
+#else
+    #define xis_linux       0
+#endif
 
 #ifndef xis_x86
     #define xis_86          0
