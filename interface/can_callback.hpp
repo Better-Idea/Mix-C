@@ -55,5 +55,6 @@
 
 namespace xuser::inc{
     using ::mixc::interface_can_callback::can_callback;
-    using namespace ::mixc::macro_private_callable;
 }
+
+#include"macro/private/callable.hpp"

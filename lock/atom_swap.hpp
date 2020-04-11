@@ -21,5 +21,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::lock_atom_swap;
+    using ::mixc::lock_atom_swap::atom_swap;
 }

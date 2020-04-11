@@ -10,6 +10,9 @@
     namespace mixc::define_bitbind{
         template<class type, class bit_type = bool>
         xgc(bitbind)
+            using the_t = bitbind;
+            using final = bitbind;
+            
             xgc_fields(
                 xpro(ptr, type *),
                 xpro(mask, type)

@@ -55,7 +55,7 @@
             );                                                                          \
         template<class __type__> friend union ::mixc::macro_xtypeid::__typeid;          \
         static constexpr const char * __self_name = # name;                             \
-        static inline auto            __class_id = ++::mixc::macro_xgc::__class_id;     \
+        static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;    \
     public:
 
     #define xgc(name,...)  xgcx(name,,__VA_ARGS__)

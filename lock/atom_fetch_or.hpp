@@ -16,7 +16,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::lock_atom_fetch_or;
+    using ::mixc::lock_atom_fetch_or::atom_fetch_or;
 }
-
-#pragma once

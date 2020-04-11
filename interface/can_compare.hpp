@@ -30,5 +30,6 @@
 namespace xuser::inc{
     using ::mixc::interface_can_compare::can_compare;
     using ::mixc::interface_can_compare::default_compare;
-    using namespace ::mixc::macro_private_callable;
 }
+
+#include"macro/private/callable.hpp"

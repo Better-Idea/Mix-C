@@ -16,5 +16,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::lock_atom_add;
+    using ::mixc::lock_atom_add::atom_add;
 }

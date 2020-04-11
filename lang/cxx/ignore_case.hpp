@@ -22,5 +22,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::lang_cxx_ignore_case;
+    using mixc::lang_cxx_ignore_case::ignore_case;
 }

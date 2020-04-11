@@ -74,11 +74,10 @@
         template<class item_t>
         struct binary_search{
             // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
-            static auto match(
+            static uxx match(
                 inc::ranger<item_t>      range,
                 item_t const &           value, 
                 inc::can_compare<item_t> compare = inc::default_compare<item_t>) {
-
                 return match_template(range, value, compare).match;
             }
 
@@ -87,7 +86,6 @@
                 inc::ranger<item_t>      range,
                 item_t const &           value, 
                 inc::can_compare<item_t> compare = inc::default_compare<item_t>) {
-
                 auto result = match_template(range, value, compare);
                 return result.match == not_exist ? result.less_then_target : result.match;
             }
@@ -97,7 +95,6 @@
                 inc::ranger<item_t>      range,
                 item_t const &           value,
                 inc::can_compare<item_t> compare = inc::default_compare<item_t>) {
-
                 auto result = match_template(range, value, compare);
                 return result.match == not_exist ? result.grater_then_target : result.match;
             }

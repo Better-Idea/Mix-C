@@ -34,10 +34,10 @@
             }
         xgc_end();
 
-        #pragma warning(push)
+        #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wnull-dereference"
         inline const nullref_t & nullref = *(nullref_t *)nullptr;
-        #pragma warning(pop)
+        #pragma GCC diagnostic pop
     }
 
 #endif

@@ -109,6 +109,4 @@ int main(){
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::macro_private_callable;
-}
+#include"macro/private/callable.hpp"

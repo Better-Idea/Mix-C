@@ -2,10 +2,10 @@
 #ifdef xenable_xdebug
     #include<stdio.h>
     #include"macro/xtypeid.hpp"
-    #include"macro/private/mix.hpp"
+    #include"macro/private/log.hpp"
     #define xdebug(token,...)                               \
     if (token) {                                            \
-        mixc::macro_private_mix::mix::print(                \
+        ::mixc::macro_private_log::log(                     \
         __debug_id += 1,                                    \
         __FILE__,                                           \
         __LINE__,                                           \
