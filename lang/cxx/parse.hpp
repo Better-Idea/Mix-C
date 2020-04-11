@@ -13,7 +13,7 @@
         #include"define/platform.hpp"
         #include"docker/transmitter.hpp"
         #include"lang/cxx.hpp"
-        #include"math/numeration.hpp"
+        #include"math/numeration_t.hpp"
         #include"meta/unsigned_type.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
@@ -117,7 +117,7 @@ namespace mixc::lang_cxx_parse::xuser{
         }
 
         template<class target>
-        parse_result<target> parse(inc::numeration base) const {
+        parse_result<target> parse(inc::numeration_t base) const {
             // TODO: floating parse ======================================================
             if constexpr (is_64bit or sizeof(target) <= sizeof(uxx)){
                 return the.template parse<uxx>(uxx(base));
@@ -129,7 +129,7 @@ namespace mixc::lang_cxx_parse::xuser{
     };
 }
 
-#include"math/numeration.hpp"
+#include"math/numeration_t.hpp"
 
 #undef  xusing_lang_cxx
 #define xusing_lang_cxx ::mixc::lang_cxx_parse::xuser
