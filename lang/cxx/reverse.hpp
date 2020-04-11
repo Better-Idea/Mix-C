@@ -10,7 +10,7 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_reverse
         #include"define/base_type.hpp"
-        #include"lang/cxx/substr.hpp"
+        #include"lang/cxx/slice.hpp"
         #include"lang/cxx.hpp"
         #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -23,7 +23,7 @@
             using the_t = core<item>;
 
             the_t reverse(inc::alloc_callback<item> alloc) const {
-                return the.substr(-1, 0, alloc);
+                return the.slice(-1, 0, alloc);
             }
         };
     }
