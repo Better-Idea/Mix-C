@@ -5,9 +5,7 @@
         #undef  xuser
         #define xuser mixc::macro_private_mix
         #include"define/base_type.hpp"
-        #include"dumb/implicit.hpp"
         #include"meta/more_fit.hpp"
-        #include<stdio.h>
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_private_mix{
@@ -56,7 +54,7 @@
                 }
                 else if constexpr(index < 11){
                     str = value;
-                    fmt = "\"%s\"";
+                    fmt = "%s";
                 }
                 else if constexpr(index < 12){
                     v   = value;
@@ -67,23 +65,10 @@
                     fmt = "%c";
                 }
             }
-
-            template<class ... args>
-            static void print(int no, const char * file, int line, const char * msg, args ... list){
-                inc::implicit<mix> arg[] = { list... };
-                printf("%5d | %s:%d\n      | ", no, file, line);
-
-                for (auto item : arg){
-                    do {
-                        msg += 1;
-                        putchar(msg[-1]);
-                    }while(msg[0] != ',');
-
-                    putchar(':');
-                    printf(item->fmt, item->v);
-                }
-                putchar('\n');
-            }
         };
     }
 #endif
+
+namespace xuser::inc{
+    using ::mixc::macro_private_mix::mix;
+}
