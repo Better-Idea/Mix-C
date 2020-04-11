@@ -22,7 +22,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            the_t reverse(inc::alloc_callback<item> alloc) const {
+            auto reverse(inc::alloc_callback<item> alloc) const {
                 return the.slice(-1, 0, alloc);
             }
         };

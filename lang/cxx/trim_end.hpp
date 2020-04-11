@@ -26,7 +26,7 @@
             using the_t = core<item>;
 
             template<class ... args>
-            the_t trim_end(item value, args const & ... list) {
+            auto trim_end(item value, args const & ... list) {
                 item           group[sizeof...(args) + 1];
                 auto           temp       = the;
                 auto           may_alloc  = inc::layout_args(group, value, list...);

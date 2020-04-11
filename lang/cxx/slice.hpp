@@ -36,13 +36,13 @@
                 xdebug_fail(end   >= the.length());
             }
 
-            the_t slice(ixx start, ixx end) const {
+            auto slice(ixx start, ixx end) const {
                 rollback(start, end);
                 xdebug_fail(start > end);
                 return the.backward(start).length(end - start + 1);
             }
 
-            the_t slice(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
+            auto slice(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
                 rollback(start, end);
 
                 uxx    target_length;

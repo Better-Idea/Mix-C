@@ -27,7 +27,7 @@
             using the_t = core<item>;
 
             template<class ... args>
-            the_t trim_start(item value, args const & ... list) const {
+            auto trim_start(item value, args const & ... list) const {
                 item             group[sizeof...(args) + 1]; // 包含'\0'
                 auto             may_alloc  = inc::layout_args(group, value, list...);
                 constexpr auto   need_alloc = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;

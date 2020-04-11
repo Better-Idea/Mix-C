@@ -123,7 +123,7 @@ namespace mixc::lang_cxx_parse::xuser{
                 return the.template parse<uxx>(uxx(base));
             }
             else if constexpr (is_32bit){
-                return the.template parse<unsigned_type<target>>(uxx(base));
+                return the.template parse<inc::unsigned_type<target>>(uxx(base));
             }
         }
     };

@@ -24,7 +24,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            the_t remove(ixx start, ixx endx, inc::alloc_callback<item> alloc) const {
+            auto remove(ixx start, ixx endx, inc::alloc_callback<item> alloc) const {
                 xindex_rollback(the.length(), start);
                 xindex_rollback(the.length(), endx);
 

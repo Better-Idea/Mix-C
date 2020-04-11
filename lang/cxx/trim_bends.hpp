@@ -27,7 +27,7 @@
             using the_t = core<item>;
 
             template<class ... args>
-            the_t trim_bends(item first, args const & ... list) const {
+            auto trim_bends(item first, args const & ... list) const {
                 item group[sizeof...(args) + 1]; // 包含'\0'
 
                 auto            may_alloc   = inc::layout_args(group, first, list...);

@@ -25,7 +25,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            the_t strcat(the_t * list, uxx length, inc::alloc_callback<item> alloc) const {
+            auto strcat(the_t * list, uxx length, inc::alloc_callback<item> alloc) const {
                 uxx total_length = 0;
 
                 for(uxx i = 0; i < length; i++){
@@ -45,7 +45,7 @@
             }
 
             template<class ... args>
-            the_t strcat(args const & ... list) const {
+            auto strcat(args const & ... list) const {
                 constexpr uxx length = sizeof...(args) - 1;
                 the_t         buf[length];
                 auto          alloc = inc::layout_args<the_t, 0>(buf, list...);

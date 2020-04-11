@@ -30,7 +30,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            the_t replace(
+            auto replace(
                 the_t                     old_value, 
                 the_t                     new_value, 
                 inc::can_compare<item>    compare, 

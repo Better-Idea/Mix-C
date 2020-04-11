@@ -46,7 +46,7 @@ namespace mixc::lang_cxx_is_starts_with::xuser{
         using the_t = mixc::lang_cxx_is_starts_with::core<item>;
 
         bool is_starts_with(
-            fianl                  value, 
+            final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.is_starts_with(value, compare);
         }

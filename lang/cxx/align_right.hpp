@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            the_t align_right(uxx width, item pad, inc::alloc_callback<item> alloc) const {
+            auto align_right(uxx width, item pad, inc::alloc_callback<item> alloc) const {
                 if (ixx r = ixx(the.length() - width); r >= 0){
                     return the.shorten(uxx(r)).clone(alloc);
                 }
