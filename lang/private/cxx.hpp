@@ -5,51 +5,53 @@
         #define xuser mixc::lang_cxx
         #include"define/base_type.hpp"
         #include"macro/xgc.hpp"
+        #include"macro/xprop.hpp"
         #include"macro/xsv.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx{
-        template<class item>
-        xgc(core)
+        template<class final, class item>
+        xgc(cxx)
+        private:
+            inline static item empty = item(0);
+        public:
+            using the_t = cxx<final, item>;
+
             xgc_fields(
-                xpro(ptr, item *),
+                xpro(ptr,   item *),
                 xpro(count, uxx)
             );
 
-            core() : core(& empty, 0) {}
-            core(core const &) = default;
-            core(item const * ptr, uxx count) : 
+            cxx() : 
+                cxx(& empty, 0) {}
+
+            cxx(cxx const &) = default;
+
+            template<class final_t>
+            cxx(cxx<final_t, item> const & self) : 
+                cxx((the_t &)self){
+            }
+
+            template<class type>
+            cxx(type const * ptr, uxx count) : 
                 ptr((item *)ptr), count(count) {
+                static_assert(sizeof(type) == sizeof(item));
             }
 
-            core(inc::static_string_holder<item> holder){
-                ptr   = holder.ptr();
-                count = holder.length();
-            }
-        protected:
-            inline static item empty = item(0);
-        xgc_end();
-
-        template<class final, class item>
-        struct cxx : core<item> {
-            using core<item>::core;
-            using the_t = core<item>;
-            cxx(core<item> const & self) : core<item>(self){}
-
-            item & operator [](uxx index) {
-                return core<item>::ptr[index];
+            cxx(inc::static_string_holder<item> holder) : 
+                cxx(holder.ptr(), holder.length()){
             }
 
-            const item & operator [](uxx index) const {
-                return core<item>::ptr[index];
+            item & operator [](uxx index) const {
+                return the.ptr[index];
             }
 
             operator item *(){
-                return core<item>::ptr;
+                return the.ptr;
             }
 
             operator const item *() const {
-                return core<item>::ptr;
+                return the.ptr;
             }
 
             final backward(uxx value) const {
@@ -77,26 +79,16 @@
                 );
             }
 
-            /*属性区*/
         public:
-            uxx length() const {
-                return core<item>::count;
-            }
+            xpubget_pubset(length, uxx){
+                xr{ return the.count; }
+                xw{ the.count = value; }
+            };
 
-            final & length(uxx value) {
-                core<item>::count = value;
-                return thex;
-            }
-
-            final & length(uxx * result) const {
-                result[0] = length();
-                return thex;
-            }
-
-            bool is_empty() const {
+            xpubget(is_empty, bool){
                 return length() == 0;
-            }
-        };
+            };
+        xgc_end();
     }
 
     #ifdef xos64
