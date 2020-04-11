@@ -6,8 +6,10 @@
         #include"define/base_type.hpp"
         #include"define/platform.hpp"
         #include"io/private/tty_color_t.hpp"
-        #include"io/private/printf.hpp"
+        #include"io/private/tty_key_t.hpp"
+        #include"io/private/tty.hpp"
         #include"macro/xgc.hpp"
+        #include"macro/xprop.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::io_tty{
@@ -18,24 +20,26 @@
                 xpro(visiable_of_cursor , mutable bool),
             );
             using the_t = tty_t;
+            using final = tty_t;
         private:
             auto map_forecolor(inc::tty_color_t value) const {
-                static_assert(uxx(inc::black)           == 0x0);
-                static_assert(uxx(inc::red)             == 0x1);
-                static_assert(uxx(inc::green)           == 0x2);
-                static_assert(uxx(inc::yellow)          == 0x3);
-                static_assert(uxx(inc::blue)            == 0x4);
-                static_assert(uxx(inc::magenta)         == 0x5);
-                static_assert(uxx(inc::cyan)            == 0x6);
-                static_assert(uxx(inc::white)           == 0x7);
-                static_assert(uxx(inc::gray)            == 0x8);
-                static_assert(uxx(inc::light_red)       == 0x9);
-                static_assert(uxx(inc::light_green)     == 0xa);
-                static_assert(uxx(inc::light_yellow)    == 0xb);
-                static_assert(uxx(inc::light_blue)      == 0xc);
-                static_assert(uxx(inc::light_magenta)   == 0xd);
-                static_assert(uxx(inc::light_cyan)      == 0xe);
-                static_assert(uxx(inc::light_gray)      == 0xf);
+                using namespace inc::tty_color;
+                static_assert(uxx(black)           == 0x0);
+                static_assert(uxx(red)             == 0x1);
+                static_assert(uxx(green)           == 0x2);
+                static_assert(uxx(yellow)          == 0x3);
+                static_assert(uxx(blue)            == 0x4);
+                static_assert(uxx(magenta)         == 0x5);
+                static_assert(uxx(cyan)            == 0x6);
+                static_assert(uxx(white)           == 0x7);
+                static_assert(uxx(gray)            == 0x8);
+                static_assert(uxx(light_red)       == 0x9);
+                static_assert(uxx(light_green)     == 0xa);
+                static_assert(uxx(light_yellow)    == 0xb);
+                static_assert(uxx(light_blue)      == 0xc);
+                static_assert(uxx(light_magenta)   == 0xd);
+                static_assert(uxx(light_cyan)      == 0xe);
+                static_assert(uxx(light_gray)      == 0xf);
 
                 if constexpr(xis_linux){
                     constexpr asciis map[] = {
@@ -55,85 +59,69 @@
             }
         public:
             tty_t(){
-                // backcolor(inc::black);
-                forecolor(inc::light_gray);
+                backcolor(inc::tty_color::black);
+                forecolor(inc::tty_color::light_gray);
                 cursor_visiable(true);
             }
 
-            inc::tty_color_t backcolor() const {
-                return back;
-            }
-
-            bool cursor_visiable() const {
-                return visiable_of_cursor;
-            }
-
-            inc::tty_color_t forecolor() const {
-                return fore;
-            }
-
-            tty_t & backcolor(inc::tty_color_t * value) const {
-                value[0] = back;
-                return the;
-            }
-
-            tty_t & backcolor(inc::tty_color_t value) const {
-                if constexpr(xis_linux){
-                    inc::print(map_backcolor(back = value));
+            xpubget_pubset(backcolor, inc::tty_color_t){
+                xr { return the.back; }
+                xw {
+                    if constexpr(xis_linux){
+                        the.back = value;
+                        inc::print(the.map_backcolor(value));
+                    }
                 }
-                return the;
-            }
+            };
 
-            tty_t & clear() const {
-                if constexpr (xis_linux){
+            xpubget_pubset(cursor_visiable, bool){
+                xr { return the.visiable_of_cursor; }
+                xw {
+                    if constexpr(xis_linux){
+                        the.visiable_of_cursor = value;
+                        inc::print(value ? "\e[?25h" : "\e[?25l");
+                        inc::print_flush();
+                    }
+                }
+            };
+
+            xpubget_pubset(forecolor, inc::tty_color_t){
+                xr { return the.back; }
+                xw {
+                    if constexpr(xis_linux){
+                        the.fore = value;
+                        inc::print(the.map_forecolor(value));
+                    }
+                }
+            };
+
+            xpubget(read_key, inc::tty_key_t){
+                return inc::read_key();
+            };
+
+            final & clear() const {
+                if constexpr(xis_linux){
                     inc::print("\e[0m\e[0;0H\e[2J");
-                    inc::print_flush();
                     the.forecolor(fore);
                     the.backcolor(back);
                     inc::print_flush();
                 }
-                return the;
+                return thex;
             }
-
-            tty_t & cursor_visiable(bool * value) const {
-                value[0] = visiable_of_cursor;
-                return the;
-            }
-
-            tty_t & cursor_visiable(bool value) const {
-                // need lock
-                visiable_of_cursor = value;
-                if constexpr(xis_linux){
-                    inc::print(value ? "\e[?25h" : "\e[?25l");
-                    inc::print_flush();
-                }
-                return the;
-            }
-
-            tty_t & forecolor(inc::tty_color_t * value) const {
-                value[0] = fore;
-                return the;
-            }
-
-            tty_t & forecolor(inc::tty_color_t value) const {
-                if constexpr(xis_linux){
-                    inc::print(map_forecolor(fore = value));
-                }
-                return the;
-            }
-
-            tty_t & write(asciis value) const {
-                inc::print("%s", value);
-                return the;
+            
+            template<class a0, class ... args>
+            final & write(a0 const & first, args const & ... list) const {
+                inc::print(first, list...);
+                return thex;
             }
         xgc_end();
 
-        inline const tty_t tty;
+        inline tty_t tty;
     }
 #endif
-
-#include"io/private/tty_color_t.hpp"
 
 namespace xuser::inc{
     using ::mixc::io_tty::tty;
 }
+
+#include"io/private/tty_color_t.hpp"
