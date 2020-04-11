@@ -113,7 +113,7 @@ namespace mixc::lang_cxx_parse::xuser{
 
         template<class target>
         parse_result<target> parse() const {
-            return parse<target>(inc::dec);
+            return parse<target>(inc::numeration_t::dec);
         }
 
         template<class target>
