@@ -78,7 +78,8 @@
 
 
         xgc(tty_key_t)
-            using items = u08[6];
+            static constexpr uxx max_length = 6;
+            using items = u08[max_length];
             using final = tty_key_t;
             using the_t = tty_key_t;
 

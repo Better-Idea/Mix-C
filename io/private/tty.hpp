@@ -1,5 +1,5 @@
-#ifndef xpack_io_privaye_printf
-#define xpack_io_privaye_printf
+#ifndef xpack_io_private_tty
+#define xpack_io_private_tty
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::io_private_tty

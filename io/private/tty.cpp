@@ -1,3 +1,9 @@
+/*
+问题：
+- ctrl+m 会被映射成 ctrl+j
+- 部分 ctrl+字母 和 ascii 的转移符重合，比如 \a \b \t \v \n
+*/
+
 #define xuser mixc::io_private_tty
 #include"algo/binary_search.hpp"
 #include"define/platform.hpp"
@@ -107,11 +113,11 @@ namespace mixc::io_private_tty{
                 }
 
                 if (len = ptr - buf; len == 1){
+                    if (' ' <= buf[0] and buf[0] <= '~' or buf[0] == '\n'){ // 是 ascii
+                        return key.is_ascii(true).value(buf[0]);
+                    }
                     if (buf[0] < max_ctrl){ // 是 ctrl + ascii
                         return key.has_ctrl(true).is_ascii(true).value(buf[0] + 'a' - 1);
-                    }
-                    if (' ' <= buf[0] and buf[0] <= '~'){ // 是 ascii
-                        return key.is_ascii(true).value(buf[0]);
                     }
                 }
 
@@ -134,8 +140,16 @@ namespace mixc::io_private_tty{
                     return left.value.compare(right.value);
                 });
 
-                if (index == not_exist){ // 稍后支持 款字节字符
-                    hint(); continue;
+                if (index == not_exist){
+                    if (buf[0] == 0x1b or len > key.max_length){
+                        hint(); continue;
+                    }
+
+                    key.length(len);
+
+                    for(uxx i = 0; i < len; i++){
+                        key[i] = buf[i];
+                    }
                 }
 
                 auto & v = map[index];
