@@ -4,11 +4,27 @@
         #undef  xuser
         #define xuser mixc::draft_isa
         #include"define/base_type.hpp"
+        #include"define/bitbind.hpp"
+        #include"instruction/index_of_first_set.hpp"
+        #include"instruction/index_of_last_set.hpp"
         #include"memop/cast.hpp"
         #include"memop/signature.hpp"
+        #include"memop/swap.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::draft_isa{
+        union bit_range_t{
+            u64     imm;
+            struct{
+                u64 first_index   : 6;
+                u64 last_index    : 6;
+            };
+
+            bit_range_t(u64 v) : 
+                imm(v){
+            }
+        };
+
         enum opviii_t{
             o8_aai,
             o8_aaii,
@@ -20,13 +36,16 @@
             o8_tab,
         };
 
-        enum opvi_t{
-            o6_aai,
-            o6_aab,
-            o6_abt,
-            o6_tab,
-            o6_tia = 0,
-            o6_atb,
+        enum opviiix_t{
+            o8x_aai,
+            o8x_aab,
+            o8x_abt,
+            o8x_tab,
+            
+            o8x_tai,
+            o8x_tia,
+            o8x_atb,
+            // o8x_xxx
         };
 
         #define xgen(name,count)  name, name ## _end = name + count - 1
@@ -34,27 +53,55 @@
         enum set_t : u08{
             xgen(ldi    , 16),
 
-            xgen(ldxi   , 4),   // ldx.i    ra, [rb + im]
-            xgen(ldxit  , 4),   // ldx.i    ra, [rb + im + rt]
-            xgen(ldxu   , 4),   // ldx.u    ra, [rb + im]
-            xgen(ldxut  , 4),   // ldx.u    ra, [rb + im + rt]
-
-            xgen(stxu   , 4),   // stx.u    ra, [rb + im]
-            xgen(stxut  , 4),   // stx.u    ra, [rb + im + rt]
-
-            xgen(psh    , 2),
-            xgen(pop    , 2),
-            xgen(ldf    , 2),   // ldf      sa/da, [rb + im]
-            xgen(ldft   , 2),   // ldf      sa/da, [rb + im + rt]
-            xgen(stf    , 2),   // stf      sa/da, [rb + im]
-            xgen(stft   , 2),   // stf      sa/da, [rb + im + rt]
-            xgen(pshf   , 2),
-            xgen(popf   , 2),
-
             xgen(shl    , 8),
             xgen(shr    , 8),
             xgen(sar    , 8),
             xgen(bts    , 8),
+
+            xgen(ldib   , 1),
+            xgen(ldiw   , 1),
+            xgen(ldid   , 1),
+            xgen(ldiq   , 1),
+            xgen(ldub   , 1),
+            xgen(lduw   , 1),
+            xgen(ldud   , 1),
+            xgen(lduq   , 1),
+
+            xgen(ldtib  , 1),
+            xgen(ldtiw  , 1),
+            xgen(ldtid  , 1),
+            xgen(ldtiq  , 1),
+            xgen(ldtub  , 1),
+            xgen(ldtuw  , 1),
+            xgen(ldtud  , 1),
+            xgen(ldtuq  , 1),
+
+            xgen(stb    , 1),
+            xgen(stw    , 1),
+            xgen(std    , 1),
+            xgen(stq    , 1),
+            xgen(sttb   , 1),
+            xgen(sttw   , 1),
+            xgen(sttd   , 1),
+            xgen(sttq   , 1),
+
+            xgen(ldfs   , 1),
+            xgen(ldfd   , 1),
+            xgen(ldtfs  , 1),
+            xgen(ldtfd  , 1),
+
+            xgen(stfs   , 1),
+            xgen(stfd   , 1),
+            xgen(sttfs  , 1),
+            xgen(sttfd  , 1),
+
+            xgen(pop    , 2),
+            xgen(popf   , 2),
+            xgen(rsv0   , 4),
+            xgen(psh    , 2),
+            xgen(pshs   , 2),
+            xgen(pshf   , 2),
+            xgen(pshfs  , 2),
 
             xgen(movbx  , 1),   // movx ra, rb.b
             xgen(movwx  , 1),   // movx ra, rb.w
@@ -76,34 +123,28 @@
 
             xgen(add    , 4),
             xgen(adc    , 4),
-            xgen(sub    , 4),
-            xgen(sbb    , 4),
+            xgen(sbb    , 8),
+            xgen(sub    , 8),
             xgen(mul    , 4),
             xgen(mulu   , 4),
             xgen(mulx   , 4),
             xgen(mulxu  , 4),
-            xgen(div    , 4),
-            xgen(divu   , 4),
-            xgen(subp   , 2),
-            xgen(sbbp   , 2),
-            xgen(divp   , 2),
-            xgen(divup  , 2),
+            xgen(div    , 8),
+            xgen(divu   , 8),
 
             xgen(andi   , 4),
             xgen(ori    , 4),
             xgen(nandi  , 4),
             xgen(xori   , 4),
-
-            xgen(cmp    , 2),
-            xgen(fcmp   , 2),
-            xgen(mask   , 2),  // mask bits
-            xgen(ldf    , 1),  // load bits range
-            xgen(stf    , 1),  // store bits range
+            xgen(mask   , 1),  // mask bits
+            xgen(ldbs   , 1),  // load bits range
+            xgen(stbs   , 1),  // store bits range
             xgen(sbc    , 1),  // set bit count
             xgen(ios    , 1),  // index of set
             xgen(lis    , 1),  // last index of set
             xgen(___    , 1),
-            xgen(swap   , 1),
+            xgen(swp    , 1),
+            xgen(swpf   , 1),
             xgen(lock   , 1),
 
             xgen(ifeq   , 1),
@@ -120,32 +161,31 @@
             xgen(ifle   , 1),
             xgen(ifov   , 1),
             xgen(ifno   , 1),
-            xgen(jmp    , 2),
-            xgen(call   , 2),
-
-            xgen(fadd   , 4),
-            xgen(fsub   , 4),
-            xgen(fmul   , 4),
-            xgen(fdiv   , 4),
-            xgen(fsubp  , 2),
-            xgen(fdivp  , 2),
-        };
-
-        enum subset_iv_t{
+            xgen(jmp    , 1),
             xgen(ret    , 1),
-            xgen(rgn    , 1), // register windoes region
+            xgen(call   , 1),
+            xgen(calli  , 1),
+
+            xgen(addf   , 4),
+            xgen(mulf   , 4),
+            xgen(subf   , 8),
+            xgen(divf   , 8),
         };
 
         #undef  xgen
 
         using u128 = __uint128_t;
+        using i128 = __int128_t;
 
         struct cpu_t{
             using the_t = cpu_t;
 
             enum{
-                integer_register_count = 16,
+                integer_register_count  = 16,
+                floating_register_count = 16,
             };
+
+            voidp mem;
 
             struct opc_t{
                 union{
@@ -153,28 +193,56 @@
                         u08 a   : 4;
                         u08 b   : 4;
                     };
-                    u08 ab;
-                    u08 im4 : 4;
+                    u08     ab;
+                    u08     im4 : 4;
                 };
-                u08 op;
+                u08         op;
+
+                static constexpr uxx sp     = 0;
+                static constexpr uxx bp     = 1;
+                static constexpr uxx t      = 2;
+                static constexpr uxx x      = 3;
 
                 operator u16 (){
                     return u16p(this)[0];
                 }
             } ins;
 
-            union state_t{
-                u64     zf  : 1;
-                struct{
-                    u64 eq  : 1;
-                    u64 cf  : 1;
-                    u64 ab  : 1;
-                    u64 gt  : 1;
+            struct state_t{
+                struct {
+                    inc::bitbind<u16> operator[](uxx index){
+                        return { & mask, index };
+                    }
+                private:
+                    u16 mask = 0;
+                } is_f64;
+
+                union{
+                    u16     zf  : 1;    // zero flag
+                    struct {
+                        u16 eq  : 1;    // equal
+                        u16 cf  : 1;    // carry flag
+                        u16 ab  : 1;    // above
+                        u16 gt  : 1;    // great than
+                        u16 ov  : 1;    // overflow
+                    };
                 };
+
+                operator u64 & (){
+                    return u64p(this)[0];
+                }
+
+                void operator =(u64 value){
+                    operator u64 &() = value;
+                }
             } sta;
 
             struct imm_t{
                 using the_t = imm_t;
+
+                uxx width(){
+                    return bits;
+                }
 
                 imm_t & load(u64 value, uxx width){
                     v    |= value << bits;
@@ -183,6 +251,11 @@
                     if (bits > 64){
                         bits = 64;
                     }
+                    return the;
+                }
+
+                imm_t & clear(){
+                    operator u64();
                     return the;
                 }
 
@@ -210,7 +283,7 @@
                     return inc::cast<f32>(u);
                 }
                 
-                operator f32(){
+                operator f64(){
                     auto b = bits;
                     auto u = the.operator u64();
 
@@ -219,18 +292,39 @@
                     }
                     return inc::cast<f64>(u);
                 }
+
             private:
                 u64 v       = 0;
                 uxx bits    = 0;
             } imm;
 
             union reg_t {
-                u64 u;
+                i08 ib;
+                i16 iw;
+                i32 id;
                 i64 i;
+
+                u08 ub;
+                u16 uw;
+                u32 ud;
+                u64 u;
+
+                f32 fs;
+                f64 fd;
+
+                reg_t() : u(0){}
+                reg_t(u64 v) : u(v){}
+                reg_t(i64 v) : i(v){}
+                
             }     r[integer_register_count], 
-                & sp = r[0], // stack point
-                & t  = r[1], // temp
-                & x  = r[2]; // extern
+                  f[floating_register_count],
+                  pc,               // program counter
+                  csp,              // call stack pointer
+                  tbp,              // temp stack base pointer
+                & sp = r[ins.sp],   // stack pointer
+                & bp = r[ins.bp],   // stack base pointer
+                & t  = r[ins.t],    // temp
+                & x  = r[ins.x];    // extern
 
             struct cmd_t{
                 void operator()(void * cpu){
@@ -245,40 +339,51 @@
                 voidp cmd;
             } sets[256];
 
-            template<class type, class lambda>
+            template<class imm_t, class type, class lambda>
             void opviii(type * r, lambda && op){
                 switch(opviii_t(ins.op & 0x7)){
-                case o8_aai:    op(r[ins.a], r[ins.a], imm.load(ins.im4 + 0x00, 4)); break;
-                case o8_aaii:   op(r[ins.a], r[ins.a], imm.load(ins.im4 + 0x10, 5)); break;
-                case o8_aaiii:  op(r[ins.a], r[ins.a], imm.load(ins.im4 + 0x20, 6)); break;
-                case o8_aaiv:   op(r[ins.a], r[ins.a], imm.load(ins.im4 + 0x30, 6)); break;
-                case o8_aab:    op(r[ins.a], r[ins.a], r[ins.b]);                    break;
-                case o8_abt:    op(r[ins.a], r[ins.b], r[ins.t]);                    break;
-                case o8_atb:    op(r[ins.a], r[ins.t], r[ins.b]);                    break;
-                case o8_tab:    op(r[ins.t], r[ins.a], r[ins.b]);                    break;
+                case o8_aai:    op(r[ins.a], r[ins.a], imm_t(imm.load(ins.im4 + 0x00, 4))); break;
+                case o8_aaii:   op(r[ins.a], r[ins.a], imm_t(imm.load(ins.im4 + 0x10, 5))); break;
+                case o8_aaiii:  op(r[ins.a], r[ins.a], imm_t(imm.load(ins.im4 + 0x20, 6))); break;
+                case o8_aaiv:   op(r[ins.a], r[ins.a], imm_t(imm.load(ins.im4 + 0x30, 6))); break;
+                case o8_aab:    op(r[ins.a], r[ins.a], r[ins.b]);                           break;
+                case o8_abt:    op(r[ins.a], r[ins.b], r[ins.t]);                           break;
+                case o8_atb:    op(r[ins.a], r[ins.t], r[ins.b]);                           break;
+                case o8_tab:    op(r[ins.t], r[ins.a], r[ins.b]);                           break;
                 }
             }
 
-            template<class type, class lambda>
+            template<class imm_t, class type, class lambda>
+            void opviiix(type * r, uxx mask, lambda && op){
+                switch(opviiix_t(ins.op & mask)){
+                case o8x_aai:   op(r[ins.a], r[ins.a], imm_t(imm.load(ins.im4, 4)));        break;
+                case o8x_aab:   op(r[ins.a], r[ins.a], r[ins.b]);                           break;
+                case o8x_abt:   op(r[ins.a], r[ins.b], r[ins.t]);                           break;
+                case o8x_tab:   op(r[ins.t], r[ins.a], r[ins.b]);                           break;
+
+                case o8x_tai:   op(r[ins.t], r[ins.a], imm_t(imm.load(ins.im4, 4)));        break;
+                case o8x_tia:   op(r[ins.t], imm_t(imm.load(ins.im4, 4)), r[ins.a]);        break;
+                case o8x_atb:   op(r[ins.a], r[ins.t], r[ins.b]);                           break;
+                // TODO: case xxx
+                }
+            }
+
+            template<class imm_t, class type, class lambda>
+            void opviiix(type * r, lambda && op){
+                opviiix<imm_t>(r, 0x7, op);
+            }
+
+            template<class imm_t, class type, class lambda>
             void opiv(type * r, lambda && op){
-                switch(opvi_t(ins.op & 0x3)){
-                case o6_aai:    op(r[ins.a], r[ins.a], imm.load(ins.im4, 4));        break;
-                case o6_aab:    op(r[ins.a], r[ins.a], r[ins.b]);                    break;
-                case o6_abt:    op(r[ins.a], r[ins.b], r[ins.t]);                    break;
-                case o6_tab:    op(r[ins.t], r[ins.a], r[ins.b]);                    break;
-                }
+                opviiix<imm_t>(r, 0x3, op);
             }
 
-            template<class type, class lambda>
-            void opivp(type * r, lambda && op){
-                switch(opvi_t(ins.op & 0x1)){
-                case o6_tia:    op(r[ins.t], r[ins.i], r[ins.a]);                    break;
-                case o6_atb:    op(r[ins.a], r[ins.t], r[ins.b]);                    break;
-                }
-            }
+            enum{
+                with_cf = 1,
+            };
 
-            void builtin_sub(reg_t & a, reg_t b, reg_t c, uxx mask){
-                u128 u = u128(b.u) - c.u - (sta.cf & mask);
+            void builtin_sub(reg_t & a, reg_t b, reg_t c, uxx with_cf){
+                u128 u = u128(b.u) - c.u - (sta.cf & with_cf);
                 a.u    = u64(u);
                 sta.cf = u64(u >> 64) & 1;
                 sta.zf = a.u == 0;
@@ -286,11 +391,129 @@
                 sta.gt = b.i > c.i;
             }
 
-            void builtn_add(reg_t & a, reg_t b, reg_t c, uxx mask){
-                u128 u = u128(b.u) + c.u + (sta.cf & mask);
+            void builtin_add(reg_t & a, reg_t b, reg_t c, uxx with_cf){
+                u128 u = u128(b.u) + c.u + (sta.cf & with_cf);
                 a.u    = u64(u);
                 sta.cf = u64(u >> 64) & 1;
                 sta.zf = a.u == 0;
+            }
+
+            reg_t builtin_mul(reg_t & a, reg_t b, reg_t c){
+                u128 u = i128(b.i) * c.i;
+                i64  h = i64(u >> 64);
+                a.i    = i64(u);
+                sta.zf = a.i == 0;
+                sta.ov = h != 0 and h != -1;
+                return h;
+            }
+
+            reg_t builtin_mulu(reg_t & a, reg_t b, reg_t c){
+                u128 u = u128(b.i) * c.u;
+                u64  h = u64(u >> 64);
+                a.u    = u64(u);
+                sta.zf = a.i == 0;
+                sta.ov = x.i != 0;
+                return h;
+            }
+
+            void builtin_div(reg_t & a, reg_t b, reg_t c){
+                if (c.u == 0){
+                    sta.ov = true;
+                    return;
+                }
+                a.i    = b.i / c.i;
+                x.i    = b.i % c.i;
+                sta.zf = a.i == 0;
+                sta.cf = x.i == 0;
+            }
+
+            void builtin_divu(reg_t & a, reg_t b, reg_t c){
+                if (c.u == 0){
+                    sta.ov = true;
+                    return;
+                }
+                a.u    = b.u / c.u;
+                x.u    = b.u % c.u;
+                sta.zf = a.u == 0;
+                sta.cf = x.u == 0;
+            }
+
+            void builtin_pop(reg_t * ptr){
+                uxx  mask = ins.ab;
+                bool need_load_sta = false;
+
+                if (ins.op & 1){ // 下一组，每组 8 个寄存器
+                    ptr  += 8;
+                    static_assert(integer_register_count == 16);
+                    static_assert(floating_register_count == 16);
+                }
+
+                while(true){
+                    if (auto i = inc::index_of_last_set(mask); i == not_exist){
+                        break;
+                    }
+                    else{
+                        ptr[i].u = read<u64>(sp.u -= sizeof(u64), 0);
+                        mask ^= uxx(1) << i;
+                    }
+                }
+            }
+
+            enum{
+                is_start_push = 1,
+            };
+
+            void builtin_psh(reg_t * ptr, bool is_start_push){
+                uxx mask  = ins.ab;
+
+                if (is_start_push){
+                    tbp   = bp;
+                    bp    = sp;
+                }
+                if (ins.op & 1){ // 下一组，每组 8 个寄存器
+                    ptr  += 8;
+                    static_assert(integer_register_count == 16);
+                    static_assert(floating_register_count == 16);
+                }
+
+                while(true){
+                    if (auto i = inc::index_of_first_set(mask); i == not_exist){
+                        break;
+                    }
+                    else{
+                        write<u64>(ptr[i].u, sp.u, 0);
+                        sp.u += sizeof(u64);
+                        mask ^= uxx(1) << i;
+                    }
+                }
+            }
+
+            void builtin_if(bool condition){
+                if (i64 offset = imm.load(ins.ab, 8); condition == false){
+                    pc.i += offset << 1; // 每条指令 2 字节
+                }
+            }
+
+            void builtin_csp_psh(){
+                write<u64>(pc.u, csp.u, 0); 
+                write<u64>(tbp.u, csp.u += sizeof(u64), 0);
+                csp.u += sizeof(u64);
+            }
+
+            void builtin_csp_pop(){
+                sp   = bp;
+                bp.u = read<u64>(csp.u -= sizeof(u64), 0);
+                pc.u = read<u64>(csp.u -= sizeof(u64), 0);
+            }
+
+            template<class type>
+            type read(u64 base, i64 offset){
+                
+            }
+
+            template<class type>
+            void write(type src, u64 base, i64 offset){
+
             }
 
             cpu_t(){
@@ -298,62 +521,6 @@
                 
                 xgen(ldi){
                     imm.load(ins & 0xfff, 12);
-                };
-
-                xgen(ldxi){
-                    
-                };
-
-                xgen(ldxit){
-                    
-                };
-
-                xgen(ldxu){
-                    
-                };
-
-                xgen(ldxut){
-                    
-                };
-
-                xgen(stxu){
-                    
-                };
-
-                xgen(stxut){
-                    
-                };
-
-                xgen(psh){
-                    
-                };
-
-                xgen(pop){
-                    
-                };
-
-                xgen(ldf){
-                    
-                };
-
-                xgen(ldft){
-                    
-                };
-
-                xgen(stf){
-                    
-                };
-
-                xgen(stft){
-                    
-                };
-
-                xgen(pshf){
-                    
-                };
-
-                xgen(popf){
-                    
                 };
 
                 #define xgen2(bits)     \
@@ -368,7 +535,7 @@
                     } else
 
                 xgen(shl){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
+                    opviii<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
                         xgen2(64) {
                             x.u    = b.u >> (64 - c.u);
                             a.u    = b.u << c.u;
@@ -379,7 +546,7 @@
                 };
 
                 xgen(shr){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
+                    opviii<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
                         xgen2(64) {
                             x.u    = b.u >> (c.u - 1);
                             a.u    = b.u << c.u;
@@ -390,7 +557,7 @@
                 };
 
                 xgen(sar){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
+                    opviii<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
                         xgen2(63){
                             x.u    = b.i >> (c.u - 1);
                             a.u    = b.i << c.u;
@@ -400,172 +567,343 @@
                     });
                 };
 
+                #undef  xgen2
+
                 xgen(bts){
 
                 };
 
-                xgen(movbx){
+                xgen(ldib){
+                    r[ins.a].u = read<i08>(r[ins.b].u, imm);
+                };
 
+                xgen(ldiw){
+                    r[ins.a].u = read<i16>(r[ins.b].u, imm);
+                };
+
+                xgen(ldid){
+                    r[ins.a].u = read<i32>(r[ins.b].u, imm);
+                };
+
+                xgen(ldiq){
+                    r[ins.a].u = read<i64>(r[ins.b].u, imm);
+                };
+
+                xgen(ldub){
+                    r[ins.a].u = read<u08>(r[ins.b].u, imm);
+                };
+
+                xgen(lduw){
+                    r[ins.a].u = read<u16>(r[ins.b].u, imm);
+                };
+
+                xgen(ldud){
+                    r[ins.a].u = read<u32>(r[ins.b].u, imm);
+                };
+
+                xgen(lduq){
+                    r[ins.a].u = read<u64>(r[ins.b].u, imm);
+                };
+
+                xgen(ldtib){
+                    r[ins.a].u = read<i08>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtiw){
+                    r[ins.a].u = read<i16>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtid){
+                    r[ins.a].u = read<i32>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtiq){
+                    r[ins.a].u = read<i64>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtub){
+                    r[ins.a].u = read<u08>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtuw){
+                    r[ins.a].u = read<u16>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtud){
+                    r[ins.a].u = read<u32>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldtuq){
+                    r[ins.a].u = read<u64>(r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(stb){
+                    write<u08>(r[ins.a].ub, r[ins.b].u, i64(imm));
+                };
+
+                xgen(stw){
+                    write<u16>(r[ins.a].uw, r[ins.b].u, i64(imm));
+                };
+
+                xgen(std){
+                    write<u32>(r[ins.a].ud, r[ins.b].u, i64(imm));
+                };
+
+                xgen(stq){
+                    write<u64>(r[ins.a].u, r[ins.b].u, i64(imm));
+                };
+
+                xgen(sttb){
+                    write<u08>(r[ins.a].ub, r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(sttw){
+                    write<u16>(r[ins.a].uw, r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(sttd){
+                    write<u32>(r[ins.a].ud, r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(sttq){
+                    write<u64>(r[ins.a].u, r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(ldfs){
+                    f[ins.a].fs       = read<f32>(r[ins.b].u, imm);
+                    sta.is_f64[ins.a] = false;
+                };
+
+                xgen(ldfd){
+                    f[ins.a].fd       = read<f64>(r[ins.b].u, imm);
+                    sta.is_f64[ins.a] = true;
+                };
+
+                xgen(ldtfs){
+                    f[ins.a].fs       = read<f32>(r[ins.b].u, t.i + i64(imm));
+                    sta.is_f64[ins.a] = false;
+                };
+
+                xgen(ldtfd){
+                    f[ins.a].fs       = read<f64>(r[ins.b].u, t.i + i64(imm));
+                    sta.is_f64[ins.a] = true;
+                };
+
+                xgen(stfs){
+                    write<f32>(f[ins.a].fs, r[ins.b].u, imm);
+                };
+
+                xgen(stfd){
+                    write<f64>(f[ins.a].fd, r[ins.b].u, imm);
+                };
+
+                xgen(sttfs){
+                    write<f32>(f[ins.a].fs, r[ins.b].u, t.i + i64(imm));
+                };
+
+                xgen(sttfd){
+                    write<f64>(f[ins.a].fd, r[ins.b].u, t.i + i64(imm));
+                };
+
+
+                xgen(pop){
+                    builtin_pop(r);
+                };
+
+                xgen(popf){
+                    builtin_pop(r);
+                };
+
+                xgen(psh){
+                    builtin_psh(r, not is_start_push);
+                };
+
+                xgen(pshs){
+                    builtin_psh(r, is_start_push);
+                };
+
+                xgen(pshf){
+                    builtin_psh(f, not is_start_push);
+                };
+
+                xgen(pshfs){
+                    builtin_psh(f, is_start_push);
+                };
+
+                xgen(movbx){
+                    r[ins.a].u = r[ins.b].ib;
                 };
 
                 xgen(movwx){
-
+                    r[ins.a].u = r[ins.b].iw;
                 };
 
                 xgen(movdx){
-
+                    r[ins.a].u = r[ins.b].id;
                 };
 
                 xgen(movix){
-
+                    r[ins.a].i = imm.load(ins.im4, 4);
                 };
 
                 xgen(movb){
-
+                    r[ins.a].u = r[ins.b].ub;
                 };
 
                 xgen(movw){
-
+                    r[ins.a].u = r[ins.b].uw;
                 };
 
                 xgen(movd){
-
+                    r[ins.a].u = r[ins.b].ud;
                 };
 
                 xgen(movq){
-
+                    r[ins.a].u = r[ins.b].u;
                 };
 
                 xgen(movfsi){
-
+                    f[ins.a].fs = imm.load(ins.im4, 4);
                 };
 
                 xgen(movfs){
-
+                    f[ins.a].fs = f[ins.b].fs;
                 };
 
                 xgen(movfdi){
-
+                    f[ins.a].fd = imm.load(ins.im4, 4);
                 };
 
                 xgen(movfd){
-
+                    f[ins.a].fd = f[ins.b].fd;
                 };
 
                 xgen(uq2fs){
-
+                    f[ins.a].fs = r[ins.b].u;
                 };
 
                 xgen(uq2fd){
-
+                    f[ins.a].fd = r[ins.b].u;
                 };
 
                 xgen(iq2fs){
-
+                    f[ins.a].fs = r[ins.b].i;
                 };
 
                 xgen(iq2fd){
-
+                    f[ins.a].fd = r[ins.b].i;
                 };
 
                 xgen(add){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
-                        builtn_add(a, b, c, false);
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_add(a, b, c, not with_cf);
                     });
                 };
 
                 xgen(adc){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
-                        builtn_add(a, b, c, true);
-                    });
-                };
-
-                xgen(sub){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
-                        builtin_sub(a, b, c, false);
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_add(a, b, c, with_cf);
                     });
                 };
 
                 xgen(sbb){
-                    opviii(r, [this](reg_t & a, reg_t b, reg_t c){
-                        builtin_sub(a, b, c, true);
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_sub(a, b, c, with_cf);
+                    });
+                };
+
+                xgen(sub){
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_sub(a, b, c, not with_cf);
                     });
                 };
 
                 xgen(mul){
-
+                    opviiix<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_mul(a, b, c);
+                    });
                 };
 
                 xgen(mulu){
-
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_mulu(a, b, c);
+                    });
                 };
 
                 xgen(mulx){
-
+                    opviiix<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        x = builtin_mul(a, b, c);
+                    });
                 };
 
                 xgen(mulxu){
-
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        x = builtin_mulu(a, b, c);
+                    });
                 };
 
                 xgen(div){
-
+                    opviiix<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_div(a, b, c);
+                    });
                 };
 
                 xgen(divu){
-
-                };
-
-                xgen(subp){
-
-                };
-
-                xgen(sbbp){
-
-                };
-
-                xgen(divp){
-
-                };
-
-                xgen(divup){
-
+                    opviiix<u64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        builtin_divu(a, b, c);
+                    });
                 };
 
                 xgen(andi){
-
+                    opiv<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        a.u    = b.u & c.u;
+                        sta.zf = a.u == 0;
+                    });
                 };
 
                 xgen(ori){
-
+                    opiv<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        a.u    = b.u | c.u;
+                        sta.zf = a.u == 0;
+                    });
                 };
 
                 xgen(nandi){
-
+                    opiv<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        a.u    = b.u & c.u;
+                        a.u    = ~a.u;
+                        sta.zf = a.u == 0;
+                    });
                 };
 
                 xgen(xori){
-
-                };
-
-                xgen(cmp){
-
-                };
-
-                xgen(fcmp){
-
+                    opiv<i64>(r, [this](reg_t & a, reg_t b, reg_t c){
+                        a.u    = b.u ^ c.u;
+                        sta.zf = a.u == 0;
+                    });
                 };
 
                 xgen(mask){
-
+                    u64 mask   = u64(1) << r[ins.b].u;
+                    r[ins.a].u = r[ins.a].u & (mask - 1);
+                    sta.zf     = r[ins.a].u == 0;
                 };
 
-                xgen(ldf){
-
+                xgen(ldbs){
+                    bit_range_t range = u64(imm);
+                    u64 mask = (u64(1) << (range.last_index + 1)) - 1;
+                    u64 bits = (r[ins.b].u & mask);
+                    bits     = (bits >> range.first_index);
                 };
 
-                xgen(stf){
-
+                xgen(stbs){
+                    bit_range_t range = u64(imm);
+                    u64 mask    = (u64(1) << (range.last_index - range.first_index + 1)) - 1;
+                    u64 v       = (r[ins.a].u & mask) << range.first_index;
+                    mask      <<= range.first_index;
+                    r[ins.b].u  = r[ins.b].u & u64(~mask);
+                    r[ins.b].u |= v;
+                    range.first_index;
                 };
 
                 xgen(sbc){
@@ -573,118 +911,144 @@
                 };
 
                 xgen(ios){
-
+                    r[ins.a].u = inc::index_of_first_set(r[ins.b].u);
+                    sta.zf     = r[ins.b].u == 0;
                 };
 
                 xgen(lis){
-
+                    r[ins.a].u = inc::index_of_last_set(r[ins.b].u);
+                    sta.zf     = r[ins.b].u == 0;
                 };
 
-                xgen(___){
+                // xgen(___){
 
+                // };
+
+                xgen(swp){
+                    inc::swap(& r[ins.a], & r[ins.b]);
                 };
 
-                xgen(swap){
-
+                xgen(swpf){
+                    inc::swap(& f[ins.a], & f[ins.b]);
+                    sta.is_f64[ins.a].swap(sta.is_f64[ins.b]);
                 };
 
                 xgen(lock){
-
+                    // TODO:===================================================================
                 };
 
                 xgen(ifeq){
-
+                    builtin_if(sta.eq);
                 };
 
                 xgen(ifne){
-
+                    builtin_if(not sta.eq);
                 };
 
                 xgen(ifcf){
-
+                    builtin_if(sta.cf);
                 };
 
                 xgen(ifnc){
-
+                    builtin_if(not sta.cf);
                 };
 
                 xgen(ifab){
-
+                    builtin_if(sta.ab);
                 };
 
                 xgen(ifae){
-
+                    builtin_if(sta.ab or sta.eq);
                 };
 
                 xgen(ifbt){
-
+                    builtin_if(not (sta.ab or sta.eq));
                 };
 
                 xgen(ifbe){
-
+                    builtin_if(not sta.ab);
                 };
 
                 xgen(ifgt){
-
+                    builtin_if(sta.gt);
                 };
 
                 xgen(ifge){
-
+                    builtin_if(sta.gt or sta.eq);
                 };
 
                 xgen(iflt){
-
+                    builtin_if(not (sta.gt or sta.eq));
                 };
 
                 xgen(ifle){
-
+                    builtin_if(not sta.gt);
                 };
 
                 xgen(ifov){
-
+                    builtin_if(sta.ov);
                 };
 
                 xgen(ifno){
-
+                    builtin_if(not sta.ov);
                 };
 
                 xgen(jmp){
+                    builtin_if(true);
+                };
 
+                xgen(ret){
+                    builtin_csp_pop();
                 };
 
                 xgen(call){
-
+                    builtin_csp_psh();
+                    pc.u      = r[ins.a].u;
                 };
 
-                xgen(fadd){
-
+                xgen(calli){
+                    builtin_csp_psh();
+                    uxx width = imm.load(ins.ab, 8).width();
+                    u64 mask  = u64(1) << width;
+                    pc.u     &= mask - 1;
+                    pc.u     |= u64(imm);
                 };
 
-                xgen(fsub){
-
+                xgen(addf){
+                    // TODO:===================================================================
                 };
 
-                xgen(fmul){
-
+                xgen(mulf){
+                    // TODO:===================================================================
                 };
 
-                xgen(fdiv){
-
+                xgen(subf){
+                    // TODO:===================================================================
                 };
 
-                xgen(fsubp){
-
-                };
-
-                xgen(fdivp){
-
+                xgen(divf){
+                    // TODO:===================================================================
                 };
 
                 #undef  xgen
             }
         };
-        
     }
 
 #endif
 
+namespace xuser::inc{
+    using ::mixc::draft_isa::cpu_t;
+}
+
+/*
+等效指令            |   实际指令
+------------------------------------------
+store   bp          ;   pushs   rx, ...
+mov     bp, sp      ;   
+push    ...         ;   
+
+call    func_name   ;   call    func_name
+mov     sp, bp      ;   
+load    bp          ;   
+*/
