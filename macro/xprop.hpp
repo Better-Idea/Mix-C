@@ -1,40 +1,34 @@
 #pragma once
 
-namespace mixc::macro_xprop{
-    template<class type>
-    struct repeat{
-        using item_t = type;
-    };
-}
-
-#define __xget__(token_get,name,...)                \
-token_get:                                          \
-    final & name(__VA_ARGS__ * get) const {         \
-        get[0] = (*(prop_ ## name *)this)();        \
-        return thex;                                \
-    }                                               \
-    __VA_ARGS__ name() const {                      \
-        return (*(prop_ ## name *)this)();          \
+#define __xget__(token_get,name,...)                        \
+token_get:                                                  \
+    final & name(__VA_ARGS__ * get) const {                 \
+        get[0] = (*(prop_ ## name<__VA_ARGS__> *)this)();   \
+        return thex;                                        \
+    }                                                       \
+    __VA_ARGS__ name() const {                              \
+        return (*(prop_ ## name<__VA_ARGS__> *)this)();     \
     }
 
-#define __xset__(token_set,name,...)                \
-token_set:                                          \
-    final & name(__VA_ARGS__ set) {                 \
-        (*(prop_ ## name *)this)(set);              \
-        return thex;                                \
+#define __xset__(token_set,name,...)                        \
+token_set:                                                  \
+    final & name(__VA_ARGS__ set) {                         \
+        (*(prop_ ## name<__VA_ARGS__> *)this)(set);         \
+        return thex;                                        \
     }
 
-#define __xprop__(token_get,token_set,name,...)     \
-private:                                            \
-    struct prop_ ## name;                           \
-    __xget__(token_get,name,__VA_ARGS__)            \
-    __xset__(token_set,name,__VA_ARGS__)            \
-private:                                            \
-    struct prop_ ## name :                          \
-        mixc::macro_xprop::repeat<__VA_ARGS__>
+#define __xprop__(token_get,token_set,name,...)             \
+private:                                                    \
+    template<class prop_item_t>                             \
+    struct prop_ ## name;                                   \
+    __xget__(token_get,name,__VA_ARGS__)                    \
+    __xset__(token_set,name,__VA_ARGS__)                    \
+private:                                                    \
+    template<class prop_item_t>                             \
+    struct prop_ ## name
 
-#define xr      item_t operator()()
-#define xw      void operator()(item_t value)
+#define xr      prop_item_t operator()()
+#define xw      void operator()(prop_item_t value)
 
 #define xpubget_pubset(name,...)    __xprop__(public   , public   , name,__VA_ARGS__)
 #define xpubget_proset(name,...)    __xprop__(public   , protected, name,__VA_ARGS__)
@@ -48,16 +42,16 @@ private:                                            \
 #define xpriget_proset(name,...)    __xprop__(private  , protected, name, __VA_ARGS__)
 #define xpriget_priset(name,...)    __xprop__(private  , private  , name, __VA_ARGS__)
 
-#define __xget_only__(token_get,name,...)           \
-token_get:                                          \
-    final & name(__VA_ARGS__ * get) const {         \
-        get[0] = the.name();                        \
-        return thex;                                \
-    }                                               \
+#define __xget_only__(token_get,name,...)                   \
+token_get:                                                  \
+    final & name(__VA_ARGS__ * get) const {                 \
+        get[0] = the.name();                                \
+        return thex;                                        \
+    }                                                       \
     __VA_ARGS__ name() const 
 
-#define __xset_only__(token_get,name,...)           \
-token_set:                                          \
+#define __xset_only__(token_get,name,...)                   \
+token_set:                                                  \
     final & name(__VA_ARGS__ get)
 
 #define xpubget(name,...)   __xget_only__(public   , name, __VA_ARGS__)
