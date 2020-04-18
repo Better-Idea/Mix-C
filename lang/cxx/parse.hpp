@@ -89,7 +89,7 @@
                     uxx v   = lut[dis & mask];
 
                     if (dis >= mask or v == lut_error){
-                        return parse_result<target>(0, cur - begin);
+                        return parse_result<target>(value, cur - begin);
                     }
                     else{
                         value = value * base + v;
