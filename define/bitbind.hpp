@@ -33,6 +33,13 @@
                 mask = type(1) << index;
             }
 
+            void swap_value(bitbind value){
+                bit_type a = the;
+                bit_type b = value;
+                the        = b;
+                value      = a;
+            }
+
             operator bit_type(){
                 return bit_type((ptr[0] & mask) != 0);
             }
