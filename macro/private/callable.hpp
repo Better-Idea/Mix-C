@@ -24,13 +24,10 @@
                 __object = nullptr;
             }
         };
-
-        inline const callable_t callable {};
     }
 
 #endif
 
 namespace xuser::inc{
-    using ::mixc::macro_private_callable::callable;
     using ::mixc::macro_private_callable::callable_t;
 }
