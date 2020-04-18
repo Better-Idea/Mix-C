@@ -1,6 +1,6 @@
 #include"lang/wxx/is_alpha.hpp"
 #include"lang/wxx/is_control.hpp"
-#include"lang/wxx/is_digtal.hpp"
+#include"lang/wxx/is_digital.hpp"
 #include"lang/wxx/is_hex.hpp"
 #include"lang/wxx/is_lower_hex.hpp"
 #include"lang/wxx/is_lower.hpp"
@@ -10,4 +10,3 @@
 #include"lang/wxx/is_whitespace.hpp"
 #include"lang/wxx/to_lower.hpp"
 #include"lang/wxx/to_upper.hpp"
-#include"lang/wxx.hpp"

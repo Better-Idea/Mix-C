@@ -46,10 +46,6 @@ namespace mixc::lang_wxx_is_control::xuser{
             result[0] = the.is_control();
             return thex;
         }
-
-        auto ret() const {
-            return inc::c08();
-        }
     };
 }
 
