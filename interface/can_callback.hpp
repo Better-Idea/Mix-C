@@ -7,6 +7,7 @@
         #include"macro/private/callable.hpp"
         #include"memop/signature.hpp"
         #include"memop/addressof.hpp"
+        #include"meta/has_cast.hpp"
         #include"meta/remove_membership.hpp"
     #pragma pop_macro("xuser")
 
@@ -20,8 +21,12 @@
             using base::operator==;
 
             can_callback(){}
+            can_callback(decltype(nullptr)){}
 
-            template<class object>
+            template<class object> requires inc::has_cast<
+                ret(object::*)(args...), 
+                decltype(& object::operator())
+            >
             can_callback(object const & impl){
                 __object    = inc::addressof(impl);
                 __func_list = (void **)signature::check(& object::operator());
@@ -38,23 +43,10 @@
             using the_t = can_callback<ret(args...)>;
             using the_t::the_t;
         };
-
-        struct sugar{
-            template<class callback>
-            auto operator * (callback const & call) const {
-                using lambda = decltype(& callback::operator());
-                using pure   = typename inc::remove_membership<lambda>::result;
-                return typename can_callback<pure>::the_t((callback &)call);
-            }
-        };
     }
-
-    #define xcb ::mixc::interface_can_callback::sugar() *
 
 #endif
 
 namespace xuser::inc{
     using ::mixc::interface_can_callback::can_callback;
 }
-
-#include"macro/private/callable.hpp"
