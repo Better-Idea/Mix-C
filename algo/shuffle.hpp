@@ -4,7 +4,7 @@
         #undef  xuser
         #define xuser mixc::algo_shuffle
         #include"define/base_type.hpp"
-        #include"macro/xrange.hpp"
+        #include"interface/ranger.hpp"
         #include"macro/xref.hpp"
         #include"math/random.hpp"
         #include"memop/swap.hpp"

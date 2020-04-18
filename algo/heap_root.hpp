@@ -6,11 +6,11 @@
         #include"define/base_type.hpp"
         #include"docker/transmitter.hpp"
         #include"dumb/mirror.hpp"
-        #include"macro/xrange.hpp"
+        #include"interface/can_compare.hpp"
+        #include"interface/ranger.hpp"
         #include"macro/xref.hpp"
         #include"memop/copy.hpp"
         #include"memory/new.hpp"
-        #include"interface/can_compare.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_heap_root{

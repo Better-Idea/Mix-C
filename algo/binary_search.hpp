@@ -9,7 +9,7 @@
         #define xuser mixc::algo_binary_search
         #include"define/base_type.hpp"
         #include"interface/can_compare.hpp"
-        #include"macro/xrange.hpp"
+        #include"interface/ranger.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_binary_search{
