@@ -59,7 +59,7 @@
             }
         public:
             tty_t(){
-                backcolor(inc::tty_color::black);
+                // backcolor(inc::tty_color::black);
                 forecolor(inc::tty_color::light_gray);
                 cursor_visiable(true);
             }
@@ -102,16 +102,27 @@
             final & clear() const {
                 if constexpr(xis_linux){
                     inc::print("\e[0m\e[0;0H\e[2J");
+                    // the.backcolor(back);
                     the.forecolor(fore);
-                    the.backcolor(back);
-                    inc::print_flush();
+                    the.flush();
                 }
+                return thex;
+            }
+
+            final & flush() const {
+                inc::print_flush();
                 return thex;
             }
             
             template<class a0, class ... args>
             final & write(a0 const & first, args const & ... list) const {
                 inc::print(first, list...);
+                return thex;
+            }
+            
+            template<class a0, class ... args>
+            final & write_line(a0 const & first, args const & ... list) const {
+                inc::print(first, list..., '\n');
                 return thex;
             }
         xgc_end();
