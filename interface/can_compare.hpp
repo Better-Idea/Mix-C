@@ -4,20 +4,15 @@
         #undef  xuser
         #define xuser mixc::interface_can_compare
         #include"define/base_type.hpp"
+        #include"interface/can_callback.hpp"
         #include"macro/xitf.hpp"
-        #include"macro/private/callable.hpp"
         #include"macro/xcmp.hpp"
         #include"memop/cmp.hpp"
     #pragma pop_macro("xuser")
     
     namespace mixc::interface_can_compare{
-        template<class type>
-        xitf(can_compare)
-            xitf_item(operator(), ixx,
-                xnt(left, type const &),
-                xnt(right, type const &)
-            );
-        xitf_end();
+        template<class item>
+        using can_compare = inc::can_callback<ixx(item const &, item const & right)>;
 
         template<class type>
         inline auto const & default_compare = 
@@ -31,5 +26,3 @@ namespace xuser::inc{
     using ::mixc::interface_can_compare::can_compare;
     using ::mixc::interface_can_compare::default_compare;
 }
-
-#include"macro/private/callable.hpp"
