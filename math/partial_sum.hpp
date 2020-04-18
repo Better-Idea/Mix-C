@@ -4,7 +4,7 @@
         #undef  xuser
         #define xuser mixc::math_partial_sum
         #include"define/base_type.hpp"
-        #include"macro/xrange.hpp"
+        #include"interface/ranger.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::math_partial_sum{

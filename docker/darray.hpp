@@ -6,8 +6,8 @@
         #include"define/base_type.hpp"
         #include"dumb/dummy_t.hpp"
         #include"gc/private/ref.hpp"
+        #include"interface/ranger.hpp"
         #include"macro/xgc.hpp"
-        #include"macro/xrange.hpp"
         #include"memop/cast.hpp"
     #pragma pop_macro("xuser")
 

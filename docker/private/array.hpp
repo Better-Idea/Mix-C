@@ -4,8 +4,9 @@
         #undef  xuser
         #define xuser mixc::docker_array
         #include"define/base_type.hpp"
+        #include"interface/ranger.hpp"
         #include"macro/xgc.hpp"
-        #include"macro/xrange.hpp"
+        #include"meta/has_cast.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_array{
@@ -35,6 +36,14 @@
 
             constexpr uxx length() const {
                 return count;
+            }
+
+            operator item *(){
+                return data;
+            }
+
+            operator const item *() const {
+                return data;
             }
         xgc_end();
 

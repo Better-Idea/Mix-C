@@ -10,9 +10,7 @@
 namespace some_pack{
     void test(){
         // 指定索引出现的比例
-        inc::probability<> distribution(
-            1, 2, 3
-        );
+        inc::probability<> distribution({ 1, 2, 3 });
 
         // 计算指定索引出现的频数
         inc::array<uxx, 3> counts {};
@@ -44,7 +42,7 @@ int main(){
         #include"define/base_type.hpp"
         #include"docker/darray.hpp"
         #include"docker/array.hpp"
-        #include"macro/xrange.hpp"
+        #include"interface/ranger.hpp"
         #include"math/random.hpp"
         #include"meta/is_same.hpp"
         #include"meta/unsigned_type.hpp"
@@ -58,12 +56,6 @@ int main(){
             inc::darray<item_t> guide;
         public:
             probability() = default;
-
-            template<class ... args>
-            probability(type first, type second, args const & ... list) : 
-                probability(inc::array_view { first, second, list... }){
-            }
-
             probability(inc::ranger<type> proportion) : 
                 guide(
                     inc::length(proportion.length())
