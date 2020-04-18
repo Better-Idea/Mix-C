@@ -11,6 +11,8 @@
         #define xuser mixc::lang_cxx_index_of_last_miss
         #include"define/base_type.hpp"
         #include"dumb/implicit.hpp"
+        #include"interface/can_compare.hpp"
+        #include"interface/initializer_list.hpp"
         #include"lang/cxx/index_of_first.hpp"
         #include"lang/cxx.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -42,14 +44,16 @@ namespace mixc::lang_cxx_index_of_last_miss::xuser{
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        uxx index_of_last_miss(item const * value, uxx count) const {
-            return the.index_of_last_miss(value, count);
+        uxx index_of_last_miss(
+            item                   value, 
+            inc::can_compare<item> compare = inc::default_compare<item>) const {
+            return the.index_of_last_miss(& value, 1, compare);
         }
 
-        template<class ... args>
-        uxx index_of_last_miss(item value, args const & ... list) const {
-            inc::implicit<item> group[] = { value, list... };
-            return index_of_last_miss((item *)group, 1 + sizeof...(args));
+        uxx index_of_last_miss(
+            inc::initializer_list<item> values, 
+            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            return the.index_of_last_miss(values.begin(), values.size(), compare);
         }
     };
 }

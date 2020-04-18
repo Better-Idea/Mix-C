@@ -10,9 +10,9 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_remove
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xindex_rollback.hpp"
-        #include"memory/alloc_callback.hpp"
         #include"memop/copy.hpp"
         #include"memop/swap.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -24,7 +24,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto remove(ixx start, ixx endx, inc::alloc_callback<item> alloc) const {
+            auto remove(ixx start, ixx endx, inc::can_alloc<item> alloc) const {
                 xindex_rollback(the.length(), start);
                 xindex_rollback(the.length(), endx);
 
@@ -48,11 +48,11 @@ namespace mixc::lang_cxx_remove::xuser{
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final remove(uxx start, inc::alloc_callback<item> alloc) const {
+        final remove(ixx start, inc::can_alloc<item> alloc) const {
             return the.remove(start, -1, alloc);
         }
 
-        final remove(uxx start, uxx endx, inc::alloc_callback<item> alloc) const {
+        final remove(ixx start, ixx endx, inc::can_alloc<item> alloc) const {
             return the.remove(start, endx, alloc);
         }
     };

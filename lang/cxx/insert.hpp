@@ -10,10 +10,10 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_insert
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xindex_rollback.hpp"
         #include"memop/copy.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto insert(ixx index, the_t value, inc::alloc_callback<item> alloc) const {
+            auto insert(ixx index, the_t value, inc::can_alloc<item> alloc) const {
                 xindex_rollback(the.length(), index, + 1);
                 uxx             target_length = the.length() + value.length();
                 the_t           r { alloc(target_length), target_length };
@@ -42,7 +42,7 @@ namespace mixc::lang_cxx_insert::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final insert(ixx index, final value, inc::alloc_callback<item> alloc) const {
+        final insert(ixx index, final value, inc::can_alloc<item> alloc) const {
             return the.insert(index, value, alloc);
         }
     };

@@ -10,9 +10,9 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_strlize
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"math/numeration_t.hpp"
-        #include"memory/alloc_callback.hpp"
         #include"meta/more_fit.hpp"
         #include"meta/unsigned_type.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -25,7 +25,7 @@
             using the_t = core<item>;
 
             template<class type>
-            auto strlize(type value, uxx base, asciis lut, inc::alloc_callback<item> alloc) const {
+            auto strlize(type value, uxx base, asciis lut, inc::can_alloc<item> alloc) const {
                 constexpr uxx i = inc::more_fit<type, u08, u16, u32, u64, i08, i16, i32, i64, f32, f64>;
                 u08  buf[64];
                 u08p ptr = buf;
@@ -78,19 +78,19 @@ namespace mixc::lang_cxx_strlize::xuser{
         using the_t = core<item>;
 
         #define xgen(type)                                                                      \
-        cxx(type value, inc::alloc_callback<item> alloc) :                                      \
+        cxx(type value, inc::can_alloc<item> alloc) :                                           \
             cxx(value, inc::numeration_t::dec, lower, alloc){                                   \
         }                                                                                       \
                                                                                                 \
-        cxx(type value, asciis case_t, inc::alloc_callback<item> alloc) :                       \
+        cxx(type value, asciis case_t, inc::can_alloc<item> alloc) :                            \
             cxx(value, inc::numeration_t::dec, case_t, alloc){                                  \
         }                                                                                       \
                                                                                                 \
-        cxx(type value, inc::numeration_t base, inc::alloc_callback<item> alloc) :              \
+        cxx(type value, inc::numeration_t base, inc::can_alloc<item> alloc) :                   \
             cxx(value, base, lower, alloc){                                                     \
         }                                                                                       \
                                                                                                 \
-        cxx(type value, inc::numeration_t base, asciis case_t, inc::alloc_callback<item> alloc){\
+        cxx(type value, inc::numeration_t base, asciis case_t, inc::can_alloc<item> alloc){     \
             thex = the.strlize(value, type(base), case_t, alloc);                               \
         }
 

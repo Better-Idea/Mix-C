@@ -10,9 +10,9 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_reverse
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx/slice.hpp"
         #include"lang/cxx.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -22,7 +22,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto reverse(inc::alloc_callback<item> alloc) const {
+            auto reverse(inc::can_alloc<item> alloc) const {
                 return the.slice(-1, 0, alloc);
             }
         };
@@ -35,7 +35,7 @@ namespace mixc::lang_cxx_reverse::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final reverse(inc::alloc_callback<item> alloc) const {
+        final reverse(inc::can_alloc<item> alloc) const {
             return the.reverse(alloc);
         }
     };

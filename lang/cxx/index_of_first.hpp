@@ -12,6 +12,7 @@
         #include"define/base_type.hpp"
         #include"interface/can_callback.hpp"
         #include"interface/can_compare.hpp"
+        #include"interface/initializer_list.hpp"
         #include"lang/cxx.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
@@ -27,10 +28,12 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            uxx index_of_first(item value, inc::can_compare<item> compare) const {
-                for (uxx i = 0; i < the.length(); i++){
-                    if (compare(the[i], value) == 0){
-                        return i;
+            uxx index_of_first(item const * value, uxx length, inc::can_compare<item> compare) const {
+                for(uxx i = 0; i < the.length(); i++){
+                    for(uxx ii = 0; ii < length; ii++){
+                        if (compare(the[i], value[ii]) == 0){
+                            return i;
+                        }
                     }
                 }
                 return not_exist;
@@ -68,14 +71,14 @@
                 return not_exist;
             }
 
-            the_t & index_of_first(
+            void index_of_first(
                 the_t                              value, 
                 inc::can_callback<void(uxx index)> match,
                 inc::can_compare<item>             compare) const {
 
                 for(auto cur = the;;){
                     if (uxx i = cur.index_of_first(value, compare); i == not_exist){
-                        return the;
+                        return;
                     }
                     else{
                         cur = cur.backward(i + value.length());
@@ -96,7 +99,13 @@ namespace mixc::lang_cxx_index_of_first::xuser {
         uxx index_of_first(
             item                   value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.index_of_first(value, compare);
+            return the.index_of_first(& value, 1, compare);
+        }
+
+        uxx index_of_first(
+            inc::initializer_list<item> values, 
+            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            return the.index_of_first(values.begin(), values.size(), compare);
         }
 
         uxx index_of_first(
@@ -109,7 +118,8 @@ namespace mixc::lang_cxx_index_of_first::xuser {
             final                              value, 
             inc::can_callback<void(uxx index)> match,
             inc::can_compare<item>             compare = inc::default_compare<item>) const {
-            return (final &)the.index_of_first(value, match, compare);
+            the.index_of_first(value, match, compare);
+            return thex;
         }
     };
 }

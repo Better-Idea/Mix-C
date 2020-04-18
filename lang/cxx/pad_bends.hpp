@@ -10,10 +10,10 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_pad_bends
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
+            auto pad_bends(uxx left_count, uxx right_count, item value, inc::can_alloc<item> alloc) const {
                 uxx             total_length = left_count + right_count + the.length();
                 the_t           r(alloc(total_length), total_length);
                 inc::fill<item>(r, value, left_count);
@@ -41,7 +41,7 @@ namespace mixc::lang_cxx_pad_bends::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final pad_bends(uxx left_count, uxx right_count, item value, inc::alloc_callback<item> alloc) const {
+        final pad_bends(uxx left_count, uxx right_count, item value, inc::can_alloc<item> alloc) const {
             return the.pad_bends(left_count, right_count, value, alloc);
         }
     };

@@ -38,20 +38,12 @@ namespace mixc::lang_cxx_is_ends_with::xuser{
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item> {
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = mixc::lang_cxx_is_ends_with::core<item>;
+        using the_t = ::mixc::lang_cxx_is_ends_with::core<item>;
 
         bool is_ends_with(
             final                  value, 
             inc::can_compare<item> compare = inc::default_compare<item>) const {
             return the.is_ends_with(value, compare);
-        }
-
-        final & is_ends_with(
-            final                  value, 
-            bool                 * receive,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            receive[0] = the.is_ends_with(value, compare);
-            return thex;
         }
     };
 }

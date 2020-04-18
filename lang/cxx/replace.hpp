@@ -11,11 +11,11 @@
         #define xuser mixc::lang_cxx_replace
         #include"define/base_type.hpp"
         #include"docker/darray.hpp"
+        #include"interface/can_alloc.hpp"
         #include"interface/can_compare.hpp"
         #include"lang/cxx/index_of_first.hpp"
         #include"lang/cxx.hpp"
         #include"memop/copy.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -34,7 +34,7 @@
                 the_t                     old_value, 
                 the_t                     new_value, 
                 inc::can_compare<item>    compare, 
-                inc::alloc_callback<item> alloc) const {
+                inc::can_alloc<item> alloc) const {
 
                 constexpr uxx buf_size = 64;
                 struct {
@@ -63,7 +63,7 @@
                 pack.dis          = new_value.length() - old_value.length();
                 pack.total_length = the.length();
 
-                the.index_of_first(old_value, xcb[&](uxx index){
+                the.index_of_first(old_value, [&](uxx index){
                     pack.push(index);
                 });
 
@@ -88,7 +88,7 @@
                 };
 
                 auto && change = 
-                    new_value.is_empty() ? xcb remove : xcb replace;
+                    new_value.is_empty() ?  remove :  replace;
 
                 for(uxx i = 0; i < top; i++){
                     change(pack.buf[i]);
@@ -108,15 +108,15 @@ namespace mixc::lang_cxx_replace::xuser{
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final replace(final old_value, final new_value, inc::alloc_callback<item> alloc) const {
+        final replace(final old_value, final new_value, inc::can_alloc<item> alloc) const {
             return the.replace(old_value, new_value, inc::default_compare<item>, alloc);
         }
 
         final replace(
-            final                     old_value, 
-            final                     new_value, 
-            inc::can_compare<item>    compare, 
-            inc::alloc_callback<item> alloc) const {
+            final                  old_value, 
+            final                  new_value, 
+            inc::can_compare<item> compare, 
+            inc::can_alloc<item>   alloc) const {
             return the.replace(old_value, new_value, compare, alloc);
         }
     };

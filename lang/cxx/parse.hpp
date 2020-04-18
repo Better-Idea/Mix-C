@@ -52,7 +52,7 @@
         private:
             template<class a> friend struct parse_result;
             target value; 
-            uxx  error_index;
+            uxx    error_index;
         };
 
         // using item = char;

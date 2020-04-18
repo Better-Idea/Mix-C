@@ -10,12 +10,12 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_trim_bends
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
+        #include"interface/initializer_list.hpp"
         #include"lang/cxx/clone.hpp"
         #include"lang/cxx/index_of_first_miss.hpp"
         #include"lang/cxx/index_of_last_miss.hpp"
         #include"lang/cxx.hpp"
-        #include"lang/private/layout_args.hpp"
-        #include"memory/alloc_callback.hpp"
         #include"meta/is_same.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
@@ -26,30 +26,20 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            template<class ... args>
-            auto trim_bends(item first, args const & ... list) const {
-                item group[sizeof...(args) + 1]; // 包含'\0'
+            auto trim_bends(inc::initializer_list<item>         values, inc::can_alloc<item> alloc) const {
+                auto token  = the_t(values.begin(), values.size());
+                auto offset = the.index_of_first_miss(values);
 
-                auto            may_alloc   = inc::layout_args(group, first, list...);
-                constexpr auto  need_alloc  = inc::is_same<decltype(may_alloc), inc::alloc_callback<item>>;
-                auto            token       = the_t(group, sizeof...(args) + 1 - need_alloc);
-                auto            offset      = the.index_of_first_miss(token, token.length());
-
-                if constexpr (need_alloc){
-                    if (offset == not_exist){
-                        return inc::cxx<item>();
-                    }
+                if (offset == not_exist){
+                    return inc::cxx<item>();
                 }
 
-                auto temp   = the.backward(offset);
+                auto temp = the.backward(offset);
                 temp.length(
-                    temp.index_of_last_miss(
-                        token,
-                        token.length()
-                    )
+                    temp.index_of_last_miss(values)
                 );
 
-                if constexpr (need_alloc){
+                if (alloc != nullptr){
                     temp = temp.clone(may_alloc);
                 }
                 return temp;
@@ -64,9 +54,12 @@ namespace mixc::lang_cxx_trim_bends::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        template<class ... args>
-        final trim_bends(item first, args const & ... list) const {
-            return the.trim_bends(first, list...);
+        final trim_bends(item value, inc::can_alloc<item> alloc = nullptr) const {
+            return the.trim_bends({ value }, alloc);
+        }
+
+        final trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
+            return the.trim_bends(values, alloc);
         }
     };
 }

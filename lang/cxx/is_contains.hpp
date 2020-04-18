@@ -11,60 +11,35 @@
         #define xuser mixc::lang_cxx_is_contains
         #include"define/base_type.hpp"
         #include"interface/can_compare.hpp"
+        #include"interface/initializer_list.hpp"
         #include"lang/cxx/index_of_first.hpp"
         #include"lang/cxx.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
-
-    namespace mixc::lang_cxx_is_contains{
-        template<class item>
-        struct core : inc::cxx<item> {
-            using inc::cxx<item>::cxx;
-            using the_t = core<item>;
-
-            bool is_contains(item value, inc::can_compare<item> compare) const {
-                return the.index_of_first(value, compare) != not_exist;
-            }
-
-            bool is_contains(the_t value, inc::can_compare<item> compare) const {
-                return the.index_of_first(value, compare) != not_exist;
-            }
-        };
-    }
 #endif
 
 namespace mixc::lang_cxx_is_contains::xuser{
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item>{
         using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
+        using the_t = inc::cxx<item>;
 
         bool is_contains(
             item                   value,
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.is_contains(value, compare);
+            return the.index_of_first(value, compare) != not_exist;
+        }
+
+        bool is_contains(
+            inc::initializer_list<item> values,
+            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            return the.index_of_first(values.begin(), values.size(), compare) != not_exist;
         }
 
         bool is_contains(
             final                  value,
             inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.is_contains(value, compare);
-        }
-
-        final & is_contains(
-            item                   value,
-            bool                 * receive,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            receive[0] = the.is_contains(value, compare);
-            return thex;
-        }
-
-        final & is_contains(
-            final                  value,
-            bool                 * receive,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            receive[0] = the.is_contains(value, compare);
-            return thex;
+            return the.index_of_first(value, compare) != not_exist;
         }
     };
 }

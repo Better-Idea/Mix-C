@@ -9,10 +9,10 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_clone
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xgc.hpp"
         #include"memop/copy.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -22,8 +22,8 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto clone(inc::alloc_callback<item> alloc) const {
-                the_t r = { alloc(the.length()), the.length() };
+            auto clone(inc::can_alloc<item> alloc) const {
+                the_t  r{ alloc(the.length()), the.length() };
                 inc::copy<item>(r, the, the.length());
                 return r;
             }
@@ -37,7 +37,7 @@ namespace mixc::lang_cxx_clone::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final clone(inc::alloc_callback<item> alloc) const {
+        final clone(inc::can_alloc<item> alloc) const {
             return the.clone(alloc);
         }
     };

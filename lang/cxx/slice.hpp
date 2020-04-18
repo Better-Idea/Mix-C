@@ -10,10 +10,10 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_slice
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xdebug_fail.hpp"
         #include"macro/xindex_rollback.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -42,7 +42,7 @@
                 return the.backward(start).length(end - start + 1);
             }
 
-            auto slice(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
+            auto slice(ixx start, ixx end, inc::can_alloc<item> alloc) const {
                 rollback(start, end);
 
                 uxx    target_length;
@@ -83,11 +83,11 @@ namespace mixc::lang_cxx_slice::xuser {
             return the.slice(start, end);
         }
 
-        final slice(ixx start, inc::alloc_callback<item> alloc) const {
+        final slice(ixx start, inc::can_alloc<item> alloc) const {
             return slice(start, -1, alloc);
         }
 
-        final slice(ixx start, ixx end, inc::alloc_callback<item> alloc) const {
+        final slice(ixx start, ixx end, inc::can_alloc<item> alloc) const {
             return the.slice(start, end, alloc);
         }
     };

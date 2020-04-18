@@ -10,10 +10,10 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_pad_left
         #include"define/base_type.hpp"
+        #include"interface/can_alloc.hpp"
         #include"lang/cxx.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
-        #include"memory/alloc_callback.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -23,7 +23,7 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto pad_left(uxx count, item value, inc::alloc_callback<item> alloc) const {
+            auto pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
                 uxx             length = the.length() + count;
                 the_t           r(alloc(length), length);
                 inc::fill<item>(r, value, count);
@@ -40,7 +40,7 @@ namespace mixc::lang_cxx_pad_left::xuser {
         using xusing_lang_cxx::cxx<final, item>::cxx;
         using the_t = core<item>;
 
-        final pad_left(uxx count, item value, inc::alloc_callback<item> alloc) const {
+        final pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
             return the.pad_left(count, value, alloc);
         }
     };
