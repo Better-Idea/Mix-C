@@ -7,7 +7,7 @@
         #include"macro/private/callable.hpp"
         #include"memop/signature.hpp"
         #include"memop/addressof.hpp"
-        #include"meta/has_cast.hpp"
+        #include"meta/more_fit.hpp"
         #include"meta/remove_membership.hpp"
     #pragma pop_macro("xuser")
 
@@ -23,14 +23,22 @@
             can_callback(){}
             can_callback(decltype(nullptr)){}
 
-            template<class object> requires inc::has_cast<
-                ret(object::*)(args...), 
-                decltype(& object::operator())
-            >
-            can_callback(object const & impl){
-                __object    = inc::addressof(impl);
-                __func_list = (void **)signature::check(& object::operator());
-            }
+            #ifdef __faker__
+                template<class object>
+                can_callback(object const &){}
+            #else
+                template<class object> requires (
+                    inc::more_fit<
+                        decltype(& object::operator()), 
+                        ret(object::*)(args...) const, 
+                        ret(object::*)(args...)
+                    > != not_exist
+                )
+                can_callback(object const & impl){
+                    __object    = inc::addressof(impl);
+                    __func_list = (void **)signature::check(& object::operator());
+                }
+            #endif
 
             ret operator()(args ... list) const {
                 return signature::call(__object, (void *)__func_list, list...);

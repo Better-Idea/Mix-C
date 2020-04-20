@@ -12,7 +12,7 @@
     
     namespace mixc::interface_can_compare{
         template<class item>
-        using can_compare = inc::can_callback<ixx(item const &, item const & right)>;
+        using can_compare = inc::can_callback<ixx(item const &, item const &)>;
 
         template<class type>
         inline auto const & default_compare = 
