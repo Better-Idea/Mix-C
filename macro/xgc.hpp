@@ -3,81 +3,111 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::macro_xgc
-        #include"dumb/place_holder.hpp"
-        #include"macro/private/xlist.hpp"
-        #include"macro/private/xprefix.hpp"
-        #include"meta_seq/vlist.hpp"
+        #include"meta/is_same.hpp"
         #include"meta_seq/vmarge.hpp"
+        #include"meta_seq/vappend.hpp"
+        #include"meta_seq/vlist.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_xtypeid{
         template<class type> union __typeid;
     }
 
-    namespace mixc::macro_xgc{
-        struct none{
-            using member_list = inc::vlist<>;
+    namespace mixc::macro_xgc {
+        template<class a0, class ... args>
+        struct first_t {
+            using type = a0;
         };
 
-        template<class a0 = none, class ... args>
-        inline auto expand_member_list(){
-            using current = typename a0::member_list;
-            if constexpr (sizeof...(args) == 0){
-                return current();
+        template<class type>
+        struct fake { type * item; };
+
+        template<template<int> class member_list, int i = 0, class vlist = inc::vlist<>>
+        inline auto append() {
+            if constexpr (member_list<i>::is_empty) {
+                return vlist();
             }
-            else{
-                using next = decltype(expand_member_list<args...>());
-                using set = typename inc::vmarge<current, next>::new_list;
-                return set();
+            else {
+                using new_list = typename inc::vappend<vlist, member_list<i>::gc_item_t>::new_list;
+                return append<member_list, i + 1, new_list>();
             }
         }
 
         template<class type>
-        struct fake{
-            type item;
-
-            template<class ... args>
-            fake(args const & ... list) : item(list...) {}
+        concept has_gc_member_t = requires(typename type::template gc_member_t<0> t) {
+            t = t;
         };
 
-        inline u32 __class_id = u32(-1) >> 1;
+        template<has_gc_member_t a0, class ... args>
+        inline auto marge();
+
+        template<class a0, class ... args>
+        inline auto marge() {
+            if constexpr (sizeof...(args) == 0) {
+                return inc::vlist<>();
+            }
+            else {
+                return marge<args...>();
+            }
+        }
+
+        template<has_gc_member_t a0, class ... args>
+        inline auto marge() {
+            using vlist = decltype(append<a0::template gc_member_t>());
+
+            if constexpr (sizeof...(args) == 0) {
+                return vlist();
+            }
+            else {
+                using tlist_next = decltype(marge<args...>());
+                return typename inc::vmarge<vlist, tlist_next>::new_list();
+            }
+        }
+
+        inline u32 class_id = u32(-1) >> 1;
     }
 
-    #define xgcx(name,tmpl,...)                                                         \
-    struct name __xprefix_keep_tmpl_ ## tmpl __xlist__(first_base_,base_,__VA_ARGS__) { \
-    private:                                                                            \
-        using __self = name;                                                            \
-        using __expand_member_list =                                                    \
-            decltype(                                                                   \
-                ::mixc::macro_xgc::expand_member_list<                                  \
-                    __xlist__(first_member_,member_,__VA_ARGS__)                        \
-                >()                                                                     \
-            );                                                                          \
-        template<class __type__> friend union ::mixc::macro_xtypeid::__typeid;          \
-        static constexpr const char * __self_name = # name;                             \
-        static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;    \
-    public:
+    #define __xgc_item__(name,...)                              \
+        __VA_ARGS__ name;                                       \
+    public:                                                     \
+        template<> struct gc_member_t<__start - __COUNTER__>{   \
+            static constexpr auto is_empty    = false;          \
+            static constexpr auto gc_name     = # name;         \
+            static constexpr auto gc_item_t   =                 \
+                & the_t::name;                                  \
+        }
 
-    #define xgc(name,...)  xgcx(name,,__VA_ARGS__)
+    #define __xgc_name_xthe(...)    #__VA_ARGS__
 
-    #define xgc_fields(...)                                                             \
-    __xlist__(field_,field_,__VA_ARGS__);                                               \
-    public:                                                                             \
-        using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                   \
-            __expand_member_list,                                                       \
-            ::mixc::meta_seq_vlist::vlist<                                              \
-                __xlist__(first_member_list_,member_list_,__VA_ARGS__)                  \
-            >                                                                           \
-        >::new_list                                                                     \
+    #define xins(...)                                           \
+    public:                                                     \
+        template<> struct gc_member_t<__start - __COUNTER__>{   \
+            static constexpr auto is_empty    = false;          \
+            static constexpr auto gc_item_t   =                 \
+                & ::mixc::macro_xgc::fake<__VA_ARGS__>::item;   \
+        }
 
-    #define xgc_self_management(...)                                                    \
-    public:                                                                             \
-        using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                   \
-            __expand_member_list,                                                       \
-            ::mixc::meta_seq_vlist::vlist<                                              \
-                __xlist__(first_self_management_,self_management_,__VA_ARGS__)          \
-            >                                                                           \
-        >::new_list                                                                     \
+    #define xpub(name,...)  public   : __xgc_item__(name,__VA_ARGS__)
+    #define xpro(name,...)  protected: __xgc_item__(name,__VA_ARGS__)
+    #define xpri(name,...)  private  : __xgc_item__(name,__VA_ARGS__)
 
-    #define xgc_end()       }
+    #define xgc_fields(meta,...)                                \
+    public:                                                     \
+        using the_t =                                           \
+            typename ::mixc::macro_xgc::first_t<meta>::type;    \
+        template<int i> struct gc_member_t {                    \
+            static constexpr auto is_empty = true;              \
+            static constexpr auto gc_name = __xgc_name_ ## meta;\
+            static inline auto gc_class_id =                    \
+                ::mixc::macro_xgc::class_id++;                  \
+        };                                                      \
+    private:                                                    \
+        enum { __start = __COUNTER__ - 1,  };                   \
+        __VA_ARGS__                                             \
+    public:                                                     \
+        using member_list = decltype(                           \
+            ::mixc::macro_xgc::marge<meta>()                    \
+        )
+
+    #define xthe(...)    __VA_ARGS__
 #endif
