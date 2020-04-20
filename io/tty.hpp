@@ -13,11 +13,12 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::io_tty{
-        xgc(tty_t)
+        struct tty_t{
             xgc_fields(
-                xpro(fore               , mutable inc::tty_color_t),
-                xpro(back               , mutable inc::tty_color_t),
-                xpro(visiable_of_cursor , mutable bool),
+                xthe(tty_t),
+                xpro(fore               , mutable inc::tty_color_t);
+                xpro(back               , mutable inc::tty_color_t);
+                xpro(visiable_of_cursor , mutable bool);
             );
             using the_t = tty_t;
             using final = tty_t;
@@ -125,7 +126,7 @@
                 inc::print(first, list..., '\n');
                 return thex;
             }
-        xgc_end();
+        };
 
         inline tty_t tty;
     }

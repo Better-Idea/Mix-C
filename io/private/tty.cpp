@@ -1,7 +1,7 @@
 /*
 问题：
 - ctrl+m 会被映射成 ctrl+j
-- 部分 ctrl+字母 和 ascii 的转移符重合，比如 \a \b \t \v \n
+- 部分 ctrl+字母 和 ascii 的转义符重合，比如 \a \b \t \v \n
 */
 
 #define xuser mixc::io_private_tty

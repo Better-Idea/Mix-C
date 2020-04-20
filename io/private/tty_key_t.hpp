@@ -77,16 +77,17 @@
         };
 
 
-        xgc(tty_key_t)
+        struct tty_key_t{
             static constexpr uxx max_length = 6;
             using items = u08[max_length];
             using final = tty_key_t;
             using the_t = tty_key_t;
 
             xgc_fields(
-                xpri(type,   key_type),
-                xpri(values, items),
-                xpri(count,  uxx)
+                xthe(tty_key_t),
+                xpri(type,   key_type);
+                xpri(values, items);
+                xpri(count,  uxx);
             );
 
             tty_key_t() :
@@ -140,7 +141,7 @@
             u08 & operator[](uxx index) {
                 return values[index];
             }
-        xgc_end();
+        };
     }
 
 #endif
