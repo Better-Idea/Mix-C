@@ -11,36 +11,39 @@
     namespace mixc::docker_shared_ptr{
         template<class type> struct shared_ptr;
         template<class type>
-        xgc(shared_ptr, xpub(inc::ref_ptr<shared_ptr<type>, type>))
-            using meta = inc::ref_ptr<shared_ptr<type>, type>;
-            using the_t = shared_ptr<type>;
+        struct shared_ptr : inc::ref_ptr<shared_ptr<type>, type>{
+            using base_t = inc::ref_ptr<shared_ptr<type>, type>;
+
+            xgc_fields(
+                xthe(shared_ptr<type>, base_t)
+            );
 
             shared_ptr() = default;
 
             explicit shared_ptr(inc::ini) : 
-                meta(inc::ini_now) {}
+                base_t(inc::ini_now) {}
 
             template<class ... args>
             explicit shared_ptr(inc::ini, args const & ... list) : 
-                meta(inc::ini_now, list...) {}
+                base_t(inc::ini_now, list...) {}
 
             template<class ... args>
             shared_ptr<type> & operator()(ini, args const & ... list){
-                using metap = meta *;
-                the.~meta();
-                new (metap(this)) meta(inc::length(0), list...);
+                using metap = base_t *;
+                the.~base_t();
+                new (metap(this)) base_t(inc::length(0), list...);
                 return the;
             }
 
             operator type & () const {
-                return meta::attr();
+                return base_t::attr();
             }
 
             type const & operator= (type const & value){
                 operator type & () = value;
                 return value;
             }
-        xgc_end();
+        };
     }
 
 #endif

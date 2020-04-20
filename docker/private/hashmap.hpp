@@ -39,7 +39,7 @@
         };
 
         template<class key_t, class val_t>
-        xgc(core, xpub(inc::self_management))
+        struct hashmap_t : public inc::self_management{
         private:
             template<class root_t, class member_list> friend union mixc::gc_tuple::tuple;
 
@@ -56,15 +56,14 @@
                     key(key), value(value){}
             } * pairp;
 
-            xgc(node)
-                using the_t = node;
-                node   * next;
-                uxx      hash_code;
-                u08      mirror[sizeof(pair)];
+            struct node{
+                using mirror_t = u08[sizeof(pair)];
 
-                xgc_self_management(
-                    xpub(key_t),
-                    xpub(val_t)
+                xgc_fields(
+                    xthe(node, key_t, val_t),
+                    xpub(next,      node *);
+                    xpub(hash_code, uxx);
+                    xpub(mirror,    mirror_t);
                 );
 
                 node() : next(this) {}
@@ -118,7 +117,6 @@
                     return inc::nullref;
                 }
 
-                // 必须接收返回值
                 void take_out(uxx hash, key_t const & key, inc::transmitter<pair> * receive){
                     if (is_empty()){
                         return;
@@ -177,37 +175,32 @@
                 pair * operator->() const {
                     return (pair *)mirror;
                 }
-            xgc_end();
-
-            using the_t = core<key_t, val_t>;
+            };
 
             static constexpr uxx multi         = 4;
             static constexpr uxx start_capcity = 16;
-            uxx    lines                       = start_capcity;
-            uxx    count                       = 0;
-            node * nodes                       = the_t::alloc(lines);
 
-            xgc_self_management(
-                xpub(node)
+            xgc_fields(
+                xthe(hashmap_t<key_t, val_t>, node),
+                xpro(lines,  uxx);
+                xpro(count,  uxx);
+                xpro(nodes,  node *);
             );
         public:
 
             /*构造/析构区*/
         public:
-            core() = default;
-            core(the_t const &) = delete;
-            core(uxx start_capcity) : 
-                lines(inc::align(start_capcity)){
+            hashmap_t() : hashmap_t(start_capcity){}
+            hashmap_t(the_t const &) = delete;
+            hashmap_t(uxx start_capcity) : 
+                lines(inc::align(start_capcity)), 
+                count(0), 
+                nodes(the_t::alloc(lines)) {
             }
         protected:
-            ~core(){
-                if (nodes == nullptr){
-                    return;
-                }
-                for (uxx i = 0; i < lines; i++){
-                    nodes[i].free();
-                }
-                this->free();
+            ~hashmap_t(){
+                the.clear();
+                the.free();
             }
 
             /*接口区*/
@@ -233,8 +226,11 @@
             }
 
             the_t & clear() {
-                this->~core();
-                new (this) core();
+                if (nodes != nullptr){
+                    for (uxx i = 0; i < lines; i++){
+                        nodes[i].free();
+                    }
+                }
                 return the;
             }
 
@@ -322,7 +318,7 @@
                 return the;
             }
 
-            // 该函数用于 core 内部扩容和压缩
+            // 该函数用于 hashmap_t 内部扩容和压缩
             // 要求 map 是新分配的空间，并且内部无元素
             the_t & resize_to(the_t & map) {
                 for (uxx i = 0; i < lines; i++){
@@ -383,11 +379,11 @@
                 }
                 return nodes;
             }
-        xgc_end();
+        };
 
         template<class final, class key_t, class val_t>
-        struct hashmap : core<key_t, val_t> {
-            using the_t = core<key_t, val_t>;
+        struct hashmap : hashmap_t<key_t, val_t> {
+            using the_t = hashmap_t<key_t, val_t>;
             using the_t::the_t;
 
             final & clear() {
@@ -406,7 +402,6 @@
                 key_t const &        key, 
                 val_t const &        value, 
                 hashmap_set_result * state = nullptr) {
-
                 val_t * receive;
                 return (final &)the.set(key, value, xref receive, state);
             }
@@ -416,7 +411,6 @@
                 val_t const &        value, 
                 val_t **             receive, 
                 hashmap_set_result * state = nullptr) {
-
                 return (final &)the.set(key, value, receive, state);
             }
 
@@ -424,7 +418,6 @@
                 key_t const &           key, 
                 val_t *                 value, 
                 hashmap_remove_result * state = nullptr) {
-
                 return (final &)the.take_out(key, value, state);
             }
         };
@@ -438,4 +431,3 @@ namespace xuser::inc{
     using xusing_docker_hashmap::hashmap_take_out_result;
     using xusing_docker_hashmap::hashmap_set_result;
 }
-

@@ -14,10 +14,11 @@
 
     namespace mixc::docker_transmitter{
         template<class type>
-        xgc(transmitter)
+        struct transmitter{
             xgc_fields(
-                xpri(data, inc::mirror<type>),
-                xpri(is_none, mutable bool)
+                xthe(transmitter<type>),
+                xpri(data,    inc::mirror<type>);
+                xpri(is_none, mutable bool);
             );
 
             transmitter() : 
@@ -50,7 +51,7 @@
             }
 
             xis_nullptr(is_none == true);
-        xgc_end();
+        };
     }
 
 #endif

@@ -16,17 +16,16 @@
 
         template<class type, uxx rank = 1> struct darray;
         template<class type, uxx rank>
-        xgc(darray, 
-            xpub(
-                inc::ref_array<
-                    darray<type, rank>,
-                    typename darray<type, rank - 1>::the_t
-                >
-            )
-        )
+        struct darray : public inc::ref_array<
+            darray<type, rank>,
+            typename darray<type, rank - 1>::the_t
+        >{
             using item_t = typename darray<type, rank - 1>::the_t;
-            using meta   = inc::ref_array<darray<type>, type>;
-            using the_t  = darray<type, rank>;
+            using base_t = inc::ref_array<darray<type, rank>, item_t>;
+            
+            xgc_fields(
+                xthe(darray<type, rank>, base_t)
+            );
             
             xrange(item_t);
 
@@ -60,7 +59,7 @@
             const item_t & operator[](uxx index) const {
                 return meta::operator[](index);
             }
-        xgc_end();
+        };
 
         template<class type>
         struct darray<type, 0>{

@@ -5,8 +5,16 @@
 
     namespace xuser::inc{
         template<class item, uxx count, uxx ... rest>
-        struct array : xusing_docker_array::array<array<item, count, rest...>, item, count, rest...>{
-            using xusing_docker_array::array<array<item, count, rest...>, item, count, rest...>::array;
+        struct array : 
+            xusing_docker_array::array<
+                array<item, count, rest...>, 
+                item, count, rest...
+            >{
+
+            using xusing_docker_array::array<
+                array<item, count, rest...>, 
+                item, count, rest...
+            >::array;
         };
 
         template<class type, class ... args>

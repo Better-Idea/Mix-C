@@ -11,26 +11,26 @@
 
     namespace mixc::docker_array{
         template<class type, uxx count = 0, uxx ... rest>
-        xgc(core)
-            using the_t = core<type, count, rest...>;
-            using item  = typename core<type, rest...>::the_t;
-            using itemp = item *;
-            using items = item[count];
+        struct array_t{
+            using item_t = typename array_t<type, rest...>::the_t;
+            using items  = item_t[count];
 
             xgc_fields(
-                xpro(data, items)
+                xthe(array_t<type, count, rest...>),
+                xpro(data, items);
             );
-            xrange(item);
+
+            xrange(item_t);
 
             template<class ... args>
-            core(args const & ... list) : 
-                data { item(list)... } {}
+            array_t(args const & ... list) : 
+                data { item_t(list)... } {}
             
-            item & operator[] (uxx index) {
+            item_t & operator[] (uxx index) {
                 return data[index];
             }
 
-            const item & operator[] (uxx index) const {
+            const item_t & operator[] (uxx index) const {
                 return data[index];
             }
 
@@ -38,23 +38,23 @@
                 return count;
             }
 
-            operator item *(){
+            operator item_t *(){
                 return data;
             }
 
-            operator const item *() const {
+            operator const item_t *() const {
                 return data;
             }
-        xgc_end();
+        };
 
         template<class type>
-        struct core<type>{
+        struct array_t<type>{
             using the_t = type;
         };
 
         template<class final, class type, uxx count, uxx ... rest>
-        struct array : core<type, count, rest...> {
-            using the_t = core<type, count, rest...>;
+        struct array : array_t<type, count, rest...> {
+            using the_t = array_t<type, count, rest...>;
             using the_t::the_t;
         };
     }
