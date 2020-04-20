@@ -10,8 +10,8 @@
         protected:
             void  *   __object;
             void  **  __func_list;
-            using base   = callable_t;
-            using __self = callable_t;
+            using base  = callable_t;
+            using the_t = callable_t;
         public:
             callable_t(){
                 __object    = nullptr;

@@ -62,8 +62,8 @@
     struct name{                                                                                        \
         template<class call>                                                                            \
         name(call && item){                                                                             \
-            mixc::macro_xassert::result r(__func__, ## __VA_ARGS__);                                    \
+            ::mixc::macro_xassert::result r(__func__, ## __VA_ARGS__);                                  \
             item(r);                                                                                    \
         }                                                                                               \
-    } xlink2(__, __COUNTER__) = [](mixc::macro_xassert::result & __test)
+    } xlink2(__, __COUNTER__) = [](::mixc::macro_xassert::result & __test)
 #endif

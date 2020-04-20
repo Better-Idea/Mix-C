@@ -25,7 +25,7 @@
     #undef  xon
 
     // memop/memory.hpp
-    #define xon    0
+    #define xon    1
     xsw(im_alloc_with_initial       , xon);
     xsw(im_alloc                    , xon);
     xsw(im_free                     , xon);
@@ -33,7 +33,7 @@
     #undef  xon
 
     // gc/private/ref
-    #define xon    1
+    #define xon    0
     xsw(im_gc_$token_mix            , xon);
     xsw(im_gc_$meta                 , xon);
     xsw(im_gc_meta_routing_entry    , xon);
@@ -41,7 +41,7 @@
     #undef  xon
 
     // gc/private/tuple
-    #define xon    1
+    #define xon    0
     xsw(im_gc_tuple_routing         , xon);
     #undef  xon
 
