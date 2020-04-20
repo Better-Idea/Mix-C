@@ -18,9 +18,10 @@ auto function(args const & ... list){
 
     namespace mixc::dumb_implicit{
         template<class a>
-        xgc(implicit)
+        struct implicit{
             xgc_fields(
-                xpub(value, a),
+                xthe(implicit<a>),
+                xpub(value, a);
             );
 
             template<class b>
@@ -34,7 +35,7 @@ auto function(args const & ... list){
             auto operator -> () const {
                 return & value;
             }
-        xgc_end();
+        };
     }
 
 #endif

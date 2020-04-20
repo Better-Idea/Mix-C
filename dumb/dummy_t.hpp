@@ -8,12 +8,13 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::dumb_dummy_t{
-        xgc(dummy_t)
-            xgc_fields();
-
+        struct dummy_t {
+            xgc_fields(
+                xthe(dummy_t)
+            );
             template<class ... args>
             constexpr dummy_t(args const & ...){}
-        xgc_end();
+        };
     }
 
 #endif

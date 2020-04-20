@@ -11,18 +11,24 @@
     namespace mixc::dumb_struct_t{
         template<class type, bool is_class> struct struct_t;
         template<class type>
-        xgcx(struct_t, xtmpl(type, true), xpub(type))
-            xgc_fields();
-            using type::type;
-            struct_t() = default;
-            struct_t(type const & self) : 
-                type(self) {}
-        xgc_end();
+        struct struct_t<type, true> : type {
+            xgc_fields(
+                xthe(struct_t<type, true>, type)
+            );
+
+            struct_t(struct_t const &) = default;
+
+            template<class ... args>
+            struct_t(args const & ... list) :
+                type(list...) {}
+
+        };
 
         template<class type>
-        xgcx(struct_t, xtmpl(type, false))
+        struct struct_t<type, false>{
             xgc_fields(
-                xpro(data, type)
+                xthe(struct_t<type, false>),
+                xpro(data, type);
             );
 
             template<class ... args>
@@ -37,7 +43,7 @@
             operator const type & () const {
                 return data;
             }
-        xgc_end();
+        };
     }
 
 #endif
