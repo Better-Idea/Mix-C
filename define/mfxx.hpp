@@ -14,14 +14,16 @@
             uxx     decimal_bits, 
             uxx     exp_bits, 
             uxx     exp_offset>
-        xgc(mfxx)
-            using the_t = mfxx<
-                float_type, 
-                equivalent_type, 
-                decimal_bits, 
-                exp_bits, 
-                exp_offset
-            >;
+        struct mfxx{
+            xgc_fields(
+                xthe(mfxx<
+                    float_type,
+                    equivalent_type,
+                    decimal_bits,
+                    exp_bits,
+                    exp_offset
+                >)
+            );
 
             union {
                 struct {
@@ -42,8 +44,6 @@
                 } real_exp;
             };
 
-            xgc_fields();
-
             mfxx() : value(0) { }
             mfxx(float_type value) : value(value) { }
 
@@ -57,7 +57,7 @@
             operator const float_type & () const {
                 return value;
             }
-        xgc_end();
+        };
 
         using mf32 = mfxx<f32, u32, 23, 8, 127 >;
         using mf64 = mfxx<f64, u64, 52, 11, 1023>;

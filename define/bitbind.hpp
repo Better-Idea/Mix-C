@@ -9,13 +9,13 @@
 
     namespace mixc::define_bitbind{
         template<class type, class bit_type = bool>
-        xgc(bitbind)
-            using the_t = bitbind;
+        struct bitbind{
             using final = bitbind;
             
             xgc_fields(
-                xpro(ptr, type *),
-                xpro(mask, type)
+                xthe(bitbind<type, bit_type>),
+                xpro(ptr,  type *);
+                xpro(mask, type);
             );
 
             bitbind() : bitbind(nullptr, 0) {}
@@ -43,7 +43,7 @@
             operator bit_type(){
                 return bit_type((ptr[0] & mask) != 0);
             }
-        xgc_end();
+        };
     }
 
 #endif

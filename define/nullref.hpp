@@ -9,8 +9,10 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::define_nullref_t{
-        xgc(nullref_t)
-            xgc_fields();
+        struct nullref_t{
+            xgc_fields(
+                xthe(nullref_t)
+            );
 
             template<class a> friend auto operator == (a const & value, nullref_t) {
                 return inc::addressof(value) == nullptr;
@@ -32,7 +34,7 @@
             operator a & () const {
                 return *(a *)this;
             }
-        xgc_end();
+        };
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wnull-dereference"
