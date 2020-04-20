@@ -8,25 +8,23 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_wxx{
-        template<class type>
-        xgc(core)
+        template<class final, class type>
+        struct wxx{
             xgc_fields(
-                xpro(data, type)
+                xthe(wxx<final, type>),
+                xpro(data, type);
             );
         public:
-            core() = default;
-            core(core const &) = default;
-            core(type value) : data(value){}
+            wxx() = default;
+            wxx(wxx const &) = default;
+            wxx(type value) : data(value){}
+            template<class final_t>
+            wxx(wxx<final_t, type> const& self) :
+                wxx((the_t &)self) {
+            }
             operator type & (){
                 return data;
             }
-        xgc_end();
-
-        template<class final, class type>
-        struct wxx : core<type> {
-            using core<type>::core;
-            wxx(core<type> const & self) : 
-                core<type>(self){}
         };
     }
 #endif

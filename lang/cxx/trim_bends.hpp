@@ -26,12 +26,12 @@
             using inc::cxx<item>::cxx;
             using the_t = core<item>;
 
-            auto trim_bends(inc::initializer_list<item>         values, inc::can_alloc<item> alloc) const {
+            auto trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
                 auto token  = the_t(values.begin(), values.size());
                 auto offset = the.index_of_first_miss(values);
 
                 if (offset == not_exist){
-                    return inc::cxx<item>();
+                    return the_t();
                 }
 
                 auto temp = the.backward(offset);
@@ -40,7 +40,7 @@
                 );
 
                 if (alloc != nullptr){
-                    temp = temp.clone(may_alloc);
+                    temp = temp.clone(alloc);
                 }
                 return temp;
             }

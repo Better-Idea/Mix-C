@@ -34,7 +34,7 @@
             }
 
             auto () const {}
-        xgc_end();
+        };
     }
 
     namespace mixc::lang_sxx::inc{

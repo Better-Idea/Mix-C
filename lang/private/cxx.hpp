@@ -11,15 +11,14 @@
 
     namespace mixc::lang_cxx{
         template<class final, class item>
-        xgc(cxx)
+        struct cxx{
         private:
             inline static item empty = item(0);
         public:
-            using the_t = cxx<final, item>;
-
             xgc_fields(
-                xpro(ptr,   item *),
-                xpro(count, uxx)
+                xthe(cxx<final, item>),
+                xpro(ptr,   item *);
+                xpro(count, uxx);
             );
 
             cxx() : 
@@ -88,14 +87,12 @@
             xpubget(is_empty, bool){
                 return length() == 0;
             };
-        xgc_end();
+        };
     }
 
-    #ifdef xos64
+    #if xos64
         #define xc08(str)      xsv(char, "0123456789abcdef", str)
-    #endif
-
-    #ifdef xos32
+    #elif xos32
         #define xc08(str)      xsv(char, "01234567", str)
     #endif
 #endif

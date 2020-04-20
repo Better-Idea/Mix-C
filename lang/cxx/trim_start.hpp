@@ -35,7 +35,7 @@
                     return the.backward(offset);
                 }
                 else {
-                    return the.backward(offset).clone(may_alloc);
+                    return the.backward(offset).clone(alloc);
                 }
             }
         };
