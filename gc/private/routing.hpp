@@ -12,8 +12,7 @@
         #undef  xuser
         #define xuser mixc::gc_routing
         #include"define/base_type.hpp"
-        #include"meta/is_class.hpp"
-        #include"meta/remove_membership.hpp"
+        #include"meta/is_class.hpp"         
         #include"meta_seq/tappend.hpp"
         #include"meta_seq/tdeque.hpp"
         #include"meta_seq/tlist.hpp"
@@ -28,6 +27,18 @@
         template<class root>
         struct routing{
         private:
+            template<class meta> struct origin {
+                using type = meta;
+            };
+
+            template<class object, class meta> struct origin<meta object::*> {
+                using type = meta;
+            };
+
+            template<class object, class meta> struct origin<meta * object::*> {
+                using type = meta;
+            };
+
             // attach 用于将 current 与它的成员类型列表 member_list 中的每一个成员类型添加连接关系
             // member_list 的所有成员都被 current 包含
             // 所以对于任意成员类型 first，都有 tkv<first, current> 连接关系
@@ -37,7 +48,7 @@
             private:
                 template<class first, class ... args, class ... result_args>
                 static auto invoke(tlist<first, args...>, tlist<result_args...>){
-                    using without_membership = typename remove_membership<first>::result;
+                    using without_membership = typename origin<first>::type;
 
                     if constexpr(is_class<without_membership>){
                         return invoke(
@@ -68,7 +79,7 @@
             static auto invoke(active_list, result_kvlist, visited_list){
                 using pair = tdeque<active_list>;
                 using new_root = typename pair::item;
-                using new_root_without_membership = typename remove_membership<new_root>::result;
+                using new_root_without_membership = typename origin<new_root>::type;
                 using current_active_list = typename pair::new_list;
                 
                 if constexpr(

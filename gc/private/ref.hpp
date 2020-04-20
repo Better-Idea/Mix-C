@@ -31,6 +31,10 @@
         using visited_ptr_t = voidp;
 
         struct info_t {
+            xgc_fields(
+                xthe(info_t)
+            );
+
             uxx can_arrive_root : 1;
             uxx visited         : sizeof(uxx) * 8 - 1;
 
@@ -44,21 +48,23 @@
 
         inline hashmap<visited_ptr_t, info_t> gc_map;
 
+
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
-        xgc(meta, xpub(self_management))
-            using the_t       = meta<impl, item, attribute, is_array>;
+        struct meta : self_management {
             using the_length  = typename cif<is_array, token_plus, token>::result;
             using token_mix_t = token_mix<item, attribute, the_length>;
-            using member_list = vlist<
-                ((attribute the_t::*)nullptr),
-                ((item the_t::*)nullptr)
-            >;
+
+            xgc_fields(
+                xthe(meta<impl, item, attribute, is_array>),
+                xins(attribute);
+                xins(item);
+            );
 
             meta() : mem(nullptr) { }
 
             template<class ... args>
-            meta(length length, args const & ... list) {
+            meta(inc::length length, args const & ... list) {
                 mem = alloc(length);
 
                 for (uxx i = 0; i < length; i++) {
@@ -68,7 +74,7 @@
 
             template<class ... args>
             meta(ini, args const & ... list) {
-                mem = alloc(length(0), list...);
+                mem = alloc(inc::length(0), list...);
             }
 
             meta(the_t const & value){
@@ -81,7 +87,6 @@
                 using guide = decltype(make_guide<impl>());
                 constexpr bool need_gc = not is_same<guide, tlist<>>;
                 token_mix_t *  tmp = nullptr;
-                guide          gui;
                 uxx            cnt;
 
                 if (tmp = atom_swap(& mem, tmp); tmp == nullptr) { // enter only once
@@ -167,7 +172,10 @@
                     r.degree_dvalue
                 );
 
-                if (gc_map.clear(); r.degree_dvalue <= 0){
+                gc_map.clear();
+                gc_map.resize();
+
+                if (r.degree_dvalue <= 0){
                     the.free();
                 }
                 else if constexpr (tin<guide, item>){
@@ -195,7 +203,7 @@
                 if (auto & info = gc_map.get(mem); info == nullref){
                     routing_result r;
                     attribute *    ptr = mem;
-                    info_t    *    i;
+                    info_t    *    i = nullptr;
 
                     xdebug(im_gc_meta_routing, 
                         mem,
@@ -249,7 +257,7 @@
                     )
                 );
             }
-        xgc_end();
+        };
     }
 
 #endif
@@ -257,14 +265,14 @@
 namespace xuser::inc{
     template<class impl, class type>
     using ref_ptr = 
-        mixc::gc_ref::meta<
+        ::mixc::gc_ref::meta<
             impl, 
-            mixc::gc_ref::dummy_t, 
-            mixc::gc_ref::inc::struct_t<type>, 
+            ::mixc::gc_ref::dummy_t, 
+            type, 
             false
         >;
 
     template<class impl, class item, class attribute = mixc::gc_ref::dummy_t>
     using ref_array = 
-        mixc::gc_ref::meta<impl, item, attribute, true>;
+        ::mixc::gc_ref::meta<impl, item, attribute, true>;
 }

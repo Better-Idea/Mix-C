@@ -67,7 +67,7 @@
 
         
         struct token_plus : token {
-            token_plus(uxx length) : length(length), token(0) { }
+            token_plus(uxx length) : token(0), length(length) { }
         protected:
             template<class item> friend struct mixc::macro_xsv::static_string_holder;
             uxx length;
