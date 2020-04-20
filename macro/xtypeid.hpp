@@ -22,9 +22,30 @@
             union{
                 operator asciis() const {
                     #define xgen(target)      else if constexpr (is_same<type, target>){ return # target; }
+                    constexpr int len       = 32;
+                    constexpr int leave_out = 3;
+                    static char the_name[len + leave_out + 1/* \0 */] = { 0 };
 
                     if constexpr (is_class<the_type>){
-                        return the_type::__self_name;
+                        auto ptr = the_type::template gc_member_t<-1>::gc_name;
+                        the_name[len + 0] = '.';
+                        the_name[len + 1] = '.';
+                        the_name[len + 2] = '.';
+
+                        if (the_name[0] == 0) for (int i = 0; i < len; i++) {
+                            if (auto c = ptr[i];
+                                ('a' <= c and c <= 'z') or
+                                ('A' <= c and c <= 'Z') or
+                                ('0' <= c and c <= '9') or
+                                ('$' == c) or
+                                ('_' == c)) {
+                                the_name[i] = ptr[i];
+                            }
+                            else {
+                                the_name[i] = '\0';
+                            }
+                        }
+                        return the_name;
                     }
 
                     xgen(char)
@@ -67,7 +88,7 @@
                     enum { __start = __COUNTER__ + 1 };
 
                     if constexpr (is_class<the_type>){
-                        return the_type::__class_id;
+                        return the_type::template gc_member_t<-1>::gc_class_id;
                     }
 
                     xgen(char)
