@@ -17,7 +17,7 @@ constexpr bool is_32bit          = sizeof(void *) == 4;
 #endif
 
 #ifndef xis_x86
-    #define xis_86          0
+    #define xis_x86         0
 #else
     constexpr bool stack_down_group = true;
 #endif
@@ -32,6 +32,10 @@ constexpr bool is_32bit          = sizeof(void *) == 4;
 
 #ifndef xis_mips
     #define xis_mips        0
+#endif
+
+#if not (xos64 or xos32)
+    #error "you need define one os mode like \"#define xos64    1\""
 #endif
 
 #if not (xis_x86 || xis_arm || xis_risc_v || xis_mips)
