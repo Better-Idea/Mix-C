@@ -1,9 +1,5 @@
-#pragma once
-#define xnt             xnt__
-#define xpub(...)       pub__(__VA_ARGS__)
-#define xpro(...)       pro__(__VA_ARGS__)
-#define xpri(...)       pri__(__VA_ARGS__)
-#define xtmpl(...)      tmpl__(__VA_ARGS__)
+#ifndef xpack_macro_private_xprefix
+#define xpack_macro_private_xprefix
 
 #define __xprefix_
 #define __xprefix_first_base_
@@ -30,7 +26,7 @@
 #define __xprefix_member_pro__(...)                     , __VA_ARGS__
 #define __xprefix_member_pri__(...)                     , __VA_ARGS__
 
-#define __xprefix_field_
+#define __xprefix_field_none
 #define __xprefix_field_pub__(name,...)                 public:     __VA_ARGS__ name;
 #define __xprefix_field_pro__(name,...)                 protected:  __VA_ARGS__ name;
 #define __xprefix_field_pri__(name,...)                 private:    __VA_ARGS__ name;
@@ -84,3 +80,4 @@
 
 #define __xprefix_fields_
 #define __xprefix_fields_xnt__(first,...)               ; __VA_ARGS__ first
+#endif
