@@ -35,6 +35,9 @@
     using mixc_w16p     = mixc_w16  *;
     using mixc_voidp    = void      *;
 
+    using size_t        = long unsigned int;
+    #define size_t      size_t
+
     #define i08         mixc_i08
     #define i16         mixc_i16
     #define i32         mixc_i32
