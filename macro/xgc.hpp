@@ -3,7 +3,7 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::macro_xgc
-        #include"meta/is_same.hpp"
+        #include"meta/is_class.hpp"
         #include"meta_seq/vmarge.hpp"
         #include"meta_seq/vappend.hpp"
         #include"meta_seq/vlist.hpp"
@@ -33,34 +33,24 @@
             }
         }
 
-        template<class type>
-        concept has_gc_member_t = requires(typename type::template gc_member_t<0> t) {
-            t = t;
-        };
-
-        template<has_gc_member_t a0, class ... args>
-        inline auto marge();
-
         template<class a0, class ... args>
         inline auto marge() {
-            if constexpr (sizeof...(args) == 0) {
+            if constexpr (inc::is_class<a0>){
+                using vlist = decltype(append<a0::template gc_member_t>());
+
+                if constexpr (sizeof...(args) == 0) {
+                    return vlist();
+                }
+                else{
+                    using tlist_next = decltype(marge<args...>());
+                    return typename inc::vmarge<vlist, tlist_next>::new_list();
+                }
+            }
+            else if constexpr (sizeof...(args) == 0) {
                 return inc::vlist<>();
             }
-            else {
+            else{
                 return marge<args...>();
-            }
-        }
-
-        template<has_gc_member_t a0, class ... args>
-        inline auto marge() {
-            using vlist = decltype(append<a0::template gc_member_t>());
-
-            if constexpr (sizeof...(args) == 0) {
-                return vlist();
-            }
-            else {
-                using tlist_next = decltype(marge<args...>());
-                return typename inc::vmarge<vlist, tlist_next>::new_list();
             }
         }
 
