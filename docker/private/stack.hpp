@@ -16,7 +16,7 @@
         struct stack{
             struct node : inc::struct_t<item_t>{
                 xgc_fields(
-                    xthe(node, inc::struct_t<item_t>),
+                    xiam(node, inc::struct_t<item_t>),
                     xpub(next, node *)
                 );
 
@@ -30,8 +30,8 @@
             using nodep = node *;
 
             xgc_fields(
-                xthe(stack<item_t>, node),
-                xpub(top, mutable nodep);
+                xiam(stack<item_t>, node),
+                xpub(top, mutable nodep)
             );
 
             stack(){

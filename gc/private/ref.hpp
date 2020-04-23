@@ -32,7 +32,7 @@
 
         struct info_t {
             xgc_fields(
-                xthe(info_t)
+                xiam(info_t)
             );
 
             uxx can_arrive_root : 1;
@@ -56,9 +56,9 @@
             using token_mix_t = token_mix<item, attribute, the_length>;
 
             xgc_fields(
-                xthe(meta<impl, item, attribute, is_array>),
-                xins(attribute);
-                xins(item);
+                xiam(meta<impl, item, attribute, is_array>),
+                xhas(attribute),
+                xhas(item)
             );
 
             meta() : mem(nullptr) { }

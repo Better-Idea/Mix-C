@@ -16,8 +16,8 @@
             using items  = item_t[count];
 
             xgc_fields(
-                xthe(array_t<type, count, rest...>),
-                xpro(data, items);
+                xiam(array_t<type, count, rest...>),
+                xpro(data, items)
             );
 
             xrange(item_t);

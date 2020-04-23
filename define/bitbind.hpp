@@ -13,7 +13,7 @@
             using final = bitbind;
             
             xgc_fields(
-                xthe(bitbind<type, bit_type>),
+                xiam(bitbind<type, bit_type>),
                 xpro(ptr,  type *);
                 xpro(mask, type);
             );

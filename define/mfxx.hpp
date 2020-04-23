@@ -16,7 +16,7 @@
             uxx     exp_offset>
         struct mfxx{
             xgc_fields(
-                xthe(mfxx<
+                xiam(mfxx<
                     float_type,
                     equivalent_type,
                     decimal_bits,

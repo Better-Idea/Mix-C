@@ -10,7 +10,7 @@
     namespace mixc::dumb_dummy_t{
         struct dummy_t {
             xgc_fields(
-                xthe(dummy_t)
+                xiam(dummy_t)
             );
             template<class ... args>
             constexpr dummy_t(args const & ...){}

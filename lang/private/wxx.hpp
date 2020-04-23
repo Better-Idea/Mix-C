@@ -11,8 +11,8 @@
         template<class final, class type>
         struct wxx{
             xgc_fields(
-                xthe(wxx<final, type>),
-                xpro(data, type);
+                xiam(wxx<final, type>),
+                xpro(data, type)
             );
         public:
             wxx() = default;

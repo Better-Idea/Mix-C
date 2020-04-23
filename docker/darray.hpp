@@ -24,7 +24,7 @@
             using base_t = inc::ref_array<darray<type, rank>, item_t>;
             
             xgc_fields(
-                xthe(darray<type, rank>, base_t)
+                xiam(darray<type, rank>, base_t)
             );
             
             xrange(item_t);

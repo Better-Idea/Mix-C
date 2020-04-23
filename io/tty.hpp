@@ -15,10 +15,10 @@
     namespace mixc::io_tty{
         struct tty_t{
             xgc_fields(
-                xthe(tty_t),
-                xpro(fore               , mutable inc::tty_color_t);
-                xpro(back               , mutable inc::tty_color_t);
-                xpro(visiable_of_cursor , mutable bool);
+                xiam(tty_t),
+                xpro(fore               , mutable inc::tty_color_t),
+                xpro(back               , mutable inc::tty_color_t),
+                xpro(visiable_of_cursor , mutable bool)
             );
             using the_t = tty_t;
             using final = tty_t;

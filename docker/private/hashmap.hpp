@@ -1,4 +1,4 @@
-#ifndef xpack_docker_hashmap
+﻿#ifndef xpack_docker_hashmap
 #define xpack_docker_hashmap
     #pragma push_macro("xuser")
         #undef  xuser
@@ -60,10 +60,11 @@
                 using mirror_t = u08[sizeof(pair)];
 
                 xgc_fields(
-                    xthe(node, key_t, val_t),
-                    xpub(next,      node *);
-                    xpub(hash_code, uxx);
-                    xpub(mirror,    mirror_t);
+                    //xiam(node, key_t, val_t),
+                    xiam(node),
+                    xpub(next,      node *),
+                    xpub(hash_code, uxx),
+                    xpub(mirror,    mirror_t)
                 );
 
                 node() : next(this) {}
@@ -181,10 +182,10 @@
             static constexpr uxx start_capcity = 16;
 
             xgc_fields(
-                xthe(hashmap_t<key_t, val_t>, node),
-                xpro(lines,  uxx);
-                xpro(count,  uxx);
-                xpro(nodes,  node *);
+                xiam(hashmap_t<key_t, val_t>, node),
+                xpro(lines,  uxx),
+                xpro(count,  uxx),
+                xpro(nodes,  node *)
             );
         public:
 
@@ -213,7 +214,7 @@
             }
 
             inc::transmitter<val_t> take_out(key_t const & key) {
-                inc::transmitter<pair>    mem;
+                inc::transmitter<pair>  mem;
                 inc::transmitter<val_t> r;
                 auto a = addressing(key);
                 

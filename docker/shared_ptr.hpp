@@ -15,7 +15,7 @@
             using base_t = inc::ref_ptr<shared_ptr<type>, type>;
 
             xgc_fields(
-                xthe(shared_ptr<type>, base_t)
+                xiam(shared_ptr<type>, base_t)
             );
 
             shared_ptr() = default;

@@ -84,10 +84,10 @@
             using the_t = tty_key_t;
 
             xgc_fields(
-                xthe(tty_key_t),
-                xpri(type,   key_type);
-                xpri(values, items);
-                xpri(count,  uxx);
+                xiam(tty_key_t),
+                xpri(type,   key_type),
+                xpri(values, items),
+                xpri(count,  uxx)
             );
 
             tty_key_t() :

@@ -10,7 +10,7 @@
     namespace mixc::define_nan{
         struct nan_t{
             xgc_fields(
-                xthe(nan_t)
+                xiam(nan_t)
             );
 
             constexpr nan_t(){}

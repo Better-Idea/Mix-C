@@ -16,9 +16,9 @@
         template<class type>
         struct transmitter{
             xgc_fields(
-                xthe(transmitter<type>),
-                xpri(data,    inc::mirror<type>);
-                xpri(is_none, mutable bool);
+                xiam(transmitter<type>),
+                xpri(data,    inc::mirror<type>),
+                xpri(is_none, mutable bool)
             );
 
             transmitter() : 

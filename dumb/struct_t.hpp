@@ -13,7 +13,7 @@
         template<class type>
         struct struct_t<type, true> : type {
             xgc_fields(
-                xthe(struct_t<type, true>, type)
+                xiam(struct_t<type, true>, type)
             );
 
             struct_t(struct_t const &) = default;
@@ -27,8 +27,8 @@
         template<class type>
         struct struct_t<type, false>{
             xgc_fields(
-                xthe(struct_t<type, false>),
-                xpro(data, type);
+                xiam(struct_t<type, false>),
+                xpro(data, type)
             );
 
             template<class ... args>

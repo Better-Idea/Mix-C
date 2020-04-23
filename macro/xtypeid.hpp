@@ -27,7 +27,7 @@
                     static char the_name[len + leave_out + 1/* \0 */] = { 0 };
 
                     if constexpr (is_class<the_type>){
-                        auto ptr = the_type::template gc_member_t<-1>::gc_name;
+                        auto ptr = the_type::__self_name;
                         the_name[len + 0] = '.';
                         the_name[len + 1] = '.';
                         the_name[len + 2] = '.';
@@ -88,7 +88,7 @@
                     enum { __start = __COUNTER__ + 1 };
 
                     if constexpr (is_class<the_type>){
-                        return the_type::template gc_member_t<-1>::gc_class_id;
+                        return the_type::__class_id;
                     }
 
                     xgen(char)

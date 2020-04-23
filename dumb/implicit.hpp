@@ -20,8 +20,8 @@ auto function(args const & ... list){
         template<class a>
         struct implicit{
             xgc_fields(
-                xthe(implicit<a>),
-                xpub(value, a);
+                xiam(implicit<a>),
+                xpub(value, a)
             );
 
             template<class b>

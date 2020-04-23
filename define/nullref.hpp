@@ -11,7 +11,7 @@
     namespace mixc::define_nullref_t{
         struct nullref_t{
             xgc_fields(
-                xthe(nullref_t)
+                xiam(nullref_t)
             );
 
             template<class a> friend auto operator == (a const & value, nullref_t) {

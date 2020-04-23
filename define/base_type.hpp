@@ -34,9 +34,11 @@
     using mixc_f64p     = mixc_f64  *;
     using mixc_w16p     = mixc_w16  *;
     using mixc_voidp    = void      *;
-
-    using size_t        = long unsigned int;
-    #define size_t      size_t
+    
+    #ifndef _MSC_BUILD
+        using size_t        = long unsigned int;
+        #define size_t      size_t
+    #endif
 
     #define i08         mixc_i08
     #define i16         mixc_i16

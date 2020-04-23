@@ -16,9 +16,9 @@
             inline static item empty = item(0);
         public:
             xgc_fields(
-                xthe(cxx<final, item>),
-                xpro(ptr,   item *);
-                xpro(count, uxx);
+                xiam(cxx<final, item>),
+                xpro(ptr,   item *),
+                xpro(count, uxx)
             );
 
             cxx() : 
