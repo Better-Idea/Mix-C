@@ -48,22 +48,26 @@
             mutable data  dat;
             mutable voidp func;
         public:
-            template<class impl> requires
-                inc::has_cast<item &(impl::*)(uxx), & impl::operator[]> or
-                inc::has_cast<item &(impl::*)(uxx) const, & impl::operator[]>
-            ranger(impl const & imp) {
-                if constexpr (inc::is_based_on<data, impl>){
-                    dat    = imp;
-                    func   = inc::signature<item &, uxx>::check(& impl::operator[]);
+            #ifndef __faker__
+                template<class impl> ranger(impl const &){}
+            #else
+                template<class impl> requires
+                    inc::has_cast<item &(impl::*)(uxx), & impl::operator[]> or
+                    inc::has_cast<item &(impl::*)(uxx) const, & impl::operator[]>
+                ranger(impl const & imp) {
+                    if constexpr (inc::is_based_on<data, impl>){
+                        dat    = imp;
+                        func   = inc::signature<item &, uxx>::check(& impl::operator[]);
+                    }
+                    else{
+                        auto p = positive{ inc::addressof(imp), imp[0], 0, imp.length() };
+                        dat    = p;
+                        func   = inc::signature<item &, uxx>::check(& decltype(p)::operator[]);
+                    }
                 }
-                else{
-                    auto p = positive{ inc::addressof(imp), imp[0], 0, imp.length() };
-                    dat    = p;
-                    func   = inc::signature<item &, uxx>::check(& decltype(p)::operator[]);
-                }
-            }
+            #endif
 
-            ranger(inc::initializer_list<item>         list){
+            ranger(inc::initializer_list<item> list){
                 auto p = special{ inc::addressof(list), list.begin()[0], 0, list.size() };
                 dat    = p;
                 func   = inc::signature<const item &, uxx>::check(& decltype(p)::operator[]);
