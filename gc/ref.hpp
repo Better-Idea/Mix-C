@@ -8,9 +8,8 @@
         #include"docker/hashmap.hpp"
         #include"dumb/dummy_t.hpp"
         #include"dumb/struct_t.hpp"
+        #include"gc/self_management.hpp"
         #include"gc/private/make_guide.hpp"
-        #include"gc/private/routing_result.hpp"
-        #include"gc/private/self_management.hpp"
         #include"gc/private/token.hpp"
         #include"gc/private/tuple.hpp"
         #include"lock/atom_swap.hpp"
@@ -19,7 +18,6 @@
         #include"macro/xis_nullptr.hpp"
         #include"memory/allocator.hpp"
         #include"memop/cast.hpp"
-        #include"meta/is_same.hpp"
         #include"meta_ctr/cif.hpp"
         #include"meta_seq/tlist.hpp"
         #include"meta_seq/tin.hpp"
@@ -47,7 +45,6 @@
         };
 
         inline hashmap<visited_ptr_t, info_t> gc_map;
-
 
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
