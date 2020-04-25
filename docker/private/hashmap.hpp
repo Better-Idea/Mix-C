@@ -8,8 +8,7 @@
         #include"define/nullref.hpp"
         #include"docker/transmitter.hpp"
         #include"dumb/mirror.hpp"
-        #include"gc/private/self_management.hpp"
-        #include"gc/private/routing_result.hpp"
+        #include"gc/self_management.hpp"
         #include"macro/xdebug.hpp"
         #include"macro/xgc.hpp"
         #include"macro/xref.hpp"
@@ -17,10 +16,6 @@
         #include"memop/copy.hpp"
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
-
-    namespace mixc::gc_tuple{
-        template<class root_t, class member_list> union tuple;
-    }
 
     namespace mixc::docker_hashmap{
         enum class hashmap_remove_result{
@@ -39,10 +34,8 @@
         };
 
         template<class key_t, class val_t>
-        struct hashmap_t : public inc::self_management{
+        struct hashmap_t : inc::self_management{
         private:
-            template<class root_t, class member_list> friend union mixc::gc_tuple::tuple;
-
             template<class guide> inc::routing_result routing(){
                 return inc::routing_result();
                 // TODO:================================================================
@@ -64,7 +57,9 @@
                     xiam(node),
                     xpub(next,      node *),
                     xpub(hash_code, uxx),
-                    xpub(mirror,    mirror_t)
+                    xpub(mirror,    mirror_t),
+                    xhas(key_t),
+                    xhas(val_t)
                 );
 
                 node() : next(this) {}
@@ -182,10 +177,11 @@
             static constexpr uxx start_capcity = 16;
 
             xgc_fields(
-                xiam(hashmap_t<key_t, val_t>, node),
+                xiam(hashmap_t<key_t, val_t>, inc::self_management),
                 xpro(lines,  uxx),
                 xpro(count,  uxx),
-                xpro(nodes,  node *)
+                xpro(nodes,  node *),
+                xhas(node)
             );
         public:
 

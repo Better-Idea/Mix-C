@@ -4,7 +4,7 @@
         #undef  xuser
         #define xuser mixc::docker_shared_ptr
         #include"define/base_type.hpp"
-        #include"gc/private/ref.hpp"
+        #include"gc/ref.hpp"
         #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
