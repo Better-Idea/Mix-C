@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable:4390)
 #ifdef xenable_xdebug
     #include<stdio.h>
     #include"macro/xtypeid.hpp"
@@ -15,7 +16,7 @@
 
     #define xsw(token,...)            constexpr bool token = { __VA_ARGS__ + 0 };
 
-    inline uxx __debug_id;
+    inline int __debug_id;
 
     // docker/private/hashmap.hpp
     #define xon    0
@@ -32,7 +33,7 @@
     xsw(im_free_with_destroy        , xon);
     #undef  xon
 
-    // gc/private/ref
+    // gc/ref
     #define xon    0
     xsw(im_gc_$token_mix            , xon);
     xsw(im_gc_$meta                 , xon);
