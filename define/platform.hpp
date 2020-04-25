@@ -16,6 +16,12 @@ constexpr bool is_32bit          = sizeof(void *) == 4;
     #define xis_linux       0
 #endif
 
+#if _WIN32 or _WIN64
+    #define xis_windows     1
+#else
+    #define xis_windows     0
+#endif
+
 #ifndef xis_x86
     #define xis_x86         0
 #else
