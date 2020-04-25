@@ -31,8 +31,7 @@ tuple<foo::member_list> xx;
         #undef  xuser
         #define xuser mixc::gc_tuple
         #include"define/base_type.hpp"
-        #include"gc/private/self_management.hpp"
-        #include"gc/private/routing_result.hpp"
+        #include"gc/self_management.hpp"
         #include"macro/xdebug.hpp"
         #include"memop/cast.hpp"
         #include"meta/is_class.hpp"
