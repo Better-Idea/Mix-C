@@ -13,6 +13,10 @@
         template<class type> union __typeid;
     }
 
+    namespace mixc::gc_tuple {
+        template<class root_t, class member_list> union tuple;
+    }
+
     namespace mixc::macro_xgc{
         template<class a0, class ... args>
         struct first_t {
@@ -56,20 +60,21 @@
     #define __xgc_list_iam__(...)        __VA_ARGS__
 
     #if __clang__ or __GNUC__
-        #define __xgc_fields__(meta,...)                                                    \
-        __xlist__(field_,field_,__VA_ARGS__)                                                \
-        private:                                                                            \
-            using the_t =                                                                   \
-                typename ::mixc::macro_xgc::first_t<__xgc_list_ ## meta>::type;             \
-            template<class __type> friend union ::mixc::macro_xtypeid::__typeid;            \
-            static constexpr const char * __self_name = __xgc_name_ ## meta;                \
-            static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;    \
-        public:                                                                             \
-            using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                   \
-                decltype(::mixc::macro_xgc::expand_member_list<__xgc_list_ ## meta>()),     \
-                ::mixc::meta_seq_vlist::vlist<                                              \
-                    __xlist__(first_member_list_,member_list_,__VA_ARGS__)                  \
-                >                                                                           \
+        #define __xgc_fields__(meta,...)                                                        \
+        __xlist__(field_,field_,__VA_ARGS__)                                                    \
+        private:                                                                                \
+            using the_t =                                                                       \
+                typename ::mixc::macro_xgc::first_t<__xgc_list_ ## meta>::type;                 \
+            template<class __type> friend union ::mixc::macro_xtypeid::__typeid;                \
+            template<class __root_t, class __member_list> friend union mixc::gc_tuple::tuple;   \
+            static constexpr const char * __self_name = __xgc_name_ ## meta;                    \
+            static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;        \
+        public:                                                                                 \
+            using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                       \
+                decltype(::mixc::macro_xgc::expand_member_list<__xgc_list_ ## meta>()),         \
+                ::mixc::meta_seq_vlist::vlist<                                                  \
+                    __xlist__(first_member_list_,member_list_,__VA_ARGS__)                      \
+                >                                                                               \
             >::new_list;
         #define xgc_fields(meta,...)    __xgc_fields__(meta,__VA_ARGS__,)
     #else
