@@ -8,6 +8,7 @@
         #include"define/nullref.hpp"
         #include"docker/transmitter.hpp"
         #include"dumb/mirror.hpp"
+        #include"dumb/disable_copy.hpp"
         #include"gc/self_management.hpp"
         #include"macro/xdebug.hpp"
         #include"macro/xgc.hpp"
@@ -34,7 +35,7 @@
         };
 
         template<class key_t, class val_t>
-        struct hashmap_t : inc::self_management{
+        struct hashmap_t : inc::self_management, inc::disable_copy {
         private:
             template<class guide> inc::routing_result routing(){
                 return inc::routing_result();
@@ -188,7 +189,6 @@
             /*构造/析构区*/
         public:
             hashmap_t() : hashmap_t(start_capcity){}
-            hashmap_t(the_t const &) = delete;
             hashmap_t(uxx start_capcity) : 
                 lines(inc::align(start_capcity)), 
                 count(0), 
@@ -304,8 +304,6 @@
                 r.index = r.hash & mask();
                 return r;
             }
-
-            void operator=(the_t const &) = delete;
 
             the_t & resize(uxx capcity){
                 inc::mirror<the_t> mem = the;
