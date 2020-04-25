@@ -5,139 +5,144 @@
         #define xuser mixc::docker_stack
         #include"define/base_type.hpp"
         #include"docker/transmitter.hpp"
+        #include"dumb/disable_copy.hpp"
         #include"dumb/struct_t.hpp"
-        #include"dumb/implicit.hpp"
+        #include"gc/self_management.hpp"
+        #include"interface/ranger.hpp"
+        #include"lock/atom_swap.hpp"
         #include"macro/xgc.hpp"
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_stack{
         template<class item_t>
-        struct stack{
-            struct node : inc::struct_t<item_t>{
+        struct stack_t : inc::self_management, inc::disable_copy {
+            typedef struct node : inc::struct_t<item_t>{
                 xgc_fields(
                     xiam(node, inc::struct_t<item_t>),
                     xpub(next, node *)
-                );
+                )
 
                 template<class ... args>
-                node(args const & ... list) : 
+                node(args const & ... list) :
                     inc::struct_t<item_t>(list...){
                     next = nullptr;
                 }
-            };
-
-            using nodep = node *;
+            } * nodep;
 
             xgc_fields(
-                xiam(stack<item_t>, node),
-                xpub(top, mutable nodep)
-            );
+                xiam(stack_t<item_t>, inc::self_management, inc::disable_copy),
+                xpro(ptop, mutable nodep),
+                xhas(node)
+            )
 
-            stack(){
-                top = nullptr;
+            stack_t(){
+                ptop = nullptr;
             }
-
-            ~stack() {
+        protected:
+            ~stack_t() {
                 clear();
             }
 
-            template<class ... args>
-            void push_back(item_t const & first, args const & ... list) const {
-                inc::implicit<item_t &> items[] = { first, list... };
-                for (uxx i = 0; i < 1 + sizeof...(args); i++){
-                    push_back(items[i]);
-                }
+            template<class guide> inc::routing_result routing() {
+                // TODO:
             }
-
-            void push_back(item_t const & value) const {
-                auto new_top  = inc::alloc_with_initial<node>(value);
-                new_top->next = the_t::top;
-                the_t::top    = new_top;
-            }
-
-            template<class ... args>
-            void pop_back(item_t * first, args ... list) const {
-                inc::implicit<item_t *> items[] = { first, list... };
-                for (uxx i = 0; i < 1 + sizeof...(args); i++){
-                    pop_back(items[i]);
-                }
-            }
-
-            void pop_back(item_t * result) const {
-                auto tmp   = the_t::top;
-                result[0]  = the_t::top[0];
-                inc::free_with_destroy<node>(the_t::top);
-                the_t::top = the_t::top->next;
-            }
-
+        public:
             void clear() {
-                while (the_t::top != nullptr){
-                    auto tmp   = the_t::top;
-                    the_t::top = the_t::top->next;
+                nodep cur = inc::atom_swap(& the.ptop, nodep(nullptr));
+                nodep tmp;
+                while(cur != nullptr){
+                    tmp = cur;
+                    cur = cur->next;
                     inc::free_with_destroy<node>(tmp);
                 }
             }
 
-            inc::transmitter<item_t> pop_back() const {
-                inc::transmitter<item_t> r(the_t::top[0]);
-                inc::free_with_destroy<node>(the_t::top);
-                the_t::top = the_t::top->next;
+            void push(item_t const & value) const {
+                auto new_top  = inc::alloc_with_initial<node>(value);
+                new_top->next = inc::atom_swap(& ptop, new_top);
+            }
+
+            void push(inc::ranger<item_t> values) const {
+                for(uxx i = 0; i < values.length(); i++){
+                    push(values[i]);
+                }
+            }
+
+            void pop(item_t * result) const {
+                auto next = ptop->next;
+                result[0] = ptop[0];
+                inc::free_with_destroy<node>(ptop);
+                ptop      = next;
+            }
+
+            inc::transmitter<item_t> pop() const {
+                inc::transmitter<item_t> r = ptop[0];
+                inc::free_with_destroy<node>(ptop);
+                ptop = ptop->next;
                 return r;
             }
 
+            void pop(inc::ranger<item_t *> values) const {
+                for(uxx i = 0; i < values.length(); i++){
+                    pop(values[i]);
+                }
+            }
+
             item_t & top(){
-                return *(item_t *)top;
+                return *(item_t *)ptop;
             }
 
             const item_t & top() const {
-                return *(item_t *)top;
+                return *(item_t *)ptop;
             }
 
             bool is_empty() const {
-                return top == nullptr;
+                return ptop == nullptr;
             }
         };
 
         template<class final, class item_t>
-        struct stack_t : stack<item_t> {
-            using stack<item_t>::stack;
-            using the_t = stack<item_t>;
-            using node  = typename the_t::node;
+        struct stack : stack_t<item_t> {
+            using the_t = stack_t<item_t>;
+            using the_t::the_t;
 
-            template<class ... args>
-            final & push_back(item_t const & first, args const & ... list) const {
-                the.push_back(first, list...);
+            final & clear() {
+                the.clear();
                 return thex;
             }
 
-            final & push_back(item_t const & value) const {
-                auto new_top  = inc::alloc_with_initial<node>(value);
-                new_top->next = the_t::top;
-                the_t::top    = new_top;
+            final & push(item_t const & value) const{
+                the.push(value);
+                return thex;
             }
 
-            template<class ... args>
-            void pop_back(item_t * first, args ... list) const {
-                inc::implicit<item_t *> items[] = { first, list... };
-                for (uxx i = 0; i < 1 + sizeof...(args); i++){
-                    pop_back(items[i]);
-                }
+            final & push(inc::ranger<item_t> values) const{
+                the.push(values);
+                return thex;
             }
 
-            void pop_back(item_t * result) const {
-                auto tmp   = the_t::top;
-                result[0]  = the_t::top[0];
-                inc::free_with_destroy<node>(the_t::top);
-                the_t::top = the_t::top->next;
+            final & pop(item_t * value) const{
+                the.pop(value);
+                return thex;
             }
 
-            void clear() {
-            
-
-            
+            final & pop(inc::ranger<item_t *> values) const{
+                the.pop(values);
+                return thex;
+            }
         };
     }
 #endif
 
-#define xusing_docker_stack     mixc::docker_stack
+#define xusing_docker_stack     ::mixc::docker_stack
+
+/*
+        \   when
+    can  \  top     pop     push    clear   routing
+    top     true    false   true    false   true
+    pop     false   false   false   false   false
+    push    true    false   true    false   false
+    clear   false   false   false   true    false
+    routing true    false   false   false   false
+*/
