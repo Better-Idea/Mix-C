@@ -17,6 +17,7 @@
         #include"macro/xgc.hpp"
         #include"macro/xis_nullptr.hpp"
         #include"memory/allocator.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/cast.hpp"
         #include"meta/is_same.hpp"
         #include"meta_ctr/cif.hpp"
@@ -124,7 +125,7 @@
                     mem->owners_inc();
                 }
             }
-
+        protected:
             ~meta(){
                 using guide = decltype(make_guide<impl>());
                 constexpr bool need_gc = not is_same<guide, tlist<>>;
@@ -151,7 +152,7 @@
             auto operator -> () const{
                 return mem;
             }
-
+        public:
             impl & operator = (the_t const & value){
                 if (value.mem){ 
                     value->owners_inc();
@@ -171,11 +172,12 @@
             bool operator != (the_t const & value) const {
                 return mem != value.mem;
             }
-        protected:
-            attribute & attr () const {
-                return mem[0];
+
+            void swap(the_t * values) {
+                values->mem = atom_swap(& mem, values->mem);
             }
 
+        protected:
             item & operator [] (uxx index){
                 return mem[0][index];
             }
@@ -189,8 +191,6 @@
             }
         private:
             token_mix_t * mem;
-
-            template<class root_t, class list> friend union mixc::gc_tuple::tuple;
 
             template<class guide> void routing_entry(){
                 using tuplep = tuple<attribute, typename attribute::member_list> *;
@@ -244,7 +244,6 @@
                     length, list...
                 );
             }
-
             void free(){
                 mem->mark_under_free();
                 free_with_destroy(mem,
@@ -258,8 +257,19 @@
         template<class impl, class type>
         using ref_ptr = meta<impl, dummy_t, struct_t<type>, false>;
 
-        template<class impl, class item, class attribute = mixc::gc_ref::dummy_t>
-        using ref_array = meta<impl, item, struct_t<attribute>, true>;
+        template<class impl, class item, class attribute = void>
+        using ref_array = meta<
+            impl, 
+            item, 
+            struct_t<
+                typename cif<
+                    is_same<attribute, void>,
+                    dummy_t,
+                    attribute
+                >::result
+            >,
+            true
+        >;
     }
 
 #endif
