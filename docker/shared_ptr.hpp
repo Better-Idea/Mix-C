@@ -13,6 +13,7 @@
         template<class type>
         struct shared_ptr : inc::ref_ptr<shared_ptr<type>, type>{
             using base_t = inc::ref_ptr<shared_ptr<type>, type>;
+            using base_t::operator->;
 
             xgc_fields(
                 xiam(shared_ptr<type>, base_t)
@@ -37,7 +38,7 @@
             }
 
             operator type & () const {
-                return base_t::attr();
+                return * the.operator->();
             }
 
             type const & operator= (type const & value){
