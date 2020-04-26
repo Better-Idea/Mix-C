@@ -12,6 +12,7 @@
             xgc_fields(
                 xiam(dummy_t)
             );
+        public:
             template<class ... args>
             constexpr dummy_t(args const & ...){}
         };

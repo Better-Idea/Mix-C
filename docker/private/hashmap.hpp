@@ -37,11 +37,6 @@
         template<class key_t, class val_t>
         struct hashmap_t : inc::self_management, inc::disable_copy {
         private:
-            template<class guide> inc::routing_result routing(){
-                return inc::routing_result();
-                // TODO:================================================================
-            }
-
             typedef struct pair{
                 key_t    key;
                 val_t    value;
@@ -62,6 +57,7 @@
                     xhas(key_t),
                     xhas(val_t)
                 );
+            public:
 
                 node() : next(this) {}
                 node(uxx hash_code, key_t const & key, val_t const & value, bool with_copy_operator) : 
@@ -183,9 +179,10 @@
                 xpro(count,  uxx),
                 xpro(nodes,  node *),
                 xhas(node)
-            );
-        public:
-
+            ){
+                // TODO:====================================================================
+                return inc::routing_result();
+            }
             /*构造/析构区*/
         public:
             hashmap_t() : hashmap_t(start_capcity){}
@@ -288,7 +285,7 @@
                 return length() == 0;
             }
 
-            bool contains(key_t const & key) const {
+            bool is_contains(key_t const & key) const {
                 return get(key) != inc::nullref;
             }
 
@@ -348,7 +345,7 @@
                 }
 
                 map.count = count;
-                this->free();
+                the.free();
                 return map;
             }
 
@@ -419,7 +416,7 @@
     }
 #endif
 
-#define xusing_docker_hashmap     mixc::docker_hashmap
+#define xusing_docker_hashmap     ::mixc::docker_hashmap
 
 namespace xuser::inc{
     using xusing_docker_hashmap::hashmap_remove_result;

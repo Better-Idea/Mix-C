@@ -19,9 +19,7 @@
         struct self_management{
             xgc_fields(
                 xiam(self_management)
-            )
-        protected:
-            template<class guide> inc::routing_result routing();
+            );
         };
     }
 

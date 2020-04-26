@@ -20,6 +20,7 @@
                 xpro(back               , mutable inc::tty_color_t),
                 xpro(visiable_of_cursor , mutable bool)
             );
+        public:
             using the_t = tty_t;
             using final = tty_t;
         private:

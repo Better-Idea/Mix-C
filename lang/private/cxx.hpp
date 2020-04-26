@@ -20,7 +20,7 @@
                 xpro(ptr,   item *),
                 xpro(count, uxx)
             );
-
+        public:
             cxx() : 
                 cxx(& empty, 0) {}
 

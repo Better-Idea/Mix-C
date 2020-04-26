@@ -17,7 +17,7 @@
                 xpro(ptr,  type *);
                 xpro(mask, type);
             );
-
+        public:
             bitbind() : bitbind(nullptr, 0) {}
             bitbind(type * bits, uxx index){
                 this->bind(bits, index);

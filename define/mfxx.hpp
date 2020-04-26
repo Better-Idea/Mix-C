@@ -24,7 +24,7 @@
                     exp_offset
                 >)
             );
-
+        public:
             union {
                 struct {
                     equivalent_type decimal : decimal_bits;

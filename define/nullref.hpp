@@ -13,7 +13,7 @@
             xgc_fields(
                 xiam(nullref_t)
             );
-
+        public:
             template<class a> friend auto operator == (a const & value, nullref_t) {
                 return inc::addressof(value) == nullptr;
             }

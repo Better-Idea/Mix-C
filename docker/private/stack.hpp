@@ -21,8 +21,8 @@
                 xgc_fields(
                     xiam(node, inc::struct_t<item_t>),
                     xpub(next, node *)
-                )
-
+                );
+            public:
                 template<class ... args>
                 node(args const & ... list) :
                     inc::struct_t<item_t>(list...){
@@ -34,18 +34,17 @@
                 xiam(stack_t<item_t>, inc::self_management, inc::disable_copy),
                 xpro(ptop, mutable nodep),
                 xhas(node)
-            )
-
+            ) {
+                // TODO:====================================================================
+                return inc::routing_result();
+            }
+        public:
             stack_t(){
                 ptop = nullptr;
             }
         protected:
             ~stack_t() {
                 clear();
-            }
-
-            template<class guide> inc::routing_result routing() {
-                // TODO:
             }
         public:
             void clear() {
@@ -58,32 +57,29 @@
                 }
             }
 
-            void push(item_t const & value) const {
+            void push(item_t const & value) {
                 auto new_top  = inc::alloc_with_initial<node>(value);
                 new_top->next = inc::atom_swap(& ptop, new_top);
             }
 
-            void push(inc::ranger<item_t> values) const {
+            void push(inc::ranger<item_t> values) {
                 for(uxx i = 0; i < values.length(); i++){
                     push(values[i]);
                 }
             }
 
-            void pop(item_t * result) const {
-                auto next = ptop->next;
-                result[0] = ptop[0];
-                inc::free_with_destroy<node>(ptop);
-                ptop      = next;
-            }
-
-            inc::transmitter<item_t> pop() const {
+            inc::transmitter<item_t> pop() {
                 inc::transmitter<item_t> r = ptop[0];
                 inc::free_with_destroy<node>(ptop);
                 ptop = ptop->next;
                 return r;
             }
 
-            void pop(inc::ranger<item_t *> values) const {
+            void pop(item_t * result) {
+                result[0] = pop();
+            }
+
+            void pop(inc::ranger<item_t *> values) {
                 for(uxx i = 0; i < values.length(); i++){
                     pop(values[i]);
                 }
@@ -93,7 +89,7 @@
                 return *(item_t *)ptop;
             }
 
-            const item_t & top() const {
+            item_t const & top() const {
                 return *(item_t *)ptop;
             }
 
@@ -112,22 +108,22 @@
                 return thex;
             }
 
-            final & push(item_t const & value) const{
+            final & push(item_t const & value) {
                 the.push(value);
                 return thex;
             }
 
-            final & push(inc::ranger<item_t> values) const{
+            final & push(inc::ranger<item_t> values) {
                 the.push(values);
                 return thex;
             }
 
-            final & pop(item_t * value) const{
+            final & pop(item_t * value) {
                 the.pop(value);
                 return thex;
             }
 
-            final & pop(inc::ranger<item_t *> values) const{
+            final & pop(inc::ranger<item_t *> values) {
                 the.pop(values);
                 return thex;
             }

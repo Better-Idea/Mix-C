@@ -18,6 +18,7 @@
         #include"macro/xis_nullptr.hpp"
         #include"memory/allocator.hpp"
         #include"memop/cast.hpp"
+        #include"meta/is_same.hpp"
         #include"meta_ctr/cif.hpp"
         #include"meta_seq/tlist.hpp"
         #include"meta_seq/tin.hpp"
@@ -32,7 +33,7 @@
             xgc_fields(
                 xiam(info_t)
             );
-
+        public:
             uxx can_arrive_root : 1;
             uxx visited         : sizeof(uxx) * 8 - 1;
 
@@ -56,8 +57,52 @@
                 xiam(meta<impl, item, attribute, is_array>),
                 xhas(attribute),
                 xhas(item)
-            );
+            ) {
+                using tuplep = tuple<attribute, typename attribute::member_list> *;
 
+                if (mem == nullptr){
+                    return { 0 }; // no way
+                }
+                if (auto & info = gc_map.get(mem); info == nullref){
+                    routing_result r;
+                    attribute *    ptr = mem;
+                    info_t    *    i = nullptr;
+
+                    xdebug(im_gc_meta_routing, 
+                        mem,
+                        xtypeid(attribute).name,
+                        "not visited"
+                    );
+
+                    gc_map.set(mem, info_t(), xref i);
+
+                    if (r = tuplep(ptr)->template routing<guide>(); r.can_arrive_root){
+                        i->can_arrive_root = true;
+                        r.degree_dvalue   += mem->owners() - i->visited;
+                    }
+                    return r;
+                }
+                else if (info.can_arrive_root){
+                    xdebug(im_gc_meta_routing, 
+                        mem,
+                        xtypeid(attribute).name,
+                        info.can_arrive_root,
+                        info.visited
+                    );
+                    return { 1 }; // has a way can arrive root
+                }
+                else{
+                    info.visited += 1;
+                    xdebug(im_gc_meta_routing, 
+                        mem,
+                        xtypeid(attribute).name,
+                        info.can_arrive_root,
+                        info.visited
+                    );
+                    return { 0 };
+                }
+            }
+        public:
             meta() : mem(nullptr) { }
 
             template<class ... args>
@@ -191,52 +236,6 @@
                 }
             }
 
-            template<class guide> routing_result routing(){
-                using tuplep = tuple<attribute, typename attribute::member_list> *;
-
-                if (mem == nullptr){
-                    return { 0 }; // no way
-                }
-                if (auto & info = gc_map.get(mem); info == nullref){
-                    routing_result r;
-                    attribute *    ptr = mem;
-                    info_t    *    i = nullptr;
-
-                    xdebug(im_gc_meta_routing, 
-                        mem,
-                        xtypeid(attribute).name,
-                        "not visited"
-                    );
-
-                    gc_map.set(mem, info_t(), xref i);
-
-                    if (r = tuplep(ptr)->template routing<guide>(); r.can_arrive_root){
-                        i->can_arrive_root = true;
-                        r.degree_dvalue   += mem->owners() - i->visited;
-                    }
-                    return r;
-                }
-                else if (info.can_arrive_root){
-                    xdebug(im_gc_meta_routing, 
-                        mem,
-                        xtypeid(attribute).name,
-                        info.can_arrive_root,
-                        info.visited
-                    );
-                    return { 1 }; // has a way can arrive root
-                }
-                else{
-                    info.visited += 1;
-                    xdebug(im_gc_meta_routing, 
-                        mem,
-                        xtypeid(attribute).name,
-                        info.can_arrive_root,
-                        info.visited
-                    );
-                    return { 0 };
-                }
-            }
-
             template<class ... args> auto alloc(uxx length, args const & ... list) {
                 return alloc_with_initial<token_mix_t>(
                     memory_size(
@@ -255,21 +254,17 @@
                 );
             }
         };
+
+        template<class impl, class type>
+        using ref_ptr = meta<impl, dummy_t, struct_t<type>, false>;
+
+        template<class impl, class item, class attribute = mixc::gc_ref::dummy_t>
+        using ref_array = meta<impl, item, struct_t<attribute>, true>;
     }
 
 #endif
 
 namespace xuser::inc{
-    template<class impl, class type>
-    using ref_ptr = 
-        ::mixc::gc_ref::meta<
-            impl, 
-            ::mixc::gc_ref::dummy_t, 
-            type, 
-            false
-        >;
-
-    template<class impl, class item, class attribute = mixc::gc_ref::dummy_t>
-    using ref_array = 
-        ::mixc::gc_ref::meta<impl, item, attribute, true>;
+    using ::mixc::gc_ref::ref_ptr;
+    using ::mixc::gc_ref::ref_array;
 }

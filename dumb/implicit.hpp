@@ -23,6 +23,7 @@ auto function(args const & ... list){
                 xiam(implicit<a>),
                 xpub(value, a)
             );
+        public:
 
             template<class b>
             implicit(b const & value) : 

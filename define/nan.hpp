@@ -12,7 +12,7 @@
             xgc_fields(
                 xiam(nan_t)
             );
-
+        public:
             constexpr nan_t(){}
 
             friend inline auto operator == (f32 value, nan_t) {

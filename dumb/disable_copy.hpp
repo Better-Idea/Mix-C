@@ -11,8 +11,8 @@
         struct disable_copy {
             xgc_fields(
                 xiam(disable_copy)
-            )
-            
+            );
+        public:
             disable_copy() = default;
             disable_copy(disable_copy const &) = delete;
             void operator=(disable_copy const &) = delete;

@@ -15,7 +15,7 @@
             xgc_fields(
                 xiam(struct_t<type, true>, type)
             );
-
+        public:
             struct_t(struct_t const &) = default;
 
             template<class ... args>
@@ -30,7 +30,7 @@
                 xiam(struct_t<type, false>),
                 xpro(data, type)
             );
-
+        public:
             template<class ... args>
             struct_t(args const & ... list) : 
                 data(list...){

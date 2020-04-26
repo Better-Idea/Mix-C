@@ -19,7 +19,7 @@
                 xiam(array_t<type, count, rest...>),
                 xpro(data, items)
             );
-
+        public:
             xrange(item_t);
 
             template<class ... args>

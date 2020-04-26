@@ -20,6 +20,7 @@
                 xpri(data,    inc::mirror<type>),
                 xpri(is_none, mutable bool)
             );
+        public:
 
             transmitter() : 
                 is_none(true) {}

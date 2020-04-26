@@ -26,7 +26,7 @@
             xgc_fields(
                 xiam(darray<type, rank>, base_t)
             );
-            
+        public:
             xrange(item_t);
 
             darray() : 

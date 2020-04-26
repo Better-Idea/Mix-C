@@ -48,7 +48,7 @@
             mutable data  dat;
             mutable voidp func;
         public:
-            #ifndef __faker__
+            #ifdef xfor_msvc_hint
                 template<class impl> ranger(impl const &){}
             #else
                 template<class impl> requires

@@ -89,7 +89,7 @@
                 xpri(values, items),
                 xpri(count,  uxx)
             );
-
+        public:
             tty_key_t() :
                 type{}, values{}, count{}{}
 
