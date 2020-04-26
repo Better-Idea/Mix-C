@@ -7,7 +7,7 @@
         #include"dumb/mirror.hpp"
         #include"macro/xgc.hpp"
         #include"macro/xis_nullptr.hpp"
-        #include"macro/xref.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/copy.hpp"
         #include"memory/new.hpp"
     #pragma pop_macro("xuser")

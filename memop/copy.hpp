@@ -5,7 +5,7 @@
         #define xuser mixc::memop_copy
         #include"define/base_type.hpp"
         #include"dumb/mirror.hpp"
-        #include"macro/xref.hpp"
+        #include"memop/addressof.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::memop_copy{

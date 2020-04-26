@@ -12,8 +12,9 @@
         #include"gc/self_management.hpp"
         #include"macro/xdebug.hpp"
         #include"macro/xgc.hpp"
-        #include"macro/xref.hpp"
+        
         #include"math/align.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/copy.hpp"
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")

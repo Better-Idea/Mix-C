@@ -5,8 +5,8 @@
         #define xuser mixc::algo_shuffle
         #include"define/base_type.hpp"
         #include"interface/ranger.hpp"
-        #include"macro/xref.hpp"
         #include"math/random.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/swap.hpp"
     #pragma pop_macro("xuser")
 

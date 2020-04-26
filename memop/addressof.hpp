@@ -15,8 +15,16 @@
             } got(value);
             return (*(type **)& got);
         }
+
+        struct sugar{
+            template<class type>
+            auto * operator * (type const & value){
+                return addressof(value);
+            }
+        };
     }
 
+    #define xref ::mixc::memop_addressof::sugar() *
 #endif
 
 namespace xuser::inc{

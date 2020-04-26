@@ -6,7 +6,6 @@
         #include"define/base_type.hpp"
         #include"interface/ranger.hpp"
         #include"macro/xgc.hpp"
-        #include"meta/has_cast.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_array{

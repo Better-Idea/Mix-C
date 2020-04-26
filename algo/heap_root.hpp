@@ -8,7 +8,7 @@
         #include"dumb/mirror.hpp"
         #include"interface/can_compare.hpp"
         #include"interface/ranger.hpp"
-        #include"macro/xref.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/copy.hpp"
         #include"memory/new.hpp"
     #pragma pop_macro("xuser")
