@@ -7,13 +7,27 @@
         #include"dumb/implicit.hpp"
         #include"macro/private/mix.hpp"
         #include<stdio.h>
+        #include<string.h>
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_private_log{
         template<class ... args>
         inline void log(int no, const char * file, int line, const char * msg, args ... list){
+            #ifdef xdebug_short_path
+                char prefix[] = "Mix-C";
+                while(true) {
+                    auto name = strstr(file, prefix);
+                    if (name != nullptr) {
+                        file = name + sizeof(prefix);
+                    }
+                    else {
+                        break;
+                    }
+                }
+            #endif
+
             inc::implicit<inc::mix> arg[] = { list... };
-            printf("%5d | %s:%d\n      | ", no, file, line);
+            printf("%5d | %s:%d\n      | - ", no, file, line);
 
             for (auto item : arg){
                 do {
