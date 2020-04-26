@@ -5,6 +5,7 @@
         #define xuser mixc::docker_stack
         #include"define/base_type.hpp"
         #include"docker/transmitter.hpp"
+        #include"docker/private/pushpop_t.hpp"
         #include"dumb/disable_copy.hpp"
         #include"dumb/struct_t.hpp"
         #include"gc/self_management.hpp"
@@ -39,8 +40,8 @@
                 return inc::routing_result();
             }
         public:
-            stack_t(){
-                ptop = nullptr;
+            stack_t() : 
+                ptop(nullptr){
             }
         protected:
             ~stack_t() {
@@ -62,27 +63,11 @@
                 new_top->next = inc::atom_swap(& ptop, new_top);
             }
 
-            void push(inc::ranger<item_t> values) {
-                for(uxx i = 0; i < values.length(); i++){
-                    push(values[i]);
-                }
-            }
-
             inc::transmitter<item_t> pop() {
                 inc::transmitter<item_t> r = ptop[0];
                 inc::free_with_destroy<node>(ptop);
                 ptop = ptop->next;
                 return r;
-            }
-
-            void pop(item_t * result) {
-                result[0] = pop();
-            }
-
-            void pop(inc::ranger<item_t *> values) {
-                for(uxx i = 0; i < values.length(); i++){
-                    pop(values[i]);
-                }
             }
 
             item_t & top(){
@@ -99,35 +84,7 @@
         };
 
         template<class final, class item_t>
-        struct stack : stack_t<item_t> {
-            using the_t = stack_t<item_t>;
-            using the_t::the_t;
-
-            final & clear() {
-                the.clear();
-                return thex;
-            }
-
-            final & push(item_t const & value) {
-                the.push(value);
-                return thex;
-            }
-
-            final & push(inc::ranger<item_t> values) {
-                the.push(values);
-                return thex;
-            }
-
-            final & pop(item_t * value) {
-                the.pop(value);
-                return thex;
-            }
-
-            final & pop(inc::ranger<item_t *> values) {
-                the.pop(values);
-                return thex;
-            }
-        };
+        using stack = inc::pushpop_t<final, stack_t<item_t>, item_t>;
     }
 #endif
 
