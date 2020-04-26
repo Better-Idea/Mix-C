@@ -71,6 +71,7 @@
                     xgen(f64)
                     xgen(f64p)
                     xgen(asciis)
+                    xgen(void)
                     else{
                         return "wait implement";
                     }
@@ -114,6 +115,7 @@
                     xgen(f64)
                     xgen(f64p)
                     xgen(asciis)
+                    xgen(void)
                     else{
                         return not_exist;
                     }
