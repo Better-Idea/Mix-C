@@ -16,7 +16,7 @@
             if constexpr(inc::is_class<a> or inc::is_enum<a> or inc::is_union<a>){
                 auto l = inc::base_seqlize(left);
                 auto r = inc::base_seqlize(right);
-                for (auto i = 0; i < l.lenght; i++){
+                for (auto i = 0; i < l.length; i++){
                     if (ixx s = cmp(l.ptr[i], r.ptr[i]); s != 0){
                         return s;
                     }
