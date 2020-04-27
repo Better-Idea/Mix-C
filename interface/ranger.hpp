@@ -8,7 +8,6 @@
         #include"macro/xindex_rollback.hpp"
         #include"memop/signature.hpp"
         #include"memop/addressof.hpp"
-        #include"meta/has_cast.hpp"
         #include"meta/is_based_on.hpp"
     #pragma pop_macro("xuser")
 
@@ -31,8 +30,10 @@
                                                                             \
             name(owner const * ptr, item const &, uxx ofs, uxx len) :       \
                 base(ptr, ofs, len){}                                       \
-                                                                            \
-            const item & operator[](uxx index) const {                      \
+            item & operator[](uxx index) {                                  \
+                return (*(owner *)base::ptr)__VA_ARGS__[base::ofs op index];\
+            }                                                               \
+            item const & operator[](uxx index) const {                      \
                 return (*(owner *)base::ptr)__VA_ARGS__[base::ofs op index];\
             }                                                               \
         }
@@ -41,6 +42,11 @@
         xgen(special , +, .begin());
         xgen(negative, -);
         #undef xgen
+
+        template<class object_t, class item_t>
+        concept can_random_access = requires(object_t items, uxx i, item_t value){
+            value = items[i];
+        };
 
         template<class item>
         struct ranger {
@@ -51,9 +57,8 @@
             #ifdef xfor_msvc_hint
                 template<class impl> ranger(impl const &){}
             #else
-                template<class impl> requires
-                    inc::has_cast<item &(impl::*)(uxx), & impl::operator[]> or
-                    inc::has_cast<item &(impl::*)(uxx) const, & impl::operator[]>
+                template<class impl> requires 
+                can_random_access<impl, item>
                 ranger(impl const & imp) {
                     if constexpr (inc::is_based_on<data, impl>){
                         dat    = imp;
