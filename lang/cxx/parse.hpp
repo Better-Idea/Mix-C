@@ -73,6 +73,9 @@
                 item * begin  = the;
                 item * end    = cur + the.length();
 
+                if (begin >= end) {
+                    return parse_result<target>(value, 0);
+                }
                 if (cur[0] == '+'){
                     cur++;
                 }
