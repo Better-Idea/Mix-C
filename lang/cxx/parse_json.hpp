@@ -9,11 +9,13 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_json
         #include"define/base_type.hpp"
+        #include"dumb/disable_copy.hpp"
         #include"interface/can_alloc.hpp"
         #include"lang/wxx/is_whitespace.hpp"
         #include"lang/wxx/is_hex.hpp"
         #include"lang/wxx.hpp"
         #include"lang/cxx/is_starts_with.hpp"
+        #include"lang/cxx/compare_fastly.hpp"
         #include"lang/cxx/parse.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xdebug_fail.hpp"
@@ -23,7 +25,7 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_json {
-        enum class json_value_type {
+        enum class json_type_t {
             json_object,
             json_string,
             json_array,
@@ -31,10 +33,10 @@
         };
 
         namespace json_type {
-            constexpr json_value_type json_object = json_value_type::json_object;
-            constexpr json_value_type json_string = json_value_type::json_string;
-            constexpr json_value_type json_array  = json_value_type::json_array;
-            constexpr json_value_type json_number = json_value_type::json_number;
+            constexpr json_type_t json_object = json_type_t::json_object;
+            constexpr json_type_t json_string = json_type_t::json_string;
+            constexpr json_type_t json_array  = json_type_t::json_array;
+            constexpr json_type_t json_number = json_type_t::json_number;
         }
 
         template<class index_t> union  json_value_t;
@@ -192,8 +194,8 @@
                         c        = the.template parse_value<index_t>(i, alloc);
                     }
 
-                    ptr[0]       = c;
-                    obj->length += 1;
+                    ptr[obj->length++] = c;
+
                     the.skip_whitespace(i);
 
                     if (the[i] == ',') {
@@ -268,11 +270,69 @@
                 return f64(r);
             }
 
-            template<class index_t>
-            auto parse_json(inc::can_alloc<byte> alloc) {
-                uxx   i   = 0;
-                any   mem = alloc(the.length() * 5 + 1);
-                return the.template parse_value<index_t>(i, mem);
+            template<class final, class index_t>
+            struct json_t : inc::disable_copy {
+                using jval = json_value_t<index_t>;
+                json_t(){}
+                json_t(final json, jval value) :
+                    json(json), value(value){
+                }
+
+                operator f64 () const {
+                    return origin().real;
+                }
+
+                operator bool() const {
+                    return origin().number != 0;
+                }
+
+                operator final() const {
+                    auto str = origin().string;
+                    return json.backward(str.offset).length(str.length);
+                }
+
+                json_t operator [](final index) const {
+                    auto & obj = origin().object[0];
+
+                    for(uxx i = 0; i < obj.length; i++) {
+                        auto str  = obj[i].name;
+                        auto name = json.backward(str.offset).length(str.length);
+
+                        if (inc::cxx<item_t>(index).compare_fastly(name) == 0) {
+                            return { json, obj[i].value) };
+                        }
+                    }
+                    return {};
+                }
+
+                json_t operator[](uxx index) const {
+                    return { json, origin().array[0][index] };
+                }
+
+                uxx length() const {
+                    auto list = origin().array;
+
+                    if (value.type == u08(json_object) or 
+                        value.type == u08(json_array) or list == nullptr) {
+                        return 0;
+                    }
+                    return list.length;
+                }
+            private:
+                jval origin() const {
+                    jval temp = value;
+                    temp.type = 0;
+                    return temp;
+                }
+                final json;
+                jval  value;
+            };
+
+            template<class final, class index_t>
+            json_t<final, index_t> parse_json(inc::can_alloc<byte> alloc) {
+                uxx i   = 0;
+                any mem = alloc(the.length() * 5 + 1);
+                return { the, the.template parse_value<index_t>(i, mem) };
             }
         };
     }
@@ -286,7 +346,7 @@ namespace mixc::lang_cxx_json::xuser {
 
         template<class index_t = u32>
         auto parse_json(inc::can_alloc<byte> alloc) {
-            return the.template parse_json<index_t>(alloc);
+            return the.template parse_json<final, index_t>(alloc);
         }
     };
 }
