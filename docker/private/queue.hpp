@@ -79,7 +79,7 @@
 			inc::transmitter<item_t> pop() {
 				auto head				   = pend->next;
 				auto next				   = head->next;
-				inc::transmitter<item_t> r = head[0];
+				inc::transmitter<item_t> r = (item_t &)head[0];
 				
 				if (next != head) {
 					pend->next = next;
