@@ -10,14 +10,14 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx{
-        template<class final, class item>
+        template<class final, class item_t>
         struct cxx{
         private:
-            inline static item empty = item(0);
+            inline static item_t empty = item_t(0);
         public:
             xgc_fields(
-                xiam(cxx<final, item>),
-                xpro(ptr,   item *),
+                xiam(cxx<final, item_t>),
+                xpro(ptr,   item_t *),
                 xpro(count, uxx)
             );
         public:
@@ -26,30 +26,35 @@
 
             cxx(cxx const &) = default;
 
+            constexpr cxx(const item_t * str) : 
+                ptr((item_t *)str), count(0) {
+                for(uxx i = 0; str[i++]; count = i);
+            }
+
             template<class final_t>
-            cxx(cxx<final_t, item> const & self) : 
+            cxx(cxx<final_t, item_t> const & self) : 
                 cxx((the_t &)self){
             }
 
             template<class type>
             cxx(type const * ptr, uxx count) : 
-                ptr((item *)ptr), count(count) {
-                static_assert(sizeof(type) == sizeof(item));
+                ptr((item_t *)ptr), count(count) {
+                static_assert(sizeof(type) == sizeof(item_t));
             }
 
-            cxx(inc::static_string_holder<item> holder) : 
+            cxx(inc::static_string_holder<item_t> holder) : 
                 cxx(holder.ptr(), holder.length()){
             }
 
-            item & operator [](uxx index) const {
+            item_t & operator [](uxx index) const {
                 return the.ptr[index];
             }
 
-            operator item *(){
+            operator item_t *(){
                 return the.ptr;
             }
 
-            operator const item *() const {
+            operator const item_t *() const {
                 return the.ptr;
             }
 
