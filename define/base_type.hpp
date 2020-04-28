@@ -76,6 +76,7 @@
     #define voidp       mixc_voidp
     #define the         (*(the_t *)this)
     #define thex        (*(final *)this)
+    using byte = mixc_u08;
 
     namespace mixc{
         template<int> struct env{};
