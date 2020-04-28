@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>template-class-extern</Title>
+			<Shortcut>tclassx</Shortcut>
+			<Description>使用包含范式的可扩模板展部分类</Description>
+			<Author>MixC</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+				<SnippetType>SurroundsWith</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>path</ID>
+					<ToolTip>文件路径</ToolTip>
+					<Default>path</Default>
+				</Literal>
+                <Literal>
+                    <ID>class</ID>
+                    <ToolTip>类名</ToolTip>
+                    <Default>class</Default>
+                </Literal>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>函数名称</ToolTip>
+                    <Default>name</Default>
+                </Literal>
+                <Literal>
+                    <ID>tmpl_define</ID>
+                    <ToolTip>模板定义</ToolTip>
+                    <Default>tmpl_define</Default>
+                </Literal>
+                <Literal>
+                    <ID>tmpl_args</ID>
+                    <ToolTip>模板参数列表</ToolTip>
+                    <Default>tmpl_args</Default>
+                </Literal>
+			</Declarations>
+			<Code Language="cpp">
+                    <![CDATA[#ifndef xusing_$path$_$class$
+						#include"$path$/private/$class$.hpp"
+                    #endif
+                    
+                    #ifndef xpack_$path$_$class$_$name$
+					#define xpack_$path$_$class$_$name$
+						#pragma push_macro("xuser")
+                        #pragma push_macro("xusing_$path$_$class$")
+							#undef  xuser
+							#define xuser mixc::$path$_$class$_$name$
+							#include"define/base_type.hpp"
+                            #include"$path$/$class$.hpp"
+                        #pragma pop_macro("xusing_$path$_$class$")
+						#pragma pop_macro("xuser")
+						
+                        namespace mixc::$path$_$class$_$name${
+							template<$tmpl_define$>
+							struct core : inc::$class$<$tmpl_args$>{
+								using inc::$class$<$tmpl_args$>::$class$;
+								using the_t = core<$tmpl_args$>;
+                            
+								auto $name$(){
+								}
+							};
+						}
+					#endif
+                
+				namespace mixc::$path$_$class$_$name$::xuser{
+					template<class final, $tmpl_define$>
+					struct $class$ : xusing_$path$_$class$::$class$<final, $tmpl_args$>{
+						using xusing_$path$_$class$::$class$<final, $tmpl_args$>::$class$;
+                        using the_t = core<$tmpl_args$>;
+                            
+                        final & $name$(){
+							the.$name$();
+							return thex;
+                        }
+					};
+				}
+                
+                #undef  xusing_$path$_$class$
+                #define xusing_$path$_$class$  ::mixc::$path$_$class$_$name$::xuser
+				]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>

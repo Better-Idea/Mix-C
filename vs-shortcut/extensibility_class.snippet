@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>extensibility-class</Title>
+			<Shortcut>eclass</Shortcut>
+			<Description>使用包含范式的可扩展部分类</Description>
+			<Author>MixC</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+				<SnippetType>SurroundsWith</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>path</ID>
+					<ToolTip>文件路径</ToolTip>
+					<Default>path</Default>
+				</Literal>
+				<Literal>
+					<ID>name</ID>
+					<ToolTip>类名</ToolTip>
+					<Default>name</Default>
+				</Literal>
+			</Declarations>
+			<Code Language="cpp">
+                    <![CDATA[#ifndef xpack_$path$_$name$
+					#define xpack_$path$_$name$
+						#pragma push_macro("xuser")
+							#undef  xuser
+							#define xuser mixc::$path$_$name$
+							#include"define/base_type.hpp"
+							#include"macro/xgc.hpp"
+						#pragma pop_macro("xuser")
+				
+					namespace mixc::$path$_$name${
+						struct $name$_t{
+							xgc_fields(
+								xiam($name$_t)
+							)
+						};
+                        
+                        template<class final>
+                        struct $name$ : $name$_t{
+							using the_t = $name$_t;
+                            using the_t::the_t;
+                        };
+					}
+				#endif
+                
+                #define xusing_$path$_$name$  ::mixc::$path$_$name$
+                
+                // final class
+                #ifdef xuser
+					#ifndef xusing_$path$_$name$
+						#include"$path$/private/$name$.hpp"
+                    #endif
+					
+                    namespace xuser::inc{
+                        struct $name$ : xusing_$path$_$name$::$name$<$name$>{
+							using the_t = xusing_$path$_$name$::$name$<$name$>;
+                            using the_t::the_t;
+                        };
+					}
+				#endif
+				]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>

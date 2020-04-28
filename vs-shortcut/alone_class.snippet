@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>alone-class</Title>
+			<Shortcut>aclass</Shortcut>
+			<Description>使用包含范式的无扩展独立类</Description>
+			<Author>MixC</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+				<SnippetType>SurroundsWith</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>path</ID>
+					<ToolTip>文件路径</ToolTip>
+					<Default>path</Default>
+				</Literal>
+				<Literal>
+					<ID>name</ID>
+					<ToolTip>类名</ToolTip>
+					<Default>name</Default>
+				</Literal>
+			</Declarations>
+			<Code Language="cpp"><![CDATA[#ifndef xpack_$path$_$name$
+					#define xpack_$path$_$name$
+						#pragma push_macro("xuser")
+							#undef  xuser
+							#define xuser mixc::$path$_$name$
+							#include"define/base_type.hpp"
+							#include"macro/xgc.hpp"
+						#pragma pop_macro("xuser")
+				
+					namespace mixc::$path$_$name${
+						struct $name${
+							xgc_fields(
+								xiam($name$)
+							);
+                        public:
+						};
+					}
+				#endif
+
+				namespace xuser::inc{
+					using ::mixc::$path$_$name$::$name$;
+				}
+				]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
