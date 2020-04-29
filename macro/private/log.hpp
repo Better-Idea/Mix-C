@@ -27,7 +27,14 @@
             #endif
 
             inc::implicit<inc::mix> arg[] = { list... };
-            printf("%5d | %s:%d\n      | - ", no, file, line);
+            char buf[128] = {0};
+            sprintf(buf, "%5d | %s:%d ", no, file, line); // may over range =============================
+
+            for(int i = strlen(buf); i < 40; i++){
+                buf[i] = ' ';
+            }
+            
+            printf("%s | ", buf);
 
             for (auto item : arg){
                 do {
