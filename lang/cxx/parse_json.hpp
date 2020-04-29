@@ -9,7 +9,8 @@
         #undef  xuser
         #define xuser mixc::lang_cxx_json
         #include"define/base_type.hpp"
-        #include"dumb/disable_copy.hpp"
+        #include"docker/darray/pushpop.hpp"
+        #include"docker/darray.hpp"
         #include"interface/can_alloc.hpp"
         #include"lang/wxx/is_whitespace.hpp"
         #include"lang/wxx/is_hex.hpp"
@@ -21,6 +22,7 @@
         #include"macro/xdebug_fail.hpp"
         #include"memory/new.hpp"
         #include"meta/is_same.hpp"
+        #include"meta/more_fit.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -39,6 +41,8 @@
             constexpr json_type_t json_number = json_type_t::json_number;
         }
 
+        using namespace json_type;
+
         template<class index_t> union  json_value_t;
         template<class index_t> struct json_list_t;
         template<class index_t> struct json_pair_t;
@@ -56,7 +60,7 @@
             };
             json_string_t<index_t>      string;
             json_object_t<index_t> *    object;
-            json_array_t<index_t>  *    array;
+            json_array_t<index_t>  *    array = nullptr;
             f64                         real;
         };
 
@@ -71,17 +75,106 @@
         struct json_pair_t {
             json_string_t<index_t>      name;
             json_value_t<index_t>       value;
+
+            xgc_fields(xiam(json_pair_t<index_t>));
         };
 
         template<class item_t>
         struct json_list_t {
             uxx                         length  = 0;
             item_t & operator[](uxx index) {
-                return ((item_t *)this)[1 + index];
+                return ((item_t *)(this + 1))[index];
             }
         };
 
-        using namespace json_type;
+        template<class final, class item_t, class index_t>
+        struct json_t {
+            using jval  = json_value_t<index_t>;
+            using the_t = json_t<final, item_t, index_t>;
+
+            json_t(){}
+            json_t(final json, jval value) :
+                json(json), value(value){
+            }
+
+            operator f64() const {
+                return origin().real;
+            }
+
+            operator bool() const {
+                return origin().number != 0;
+            }
+
+            operator final() const {
+                auto str = origin().string;
+                return json.backward(str.offset).length(str.length);
+            }
+
+            template<class key_t>
+            the_t operator[](key_t const & index) const {
+                constexpr auto i = inc::more_fit<key_t, final, uxx>;
+
+                if constexpr(i == 0){
+                    auto & obj = origin().object[0];
+                    auto   key = inc::cxx<item_t>(index);
+
+                    for(uxx i = 0; i < obj.length; i++) {
+                        auto str  = obj[i].name;
+                        auto name = json.backward(str.offset).length(str.length);
+
+                        if (key.compare_fastly(name) == 0) {
+                            return { json, obj[i].value };
+                        }
+                    }
+                    return {};
+                }
+                else if constexpr(i == 1){
+                    return { json, origin().array[0][index] };
+                }
+            }
+
+            uxx length() const {
+                auto list = origin().array;
+                if (value.type == u08(json_object) or
+                    value.type == u08(json_array)) {
+                    if (list != nullptr) {
+                        return list->length;
+                    }
+                }
+                return 0;
+            }
+        private:
+            jval origin() const {
+                jval temp = value;
+                temp.type = 0;
+                return temp;
+            }
+            final json;
+            jval  value;
+        };
+
+        struct any{
+            any(u08p buffer) : 
+                begin(buffer), end(buffer){}
+
+            template<class object>
+            object * array(uxx length) {
+                object * ptr = (object *)end;
+                end          = u08p(ptr + length);
+                uxx cost     = end - begin;
+                xdebug(true, cost);
+                return ptr;
+            }
+
+            template<class object>
+            operator object * (){
+                auto ptr = array<object>(1);
+                return new (ptr) object();
+            }
+        private:
+            u08p begin;
+            u08p end;
+        };
 
         // template<class item_t> struct core;
         // using item_t = char;
@@ -92,31 +185,7 @@
             using inc::cxx<item_t>::cxx;
             using the_t = core<item_t>;
 
-            template<class base_t>
-            core(base_t const & self) : inc::cxx<item_t>(self){}
-
-            struct any{
-                any(u08p buffer) : 
-                    begin(buffer), end(buffer){}
-
-                template<class object>
-                object * array(uxx length) {
-                    object * ptr = (object *)end;
-                    end          = u08p(ptr + length);
-                    // uxx cost     = end - begin;
-                    // xdebug(true, cost);
-                    return ptr;
-                }
-
-                template<class object>
-                operator object * (){
-                    auto ptr = array<object>(1);
-                    return new (ptr) object();
-                }
-            private:
-                u08p begin;
-                u08p end;
-            };
+            core(inc::cxx<item_t> const & self) : inc::cxx<item_t>(self){}
 
             auto skip_whitespace(uxx & i) {
                 while(inc::wxx<item_t>(the[i]).is_whitespace() and i < the.length()) {
@@ -148,9 +217,10 @@
                 }
                 else {
                     auto cur = the.backward(i);
-                    auto ii = 0;
+                    auto ii  = 0;
+                    auto len = sizeof(candidate) / sizeof(candidate[0]);
 
-                    for(ii = 0; ii < 3; ii++) {
+                    for(ii = 0; ii < len; ii++) {
                         if (cur.is_starts_with(candidate[ii])) {
                             i           += candidate[ii].length();
                             value.number = ii == 0; // is "true"
@@ -159,7 +229,7 @@
                         }
                     }
 
-                    if (ii == 3) {
+                    if (ii == len) {
                         value.real = the.parse_number(i);
                         value.type = u08(json_number); // set this field after value.real
                     }
@@ -169,21 +239,25 @@
 
             template<class jlist_t, class jitem_t, class index_t>
             auto parse_list(uxx & i, any & alloc, item_t end_char) {
+                using array   = inc::darray<jitem_t>;
+                jlist_t * obj = nullptr;
+                jitem_t * ptr;
                 jitem_t   c;
-                jlist_t * obj    = alloc;
-                jitem_t * ptr    = alloc.template array<jitem_t>(0); // get current memory head
+                array     tmp;
+                constexpr bool is_object = inc::is_same<jitem_t, json_pair_t<index_t>>;
 
-                if (the[++i] == end_char) {
-                    i           += 1; // skip '}' or ']'
+                if (the[++i] == end_char) { // skip '}' or ']'
                     return obj;
                 }
                 
                 while(true) {
+                    the.skip_whitespace(i);
+
                     if (auto over_range = i == the.length(); over_range) {
                         xdebug_fail(over_range);
                         break;
                     }
-                    if constexpr (inc::is_same<jitem_t, json_pair_t<index_t>>) {
+                    if constexpr (is_object) {
                         c.name   = the.template parse_string<index_t>(i);
                         the.skip_whitespace(i);
                         xdebug_fail(the[i] != ':');
@@ -194,8 +268,7 @@
                         c        = the.template parse_value<index_t>(i, alloc);
                     }
 
-                    ptr[obj->length++] = c;
-
+                    tmp.push(c);
                     the.skip_whitespace(i);
 
                     if (the[i] == ',') {
@@ -207,7 +280,14 @@
                     }
                 }
 
-                alloc.template array<jitem_t>(obj->length); // real cost
+                if (auto length = tmp.length(); length != 0) {
+                    obj = alloc;
+                    ptr = alloc.template array<jitem_t>(obj->length = tmp.length());
+
+                    for(uxx i = 0; i < tmp.length(); i++){
+                        ptr[i] = tmp[i];
+                    }
+                }
                 return obj;
             }
 
@@ -270,66 +350,8 @@
                 return f64(r);
             }
 
-            template<class final, class index_t>
-            struct json_t : inc::disable_copy {
-                using jval = json_value_t<index_t>;
-                json_t(){}
-                json_t(final json, jval value) :
-                    json(json), value(value){
-                }
-
-                operator f64 () const {
-                    return origin().real;
-                }
-
-                operator bool() const {
-                    return origin().number != 0;
-                }
-
-                operator final() const {
-                    auto str = origin().string;
-                    return json.backward(str.offset).length(str.length);
-                }
-
-                json_t operator [](final index) const {
-                    auto & obj = origin().object[0];
-
-                    for(uxx i = 0; i < obj.length; i++) {
-                        auto str  = obj[i].name;
-                        auto name = json.backward(str.offset).length(str.length);
-
-                        if (inc::cxx<item_t>(index).compare_fastly(name) == 0) {
-                            return { json, obj[i].value) };
-                        }
-                    }
-                    return {};
-                }
-
-                json_t operator[](uxx index) const {
-                    return { json, origin().array[0][index] };
-                }
-
-                uxx length() const {
-                    auto list = origin().array;
-
-                    if (value.type == u08(json_object) or 
-                        value.type == u08(json_array) or list == nullptr) {
-                        return 0;
-                    }
-                    return list.length;
-                }
-            private:
-                jval origin() const {
-                    jval temp = value;
-                    temp.type = 0;
-                    return temp;
-                }
-                final json;
-                jval  value;
-            };
-
-            template<class final, class index_t>
-            json_t<final, index_t> parse_json(inc::can_alloc<byte> alloc) {
+            template<class final, class index_t = u32>
+            json_t<final, item_t, index_t> parse_json(inc::can_alloc<byte> alloc) {
                 uxx i   = 0;
                 any mem = alloc(the.length() * 5 + 1);
                 return { the, the.template parse_value<index_t>(i, mem) };
