@@ -4,6 +4,7 @@
         #undef  xuser
         #define xuser mixc::dumb_mirror
         #include"define/base_type.hpp"
+        #include"macro/xgc.hpp"
         #include"memop/addressof.hpp"
     #pragma pop_macro("xuser")
 
