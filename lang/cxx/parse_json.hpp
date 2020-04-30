@@ -26,6 +26,8 @@
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
+    #define xjson(...)  #__VA_ARGS__
+
     namespace mixc::lang_cxx_json {
         enum class json_type_t {
             json_object,
@@ -95,6 +97,10 @@
             json_t(){}
             json_t(final json, jval value) :
                 json(json), value(value){
+            }
+
+            json_type_t type() const{
+                return json_type_t(value.type);
             }
 
             operator f64() const {
@@ -202,8 +208,11 @@
                     the_t{ "false",   5 },
                 };
 
-                if (the.skip_whitespace(i); 
-                    the[i] == '{') {
+                if (the.skip_whitespace(i); i == the.length()){
+                    value.object = nullptr;
+                    value.type   = u08(json_object);
+                }
+                else if (the[i] == '{') {
                     value.object = the.template parse_object<index_t>(i, alloc);
                     value.type   = u08(json_object);
                 }
@@ -255,6 +264,10 @@
 
                     if (auto over_range = i == the.length(); over_range) {
                         xdebug_fail(over_range);
+                        break;
+                    }
+                    if (the[i] == end_char){
+                        i       += 1;
                         break;
                     }
                     if constexpr (is_object) {
@@ -371,6 +384,10 @@ namespace mixc::lang_cxx_json::xuser {
             return the.template parse_json<final, index_t>(alloc);
         }
     };
+}
+
+namespace xuser::inc::json_type{
+    using namespace ::mixc::lang_cxx_json::json_type;
 }
 
 #undef  xusing_lang_cxx
