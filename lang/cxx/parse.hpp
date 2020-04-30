@@ -9,8 +9,8 @@
         #undef  xusing_lang_cxx
         #undef  xuser
         #define xuser mixc::lang_cxx_parse
+        #include"configure.hpp"
         #include"define/base_type.hpp"
-        #include"define/platform.hpp"
         #include"docker/transmitter.hpp"
         #include"lang/cxx.hpp"
         #include"math/numeration_t.hpp"
@@ -122,10 +122,10 @@ namespace mixc::lang_cxx_parse::xuser{
         template<class target>
         parse_result<target> parse(inc::numeration_t base) const {
             // TODO: floating parse ======================================================
-            if constexpr (is_64bit or sizeof(target) <= sizeof(uxx)){
+            if constexpr (xis_os64 or sizeof(target) <= sizeof(uxx)){
                 return the.template parse<uxx>(uxx(base));
             }
-            else if constexpr (is_32bit){
+            else if constexpr (xis_os32){
                 return the.template parse<inc::unsigned_type<target>>(uxx(base));
             }
         }
