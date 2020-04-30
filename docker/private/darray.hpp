@@ -8,6 +8,7 @@
         #include"gc/ref.hpp"
         #include"interface/ranger.hpp"
         #include"macro/xgc.hpp"
+        #include"memory/new.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_darray{
@@ -26,25 +27,21 @@
             xgc_fields(
                 xiam(darray_t<type, rank, attribute>, base_t)
             );
-            
         public:
             xrange(item_t);
 
-            static inline the_t const empty_array{
-                inc::length(0)
-            };
-
             darray_t() : 
-                darray_t(empty_array) {
+                darray_t(inc::empty_array){
+                static_assert(base_t::header_size() <= sizeof(inc::empty_array));
             }
 
             darray_t(darray_t const &) = default;
 
-            explicit darray_t(inc::length length) :
+            darray_t(inc::length length) :
                 base_t(length) {}
 
             template<class ... args>
-            explicit darray_t(inc::length length, args const & ... list) : 
+            darray_t(inc::length length, args const & ... list) : 
                 base_t(length, list...) {}
 
             template<class ... args>

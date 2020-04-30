@@ -46,7 +46,20 @@
             }
         };
 
+        struct empty_t : token_plus{
+            byte empty[48] = { 0 };
+
+            empty_t() : token_plus(0) {}
+
+            template<class type>
+            operator type const & () const {
+                auto self = this;
+                return inc::cast<type>(self);
+            }
+        };
+
         inline hashmap<visited_ptr_t, info_t> gc_map;
+        inline empty_t const empty_array;
 
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
@@ -189,6 +202,10 @@
             uxx length() const {
                 return mem->this_length();
             }
+
+            constexpr static uxx header_size(){
+                return sizeof(token_mix_t);
+            }
         private:
             token_mix_t * mem;
 
@@ -277,4 +294,5 @@
 namespace xuser::inc{
     using ::mixc::gc_ref::ref_ptr;
     using ::mixc::gc_ref::ref_array;
+    using ::mixc::gc_ref::empty_array;
 }
