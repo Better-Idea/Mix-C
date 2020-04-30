@@ -2,21 +2,22 @@
     #include"lang/private/cxx.hpp"
 #endif
 
-#ifndef xpack_lang_cxx_json
-#define xpack_lang_cxx_json
+#ifndef xpack_lang_cxx_parse_json
+#define xpack_lang_cxx_parse_json
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
+        #undef  xusing_lang_cxx
         #undef  xuser
-        #define xuser mixc::lang_cxx_json
+        #define xuser mixc::lang_cxx_parse_json
         #include"define/base_type.hpp"
         #include"docker/darray/pushpop.hpp"
         #include"docker/darray.hpp"
         #include"interface/can_alloc.hpp"
-        #include"lang/wxx/is_whitespace.hpp"
         #include"lang/wxx/is_hex.hpp"
+        #include"lang/wxx/is_whitespace.hpp"
         #include"lang/wxx.hpp"
-        #include"lang/cxx/is_starts_with.hpp"
         #include"lang/cxx/compare_fastly.hpp"
+        #include"lang/cxx/is_starts_with.hpp"
         #include"lang/cxx/parse.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xdebug_fail.hpp"
@@ -28,7 +29,7 @@
 
     #define xjson(...)  #__VA_ARGS__
 
-    namespace mixc::lang_cxx_json {
+    namespace mixc::lang_cxx_parse_json {
         enum class json_type_t {
             json_object,
             json_string,
@@ -373,7 +374,7 @@
     }
 #endif
 
-namespace mixc::lang_cxx_json::xuser {
+namespace mixc::lang_cxx_parse_json::xuser {
     template<class final, class item_t>
     struct cxx : xusing_lang_cxx::cxx<final, item_t> {
         using xusing_lang_cxx::cxx<final, item_t>::cxx;
@@ -387,8 +388,8 @@ namespace mixc::lang_cxx_json::xuser {
 }
 
 namespace xuser::inc::json_type{
-    using namespace ::mixc::lang_cxx_json::json_type;
+    using namespace ::mixc::lang_cxx_parse_json::json_type;
 }
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx  ::mixc::lang_cxx_json::xuser
+#define xusing_lang_cxx  ::mixc::lang_cxx_parse_json::xuser
