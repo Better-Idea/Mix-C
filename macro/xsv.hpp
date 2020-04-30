@@ -3,8 +3,8 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::macro_xsv
+        #include"configure.hpp"
         #include"define/base_type.hpp"
-        #include"define/platform.hpp"
         #include"gc/private/token.hpp"
         #include"memory/new.hpp"
     #pragma pop_macro("xuser")
@@ -27,7 +27,7 @@
     #define __xsv__(item,padding,str)                                               \
     struct sv{                                                                      \
         sv() : buf(padding str) {                                                   \
-            new (this) mixc::gc_token::token_plus(sizeof(str) / sizeof(item) - 1);  \
+            new (this) ::mixc::gc_token::token_plus(sizeof(str) / sizeof(item) - 1);\
         }                                                                           \
         item buf[sizeof(padding str) / sizeof(item)];                               \
     };                                                                              \
