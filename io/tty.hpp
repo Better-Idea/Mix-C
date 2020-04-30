@@ -3,8 +3,8 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::io_tty
+        #include"configure.hpp"
         #include"define/base_type.hpp"
-        #include"define/platform.hpp"
         #include"io/private/tty_color_t.hpp"
         #include"io/private/tty_key_t.hpp"
         #include"io/private/tty.hpp"
@@ -21,7 +21,6 @@
                 xpro(visiable_of_cursor , mutable bool)
             );
         public:
-            using the_t = tty_t;
             using final = tty_t;
         private:
             auto map_forecolor(inc::tty_color_t value) const {

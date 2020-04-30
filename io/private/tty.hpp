@@ -13,16 +13,7 @@
         using print_t = int (*)(const char * fmt,...);
         extern print_t const  print_core;
         extern inc::tty_key_t read_key();
-        extern void           print_begin();
         extern void           print_flush();
-
-        struct ini{
-            ini(){
-                print_begin();
-            }
-        };
-
-        inline ini __ini;
 
         template<class ... args>
         void print(args const & ... list){
@@ -39,4 +30,5 @@ namespace xuser::inc{
     using ::mixc::io_private_tty::print;
     using ::mixc::io_private_tty::print_flush;
     using ::mixc::io_private_tty::read_key;
+    using ::mixc::io_private_tty::print_core;
 }
