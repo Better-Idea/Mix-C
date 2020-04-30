@@ -95,9 +95,9 @@
         };
     }
 
-    #if xos64
+    #if xis_os64
         #define xc08(str)      xsv(char, "0123456789abcdef", str)
-    #elif xos32
+    #elif xis_os32
         #define xc08(str)      xsv(char, "01234567", str)
     #endif
 #endif
