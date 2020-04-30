@@ -18,16 +18,12 @@
 
             result(asciis name, uxx error_threshold = 128) : 
                 error_threshold(error_threshold){
-                inc::print(" TEST | %-24s", name);
+                inc::print_core(" TEST | %-24s\n", name);
             }
 
             ~result(){
-                if (error_count == 0){
-                    inc::print(" [PASS | CASE:%-9u]\n", case_count);
-                }
-                else{
-                    inc::print('\n');
-                }
+                asciis msg[] = { "fail", "pass" };
+                inc::print_core("      | case:%-9u %s\n", case_count, msg[error_count == 0]);
             }
         };
     }
@@ -39,7 +35,6 @@
         }                                                                                               \
         else{                                                                                           \
             using namespace ::mixc::macro_xassert::inc;                                                 \
-            tty.write("\n");                                                                            \
             log(                                                                                        \
                 __test.error_count += 1,                                                                \
                 __FILE__,                                                                               \
@@ -48,15 +43,17 @@
             if (__test.error_count % __test.error_threshold == 0) {                                     \
                 tty.write("\npause key to continue...");                                                \
                 tty.read_key();                                                                         \
-                tty.write("\n");                                                                        \
             }                                                                                           \
+            tty.write("\n");                                                                            \
             return true;                                                                                \
         }                                                                                               \
     })())
 
-    #define xassert_eq(the_wanted,...)                                                                  \
-    if (auto const & wanted = (the_wanted), & actually = (__VA_ARGS__); false) {}                       \
-    else xassert(wanted == actually, wanted, actually)
+    #define xassert_eq(...)                                                                             \
+    if (([&](auto const & wanted, auto const & actually){                                               \
+        xassert(wanted == actually, wanted, actually) return true;                                      \
+        return false;                                                                                   \
+    })(__VA_ARGS__))
 
     #define xtest(name,...)                                                                             \
     struct name{                                                                                        \

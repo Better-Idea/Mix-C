@@ -3,6 +3,7 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::macro_private_log
+        #include"configure.hpp"
         #include"define/base_type.hpp"
         #include"dumb/implicit.hpp"
         #include"macro/private/mix.hpp"
@@ -12,18 +13,16 @@
 
     namespace mixc::macro_private_log{
         template<class ... args>
-        inline void log(int no, const char * file, int line, const char * msg, args ... list){
-            #ifdef xdebug_short_path
-                char prefix[] = "Mix-C";
-                while(true) {
-                    auto name = strstr(file, prefix);
-                    if (name != nullptr) {
-                        file = name + sizeof(prefix);
-                    }
-                    else {
-                        break;
-                    }
+        inline void log(int no, const char * file, int line, const char * msg, args const & ... list){
+            #if xuse_xdebug_short_path
+            while(true) {
+                if (auto name = strstr(file, xmixc); name != nullptr) {
+                    file = name + sizeof(xmixc);
                 }
+                else {
+                    break;
+                }
+            }
             #endif
 
             inc::implicit<inc::mix> arg[] = { list... };
@@ -54,3 +53,9 @@
 namespace xuser::inc{
     using ::mixc::macro_private_log::log;
 }
+
+/*
+
+ TEST | 
+
+*/
