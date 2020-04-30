@@ -41,11 +41,11 @@
                 >;
 
                 if constexpr (index < 4){
-                    i   = value;
+                    i   = i64(value); // maybe is enum class
                     fmt = "%lld";
                 }
                 else if constexpr(index < 8){
-                    u   = value;
+                    u   = u64(value);
                     fmt = "%llu";
                 }
                 else if constexpr(index < 10){
