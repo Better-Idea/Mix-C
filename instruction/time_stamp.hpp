@@ -3,8 +3,8 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::instruction_time_stamp
+        #include"configure.hpp"
         #include"define/base_type.hpp"
-        #include"define/platform.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::instruction_time_stamp{

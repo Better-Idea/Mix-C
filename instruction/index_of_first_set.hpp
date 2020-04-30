@@ -4,7 +4,6 @@
         #undef  xuser
         #define xuser mixc::instruction_index_of_first_set
         #include"define/base_type.hpp"
-        #include"define/platform.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::instruction_index_of_first_set{
