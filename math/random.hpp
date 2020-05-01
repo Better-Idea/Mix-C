@@ -12,15 +12,8 @@
 
     namespace mixc::math_random{
         namespace inner{
-            inline u64 x;
-            inline u64 y;
-
-            struct __ini__{
-                __ini__(){
-                    x = inc::time_stamp();
-                    y = inc::time_stamp() * magic_number;
-                }
-            } __ini__;
+            inline static u64 x = inc::time_stamp();
+            inline static u64 y = inc::time_stamp() * magic_number;
 
             inline u64 random() {
                 constexpr u64 change_period = 0x3f;

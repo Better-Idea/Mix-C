@@ -55,7 +55,7 @@
             fake(args const & ... list) : item(list...) {}
         };
 
-        inline u32 __class_id = u32(-1) >> 1;
+        inline static u32 __class_id = u32(-1) >> 1;
     }
     #define __xgc_name_iam__(...)        #__VA_ARGS__
     #define __xgc_list_iam__(...)        __VA_ARGS__

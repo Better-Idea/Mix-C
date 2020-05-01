@@ -52,14 +52,14 @@
             empty_t() : token_plus(0) {}
 
             template<class type>
-            operator type const & () const {
+            operator type () const {
                 auto self = this;
                 return inc::cast<type>(self);
             }
         };
 
-        inline hashmap<visited_ptr_t, info_t> gc_map;
-        inline empty_t const empty_array;
+        inline static hashmap<visited_ptr_t, info_t> gc_map;
+        inline static empty_t const empty_array;
 
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
