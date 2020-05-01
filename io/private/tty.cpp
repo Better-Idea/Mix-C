@@ -32,7 +32,7 @@ namespace mixc::io_private_tty{
     struct pair{ u08 key; u08 modify; inc::c08 value; };
     
     #define xgen(key,val,modify) pair{ key, modify, val) }
-    inline auto const & map = inc::array_view {
+    static const & map = inc::array_view {
         xgen(esc,       "\x1b",                      is_func),
         xgen(f1,        "\x1b\x4f\x50",              is_func),
         xgen(f2,        "\x1b\x4f\x51",              is_func),
