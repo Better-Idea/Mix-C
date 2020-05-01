@@ -25,7 +25,7 @@
 
             auto clone(inc::can_alloc<item> alloc) const {
                 the_t  r{ alloc(the.length()), the.length() };
-                inc::copy<item>(r, the, the.length());
+                inc::copy(r, the, the.length());
                 return r;
             }
         };
