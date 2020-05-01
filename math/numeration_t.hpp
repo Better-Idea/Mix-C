@@ -7,7 +7,7 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::math_numeration_t{
-        enum class numeration_t{
+        enum class numeration_t : u08 {
             bin =  2,
             oct =  8,
             dec =  10,
