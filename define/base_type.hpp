@@ -1,82 +1,49 @@
 #ifndef xpack_define_base_type
 #define xpack_define_base_type
-    using mixc_i08      = signed char;
-    using mixc_i16      = signed short;
-    using mixc_i32      = signed int;
-    using mixc_i64      = signed long long;
-    using mixc_u08      = unsigned char;
-    using mixc_u16      = unsigned short;
-    using mixc_u32      = unsigned int;
-    using mixc_u64      = unsigned long long;
-    using mixc_f32      = float;
-    using mixc_f64      = double;
-    using mixc_w16      = char16_t;
-    using mixc_asciis   = const char *;
-    using mixc_ci08     = const mixc_i08;
-    using mixc_ci16     = const mixc_i16;
-    using mixc_ci32     = const mixc_i32;
-    using mixc_ci64     = const mixc_i64;
-    using mixc_cu08     = const mixc_u08;
-    using mixc_cu16     = const mixc_u16;
-    using mixc_cu32     = const mixc_u32;
-    using mixc_cu64     = const mixc_u64;
-    using mixc_cf32     = const mixc_f32;
-    using mixc_cf64     = const mixc_f64;
-    using mixc_i08p     = mixc_i08  *;
-    using mixc_i16p     = mixc_i16  *;
-    using mixc_i32p     = mixc_i32  *;
-    using mixc_i64p     = mixc_i64  *;
-    using mixc_u08p     = mixc_u08  *;
-    using mixc_u16p     = mixc_u16  *;
-    using mixc_u32p     = mixc_u32  *;
-    using mixc_u64p     = mixc_u64  *;
-    using mixc_f32p     = mixc_f32  *;
-    using mixc_f64p     = mixc_f64  *;
-    using mixc_w16p     = mixc_w16  *;
-    using mixc_voidp    = void      *;
+    using i08      = signed char;
+    using i16      = signed short;
+    using i32      = signed int;
+    using i64      = signed long long;
+    using u08      = unsigned char;
+    using u16      = unsigned short;
+    using u32      = unsigned int;
+    using u64      = unsigned long long;
+    using f32      = float;
+    using f64      = double;
+    using w16      = char16_t;
+    using asciis   = const char *;
+    using words    = const char16_t *;
+    using ci08     = const i08;
+    using ci16     = const i16;
+    using ci32     = const i32;
+    using ci64     = const i64;
+    using cu08     = const u08;
+    using cu16     = const u16;
+    using cu32     = const u32;
+    using cu64     = const u64;
+    using cf32     = const f32;
+    using cf64     = const f64;
+    using i08p     = i08  *;
+    using i16p     = i16  *;
+    using i32p     = i32  *;
+    using i64p     = i64  *;
+    using u08p     = u08  *;
+    using u16p     = u16  *;
+    using u32p     = u32  *;
+    using u64p     = u64  *;
+    using f32p     = f32  *;
+    using f64p     = f64  *;
+    using w16p     = w16  *;
+    using voidp    = void *;
+    using byte     = u08;
     
     #ifndef _MSC_BUILD
         using size_t        = long unsigned int;
         #define size_t      size_t
     #endif
 
-    #define i08         mixc_i08
-    #define i16         mixc_i16
-    #define i32         mixc_i32
-    #define i64         mixc_i64
-    #define u08         mixc_u08
-    #define u16         mixc_u16
-    #define u32         mixc_u32
-    #define u64         mixc_u64
-    #define f32         mixc_f32
-    #define f64         mixc_f64
-    #define w16         mixc_w16
-    #define asciis      mixc_asciis
-    #define ci08        mixc_ci08
-    #define ci16        mixc_ci16
-    #define ci32        mixc_ci32
-    #define ci64        mixc_ci64
-    #define cu08        mixc_cu08
-    #define cu16        mixc_cu16
-    #define cu32        mixc_cu32
-    #define cu64        mixc_cu64
-    #define cf32        mixc_cf32
-    #define cf64        mixc_cf64
-    #define i08p        mixc_i08p
-    #define i16p        mixc_i16p
-    #define i32p        mixc_i32p
-    #define i64p        mixc_i64p
-    #define u08p        mixc_u08p
-    #define u16p        mixc_u16p
-    #define u32p        mixc_u32p
-    #define u64p        mixc_u64p
-    #define f32p        mixc_f32p
-    #define f64p        mixc_f64p
-    #define w16p        mixc_w16p
-    #define voidp       mixc_voidp
     #define the         (*(the_t *)this)
     #define thex        (*(final *)this)
-    using byte = mixc_u08;
 
     namespace mixc{
         template<int> struct env{};
