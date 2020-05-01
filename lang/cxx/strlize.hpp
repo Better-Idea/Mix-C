@@ -11,6 +11,7 @@
         #define xuser mixc::lang_cxx_strlize
         #include"define/base_type.hpp"
         #include"interface/can_alloc.hpp"
+        #include"lang/cxx/clone.hpp"
         #include"lang/cxx.hpp"
         #include"math/numeration_t.hpp"
         #include"meta/more_fit.hpp"
@@ -69,8 +70,8 @@
 #endif
 
 namespace mixc::lang_cxx_strlize::xuser{
-    constexpr asciis lower = "0123456789abcdefghijklmnopqrstuvwxyz";
-    constexpr asciis upper = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    constexpr char lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    constexpr char upper[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item>{
@@ -82,16 +83,16 @@ namespace mixc::lang_cxx_strlize::xuser{
             cxx(value, inc::numeration_t::dec, lower, alloc){                                   \
         }                                                                                       \
                                                                                                 \
-        cxx(type value, asciis case_t, inc::can_alloc<item> alloc) :                            \
-            cxx(value, inc::numeration_t::dec, case_t, alloc){                                  \
+        cxx(type value, asciis lut, inc::can_alloc<item> alloc) :                               \
+            cxx(value, inc::numeration_t::dec, lut, alloc){                                     \
         }                                                                                       \
                                                                                                 \
         cxx(type value, inc::numeration_t base, inc::can_alloc<item> alloc) :                   \
             cxx(value, base, lower, alloc){                                                     \
         }                                                                                       \
                                                                                                 \
-        cxx(type value, inc::numeration_t base, asciis case_t, inc::can_alloc<item> alloc){     \
-            thex = the.strlize(value, type(base), case_t, alloc);                               \
+        cxx(type value, inc::numeration_t base, asciis lut, inc::can_alloc<item> alloc){        \
+            thex = the.strlize(value, type(base), lut, alloc);                                  \
         }
 
         xgen(u08);
@@ -102,6 +103,16 @@ namespace mixc::lang_cxx_strlize::xuser{
         xgen(i16);
         xgen(i32);
         xgen(i64);
+
+        cxx(final value, inc::can_alloc<item> alloc){
+            thex = the_t(value).clone(alloc);
+        }
+
+        cxx(item value, inc::can_alloc<item> alloc){
+            item * ptr = alloc(1);
+            thex = the_t{ ptr, 1 };
+            ptr[0] = value;
+        }
 
         // TODO: floating point =====================================================
         #undef  xgen
