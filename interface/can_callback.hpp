@@ -7,7 +7,7 @@
         #include"macro/private/callable.hpp"
         #include"memop/signature.hpp"
         #include"memop/addressof.hpp"
-        #include"meta/more_fit.hpp"
+        #include"meta/is_same.hpp"
         #include"meta/remove_membership.hpp"
     #pragma pop_macro("xuser")
 
@@ -27,12 +27,16 @@
                 template<class object>
                 can_callback(object const &){}
             #else
-                template<class object> requires (
-                    inc::more_fit<
-                        decltype(& object::operator()), 
-                        ret(object::*)(args...) const, 
+                // 在 requires 中使用 is_same 代替 more_fit 达到区分 lambda 的目的
+                template<class object> requires ( 
+                    inc::is_same<
+                        decltype(& object::operator()),
+                        ret(object::*)(args...) const
+                    > or 
+                    inc::is_same<
+                        decltype(& object::operator()),
                         ret(object::*)(args...)
-                    > != not_exist
+                    > 
                 )
                 can_callback(object const & impl){
                     __object    = inc::addressof(impl);
