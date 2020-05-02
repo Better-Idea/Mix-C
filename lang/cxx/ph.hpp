@@ -2,27 +2,28 @@
     #include"lang/private/cxx.hpp"
 #endif
 
-#ifndef xpack_lang_cxx_format
-#define xpack_lang_cxx_format
+#ifndef xpack_lang_cxx_ph
+#define xpack_lang_cxx_ph
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
         #undef  xusing_lang_cxx
         #undef  xuser
-        #define xuser mixc::lang_cxx_format
+        #define xuser mixc::lang_cxx_ph
         #include"define/base_type.hpp"
         #include"interface/can_alloc.hpp"
         #include"lang/cxx/strlize.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xdebug_fail.hpp"
-        #include"math/abs.hpp"
-        #include"memop/base_seqlize.hpp"
+        #include"memop/addressof.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
+        #include"meta/is_based_on.hpp"
         #include"meta/unsigned_type.hpp"
+        #include"meta_ctr/cif.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_format{
+    namespace mixc::lang_cxx_ph{
         /*
         * h{}      hex
         * H{}      upper hex 
@@ -46,8 +47,10 @@
         * more... to be continue
         */
 
+        struct place_holder_group{};
+
         template<class final, class type>
-        struct base{
+        struct base : place_holder_group{
         protected:
             type        value;
             uxx         align_mode          : 2  = 0;
@@ -99,26 +102,25 @@
 
                 switch(the_t::align_mode){
                 case the_t::align_center:
-                    inc::fill(mem, ' ', half);
-                    inc::fill(length + (mem += half), ' ', pad_width - half);
+                    inc::fill_with_operator(mem, ' ', half);
+                    inc::fill_with_operator(length + (mem += half), ' ', pad_width - half);
                     return mem;
                 case the_t::align_left:
-                    inc::fill(mem + length, ' ', pad_width);
+                    inc::fill_with_operator(mem + length, ' ', pad_width);
                     return mem;
                 default: // align_right
-                    inc::fill(mem, ' ', pad_width);
+                    inc::fill_with_operator(mem, ' ', pad_width);
                     return mem + pad_width;
                 }
             }
         };
 
         #define xbase   (*(basex<decltype(*this), type> *)this)
-        #define xopt                                                                        \
-            void operator >> (inc::can_alloc<char> alloc){ output<char>(alloc); }           \
-            void operator >> (inc::can_alloc<w16> alloc){ output<w16>(alloc); }             \
-        private:                                                                            \
-            template<class item_t>                                                          \
-            void output(inc::can_alloc<item_t> alloc)
+        #define xopt                                                                            \
+            inc::cxx<char> operator >> (inc::can_alloc<char> alloc) { return output(alloc); }   \
+            inc::cxx<w16>  operator >> (inc::can_alloc<w16>  alloc) { return output(alloc); }   \
+            template<class item_t>                                                              \
+            inc::cxx<item_t> output(inc::can_alloc<item_t> alloc)
 
         template<
             class             final, 
@@ -127,12 +129,12 @@
             bool              with_prefix, 
             bool              keep_leading_zero, 
             auto              lut>
-        struct hex : base<final, type>{
+        struct num : base<final, type>{
             using the_t = base<final, type>;
             using the_t::the_t;
 
             xopt{
-                inc::cxx<item_t>(the_t::value, n,  lut, [this, alloc](uxx length){
+                return inc::cxx<item_t>(the_t::value, n,  lut, [this, alloc](uxx length){
                     auto klz_length = sizeof(type) * 8; // keep leading zero length
 
                     if constexpr (n == inc::numeration::hex){
@@ -153,11 +155,11 @@
                     );
 
                     if constexpr (with_prefix){ // only in hex
-                        inc::copy(mem, "0x", 2);
+                        inc::copy_with_operator(mem, "0x", 2);
                         mem += 2;
                     }
                     if (zero_count){
-                        inc::fill(mem, '0', zero_count);
+                        inc::fill_with_operator(mem, '0', zero_count);
                         mem += zero_count;
                     }
                     return mem;
@@ -170,9 +172,9 @@
 
         #define xnum(name,type_t,numeration,prefix,leading_zero,lut)                            \
             template<class type>                                                                \
-            struct name : hex<name<type>, type_t, numeration, prefix, leading_zero, lut> {      \
+            struct name : num<name<type>, type_t, numeration, prefix, leading_zero, lut> {      \
                 name(type const & value) :                                                      \
-                    hex<name<type>, type_t, numeration, prefix, leading_zero, lut>(value){}     \
+                    num<name<type>, type_t, numeration, prefix, leading_zero, lut>(value){}     \
             }
         
         #define xhex(name,prefix,leading_zero,lut)      \
@@ -186,9 +188,46 @@
 
         #define xstr(type,ptr) template<uxx n> struct v<type[n]> : v<ptr>{ using v<ptr>::v; }
 
+        namespace ph{
+            template<class> struct v;
+        }
+
+        template<class ... args> struct phg_core;
+        template<class a0, class ... args>
+        struct phg_core<a0, args...> : phg_core<args...>{
+        private:
+            static constexpr bool is_ph = inc::is_based_on<place_holder_group, a0>;
+            typename inc::cif<is_ph, a0, ph::v<a0>>::result item;
+            using base_t = phg_core<args...>;
+        public:
+            phg_core(a0 const & first, args const & ... list) : 
+                base_t(list...), item(first){
+            }
+
+            template<class item_t>
+            inc::cxx<item_t> output(uxx old_length){
+                inc::cxx<item_t> ret;
+                item.template output<item_t>([&](uxx length) -> item_t * {
+                    ret = base_t::template output<item_t>(old_length + length);
+                    ret = ret.forward(length);
+                    return ret;
+                });
+                return ret;
+            }
+        };
+
+        template<> struct phg_core<>{
+            inc::can_alloc<void> alloc;
+
+            template<class item_t>
+            inc::cxx<item_t> output(uxx length){
+                return { (item_t *)alloc(length) + length, length };
+            }
+        };
+
     }
 
-    namespace mixc::lang_cxx_format::ph{ // place_holder group
+    namespace mixc::lang_cxx_ph::ph{ // place_holder
         xhex(h , not with_prefix, not keep_leading_zero, inc::lower);
         xhex(H , not with_prefix, not keep_leading_zero, inc::upper);
         xhex(zh, not with_prefix,     keep_leading_zero, inc::lower);
@@ -212,7 +251,7 @@
                 : the_t(value){}
 
             xopt {
-                inc::cxx<item_t>(the_t::value, [this, alloc](uxx length){
+                return inc::cxx<item_t>(the_t::value, [this, alloc](uxx length){
                     return xbase.template align<item_t>(length, alloc);
                 });
             }
@@ -220,6 +259,20 @@
 
         xstr(char, asciis);
         xstr(w16, words);
+
+        template<class a0, class ... args>
+        struct phg{ // place_holder group
+            phg(a0 const & first, args const & ... list)
+                : items(first, list...){
+            }
+
+            xopt {
+                inc::copy(xref items.alloc, alloc);
+                return items.template output<item_t>(0);
+            }
+        private:
+            phg_core<a0, args...> items;
+        };
 
         #undef  xstr
         #undef  xbin
@@ -229,31 +282,9 @@
         #undef  xopt 
         #undef  xmate
     }
-
-    namespace mixc::lang_cxx_format{
-        template<class item>
-        struct core : inc::cxx<item> {
-            using inc::cxx<item>::cxx;
-            using the_t = core<item>;
-
-            auto format() const {
-
-            }
-        };
-    }
 #endif
 
-namespace mixc::lang_cxx_format::xuser {
-    template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item> {
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-    };
-}
-
 namespace xuser::inc::ph{
-    using namespace ::mixc::lang_cxx_format::ph;
+    using namespace ::mixc::lang_cxx_ph::ph;
 }
 
-#undef  xusing_lang_cxx
-#define xusing_lang_cxx ::mixc::lang_cxx_format::xuser
