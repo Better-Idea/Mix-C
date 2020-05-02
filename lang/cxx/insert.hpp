@@ -25,11 +25,11 @@
 
             auto insert(ixx index, the_t value, inc::can_alloc<item> alloc) const {
                 xindex_rollback(the.length(), index, + 1);
-                uxx             target_length = the.length() + value.length();
-                the_t           r { alloc(target_length), target_length };
-                inc::copy<item>(r, the, index);
-                inc::copy<item>(r.backward(index), value, value.length());
-                inc::copy<item>(r.backward(index + value.length()), the.backward(index), the.length() - index);
+                uxx                     target_length = the.length() + value.length();
+                the_t                   r { alloc(target_length), target_length };
+                inc::copy_with_operator(r, the, index);
+                inc::copy_with_operator(r.backward(index), value, value.length());
+                inc::copy_with_operator(r.backward(index + value.length()), the.backward(index), the.length() - index);
                 return r;
             }
         };

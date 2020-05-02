@@ -34,8 +34,8 @@
 
                 auto  len = the.length() - (endx - start);
                 the_t r { alloc(len), len };
-                inc::copy<item>(r        , the       , start);
-                inc::copy<item>(r + start, the + endx, len - start);
+                inc::_with_operator(r        , the       , start);
+                inc::_with_operator(r + start, the + endx, len - start);
                 return r;
             }
         };

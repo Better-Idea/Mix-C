@@ -67,8 +67,8 @@
                         new (mirror) pair(key, value);
                     }
                     else{
-                        inc::copy<key_t>(xref the->key, key);
-                        inc::copy<val_t>(xref the->value, value);
+                        inc::copy(xref the->key, key);
+                        inc::copy(xref the->value, value);
                     }
                 }
 

@@ -53,7 +53,7 @@
                         }
                         if (index - buf_size - heap.length() == 0){
                             inc::darray<uxx> new_heap { inc::length(index) };
-                            inc::copy(new_heap, heap, heap.length());
+                            inc::copy_with_operator(new_heap, heap, heap.length());
                             heap = new_heap;
                         }
                         heap[index - buf_size] = value;
@@ -74,15 +74,15 @@
                 uxx   top        = only_stack ? pack.i : buf_size;
 
                 auto && replace = [&](uxx length){
-                    inc::copy<item>(target, source, length);
+                    inc::copy_with_operator(target, source, length);
                     target = target.backward(length);
                     source = source.backward(length + old_value.length());
-                    inc::copy<item>(target, new_value, length = new_value.length());
+                    inc::copy_with_operator(target, new_value, length = new_value.length());
                     target = target.backward(length);
                 };
 
                 auto && remove = [&](uxx length){
-                    inc::copy<item>(target, source, length);
+                    inc::copy_with_operator(target, source, length);
                     target = target.backward(length);
                     source = source.backward(length + old_value.length());
                 };

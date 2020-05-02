@@ -24,11 +24,11 @@
             using the_t = core<item>;
 
             auto pad_bends(uxx left_count, uxx right_count, item value, inc::can_alloc<item> alloc) const {
-                uxx             total_length = left_count + right_count + the.length();
-                the_t           r(alloc(total_length), total_length);
-                inc::fill<item>(r, value, left_count);
-                inc::copy<item>(r.backward(left_count), the, the.length());
-                inc::fill<item>(r.backward(left_count + the.length()), value, right_count);
+                uxx                     total_length = left_count + right_count + the.length();
+                the_t                   r(alloc(total_length), total_length);
+                inc::fill_with_operator(r, value, left_count);
+                inc::copy_with_operator(r.backward(left_count), the, the.length());
+                inc::fill_with_operator(r.backward(left_count + the.length()), value, right_count);
                 return r;
             }
         };

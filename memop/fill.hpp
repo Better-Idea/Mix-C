@@ -4,21 +4,40 @@
         #undef  xuser
         #define xuser mixc::memop_fill
         #include"define/base_type.hpp"
-        #include"dumb/mirror.hpp"
+        #include"memop/copy.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::memop_fill{
-        template<class target, class source>
-        inline void fill_with_operator(target * a, source const & value, uxx count) {
+        template<bool with_operator, class a, class b>
+        inline void fill_core(a & target, b const & source, uxx count) {
             for (uxx i = 0; i < count; i++) {
-                a[i] = (source &)value;
+                if constexpr(with_operator){
+                    target[i] = (b &)source;
+                }
+                else{
+                    inc::copy(xref target[i], source);
+                }
             }
         }
+
+        template<class a, class b>
+        inline void fill_with_operator(a & target, b const & source, uxx count) {
+            fill_core<true, a, b>(target, source, count);
+        }
+
+        template<class a, class b>
+        inline void fill_with_operator(a && target, b const & source, uxx count) {
+            fill_core<true, a, b>((a &)target, source, count);
+        }
         
-        template<class target, class source>
-        inline void fill(target * a, source const & value, uxx count) {
-            using mp = inc::mirror<target> *;
-            fill_with_operator(mp(a), value, count);
+        template<class a, class b>
+        inline void fill(a & target, b const & source, uxx count) {
+            fill_core<false, a, b>(target, source, count);
+        }
+        
+        template<class a, class b>
+        inline void fill(a && target, b const & source, uxx count) {
+            fill_core<false, a, b>((a &)target, source, count);
         }
     }
 

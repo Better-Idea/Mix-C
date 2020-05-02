@@ -24,10 +24,10 @@
             using the_t = core<item>;
 
             auto pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
-                uxx             length = the.length() + count;
-                the_t           r(alloc(length), length);
-                inc::fill<item>(r, value, count);
-                inc::copy<item>(r.backward(count), the, the.length());
+                uxx                     length = the.length() + count;
+                the_t                   r(alloc(length), length);
+                inc::fill_with_operator(r, value, count);
+                inc::copy_with_operator(r.backward(count), the, the.length());
                 return r;
             }
         };
