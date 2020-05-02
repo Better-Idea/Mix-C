@@ -4,8 +4,8 @@
         #undef  xuser
         #define xuser mixc::meta_seq_tpop
         #include"define/base_type.hpp"
-        #include"meta_seq/tnull.hpp"
         #include"meta_seq/tlist.hpp"
+        #include"meta_seq/tnull.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_seq_tpop{
