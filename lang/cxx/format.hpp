@@ -13,6 +13,8 @@
         #include"interface/can_alloc.hpp"
         #include"lang/cxx/strlize.hpp"
         #include"lang/cxx.hpp"
+        #include"macro/xdebug_fail.hpp"
+        #include"math/abs.hpp"
         #include"memop/base_seqlize.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
@@ -130,15 +132,27 @@
             using the_t::the_t;
 
             xopt{
-                inc::cxx<item_t>(the_t::value, n, lut, [this, alloc](uxx length){
-                    auto new_length = (keep_leading_zero ? sizeof(type) * 2 : length);
+                inc::cxx<item_t>(the_t::value, n,  lut, [this, alloc](uxx length){
+                    auto klz_length = sizeof(type) * 8; // keep leading zero length
+
+                    if constexpr (n == inc::numeration::hex){
+                        klz_length /= 4;
+                    }
+                    else if constexpr (n == inc::numeration::oct){
+                        klz_length = klz_length / 3 + (klz_length % 3 != 0);
+                    }
+                    else if constexpr (n == inc::numeration::bin){
+                        klz_length = klz_length;
+                    }
+
+                    auto new_length = (keep_leading_zero ? klz_length : length);
                     auto zero_count = new_length - length;
                     auto mem        = xbase.template align<item_t>(
                         new_length += (with_prefix ? 2 : 0), 
                         alloc
                     );
 
-                    if (with_prefix){
+                    if constexpr (with_prefix){ // only in hex
                         inc::copy(mem, "0x", 2);
                         mem += 2;
                     }
