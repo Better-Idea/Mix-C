@@ -41,10 +41,10 @@
                 __LINE__,                                                                               \
                 #__VA_ARGS__ ",", ## __VA_ARGS__);                                                      \
             if (__test.error_count % __test.error_threshold == 0) {                                     \
-                tty.write("\npause key to continue...");                                                \
+                tty.write("pause key to continue...");                                                  \
                 tty.read_key();                                                                         \
+                tty.write("\n");                                                                        \
             }                                                                                           \
-            tty.write("\n");                                                                            \
             return true;                                                                                \
         }                                                                                               \
     })())
