@@ -10,7 +10,6 @@
     using u64      = unsigned long long;
     using f32      = float;
     using f64      = double;
-    using w16      = char16_t;
     using asciis   = const char *;
     using words    = const char16_t *;
     using ci08     = const i08;
@@ -33,7 +32,7 @@
     using u64p     = u64  *;
     using f32p     = f32  *;
     using f64p     = f64  *;
-    using w16p     = w16  *;
+    using w16p     = char16_t  *;
     using voidp    = void *;
     using byte     = u08;
     
