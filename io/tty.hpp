@@ -8,8 +8,11 @@
         #include"io/private/tty_color_t.hpp"
         #include"io/private/tty_key_t.hpp"
         #include"io/private/tty.hpp"
+        #include"lang/cxx/ph.hpp"
+        #include"lang/cxx.hpp"
         #include"macro/xgc.hpp"
         #include"macro/xprop.hpp"
+        #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::io_tty{
@@ -42,7 +45,7 @@
                 static_assert(uxx(light_cyan)      == 0xe);
                 static_assert(uxx(light_gray)      == 0xf);
 
-                if constexpr(xis_linux){
+                if constexpr (xis_linux){
                     constexpr asciis map[] = {
                         "\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[90m", "\e[91m", "\e[92m", "\e[93m", "\e[94m", "\e[95m", "\e[96m", "\e[97m",
                     };
@@ -117,13 +120,33 @@
             
             template<class a0, class ... args>
             final & write(a0 const & first, args const & ... list) const {
-                inc::print(first, list...);
+                using namespace inc::ph;
+                char   buf_stack[128];
+                char * buf_heap   = nullptr;
+                auto   buf_length = 0;
+                auto   content    = phg { first, list... } >> [&](uxx length){
+                    auto ptr = buf_stack;
+
+                    if (length >= sizeof(buf_stack) / sizeof(buf_stack[0])){
+                        ptr = buf_heap = inc::alloc<char>(
+                            inc::memory_size(length + 1)
+                        );
+                    }
+
+                    buf_length  = length;
+                    ptr[length] = '\0';
+                    return ptr;
+                };
+
+                if (inc::print(content); buf_heap != nullptr){
+                    inc::free(buf_heap, inc::memory_size(buf_length + 1));
+                }
                 return thex;
             }
             
-            template<class a0, class ... args>
-            final & write_line(a0 const & first, args const & ... list) const {
-                inc::print(first, list..., '\n');
+            template<class ... args>
+            final & write_line(args const & ... list) const {
+                write(list..., '\n');
                 return thex;
             }
         };
