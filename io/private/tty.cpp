@@ -2,24 +2,324 @@
 问题：
 - ctrl+m 会被映射成 ctrl+j
 - 部分 ctrl+字母 和 ascii 的转义符重合，比如 \a \b \t \v \n
+
+查表:
+l          : 1b,5b,44,
+shift+l    : 1b,5b,31,3b,32,44,
+ALT+l      : 1b,5b,31,3b,33,44,
+ctr+l      : 1b,5b,31,3b,35,44,
+CS+l       : 1b,5b,31,3b,36,44,
+CA+l       : 1b,5b,31,3b,37,44,
+t          : 1b,5b,41,
+shift+t    : 1b,5b,31,3b,32,41,
+ALT+t      : 1b,5b,31,3b,33,41,
+ctr+t      : 1b,5b,31,3b,35,41,
+CS+t       : 1b,5b,31,3b,36,41,
+CA+t       : 1b,5b,31,3b,37,41,
+r          : 1b,5b,43,
+shift+r    : 1b,5b,31,3b,32,43,
+ALT+r      : 1b,5b,31,3b,33,43,
+ctr+r      : 1b,5b,31,3b,35,43,
+CS+r       : 1b,5b,31,3b,36,43,
+CA+r       : 1b,5b,31,3b,37,43,
+b          : 1b,5b,42,
+shift+b    : 1b,5b,31,3b,32,42,
+ALT+b      : 1b,5b,31,3b,33,42,
+ctr+b      : 1b,5b,31,3b,35,42,
+CS+b       : 1b,5b,31,3b,36,42,
+CA+b       : 1b,5b,31,3b,37,42,
+
+del
+1b,5b,33,7e,
+1b,5b,33,3b,32,7e,
+1b,5b,33,3b,33,7e,
+1b,5b,33,3b,35,7e,
+
+ins
+1b,5b,32,7e,
+1b,5b,32,3b,35,7e,
+1b,5b,32,3b,32,7e,
+1b,5b,32,3b,33,7e,
+
+Home       : 1b,5b,48,
+PgUp       : 1b,5b,35,7e,
+End        : 1b,5b,46,
+PgDn       : 1b,5b,36,7e,
+
+
+Home
+PgUp
+End
+PgDn
+
+ALT:Home    : 1b,5b,31,3b,33,48,
+ALT:PgUp    : 1b,5b,35,3b,33,7e,
+ALT:End     : 1b,5b,31,3b,33,46,
+ALT:PgDn    : 1b,5b,36,3b,33,7e,
+
+F1         : 1b,4f,50,
+SHIFT+F1   : 1b,5b,31,3b,32,50,
+ALT+F1     : 1b,5b,31,3b,33,50,
+AS+F1      : 1b,5b,31,3b,34,50,
+CTRL+F1    : 1b,5b,31,3b,35,50,
+CS+F1      : 1b,5b,31,3b,36,50,
+CA+F1      : 1b,5b,31,3b,37,50,
+ASC+F1     : 1b,5b,31,3b,38,50,
+F2         : 1b,4f,51,
+SHIFT+F2   : 1b,5b,31,3b,32,51,
+ALT+F2     : 1b,5b,31,3b,33,51,
+AS+F2      : 1b,5b,31,3b,34,51,
+CTRL+F2    : 1b,5b,31,3b,35,51,
+CS+F2      : 1b,5b,31,3b,36,51,
+CA+F2      : 1b,5b,31,3b,37,51,
+ASC+F2     : 1b,5b,31,3b,38,51,
+F3         : 1b,4f,52,
+SHIFT+F3   : 1b,5b,31,3b,32,52,
+ALT+F3     : 1b,5b,31,3b,33,52,
+AS+F3      : 1b,5b,31,3b,34,52,
+CTRL+F3    : 1b,5b,31,3b,35,52,
+CS+F3      : 1b,5b,31,3b,36,52,
+CA+F3      : 1b,5b,31,3b,37,52,
+ASC+F3     : 1b,5b,31,3b,38,52,
+F4         : 1b,4f,53,
+SHIFT+F4   : 1b,5b,31,3b,32,53,
+ALT+F4     : 1b,5b,31,3b,33,53,
+AS+F4      : 1b,5b,31,3b,34,53,
+CTRL+F4    : 1b,5b,31,3b,35,53,
+CS+F4      : 1b,5b,31,3b,36,53,
+CA+F4      : 1b,5b,31,3b,37,53,
+ASC+F4     : 1b,5b,31,3b,38,53,
+F5         : 1b,5b,31,35,7e,
+SHIFT+F5   : 1b,5b,31,35,3b,32,7e,
+ALT+F5     : 1b,5b,31,35,3b,33,7e,
+AS+F5      : 1b,5b,31,35,3b,34,7e,
+CTRL+F5    : 1b,5b,31,35,3b,35,7e,
+CS+F5      : 1b,5b,31,35,3b,36,7e,
+CA+F5      : 1b,5b,31,35,3b,37,7e,
+ASC+F5     : 1b,5b,31,35,3b,38,7e,
+F6         : 1b,5b,31,37,7e,
+SHIFT+F6   : 1b,5b,31,37,3b,32,7e,
+ALT+F6     : 1b,5b,31,37,3b,33,7e,
+AS+F6      : 1b,5b,31,37,3b,34,7e,
+CTRL+F6    : 1b,5b,31,37,3b,35,7e,
+CS+F6      : 1b,5b,31,37,3b,36,7e,
+CA+F6      : 1b,5b,31,37,3b,37,7e,
+ASC+F6     : 1b,5b,31,37,3b,38,7e,
+F7         : 1b,5b,31,38,7e,
+SHIFT+F7   : 1b,5b,31,38,3b,32,7e,
+ALT+F7     : 1b,5b,31,38,3b,33,7e,
+AS+F7      : 1b,5b,31,38,3b,34,7e,
+CTRL+F7    : 1b,5b,31,38,3b,35,7e,
+CS+F7      : 1b,5b,31,38,3b,36,7e,
+CA+F7      : 1b,5b,31,38,3b,37,7e,
+ASC+F7     : 1b,5b,31,38,3b,38,7e,
+F8         : 1b,5b,31,39,7e,
+SHIFT+F8   : 1b,5b,31,39,3b,32,7e,
+ALT+F8     : 1b,5b,31,39,3b,33,7e,
+AS+F8      : 1b,5b,31,39,3b,34,7e,
+CTRL+F8    : 1b,5b,31,39,3b,35,7e,
+CS+F8      : 1b,5b,31,39,3b,36,7e,
+CA+F8      : 1b,5b,31,39,3b,37,7e,
+ASC+F8     : 1b,5b,31,39,3b,38,7e,
+F9         : 1b,5b,32,30,7e,
+SHIFT+F9   : 1b,5b,32,30,3b,32,7e,
+ALT+F9     : 1b,5b,32,30,3b,33,7e,
+AS+F9      : 1b,5b,32,30,3b,34,7e,
+CTRL+F9    : 1b,5b,32,30,3b,35,7e,
+CS+F9      : 1b,5b,32,30,3b,36,7e,
+CA+F9      : 1b,5b,32,30,3b,37,7e,
+ASC+F9     : 1b,5b,32,30,3b,38,7e,
+F10        : 1b,5b,32,31,7e,
+SHIFT+F10  : 1b,5b,32,31,3b,32,7e,
+ALT+F10    : 1b,5b,32,31,3b,33,7e,
+AS+F10     : 1b,5b,32,31,3b,34,7e,
+CTRL+F10   : 1b,5b,32,31,3b,35,7e,
+CS+F10     : 1b,5b,32,31,3b,36,7e,
+CA+F10     : 1b,5b,32,31,3b,37,7e,
+ASC+F10    : 1b,5b,32,31,3b,38,7e,
+F11        : 1b,5b,32,33,7e,
+SHIFT+F11  : 1b,5b,32,33,3b,32,7e,
+ALT+F11    : 1b,5b,32,33,3b,33,7e,
+AS+F11     : 1b,5b,32,33,3b,34,7e,
+CTRL+F11   : 1b,5b,32,33,3b,35,7e,
+CS+F11     : 1b,5b,32,33,3b,36,7e,
+CA+F11     : 1b,5b,32,33,3b,37,7e,
+ASC+F11    : 1b,5b,32,33,3b,38,7e,
+F12        : 1b,5b,32,34,7e,
+SHIFT+F12  : 1b,5b,32,34,3b,32,7e,
+ALT+F12    : 1b,5b,32,34,3b,33,7e,
+AS+F12     : 1b,5b,32,34,3b,34,7e,
+CTRL+F12   : 1b,5b,32,34,3b,35,7e,
+CS+F12     : 1b,5b,32,34,3b,36,7e,
+CA+F12     : 1b,5b,32,34,3b,37,7e,
+ASC+F12    : 1b,5b,32,34,3b,38,7e,
+
 */
 
 #define xuser mixc::io_private_tty
+#include<stdio.h>
 #include"algo/binary_search.hpp"
 #include"configure.hpp"
 #include"docker/array.hpp"
 #include"io/private/tty.hpp"
 #include"io/private/tty_key_t.hpp"
+#include"io/private/tty_color_t.hpp"
 #include"lang/cxx/compare.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
-#include<stdio.h>
+
+#if xis_windows
+    #include<windows.h>
+#endif
 
 namespace mixc::io_private_tty{
-    print_t const print_core = & printf;
+    print_t const        print_core = & printf;
+    inc::tty_key_t const unknown_key{};
+
+    struct{
+        u08 fore : 4;
+        u08 back : 4;
+        operator u08(){
+            return *u08p(this);
+        }
+    } color;
+    
+    bool the_cursor_visiable = true;
+    
+    inc::tty_color_t backcolor() {
+        return inc::tty_color_t(color.back);
+    }
+
+    inc::tty_color_t forecolor() {
+        return inc::tty_color_t(color.fore);
+    }
+
+    bool cursor_visiable(){
+        return the_cursor_visiable;
+    }
 
     void print_flush(){
         fflush(stdout);
+    }
+
+    inc::tty_key_t decode(inc::c08 codes){
+        using namespace inc::func_key;
+
+        auto    key = inc::tty_key_t().length(1);
+        auto && ascii = [](char code, inc::tty_key_t key){
+            switch(code) {
+            case 0x1b: return key.is_func(true).value(esc);
+            case 0x7f: return key.is_func(true).value(backspace);
+            case '\r':
+            case '\n': return key.is_func(true).value(enter);
+            }
+            if (key.is_ascii(true); ' ' <= code and code <= '~'){ // is ascii
+                return key.value(code);
+            }
+            if (key.has_ctrl(true); code <= 0x1a){
+                return key.value('a' + code - 1);
+            }
+            switch(code){
+            // case 0x1b: return key.value('['); ========================= conflict
+            case 0x1c: return key.value('\\');
+            case 0x1d: return key.value(']');
+            case 0x1f: return key.value('/');
+            }
+            return unknown_key;
+        };
+
+        auto && func = [](char code, inc::tty_key_t key){
+            switch(key.is_func(true); code){
+            case 0x41: return key.value(top);
+            case 0x42: return key.value(buttom);
+            case 0x43: return key.value(right);
+            case 0x44: return key.value(left);
+            case 0x50: return key.value(f1);
+            case 0x51: return key.value(f2);
+            case 0x52: return key.value(f3);
+            case 0x53: return key.value(f4);
+            }
+            return unknown_key;
+        };
+
+        auto && funcii = [](char code, inc::tty_key_t key){
+            switch(key.is_func(true); code){
+            case 0x35: return key.value(f5);
+            case 0x37: return key.value(f6);
+            case 0x38: return key.value(f7);
+            case 0x39: return key.value(f8);
+            case 0x30: return key.value(f9);
+            case 0x31: return key.value(f10);
+            case 0x33: return key.value(f11);
+            case 0x34: return key.value(f12);
+            }
+            return unknown_key;
+        };
+
+        auto && funciii = [](char code, inc::tty_key_t key){
+            return key.is_func(true).value(
+                code == 0x32 ? ins :
+                code == 0x33 ? del : 0 // 0 indicated the unknown key
+            );
+        };
+
+        if (codes.length() == 1){
+            return ascii(codes[0], key);
+        }
+        if (uxx i = 0; codes[0] != 0x1b){ // is unicode
+            key.is_ascii(true);
+
+            for(; u08(codes[i]) > 0x7f; i++){
+                key[i] = codes[i];
+            }
+            return key.length(i);
+        }
+
+        enum{
+            has_shift   = 0x1,
+            has_ctrl    = 0x2,
+            has_alt     = 0x4,
+        };
+
+        constexpr u08 modify_lut[] = {
+            has_shift,
+            has_alt,
+            has_shift | has_alt,
+            has_ctrl,
+            has_ctrl | has_shift,
+            has_ctrl | has_alt,
+            has_ctrl | has_shift | has_alt,
+        };
+
+        u08 modify = 0;
+
+        switch(codes.length()){
+        case 2:
+            return ascii(codes[1], key.has_alt(true));
+        case 3:
+            return func(codes[2], key);
+        case 4: 
+            return funciii(codes[2], key);
+        case 5:
+            return funcii(codes[3], key);
+        case 6: 
+            if (modify = modify_lut[codes[4] - 0x32]; codes[5] == 0x7e){
+                key = funciii(codes[2], key);
+            }
+            else{
+                key = func(codes[5], key);
+            }
+            break;
+        case 7:
+            modify = modify_lut[codes[5] - 0x32];
+            key = funcii(codes[3], key);
+            break;
+        }
+
+        return key
+            .has_shift(modify & has_shift)
+            .has_alt(modify & has_alt)
+            .has_ctrl(modify & has_ctrl);
     }
 
     #if xis_linux
@@ -29,42 +329,50 @@ namespace mixc::io_private_tty{
     using namespace inc::func_key;
     using namespace io_private;
 
-    struct pair{ u08 key; u08 modify; inc::c08 value; };
-    
-    #define xgen(key,val,modify) pair{ key, modify, val) }
-    static const & map = inc::array_view {
-        xgen(esc,       "\x1b",                      is_func),
-        xgen(f1,        "\x1b\x4f\x50",              is_func),
-        xgen(f2,        "\x1b\x4f\x51",              is_func),
-        xgen(f3,        "\x1b\x4f\x52",              is_func),
-        xgen(f4,        "\x1b\x4f\x53",              is_func),
-        xgen(f5,        "\x1b\x5b\x31\x35\x7e",      is_func),
-        xgen(f6,        "\x1b\x5b\x31\x37\x7e",      is_func),
-        xgen(f7,        "\x1b\x5b\x31\x38\x7e",      is_func),
-        xgen(f8,        "\x1b\x5b\x31\x39\x7e",      is_func),
-        xgen(top,       "\x1b\x5b\x31\x3b\x33\x41",  is_func | has_alt),
-        xgen(buttom,    "\x1b\x5b\x31\x3b\x33\x42",  is_func | has_alt),
-        xgen(right,     "\x1b\x5b\x31\x3b\x33\x43",  is_func | has_alt),
-        xgen(left,      "\x1b\x5b\x31\x3b\x33\x44",  is_func | has_alt),
-        xgen(end,       "\x1b\x5b\x31\x3b\x33\x46",  is_func | has_alt),
-        xgen(home,      "\x1b\x5b\x31\x3b\x33\x48",  is_func | has_alt),
-        xgen(f9,        "\x1b\x5b\x32\x30\x7e",      is_func),
-        xgen(ins,       "\x1b\x5b\x32\x3b\x33\x7e",  is_func | has_alt),
-        xgen(ins,       "\x1b\x5b\x32\x7e",          is_func),
-        xgen(del,       "\x1b\x5b\x33\x3b\x33\x7e",  is_func | has_alt),
-        xgen(del,       "\x1b\x5b\x33\x7e",          is_func),
-        xgen(page_up,   "\x1b\x5b\x35\x7e",          is_func),
-        xgen(page_down, "\x1b\x5b\x36\x7e",          is_func),
-        xgen(top,       "\x1b\x5b\x41",              is_func),
-        xgen(buttom,    "\x1b\x5b\x42",              is_func),
-        xgen(right,     "\x1b\x5b\x43",              is_func),
-        xgen(left,      "\x1b\x5b\x44",              is_func),
-        xgen(end,       "\x1b\x5b\x46",              is_func),
-        xgen(home,      "\x1b\x5b\x48",              is_func),
-        xgen(backspace, "\x7f",                      is_func),
-    };
+    void forecolor(inc::tty_color_t value) {
+        using namespace inc::tty_color;
+        static_assert(uxx(black)           == 0x0);
+        static_assert(uxx(red)             == 0x1);
+        static_assert(uxx(green)           == 0x2);
+        static_assert(uxx(yellow)          == 0x3);
+        static_assert(uxx(blue)            == 0x4);
+        static_assert(uxx(magenta)         == 0x5);
+        static_assert(uxx(cyan)            == 0x6);
+        static_assert(uxx(white)           == 0x7);
+        static_assert(uxx(gray)            == 0x8);
+        static_assert(uxx(light_red)       == 0x9);
+        static_assert(uxx(light_green)     == 0xa);
+        static_assert(uxx(light_yellow)    == 0xb);
+        static_assert(uxx(light_blue)      == 0xc);
+        static_assert(uxx(light_magenta)   == 0xd);
+        static_assert(uxx(light_cyan)      == 0xe);
+        static_assert(uxx(light_gray)      == 0xf);
 
-    #undef xgen
+        constexpr asciis map[] = {
+            "\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[90m", "\e[91m", "\e[92m", "\e[93m", "\e[94m", "\e[95m", "\e[96m", "\e[97m",
+        };
+        print_core(map[uxx(index)]);
+    }
+
+    void backcolor(inc::tty_color_t value) {
+        constexpr asciis map[]{
+            "\e[40m", "\e[41m", "\e[42m", "\e[43m", "\e[44m", "\e[45m", "\e[46m", "\e[47m", "\e[100m", "\e[101m", "\e[102m", "\e[103m", "\e[104m", "\e[105m", "\e[106m", "\e[107m",
+        };
+        print_core(map[uxx(index)]);
+    }
+
+    void clear(){
+        print_core("\e[0m\e[0;0H\e[2J");
+        // backcolor(back);
+        forecolor(color.fore);
+        flush();
+    }
+
+    void cursor_visiable(bool value){
+        cursor_visiable = true;
+        print_core(value ? "\e[?25h" : "\e[?25l");
+        print_flush();
+    }
 
     struct ini{
         ini(){
@@ -87,86 +395,71 @@ namespace mixc::io_private_tty{
 
     inc::tty_key_t read_key(){
         constexpr uxx buf_size = 16;
-        constexpr uxx max_ctrl = 'z' - 'a' + 2;
         u08           buf[buf_size];
-        auto          key = inc::tty_key_t().length(1);
-        auto          ptr = buf;
-        auto          end = buf + buf_size;
-        uxx           len;
+        u08p          ptr = buf;
+        ptr[0]            = getchar(); // 阻塞读取
+        ptr              += 1;
 
-        auto && hint = [&](){
-            ptr = buf;
-            while(ptr < buf + len){
-                print("\\x%x", ptr[0]);
-                ptr += 1;
+        while(ptr < end){
+            if (auto v = hit(); v == not_exist){ // 非阻塞读取
+                break;
             }
-        };
-
-        while(true){
-            ptr[0] = getchar(); // 阻塞读取
-            ptr   += 1;
-
-            while(ptr < end){
-                if (auto v = hit(); v == not_exist){ // 非阻塞读取
-                    break;
-                }
-                else{
-                    ptr[0] = u08(v);
-                    ptr   += 1;
-                }
+            else{
+                ptr[0] = u08(v);
+                ptr   += 1;
             }
-
-            if (len = ptr - buf; len == 1){
-                if (' ' <= buf[0] and buf[0] <= '~' or buf[0] == '\n'){ // 是 ascii
-                    return key.is_ascii(true).value(buf[0]);
-                }
-                if (buf[0] < max_ctrl){ // 是 ctrl + ascii
-                    return key.has_ctrl(true).is_ascii(true).value(buf[0] + 'a' - 1);
-                }
-            }
-
-            if (auto c = buf[1]; len == 2 and buf[0] == 0x1b){
-                if (' ' <= c and c <= '~'){ // alt + ascii
-                    return key.has_alt(true).is_ascii(true).value(c);
-                }
-                if (c == 0x7f){ // alt + backspace
-                    return key.has_alt(true).is_func(true).value(backspace);
-                }
-                else{
-                    hint(); continue;
-                }
-            }
-
-            pair item;
-            uxx  index;
-            item.value = inc::c08(buf, len);
-            index      = inc::binary_search<pair>::match(map, item, []xcmp(pair){
-                return left.value.compare(right.value);
-            });
-
-            if (index == not_exist){
-                if (buf[0] == 0x1b or len > key.max_length){
-                    hint(); continue;
-                }
-
-                key.length(len);
-
-                for(uxx i = 0; i < len; i++){
-                    key[i] = buf[i];
-                }
-            }
-
-            auto & v = map[index];
-            return key.has_ctrl((v.modify & has_ctrl) != 0)
-                .has_alt((v.modify & has_alt) != 0)
-                .is_func((v.modify & is_func) != 0)
-                .value(v.key);
         }
+        ptr[0] = '\0'; // end
+
+        return decode(inc::c08{ buf, ptr - buf });
     }
     #elif xis_windows
     // 临时设置
     inc::tty_key_t read_key(){
         return inc::tty_key_t().length(1).is_ascii(true).ascii(getchar());
     }
+
+    constexpr u08 map[]{
+        0 << 3 | 0 << 2 | 0 << 1 | 0 << 0,
+        0 << 3 | 1 << 2 | 0 << 1 | 0 << 0,
+        0 << 3 | 0 << 2 | 1 << 1 | 0 << 0,
+        0 << 3 | 1 << 2 | 1 << 1 | 0 << 0,
+        0 << 3 | 0 << 2 | 0 << 1 | 1 << 0,
+        0 << 3 | 0 << 2 | 1 << 1 | 1 << 0,
+        0 << 3 | 1 << 2 | 0 << 1 | 1 << 0,
+        1 << 3 | 1 << 2 | 1 << 1 | 1 << 0,
+        1 << 3 | 0 << 2 | 0 << 1 | 0 << 0,
+        1 << 3 | 1 << 2 | 0 << 1 | 0 << 0,
+        1 << 3 | 0 << 2 | 1 << 1 | 0 << 0,
+        1 << 3 | 1 << 2 | 1 << 1 | 0 << 0,
+        1 << 3 | 0 << 2 | 0 << 1 | 1 << 0,
+        1 << 3 | 0 << 2 | 1 << 1 | 1 << 0,
+        1 << 3 | 1 << 2 | 0 << 1 | 1 << 0,
+        0 << 3 | 1 << 2 | 1 << 1 | 1 << 0,
+    };
+
+    void forecolor(inc::tty_color_t value) {
+        color.fore = map[uxx(value)];
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+    }
+
+    void backcolor(inc::tty_color_t value) {
+        color.back = map[uxx(value)];
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+    }
+
+    void clear(){
+        backcolor(inc::tty_color_t(color.back));
+        forecolor(inc::tty_color_t(color.fore));
+        print_flush();
+    }
+
+    void cursor_visiable(bool value){
+        CONSOLE_CURSOR_INFO info;    
+        info.bVisible = value;    
+        info.dwSize = sizeof(info);
+        SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), & info);
+    }
+
     #endif
 }

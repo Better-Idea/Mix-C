@@ -6,14 +6,22 @@
         #include"define/base_type.hpp"
         #include"dumb/implicit.hpp"
         #include"io/private/tty_key_t.hpp"
+        #include"io/private/tty_color_t.hpp"
         #include"macro/private/mix.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::io_private_tty{
         using print_t = int (*)(const char * fmt,...);
-        extern print_t const  print_core;
-        extern inc::tty_key_t read_key();
-        extern void           print_flush();
+        extern print_t const    print_core;
+        extern inc::tty_key_t   read_key();
+        extern inc::tty_color_t backcolor();
+        extern inc::tty_color_t forecolor();
+        extern bool             cursor_visiable();
+        extern void             cursor_visiable(bool value);
+        extern void             clear();
+        extern void             print_flush();
+        extern void             forecolor(inc::tty_color_t value);
+        extern void             backcolor(inc::tty_color_t value);
 
         template<class ... args>
         void print(args const & ... list){
@@ -27,8 +35,12 @@
 #endif
 
 namespace xuser::inc{
+    using ::mixc::io_private_tty::backcolor;
+    using ::mixc::io_private_tty::clear;
+    using ::mixc::io_private_tty::cursor_visiable;
+    using ::mixc::io_private_tty::forecolor;
     using ::mixc::io_private_tty::print;
+    using ::mixc::io_private_tty::print_core;
     using ::mixc::io_private_tty::print_flush;
     using ::mixc::io_private_tty::read_key;
-    using ::mixc::io_private_tty::print_core;
 }
