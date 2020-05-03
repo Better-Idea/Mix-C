@@ -10,6 +10,8 @@
         };
 
         using c08 = cxx<char>;
+        using c16 = cxx<char16_t>;
     }
+
     #undef xusing_lang_cxx
 #endif

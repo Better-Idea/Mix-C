@@ -117,8 +117,8 @@
 
         #define xbase   (*(basex<decltype(*this), type> *)this)
         #define xopt                                                                            \
-            inc::cxx<char> operator >> (inc::can_alloc<char> alloc) { return output(alloc); }   \
-            inc::cxx<w16>  operator >> (inc::can_alloc<w16>  alloc) { return output(alloc); }   \
+            inc::c08 operator >> (inc::can_alloc<char> alloc) { return output(alloc); }         \
+            inc::c16 operator >> (inc::can_alloc<char16_t>  alloc) { return output(alloc); }    \
             template<class item_t>                                                              \
             inc::cxx<item_t> output(inc::can_alloc<item_t> alloc)
 
@@ -258,7 +258,7 @@
         };
 
         xstr(char, asciis);
-        xstr(w16, words);
+        xstr(char16_t, words);
 
         template<class a0, class ... args>
         struct phg{ // place_holder group

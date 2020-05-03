@@ -19,7 +19,7 @@
             wxx(wxx const &) = default;
             wxx(type value) : data(value){}
             template<class final_t>
-            wxx(wxx<final_t, type> const& self) :
+            wxx(wxx<final_t, type> const & self) :
                 wxx((the_t &)self) {
             }
             operator type & (){
