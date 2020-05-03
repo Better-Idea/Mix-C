@@ -23,13 +23,17 @@
                 f6,
                 f7,
                 f8,
-                top,
-                buttom,
-                right,
+                f9,
+                f10,
+                f11,
+                f12,
+                enter,
                 left,
+                top,
+                right,
+                buttom,
                 end,
                 home,
-                f9,
                 ins,
                 del,
                 page_up,
@@ -39,10 +43,11 @@
         }
 
         enum key_type : u08{
-            is_ascii   = 0x1,
-            is_func    = 0x2,
-            has_ctrl   = 0x4,
-            has_alt    = 0x8,
+            is_ascii   = 0x01,
+            is_func    = 0x02,
+            has_shift  = 0x04,
+            has_alt    = 0x08,
+            has_ctrl   = 0x10,
         };
     }
 
@@ -54,16 +59,6 @@
 
         inline auto const & func_map = inc::array_view {
             pair { esc       , "escape"    },
-            pair { ins       , "insert"    },
-            pair { del       , "delele"    },
-            pair { page_up   , "page_up"   },
-            pair { page_down , "page_down" },
-            pair { left      , "left"      },
-            pair { top       , "top"       },
-            pair { buttom    , "buttom"    },
-            pair { right     , "right"     },
-            pair { end       , "end"       },
-            pair { home      , "home"      },
             pair { f1        , "f1"        },
             pair { f2        , "f2"        },
             pair { f3        , "f3"        },
@@ -73,6 +68,20 @@
             pair { f7        , "f7"        },
             pair { f8        , "f8"        },
             pair { f9        , "f9"        },
+            pair { f10       , "f10"       },
+            pair { f11       , "f11"       },
+            pair { f12       , "f12"       },
+            pair { enter     , "enter"     },
+            pair { left      , "left"      },
+            pair { top       , "top"       },
+            pair { right     , "right"     },
+            pair { buttom    , "buttom"    },
+            pair { end       , "end"       },
+            pair { home      , "home"      },
+            pair { ins       , "insert"    },
+            pair { del       , "delele"    },
+            pair { page_up   , "page_up"   },
+            pair { page_down , "page_down" },
             pair { backspace , "backspace" },
         };
 
@@ -89,27 +98,32 @@
                 xpri(count,  uxx)
             );
         public:
-            tty_key_t() :
+            constexpr tty_key_t() :
                 type{}, values{}, count{}{}
 
             xpubget_pubset(is_ascii, bool){
                 xr { return inc::bit(the.type, key_type::is_ascii); }
-                xw { inc::bit(& the.type, value, key_type::is_ascii); }
+                xw { inc::bit(& the.type, key_type::is_ascii, value); }
             };
 
             xpubget_pubset(is_func, bool){
                 xr { return inc::bit(the.type, key_type::is_func); }
-                xw { inc::bit(& the.type, value, key_type::is_func); }
+                xw { inc::bit(& the.type, key_type::is_func, value); }
             };
 
-            xpubget_pubset(has_ctrl, bool){
-                xr { return inc::bit(the.type, key_type::has_ctrl); }
-                xw { inc::bit(& the.type, value, key_type::has_ctrl); }
+            xpubget_pubset(has_shift, bool){
+                xr { return inc::bit(the.type, key_type::has_shift); }
+                xw { inc::bit(& the.type, key_type::has_shift, value); }
             };
 
             xpubget_pubset(has_alt, bool){
                 xr { return inc::bit(the.type, key_type::has_alt); }
-                xw { inc::bit(& the.type, value, key_type::has_alt); }
+                xw { inc::bit(& the.type, key_type::has_alt, value); }
+            };
+
+            xpubget_pubset(has_ctrl, bool){
+                xr { return inc::bit(the.type, key_type::has_ctrl); }
+                xw { inc::bit(& the.type, key_type::has_ctrl, value); }
             };
 
             xpubget_pubset(length, uxx){
@@ -135,6 +149,10 @@
                     }
                 }
                 return "not func-key";
+            };
+
+            xpubget(multi_ascii, asciis) {
+                return (asciis)the.values;
             };
 
             u08 & operator[](uxx index) {
