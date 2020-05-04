@@ -44,7 +44,7 @@
             };
 
             xpubget(read_key, inc::tty_key_t){
-                return inc::read_key();
+                return inc::read_key(false);
             };
 
             final & clear() const {
@@ -90,7 +90,7 @@
             }
         };
 
-        inline tty_t tty;
+        inline static tty_t tty;
     }
 #endif
 
@@ -99,3 +99,4 @@ namespace xuser::inc{
 }
 
 #include"io/private/tty_color_t.hpp"
+#include"io/private/tty_key_t.hpp"

@@ -202,10 +202,10 @@ namespace mixc::io_private_tty{
         fflush(stdout);
     }
 
-    inc::tty_key_t decode(inc::c08 codes){
+    inc::tty_key_t decode(inc::c16 codes, uxx * rest){
         using namespace inc::func_key;
 
-        auto    key = inc::tty_key_t().length(1);
+        auto    key = inc::tty_key_t();
         auto && ascii = [](char code, inc::tty_key_t key){
             switch(code) {
             case 0x1b: return key.is_func(true).value(esc);
@@ -213,7 +213,7 @@ namespace mixc::io_private_tty{
             case '\r': // conflict =========================
             case '\n': return key.is_func(true).value(enter);
             }
-            if (key.is_ascii(true); ' ' <= code and code <= '~'){ // is ascii
+            if (key.is_char(true); ' ' <= code and code <= '~'){ // is ascii
                 return key.value(code);
             }
             if (key.has_ctrl(true); code <= 0x1a){
@@ -263,14 +263,12 @@ namespace mixc::io_private_tty{
             );
         };
 
-        if (codes.length() == 1){
-            return ascii(codes[0], key);
+        if (u16(codes[0]) > 0x7f or (' ' <= codes[0] and codes[0] <= '~')){ // normal char
+            rest[0] = codes.length() - 1;
+            return key.is_char(true).value(codes[0]);
         }
-        if (uxx i = 0; codes[0] != 0x1b){ // normal char
-            for(key.is_ascii(true); codes[i] != '\0'; i++){
-                key[i] = codes[i];
-            }
-            return key.length(i);
+        if (rest[0] = 0; codes.length() == 1){
+            return ascii(codes[0], key);
         }
 
         enum{
@@ -391,30 +389,62 @@ namespace mixc::io_private_tty{
         return v;
     }
 
+    constexpr uxx buf_size = 16;
+    u08           buf[buf_size + 1];
+    uxx           rest = 0;
+
     inc::tty_key_t read_key(){
-        constexpr uxx buf_size = 16;
-        u08           buf[buf_size];
-        u08p          ptr = buf;
-        ptr[0]            = getchar(); // 阻塞读取
-        ptr              += 1;
+        // u08p          end = buf + buf_size;
+        // u08p          ptr = buf;
+        // ptr[0]            = getchar(); // 阻塞读取
+        // ptr              += 1;
 
-        while(ptr < end){
-            if (auto v = hit(); v == not_exist){ // 非阻塞读取
-                break;
-            }
-            else{
-                ptr[0] = u08(v);
-                ptr   += 1;
-            }
-        }
-        ptr[0] = '\0'; // end
+        // while(ptr < end){
+        //    if (auto v = hit(); v == not_exist){ // 非阻塞读取
+        //        break;
+        //    }
+        //    else{
+        //        ptr[0] = u08(v);
+        //        ptr   += 1;
+        //    }
+        // }
+        // ptr[0] = '\0'; // end
 
-        return decode(inc::c08{ buf, ptr - buf });
+        // return decode(inc::c08{ buf, ptr - buf }, & rest);
     }
     #elif xis_windows
-    // 临时设置
-    inc::tty_key_t read_key(){
-        return inc::tty_key_t().length(1).is_ascii(true).ascii(getchar());
+
+    char16_t buf_key[8];
+    uxx      rest;
+    inc::c16 key_str;
+
+    inc::tty_key_t read_key(bool echo){
+        // need lock ===================================
+        inc::tty_key_t key;
+
+        if (key_str.length() == 0) {
+            HANDLE         h = GetStdHandle(STD_INPUT_HANDLE);
+            DWORD          mode;
+            DWORD          length;
+            GetConsoleMode(h, & mode);
+            SetConsoleMode(h, ~(
+                ENABLE_LINE_INPUT | 
+                ENABLE_PROCESSED_INPUT | (
+                    not echo ? ENABLE_ECHO_INPUT : 0
+                )
+            ));
+            ReadConsoleW(h, buf_key, sizeof(buf_key) / sizeof(buf_key[0]), & length, NULL);
+            SetConsoleMode(h, mode); // recover
+            key_str = { buf_key, length };
+        }
+
+        key     = decode(key_str, & rest);
+        key_str = key_str.backward(key_str.length() - rest);
+
+        if (auto v = key.value(); key.is_char()) {
+            WideCharToMultiByte(CP_ACP, 0, LPCWCH(& v), 1, (LPSTR)key.multi_bytes_char(), sizeof(inc::tty_key_t::items_t), NULL, NULL);
+        }
+        return key;
     }
 
     constexpr u08 map[]{

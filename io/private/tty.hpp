@@ -13,7 +13,7 @@
     namespace mixc::io_private_tty{
         using print_t = int (*)(const char * fmt,...);
         extern print_t const    print_core;
-        extern inc::tty_key_t   read_key();
+        extern inc::tty_key_t   read_key(bool echo);
         extern inc::tty_color_t backcolor();
         extern inc::tty_color_t forecolor();
         extern bool             cursor_visiable();

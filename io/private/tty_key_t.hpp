@@ -43,7 +43,7 @@
         }
 
         enum key_type : u08{
-            is_ascii   = 0x01,
+            is_char    = 0x01,
             is_func    = 0x02,
             has_shift  = 0x04,
             has_alt    = 0x08,
@@ -85,25 +85,23 @@
             pair { backspace , "backspace" },
         };
 
-
         struct tty_key_t{
-            static constexpr uxx max_length = 6;
-            using items = u08[max_length];
             using final = tty_key_t;
+            using items_t = char[5];
 
             xgc_fields(
                 xiam(tty_key_t),
-                xpri(type,   key_type),
-                xpri(values, items),
-                xpri(count,  uxx)
+                xpri(type, key_type),
+                xpri(w08,  items_t),
+                xpri(w16,  char16_t)
             );
         public:
             constexpr tty_key_t() :
-                type{}, values{}, count{}{}
+                type{}, w08{}, w16{}{}
 
-            xpubget_pubset(is_ascii, bool){
-                xr { return inc::bit(the.type, key_type::is_ascii); }
-                xw { inc::bit(& the.type, key_type::is_ascii, value); }
+            xpubget_pubset(is_char, bool){
+                xr { return inc::bit(the.type, key_type::is_char); }
+                xw { inc::bit(& the.type, key_type::is_char, value); }
             };
 
             xpubget_pubset(is_func, bool){
@@ -126,19 +124,13 @@
                 xw { inc::bit(& the.type, key_type::has_ctrl, value); }
             };
 
-            xpubget_pubset(length, uxx){
-                xr { return the.count; }
-                xw { the.count = value; }
+            xpubget_pubset(value, char16_t){
+                xr { return the.w16; }
+                xw { the.w16 = value; }
             };
 
-            xpubget_pubset(value, u08){
-                xr { return the.values[0]; }
-                xw { the.values[0] = value; }
-            };
-
-            xpubget_pubset(ascii, char){
-                xr { return the.values[0]; }
-                xw { the.values[0] = value; }
+            xpubget(multi_bytes_char, asciis){
+                return w08;
             };
 
             // 临时设施 ============================================
@@ -150,14 +142,6 @@
                 }
                 return "not func-key";
             };
-
-            xpubget(multi_ascii, asciis) {
-                return (asciis)the.values;
-            };
-
-            u08 & operator[](uxx index) {
-                return values[index];
-            }
         };
     }
 
