@@ -210,7 +210,7 @@ namespace mixc::io_private_tty{
             switch(code) {
             case 0x1b: return key.is_func(true).value(esc);
             case 0x7f: return key.is_func(true).value(backspace);
-            case '\r':
+            case '\r': // conflict =========================
             case '\n': return key.is_func(true).value(enter);
             }
             if (key.is_ascii(true); ' ' <= code and code <= '~'){ // is ascii
@@ -266,10 +266,8 @@ namespace mixc::io_private_tty{
         if (codes.length() == 1){
             return ascii(codes[0], key);
         }
-        if (uxx i = 0; codes[0] != 0x1b){ // is unicode
-            key.is_ascii(true);
-
-            for(; u08(codes[i]) > 0x7f; i++){
+        if (uxx i = 0; codes[0] != 0x1b){ // normal char
+            for(key.is_ascii(true); codes[i] != '\0'; i++){
                 key[i] = codes[i];
             }
             return key.length(i);
