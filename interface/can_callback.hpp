@@ -5,6 +5,7 @@
         #define xuser mixc::interface_can_callback
         #include"define/base_type.hpp"
         #include"macro/private/callable.hpp"
+        #include"macro/xgc.hpp"
         #include"memop/signature.hpp"
         #include"memop/addressof.hpp"
         #include"meta/is_same.hpp"
@@ -14,12 +15,15 @@
     namespace mixc::interface_can_callback{
         template<class func> struct can_callback;
         template<class ret, class ... args> 
-        struct can_callback<ret(args...)> : mixc::macro_private_callable::callable_t {
-            using the_t     = can_callback<ret(args...)>;
+        struct can_callback<ret(args...)> : inc::callable_t {
             using signature = inc::signature<ret, args...>;
             using base::operator=;
             using base::operator==;
 
+            xgc_fields(
+                xiam(can_callback<ret(args...)>)
+            );
+        public:
             can_callback(){}
             can_callback(decltype(nullptr)){}
 

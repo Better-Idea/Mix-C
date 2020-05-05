@@ -5,7 +5,6 @@
         #define xuser mixc::interface_can_compare
         #include"define/base_type.hpp"
         #include"interface/can_callback.hpp"
-        #include"macro/xitf.hpp"
         #include"macro/xcmp.hpp"
         #include"memop/cmp.hpp"
     #pragma pop_macro("xuser")
