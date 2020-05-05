@@ -7,7 +7,7 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_has_cast{
-        template<class source, class target>
+        template<class target, class source>
         struct meta{
         private:
             static u08 test(target){
@@ -22,8 +22,8 @@
             ) == 1;
         };
 
-        template<class source, class target>
-        constexpr bool has_cast = meta<source, target>::result;
+        template<class target, class source>
+        constexpr bool has_cast = meta<target, source>::result;
     }
 
 #endif
