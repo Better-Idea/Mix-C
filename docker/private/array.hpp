@@ -5,6 +5,7 @@
         #define xuser mixc::docker_array
         #include"define/base_type.hpp"
         #include"interface/ranger.hpp"
+        #include"interface/seqptr.hpp"
         #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
@@ -19,7 +20,8 @@
                 xpro(data, items)
             );
         public:
-            xrange(item_t);
+            xranger(item_t);
+            xseqptr(item_t);
 
             template<class ... args>
             array_t(args const & ... list) : 
@@ -58,6 +60,8 @@
         };
     }
 #endif
+
+#include"math/index_system.hpp"
 
 #undef  xusing_docker_array
 #define xusing_docker_array     mixc::docker_array

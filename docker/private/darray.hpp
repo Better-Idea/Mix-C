@@ -7,6 +7,7 @@
         #include"dumb/dummy_t.hpp"
         #include"gc/ref.hpp"
         #include"interface/ranger.hpp"
+        #include"interface/seqptr.hpp"
         #include"macro/xgc.hpp"
         #include"memory/new.hpp"
     #pragma pop_macro("xuser")
@@ -21,6 +22,7 @@
         >{
             using item_t = typename darray_t<type, rank - 1, attribute>::the_t;
             using base_t = inc::ref_array<darray_t<type, rank, attribute>, item_t, attribute>;
+            using base_t::operator*;
             using base_t::operator[];
             using base_t::operator->;
 
@@ -28,7 +30,8 @@
                 xiam(darray_t<type, rank, attribute>, base_t)
             );
         public:
-            xrange(item_t);
+            xranger(item_t);
+            xseqptr(item_t);
 
             darray_t() : 
                 darray_t(inc::empty_array){
@@ -73,5 +76,7 @@
     }
 
 #endif
+
+#include"math/index_system.hpp"
 
 #define xusing_docker_darray        ::mixc::docker_darray
