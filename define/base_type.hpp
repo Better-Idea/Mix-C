@@ -44,7 +44,7 @@
     #define the         (*(the_t *)this)
     #define thex        (*(final *)this)
 
-    namespace mixc{
+    namespace mixc::base_type{
         template<int> struct env{};
         
         template<>
@@ -58,36 +58,37 @@
             using ixx       = i64;
             using uxx       = u64;
         };
-        
-        using ixx           = env<sizeof(void *)>::ixx;
-        using uxx           = env<sizeof(void *)>::uxx;
-
-        constexpr uxx       not_exist = uxx(-1);
-        constexpr uxx       magic_number = 19961212;
-        
-        enum class ini {};
-        constexpr ini ini_now = ini(0);
-
-        struct length {
-            explicit length(uxx value) : value(value) { }
-            operator uxx () {
-                return value;
-            }
-        private:
-            uxx value;
-        };
     }
 
-    using ixx               = mixc::ixx;
-    using uxx               = mixc::uxx;
-    using ixxp              = ixx *;
-    using uxxp              = uxx *;
+    using ixx           = mixc::base_type::env<sizeof(void *)>::ixx;
+    using uxx           = mixc::base_type::env<sizeof(void *)>::uxx;
+    using ixxp          = ixx *;
+    using uxxp          = uxx *;
+
+    enum class bstate{ // binary state
+        fail,
+        success,
+    };
+
+    constexpr uxx       not_exist    = uxx(-1);
+    constexpr uxx       magic_number = 19961212;
+    constexpr bstate    fail         = bstate::fail;
+    constexpr bstate    success      = bstate::success;
+    
+    enum class ini {};
+    constexpr ini ini_now = ini(0);
+
+    struct length {
+        explicit length(uxx value) : value(value) { }
+        operator uxx () {
+            return value;
+        }
+    private:
+        uxx value;
+    };
+
 #endif
 
-namespace xuser::inc{
-    using ::mixc::length;
-    using ::mixc::ini;
-    using ::mixc::ini_now;
-    using ::mixc::not_exist;
-    using ::mixc::magic_number;
+namespace xuser{
+    using namespace ::mixc::base_type;
 }
