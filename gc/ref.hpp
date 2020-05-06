@@ -191,6 +191,14 @@
             }
 
         protected:
+            operator item * () {
+                return mem[0];
+            }
+
+            operator item const * () const {
+                return mem[0];
+            }
+
             item & operator [] (uxx index){
                 return mem[0][index];
             }
