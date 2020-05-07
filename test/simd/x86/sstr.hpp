@@ -19,6 +19,25 @@
                     auto acturlly = ::sstr_index_of_first(str, str.ptr[i]);
                     xassert_eq(i, acturlly);
                 }
+                auto acturlly = ::sstr_index_of_first(str, ' ');
+                xassert(acturlly == not_exist, acturlly, str.len);
+            }
+        };
+
+        xtest(sstr_index_of_last){
+            sstr str;
+            char buf[65] = "0000000000000000000000000000000000000000000000000000000000000000";
+            str.ptr      = buf;
+
+            for(str.len = 0; str.len < 64; str.len++){
+                for(i32 i = 0; i < str.len; i++){
+                    buf[i] = '1';
+                    auto acturlly = ::sstr_index_of_last(str, '1');
+                    xassert(i == acturlly, i, acturlly, str.len);
+                    buf[i] = '0';
+                }
+                auto acturlly = ::sstr_index_of_last(str, '1');
+                xassert(acturlly == not_exist, acturlly, str.len);
             }
         };
 
