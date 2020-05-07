@@ -1,4 +1,6 @@
 /* simd string library (sstr)
+ * 注意：
+ * 需要保证越界内存仍可访问，否则可能访问到不在页表中的地址导致 CPU 产生缺页异常
  */
 
 #pragma once
@@ -19,9 +21,6 @@ struct sstr{
 
 inline uxx sstr_index_of_first(sstr seq, char value){
     using namespace simd::inc;
-    if (seq.ptr == nullptr){
-        return not_exist;
-    }
 
     auto ymm0  = _mm256_set1_epi8(value);
     auto step  = sizeof(ymm0);
@@ -48,6 +47,34 @@ inline uxx sstr_index_of_first(sstr seq, char value){
     else{
         return not_exist;
     }
+}
+
+ixx sstr_compare(sstr left, sstr right){
+    using namespace simd::inc;
+    uxx r   = not_exist;
+    uxx len = left.len <= right.len ? left.len : right.len;
+
+    for(uxx i = 0; i < len; i += sizeof(__m256i)){
+        auto ymm0 = _mm256_loadu_si256((__m256i *)(left.ptr + i));
+        auto ymm1 = _mm256_loadu_si256((__m256i *)(right.ptr + i));
+        auto cmpr = _mm256_cmpeq_epi8(ymm0, ymm1);
+        auto bits = _mm256_movemask_epi8(cmpr);
+
+        if (bits = ~bits; bits == 0){
+            continue;
+        }
+        if (auto m = index_of_first_set(bits), ii = m + i; ii >= len){
+            break;
+        }
+        else{
+            return ixx(left.ptr[ii] - right.ptr[ii]);
+        }
+    }
+
+    if (left.len == right.len){
+        return 0;
+    }
+    return ixx(left.len - right.len);
 }
 
 #include"endc"
