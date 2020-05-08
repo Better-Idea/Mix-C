@@ -63,7 +63,7 @@
                 char   buf_stack[128];
                 char * buf_heap   = nullptr;
                 auto   buf_length = 0;
-                auto   content    = phg { first, list... } >> [&](uxx length){
+                auto   content    = phg { first, list... } >> [&](uxx length) {
                     auto ptr = buf_stack;
 
                     if (length >= sizeof(buf_stack) / sizeof(buf_stack[0])){
@@ -96,6 +96,10 @@
 
 namespace xuser::inc{
     using ::mixc::io_tty::tty;
+}
+
+namespace xuser::inc::ph{
+    using namespace ::mixc::lang_cxx_ph::ph;
 }
 
 #include"io/private/tty_color_t.hpp"

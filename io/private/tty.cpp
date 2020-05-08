@@ -206,7 +206,7 @@ namespace mixc::io_private_tty{
         using namespace inc::func_key;
 
         auto    key = inc::tty_key_t();
-        auto && ascii = [](char code, inc::tty_key_t key){
+        auto && ascii = [](auto code, auto key){
             switch(code) {
             case 0x1b: return key.is_func(true).value(esc);
             case 0x7f: return key.is_func(true).value(backspace);
@@ -228,7 +228,7 @@ namespace mixc::io_private_tty{
             return unknown_key;
         };
 
-        auto && func = [](char code, inc::tty_key_t key){
+        auto && func = [](auto code, auto key){
             switch(key.is_func(true); code){
             case 0x41: return key.value(top);
             case 0x42: return key.value(buttom);
@@ -242,7 +242,7 @@ namespace mixc::io_private_tty{
             return unknown_key;
         };
 
-        auto && funcii = [](char code, inc::tty_key_t key){
+        auto && funcii = [](auto code, auto key){
             switch(key.is_func(true); code){
             case 0x35: return key.value(f5);
             case 0x37: return key.value(f6);
@@ -256,7 +256,7 @@ namespace mixc::io_private_tty{
             return unknown_key;
         };
 
-        auto && funciii = [](char code, inc::tty_key_t key){
+        auto && funciii = [](auto code, auto key){
             return key.is_func(true).value(
                 code == 0x32 ? ins :
                 code == 0x33 ? del : 0 // 0 indicated the unknown key
