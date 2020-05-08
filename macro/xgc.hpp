@@ -3,6 +3,7 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::macro_xgc
+        #include"configure.hpp"
         #include"gc/private/routing_result.hpp"
         #include"macro/private/xlist.hpp"
         #include"macro/private/xprefix.hpp"
@@ -60,28 +61,9 @@
     #define __xgc_name_iam__(...)        #__VA_ARGS__
     #define __xgc_list_iam__(...)        __VA_ARGS__
 
-    #if __clang__ or __GNUC__
-        #define __xgc_fields__(meta,...)                                                        \
-        __xlist__(field_,field_,__VA_ARGS__)                                                    \
-        private:                                                                                \
-            using the_t =                                                                       \
-                typename ::mixc::macro_xgc::first_t<__xgc_list_ ## meta>::type;                 \
-            template<class __type> friend union ::mixc::macro_xtypeid::__typeid;                \
-            template<class __root_t, class __member_list> friend union mixc::gc_tuple::tuple;   \
-            static constexpr const char * __self_name = __xgc_name_ ## meta;                    \
-            static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;        \
-        public:                                                                                 \
-            using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                       \
-                decltype(::mixc::macro_xgc::expand_member_list<__xgc_list_ ## meta>()),         \
-                ::mixc::meta_seq_vlist::vlist<                                                  \
-                    __xlist__(first_member_list_,member_list_,__VA_ARGS__)                      \
-                >                                                                               \
-            >::new_list;                                                                        \
-        private: template<class guide> ::mixc::gc_routing_result::routing_result routing()
-
-        #define xgc_fields(meta,...)    __xgc_fields__(meta,__VA_ARGS__,) 
-    #else
+    #if xfor_msvc_hint
         #include"macro/xlink.hpp"
+        #pragma warning(disable:4003)
         #define xgc_fields(meta,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63)                                                    \
         __xlist_core__(field_,field_,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63) \
         private:                                                                            \
@@ -99,7 +81,25 @@
             >::new_list;                                                                    \
         private: template<class guide> ::mixc::gc_routing_result::routing_result routing()
         
-        #pragma warning(disable:4003)
+    #else
+        #define xgc_fields(meta,...)    __xgc_fields__(meta,__VA_ARGS__,) 
+        #define __xgc_fields__(meta,...)                                                        \
+        __xlist__(field_,field_,__VA_ARGS__)                                                    \
+        private:                                                                                \
+            using the_t =                                                                       \
+                typename ::mixc::macro_xgc::first_t<__xgc_list_ ## meta>::type;                 \
+            template<class __type> friend union ::mixc::macro_xtypeid::__typeid;                \
+            template<class __root_t, class __member_list> friend union mixc::gc_tuple::tuple;   \
+            static constexpr const char * __self_name = __xgc_name_ ## meta;                    \
+            static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;        \
+        public:                                                                                 \
+            using member_list = typename ::mixc::meta_seq_vmarge::vmarge<                       \
+                decltype(::mixc::macro_xgc::expand_member_list<__xgc_list_ ## meta>()),         \
+                ::mixc::meta_seq_vlist::vlist<                                                  \
+                    __xlist__(first_member_list_,member_list_,__VA_ARGS__)                      \
+                >                                                                               \
+            >::new_list;                                                                        \
+        private: template<class guide> ::mixc::gc_routing_result::routing_result routing()
     #endif
 
     #define xiam(...)        iam__(__VA_ARGS__)

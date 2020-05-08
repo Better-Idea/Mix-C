@@ -53,9 +53,3 @@
 namespace xuser::inc{
     using ::mixc::macro_private_log::log;
 }
-
-/*
-
- TEST | 
-
-*/

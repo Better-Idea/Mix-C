@@ -5,7 +5,6 @@
 #define xpri(...)       pri__(__VA_ARGS__)
 #define xhas(...)       has__(__VA_ARGS__)
 
-#define __xprefix_
 #define __xprefix_first_base_
 #define __xprefix_first_base_tmpl__(...)                      
 #define __xprefix_first_base_pub__(...)                 : public      __VA_ARGS__
