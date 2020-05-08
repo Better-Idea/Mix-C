@@ -3,10 +3,16 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::test_math_index_system
+        // std first
+        #include<string.h>
+        #include<stdlib.h>
+
         #include"define/base_type.hpp"
+        #include"lang/cxx/strlize.hpp"
+        #include"lang/cxx.hpp"
         #include"macro/xassert.hpp"
+        #include"math/random.hpp"
         #include"simd/x86/sstr.hpp"
-        #include"string.h"
     #pragma pop_macro("xuser")
 
     namespace mixc::test_math_index_system{
@@ -38,6 +44,57 @@
                 }
                 auto acturlly = ::sstr_index_of_last(str, '1');
                 xassert(acturlly == not_exist, acturlly, str.len);
+            }
+        };
+
+        xtest(sstr_stou){
+            using namespace inc;
+            char buf[16];
+            sstr str;
+            u32  actually;
+            u32  wanted;
+            str.ptr = buf;
+
+            for(wanted = 0; wanted < 256; wanted++){
+                str.len = c08(wanted, [&](uxx length){
+                    buf[length] = 0;
+                    return buf;
+                }).length();
+
+                actually = ::sstr_stou(str);
+                xassert_eq(wanted, actually);
+            }
+
+            #define xgen(value)                         \
+            str.ptr = #value;                           \
+            str.len = sizeof(#value) - 1;               \
+            actually = ::sstr_stou(str);                \
+            wanted   = value;                           \
+            xassert_eq(wanted, actually)
+
+            xgen(685);
+            xgen(1234);
+            xgen(23456);
+            xgen(345678);
+            xgen(4567890);
+            xgen(12345678);
+            xgen(123456789);
+            xgen(4294967294);
+            xgen(4294967295);
+            #undef  xgen
+
+            for(int i = 0; i < 32768; i++){
+                u32 width = random<u32>() % 9 + 1;
+                for(int ii = 0; ii < width; ii++){
+                    buf[ii] = "0123456789"[random<u08>() % 10];
+                }
+                buf[width] = 0;
+                str.ptr    = buf;
+                str.len    = width;
+
+                wanted     = ::atoi(buf);
+                actually   = ::sstr_stou(str);
+                xassert_eq(wanted, actually);
             }
         };
 
