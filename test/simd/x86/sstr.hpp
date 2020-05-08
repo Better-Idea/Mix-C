@@ -8,8 +8,13 @@
         #include<stdlib.h>
 
         #include"define/base_type.hpp"
+        #include"io/tty.hpp"
+        #include"lang/cxx/compare.hpp"
         #include"lang/cxx/strlize.hpp"
         #include"lang/cxx.hpp"
+        #include"lang/wxx/to_lower.hpp"
+        #include"lang/wxx/to_upper.hpp"
+        #include"lang/wxx.hpp"
         #include"macro/xassert.hpp"
         #include"math/random.hpp"
         #include"simd/x86/sstr.hpp"
@@ -95,6 +100,106 @@
                 wanted     = ::atoi(buf);
                 actually   = ::sstr_stou(str);
                 xassert_eq(wanted, actually);
+            }
+        };
+
+        xtest(sstr_to_lower) {
+            using namespace inc;
+            char abuf[] = " `1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            char bbuf[sizeof(abuf)];
+            bool test;
+            char t;
+            sstr a;
+            sstr b;
+            sstr c;
+            c08  actually;
+            c08  wanted;
+            b.ptr = bbuf;
+            
+            #define xgen(wanna,value)                   \
+            wanted   = wanna;                           \
+            a.ptr    = value;                           \
+            a.len    = sizeof(value) - 1;               \
+            bbuf[a.len] = 0;                            \
+            b        = ::sstr_to_lower(b, a);           \
+            actually = c08(b.ptr, b.len);               \
+            xassert(wanted.compare(actually) == 0, wanted, actually)
+
+            xgen("a", "A");
+            xgen("ab", "AB");
+            xgen("abz", "ABZ");
+            xgen("abz{", "ABZ{");
+            xgen("@abz{", "@ABZ{");
+            #undef  xgen
+
+            a.ptr = abuf;
+            a.len = sizeof(abuf) - 1;
+            b.ptr = bbuf;
+            b.len = sizeof(bbuf);
+
+            for(uxx i = 1; i < sizeof(abuf) - 1; i++){
+                a.len           = i;
+                c               = ::sstr_to_lower(b, a);
+                t               = wanted[c.len];
+                wanted          = c08{ a.ptr, a.len };
+                wanted[c.len]   = 0;
+                actually        = c08{ c.ptr, c.len };
+                actually[a.len] = 0;
+                test            = wanted.compare(actually, []xcmp(char){
+                    return w08(left).to_lower() - right;
+                }) == 0;
+                xassert(test, wanted, actually, i);
+                wanted[c.len]   = t;
+            }
+        };
+
+        xtest(sstr_to_upper) {
+            using namespace inc;
+            char abuf[] = " `1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            char bbuf[sizeof(abuf)];
+            bool test;
+            char t;
+            sstr a;
+            sstr b;
+            sstr c;
+            c08  actually;
+            c08  wanted;
+            b.ptr = bbuf;
+            
+            #define xgen(wanna,value)                   \
+            wanted   = wanna;                           \
+            a.ptr    = value;                           \
+            a.len    = sizeof(value) - 1;               \
+            bbuf[a.len] = 0;                            \
+            b        = ::sstr_to_upper(b, a);           \
+            actually = c08(b.ptr, b.len);               \
+            xassert(wanted.compare(actually) == 0, wanted, actually)
+
+            xgen("A", "a");
+            xgen("AB", "ab");
+            xgen("ABZ", "abz");
+            xgen("ABZ{", "abz{");
+            xgen("@ABZ{", "@abz{");
+            #undef  xgen
+
+            a.ptr = abuf;
+            a.len = sizeof(abuf) - 1;
+            b.ptr = bbuf;
+            b.len = sizeof(bbuf);
+
+            for(uxx i = 1; i < sizeof(abuf) - 1; i++){
+                a.len           = i;
+                c               = ::sstr_to_upper(b, a);
+                t               = wanted[c.len];
+                wanted          = c08{ a.ptr, a.len };
+                wanted[c.len]   = 0;
+                actually        = c08{ c.ptr, c.len };
+                actually[a.len] = 0;
+                test            = wanted.compare(actually, []xcmp(char){
+                    return w08(left).to_upper() - right;
+                }) == 0;
+                xassert(test, wanted, actually, i);
+                wanted[c.len]   = t;
             }
         };
 
