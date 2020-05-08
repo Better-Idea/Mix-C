@@ -27,7 +27,7 @@
             can_callback(){}
             can_callback(decltype(nullptr)){}
 
-            #ifdef xfor_msvc_hint
+            #if xfor_msvc_hint
                 template<class object>
                 can_callback(object const &){}
             #else

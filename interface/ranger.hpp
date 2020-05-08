@@ -4,6 +4,7 @@
         #undef  xuser
         #define xuser mixc::interface_ranger
         #include"define/base_type.hpp"
+        #include"configure.hpp"
         #include"interface/initializer_list.hpp"
         #include"macro/xindex_rollback.hpp"
         #include"math/index_system.hpp"
@@ -55,7 +56,7 @@
             mutable data  dat;
             mutable voidp func;
         public:
-            #ifdef xfor_msvc_hint
+            #if xfor_msvc_hint
                 template<class impl> ranger(impl const &){}
             #else
                 template<class impl> requires 
