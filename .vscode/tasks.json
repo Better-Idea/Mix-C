@@ -7,16 +7,17 @@
             "type": "shell",
             "label": "cpp build active file",
             // "command": "/usr/bin/clang-9",
-            "command": "/usr/bin/g++-8",
+            // "command": "/usr/bin/g++-8",
             // "command": "/usr/bin/gcc",
+            "command": "g++",
+            // "command": "clang-8",
             "args": [
-                "-Dxenable_xdebug",
-                "-Dxenable_xdebug_fail",
-                "-Dxis_x86=1",
-                "-Dxos64=1",
                 "-I${fileDirname}",
                 "-std=c++2a",
-                "-lstdc++",
+                "-fconcepts",
+                // "--coverage",
+                // "-lgcov",
+                // "-lstdc++",
                 // "",
                 // "-fno-rtti",
                 // "-fno-exceptions",
@@ -25,25 +26,28 @@
                 // "-fopenmp",
 
                 // OpenGL
-                "-lGL",
-                "-lGLEW",
-                "-lGLU",
-                "-lglut",
-                "-lglfw",
+                // "-lGL",
+                // "-lGLEW",
+                // "-lGLU",
+                // "-lglut",
+                // "-lglfw",
 
                 // "-lX11",
                 // "-lpthread",
                 // "-lXrandr",
                 // "-lXi",
 
+                // AVX
+                "-mavx",
+                "-mavx2",
                 "-g2",
-                // "${fileDirname}/io/private/tty.cpp",
+                "${fileDirname}/io/private/tty.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/../${fileBasenameNoExtension}"
             ],
             "options": {
-                "cwd": "/usr/bin"
+                "cwd": "C:/cygwin64/bin/"
             },
             "problemMatcher": [
                 "$gcc"
@@ -52,3 +56,5 @@
         }
     ]
 }
+
+// g++ -I. -std=c++2a -fconcepts --coverage -lgcov -g2 io/private/tty.cpp test_center.cpp -o test_center.exe

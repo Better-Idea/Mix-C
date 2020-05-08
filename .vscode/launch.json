@@ -10,6 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/../${fileBasenameNoExtension}",
             "args": [],
+            "miDebuggerPath": "C:/cygwin64/bin/gdb.exe",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
