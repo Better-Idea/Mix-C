@@ -33,3 +33,10 @@
     static_assert(xis_os32 and (sizeof(voidp) == 4));
     #error "you can select only one between xis_os64 and xis_os32"
 #endif
+
+// temporarily setting ========================================
+#if __clang__ or __GNUC__
+    #define xfor_msvc_hint          0
+#else
+    #define xfor_msvc_hint          1
+#endif
