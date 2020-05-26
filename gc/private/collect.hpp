@@ -33,7 +33,7 @@ search_list 期初是一个只有根类型 root 的集合。
         struct collect{
         private:
             template<class current_kvlist, class result_list, class first, class ... args>
-            static auto invoke(current_kvlist kv, tlist<first, args...> search_list, result_list result){
+            static auto invoke(current_kvlist kv, tlist<first, args...>, result_list result){
                 using pair              = tpop_by<current_kvlist, first, tselector_key>;
                 using item_kvlist       = typename pair::item_list;
 

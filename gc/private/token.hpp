@@ -6,8 +6,8 @@
         #include"define/base_type.hpp"
         #include"dumb/dummy_t.hpp"
         #include"lock/atom_add.hpp"
-        #include"lock/atom_sub.hpp"
         #include"lock/atom_or.hpp"
+        #include"lock/atom_sub.hpp"
         #include"macro/xdebug.hpp"
     #pragma pop_macro("xuser")
 
@@ -34,13 +34,13 @@
         constexpr uxx mask_owners       = mark_under_free - 1;
 
         struct token {
-            token(uxx length) : record(step) { }
+            token(uxx) : record(step) { }
         protected:
             template<class impl, class a, class b, bool is_array> friend struct mixc::gc_ref::meta;
             template<class root_t, class list> friend union mixc::gc_tuple::tuple;
 
             constexpr auto this_length() { return uxx(0); }
-            constexpr auto this_length(uxx value) { }
+            constexpr auto this_length(uxx) { }
 
             uxx record;
 
@@ -65,12 +65,11 @@
             }
         };
 
-        
         struct token_plus : token {
-            token_plus(uxx length) : token(0), length(length) { }
-        protected:
-            template<class item> friend struct mixc::macro_xsv::static_string_holder;
             uxx length;
+
+            token_plus(uxx length) : 
+                token(0), length(length) { }
 
             auto this_length() {
                 return length;
@@ -82,10 +81,13 @@
         };
 
         template<class type, class attribute = inc::dummy_t, class addition = token>
-        struct token_mix : addition, attribute {
+        struct token_mix : protected addition, public attribute {
             template<class ... args>
             token_mix(uxx length, args const & ... list) : 
                 addition(length), attribute(list...) {}
+
+            token_mix(token_mix const &)        = delete;
+            void operator=(token_mix const &)   = delete;
         private:
             ~token_mix() {
                 xdebug(im_gc_$token_mix, xtypeid(attribute).name);

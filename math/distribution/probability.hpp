@@ -58,7 +58,7 @@ int main(){
             probability() = default;
             probability(inc::ranger<type> proportion) : 
                 guide(
-                    inc::length(proportion.length())
+                    ::length(proportion.length())
                 ){
 
                 item_t multi;

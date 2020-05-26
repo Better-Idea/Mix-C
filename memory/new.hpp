@@ -1,6 +1,6 @@
 #pragma once
 #ifndef _NEW
-    inline void * operator new(size_t bytes, void * ptr) {
+    inline void * operator new(size_t, void * ptr) {
         return ptr;
     }
 #endif

@@ -16,7 +16,7 @@
             uxx  val  = (ptr[blocks] & mask);
             uxx  r    = (val + ax);
 
-            for(auto i = 0; i <= blocks; i++){
+            for(uxx i = 0; i <= blocks; i++){
                 auto plus = i == blocks ? rest : ptr[i];
                 r        += inc::ring_shift_left(plus, r);
             }

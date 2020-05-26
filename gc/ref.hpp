@@ -120,7 +120,7 @@
             meta() : mem(nullptr) { }
 
             template<class ... args>
-            meta(inc::length length, args const & ... list) {
+            meta(::length length, args const & ... list) {
                 mem = alloc(length);
 
                 for (uxx i = 0; i < length; i++) {
@@ -130,7 +130,7 @@
 
             template<class ... args>
             meta(ini, args const & ... list) {
-                mem = alloc(inc::length(0), list...);
+                mem = alloc(::length(0), list...);
             }
 
             meta(the_t const & value){
@@ -192,11 +192,11 @@
 
         protected:
             operator item * () {
-                return mem[0];
+                return xref mem[0][0];
             }
 
             operator item const * () const {
-                return mem[0];
+                return xref mem[0][0];
             }
 
             item & operator [] (uxx index){

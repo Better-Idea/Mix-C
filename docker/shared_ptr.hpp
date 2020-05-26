@@ -33,7 +33,7 @@
             shared_ptr<type> & operator()(ini, args const & ... list){
                 using metap = base_t *;
                 the.~base_t();
-                new (this) base_t(inc::length(0), list...);
+                new (this) base_t(::length(0), list...);
                 return the;
             }
 

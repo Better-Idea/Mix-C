@@ -52,7 +52,7 @@
                             return;
                         }
                         if (index - buf_size - heap.length() == 0){
-                            inc::darray<uxx> new_heap { inc::length(index) };
+                            inc::darray<uxx> new_heap { ::length(index) };
                             inc::copy_with_operator(new_heap, heap, heap.length());
                             heap = new_heap;
                         }

@@ -42,7 +42,7 @@
         public:
             priority_queue_t() = default;
             priority_queue_t(uxx start_capacity) : 
-                items(inc::length(start_capacity)){
+                items(::length(start_capacity)){
             }
 
             void clear() {

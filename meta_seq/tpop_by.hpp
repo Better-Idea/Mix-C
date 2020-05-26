@@ -34,12 +34,12 @@
             }
 
             template<class ... vals, class ... rest>
-            static auto val(tlist<tlist<vals...>, tlist<rest...>> r){
+            static auto val(tlist<tlist<vals...>, tlist<rest...>>){
                 return tlist<vals...>();
             }
 
             template<class ... vals, class ... rest>
-            static auto res(tlist<tlist<vals...> , tlist<rest...>> r){
+            static auto res(tlist<tlist<vals...> , tlist<rest...>>){
                 return tlist<rest...>();
             }
 
