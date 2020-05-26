@@ -1,5 +1,5 @@
 #include"memop/addressof.hpp"
-#include"memop/base_seqlize.hpp"
+#include"memop/seqlize.hpp"
 #include"memop/cast.hpp"
 #include"memop/cmp.hpp"
 #include"memop/copy.hpp"
