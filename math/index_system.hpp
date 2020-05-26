@@ -9,23 +9,24 @@
         #include"macro/xitf.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::math_index_system{
+    namespace mixc{
         xitf(iinterval,
             xitem(normalize, void, uxx),
             xitem(left, uxx),
             xitem(right, uxx)
         );
 
-        // left open right open interval
-        struct oo{
+        // bend close interval
+        struct cc{
             xgc_fields(
-                xiam(oo),
+                xiam(cc),
                 xpro(pleft,  ixx),
                 xpro(pright, ixx)
             );
         public:
-            oo(ixx left, ixx right = -1) : 
-                pleft(left), pright(right){}
+            template<class left_t, class right_t = ixx>
+            cc(left_t left, right_t right = right_t(-1)) : 
+                pleft(ixx(left)), pright(ixx(right)){}
 
             void normalize(uxx length){
                 xindex_rollback(length, pleft , +1);
@@ -41,32 +42,32 @@
             }
         };
 
-        // left open right close interval
-        struct oc : oo{
-            using oo::oo;
+        // left close right open interval
+        struct co : cc{
+            using cc::cc;
 
             void normalize(uxx length){
-                oo::normalize(length);
+                cc::normalize(length);
                 pright -= (pleft <= pright ? 1 : -1);
             }
         };
 
-        // left close right open interval
-        struct co : oo{
-            using oo::oo;
+        // left open right close interval
+        struct oc : cc{
+            using cc::cc;
 
             void normalize(uxx length){
-                oo::normalize(length);
+                cc::normalize(length);
                 pleft += (pleft <= pright ? 1 : -1);
             }
         };
 
-        // left close right close interval
-        struct cc : oo{
-            using oo::oo;
+        // bend open interval
+        struct oo : cc{
+            using cc::cc;
 
             void normalize(uxx length){
-                oo::normalize(length);
+                cc::normalize(length);
                 auto asc = pleft <= pright;
                 pleft  += (asc ? 1 : -1);
                 pright -= (asc ? 1 : -1);
@@ -74,15 +75,15 @@
         };
 
         namespace pack{
-            using ::mixc::math_index_system::oo;
-            using ::mixc::math_index_system::oc;
-            using ::mixc::math_index_system::co;
-            using ::mixc::math_index_system::cc;
-            using ::mixc::math_index_system::iinterval;
+            using ::mixc::cc;
+            using ::mixc::oc;
+            using ::mixc::co;
+            using ::mixc::cc;
+            using ::mixc::iinterval;
         }
     }
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::math_index_system::pack;
+    using namespace ::mixc::pack;
 }
