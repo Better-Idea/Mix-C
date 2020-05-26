@@ -15,6 +15,13 @@
             inc::array<u32, 32> x;
             inc::ranger<u32> a, b;
 
+            a = { 1,2,3,4 };
+            xassert_eq(4, a.length());
+            xassert_eq(1, a[0]);
+            xassert_eq(2, a[1]);
+            xassert_eq(3, a[2]);
+            xassert_eq(4, a[3]);
+
             a = x.range(cc{0});
             xassert_eq(x.length(), a.length());
 
