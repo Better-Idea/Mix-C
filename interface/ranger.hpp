@@ -30,7 +30,16 @@
             template<class object>
             base(object * ptr, uxx ofs, uxx len, uxx msk) : 
                 ptr(ptr),
-                itr(convert(& object::operator[])),
+                itr(convert(ptr)),
+                ofs(ofs),
+                len(len),
+                msk(msk){
+            }
+
+            template<class item_t>
+            base(inc::initializer_list<item_t> * ptr, uxx ofs, uxx len, uxx msk) : 
+                ptr((item_t *)(item_t const *)ptr->begin()),
+                itr(voidp(& access_initializer_list<item_t>)),
                 ofs(ofs),
                 len(len),
                 msk(msk){
@@ -42,22 +51,16 @@
             }
 
         private:
-            template<class object, class item_t>
-            static voidp convert(item_t & (object::* func)(uxx)){
-                union{
-                    decltype(func)  invoke;
-                    voidp           call;
-                } r { func };
-                return r.call;
+            template<class item_t>
+            static item_t & access_initializer_list(item_t * ptr, uxx index){
+                return ptr[index];
             }
 
-            template<class object, class item_t>
-            static voidp convert(item_t const & (object::* func)(uxx)){
-                union{
-                    decltype(func)  invoke;
-                    voidp           call;
-                } r { func };
-                return r.call;
+            template<class object>
+            static voidp convert(object * list){
+                using item_t = decltype(list[0][0]);
+                item_t & (object::*ptr)(uxx) = & object::operator[];
+                return *(voidp *)& ptr;
             }
         };
 
@@ -73,7 +76,6 @@
 
             ranger(base impl) : 
                 dat(impl){}
-
 
             template<class random_access_t> 
             #if not xfor_msvc_hint
