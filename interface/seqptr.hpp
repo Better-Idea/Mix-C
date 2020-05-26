@@ -5,37 +5,63 @@
         #define xuser mixc::interface_seqptr
         #include"define/base_type.hpp"
         #include"macro/xdebug_fail.hpp"
-        #include"macro/xitf.hpp"
         #include"macro/xindex_rollback.hpp"
+        #include"memop/signature.hpp"
+        #include"meta/has_cast.hpp"
         #include"math/index_system.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::interface_seqptr{
-        xitf(seqptr,
-            xtmpl(class item_t),
-            xcast(item_t *),
-            xitem(length, uxx),
-        );
+    #define xseqptr(...)                                                            \
+    inc::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {                       \
+        using ptr_t = __VA_ARGS__ *;                                                \
+        auto  len   = the.length();                                                 \
+        auto  ptr   = ptr_t(this->operator item_t const *());                       \
+        i.normalize(len);                                                           \
+        return inc::seqptr<__VA_ARGS__>(ptr + i.left(), i.right() - i.left() + 1);  \
     }
 
-    #define xseqptr(...)                                                    \
-    inc::seqptr<__VA_ARGS__> seq(inc::iinterval i) const {                  \
-        using ptr_t = __VA_ARGS__ *;                                        \
-        auto  len   = the.length();                                         \
-        auto  ptr   = ptr_t(this->operator const __VA_ARGS__ *());          \
-        i.normalize(len);                                                   \
-        struct{                                                             \
-            ptr_t  ptr;                                                     \
-            ixx    len;                                                     \
-            uxx length(){                                                   \
-                return uxx(len);                                            \
-            }                                                               \
-            operator ptr_t (){                                              \
-                return ptr;                                                 \
-            }                                                               \
-        } seq { ptr + i.left(), i.right() - i.left() + 1 };                 \
-        return seq;                                                         \
+    namespace mixc::interface_seqptr{
+        template<class item_t> struct seqptr;
+
+        namespace inc{
+            using ::mixc::interface_seqptr::seqptr;
+        }
+
+        template<class item_t>
+        struct seqptr{
+            seqptr(){}
+
+            seqptr(item_t * ptr, uxx len) : 
+                ptr(ptr), len(len){}
+
+            template<class object> requires(
+                inner::signature<uxx>::check(& object::length) and
+                inner::signature<uxx>::check(& object::operator item_t const *)
+            )
+            seqptr(object const & impl){
+                len = impl.length();
+                ptr = (item_t *)(item_t const *)impl;
+            }
+
+            operator item_t *(){
+                return ptr;
+            }
+
+            operator item_t const *() const{
+                return ptr;
+            }
+
+            uxx length() const {
+                return len;
+            }
+
+            xseqptr(item_t);
+        private:
+            item_t * ptr = nullptr;
+            uxx      len = 0;
+        };
     }
+
 #endif
 
 namespace xuser::inc{
