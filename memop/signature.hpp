@@ -9,15 +9,24 @@
     namespace mixc::memop_signature{
         template<class ret, class ... args>
         struct signature{
-            #define xgen(...)                                                           \
-                template<class object>                                                  \
-                static auto check(ret (object::* this_call)(args...) __VA_ARGS__){      \
-                    union {                                                             \
-                        voidp               result;                                     \
-                        decltype(this_call) mem;                                        \
-                    };                                                                  \
-                    mem = this_call;                                                    \
-                    return result;                                                      \
+            #define xgen(...)                                                               \
+                template<class object>                                                      \
+                static auto check(ret (object::* this_call)(args...) __VA_ARGS__){          \
+                    union {                                                                 \
+                        voidp               result;                                         \
+                        decltype(this_call) mem;                                            \
+                    };                                                                      \
+                    mem = this_call;                                                        \
+                    return result;                                                          \
+                }
+            xgen()
+            xgen(const)
+            #undef xgen
+
+            #define xgen(...)                                                               \
+                template<class object>                                                      \
+                static constexpr auto has(ret (object::*)(args...) __VA_ARGS__){            \
+                    return true;                                                            \
                 }
             xgen()
             xgen(const)
