@@ -81,16 +81,16 @@ int main(){
         #define __xprefix_check_invoke_tmpl__(...)
         #define __xprefix_check_invoke_cast__(...)
         #define __xprefix_check_invoke_item__(func_name,ret_type,...)                               \
-            inner::signature<ret_type, ## __VA_ARGS__>::check(& impl.func_name);
+            and inner::signature<ret_type, ## __VA_ARGS__>::has(& object::func_name)
 
         #define __xprefix_map_invoke_
         #define __xprefix_map_invoke_tmpl__(...)
         #define __xprefix_map_invoke_cast__(...)                                                    \
             __table->funcs[__COUNTER__ - __start] =                                                 \
-            inner::signature<__VA_ARGS__>::check(& impl.operator __VA_ARGS__);
+            inner::signature<__VA_ARGS__>::check(& object::operator __VA_ARGS__);
         #define __xprefix_map_invoke_item__(func_name,ret_type,...)                                 \
             __table->funcs[__COUNTER__ - __start] =                                                 \
-            inner::signature<ret_type, ## __VA_ARGS__>::check(& impl.func_name);
+            inner::signature<ret_type, ## __VA_ARGS__>::check(& object::func_name);
         
         #define __xprefix_emplace_invoke_
         #define __xprefix_emplace_invoke_tmpl__(...)
@@ -118,13 +118,12 @@ int main(){
         #define xtmpl(...)      tmpl__(__VA_ARGS__)
 
         #if xfor_msvc_hint
-        #pragma warning(disable:4003)
-        #define xitf(name,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63) \
+        #define xitf(name,...)                                                                      \
         namespace inner{                                                                            \
             using namespace ::mixc::macro_xitf;                                                     \
             using namespace ::mixc::macro_xitf::inc;                                                \
         }                                                                                           \
-        __xlist_core__(tmpl_invoke_, tmpl_invoke_, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63) union name{ \
+        __xlist__(tmpl_invoke_, tmpl_invoke_, __VA_ARGS__) union name{                              \
         private:                                                                                    \
             enum{ __start = __COUNTER__ + 1 };                                                      \
         public:                                                                                     \
@@ -134,32 +133,29 @@ int main(){
                 inner::__invoke_table_t * __table = (inner::__invoke_table_t *)this;                \
                 __table->object = inner::addressof(impl);                                           \
                 __table->funcs  = __func_list<object>;                                              \
-                __xlist_core__(map_invoke_, map_invoke_,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63)                                    \
+                __xlist__(map_invoke_, map_invoke_, __VA_ARGS__)                                    \
             }                                                                                       \
         private:                                                                                    \
             enum { __end = __COUNTER__ };                                                           \
             template<class object>                                                                  \
             static inline voidp __func_list[uxx(__end) - uxx(__start)];                             \
         public:                                                                                     \
-            __xlist_core__(emplace_invoke_, emplace_invoke_,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63);                               \
+            __xlist__(emplace_invoke_, emplace_invoke_, __VA_ARGS__);                               \
         }
-        #else 
+        #else
         #define xitf(name,...)                                                                      \
         namespace inner{                                                                            \
             using namespace ::mixc::macro_xitf;                                                     \
             using namespace ::mixc::macro_xitf::inc;                                                \
         }                                                                                           \
-        template<class object>                                                                      \
-        concept name ## _t = requires(object impl){                                                 \
-            __xlist__(check_invoke_, check_invoke_, __VA_ARGS__)                                    \
-        };                                                                                          \
         __xlist__(tmpl_invoke_, tmpl_invoke_, __VA_ARGS__) union name{                              \
         private:                                                                                    \
             enum{ __start = __COUNTER__ + 1 };                                                      \
         public:                                                                                     \
             name(){}                                                                                \
-            template<name ## _t object> requires(                                                   \
-                true __xlist__(requires_invoke_, requires_invoke_, __VA_ARGS__)                     \
+            template<class object> requires(true                                                    \
+                __xlist__(requires_invoke_, requires_invoke_, __VA_ARGS__)                          \
+                __xlist__(check_invoke_, check_invoke_, __VA_ARGS__)                                \
             )                                                                                       \
             name(object const & impl){                                                              \
                 inner::__invoke_table_t * __table = (inner::__invoke_table_t *)this;                \
