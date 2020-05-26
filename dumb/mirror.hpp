@@ -30,6 +30,13 @@
                 return sizeof(type);
             }
         };
+
+        template<>
+        struct mirror<void>{
+            xgc_fields(
+                xiam(mirror<void>)
+            );
+        };
     }
 
 #endif
