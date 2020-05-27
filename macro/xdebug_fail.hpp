@@ -21,6 +21,6 @@
                 }                                                                   \
             })(__func__, __VA_ARGS__), 0))
     #else
-        #define xdebug_fail(...)
+        #define xdebug_fail(...)  if (false)
     #endif
 #endif
