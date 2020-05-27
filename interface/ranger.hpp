@@ -46,7 +46,7 @@
             }
 
             template<class item_t>
-            item_t & access(uxx index){
+            item_t & access(uxx index) const {
                 return inc::signature<item_t &, uxx>::call(ptr, itr, (index ^ msk) + ofs);
             }
 
@@ -100,11 +100,19 @@
                 return dat.access<item_t>(index);
             }
 
+            item_t & operator[](uxx index) const {
+                return dat.access<item_t>(index);
+            }
+
+            bool is_positive() const {
+                return dat.msk == positive;
+            }
+
             ranger<item_t> range(iinterval i){
                 ranger<item_t> r = the;
                 i.normalize(the.length());
 
-                if (dat.msk == positive){ // 正序
+                if (is_positive()){ // 正序
                     if (i.left() <= i.right()){ // 正序
                         r.dat.ofs += i.left();
                         r.dat.len  = i.right() - i.left() + 1;
