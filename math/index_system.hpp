@@ -29,8 +29,8 @@
                 pleft(ixx(left)), pright(ixx(right)){}
 
             void normalize(uxx length){
-                xindex_rollback(length, pleft);
-                xindex_rollback(length, pright);
+                xindex_rollback(length, pleft,  +1);
+                xindex_rollback(length, pright, +1);
             }
 
             uxx left() const {
