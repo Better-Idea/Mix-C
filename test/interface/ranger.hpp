@@ -22,7 +22,7 @@
             xassert_eq(3, a[2]);
             xassert_eq(4, a[3]);
 
-            a = x.range(cc{0});
+            a = x.range(co{0});
             xassert_eq(x.length(), a.length());
 
             for(uxx i = 0; i < a.length(); i++){
@@ -39,7 +39,7 @@
             xassert_eq(x[1], b[1]);
             xassert_eq(x[2], b[0]);
 
-            a = x.range(cc{-1, 0});
+            a = x.range(oc{-1, 0});
             xassert_eq(x.length(), a.length());
 
             for(uxx i = 0; i < a.length(); i++){
@@ -55,28 +55,21 @@
             xassert_eq(1, b.length());
             xassert_eq(& a[1], & b[0]);
 
-            a = x.range(cc{0, -2});
-            xassert_eq(x.length(), a.length() + 1);
-
-            for(uxx i = 0; i < a.length(); i++){
-                xassert_eq(& x[i], & a[i]);
-            }
-
-            a = x.range(co{0});
-            xassert_eq(x.length(), a.length() + 1);
-
-            for(uxx i = 0; i < a.length(); i++){
-                xassert_eq(& x[i], & a[i]);
-            }
-
             a = x.range(co{0, -2});
+            xassert_eq(x.length(), a.length() + 1);
+
+            for(uxx i = 0; i < a.length(); i++){
+                xassert_eq(& x[i], & a[i]);
+            }
+
+            a = x.range(co{0, -3});
             xassert_eq(x.length(), a.length() + 2);
 
             for(uxx i = 0; i < a.length(); i++){
                 xassert_eq(& x[i], & a[i]);
             }
 
-            a = x.range(oc{0});
+            a = x.range(oo{0});
             xassert_eq(x.length(), a.length() + 1);
 
             for(uxx i = 0; i < a.length(); i++){
