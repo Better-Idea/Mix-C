@@ -22,15 +22,15 @@
 
             shared_ptr() = default;
 
-            explicit shared_ptr(inc::ini) : 
-                base_t(inc::ini_now) {}
+            explicit shared_ptr(::ini) : 
+                base_t(::ini_now) {}
 
             template<class ... args>
-            explicit shared_ptr(inc::ini, args const & ... list) : 
-                base_t(inc::ini_now, list...) {}
+            explicit shared_ptr(::ini, args const & ... list) : 
+                base_t(::ini_now, list...) {}
 
             template<class ... args>
-            shared_ptr<type> & operator()(ini, args const & ... list){
+            shared_ptr<type> & operator()(::ini, args const & ... list){
                 using metap = base_t *;
                 the.~base_t();
                 new (this) base_t(::length(0), list...);
