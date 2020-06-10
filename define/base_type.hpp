@@ -36,8 +36,8 @@
     using voidp    = void *;
     using byte     = u08;
     
-    #ifndef _MSC_BUILD
-        using size_t        = long unsigned int;
+    #ifndef size_t
+        using size_t = decltype(sizeof(0));
         #define size_t      size_t
     #endif
 
