@@ -17,7 +17,7 @@
                 auto l = inc::seqlize(left);
                 auto r = inc::seqlize(right);
                 for (auto i = 0; i < l.length(); i++){
-                    if (ixx s = cmp(l.ptr[i], r.ptr[i]); s != 0){
+                    if (ixx s = cmp(l[i], r[i]); s != 0){
                         return s;
                     }
                 }
@@ -31,6 +31,25 @@
         }
     }
 
+    #define xcmpop(type)                                                    \
+    inline bool operator >  (type const & left, type const & right){        \
+        return mixc::memop_cmp::cmp(left, right) > 0;                       \
+    }                                                                       \
+    inline bool operator >= (type const & left, type const & right){        \
+        return mixc::memop_cmp::cmp(left, right) >= 0;                      \
+    }                                                                       \
+    inline bool operator <  (type const & left, type const & right){        \
+        return mixc::memop_cmp::cmp(left, right) <  0;                      \
+    }                                                                       \
+    inline bool operator <= (type const & left, type const & right){        \
+        return mixc::memop_cmp::cmp(left, right) <= 0;                      \
+    }                                                                       \
+    inline bool operator == (type const & left, type const & right){        \
+        return mixc::memop_cmp::cmp(left, right) == 0;                      \
+    }                                                                       \
+    inline bool operator != (type const & left, type const & right){        \
+        return mixc::memop_cmp::cmp(left, right) != 0;                      \
+    }
 #endif
 
 namespace xuser::inc{
