@@ -107,6 +107,8 @@
             operator date_t<finalx> & (){
                 return *(date_t<finalx> *)this;
             }
+
+            static date now();
         protected:
             u32 pday            : 5;
             u32 pmonth          : 4;
@@ -124,9 +126,6 @@
             xgen(year);
             #undef  xgen
         };
-
-        date today();
-
     }
 
     xcmpop(mixc::chrono_date::origin::date);

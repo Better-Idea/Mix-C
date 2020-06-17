@@ -35,6 +35,8 @@
 
         struct time : time_t<time, u64>{
             using time_t<time, u64>::time_t;
+
+            static time now();
         };
     }
 #endif

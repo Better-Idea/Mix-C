@@ -36,6 +36,8 @@
 
         struct datetime : datetime_t<datetime>{
             using datetime_t<datetime>::datetime_t;
+
+            static datetime now();
         };
     }
 
