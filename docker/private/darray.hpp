@@ -6,7 +6,6 @@
         #include"define/base_type.hpp"
         #include"dumb/dummy_t.hpp"
         #include"gc/ref.hpp"
-        #include"interface/ranger.hpp"
         #include"interface/seqptr.hpp"
         #include"macro/xgc.hpp"
         #include"memory/new.hpp"
@@ -30,7 +29,6 @@
                 xiam(darray_t<type, rank, attribute>, base_t)
             );
         public:
-            xranger(item_t);
             xseqptr(item_t);
 
             darray_t() : 

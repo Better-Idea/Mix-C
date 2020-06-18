@@ -17,10 +17,10 @@
         template<class item_t>
         struct heap_root{
             static void push(
-                inc::ranger<item_t>      range,
-                uxx                      length,
-                item_t const &           value, 
-                inc::can_compare<item_t> compare = inc::default_compare<item_t>){
+                inc::ranger<item_t> const & range,
+                uxx                         length,
+                item_t              const & value, 
+                inc::can_compare<item_t>    compare = inc::default_compare<item_t>){
 
                 // 注意：
                 // [value] 可能存在 [range] 中, 
@@ -47,10 +47,10 @@
             }
 
             static auto pop(
-                inc::ranger<item_t>      range,
-                uxx                      length,
-                item_t const &           insert_value, 
-                inc::can_compare<item_t> compare = inc::default_compare<item_t>){
+                inc::ranger<item_t> const & range,
+                uxx                         length,
+                item_t              const & insert_value, 
+                inc::can_compare<item_t>    compare = inc::default_compare<item_t>){
                 
                 // 避免返回值的复制构造
                 auto && wanted     = inc::transmitter{ range[0] };

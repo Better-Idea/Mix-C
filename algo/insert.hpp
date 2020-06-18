@@ -13,7 +13,11 @@
 
     namespace mixc::algo_insert{
         template<class item_t>
-        inline uxx insert(inc::ranger<item_t> target, ixx index, inc::ranger<item_t> values){
+        inline uxx insert(
+            inc::ranger<item_t> const & target, 
+            ixx                         index, 
+            inc::ranger<item_t> const & values){
+
             xindex_rollback(target.length(), index, +1);
             xdebug_fail(index > target.length());
             auto len = target.length() + values.length();
@@ -31,7 +35,10 @@
         }
 
         template<class item_t>
-        inline uxx insert(inc::ranger<item_t> target, ixx index, item_t const & value){
+        inline uxx insert(
+            inc::ranger<item_t> const & target,
+            ixx                         index,
+            item_t              const & value){
             return insert<item_t>(target, index, inc::initializer_list<item_t>{ value });
         }
 

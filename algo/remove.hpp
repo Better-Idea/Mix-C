@@ -12,7 +12,7 @@
 
     namespace mixc::algo_remove{
         template<class item_t>
-        inline uxx remove(inc::ranger<item_t> target, iinterval range){
+        inline uxx remove(inc::ranger<item_t> const & target, iinterval range){
             range.normalize(target.length());
             auto l = range.left();
             auto r = range.right();
@@ -39,7 +39,7 @@
         }
 
         template<class item_t>
-        inline uxx remove(inc::ranger<item_t> target, ixx index){
+        inline uxx remove(inc::ranger<item_t> const & target, ixx index){
             xindex_rollback(target.length(), index);
             return remove<item_t>(target, cc{ index, index });
         }

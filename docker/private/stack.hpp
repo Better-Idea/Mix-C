@@ -48,6 +48,8 @@
                 clear();
             }
         public:
+            
+
             void clear() {
                 nodep cur = inc::atom_swap(& the.ptop, nodep(nullptr));
                 nodep tmp;
