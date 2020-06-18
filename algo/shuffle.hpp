@@ -12,10 +12,30 @@
 
     namespace mixc::algo_shuffle{
         template<class item_t>
-        inline void shuffle(inc::ranger<item_t> range){
-            for (uxx i = 0, length = range.length(); i < length; i++){
-                auto a = inc::random<uxx>() % length;
-                auto b = inc::random<uxx>() % length; // 用两次增强随机性
+        inline void shuffle(inc::ranger<item_t> const & range){
+            uxx length  = range.length();
+            uxx i       = 0;
+            uxx w       = uxx(1) << (sizeof(uxx) * 8 / 2);
+            uxx a;
+            uxx b;
+            uxx r;
+
+            if (w > length) for(; i < length; i++){         // 复用生成的随机数
+                r  = inc::random<uxx>();
+                a  = r >> (sizeof(uxx) * 4);                // 使用随机数的高位
+                b  = r & (uxx(-1) >> (sizeof(uxx) * 4));    // 使用随机数的低位
+                a %= length;
+                b %= length;
+
+                inc::swap(
+                    xref range[a],
+                    xref range[b]
+                );
+            }
+            else for(; i < length; i++){
+                a = inc::random<uxx>() % length;
+                b = inc::random<uxx>() % length;
+
                 inc::swap(
                     xref range[a],
                     xref range[b]
