@@ -41,6 +41,14 @@
                 return not_exist;
             }
 
+            uxx index_of_first_set(uxx start_boundary){
+                return find(& inc::index_of_first_set<bits_t>, start_boundary);
+            }
+
+            uxx index_of_last_set(uxx end_boundary){
+                return find(& inc::index_of_last_set<bits_t>, end_boundary);
+            }
+
             uxx index_of_first_set(){
                 return find(& inc::index_of_first_set<bits_t>);
             }
@@ -72,6 +80,43 @@
                     index   = index << step_exp | offset;
                 }
                 return index;
+            }
+
+            template<class callback>
+            uxx find(callback invoke, uxx boundary){
+                auto is_find_last = invoke == & inc::index_of_last_set<bits_t>;
+                auto idc    = data;
+                uxx  i      = 0;
+                uxx  msk    = is_find_last ? uxx(-1) >> (width - 1 - (boundary & mask)) : uxx(-1) << (boundary & mask);
+                uxx  w      = boundary >> step_exp;
+                uxx  r      = invoke(idc[w] & msk);
+
+                if (r != not_exist){
+                    return w << step_exp | r;
+                }
+
+                while(i < height - 1){
+                    // 从下向上
+                    idc    += lut[i];
+                    msk     = is_find_last ? uxx(-1) >> (width - (w & mask)) : uxx(-1) << ((w & mask) + 1);
+                    w     >>= step_exp;
+                    r       = invoke(idc[w] & msk);
+
+                    if (r == not_exist){
+                        i  += 1;
+                        continue;
+                    }
+
+                    // 从上向下
+                    do{
+                        idc -= lut[i];
+                        w    = w << step_exp | r;
+                        r    = invoke(idc[w]);
+                    } while(i-- != 0);
+
+                    return w << step_exp | r;
+                }
+                return not_exist;
             }
 
             template<class callback>
@@ -159,6 +204,16 @@
 
             final & index_of_first_set(uxx * value){
                 value[0] = index_of_first_set();
+                return thex;
+            }
+            
+            final & index_of_first_set(uxx start_boundary, uxx * value){
+                value[0] = index_of_first_set(start_boundary);
+                return thex;
+            }
+            
+            final & index_of_last_set(uxx end_boundary, uxx * value){
+                value[0] = index_of_last_set(end_boundary);
                 return thex;
             }
 
