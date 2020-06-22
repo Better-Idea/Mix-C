@@ -76,25 +76,21 @@
                     uxx             hash, 
                     key_t const &   key, 
                     val_t const &   value, 
-                    val_t **        receive, 
                     bool            with_copy_operator = true){
 
                     // 约定 next == this 表示的是空节点
                     if (is_empty()){
                         new (this) node(hash, key, value, with_copy_operator);
-                        receive[0] = xref the->value;
                         return hashmap_set_result::success;
                     }
 
                     for(auto cur = this; ; cur = cur->next){
                         if (cur->hash_code == hash and cur[0]->key == key){
                             cur[0]->value   = value;
-                            receive[0]      = xref cur[0]->value;
                             return hashmap_set_result::override;
                         }
                         if (cur->next == nullptr){
                             cur->next       = inc::alloc_with_initial<node>(hash, key, value, with_copy_operator);
-                            receive[0]      = xref cur[0]->value;
                             return hashmap_set_result::success;
                         }
                     }
@@ -251,7 +247,6 @@
             the_t & set(
                 key_t const &        key, 
                 val_t const &        value, 
-                val_t **             receive, 
                 hashmap_set_result * state = nullptr){
 
                 if (lines == ++count){
@@ -261,7 +256,7 @@
                 auto a = addressing(key);
                 xdebug(im_docker_hashmap_set, a.hash, a.index, key, value);
 
-                if (auto tmp = nodes[a.index].set(a.hash, key, value, receive); state != nullptr){
+                if (auto tmp = nodes[a.index].set(a.hash, key, value); state != nullptr){
                     state[0] = tmp;
                 }
                 return the;
@@ -324,7 +319,7 @@
 
                     map.nodes[
                         header.hash_code & map.mask()
-                    ].set(header.hash_code, header->key, header->value, xref dummy, false/*屏蔽 key/value 的复制构造和赋值重载*/);
+                    ].set(header.hash_code, header->key, header->value, false/*屏蔽 key/value 的复制构造和赋值重载*/);
 
                     for(auto cur = header.next; cur != nullptr;){
                         auto new_hash   = cur->hash_code & map.mask();
@@ -396,15 +391,7 @@
                 val_t const &        value, 
                 hashmap_set_result * state = nullptr) {
                 val_t * receive;
-                return (final &)the.set(key, value, xref receive, state);
-            }
-
-            final & set(
-                key_t const &        key, 
-                val_t const &        value, 
-                val_t **             receive, 
-                hashmap_set_result * state = nullptr) {
-                return (final &)the.set(key, value, receive, state);
+                return (final &)the.set(key, value, state);
             }
 
             final & take_out(
