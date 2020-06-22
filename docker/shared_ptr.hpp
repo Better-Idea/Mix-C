@@ -17,7 +17,9 @@
 
             xgc_fields(
                 xiam(shared_ptr<type>, base_t)
-            );
+            ){
+                return base_t::template routing<guide>();
+            }
         public:
 
             shared_ptr() = default;
