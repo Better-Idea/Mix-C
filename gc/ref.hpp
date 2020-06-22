@@ -80,19 +80,16 @@
                 if (auto & info = gc_map.get(mem); info == nullref){
                     routing_result r;
                     attribute *    ptr = mem;
-                    info_t    *    i = nullptr;
 
-                    xdebug(im_gc_meta_routing, 
-                        mem,
-                        xtypeid(attribute).name,
-                        "not visited"
-                    );
+                    gc_map.set(mem, info_t());
 
-                    gc_map.set(mem, info_t(), xref i);
+                    xdebug(im_gc_meta_routing, mem, xtypeid(attribute).name, "set to gcmap");
 
                     if (r = tuplep(ptr)->template routing<guide>(); r.can_arrive_root){
-                        i->can_arrive_root = true;
-                        r.degree_dvalue   += mem->owners() - i->visited;
+                        auto & i = gc_map.get(mem);
+                        xdebug(im_gc_meta_routing, mem, & i, xtypeid(attribute).name, "can_arrive_root");
+                        i.can_arrive_root = true;
+                        r.degree_dvalue   += mem->owners() - i.visited;
                     }
                     return r;
                 }
