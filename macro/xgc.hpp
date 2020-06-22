@@ -50,10 +50,7 @@
 
         template<class type>
         struct fake{
-            type item;
-
-            template<class ... args>
-            fake(args const & ... list) : item(list...) {}
+            type * item = nullptr;
         };
 
         inline static u32 __class_id = u32(-1) >> 1;
