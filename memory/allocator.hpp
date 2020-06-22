@@ -7,6 +7,8 @@
         #include"macro/xdebug.hpp"
         #include"macro/xtypeid.hpp"
         #include"memory/new.hpp"
+        #include"lock/atom_add.hpp"
+        #include"lock/atom_sub.hpp"
         #include<malloc.h>
     #pragma pop_macro("xuser")
 
@@ -25,7 +27,7 @@
         inline uxx __used_mem;
 
         inline void * malloc(uxx bytes){
-            __used_mem += bytes;
+            inc::atom_add(& __used_mem, uxx(bytes));
             return ::malloc(bytes);
         }
 
@@ -57,7 +59,7 @@
         inline void free(type * mem, memory_size bytes){
             xdebug(im_free, xtypeid(type).name, mem, bytes);
             ::free(mem);
-            __used_mem -= bytes;
+            inc::atom_sub(& __used_mem, uxx(bytes));
         }
 
         template<class type>
