@@ -58,8 +58,21 @@
             }
         };
 
+        struct state_t{
+            operator bool &(){
+                return data;
+            }
+            void operator = (bool value){
+                data = value;
+            }
+        private:
+            // 目前为单线程版本
+            bool data;
+        };
+
         inline static hashmap<visited_ptr_t, info_t> gc_map;
         inline static empty_t const empty_array;
+        inline static state_t need_free_whole_ring;
 
         template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
@@ -154,8 +167,12 @@
                     }
                     xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
                 }
+                else if (need_free_whole_ring){
+                    old.free();
+                }
                 else if (old.mem->is_under_free() == false){
                     old.template routing_entry<guide>();
+                    need_free_whole_ring = false;
                 }
             }
 
