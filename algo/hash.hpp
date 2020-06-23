@@ -5,7 +5,8 @@
         #define xuser mixc::algo_hash
         #include"define/base_type.hpp"
         #include"memop/addressof.hpp"
-        #include"instruction/ring_shift_left.hpp"
+        #include"instruction/ring_shift_right.hpp"
+        #include"instruction/count_of_set.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_hash{
@@ -17,8 +18,8 @@
             uxx  r    = (val + ax);
 
             for(uxx i = 0; i <= blocks; i++){
-                auto plus = i == blocks ? rest : ptr[i];
-                r        += inc::ring_shift_left(plus, r);
+                auto plus = i == blocks ? ptr[i] & mask : ptr[i];
+                r        += inc::ring_shift_right(plus + inc::count_of_set(r), r);
             }
             return r;
         }
