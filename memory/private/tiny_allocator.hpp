@@ -5,61 +5,120 @@
     #define xuser mixc::memory_private_tiny_allocator
     #include"define/base_type.hpp"
     #include"docker/bit_indicator.hpp"
+    #include"interface/ranger.hpp"
     #include"memory/new.hpp"
+    #include"macro/xdebug.hpp"
     #include<malloc.h>
 
-    namespace xuser::origin{
+    namespace xuser{
         typedef struct node{
             node * previous;
             node * next;
         } * nodep;
 
         enum : uxx{
-            min_base_block_size     = 16,
-            max_base_block_size     = 1024,
-            max_base_block_count    = max_base_block_size / min_base_block_size,
-            page_size               = 64 * max_base_block_size,
-            mask_to_get_offset      = page_size - 1,
+            scale                   = sizeof(uxx) * 8,
+
+            // 小块以 scale_one 为区分单位
+            // 无论是大块还是小块，scale_one 都是分配的最小单位
+            scale_one               = sizeof(node),
+
+            // 大块以 scale_two 为区分单位
+            scale_two               = scale_one * scale,
+
+            // 块数不超过该值定义为小块，否为定义为大块
+            boundary                = scale,
+
+            // 每次从底层分配器中获取一个页来管理，每一个页都是按 page_bytes 对齐
+            page_bytes              = scale_two * scale,
+
+            // 用于获取页内偏移
+            mask_to_get_offset      = page_bytes - 1,
+
+            // 用于获取页首地址
             mask_to_get_header      = ~mask_to_get_offset,
-            max_bits                = page_size / min_base_block_size,
+
+            // 页首部位指示器位数
+            max_bits                = page_bytes / scale_one,
         };
 
-        typedef struct page_header : inc::bit_indicator<max_bits>{
+        typedef struct page_header{
+        private:
+            // 在此对 bit_indicator 包装一下
+            // 在外部间接访问 idc 时
+            // 对外使用下标 [1, max_bits] 实际对应 idc 的 [0, max_bits - 1]
+            inc::bit_indicator<max_bits> idc;
+        public:
+            page_header();
+
+            uxx index_of_first_set(uxx begin){
+                return idc.index_of_first_set(begin) + 1;
+            }
+            uxx index_of_last_set(uxx end){
+                return idc.index_of_last_set(end) + 1;
+            }
+            bool get(uxx index){
+                return idc.get(index - 1);
+            }
+            void set(uxx index){
+                idc.set(index - 1);
+            }
+            void reset(uxx index){
+                idc.reset(index - 1);
+            }
             page_header * previous;
             page_header * next;
         } * page_headerp;
 
         enum : uxx{
-            index_of_top_block      = (page_size / min_base_block_size - 1),
-            index_of_bottom_block   = (sizeof(page_header) + min_base_block_size - 1) / min_base_block_size,
-            max_count_of_block      = (page_size - sizeof(page_header)) / min_base_block_size,
+            // 每一个页都包含 page_header 首部，首部之后的内存是可以分配的
+            // 页第一个可用块的索引
+            index_of_bottom_block   = (sizeof(page_header) + scale_one - 1) / scale_one,
+
+            // 页最后一个可以块的索引
+            index_of_top_block      = (page_bytes / scale_one - 1),
+
+            // 一个页一共有多少可用块
+            page_block_count        = (page_bytes - sizeof(page_header)) / scale_one,
         };
 
+        inline page_header::page_header(){
+            // 设置哨兵位
+            set(index_of_bottom_block - 1);
+            set(index_of_top_block + 1);
+        }
+
+        // 必须是 2 的次幂
+        static_assert((page_bytes & (page_bytes - 1)) == 0);
+    }
+
+    namespace xuser::origin{
         struct classifier{
         private:
-            enum{
-                max_slot_size = 64,
-            };
-            using indicator_t = inc::bit_indicator<max_slot_size>;
+            using indicator_t = inc::bit_indicator<scale>;
         public:
-            voidp alloc(uxx require_size_index){
+            voidp alloc(uxx bytes){
+                auto require_size_index = bytes / scale_one;
+
                 // slot 中置位位表示空闲的块
                 // 选择最接近但不小于所需大小的块
-                if (require_size_index < max_base_block_count){
+                if (require_size_index < boundary){
                     if (auto closest_index = slot.index_of_first_set(require_size_index); closest_index != not_exist){
                         return take_out(closest_index, require_size_index, slot, free_list_array);
                     }
                 }
-                if (require_size_index < max_count_of_block){
-                    if (auto closest_index = slot_plus.index_of_first_set(require_size_index / max_base_block_count); closest_index != not_exist){
+                if (require_size_index < page_block_count){
+                    if (auto closest_index = slot_plus.index_of_first_set(require_size_index / boundary); closest_index != not_exist){
                         return take_out(closest_index, require_size_index, slot_plus, free_list_array_plus);
                     }
                 }
                 return origin_alloc(require_size_index);
             }
 
-            void free(voidp ptr, uxx return_size){
-                if (return_size >= max_count_of_block){
+            void free(voidp ptr, uxx bytes){
+                auto return_size_index = bytes / scale_one;
+
+                if (return_size_index >= page_block_count){
                     ::free(ptr);
                     return;
                 }
@@ -69,43 +128,47 @@
                 auto   base  = nodep(& idc);
                 auto   begin = index_of(block);
                 auto   left  = begin;
-                auto   right = begin + return_size;
+                auto   right = begin + return_size_index;
                 uxx    count;
 
-                idc.reset(left).reset(right);
+                idc.reset(left);
+                idc.reset(right);
 
                 // 若左边相邻块空闲
-                if (begin != index_of_bottom_block and idc.get(begin - 1) == 0){
+                // 因为左、右边界都设置了哨兵位，所以返回值不会是 not_exist
+                if (idc.get(begin - 1) == 0){
                     left    = idc.index_of_last_set(begin - 1) + 1;
-                    block   = & base[left]; 
-                    remove(block, begin - left - 1);
+                    remove(& base[left], begin - left);
                 }
 
                 // 若右边相邻块空闲
-                if (begin != index_of_top_block and idc.get(begin + 1) == 0){
-                    right   = idc.index_of_first_set(begin + 1);
-                    right   = right == not_exist ? index_of_top_block : right - 1;
-                    remove(& base[right], right - begin);
+                if (idc.get(begin + 1) == 0){
+                    right   = idc.index_of_first_set(begin + 1) - 1;
+                    remove(& base[begin + return_size_index + 1], right - begin);
                 }
 
-                if (count = right - left + 1; count == max_count_of_block){
+                // 整个页都空闲时就释放该页
+                if (count = right - left + 1; count == page_block_count){
                     origin_free(page_headerp(base));
                     return;
                 }
 
-                if (count > max_base_block_count){
-                    append(block, count - 1, slot_plus, free_list_array_plus);
+                // 否则合成的更大的空闲块放回对应的链表数组中
+                if (count > boundary){
+                    append(block, count / boundary - 1, slot_plus, free_list_array_plus);
                 }
                 else{
                     append(block, count - 1, slot, free_list_array);
                 }
             }
+
         private:
             void origin_free(page_header * ptr){
-                auto temp = ptr;
                 auto next = ptr->next;
+                auto prev = ptr->previous;
+                ::_mm_free(ptr);
 
-                if (next == temp){
+                if (next == ptr){
                     page_list = nullptr;
                     return;
                 }
@@ -113,18 +176,20 @@
                     page_list = next;
                 }
 
-                next->previous = temp->previous;
-                temp->previous->next = next;
+                next->previous = prev;
+                prev->next     = next;
             }
 
             voidp origin_alloc(uxx require_size_index){
                 // 超出管理范畴
-                if (require_size_index > max_count_of_block){
-                    return malloc((require_size_index + 1) * min_base_block_size);
+                if (require_size_index > page_block_count){
+                    return malloc((require_size_index + 1) * scale_one);
                 }
 
-                auto meta = _mm_malloc(page_size, page_size);
-                auto page = new(meta) page_header;
+                auto meta   = _mm_malloc(page_bytes, page_bytes);
+                auto page   = new(meta) page_header;
+                page->set(index_of_bottom_block);
+                page->set(index_of_bottom_block + require_size_index);
 
                 if (page_list == nullptr){
                     page_list               = page;
@@ -138,14 +203,14 @@
                     page->next              = first;
                 }
 
-                auto base      = nodep(page);
-                auto first     = & base[index_of_bottom_block];
-                return split(first, max_count_of_block, require_size_index);
+                auto base   = nodep(page);
+                auto first  = & base[index_of_bottom_block];
+                return split(first, page_block_count, require_size_index);
             }
 
             voidp take_out(uxx closest_index, uxx require_size_index, indicator_t & slot, node ** free_list_array){
-                auto first  = free_list_array[closest_index];
-                auto next   = first->next;
+                auto first = free_list_array[closest_index];
+                auto next  = first->next;
                 
                 // 若当前元素时该链表中最后一个元素，则将该位置的 slot 设置为空
                 if (next == first){
@@ -162,14 +227,17 @@
                 auto   begin        = index_of(first);
                 auto   end          = idc.index_of_first_set(begin + 1);
 
-                if (end == not_exist){
-                    end = index_of_top_block;
-                }
-
                 // 在 first 块所在的页中标记该块所占用的范围，以便为块合并提供指引
-                idc.set(begin).set(begin + require_size_index);
+                idc.set(begin);
+                idc.set(begin + require_size_index);
+                xdebug(im_memory_classifier_take_out, 
+                    begin, 
+                    idc.get(begin),
+                    begin + require_size_index,
+                    idc.get(begin + require_size_index)
+                );
 
-                auto   total_size   = end - begin + 1;
+                auto   total_size   = end - begin;
                 return split(first, total_size, require_size_index);
             }
 
@@ -182,8 +250,10 @@
                 auto   rest         = first + require_size;
                 auto   rest_size    = total_size - require_size;
 
-                if (rest_size > max_base_block_count){
-                    append(rest, rest_size * min_base_block_size / max_base_block_size - 1, slot_plus, free_list_array_plus);
+                xdebug(im_memory_classifier_split, first, rest, total_size, require_size, rest_size);
+
+                if (rest_size > boundary){
+                    append(rest, rest_size * scale_one / scale_two - 1, slot_plus, free_list_array_plus);
                 }
                 else if (rest_size != 0){
                     append(rest, rest_size - 1, slot, free_list_array);
@@ -192,9 +262,13 @@
             }
 
             void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
+                xdebug(im_memory_classifier_append, index, slot.get(index));
+
                 if (slot.get(index) == 0){
                     slot.set(index);
                     free_list_array[index]  = block;
+                    block->next             = block;
+                    block->previous         = block;
                 }
                 else{
                     auto first              = free_list_array[index];
@@ -205,18 +279,19 @@
                 }
             }
 
-            void remove(node * block, uxx size){
-                auto   is_plus      = size >= max_base_block_count;
-                auto   next         = block->next;
-                auto & free_list    = is_plus ? 
-                    this->free_list_array_plus[size >>= max_base_block_count] : 
-                    this->free_list_array[size];
-                auto & slot         = is_plus ?
+            void remove(node * block, uxx block_size){
+                auto   block_size_index     = block_size - 1;
+                auto   is_plus              = block_size_index >= boundary;
+                auto   next                 = block->next;
+                auto & free_list            = is_plus ? 
+                    this->free_list_array_plus[block_size_index = block_size / boundary - 1] : 
+                    this->free_list_array[block_size_index];
+                auto & slot                 = is_plus ?
                     this->slot_plus :
                     this->slot;
 
                 if (next == block){
-                    slot.reset(size);
+                    slot.reset(block_size_index);
                     return;
                 }
                 if (block == free_list){
@@ -236,15 +311,14 @@
             uxx index_of(node * ptr){
                 // 页内分配的最小单位为 16Byte 的块
                 auto offset = uxx(ptr) & mask_to_get_offset;
-                return offset / min_base_block_size;
+                return offset / scale_one;
             }
 
             indicator_t     slot;
             indicator_t     slot_plus;
-            page_header *   page_list;
-            node        *   free_list_array[max_slot_size];
-            node        *   free_list_array_plus[max_slot_size];
-
+            page_header *   page_list = nullptr;
+            node        *   free_list_array[scale];
+            node        *   free_list_array_plus[scale];
         };
     }
     #pragma pop_macro("xuser")
