@@ -6,6 +6,8 @@
         #include"define/base_type.hpp"
         #include"instruction/index_of_first_set.hpp"
         #include"instruction/index_of_last_set.hpp"
+        #include"interface/ranger.hpp"
+        #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_bit_indicator{
@@ -18,11 +20,23 @@
                 });
             }
 
+            void set(inc::ranger<uxx> index_list){
+                for(uxx i = 0; i < index_list.length(); i++){
+                    set(index_list[i]);
+                }
+            }
+
             void reset(uxx index){
                 set(index, [](bits_t & p, bits_t val){
                     p &= ~val;
                     return p != 0;
                 });
+            }
+
+            void reset(inc::ranger<uxx> index_list){
+                for(uxx i = 0; i < index_list.length(); i++){
+                    reset(index_list[i]);
+                }
             }
 
             uxx pop_first(){
@@ -58,8 +72,13 @@
             }
 
             bool get(uxx index){
-                uxx i       = index >> step_exp;
-                return (data[i] & bits_t(1) << (index & step_exp)) != 0;
+                auto i  = index >> step_exp;
+                auto m  = bits_t(1) << (index & mask);
+                return (data[i] & m) != 0;
+            }
+
+            constexpr uxx length() const {
+                return bits;
             }
         private:
             template<class callback>
@@ -180,6 +199,10 @@
                 lv1 ? 2  : 1;
 
             bits_t data[size] = {0};
+
+            xgc_fields(
+                xiam(bit_indicator_t<bits>)
+            );
         };
 
         template<class final, uxx bits>
@@ -232,8 +255,18 @@
                 return thex;
             }
 
+            final & set(inc::ranger<uxx> index_group){
+                the.set(index_group);
+                return thex;
+            }
+
             final & reset(uxx index){
                 the.reset(index);
+                return thex;
+            }
+
+            final & reset(inc::ranger<uxx> index_group){
+                the.reset(index_group);
                 return thex;
             }
         };
