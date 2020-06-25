@@ -16,7 +16,7 @@
             __debug_id += 1,                                    \
             __FILE__,                                           \
             __LINE__,                                           \
-            "func, " #__VA_ARGS__ ",", __func__, __VA_ARGS__);   \
+            "func, " #__VA_ARGS__ ",", __func__, __VA_ARGS__);  \
         }                                                       \
         if (token)
 
@@ -26,30 +26,37 @@
 
         // docker/private/hashmap.hpp
         #define xon    0
-        xsw(im_docker_hashmap_node_set  , xon);
-        xsw(im_docker_hashmap_set       , xon);
-        xsw(im_docker_hashmap_get       , xon);
+        xsw(im_docker_hashmap_node_set                      , xon);
+        xsw(im_docker_hashmap_set                           , xon);
+        xsw(im_docker_hashmap_get                           , xon);
+        xsw(im_docker_hashmap_addressing                    , xon);
+        #undef  xon
+
+        #define xon     1
+        xsw(im_memory_classifier_take_out                   , xon);
+        xsw(im_memory_classifier_split                      , xon);
+        xsw(im_memory_classifier_append                     , xon);
         #undef  xon
 
         // memop/memory.hpp
         #define xon    1
-        xsw(im_alloc_with_initial       , xon);
-        xsw(im_alloc                    , xon);
-        xsw(im_free                     , xon);
-        xsw(im_free_with_destroy        , xon);
+        xsw(im_alloc_with_initial                           , xon);
+        xsw(im_alloc                                        , xon);
+        xsw(im_free                                         , xon);
+        xsw(im_free_with_destroy                            , xon);
         #undef  xon
 
         // gc/ref
         #define xon    0
-        xsw(im_gc_$token_mix            , xon);
-        xsw(im_gc_$meta                 , xon);
-        xsw(im_gc_meta_routing_entry    , xon);
-        xsw(im_gc_meta_routing          , xon);
+        xsw(im_gc_$token_mix                                , xon);
+        xsw(im_gc_$meta                                     , xon);
+        xsw(im_gc_meta_routing_entry                        , xon);
+        xsw(im_gc_meta_routing                              , xon);
         #undef  xon
 
         // gc/private/tuple
         #define xon    0
-        xsw(im_gc_tuple_routing         , xon);
+        xsw(im_gc_tuple_routing                             , xon);
         #undef  xon
 
         #undef  xsw
@@ -57,5 +64,3 @@
         #define xdebug(...)
     #endif
 #endif
-
-
