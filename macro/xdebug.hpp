@@ -34,6 +34,7 @@
 
         #define xon     1
         xsw(im_memory_classifier_take_out                   , xon);
+        xsw(im_memory_classifier_free                       , xon);
         xsw(im_memory_classifier_split                      , xon);
         xsw(im_memory_classifier_append                     , xon);
         #undef  xon
