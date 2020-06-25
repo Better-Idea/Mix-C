@@ -36,10 +36,19 @@
             printf("%s | ", buf);
 
             for (auto item : arg){
+                bool is_origin_text = false;
                 do {
                     msg += 1;
+
+                    if (not is_origin_text){
+                        is_origin_text = msg[-1] == '\"';
+                    }
                     putchar(msg[-1]);
                 }while(msg[0] != ',');
+
+                if (is_origin_text){
+                    continue;
+                }
 
                 putchar(':');
                 printf(item->fmt, item->v);
