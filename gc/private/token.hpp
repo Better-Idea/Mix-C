@@ -23,9 +23,9 @@
         template<class item> struct static_string_holder;
     }
 
-    namespace mixc::memory_alloctor{
+    namespace mixc::memory_alloctor::origin{
         struct memory_size;
-        template<class t> void free_with_destroy(t *, mixc::memory_alloctor::memory_size);
+        template<class t> void free_with_destroy(t *, memory_size);
     }
 
     namespace mixc::gc_token{
@@ -106,7 +106,7 @@
             }
 
             template<class impl, class a, class b, bool is_array> friend struct mixc::gc_ref::meta;
-            template<class t> friend void mixc::memory_alloctor::free_with_destroy(t *, mixc::memory_alloctor::memory_size);
+            template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
         };
     }
 
