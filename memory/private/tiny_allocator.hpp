@@ -8,6 +8,7 @@
     #include"interface/ranger.hpp"
     #include"memory/new.hpp"
     #include"macro/xdebug.hpp"
+    #include"macro/xdebug_fail.hpp"
     #include<malloc.h>
 
     namespace xuser{
@@ -52,10 +53,10 @@
             page_header();
 
             uxx index_of_first_set(uxx begin){
-                return idc.index_of_first_set(begin) + 1;
+                return idc.index_of_first_set(begin - 1) + 1;
             }
             uxx index_of_last_set(uxx end){
-                return idc.index_of_last_set(end) + 1;
+                return idc.index_of_last_set(end - 1) + 1;
             }
             bool get(uxx index){
                 return idc.get(index - 1);
@@ -97,8 +98,19 @@
         private:
             using indicator_t = inc::bit_indicator<scale>;
         public:
+            uxx used_bytes() {
+                return pused_bytes;
+            }
+
+            uxx need_free_count() {
+                return pneed_free_count;
+            }
+
             voidp alloc(uxx bytes){
-                auto require_size_index = bytes / scale_one;
+                pused_bytes         += bytes;
+                pneed_free_count    += 1;
+
+                auto require_size_index = (bytes - 1) / scale_one;
 
                 // slot 中置位位表示空闲的块
                 // 选择最接近但不小于所需大小的块
@@ -116,7 +128,10 @@
             }
 
             void free(voidp ptr, uxx bytes){
-                auto return_size_index = bytes / scale_one;
+                pused_bytes         -= bytes;
+                pneed_free_count    -= 1;
+
+                auto return_size_index = (bytes - 1) / scale_one;
 
                 if (return_size_index >= page_block_count){
                     ::free(ptr);
@@ -131,11 +146,26 @@
                 auto   right = begin + return_size_index;
                 uxx    count;
 
+                xdebug_fail(left < index_of_bottom_block){
+                    xdebug(im_memory_classifier_free, left, index_of_bottom_block, ptr, bytes, "unexcept release address");
+                    return;
+                }
+                xdebug_fail(idc.get(left) == 0){
+                    xdebug(im_memory_classifier_free, left, idc.get(begin), ptr, bytes, "maybe repeated release");
+                    return;
+                }
+
+                auto except_right = idc.index_of_first_set(begin + 1) - 1;
+                xdebug_fail(except_right != right){
+                    xdebug(im_memory_classifier_free, left, right, except_right, ptr, bytes, "unexcept release bytes");
+                    return;
+                }
+
                 idc.reset(left);
                 idc.reset(right);
 
                 // 若左边相邻块空闲
-                // 因为左、右边界都设置了哨兵位，所以返回值不会是 not_exist
+                // 因为左、右边界都设置了哨兵位，所以 index_of_xxxx_set 返回值不会是 not_exist
                 if (idc.get(begin - 1) == 0){
                     left    = idc.index_of_last_set(begin - 1) + 1;
                     remove(& base[left], begin - left);
@@ -316,7 +346,9 @@
 
             indicator_t     slot;
             indicator_t     slot_plus;
-            page_header *   page_list = nullptr;
+            uxx             pused_bytes         = 0;
+            uxx             pneed_free_count    = 0;
+            page_header *   page_list           = nullptr;
             node        *   free_list_array[scale];
             node        *   free_list_array_plus[scale];
         };
