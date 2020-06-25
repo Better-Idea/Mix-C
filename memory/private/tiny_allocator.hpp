@@ -354,8 +354,8 @@
         };
     }
     #pragma pop_macro("xuser")
-
-    namespace xuser::inc{
-        using namespace ::mixc::memory_private_tiny_allocator::origin;
-    }
 #endif
+
+namespace xuser::inc{
+    using namespace ::mixc::memory_private_tiny_allocator::origin;
+}

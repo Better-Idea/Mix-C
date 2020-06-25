@@ -26,8 +26,6 @@
             uxx size;
         };
 
-        inline uxx __used_mem;
-
         template<class type, class ... args>
         inline type * alloc_with_initial(memory_size bytes, args const & ... list){
             auto ptr = (type *)mem.alloc(bytes);
@@ -59,19 +57,19 @@
         }
 
         template<class type>
-        inline void free(type * mem){
-            free(mem, memory_size(sizeof(type)));
+        inline void free(type * ptr){
+            free(ptr, memory_size(sizeof(type)));
         }
 
         template<class type>
-        inline void free_with_destroy(type * mem, memory_size bytes){
-            mem->~type();
-            free(mem, bytes);
+        inline void free_with_destroy(type * ptr, memory_size bytes){
+            ptr->~type();
+            free(ptr, bytes);
         }
 
         template<class type>
-        inline void free_with_destroy(type * mem){
-            free_with_destroy(mem, memory_size(sizeof(type)));
+        inline void free_with_destroy(type * ptr){
+            free_with_destroy(ptr, memory_size(sizeof(type)));
         }
 
         inline uxx used_bytes(){
