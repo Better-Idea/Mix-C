@@ -1,25 +1,23 @@
 ﻿#ifndef xpack_docker_hashmap
 #define xpack_docker_hashmap
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::docker_hashmap
-        #include"algo/hash.hpp"
-        #include"define/base_type.hpp"
-        #include"define/nullref.hpp"
-        #include"docker/transmitter.hpp"
-        #include"dumb/mirror.hpp"
-        #include"dumb/disable_copy.hpp"
-        #include"gc/self_management.hpp"
-        #include"macro/xdebug.hpp"
-        #include"macro/xgc.hpp"
-        
-        #include"math/align.hpp"
-        #include"memop/addressof.hpp"
-        #include"memop/copy.hpp"
-        #include"memory/allocator.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::docker_hashmap
+    #include"algo/hash.hpp"
+    #include"define/base_type.hpp"
+    #include"define/nullref.hpp"
+    #include"docker/transmitter.hpp"
+    #include"dumb/mirror.hpp"
+    #include"dumb/disable_copy.hpp"
+    #include"gc/self_management.hpp"
+    #include"macro/xdebug.hpp"
+    #include"macro/xgc.hpp"
+    #include"math/align.hpp"
+    #include"memop/addressof.hpp"
+    #include"memop/copy.hpp"
+    #include"memory/allocator.hpp"
 
-    namespace mixc::docker_hashmap{
+    namespace xuser::origin{
         enum class hashmap_remove_result{
             success,
             item_not_exist,
@@ -174,7 +172,7 @@
                 xhas(node)
             ){
                 // TODO:====================================================================
-                return inc::routing_result();
+                return false;
             }
             /*构造/析构区*/
         public:
@@ -368,6 +366,7 @@
         struct hashmap : hashmap_t<key_t, val_t> {
             using the_t = hashmap_t<key_t, val_t>;
             using the_t::the_t;
+            using the_t::take_out;
 
             final & clear() {
                 return (final &)the.clear();
@@ -382,27 +381,25 @@
             }
 
             final & set(
-                key_t const &        key, 
-                val_t const &        value, 
-                hashmap_set_result * state = nullptr) {
-                val_t * receive;
+                key_t const &               key, 
+                val_t const &               value, 
+                hashmap_set_result *        state = nullptr) {
                 return (final &)the.set(key, value, state);
             }
 
             final & take_out(
-                key_t const &           key, 
-                val_t *                 value, 
-                hashmap_remove_result * state = nullptr) {
+                key_t const &               key, 
+                val_t *                     value, 
+                hashmap_take_out_result *   state = nullptr) {
                 return (final &)the.take_out(key, value, state);
             }
         };
     }
+    #pragma pop_macro("xuser")
 #endif
 
 #define xusing_docker_hashmap     ::mixc::docker_hashmap
 
 namespace xuser::inc{
-    using xusing_docker_hashmap::hashmap_remove_result;
-    using xusing_docker_hashmap::hashmap_take_out_result;
-    using xusing_docker_hashmap::hashmap_set_result;
+    using namespace xusing_docker_hashmap::origin;
 }
