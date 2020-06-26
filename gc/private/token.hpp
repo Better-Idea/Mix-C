@@ -1,15 +1,14 @@
 #ifndef xpack_gc_token
 #define xpack_gc_token
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::gc_token
-        #include"define/base_type.hpp"
-        #include"dumb/dummy_t.hpp"
-        #include"lock/atom_add.hpp"
-        #include"lock/atom_or.hpp"
-        #include"lock/atom_sub.hpp"
-        #include"macro/xdebug.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::gc_token
+    #include"define/base_type.hpp"
+    #include"dumb/dummy_t.hpp"
+    #include"lock/atom_add.hpp"
+    #include"lock/atom_or.hpp"
+    #include"lock/atom_sub.hpp"
+    #include"macro/xdebug.hpp"
 
     namespace mixc::gc_tuple{
         template<class root_t, class list> union tuple;
@@ -28,10 +27,8 @@
         template<class t> void free_with_destroy(t *, memory_size);
     }
 
-    namespace mixc::gc_token{
+    namespace xuser::origin{
         constexpr uxx step              = uxx(1);
-        constexpr uxx mark_under_free   = uxx(1) << (sizeof(uxx) * 8 - 1);
-        constexpr uxx mask_owners       = mark_under_free - 1;
 
         struct token {
             token(uxx) : record(step) { }
@@ -45,7 +42,7 @@
             uxx record;
 
             uxx owners(){
-                return record & mask_owners;
+                return record;
             }
 
             uxx owners_inc(){
@@ -54,14 +51,6 @@
 
             uxx owners_dec(){
                 return inc::atom_sub(& record, step);
-            }
-
-            void mark_under_free(){
-                inc::atom_or(& record, mixc::gc_token::mark_under_free);
-            }
-
-            bool is_under_free(){
-                return (record & mixc::gc_token::mark_under_free) != 0;
             }
         };
 
@@ -109,11 +98,9 @@
             template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
         };
     }
-
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using ::mixc::gc_token::token;
-    using ::mixc::gc_token::token_plus;
-    using ::mixc::gc_token::token_mix;
+    using namespace ::mixc::gc_token::origin;
 }
