@@ -94,7 +94,7 @@
     }
 
     namespace xuser::origin{
-        struct classifier{
+        struct tiny_allocator{
         private:
             using indicator_t = inc::bit_indicator<scale>;
         public:
@@ -131,6 +131,10 @@
                 pused_bytes         -= bytes;
                 pneed_free_count    -= 1;
 
+                xdebug_fail(bytes == 0){
+                    return;
+                }
+
                 auto return_size_index = (bytes - 1) / scale_one;
 
                 if (return_size_index >= page_block_count){
@@ -155,8 +159,8 @@
                     return;
                 }
 
-                auto except_right = idc.index_of_first_set(begin + 1) - 1;
-                xdebug_fail(except_right != right){
+                auto except_right = idc.index_of_first_set(begin + 1);
+                xdebug_fail(right > except_right){
                     xdebug(im_memory_classifier_free, left, right, except_right, ptr, bytes, "unexcept release bytes");
                     return;
                 }
@@ -166,14 +170,14 @@
 
                 // 若左边相邻块空闲
                 // 因为左、右边界都设置了哨兵位，所以 index_of_xxxx_set 返回值不会是 not_exist
-                if (idc.get(begin - 1) == 0){
-                    left    = idc.index_of_last_set(begin - 1) + 1;
+                if (idc.get(left - 1) == 0){
+                    left    = idc.index_of_last_set(left - 1) + 1;
                     remove(& base[left], begin - left);
                 }
 
                 // 若右边相邻块空闲
-                if (idc.get(begin + 1) == 0){
-                    right   = idc.index_of_first_set(begin + 1) - 1;
+                if (idc.get(right + 1) == 0){
+                    right   = idc.index_of_first_set(right + 1) - 1;
                     remove(& base[begin + return_size_index + 1], right - begin);
                 }
 

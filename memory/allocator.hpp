@@ -11,7 +11,7 @@
 
     namespace mixc::memory_alloctor{
         // 单线程
-        inline static inc::classifier mem;
+        inline static inc::tiny_allocator mem;
     }
 
     namespace mixc::memory_alloctor::origin{
