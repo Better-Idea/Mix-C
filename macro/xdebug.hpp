@@ -48,15 +48,14 @@
         #undef  xon
 
         // gc/ref
-        #define xon    0
+        #define xon    1
         xsw(im_gc_$token_mix                                , xon);
         xsw(im_gc_$meta                                     , xon);
-        xsw(im_gc_meta_routing_entry                        , xon);
         xsw(im_gc_meta_routing                              , xon);
         #undef  xon
 
         // gc/private/tuple
-        #define xon    0
+        #define xon    1
         xsw(im_gc_tuple_routing                             , xon);
         #undef  xon
 
