@@ -6,24 +6,22 @@
 #define xpack_lang_cxx_ph
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_ph
-        #include"define/base_type.hpp"
-        #include"interface/can_alloc.hpp"
-        #include"lang/cxx/strlize.hpp"
-        #include"lang/cxx.hpp"
-        #include"macro/xdebug_fail.hpp"
-        #include"memop/addressof.hpp"
-        #include"memop/copy.hpp"
-        #include"memop/fill.hpp"
-        #include"meta/is_based_on.hpp"
-        #include"meta/is_ptr.hpp"
-        #include"meta/unsigned_type.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_ph
+    #include"define/base_type.hpp"
+    #include"interface/can_alloc.hpp"
+    #include"lang/cxx/strlize.hpp"
+    #include"lang/cxx.hpp"
+    #include"macro/xdebug_fail.hpp"
+    #include"memop/addressof.hpp"
+    #include"memop/copy.hpp"
+    #include"memop/fill.hpp"
+    #include"meta/is_based_on.hpp"
+    #include"meta/is_ptr.hpp"
+    #include"meta/unsigned_type.hpp"
 
-    namespace mixc::lang_cxx_ph{
+    namespace xuser{
         /*
         * h{}      hex
         * H{}      upper hex 
@@ -50,7 +48,7 @@
         struct place_holder_group{};
 
         template<class final, class type>
-        struct base : place_holder_group{
+        struct base_ph : place_holder_group{
         protected:
             type        value;
             uxx         align_mode          : 2  = 0;
@@ -63,8 +61,8 @@
                 align_right,
             };
         public:
-            base(){}
-            base(type const & value) : 
+            base_ph(){}
+            base_ph(type const & value) : 
                 value(value){}
 
             final & c(uxx align_center_width){
@@ -87,10 +85,10 @@
         };
 
         template<class final, class type>
-        struct basex : base<final, type>{
-            using the_t = base<final, type>;
+        struct basex_ph : base_ph<final, type>{
+            using the_t = base_ph<final, type>;
             using the_t::the_t;
-            basex(){}
+            basex_ph(){}
 
             template<class item_t>
             item_t * align(uxx length, inc::can_alloc<item_t> alloc){
@@ -117,7 +115,7 @@
             }
         };
 
-        #define xbase   (*(basex<decltype(*this), type> *)this)
+        #define xbase   (*(basex_ph<decltype(*this), type> *)this)
         #define xopt                                                                            \
             inc::c08 operator >> (inc::can_alloc<char> alloc) { return output(alloc); }         \
             inc::c16 operator >> (inc::can_alloc<char16_t>  alloc) { return output(alloc); }    \
@@ -131,8 +129,8 @@
             bool              with_prefix, 
             bool              keep_leading_zero, 
             auto              lut>
-        struct num : base<final, type>{
-            using the_t = base<final, type>;
+        struct num : base_ph<final, type>{
+            using the_t = base_ph<final, type>;
             using the_t::the_t;
             num(){}
 
@@ -199,12 +197,48 @@
             xnum(name,inc::unsigned_type<type>,inc::numeration::oct,prefix,leading_zero,lut)
 
         #define xstr(type,ptr) template<uxx n> struct v<type[n]> : v<ptr>{ using v<ptr>::v; }
+    }
 
-        namespace ph{
-            template<class> struct v;
-            template<class> struct zx;
-        }
+    namespace xuser::ph{
+        using xuser::place_holder_group;
+        template<class> struct v;
+        template<class> struct zx;
 
+        xhex(h , not with_prefix, not keep_leading_zero, inc::lower);
+        xhex(H , not with_prefix, not keep_leading_zero, inc::upper);
+        xhex(zh, not with_prefix,     keep_leading_zero, inc::lower);
+        xhex(zH, not with_prefix,     keep_leading_zero, inc::upper);
+
+        xhex(x ,     with_prefix, not keep_leading_zero, inc::lower);
+        xhex(X ,     with_prefix, not keep_leading_zero, inc::upper);
+        xhex(zx,     with_prefix,     keep_leading_zero, inc::lower);
+        xhex(zX,     with_prefix,     keep_leading_zero, inc::upper);
+
+        xoct(o , not with_prefix, not keep_leading_zero, inc::lower);
+        xoct(zo, not with_prefix,     keep_leading_zero, inc::lower);
+
+        xbin(b , not with_prefix, not keep_leading_zero, inc::lower);
+        xbin(zb, not with_prefix,     keep_leading_zero, inc::lower);
+
+        template<class type>
+        struct v : base_ph<v<type>, type>{
+            using the_t = base_ph<v<type>, type>;
+            v(){}
+            v(type const & value)
+                : the_t(value){}
+
+            xopt {
+                return inc::cxx<item_t>(the_t::value, [this, alloc](uxx length){
+                    return xbase.template align<item_t>(length, alloc);
+                });
+            }
+        };
+
+        xstr(char, asciis);
+        xstr(char16_t, words);
+    }
+
+    namespace xuser{
         template<class ... args> struct phg_core;
         template<class a0, class ... args>
         struct phg_core<a0, args...> : phg_core<args...>{
@@ -248,43 +282,9 @@
                 return { (item_t *)alloc(length) + length, length };
             }
         };
-
     }
 
     namespace mixc::lang_cxx_ph::ph{ // place_holder
-        xhex(h , not with_prefix, not keep_leading_zero, inc::lower);
-        xhex(H , not with_prefix, not keep_leading_zero, inc::upper);
-        xhex(zh, not with_prefix,     keep_leading_zero, inc::lower);
-        xhex(zH, not with_prefix,     keep_leading_zero, inc::upper);
-
-        xhex(x ,     with_prefix, not keep_leading_zero, inc::lower);
-        xhex(X ,     with_prefix, not keep_leading_zero, inc::upper);
-        xhex(zx,     with_prefix,     keep_leading_zero, inc::lower);
-        xhex(zX,     with_prefix,     keep_leading_zero, inc::upper);
-
-        xoct(o , not with_prefix, not keep_leading_zero, inc::lower);
-        xoct(zo, not with_prefix,     keep_leading_zero, inc::lower);
-
-        xbin(b , not with_prefix, not keep_leading_zero, inc::lower);
-        xbin(zb, not with_prefix,     keep_leading_zero, inc::lower);
-
-        template<class type>
-        struct v : base<v<type>, type>{
-            using the_t = base<v<type>, type>;
-            v(){}
-            v(type const & value)
-                : the_t(value){}
-
-            xopt {
-                return inc::cxx<item_t>(the_t::value, [this, alloc](uxx length){
-                    return xbase.template align<item_t>(length, alloc);
-                });
-            }
-        };
-
-        xstr(char, asciis);
-        xstr(char16_t, words);
-
         template<class a0, class ... args>
         struct phg{ // place_holder group
             phg(a0 const & first, args const & ... list)
@@ -298,15 +298,17 @@
         private:
             phg_core<a0, args...> items;
         };
-
-        #undef  xstr
-        #undef  xbin
-        #undef  xoct
-        #undef  xhex
-        #undef  xnum
-        #undef  xopt 
-        #undef  xmate
     }
+
+    #undef  xstr
+    #undef  xbin
+    #undef  xoct
+    #undef  xhex
+    #undef  xnum
+    #undef  xopt 
+    #undef  xmate
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc::ph{
