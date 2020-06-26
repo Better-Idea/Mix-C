@@ -18,8 +18,8 @@
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
         #include"meta/is_based_on.hpp"
+        #include"meta/is_ptr.hpp"
         #include"meta/unsigned_type.hpp"
-        #include"meta_ctr/cif.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -63,6 +63,7 @@
                 align_right,
             };
         public:
+            base(){}
             base(type const & value) : 
                 value(value){}
 
@@ -89,6 +90,7 @@
         struct basex : base<final, type>{
             using the_t = base<final, type>;
             using the_t::the_t;
+            basex(){}
 
             template<class item_t>
             item_t * align(uxx length, inc::can_alloc<item_t> alloc){
@@ -132,9 +134,18 @@
         struct num : base<final, type>{
             using the_t = base<final, type>;
             using the_t::the_t;
+            num(){}
 
             xopt{
-                return inc::cxx<item_t>(the_t::value, n,  lut, [this, alloc](uxx length){
+                auto deformation = [this](){
+                    if constexpr (inc::is_ptr<type>){
+                        return uxx(the_t::value);
+                    }
+                    else{
+                        return the_t::value;
+                    }
+                };
+                return inc::cxx<item_t>(deformation(), n,  lut, [this, alloc](uxx length){
                     auto klz_length = sizeof(type) * 8; // keep leading zero length
 
                     if constexpr (n == inc::numeration::hex){
@@ -170,11 +181,12 @@
         constexpr bool with_prefix       = true;
         constexpr bool keep_leading_zero = true;
 
-        #define xnum(name,type_t,numeration,prefix,leading_zero,lut)                            \
-            template<class type>                                                                \
-            struct name : num<name<type>, type_t, numeration, prefix, leading_zero, lut> {      \
-                name(type const & value) :                                                      \
-                    num<name<type>, type_t, numeration, prefix, leading_zero, lut>(value){}     \
+        #define xnum(name,type_t,numeration,prefix,leading_zero,lut)                                    \
+            template<class type>                                                                        \
+            struct name : num<name<type>, type_t, numeration, prefix, leading_zero, lut> {              \
+                name(){}                                                                                \
+                name(type const & value) :                                                              \
+                    num<name<type>, type_t, numeration, prefix, leading_zero, lut>(type_t(value)){}     \
             }
         
         #define xhex(name,prefix,leading_zero,lut)      \
@@ -190,14 +202,26 @@
 
         namespace ph{
             template<class> struct v;
+            template<class> struct zx;
         }
 
         template<class ... args> struct phg_core;
         template<class a0, class ... args>
         struct phg_core<a0, args...> : phg_core<args...>{
         private:
-            static constexpr bool is_ph = inc::is_based_on<place_holder_group, a0>;
-            typename inc::cif<is_ph, a0, ph::v<a0>>::result item;
+            static auto ph_type(){
+                if constexpr (inc::is_based_on<place_holder_group, a0>){
+                    return a0();
+                }
+                else if constexpr (inc::is_ptr<a0>){
+                    return ph::zx<voidp>();
+                }
+                else{
+                    return ph::v<a0>();
+                }
+            }
+
+            decltype(ph_type()) item;
             using base_t = phg_core<args...>;
         public:
             phg_core(a0 const & first, args const & ... list) : 
@@ -247,6 +271,7 @@
         template<class type>
         struct v : base<v<type>, type>{
             using the_t = base<v<type>, type>;
+            v(){}
             v(type const & value)
                 : the_t(value){}
 
