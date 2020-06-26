@@ -14,7 +14,7 @@
         template<class type> union __typeid;
     }
 
-    namespace mixc::gc_tuple {
+    namespace mixc::gc_tuple::origin {
         template<class root_t, class member_list> union tuple;
     }
 
@@ -85,7 +85,8 @@
             using the_t =                                                                       \
                 typename ::mixc::macro_xgc::first_t<__xgc_list_ ## meta>::type;                 \
             template<class __type> friend union ::mixc::macro_xtypeid::__typeid;                \
-            template<class __root_t, class __member_list> friend union mixc::gc_tuple::tuple;   \
+            template<class __root_t, class __member_list>                                       \
+            friend union mixc::gc_tuple::origin::tuple;                                         \
             static constexpr const char * __self_name = __xgc_name_ ## meta;                    \
             static inline auto            __class_id  = ++::mixc::macro_xgc::__class_id;        \
         public:                                                                                 \
