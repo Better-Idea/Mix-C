@@ -1,32 +1,32 @@
 #ifndef xpack_gc_ref
 #define xpack_gc_ref
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::gc_ref
-        #include"define/base_type.hpp"
-        #include"define/nullref.hpp"
-        #include"docker/hashmap.hpp"
-        #include"dumb/dummy_t.hpp"
-        #include"dumb/struct_t.hpp"
-        #include"gc/self_management.hpp"
-        #include"gc/private/make_guide.hpp"
-        #include"gc/private/token.hpp"
-        #include"gc/private/tuple.hpp"
-        #include"lock/atom_swap.hpp"
-        #include"macro/xdebug.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xis_nullptr.hpp"
-        #include"memory/allocator.hpp"
-        #include"memop/addressof.hpp"
-        #include"memop/cast.hpp"
-        #include"meta/is_same.hpp"
-        #include"meta_ctr/cif.hpp"
-        #include"meta_seq/tlist.hpp"
-        #include"meta_seq/tin.hpp"
-        #include"meta_seq/vlist.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::gc_ref
+    #include"define/base_type.hpp"
+    #include"define/nullref.hpp"
+    #include"docker/hashmap.hpp"
+    #include"dumb/dummy_t.hpp"
+    #include"dumb/struct_t.hpp"
+    #include"gc/self_management.hpp"
+    #include"gc/private/make_guide.hpp"
+    #include"gc/private/token.hpp"
+    #include"gc/private/tuple.hpp"
+    #include"lock/atom_swap.hpp"
+    #include"macro/xdebug.hpp"
+    #include"macro/xgc.hpp"
+    #include"macro/xis_nullptr.hpp"
+    #include"memory/allocator.hpp"
+    #include"memop/addressof.hpp"
+    #include"memop/cast.hpp"
+    #include"meta/is_class.hpp"
+    #include"meta/is_same.hpp"
+    #include"meta_ctr/cif.hpp"
+    #include"meta_seq/tlist.hpp"
+    #include"meta_seq/tin.hpp"
+    #include"meta_seq/vlist.hpp"
 
-    namespace mixc::gc_ref{
+    namespace xuser{
         using namespace inc;
         using visited_ptr_t = voidp;
 
@@ -58,23 +58,12 @@
             }
         };
 
-        struct state_t{
-            operator bool &(){
-                return data;
-            }
-            void operator = (bool value){
-                data = value;
-            }
-        private:
-            // 目前为单线程版本
-            bool data;
-        };
+        inline static hashmap<visited_ptr_t, info_t>    gc_map;
+        inline static uxx                               degree_dvalue;
+        inline static visited_ptr_t                     root;
+        inline static empty_t const                     empty_array;
+        inline static bool                              need_free_whole_ring;
 
-        inline static hashmap<visited_ptr_t, info_t> gc_map;
-        inline static empty_t const empty_array;
-        inline static state_t need_free_whole_ring;
-
-        template<class impl, class item, class attribute = dummy_t, bool is_array = false> struct meta;
         template<class impl, class item, class attribute, bool is_array>
         struct meta : self_management {
             using the_length  = typename cif<is_array, token_plus, token>::result;
@@ -87,44 +76,57 @@
             ) {
                 using tuplep = tuple<attribute, typename attribute::member_list> *;
 
+                bool can_arrive_root = false;
+
                 if (mem == nullptr){
-                    return { 0 }; // no way
+                    return false;
                 }
-                if (auto & info = gc_map.get(mem); info == nullref){
-                    routing_result r;
-                    attribute *    ptr = mem;
 
-                    gc_map.set(mem, info_t());
+                xdebug(im_gc_meta_routing, mem, xtypeid(attribute).name, mem->owners(), the.length());
 
-                    xdebug(im_gc_meta_routing, mem, xtypeid(attribute).name, "set to gcmap");
+                if constexpr (tin<guide, item>){
+                    using tuplep = tuple<item, typename item::member_list> *;
 
-                    if (r = tuplep(ptr)->template routing<guide>(); r.can_arrive_root){
-                        auto & i = gc_map.get(mem);
-                        xdebug(im_gc_meta_routing, mem, & i, xtypeid(attribute).name, "can_arrive_root");
-                        i.can_arrive_root = true;
-                        r.degree_dvalue   += mem->owners() - i.visited;
+                    for(uxx i = 0; i < the.length(); i++){
+                        can_arrive_root |= tuplep(xref the[i])->template routing<guide>();
                     }
-                    return r;
+                }
+
+                if (auto & info = gc_map.get(mem); info == nullref){
+                    info_t      this_node;
+                    attribute * ptr             = mem; // lis convert
+                    this_node.can_arrive_root   = mem == root;
+                    this_node.visited           = mem != root;
+                    gc_map.set(mem, this_node);
+                    xdebug(im_gc_meta_routing, "set to gc_map");
+                    can_arrive_root |= tuplep(ptr)->template routing<guide>();
+
+                    if (can_arrive_root){
+                        auto & this_node            = gc_map.get(mem);
+                        this_node.can_arrive_root   = true;
+                        degree_dvalue              += mem->owners() - this_node.visited;
+                    }
                 }
                 else if (info.can_arrive_root){
-                    xdebug(im_gc_meta_routing, 
-                        mem,
-                        xtypeid(attribute).name,
-                        info.can_arrive_root,
-                        info.visited
-                    );
-                    return { 1 }; // has a way can arrive root
+                    xdebug(im_gc_meta_routing, "can_arrive_root");
+                    degree_dvalue  -= 1;
+                    can_arrive_root = true;
                 }
                 else{
-                    info.visited += 1;
-                    xdebug(im_gc_meta_routing, 
-                        mem,
-                        xtypeid(attribute).name,
-                        info.can_arrive_root,
-                        info.visited
-                    );
-                    return { 0 };
+                    info.visited   += 1;
+                    xdebug(im_gc_meta_routing, info.visited);
                 }
+                return can_arrive_root;
+            }
+
+            template<class guide>
+            bool can_release(){
+                bool    state;
+                root                    = mem;
+                the.template routing<guide>();
+                state                   = degree_dvalue == 0;
+                degree_dvalue           = 0;
+                return state;
             }
         public:
             meta() : mem(nullptr) { }
@@ -168,11 +170,20 @@
                     xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
                 }
                 else if (need_free_whole_ring){
-                    old.free();
+                    if (auto && i = gc_map.take_out(tmp); i != nullptr and info_t(i).can_arrive_root){
+                        old.free();
+                    }
                 }
-                else if (old.mem->is_under_free() == false){
-                    old.template routing_entry<guide>();
+                else if (tmp->owners_dec(); old.template can_release<guide>()){
+                    need_free_whole_ring = true;
+                    gc_map.take_out(tmp);
+                    old.free();
+                    xdebug(im_gc_$meta, gc_map.length());
                     need_free_whole_ring = false;
+                }
+                else{
+                    gc_map.clear();
+                    gc_map.resize();
                 }
             }
 
@@ -231,50 +242,6 @@
         private:
             token_mix_t * mem;
 
-            template<class guide> void routing_entry(){
-                using tuplep = tuple<attribute, typename attribute::member_list> *;
-
-                if (mem->owners_dec() == 0){
-                    the.free();
-                    return;
-                }
-
-                attribute *    ptr = mem; // lis convert
-                routing_result r;
-                info_t         info;
-
-                info.can_arrive_root = true;
-                gc_map.set(mem, info);
-                r                = tuplep(ptr)->template routing<guide>();
-                r.degree_dvalue += mem->owners();
-
-                xdebug(im_gc_meta_routing_entry, 
-                    xtypeid(attribute).name, 
-                    r.degree_dvalue
-                );
-
-                gc_map.clear();
-                gc_map.resize();
-
-                if (r.degree_dvalue <= 0){
-                    the.free();
-                }
-                else if constexpr (tin<guide, item>){
-                    using tuplep = tuple<item, typename item::member_list> *;
-
-                    for(uxx i = 0; i < length(); i++){
-                        gc_map.set(mem, info);
-                        r                = tuplep(xref the[i])->template routing<guide>();
-                        r.degree_dvalue += mem->owners();
-
-                        if (gc_map.clear(); r.degree_dvalue <= 0){
-                            the.free();
-                            break;
-                        }
-                    }
-                }
-            }
-
             template<class ... args> auto alloc(uxx length, args const & ... list) {
                 return alloc_with_initial<token_mix_t>(
                     memory_size(
@@ -283,8 +250,8 @@
                     length, list...
                 );
             }
+
             void free(){
-                mem->mark_under_free();
                 free_with_destroy(mem,
                     memory_size(
                         sizeof(token_mix_t) + mem->this_length() * sizeof(item)
@@ -292,29 +259,38 @@
                 );
             }
         };
+    }
+
+    namespace xuser::origin{
+        using xuser::empty_array;
 
         template<class impl, class type>
-        using ref_ptr = meta<impl, dummy_t, struct_t<type>, false>;
+        using ref_ptr = meta<
+            impl, 
+            dummy_t, 
+            typename cif<
+                is_class<type>,
+                type,
+                struct_t<type>
+            >::result,
+            false
+        >;
 
         template<class impl, class item, class attribute = void>
         using ref_array = meta<
             impl, 
             item, 
-            struct_t<
-                typename cif<
-                    is_same<attribute, void>,
-                    dummy_t,
-                    attribute
-                >::result
-            >,
+            typename cif<
+                is_class<attribute>,
+                attribute,
+                struct_t<attribute>
+            >::result,
             true
         >;
     }
-
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using ::mixc::gc_ref::ref_ptr;
-    using ::mixc::gc_ref::ref_array;
-    using ::mixc::gc_ref::empty_array;
+    using namespace ::mixc::gc_ref::origin;
 }
