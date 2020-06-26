@@ -42,6 +42,12 @@
                         the.exp = value + exp_offset;
                     }
                 } real_exp;
+
+                struct {
+                    operator u64 () const {
+                        return u64(1) << decimal_bits | the.decimal;
+                    }
+                } real_decimal;
             };
 
             mfxx() : value(0) { }
