@@ -37,7 +37,7 @@
                 xhas(node)
             ) {
                 // TODO:====================================================================
-                return inc::routing_result();
+                return false;
             }
         public:
             stack_t() : 
@@ -48,7 +48,31 @@
                 clear();
             }
         public:
-            
+            struct itr{
+                itr(nodep top = nullptr) : 
+                    ptop(top){
+                }
+                item_t * operator -> (){
+                    return & operator item_t & ();
+                }
+                item_t const * operator -> () const {
+                    return & operator item_t & ();
+                }
+                operator item_t & (){
+                    return ptop[0];
+                }
+                operator item_t const & () const {
+                    return ptop[0];
+                }
+                bool finished() const {
+                    return ptop == nullptr;
+                }
+                itr next() const {
+                    return itr(ptop->next);
+                }
+            private:
+                nodep ptop;
+            };
 
             void clear() {
                 nodep cur = inc::atom_swap(& the.ptop, nodep(nullptr));
@@ -86,7 +110,16 @@
         };
 
         template<class final, class item_t>
-        using stack = inc::pushpop_t<final, stack_t<item_t>, item_t>;
+        struct stack : inc::pushpop_t<final, stack_t<item_t>, item_t>{
+            using the_t  = stack_t<item_t>;
+            using itr    = typename the_t::itr;
+            using base_t = inc::pushpop_t<final, the_t, item_t>;
+            using base_t::base_t;
+
+            itr iterator() const {
+                return itr(the_t::ptop);
+            }
+        };
     }
 #endif
 
