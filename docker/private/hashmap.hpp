@@ -398,8 +398,8 @@
     #pragma pop_macro("xuser")
 #endif
 
-#define xusing_docker_hashmap     ::mixc::docker_hashmap
+#define xusing_docker_hashmap     ::mixc::docker_hashmap::origin
 
 namespace xuser::inc{
-    using namespace xusing_docker_hashmap::origin;
+    using namespace xusing_docker_hashmap;
 }
