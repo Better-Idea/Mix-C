@@ -13,7 +13,7 @@
         template<class item>
         struct static_string_holder {
         private:
-            mixc::gc_token::token_plus * info;
+            mixc::gc_token::origin::token_plus * info;
         public:
             item * ptr() const {
                 return (item *)(info + 1);
