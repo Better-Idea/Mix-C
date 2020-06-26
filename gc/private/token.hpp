@@ -28,7 +28,7 @@
     }
 
     namespace xuser::origin{
-        constexpr uxx step              = uxx(1);
+        constexpr uxx step = uxx(1);
 
         struct token {
             token(uxx) : record(step) { }
