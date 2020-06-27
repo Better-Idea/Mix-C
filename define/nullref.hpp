@@ -15,19 +15,23 @@
             );
         public:
             template<class a> friend auto operator == (a const & value, nullref_t) {
-                return inc::addressof(value) == nullptr;
+                volatile auto ptr = inc::addressof(value);
+                return voidp(ptr) == nullptr;
             }
 
             template<class a> friend auto operator == (nullref_t, a const & value) {
-                return inc::addressof(value) == nullptr;
+                volatile auto ptr = inc::addressof(value);
+                return voidp(ptr) == nullptr;
             }
 
             template<class a> friend auto operator != (a const & value, nullref_t) {
-                return inc::addressof(value) != nullptr;
+                volatile auto ptr = inc::addressof(value);
+                return voidp(ptr) != nullptr;
             }
 
             template<class a> friend auto operator != (nullref_t, a const & value) {
-                return inc::addressof(value) != nullptr;
+                volatile auto ptr = inc::addressof(value);
+                return voidp(ptr) != nullptr;
             }
 
             template<class a>
