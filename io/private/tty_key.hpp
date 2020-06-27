@@ -1,8 +1,8 @@
-#ifndef xpack_io_private_tty_key_t
-#define xpack_io_private_tty_key_t
+#ifndef xpack_io_private_tty_key
+#define xpack_io_private_tty_key
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::io_private_tty_key_t
+        #define xuser mixc::io_private_tty_key
         #include"algo/binary_search.hpp"
         #include"define/base_type.hpp"
         #include"docker/array.hpp"
@@ -51,7 +51,7 @@
         };
     }
 
-    namespace mixc::io_private_tty_key_t{
+    namespace mixc::io_private_tty_key{
         using namespace mixc::io_private;
         using namespace mixc::io_private::func_key;
 
@@ -85,18 +85,18 @@
             pair { backspace , "backspace" },
         };
 
-        struct tty_key_t{
-            using final = tty_key_t;
+        struct tty_key{
+            using final = tty_key;
             using items_t = char[5];
 
             xgc_fields(
-                xiam(tty_key_t),
+                xiam(tty_key),
                 xpri(type, key_type),
                 xpri(w08,  items_t),
                 xpri(w16,  char16_t)
             );
         public:
-            constexpr tty_key_t() :
+            constexpr tty_key() :
                 type{}, w08{}, w16{}{}
 
             xpubget_pubset(is_char, bool){
@@ -148,7 +148,7 @@
 #endif
 
 namespace xuser::inc{
-    using ::mixc::io_private_tty_key_t::tty_key_t;
+    using ::mixc::io_private_tty_key::tty_key;
     namespace func_key{
         using namespace ::mixc::io_private::func_key;
     }
