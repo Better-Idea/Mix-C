@@ -37,9 +37,14 @@
         struct hashmap_t : inc::self_management, inc::disable_copy {
         private:
             typedef struct pair{
+                xgc_fields(
+                    xiam(pair)
+                );
+            public:
                 key_t    key;
                 val_t    value;
 
+                pair(){}
                 pair(key_t const & key, val_t const & value) : 
                     key(key), value(value){}
             } * pairp;
@@ -101,9 +106,11 @@
                     return inc::nullref;
                 }
 
-                void take_out(key_t const & key, inc::transmitter<pair> * receive){
+                inc::transmitter<pair> take_out(key_t const & key){
+                    inc::transmitter<pair> r;
+
                     if (is_empty()){
-                        return;
+                        return r;
                     }
 
                     auto cur = this, pre = this;
@@ -115,10 +122,10 @@
 
                     // 未找到
                     if (cur == nullptr){
-                        return;
+                        return r;
                     }
 
-                    receive[0] = *(pair *)cur->mirror;
+                    r = *(pair *)cur->mirror;
 
                     // cur 不是首元
                     if (cur != this){
@@ -136,6 +143,7 @@
                     else{
                         next = this;
                     }
+                    return r;
                 }
 
                 void free(){
@@ -201,10 +209,8 @@
                 inc::transmitter<val_t> r;
                 auto index = addressing(key);
                 
-                if (nodes[index].take_out(key, xref mem); mem != nullptr){
-                    pair & p = mem; // 取消 mem 的析构操作，使用手动析构
-                    r        = p.value;
-                    p.key.~key_t(); // 只析构 key。value 的析构交给 r 托管
+                if (mem = nodes[index].take_out(key); mem.has_hold_value()){
+                    r = mem.value;
                 }
                 return r;
             }
