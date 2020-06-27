@@ -279,7 +279,7 @@
 
             template<class item_t>
             inc::cxx<item_t> output(uxx length){
-                return { (item_t *)alloc(length) + length, length };
+                return { (item_t *)alloc(length) + length, 0 };
             }
         };
     }
