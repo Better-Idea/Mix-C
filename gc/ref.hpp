@@ -167,23 +167,24 @@
                     if (cnt = tmp->owners_dec(); cnt == 0){
                         old.free();
                     }
-                    xdebug(im_gc_$meta, xtypeid(attribute).name, cnt, tmp);
+                    xdebug(im_gc__meta, xtypeid(attribute).name, cnt, tmp);
+                    return;
                 }
                 else if (need_free_whole_ring){
-                    if (auto && i = gc_map.take_out(tmp); i != nullptr and info_t(i).can_arrive_root){
+                    if (auto && i = gc_map.take_out(tmp); i.has_hold_value() and i.can_arrive_root){
                         old.free();
                     }
+                    return;
                 }
                 else if (tmp->owners_dec(); old.template can_release<guide>()){
                     need_free_whole_ring = true;
                     gc_map.take_out(tmp);
                     old.free();
-                    xdebug(im_gc_$meta, gc_map.length());
+                    gc_map.clear();
                     need_free_whole_ring = false;
                 }
                 else{
                     gc_map.clear();
-                    gc_map.resize();
                 }
             }
 
