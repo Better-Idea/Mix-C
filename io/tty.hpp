@@ -6,8 +6,8 @@
         #include"configure.hpp"
         #include"define/base_type.hpp"
         #include"io/private/tty_color_t.hpp"
-        #include"io/private/tty_key_t.hpp"
-        #include"io/private/tty.hpp"
+        #include"io/private/tty_extern.hpp"
+        #include"io/private/tty_key.hpp"
         #include"lang/cxx/ph.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xgc.hpp"
@@ -43,7 +43,7 @@
                 xw { inc::forecolor(value); }
             };
 
-            xpubget(read_key, inc::tty_key_t){
+            xpubget(read_key, inc::tty_key){
                 return inc::read_key(false);
             };
 
@@ -68,7 +68,7 @@
 
                     if (length >= sizeof(buf_stack) / sizeof(buf_stack[0])){
                         ptr = buf_heap = inc::alloc<char>(
-                            inc::memory_size(length + 1)
+                            inc::memory_size(length + 1) // 1 for '\0'
                         );
                     }
 
@@ -77,7 +77,7 @@
                     return ptr;
                 };
 
-                if (inc::print(content); buf_heap != nullptr){
+                if (inc::print_core(asciis(content), content.length()); buf_heap != nullptr){
                     inc::free(buf_heap, inc::memory_size(buf_length + 1));
                 }
                 return thex;
@@ -103,4 +103,4 @@ namespace xuser::inc::ph{
 }
 
 #include"io/private/tty_color_t.hpp"
-#include"io/private/tty_key_t.hpp"
+#include"io/private/tty_key.hpp"
