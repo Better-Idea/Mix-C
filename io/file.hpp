@@ -3,10 +3,9 @@
     #pragma push_macro("xuser")
     #undef  xuser
     #define xuser mixc::io_file
-    #include"define/base_type.hpp"
+    #include"mixc.hpp"
     #include"dumb/disable_copy.hpp"
     #include"interface/seqptr.hpp"
-    #include"macro/xgc.hpp"
 
     namespace mixc::io_file::origin{
         enum class access_mode_t{
@@ -22,6 +21,8 @@
                 xpri(path, mutable asciis)
             );
             using final = the_t;
+        private:
+            file(i32 stdfd) : fd(stdfd), path(""){}
         public:
             file() : fd(-1), path("") {}
             file(asciis path, access_mode_t mode, bstate * result = nullptr) {
@@ -38,16 +39,26 @@
             final & backward(u64 offset) const;
             final & seek(i64 offset) const;
             uxx     read(voidp buffer, uxx bytes) const;
-            uxx     write(voidp buffer, uxx bytes) const;
+            uxx     write(void const * buffer, uxx bytes) const;
 
             template<class item_t>
             uxx read(inc::seqptr<item_t> seq) const {
                 return read(seq, seq.length() * sizeof(item_t));
             }
 
+            template<class type>
+            uxx read(type * object){
+                return read(object, sizeof(type));
+            }
+
             template<class item_t>
             uxx write(inc::seqptr<item_t> seq) const {
                 return write(seq, seq.length() * sizeof(item_t));
+            }
+
+            template<class type>
+            uxx write(type const & object){
+                return read(xref object, sizeof(type));
             }
         };
     }

@@ -3,6 +3,7 @@
     #pragma push_macro("xuser")
     #undef  xuser
     #define xuser mixc::io_private_file
+    #define private public
     #include<unistd.h>
     #include<sys/file.h>
     #include<sys/stat.h>
@@ -10,6 +11,7 @@
     #include"io/file.hpp"
     #include"lock/atom_swap.hpp"
     #include"macro/xindex_rollback.hpp"
+    #undef  private
 
     namespace mixc::io_file{
         using namespace xuser::inc;
@@ -42,7 +44,8 @@
         }
 
         file & file::close() const {
-            if (atom_swap(& fd, 0) > 0){
+            static_assert(decltype(fd)(-1) < 0);
+            if (atom_swap(& fd, -1) >= 0){
                 ::close(fd);
             }
             return thex;
@@ -67,7 +70,7 @@
             return ::read(the.fd, buffer, bytes);
         }
 
-        uxx file::write(voidp buffer, uxx bytes) const {
+        uxx file::write(void const * buffer, uxx bytes) const {
             return ::write(the.fd, buffer, bytes);
         }
     }
