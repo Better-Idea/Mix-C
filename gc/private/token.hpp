@@ -79,7 +79,7 @@
             void operator=(token_mix const &)   = delete;
         private:
             ~token_mix() {
-                xdebug(im_gc_$token_mix, xtypeid(attribute).name);
+                xdebug(im_gc__token_mix, xtypeid(attribute).name);
 
                 for (uxx i = 0; i < addition::this_length(); i++) {
                     (*this)[i].~type();

@@ -12,14 +12,14 @@
 
     #if xuse_xdebug
         #define xdebug(token,...)                               \
-        if (token > 0 and ([&](){                               \
+        if (::token > 0 and ([&](asciis func){                  \
             ::mixc::macro_private_log::log(                     \
             __debug_id += 1,                                    \
             __FILE__,                                           \
             __LINE__,                                           \
-            "func, " #__VA_ARGS__ ",", __func__, __VA_ARGS__);  \
+            "func, " #__VA_ARGS__ ",", func, __VA_ARGS__);      \
             return true;                                        \
-        })())
+        })(__func__))
 
         inline int __debug_id;
 
@@ -32,19 +32,19 @@
         enum{
             // docker/private/hashmap.hpp
             xon,
-            xoff,
                 im_docker_hashmap_node_set,
                 im_docker_hashmap_set,
                 im_docker_hashmap_get,
                 im_docker_hashmap_addressing,
+            xoff,
 
             // memory/tiny_allocator
             xon,
                 im_memory_tiny_allocator_take_out,
                 im_memory_tiny_allocator_free,
-            xoff,
                 im_memory_tiny_allocator_split,
                 im_memory_tiny_allocator_append,
+            xoff,
 
             // memop/memory.hpp
             xon,
@@ -56,8 +56,8 @@
 
             // gc/ref
             xon,
-                im_gc_$token_mix,
-                im_gc_$meta,
+                im_gc__token_mix,
+                im_gc__meta,
                 im_gc_meta_routing,
             xoff,
 
