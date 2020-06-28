@@ -1,8 +1,8 @@
-#ifndef xpack_talk_multi_barrier
-#define xpack_talk_multi_barrier
+#ifndef xpack_talk_about_multi_barrier
+#define xpack_talk_about_multi_barrier
     #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser mixc::talk_multi_barrier
+    #define xuser mixc::talk_about_multi_barrier
     #include<thread>
     #include"define/base_type.hpp"
     #include"io/tty.hpp"
