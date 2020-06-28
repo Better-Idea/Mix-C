@@ -1,8 +1,8 @@
-#ifndef xpack_talk_gc
-#define xpack_talk_gc
+#ifndef xpack_talk_about_gc
+#define xpack_talk_about_gc
     #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser mixc::talk_gc
+    #define xuser mixc::talk_about_gc
     #include"define/base_type.hpp"
     #include"docker/array.hpp"
     #include"docker/darray.hpp"
@@ -85,7 +85,7 @@
     }
 
     int main(){
-        mixc::talk_gc::test();
+        mixc::talk_about_gc::test();
         return 0;
     }
     #pragma pop_macro("xuser")
