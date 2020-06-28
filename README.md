@@ -3,8 +3,8 @@
 **一个人的力量是有限和渺小的，我需要能一起并肩作战的伙伴**
 
 该项目有诸多亮点，包括但不限于以下：
--	内存管理算法，让 1KB 以下的小内存的分配与回收效率有超过三倍的提升，性能超越 google 的 tcmalloc，并有效的减少了内存碎片（该部分遗留在旧代码部分，等待迁移）。旧版的还是用中文写的哦！等待改邪归正。  
-https://github.com/Better-Idea/Mix-C/blob/master/old/%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89/%E8%BF%B7%E4%BD%A0.cpp
+-	内存管理算法，让 4KB 以下的小内存的分配与回收效率有超过三倍的提升，性能超越 google 的 tcmalloc，并有效的减少了内存碎片。该算法已从 old/ 旧代码中迁移完毕并增强了原有功能。
+https://github.com/Better-Idea/Mix-C/blob/master/memory/private/tiny_allocator.hpp
 
 -	半伪随机数生成算法：一款高质量的伪随机数生成算法，速度比线性同余更快，周期比 mt19937更长（理论上没有周期）  
 https://github.com/Better-Idea/Mix-C/blob/master/math/random.hpp
