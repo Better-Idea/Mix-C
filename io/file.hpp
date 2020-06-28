@@ -46,19 +46,9 @@
                 return read(seq, seq.length() * sizeof(item_t));
             }
 
-            template<class type>
-            uxx read(type * object){
-                return read(object, sizeof(type));
-            }
-
             template<class item_t>
             uxx write(inc::seqptr<item_t> seq) const {
                 return write(seq, seq.length() * sizeof(item_t));
-            }
-
-            template<class type>
-            uxx write(type const & object){
-                return read(xref object, sizeof(type));
             }
         };
     }
