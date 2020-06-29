@@ -6,20 +6,18 @@
 #define xpack_lang_cxx_replace
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_replace
-        #include"define/base_type.hpp"
-        #include"docker/darray.hpp"
-        #include"interface/can_alloc.hpp"
-        #include"interface/can_compare.hpp"
-        #include"lang/cxx/index_of_first.hpp"
-        #include"lang/cxx.hpp"
-        #include"memop/copy.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_replace
+    #include"define/base_type.hpp"
+    #include"docker/darray.hpp"
+    #include"interface/can_alloc.hpp"
+    #include"interface/can_compare.hpp"
+    #include"lang/cxx/index_of_first.hpp"
+    #include"lang/cxx.hpp"
+    #include"memop/copy.hpp"
 
-    namespace mixc::lang_cxx_replace{
+    namespace xuser{
         // using item = char;
         // template<class item> struct core;
         // template<>
@@ -27,8 +25,12 @@
 
         template<class item>
         struct core : inc::cxx<item> {
-            using inc::cxx<item>::cxx;
+            using base_t = inc::cxx<item>;
+            using base_t::base_t;
             using the_t = core<item>;
+
+            core(base_t const & self) : 
+                base_t(self){}
 
             auto replace(
                 the_t                     old_value, 
@@ -100,6 +102,9 @@
             }
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_replace::xuser{

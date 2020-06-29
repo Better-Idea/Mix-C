@@ -6,18 +6,16 @@
 #define xpack_lang_cxx_strcat
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_strcat
-        #include"define/base_type.hpp"
-        #include"interface/can_alloc.hpp"
-        #include"interface/initializer_list.hpp"
-        #include"lang/cxx.hpp"
-        #include"meta/is_same.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_strcat
+    #include"define/base_type.hpp"
+    #include"interface/can_alloc.hpp"
+    #include"interface/initializer_list.hpp"
+    #include"lang/cxx.hpp"
+    #include"meta/is_same.hpp"
 
-    namespace mixc::lang_cxx_strcat{
+    namespace xuser{
         template<class item>
         struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
@@ -44,9 +42,11 @@
                 }
                 return the_t(ptr, total_length);
             }
-
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_strcat::xuser{

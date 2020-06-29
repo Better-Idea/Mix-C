@@ -6,19 +6,17 @@
 #define xpack_lang_cxx_parse
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_parse
-        #include"configure.hpp"
-        #include"define/base_type.hpp"
-        #include"docker/transmitter.hpp"
-        #include"lang/cxx.hpp"
-        #include"math/numeration_t.hpp"
-        #include"meta/unsigned_type.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_parse
+    #include"configure.hpp"
+    #include"define/base_type.hpp"
+    #include"docker/transmitter.hpp"
+    #include"lang/cxx.hpp"
+    #include"math/numeration_t.hpp"
+    #include"meta/unsigned_type.hpp"
 
-    namespace mixc::lang_cxx_parse{
+    namespace xuser{
         constexpr u08 lut_error = 0xff;
         constexpr u08 lut[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, lut_error, lut_error, lut_error, lut_error, lut_error, lut_error, lut_error, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, lut_error, lut_error, lut_error, lut_error, lut_error, lut_error, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, lut_error, lut_error, lut_error, lut_error, lut_error, };
 
@@ -106,6 +104,9 @@
             }
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_parse::xuser{

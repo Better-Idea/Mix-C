@@ -16,6 +16,7 @@
     #include"memop/cast.hpp"
     #include"memop/copy.hpp"
     #include"memop/fill.hpp"
+    #include"meta/has_cast.hpp"
     #include"meta/is_based_on.hpp"
     #include"meta/is_ptr.hpp"
     #include"meta/unsigned_type.hpp"
@@ -67,7 +68,7 @@
                 xiam(base_ph<final, void>)
             );
         public:
-            final & c(uxx align_center_width, char left_padding_char = ' ', char right_padding_char = ' '){
+            final & c(uxx align_center_width, char left_padding_char, char right_padding_char){
                 the.align_mode              = align_center;
                 the.align_width             = align_center_width;
                 the.left_padding_char       = left_padding_char;
@@ -302,6 +303,9 @@
                 if constexpr (inc::is_based_on<place_holder_group, a0>){
                     return a0();
                 }
+                else if constexpr (inc::has_cast<asciis, a0>){
+                    return ph::v<a0>();
+                }
                 else if constexpr (inc::is_ptr<a0>){
                     return ph::zx<voidp>();
                 }
@@ -314,7 +318,7 @@
             using base_t = phg_core<args...>;
         public:
             phg_core(a0 const & first, args const & ... list) : 
-                base_t(list...), item(first){
+                item(first), base_t(list...){
             }
 
             template<class item_t>

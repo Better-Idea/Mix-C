@@ -6,26 +6,23 @@
 #define xpack_lang_cxx_is_starts_with
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_is_starts_with
-        #include"define/base_type.hpp"
-        #include"interface/can_compare.hpp"
-        #include"lang/cxx/compare_fastly.hpp"
-        #include"lang/cxx.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_is_starts_with
+    #include"define/base_type.hpp"
+    #include"interface/can_compare.hpp"
+    #include"lang/cxx/compare_fastly.hpp"
+    #include"lang/cxx.hpp"
 
-    namespace mixc::lang_cxx_is_starts_with{
-        // using item = char;
-        // template<class item> struct core;
-        // template<>
-        // struct core<item> : inc::cxx<item> {
-
+    namespace xuser{
         template<class item>
         struct core : inc::cxx<item> {
-            using inc::cxx<item>::cxx;
+            using base_t = inc::cxx<item>;
+            using base_t::base_t;
             using the_t = core<item>;
+
+            core(base_t const & self) : 
+                base_t(self){}
 
             bool is_starts_with(the_t value, inc::can_compare<item> compare) const {
                 if (the.length() < value.length() or value.length() == 0){
@@ -37,6 +34,9 @@
             }
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_is_starts_with::xuser{

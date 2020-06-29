@@ -6,30 +6,28 @@
 #define xpack_lang_cxx_parse_json
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_parse_json
-        #include"define/base_type.hpp"
-        #include"docker/darray/pushpop.hpp"
-        #include"docker/darray.hpp"
-        #include"interface/can_alloc.hpp"
-        #include"lang/wxx/is_hex.hpp"
-        #include"lang/wxx/is_whitespace.hpp"
-        #include"lang/wxx.hpp"
-        #include"lang/cxx/compare_fastly.hpp"
-        #include"lang/cxx/is_starts_with.hpp"
-        #include"lang/cxx/parse.hpp"
-        #include"lang/cxx.hpp"
-        #include"macro/xdebug_fail.hpp"
-        #include"memory/new.hpp"
-        #include"meta/is_same.hpp"
-        #include"meta/more_fit.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_parse_json
+    #include"define/base_type.hpp"
+    #include"docker/darray/pushpop.hpp"
+    #include"docker/darray.hpp"
+    #include"interface/can_alloc.hpp"
+    #include"lang/wxx/is_hex.hpp"
+    #include"lang/wxx/is_whitespace.hpp"
+    #include"lang/wxx.hpp"
+    #include"lang/cxx/compare_fastly.hpp"
+    #include"lang/cxx/is_starts_with.hpp"
+    #include"lang/cxx/parse.hpp"
+    #include"lang/cxx.hpp"
+    #include"macro/xdebug_fail.hpp"
+    #include"memory/new.hpp"
+    #include"meta/is_same.hpp"
+    #include"meta/more_fit.hpp"
 
     #define xjson(...)  #__VA_ARGS__
 
-    namespace mixc::lang_cxx_parse_json {
+    namespace xuser {
         enum class json_type_t {
             json_object,
             json_string,
@@ -189,10 +187,12 @@
 
         template<class item_t>
         struct core : inc::cxx<item_t> {
-            using inc::cxx<item_t>::cxx;
-            using the_t = core<item_t>;
+            using base_t = inc::cxx<item>;
+            using base_t::base_t;
+            using the_t = core<item>;
 
-            core(inc::cxx<item_t> const & self) : inc::cxx<item_t>(self){}
+            core(base_t const & self) : 
+                base_t(self){}
 
             auto skip_whitespace(uxx & i) {
                 while(inc::wxx<item_t>(the[i]).is_whitespace() and i < the.length()) {
@@ -372,6 +372,9 @@
             }
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_parse_json::xuser {

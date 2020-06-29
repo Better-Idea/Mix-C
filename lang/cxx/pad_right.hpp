@@ -14,10 +14,8 @@
         #include"lang/cxx.hpp"
         #include"memop/copy.hpp"
         #include"memop/fill.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_pad_right{
+    namespace xuser{
         template<class item>
         struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
@@ -32,6 +30,9 @@
             }
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_pad_right::xuser{

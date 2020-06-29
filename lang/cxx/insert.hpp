@@ -6,22 +6,24 @@
 #define xpack_lang_cxx_insert
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_insert
-        #include"define/base_type.hpp"
-        #include"interface/can_alloc.hpp"
-        #include"lang/cxx.hpp"
-        #include"macro/xindex_rollback.hpp"
-        #include"memop/copy.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_insert
+    #include"define/base_type.hpp"
+    #include"interface/can_alloc.hpp"
+    #include"lang/cxx.hpp"
+    #include"macro/xindex_rollback.hpp"
+    #include"memop/copy.hpp"
 
-    namespace mixc::lang_cxx_insert{
+    namespace xuser{
         template<class item>
         struct core : inc::cxx<item> {
-            using inc::cxx<item>::cxx;
+            using base_t = inc::cxx<item>;
+            using base_t::base_t;
             using the_t = core<item>;
+
+            core(base_t const & self) : 
+                base_t(self){}
 
             auto insert(ixx index, the_t value, inc::can_alloc<item> alloc) const {
                 xindex_rollback(the.length(), index, + 1);
@@ -34,6 +36,9 @@
             }
         };
     }
+
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_insert::xuser {
