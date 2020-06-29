@@ -1,12 +1,11 @@
 #ifndef xpack_math_numeration_t
 #define xpack_math_numeration_t
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::math_numeration_t
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::math_numeration_t
+    #include"define/base_type.hpp"
 
-    namespace mixc::math_numeration_t{
+    namespace xuser{
         enum class numeration_t : u08 {
             bin =  2,
             oct =  8,
@@ -22,12 +21,14 @@
         }
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
     using ::mixc::math_numeration_t::numeration_t;
 
-    namespace numeration{
-        using namespace ::mixc::math_numeration_t::numeration;
-    }
+}
+
+namespace xuser::inc::numeration{
+    using namespace ::mixc::math_numeration_t::numeration;
 }

@@ -1,16 +1,15 @@
 #ifndef xpack_math_random
 #define xpack_math_random
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::math_random
-        #include"define/base_type.hpp"
-        #include"define/nan.hpp"
-        #include"instruction/ring_shift_left.hpp"
-        #include"instruction/time_stamp.hpp"
-        #include"meta/is_same.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::math_random
+    #include"define/base_type.hpp"
+    #include"define/nan.hpp"
+    #include"instruction/ring_shift_left.hpp"
+    #include"instruction/time_stamp.hpp"
+    #include"meta/is_same.hpp"
 
-    namespace mixc::math_random{
+    namespace xuser::origin{
         namespace inner{
             inline static u64 x = inc::time_stamp();
             inline static u64 y = inc::time_stamp() * magic_number;
@@ -27,7 +26,6 @@
                 return y;
             }
         }
-
 
         template<class type>
         inline type random(){
@@ -67,8 +65,9 @@
         }
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using ::mixc::math_random::random;
+    using namespace ::mixc::math_random::origin;
 }

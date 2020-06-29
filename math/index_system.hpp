@@ -1,14 +1,13 @@
 #ifndef xpack_math_index_system
 #define xpack_math_index_system
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::math_index_system
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xindex_rollback.hpp"
-        #include"macro/xitf.hpp"
-    #pragma pop_macro("xuser")
-
+    #undef  xuser
+    #define xuser mixc::math_index_system
+    #include"define/base_type.hpp"
+    #include"macro/xgc.hpp"
+    #include"macro/xindex_rollback.hpp"
+    #include"macro/xitf.hpp"
+    
     namespace mixc{
         xitf(iinterval,
             xitem(normalize, void, uxx),
@@ -82,6 +81,8 @@
             using ::mixc::iinterval;
         }
     }
+
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
