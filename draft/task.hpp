@@ -16,21 +16,21 @@
         #error "please define macro 'xmax_task_priority'"
     #endif
 
-    namespace mixc::task{
-        using task_invoke_t = int(*)(void *);
+    namespace mixc::task::origin{
+        using task_invoke_t = u32(*)(voidp);
 
         constexpr u16 lut_time_slice_us[] = {
-            798500,
-            493500,
-            305000,
-            188500,
-            116500,
-            72000,
-            44500,
-            27500,
-            17000,
-            10500,
-            6500,
+            26000,
+            24000,
+            22000,
+            20000,
+            18000,
+            16000,
+            14000,
+            12000,
+            10000,
+            8000,
+            6000,
             4000,
             2500,
             1500,
@@ -121,8 +121,25 @@
             }
         } * ready_table[xmax_task_priority * task_control_block::subpriority_count];
 
-        inline static task_control_block                               info_main;
-        inline static task_control_block *                             task_cur;
+        constexpr bool add_to_ready_table = true;
+
+        task_control_block * task_current();
+        void task_current(task_control_block * value);
+        void task_environment_setup();
+        void task_create(task_invoke_t invoke);
+        void task_run();
+        void task_stop();
+        void task_wait();
+        void task_exit();
+        u64  task_us();
+        void task_switch_disable();
+        void task_switch_enable();
+        void task_timeslice(uxx us);
+        void task_switch(uxx cost_us, bool add_to_ready_table);
+
+
+        inline static task_control_block                      info_main;
+        inline static task_control_block *                    task_cur;
         inline static inc::bit_indicator<xmax_task_priority>  bmp_prio;
 
         task_control_block * task_current(){
@@ -139,9 +156,34 @@
             task_current(& info_main);
         }
 
-        void task_create(task_invoke_t invoke, task_control_block tcb){
-            uxx  stack_size = tcb.stack_scale * tcb.stack_scale_step;
-            u08p stack      = inc::alloc<u08>(inc::memory_size{stack_size});
+        void task_create(task_invoke_t invoke){
+
+            // uxx  stack_size = tcb.stack_scale * tcb.stack_scale_step;
+            // u08p stack      = inc::alloc<u08>(inc::memory_size{stack_size});
+
+            // 注意堆栈生长方向 ===========================================================
+            typedef union buf_t{
+                task_token      dat;
+                _JUMP_BUFFER    regs;
+            } * bufp;
+
+            using tcbp = task_control_block *;
+            auto ofs = inc::memory_size{1024};
+            auto tcb = tcbp(inc::alloc<u08>(ofs)) + ofs;
+            auto dat = uxxp(tcb - 1);
+            auto buf = bufp(dat) - 1;
+
+            if (setjmp(buf->dat.context) == 0){
+                #if xis_x86
+                    buf->regs.Rsp = buf->regs.Rbp = uxx(dat);
+                #elif xis_arm
+                    buf->regs.Sp = uxx(dat);
+                #endif
+            }
+            else{
+                invoke(nullptr);
+                task_switch();
+            }
         }
 
         void task_run(){
@@ -248,3 +290,7 @@
         }
     }
 #endif
+
+namespace xuser::inc{
+    using namespace ::mixc::task::origin;
+}
