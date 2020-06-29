@@ -9,9 +9,13 @@
     #include"memory/new.hpp"
     #include"macro/xdebug.hpp"
     #include"macro/xdebug_fail.hpp"
-    #include<malloc.h>
 
     namespace xuser{
+        extern voidp malloc(size_t bytes);
+        extern voidp malloc_aligned(size_t bytes, size_t align_bytes);
+        extern void  free(voidp ptr);
+        extern void  free_aligned(voidp ptr);
+
         typedef struct node{
             node * previous;
             node * next;
@@ -128,17 +132,17 @@
             }
 
             void free(voidp ptr, uxx bytes){
-                pused_bytes         -= bytes;
-                pneed_free_count    -= 1;
-
                 xdebug_fail(bytes == 0){
                     return;
                 }
 
+                pused_bytes         -= bytes;
+                pneed_free_count    -= 1;
+
                 auto return_size_index = (bytes - 1) / scale_one;
 
                 if (return_size_index >= page_block_count){
-                    ::free(ptr);
+                    xuser::free(ptr);
                     return;
                 }
 
@@ -151,17 +155,17 @@
                 uxx    count;
 
                 xdebug_fail(left < index_of_bottom_block){
-                    xdebug(im_memory_classifier_free, left, index_of_bottom_block, ptr, bytes, "unexcept release address");
+                    xdebug(im_memory_tiny_allocator_free, left, index_of_bottom_block, ptr, bytes, "unexcept release address");
                     return;
                 }
                 xdebug_fail(idc.get(left) == 0){
-                    xdebug(im_memory_classifier_free, left, idc.get(begin), ptr, bytes, "maybe repeated release");
+                    xdebug(im_memory_tiny_allocator_free, left, idc.get(begin), ptr, bytes, "maybe repeated release");
                     return;
                 }
 
                 auto except_right = idc.index_of_first_set(begin + 1);
                 xdebug_fail(right > except_right){
-                    xdebug(im_memory_classifier_free, left, right, except_right, ptr, bytes, "unexcept release bytes");
+                    xdebug(im_memory_tiny_allocator_free, left, right, except_right, ptr, bytes, "unexcept release bytes");
                     return;
                 }
 
@@ -200,7 +204,7 @@
             void origin_free(page_header * ptr){
                 auto next = ptr->next;
                 auto prev = ptr->previous;
-                ::_mm_free(ptr);
+                xuser::free_aligned(ptr);
 
                 if (next == ptr){
                     page_list = nullptr;
@@ -217,10 +221,10 @@
             voidp origin_alloc(uxx require_size_index){
                 // 超出管理范畴
                 if (require_size_index > page_block_count){
-                    return malloc((require_size_index + 1) * scale_one);
+                    return xuser::malloc((require_size_index + 1) * scale_one);
                 }
 
-                auto meta   = _mm_malloc(page_bytes, page_bytes);
+                auto meta   = xuser::malloc_aligned(page_bytes, page_bytes);
                 auto page   = new(meta) page_header;
                 page->set(index_of_bottom_block);
                 page->set(index_of_bottom_block + require_size_index);
@@ -264,7 +268,7 @@
                 // 在 first 块所在的页中标记该块所占用的范围，以便为块合并提供指引
                 idc.set(begin);
                 idc.set(begin + require_size_index);
-                xdebug(im_memory_classifier_take_out, 
+                xdebug(im_memory_tiny_allocator_take_out, 
                     begin, 
                     idc.get(begin),
                     begin + require_size_index,
@@ -284,7 +288,7 @@
                 auto   rest         = first + require_size;
                 auto   rest_size    = total_size - require_size;
 
-                xdebug(im_memory_classifier_split, first, rest, total_size, require_size, rest_size);
+                xdebug(im_memory_tiny_allocator_split, first, rest, total_size, require_size, rest_size);
 
                 if (rest_size > boundary){
                     append(rest, rest_size * scale_one / scale_two - 1, slot_plus, free_list_array_plus);
@@ -296,7 +300,7 @@
             }
 
             void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
-                xdebug(im_memory_classifier_append, index, slot.get(index));
+                xdebug(im_memory_tiny_allocator_append, index, slot.get(index));
 
                 if (slot.get(index) == 0){
                     slot.set(index);
@@ -357,6 +361,7 @@
             node        *   free_list_array_plus[scale];
         };
     }
+
     #pragma pop_macro("xuser")
 #endif
 
