@@ -2,11 +2,10 @@
 #define xpack_macro_xdebug_fail
     #pragma warning(disable:4390)
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::macro_xdebug_fail
-        #include"configure.hpp"
-        #include<stdio.h>
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::macro_xdebug_fail
+    #include"configure.hpp"
+    #include"macro/private/log.hpp"
 
     #if xuse_xdebug_fail
         #define xdebug_fail(...)                                                    \
@@ -15,12 +14,14 @@
                     return false;                                                   \
                 }                                                                   \
                 else{                                                               \
-                    printf(" FAIL | " __FILE__ ":%d\n", __LINE__);                  \
-                    printf("      | func:%s expr:" # __VA_ARGS__ "\n", name);       \
+                    using namespace ::mixc::macro_private_log::origin;              \
+                    log(for_fail, __FILE__, __LINE__, name, # __VA_ARGS__);         \
                     return error;                                                   \
                 }                                                                   \
             })(__func__, __VA_ARGS__), 0))
     #else
         #define xdebug_fail(...)  if (false)
     #endif
+
+    #pragma pop_macro("xuser")
 #endif

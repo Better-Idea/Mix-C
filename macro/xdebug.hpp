@@ -12,16 +12,12 @@
 
     #if xuse_xdebug
         #define xdebug(token,...)                               \
-        if (::token > 0 and ([&](asciis func){                  \
-            ::mixc::macro_private_log::log(                     \
-            __debug_id += 1,                                    \
-            __FILE__,                                           \
-            __LINE__,                                           \
-            "func, " #__VA_ARGS__ ",", func, __VA_ARGS__);      \
+        if (token > 0 and ([&](asciis func){                    \
+            using namespace ::mixc::macro_private_log::origin;  \
+            log(for_debug, __FILE__, __LINE__,                  \
+                func, #__VA_ARGS__ ",", __VA_ARGS__);           \
             return true;                                        \
         })(__func__))
-
-        inline int __debug_id;
 
         // 在 xon 后面的枚举是启用 xdebug 打印的
         #define xon         xlink2(__enable, __COUNTER__)       = 0
