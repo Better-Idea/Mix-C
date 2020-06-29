@@ -1,54 +1,47 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558 
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
             "type": "shell",
-            "label": "cpp build active file",
-            // "command": "/usr/bin/clang-9",
-            // "command": "/usr/bin/g++-8",
-            // "command": "/usr/bin/gcc",
-            "command": "g++",
-            // "command": "clang-8",
+            "label": "g++ build active file",
+            "command": "g++.exe",
             "args": [
-                "-I${fileDirname}",
+                "-I${workspaceFolder}",
                 "-std=c++2a",
                 "-fconcepts",
-                // "--coverage",
-                // "-lgcov",
-                // "-lstdc++",
-                // "",
-                // "-fno-rtti",
-                // "-fno-exceptions",
-                // "-mssse3",
-                // "-O2",
-                // "-fopenmp",
-
-                // OpenGL
-                // "-lGL",
-                // "-lGLEW",
-                // "-lGLU",
-                // "-lglut",
-                // "-lglfw",
-
-                // "-lX11",
-                // "-lpthread",
-                // "-lXrandr",
-                // "-lXi",
-
-                // AVX
                 "-mavx",
                 "-mavx2",
-                "-g2",
-                "${fileDirname}/io/private/tty.cpp",
+                "-g",
+                "${workspaceFolder}/precompile/extern_api_g++.o",
                 "${file}",
                 "-o",
-                "${fileDirname}/../${fileBasenameNoExtension}"
+                "${workspaceFolder}/../${fileBasenameNoExtension}"
+                // "-O2",
+                // "${fileDirname}/extern_api.cpp",
+                // "-c"
             ],
-            "options": {
-                "cwd": "C:/cygwin64/bin/"
-            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "clang build active file",
+            "command": "clang++.exe",
+            "args": [
+                "-I${workspaceFolder}",
+                "-std=c++2a",
+                // "-g",
+                "-O2",
+                "${workspaceFolder}/precompile/extern_api.o",
+                "${file}",
+                "-o",
+                "${workspaceFolder}/../${fileBasenameNoExtension}"
+                // "-O2",
+                // "${fileDirname}/extern_api.cpp",
+                // "-c"
+            ],
             "problemMatcher": [
                 "$gcc"
             ],
@@ -56,5 +49,3 @@
         }
     ]
 }
-
-// g++ -I. -std=c++2a -fconcepts --coverage -lgcov -g2 io/private/tty.cpp test_center.cpp -o test_center.exe
