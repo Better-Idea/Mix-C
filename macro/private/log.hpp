@@ -1,64 +1,40 @@
 #ifndef xpack_macro_private_log
 #define xpack_macro_private_log
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::macro_private_log
-        #include"configure.hpp"
-        #include"define/base_type.hpp"
-        #include"dumb/implicit.hpp"
-        #include"macro/private/mix.hpp"
-        #include<stdio.h>
-        #include<string.h>
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::macro_private_log
+    #include"configure.hpp"
+    #include"define/base_type.hpp"
+    #include"dumb/implicit.hpp"
+    #include"macro/private/mix.hpp"
+    
+    namespace xuser::origin{
+        enum type_t{
+            for_debug,
+            for_fail,
+        };
+        extern void log_core(
+            type_t      type, 
+            asciis      file, 
+            uxx         line, 
+            asciis      func_name, 
+            asciis      message, 
+            inc::mix *  items, 
+            uxx         length
+        );
 
-    namespace mixc::macro_private_log{
-        template<class ... args>
-        inline void log(int no, const char * file, int line, const char * msg, args const & ... list){
-            #if xuse_xdebug_short_path
-            while(true) {
-                if (auto name = strstr(file, xmixc); name != nullptr) {
-                    file = name + sizeof(xmixc);
-                }
-                else {
-                    break;
-                }
-            }
-            #endif
+        extern void log(type_t id, asciis file, uxx line, asciis func_name, asciis message);
 
-            inc::implicit<inc::mix> arg[] = { list... };
-            char buf[128] = {0};
-            sprintf(buf, "%5d | %s:%d ", no, file, line); // may over range =============================
-
-            for(int i = strlen(buf); i < 40; i++){
-                buf[i] = ' ';
-            }
-            
-            printf("%s | ", buf);
-
-            for (auto item : arg){
-                bool is_origin_text = false;
-                do {
-                    msg += 1;
-
-                    if (not is_origin_text){
-                        is_origin_text = msg[-1] == '\"';
-                    }
-                    putchar(msg[-1]);
-                }while(msg[0] != ',');
-
-                if (is_origin_text){
-                    continue;
-                }
-
-                putchar(':');
-                printf(item->fmt, item->v);
-            }
-            putchar('\n');
+        template<class a0, class ... args>
+        inline void log(type_t id, asciis file, uxx line, asciis func_name, asciis message, a0 const & first, args const & ... list){
+            inc::mix arg[] = { first, list... };
+            log_core(id, file, line, func_name, message, arg, 1 + sizeof...(args));
         }
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using ::mixc::macro_private_log::log;
+    using ::mixc::macro_private_log::origin::log;
 }
