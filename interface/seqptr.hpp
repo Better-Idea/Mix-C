@@ -1,35 +1,31 @@
 #ifndef xpack_interface_seqptr
 #define xpack_interface_seqptr
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::interface_seqptr
-        #include"define/base_type.hpp"
-        #include"interface/initializer_list.hpp"
-        #include"interface/ranger.hpp"
-        #include"macro/xdebug_fail.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xindex_rollback.hpp"
-        #include"math/index_system.hpp"
-        #include"memop/signature.hpp"
-        #include"meta/has_cast.hpp"
-    #pragma pop_macro("xuser")
-
+    #undef  xuser
+    #define xuser mixc::interface_seqptr
+    #include"define/base_type.hpp"
+    #include"interface/initializer_list.hpp"
+    #include"interface/ranger.hpp"
+    #include"macro/xgc.hpp"
+    #include"math/index_system.hpp"
+    #include"memop/signature.hpp"
+    
     #define xseqptr(...)                                                            \
-    inc::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {                       \
+    ::mixc::interface_seqptr::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {  \
         using ptr_t  = __VA_ARGS__ *;                                               \
         using ptrc_t = __VA_ARGS__ const *;                                         \
         auto  len    = the.length();                                                \
         auto  ptr    = (ptr_t)(ptrc_t)this[0];                                      \
         i.normalize(len);                                                           \
-        return inc::seqptr<__VA_ARGS__>(ptr + i.left(), i.right() - i.left() + 1);  \
-    }
+        return ::mixc::interface_seqptr::seqptr<__VA_ARGS__>(                       \
+            ptr + i.left(),                                                         \
+            i.right() - i.left() + 1                                                \
+        );                                                                          \
+    }                                                                               \
+    xranger(__VA_ARGS__)
 
-    namespace mixc::interface_seqptr{
+    namespace xuser{
         template<class item_t> struct seqptr;
-
-        namespace inc{
-            using ::mixc::interface_seqptr::seqptr;
-        }
 
         template<class item_t>
         struct seqptr{
@@ -75,10 +71,10 @@
             }
 
             xseqptr(item_t);
-            xranger(item_t);
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

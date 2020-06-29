@@ -1,18 +1,16 @@
 #ifndef xpack_interface_ranger
 #define xpack_interface_ranger
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::interface_ranger
-        #include"configure.hpp"
-        #include"define/base_type.hpp"
-        #include"interface/initializer_list.hpp"
-        #include"math/index_system.hpp"
-        #include"memop/addressof.hpp"
-        #include"memop/signature.hpp"
-        #include"meta/has_cast.hpp"
-    #pragma pop_macro("xuser")
-
-    namespace mixc::interface_ranger{
+    #undef  xuser
+    #define xuser mixc::interface_ranger
+    #include"configure.hpp"
+    #include"define/base_type.hpp"
+    #include"interface/initializer_list.hpp"
+    #include"math/index_system.hpp"
+    #include"memop/addressof.hpp"
+    #include"memop/signature.hpp"
+    
+    namespace xuser{
         enum : uxx{
             positive    = 0,
             negtive     = uxx(-1)
@@ -141,7 +139,7 @@
         };
 
         #define xranger(...)                                                        \
-        inc::ranger<__VA_ARGS__> range(::mixc::iinterval i){                        \
+        ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i){   \
             using namespace ::mixc::interface_ranger;                               \
             if (i.normalize(this->length());                                        \
                 i.left() <= i.right()){                                             \
@@ -153,6 +151,7 @@
         }
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
