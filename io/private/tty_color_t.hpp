@@ -1,10 +1,9 @@
 #ifndef xpack_io_private_tty_color_t
 #define xpack_io_private_tty_color_t
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::io_private_tty_color_t
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::io_private_tty_color_t
+    #include"define/base_type.hpp"
 
     namespace mixc::io_private_tty_color_t{
         enum class tty_color_t : u08 {
@@ -46,12 +45,13 @@
         }
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
     using ::mixc::io_private_tty_color_t::tty_color_t;
+}
 
-    namespace tty_color{
-        using namespace ::mixc::io_private_tty_color_t::tty_color;
-    }
+namespace xuser::inc::tty_color{
+    using namespace ::mixc::io_private_tty_color_t::tty_color;
 }

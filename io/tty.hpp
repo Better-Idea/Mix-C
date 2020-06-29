@@ -5,8 +5,8 @@
         #define xuser mixc::io_tty
         #include"configure.hpp"
         #include"define/base_type.hpp"
+        #include"io/private/tty.hpp"
         #include"io/private/tty_color_t.hpp"
-        #include"io/private/tty_extern.hpp"
         #include"io/private/tty_key.hpp"
         #include"lang/cxx/ph.hpp"
         #include"lang/cxx.hpp"

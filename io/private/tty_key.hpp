@@ -1,17 +1,16 @@
 #ifndef xpack_io_private_tty_key
 #define xpack_io_private_tty_key
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::io_private_tty_key
-        #include"algo/binary_search.hpp"
-        #include"define/base_type.hpp"
-        #include"docker/array.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xprop.hpp"
-        #include"memop/bit.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::io_private_tty_key
+    #include"algo/binary_search.hpp"
+    #include"define/base_type.hpp"
+    #include"docker/array.hpp"
+    #include"macro/xgc.hpp"
+    #include"macro/xprop.hpp"
+    #include"memop/bit.hpp"
 
-    namespace mixc::io_private{
+    namespace xuser{
         namespace func_key{
             enum : u08 {
                 esc     = 0x80,
@@ -49,13 +48,10 @@
             has_alt    = 0x08,
             has_ctrl   = 0x10,
         };
-    }
-
-    namespace mixc::io_private_tty_key{
-        using namespace mixc::io_private;
-        using namespace mixc::io_private::func_key;
 
         struct pair{ u08 v; asciis name; };
+
+        using namespace func_key;
 
         inline auto const & func_map = inc::array_view {
             pair { esc       , "escape"    },
@@ -84,7 +80,9 @@
             pair { page_down , "page_down" },
             pair { backspace , "backspace" },
         };
+    }
 
+    namespace xuser::origin{
         struct tty_key{
             using final = tty_key;
             using items_t = char[5];
@@ -145,11 +143,13 @@
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using ::mixc::io_private_tty_key::tty_key;
-    namespace func_key{
-        using namespace ::mixc::io_private::func_key;
-    }
+    using namespace ::mixc::io_private_tty_key::origin;
+}
+
+namespace xuser::inc::func_key{
+    using namespace ::mixc::io_private_tty_key::func_key;
 }
