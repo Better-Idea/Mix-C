@@ -10,11 +10,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/../${fileBasenameNoExtension}",
             "args": [],
-            "miDebuggerPath": "C:/cygwin64/bin/gdb.exe",
+            "miDebuggerPath": "gdb.exe",
+            // "miDebuggerPath": "gdb",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
