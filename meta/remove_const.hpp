@@ -1,12 +1,11 @@
 #ifndef xpack_meta_remove_const
 #define xpack_meta_remove_const
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_remove_const
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_remove_const
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_remove_const{
+    namespace xuser{
         template<class a>
         struct remove_const {
             using result = a;
@@ -18,6 +17,7 @@
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

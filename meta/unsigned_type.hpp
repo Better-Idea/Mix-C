@@ -1,12 +1,11 @@
 #ifndef xpack_meta_unsigned_type
 #define xpack_meta_unsigned_type
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_unsigned_type
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_unsigned_type
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_unsigned_type{
+    namespace xuser{
         template<uxx>
         struct unsigned_type{};
         template<> struct unsigned_type<1> { using result = u08; };
@@ -15,6 +14,7 @@
         template<> struct unsigned_type<8> { using result = u64; };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

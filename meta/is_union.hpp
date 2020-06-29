@@ -1,16 +1,16 @@
 #ifndef xpack_meta_is_union
 #define xpack_meta_is_union
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_is_union
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_is_union
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_is_union{
+    namespace xuser{
         template<class a>
         constexpr bool is_union = __is_union(a);
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

@@ -1,12 +1,11 @@
 #ifndef xpack_meta_int_type
 #define xpack_meta_int_type
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_int_type
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_int_type
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_int_type{
+    namespace xuser{
         template<uxx, bool is_signed>
         struct int_type{};
         template<> struct int_type<1, false> { using result = u08; };
@@ -19,6 +18,7 @@
         template<> struct int_type<8, true>  { using result = i64; };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

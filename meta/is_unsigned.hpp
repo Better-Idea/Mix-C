@@ -1,12 +1,11 @@
 #ifndef xpack_meta_is_unsigned
 #define xpack_meta_is_unsigned
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_is_unsigned
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_is_unsigned
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_is_unsigned{
+    namespace xuser{
         template<class a> struct meta {
             static constexpr bool result = false;
         };
@@ -31,6 +30,7 @@
         constexpr bool is_unsigned = meta<a>::result;
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

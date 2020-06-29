@@ -1,12 +1,11 @@
 #ifndef xpack_meta_remove_membership
 #define xpack_meta_remove_membership
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_remove_membership
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_remove_membership
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_remove_membership{
+    namespace xuser{
         template<class object> struct remove_membership{
             using result = object;
         };
@@ -37,6 +36,7 @@
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

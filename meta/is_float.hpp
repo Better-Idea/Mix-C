@@ -1,12 +1,11 @@
 #ifndef xpack_meta_is_float
 #define xpack_meta_is_float
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_is_float
-        #include"define/base_type.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::meta_is_float
+    #include"define/base_type.hpp"
 
-    namespace mixc::meta_is_float{
+    namespace xuser{
         template<class a> struct meta {
             static constexpr bool result = false;
         };
@@ -22,6 +21,8 @@
         template<class a>
         constexpr bool is_float = meta<a>::result;
     }
+
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
