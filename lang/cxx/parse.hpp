@@ -14,6 +14,8 @@
     #include"docker/transmitter.hpp"
     #include"lang/cxx.hpp"
     #include"math/numeration_t.hpp"
+    #include"math/pow.hpp"
+    #include"meta/is_float.hpp"
     #include"meta/unsigned_type.hpp"
 
     namespace xuser{
@@ -64,9 +66,9 @@
             using the_t = core<item>;
 
             template<class target>
-            auto parse(uxx base) const {
-                target   value  = 0;
+            parse_result<target> parse(uxx base) const {
                 bool   is_neg = false;
+                target value  = 0;
                 item * cur    = the;
                 item * begin  = the;
                 item * end    = cur + the.length();
@@ -81,26 +83,101 @@
                     cur++;
                     is_neg = true;
                 }
-                for(; cur < end; cur++){
-                    constexpr uxx mask = 0x4f; // mask 要大于 'z' - '0'
-                    static_assert(mask <= sizeof(lut) / sizeof(lut[0]));
-                    static_assert(mask > 'z' - '0');
 
-                    uxx dis = uxx(cur[0] - '0');
-                    uxx v   = lut[dis & mask];
+                if constexpr (inc::is_float<target>){
+                    // 浮点目前只有 10 进制表示
+                    // [+-]{0,1}/d*(/./d+){0,1}([eE][+-]/d+){0,1}
+                    auto   token        = cur;
+                    auto   miss_digital = false;
+                    auto   miss_decimal = true;
+                    target result       = 0;
+                    target mul          = 0.1;
+                    u32    exp          = 0;
 
-                    if (dis >= mask or v == lut_error){
-                        return parse_result<target>(value, cur - begin);
+                    auto part = [&](auto value, auto * ptr){
+                        auto & cur = ptr[0];
+                        while('0' <= cur[0] and cur[0] <= '9'){
+                            value  = value * 10 + cur[0] - '0';
+                            cur    += 1;
+                        };
+                        return value;
+                    };
+
+                    // skip 0
+                    while(cur[0] == '0'){
+                        cur += 1;
                     }
+
+                    // 得到整数部分
+                    result          = part(result, xref cur);
+                    miss_digital    = cur == token;
+
+                    // 得到小数部分
+                    if (cur[0] == '.'){
+                        cur     += 1;
+                        token    = cur;
+                        target s = 0.1;
+
+                        while('0' <= cur[0] and cur[0] <= '9'){
+                            result  += s * (cur[0] - '0');
+                            s       *= mul;
+                            cur     += 1;
+                        }
+                    }
+
+                    if (is_neg){
+                        result = -result;
+                    }
+
+                    if (miss_decimal = token == cur; not miss_digital or not miss_decimal){
+                        // 指数部分
+                        if (cur[0] != 'e' and cur[0] != 'E'){
+                            return result;
+                        }
+
+                        cur    += 1;
+                        token   = cur;
+                        exp     = part(exp, xref cur);
+
+                        if (token != cur){
+                            result *= inc::pow<target>(10, exp);
+                        }
+                        else{
+                            cur -= 1; // 回滚到字符 'e' or 'E'
+                        }
+                        if (cur == end){
+                            return result;
+                        }
+                    }
+                    // 如果既没有整数部分，也没有小数部分则表示该字符串不是正确的浮点格式
                     else{
-                        value = value * base + v;
+                        cur = begin;
                     }
+                    return parse_result<target>(result, cur - begin);
+                }
+                else{
+                    for(; cur < end; cur++){
+                        constexpr uxx mask = 0x4f; // mask 要大于 'z' - '0'
+                        static_assert(mask <= sizeof(lut) / sizeof(lut[0]));
+                        static_assert(mask > 'z' - '0');
+
+                        uxx dis = uxx(cur[0] - '0');
+                        uxx v   = lut[dis & mask];
+
+                        if (dis >= base or v == lut_error){
+                            return parse_result<target>(value, cur - begin);
+                        }
+                        else{
+                            value = value * base + v;
+                        }
+                    }
+
+                    if (is_neg){
+                        value = target(0) - value;
+                    }
+                    return value;
                 }
 
-                if (is_neg){
-                    value = target(0) - value;
-                }
-                return parse_result<target>(value);
             }
         };
     }
@@ -122,8 +199,10 @@ namespace mixc::lang_cxx_parse::xuser{
 
         template<class target>
         parse_result<target> parse(inc::numeration_t base) const {
-            // TODO: floating parse ======================================================
-            if constexpr (xis_os64 or sizeof(target) <= sizeof(uxx)){
+            if constexpr (inc::is_float<target>){
+                return the.template parse<target>(10);
+            }
+            else if constexpr (xis_os64 or sizeof(target) <= sizeof(uxx)){
                 return the.template parse<uxx>(uxx(base));
             }
             else if constexpr (xis_os32){
