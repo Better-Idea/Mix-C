@@ -19,6 +19,7 @@
     #include"meta/has_cast.hpp"
     #include"meta/is_based_on.hpp"
     #include"meta/is_ptr.hpp"
+    #include"meta/remove_ptr.hpp"
     #include"meta/unsigned_type.hpp"
     #include"mixc.hpp"
 
@@ -191,7 +192,6 @@
             }
         };
 
-        
         template<class final, class ... args> struct v;
         template<class final, class a0, class ... args>
         struct v<final, a0, args...> : v<final, args...> {
@@ -237,12 +237,18 @@
         constexpr bool with_prefix       = true;
         constexpr bool keep_leading_zero = true;
 
-        #define xnum(name,type_t,numeration,prefix,leading_zero,lut)                                    \
-            template<class type>                                                                        \
-            struct name : num<name<type>, type_t, numeration, prefix, leading_zero, lut> {              \
-                name(){}                                                                                \
-                name(type const & value) :                                                              \
-                    num<name<type>, type_t, numeration, prefix, leading_zero, lut>(type_t(value)){}     \
+        #define xnum(name,equivalent_type_t,numeration,prefix,leading_zero,lut)                             \
+            template<class type>                                                                            \
+            struct name : base_ph<name<type>, equivalent_type_t>{                                           \
+                using base_t = base_ph<name<type>, equivalent_type_t>;                                      \
+                using final  = num<name<type>, equivalent_type_t, numeration, prefix, leading_zero, lut>;   \
+                name(){}                                                                                    \
+                name(type const & value) :                                                                  \
+                    base_t(equivalent_type_t(value)){                                                       \
+                }                                                                                           \
+                xopt{                                                                                       \
+                    return thex.template output<item_t>(alloc);                                             \
+                }                                                                                           \
             }
         
         #define xhex(name,prefix,leading_zero,lut)      \
@@ -255,11 +261,11 @@
             xnum(name,inc::unsigned_type<type>,inc::numeration::oct,prefix,leading_zero,lut)
 
         #define xstr(type,ptr) template<uxx n> struct v<type[n]> : v<ptr>{ using v<ptr>::v; }
+
     }
 
     namespace xuser::ph{
         using xuser::place_holder_group;
-        template<class> struct zx;
 
         xhex(h , not with_prefix, not keep_leading_zero, inc::lower);
         xhex(H , not with_prefix, not keep_leading_zero, inc::upper);
@@ -301,20 +307,20 @@
         private:
             static auto ph_type(){
                 if constexpr (inc::is_based_on<place_holder_group, a0>){
-                    return a0();
+                    return (a0 *)nullptr;
                 }
                 else if constexpr (inc::has_cast<asciis, a0>){
-                    return ph::v<a0>();
+                    return (ph::v<a0> *)nullptr;
                 }
                 else if constexpr (inc::is_ptr<a0>){
-                    return ph::zx<voidp>();
+                    return (ph::zX<a0> *)nullptr;
                 }
                 else{
-                    return ph::v<a0>();
+                    return (ph::v<a0> *)nullptr;
                 }
             }
 
-            decltype(ph_type()) item;
+            inc::remove_ptr<decltype(ph_type())> item;
             using base_t = phg_core<args...>;
         public:
             phg_core(a0 const & first, args const & ... list) : 
@@ -373,5 +379,3 @@
 namespace xuser::inc::ph{
     using namespace ::mixc::lang_cxx_ph::ph;
 }
-
-

@@ -5,7 +5,6 @@
     #define xuser mixc::macro_private_log
     #include"configure.hpp"
     #include"define/base_type.hpp"
-    #include"dumb/implicit.hpp"
     #include"macro/private/mix.hpp"
     
     namespace xuser::origin{
@@ -13,6 +12,7 @@
             for_debug,
             for_fail,
         };
+
         extern void log_core(
             type_t      type, 
             asciis      file, 

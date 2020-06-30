@@ -12,7 +12,7 @@
     #include"define/base_type.hpp"
     #include"interface/can_compare.hpp"
     #include"lang/cxx.hpp"
-    #include"math/smaller.hpp"
+    #include"math/min.hpp"
 
     namespace xuser{
         template<class item>
@@ -25,7 +25,7 @@
                 base_t(self){}
 
             ixx compare(the_t value, inc::can_compare<item> compare) const {
-                uxx len = inc::smaller(the.length(), value.length());
+                uxx len = inc::min(the.length(), value.length());
 
                 for(uxx i = 0; i < len; i++){
                     if (ixx r = compare(the[i], value[i]); r != 0){

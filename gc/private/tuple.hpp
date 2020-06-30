@@ -52,7 +52,7 @@ tuple<foo::member_list> xx;
         union tuple<root_t, vlist<first, values...>>{
         private:
             tuple<root_t, vlist<values...>> next;
-            using origin = typename remove_membership<decltype(first)>::result;
+            using origin = remove_membership<decltype(first)>;
         public:
             template<class guide> bool routing(){
                 bool can_arrive_root = false;

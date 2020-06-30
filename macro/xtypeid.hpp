@@ -15,9 +15,9 @@
 
         template<class type>
         union __typeid {
-            using the_type = typename remove_ref<
-                typename remove_const<type>::result
-            >::result;
+            using the_type = remove_ref<
+                remove_const<type>
+            >;
 
             union{
                 operator asciis() const {
