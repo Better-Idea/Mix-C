@@ -7,18 +7,19 @@
 
     namespace xuser{
         template<uxx>
-        struct unsigned_type{};
-        template<> struct unsigned_type<1> { using result = u08; };
-        template<> struct unsigned_type<2> { using result = u16; };
-        template<> struct unsigned_type<4> { using result = u32; };
-        template<> struct unsigned_type<8> { using result = u64; };
+        struct meta{};
+        template<> struct meta<1> { using result = u08; };
+        template<> struct meta<2> { using result = u16; };
+        template<> struct meta<4> { using result = u32; };
+        template<> struct meta<8> { using result = u64; };
+
+        template<class type>
+        using unsigned_type = typename meta<sizeof(type)>::result;
     }
 
     #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    template<class type>
-    using unsigned_type = 
-        typename ::mixc::meta_unsigned_type::unsigned_type<sizeof(type)>::result;
+    using ::mixc::meta_unsigned_type::unsigned_type;
 }

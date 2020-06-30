@@ -7,14 +7,17 @@
 
     namespace xuser{
         template<class a>
-        struct remove_ref {
+        struct meta {
             using result = a;
         };
 
         template<class a>
-        struct remove_ref<a &> {
+        struct meta<a &> {
             using result = a;
         };
+
+        template<class type>
+        using remove_ref = typename meta<type>::result;
     }
 
     #pragma pop_macro("xuser")
