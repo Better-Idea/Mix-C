@@ -6,10 +6,12 @@
     #include"define/base_type.hpp"
 
     namespace xuser::origin{
-        constexpr f64 pi        = 3.141592653589793238462643383279502884;
-        constexpr f64 e         = 2.718281828459045235360287471352662497;
-        constexpr f64 sqrt_2    = 1.414213562373095048801688724209698078;
-        constexpr f64 log2_e    = 1.442695040888963407359924681001892137;
+        constexpr f64 pi        = 3.141592653589793238463;
+        constexpr f64 e         = 2.718281828459045235360;
+        constexpr f64 sqrt_2    = 1.414213562373095048802;
+        constexpr f64 log2_e    = 1.442695040888963407360;
+        constexpr f64 log10_2   = 0.301029995663981195226;
+        constexpr f64 log2_10   = 3.321928094887362347810;
 
         template<class a> constexpr a max_value_of = a();
         template<class a> constexpr a min_value_of = a();
