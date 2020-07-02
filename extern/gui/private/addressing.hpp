@@ -9,7 +9,7 @@
         template<uxx arg_width, uxx arg_height>
         struct addressing{
         protected:
-            uxx addressing(uxx x, uxx y){
+            uxx operator()(uxx x, uxx y){
                 return y * arg_width + x;
             }
         public:

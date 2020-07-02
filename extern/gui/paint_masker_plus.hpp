@@ -20,13 +20,17 @@
             masker   idc[2];
             masker * idc_a;
             masker * idc_b;
+
+            xgc_fields(
+                xiam(paint_masker_plus<width, height>)
+            );
         public:
             paint_masker_plus() : 
                 idc_a(idc), idc_b(idc + 1){
             }
 
             try_paint_result_t try_paint(uxx x, uxx y){
-                auto index = addressing(x, y);
+                auto index = the(x, y);
 
                 if (idc_a->get(index) == false){
                     idc_a->set(index);

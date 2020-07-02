@@ -16,9 +16,13 @@
         struct paint_masker : inc::addressing<width, height>{
         private:
             inc::bit_indicator<width * height> idc;
+
+            xgc_fields(
+                xiam(paint_masker<width, height>)
+            );
         public:
             try_paint_result_t try_paint(uxx x, uxx y){
-                auto index = addressing(x, y);
+                auto index = the(x, y);
 
                 if (idc.get(index) == false){
                     idc.set(index);
