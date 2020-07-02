@@ -1,13 +1,11 @@
 #ifndef xpack_dumb_dummy_t
 #define xpack_dumb_dummy_t
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::dumb_dummy_t
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::dumb_dummy_t
+    #include"mixc.hpp"
 
-    namespace mixc::dumb_dummy_t{
+    namespace xuser{
         struct dummy_t {
             xgc_fields(
                 xiam(dummy_t)
@@ -18,6 +16,7 @@
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

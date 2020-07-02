@@ -7,7 +7,7 @@
     #include"macro/xgc.hpp"
     #include"meta/is_class.hpp"
 
-    namespace xuser::origin{
+    namespace xuser{
         template<class type, bool is_class> struct struct_t;
         template<class type>
         struct struct_t<type, true> : type {
@@ -46,11 +46,14 @@
             );
         };
     }
+
+    namespace xuser::origin{
+        template<class type>
+        using struct_t = xuser::struct_t<type, inc::is_class<type>>;
+    }
     #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    template<class type>
-    using struct_t = ::mixc::dumb_struct_t::origin::
-        struct_t<type, mixc::dumb_struct_t::inc::is_class<type>>;
+    using ::mixc::dumb_struct_t::origin::struct_t;
 }

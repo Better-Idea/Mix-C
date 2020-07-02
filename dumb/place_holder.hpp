@@ -1,13 +1,12 @@
 #ifndef xpack_dumb_place_holder
 #define xpack_dumb_place_holder
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::dumb_place_holder
-        #include"define/base_type.hpp"
-        #include"meta_seq/vlist.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::dumb_place_holder
+    #include"define/base_type.hpp"
+    #include"meta_seq/vlist.hpp"
 
-    namespace mixc::dumb_place_holder{
+    namespace xuser{
         template<uxx i, bool hidden = false>
         struct place_holder{
             enum{
@@ -20,6 +19,7 @@
         struct place_holder<i, true> {};
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

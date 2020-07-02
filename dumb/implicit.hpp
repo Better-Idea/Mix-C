@@ -10,13 +10,11 @@ auto function(args const & ... list){
 #ifndef xpack_dumb_implicit
 #define xpack_dumb_implicit
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::dumb_implicit
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::dumb_implicit
+    #include"mixc.hpp"
 
-    namespace mixc::dumb_implicit{
+    namespace xuser{
         template<class a>
         struct implicit{
             xgc_fields(
@@ -39,6 +37,7 @@ auto function(args const & ... list){
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

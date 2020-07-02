@@ -1,14 +1,11 @@
 #ifndef xpack_dumb_mirror
 #define xpack_dumb_mirror
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::dumb_mirror
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
-        #include"memop/addressof.hpp"
-    #pragma pop_macro("xuser")
+    #undef  xuser
+    #define xuser mixc::dumb_mirror
+    #include"mixc.hpp"
 
-    namespace mixc::dumb_mirror{
+    namespace xuser{
         template<class type>
         struct mirror{
             using items_t = u08 [sizeof(type)];
@@ -39,6 +36,7 @@
         };
     }
 
+    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
