@@ -30,18 +30,16 @@
             template<class callback>
             void mask(callback const & clean){
                 uxx start = 0;
-                uxx end   = uxx(-1);
-                while(true){
-                    do{
-                        start = end + 1;
-                        end   = idc.pop_first();
+                uxx end   = 0;
 
-                        if (end == not_exist){
-                            return;
-                        }
-                    }while(end == start);
-                    
-                    clean(co{start, end});
+                while(end != not_exist){
+                    if (end = idc.pop_first(); end == start){
+                        start += 1;
+                    }
+                    else{
+                        clean(co{start, end});
+                        start  = end + 1;
+                    }
                 }
             }
         };
