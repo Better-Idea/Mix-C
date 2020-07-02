@@ -34,12 +34,11 @@
                 while(true){
                     do{
                         start = end + 1;
-                        end   = idc.index_of_first_set();
+                        end   = idc.pop_first();
 
                         if (end == not_exist){
                             return;
                         }
-                        idc.reset(end);
                     }while(end == start);
                     
                     clean(co{start, end});
