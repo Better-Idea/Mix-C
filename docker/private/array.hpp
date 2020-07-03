@@ -1,11 +1,11 @@
 #ifndef xpack_docker_array
 #define xpack_docker_array
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::docker_array
-        #include"define/base_type.hpp"
-        #include"interface/seqptr.hpp"
-        #include"macro/xgc.hpp"
+    #undef  xuser
+    #define xuser mixc::docker_array
+    #include"define/base_type.hpp"
+    #include"interface/seqptr.hpp"
+    #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_array{
@@ -62,4 +62,4 @@
 #include"math/index_system.hpp"
 
 #undef  xusing_docker_array
-#define xusing_docker_array     mixc::docker_array
+#define xusing_docker_array     ::mixc::docker_array

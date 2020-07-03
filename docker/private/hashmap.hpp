@@ -16,8 +16,9 @@
     #include"memop/addressof.hpp"
     #include"memop/copy.hpp"
     #include"memory/allocator.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin{
+    namespace mixc::docker_hashmap{
         enum class hashmap_remove_result{
             success,
             item_not_exist,
@@ -401,11 +402,17 @@
             }
         };
     }
-    #pragma pop_macro("xuser")
+
+    namespace mixc::docker_hashmap::origin{
+        using ::mixc::docker_hashmap::hashmap_remove_result;
+        using ::mixc::docker_hashmap::hashmap_take_out_result;
+        using ::mixc::docker_hashmap::hashmap_set_result;
+    }
+
 #endif
 
-#define xusing_docker_hashmap     ::mixc::docker_hashmap::origin
-
 namespace xuser::inc{
-    using namespace xusing_docker_hashmap;
+    using namespace ::mixc::docker_hashmap::origin;
 }
+
+#define xusing_docker_hashmap     ::mixc::docker_hashmap

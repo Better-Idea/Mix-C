@@ -1,18 +1,18 @@
 #ifndef xpack_docker_stack
 #define xpack_docker_stack
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::docker_stack
-        #include"define/base_type.hpp"
-        #include"docker/transmitter.hpp"
-        #include"docker/private/pushpop_t.hpp"
-        #include"dumb/disable_copy.hpp"
-        #include"dumb/struct_t.hpp"
-        #include"gc/self_management.hpp"
-        #include"interface/ranger.hpp"
-        #include"lock/atom_swap.hpp"
-        #include"macro/xgc.hpp"
-        #include"memory/allocator.hpp"
+    #undef  xuser
+    #define xuser mixc::docker_stack
+    #include"define/base_type.hpp"
+    #include"docker/transmitter.hpp"
+    #include"docker/private/pushpop_t.hpp"
+    #include"dumb/disable_copy.hpp"
+    #include"dumb/struct_t.hpp"
+    #include"gc/self_management.hpp"
+    #include"interface/ranger.hpp"
+    #include"lock/atom_swap.hpp"
+    #include"macro/xgc.hpp"
+    #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_stack{
@@ -121,6 +121,7 @@
             }
         };
     }
+
 #endif
 
 #define xusing_docker_stack     ::mixc::docker_stack

@@ -1,10 +1,10 @@
 #ifndef xpack_docker_pushpop_t
 #define xpack_docker_pushpop_t
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::docker_pushpop_t
-        #include"define/base_type.hpp"
-        #include"interface/ranger.hpp"
+    #undef  xuser
+    #define xuser mixc::docker_pushpop_t
+    #include"define/base_type.hpp"
+    #include"interface/ranger.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_pushpop_t {
@@ -44,6 +44,7 @@
             }
         };
     }
+
 #endif
 
 namespace xuser::inc {

@@ -1,13 +1,13 @@
 #ifndef xpack_docker_bit_indicator
 #define xpack_docker_bit_indicator
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::docker_bit_indicator
-        #include"define/base_type.hpp"
-        #include"instruction/index_of_first_set.hpp"
-        #include"instruction/index_of_last_set.hpp"
-        #include"interface/ranger.hpp"
-        #include"macro/xgc.hpp"
+    #undef  xuser
+    #define xuser mixc::docker_bit_indicator
+    #include"define/base_type.hpp"
+    #include"instruction/index_of_first_set.hpp"
+    #include"instruction/index_of_last_set.hpp"
+    #include"interface/ranger.hpp"
+    #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_bit_indicator{
@@ -271,7 +271,8 @@
             }
         };
     }
+
 #endif
 
 #undef  xusing_docker_bit_indicator
-#define xusing_docker_bit_indicator     mixc::docker_bit_indicator
+#define xusing_docker_bit_indicator     ::mixc::docker_bit_indicator

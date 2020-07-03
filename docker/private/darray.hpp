@@ -9,8 +9,9 @@
     #include"interface/seqptr.hpp"
     #include"macro/xgc.hpp"
     #include"memory/new.hpp"
+    #pragma pop_macro("xuser")
     
-    namespace xuser{
+    namespace mixc::docker_darray{
         template<class type, uxx rank, class attribute>
         struct darray_t : public inc::ref_array<
             darray_t<type, rank, attribute>,
@@ -75,7 +76,7 @@
             using darray_t<type, rank, attribute>::darray_t;
         };
     }
-    #pragma pop_macro("xuser")
+
 #endif
 
 #include"math/index_system.hpp"
