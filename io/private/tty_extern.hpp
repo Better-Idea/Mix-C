@@ -156,14 +156,8 @@ ASC+F12    : 1b,5b,32,34,3b,38,7e,
 
 */
 
-#if xis_windows
-    #include<windows.h>
-#endif
-
-#if xis_linux
-    #include<fcntl.h>
-    #include<termios.h>
-    #include<unistd.h>
+#ifdef xuser
+    #undef xuser
 #endif
 
 #define xuser mixc::io_private_tty
@@ -181,7 +175,17 @@ ASC+F12    : 1b,5b,32,34,3b,38,7e,
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
 
-namespace mixc::io_private_tty::origin{
+#if xis_windows
+    #include<windows.h>
+#endif
+
+#if xis_linux
+    #include<fcntl.h>
+    #include<termios.h>
+    #include<unistd.h>
+#endif
+
+namespace xuser::origin{
     inc::tty_key const unknown_key{};
 
     union color_t{
@@ -527,5 +531,3 @@ namespace mixc::io_private_tty::origin{
 
     #endif
 }
-
-#undef xuser

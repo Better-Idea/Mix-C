@@ -1,21 +1,19 @@
 #ifndef xpack_io_tty
 #define xpack_io_tty
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::io_tty
-        #include"configure.hpp"
-        #include"define/base_type.hpp"
-        #include"io/private/tty.hpp"
-        #include"io/private/tty_color_t.hpp"
-        #include"io/private/tty_key.hpp"
-        #include"lang/cxx/ph.hpp"
-        #include"lang/cxx.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xprop.hpp"
-        #include"memory/allocator.hpp"
+    #undef  xuser
+    #define xuser mixc::io_tty
+    #include"io/private/tty.hpp"
+    #include"io/private/tty_color_t.hpp"
+    #include"io/private/tty_key.hpp"
+    #include"lang/cxx/ph.hpp"
+    #include"lang/cxx.hpp"
+    #include"mixc.hpp"
+    #include"macro/xprop.hpp"
+    #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::io_tty{
+    namespace mixc::io_tty::origin{
         struct tty_t{
             xgc_fields(
                 xiam(tty_t)
@@ -92,10 +90,11 @@
 
         inline static tty_t tty;
     }
+
 #endif
 
 namespace xuser::inc{
-    using ::mixc::io_tty::tty;
+    using namespace ::mixc::io_tty::origin;
 }
 
 namespace xuser::inc::ph{
