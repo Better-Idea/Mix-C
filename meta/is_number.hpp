@@ -7,8 +7,9 @@
     #include"is_integer.hpp"
     #include"is_float.hpp"
     #include"is_enum.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_number{
         template<class a> struct meta {
             static constexpr bool result = inc::is_integer<a> || inc::is_float<a> || inc::is_enum<a>;
         };
@@ -17,7 +18,6 @@
         constexpr bool is_number = meta<a>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

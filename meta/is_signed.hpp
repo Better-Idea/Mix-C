@@ -4,8 +4,9 @@
     #undef  xuser
     #define xuser mixc::meta_is_signed
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_signed{
         template<class a> struct meta {
             static constexpr bool result = false;
         };
@@ -30,7 +31,6 @@
         constexpr bool is_signed = meta<a>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

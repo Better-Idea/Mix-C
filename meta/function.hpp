@@ -6,8 +6,9 @@
     #include"define/base_type.hpp"
     #include"meta_seq/tlist.hpp"
     #include"meta_seq/tget.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_function{
         template<class type> struct function;
 
         #define gen(a,...)                                                      \
@@ -30,7 +31,6 @@
         #undef gen_arg
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

@@ -4,8 +4,9 @@
     #undef  xuser
     #define xuser mixc::meta_is_empty_class
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_empty_class{
         template<class a> struct meta {
         private:
             static auto invoke(){
@@ -31,7 +32,6 @@
         constexpr bool is_empty_class = meta<a>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

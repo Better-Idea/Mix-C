@@ -4,8 +4,9 @@
     #undef  xuser
     #define xuser mixc::meta_unsigned_type
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_unsigned_type{
         template<uxx>
         struct meta{};
         template<> struct meta<1> { using result = u08; };
@@ -17,7 +18,6 @@
         using unsigned_type = typename meta<sizeof(type)>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

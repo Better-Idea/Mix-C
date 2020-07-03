@@ -4,6 +4,7 @@
     #undef  xuser
     #define xuser mixc::meta_is_same
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
     namespace mixc::meta_is_same{
         template<class a, class b> 
@@ -20,7 +21,6 @@
         constexpr bool is_same = meta<a, b>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

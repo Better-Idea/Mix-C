@@ -5,13 +5,13 @@
     #define xuser mixc::meta_is_based_on
     #include"define/base_type.hpp"
     #include"meta/is_same.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_based_on{
         template<class father, class child>
         constexpr bool is_based_on = __is_base_of(father, child);
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

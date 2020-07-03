@@ -5,8 +5,9 @@
     #define xuser mixc::meta_has_cast
     #include"configure.hpp"
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_has_cast{
         #if xfor_msvc_hint
             template<class target, class source>
             struct meta{
@@ -33,7 +34,6 @@
         #endif
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

@@ -4,8 +4,9 @@
     #undef  xuser
     #define xuser mixc::meta_remove_ref
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_remove_ref{
         template<class a>
         struct meta {
             using result = a;
@@ -20,7 +21,6 @@
         using remove_ref = typename meta<type>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

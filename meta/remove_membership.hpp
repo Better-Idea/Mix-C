@@ -4,8 +4,9 @@
     #undef  xuser
     #define xuser mixc::meta_remove_membership
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_remove_membership{
         template<class object> struct meta{
             using result = object;
         };
@@ -39,7 +40,6 @@
         using remove_membership = typename meta<type>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

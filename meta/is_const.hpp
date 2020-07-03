@@ -4,8 +4,9 @@
     #undef  xuser
     #define xuser mixc::meta_is_const
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_const{
         template<class a> struct meta {
             static constexpr bool result = false;
         };
@@ -18,7 +19,6 @@
         constexpr bool is_const = meta<a>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

@@ -5,8 +5,9 @@
     #undef  xuser
     #define xuser mixc::meta_is_volatile
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_volatile{
         template<class a> struct meta {
             static constexpr bool result = false;
         };
@@ -19,7 +20,6 @@
         constexpr bool is_volatile = meta<a>::result;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

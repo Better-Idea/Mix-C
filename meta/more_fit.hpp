@@ -4,11 +4,11 @@
     #undef  xuser
     #define xuser mixc::meta_more_fit
     #include"define/base_type.hpp"
-    #include"dumb/mirror.hpp"
     #include"meta/has_cast.hpp"
     #include"meta/is_same.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_more_fit{
         template<
             class the_target = void,
             uxx  index_value = not_exist, 
@@ -58,7 +58,6 @@
         constexpr uxx more_fit = meta<sizeof...(rest) + 1, source, target, rest...>::test().index;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

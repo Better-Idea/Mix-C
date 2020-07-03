@@ -4,13 +4,13 @@
     #undef  xuser
     #define xuser mixc::meta_is_class
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::meta_is_class{
         template<class a>
         constexpr bool is_class = __is_class(a);
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
