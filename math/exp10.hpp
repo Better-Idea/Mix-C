@@ -3,8 +3,9 @@
     #pragma push_macro("xuser")
     #undef  xuser
     #define xuser mixc::math_exp10
-    #include"mixc.hpp"
     #include"define/nan.hpp"
+    #include"mixc.hpp"
+    #pragma pop_macro("xuser")
 
     namespace xuser{
         constexpr f64 lut_1e0_1e15[]     = { 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, };
@@ -23,14 +24,13 @@
                     uxx hig : 1;
                 };
                 uxx full;
-            };
+            }w;
 
-            full    = x;
-            return lut_1e0_1e15[low] * lut_1e16_1e240[mid] * lut_1e256[hig];
+            w.full    = x;
+            return lut_1e0_1e15[w.low] * lut_1e16_1e240[w.mid] * lut_1e256[w.hig];
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

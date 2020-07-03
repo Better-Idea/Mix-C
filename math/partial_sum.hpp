@@ -5,8 +5,9 @@
     #define xuser mixc::math_partial_sum
     #include"define/base_type.hpp"
     #include"interface/ranger.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin{
+    namespace mixc::math_partial_sum{
         template<class item_t>
         inline void partial_sum(
             inc::ranger<item_t> des, 
@@ -31,9 +32,8 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::math_partial_sum::origin;
+    using ::mixc::math_partial_sum::partial_sum;
 }

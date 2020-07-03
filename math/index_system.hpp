@@ -7,6 +7,7 @@
     #include"macro/xgc.hpp"
     #include"macro/xindex_rollback.hpp"
     #include"macro/xitf.hpp"
+    #pragma pop_macro("xuser")
     
     namespace mixc{
         xitf(iinterval,
@@ -82,7 +83,6 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

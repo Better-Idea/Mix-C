@@ -5,8 +5,9 @@
     #define xuser mixc::math_align
     #include"define/base_type.hpp"
     #include"instruction/index_of_last_set.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::math_align{
         // 让 size 以 2 的指数次方 向上圆整
         // 例如：
         // align(0x14) = 0x20
@@ -30,7 +31,6 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

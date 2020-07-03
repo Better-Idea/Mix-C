@@ -5,7 +5,7 @@
     #define xuser mixc::math_pow
     #include"define/base_type.hpp"
 
-    namespace xuser::origin{
+    namespace mixc::math_pow{
         template<class type>
         inline type pow(type a, uxx x){
             type r       = 1;
@@ -26,5 +26,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::math_pow::origin;
+    using ::mixc::math_pow::pow;
 }

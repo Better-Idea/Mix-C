@@ -8,8 +8,9 @@
     #include"instruction/ring_shift_left.hpp"
     #include"instruction/time_stamp.hpp"
     #include"meta/is_same.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin{
+    namespace mixc::math_random{
         namespace inner{
             inline static u64 x = inc::time_stamp();
             inline static u64 y = inc::time_stamp() * magic_number;
@@ -65,9 +66,8 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::math_random::origin;
+    using ::mixc::math_random::random;
 }
