@@ -1,10 +1,10 @@
 #ifndef xpack_define_inf
 #define xpack_define_inf
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::define_inf
-        #include"define/base_type.hpp"
-        #include"define/mfxx.hpp"
+    #undef  xuser
+    #define xuser mixc::define_inf
+    #include"define/base_type.hpp"
+    #include"define/mfxx.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::define_inf{
@@ -38,10 +38,13 @@
         constexpr inf_t inf {};
     }
 
+    namespace mixc::define_inf::origin{
+        using ::mixc::define_inf::inf;
+        using ::mixc::define_inf::inf_pos;
+        using ::mixc::define_inf::inf_neg;
+    }
 #endif
 
 namespace xuser::inc{
-    using ::mixc::define_inf::inf;
-    using ::mixc::define_inf::inf_pos;
-    using ::mixc::define_inf::inf_neg;
+    using namespace ::mixc::define_inf::origin;
 }

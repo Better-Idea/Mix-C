@@ -5,8 +5,9 @@
     #define xuser mixc::define_mfxx
     #include"define/base_type.hpp"
     #include"macro/xgc.hpp"
+    #pragma pop_macro("xuser")
     
-    namespace xuser::origin{
+    namespace mixc::define_mfxx{
         template<
             class   float_type, 
             class   equivalent_type, 
@@ -56,12 +57,13 @@
                 return value;
             }
         };
+    }
 
+    namespace mixc::define_mfxx::origin{
         using mf32 = mfxx<f32, u32, 23, 8, 127 >;
         using mf64 = mfxx<f64, u64, 52, 11, 1023>;
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

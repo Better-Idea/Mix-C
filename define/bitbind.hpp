@@ -1,10 +1,10 @@
 #ifndef xpack_define_bitbind
 #define xpack_define_bitbind
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::define_bitbind
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
+    #undef  xuser
+    #define xuser mixc::define_bitbind
+    #include"define/base_type.hpp"
+    #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::define_bitbind{

@@ -5,8 +5,9 @@
     #define xuser mixc::define_nan
     #include"define/base_type.hpp"
     #include"macro/xgc.hpp"
+    #pragma pop_macro("xuser")
     
-    namespace xuser{
+    namespace mixc::define_nan{
         struct nan_t{
             xgc_fields(
                 xiam(nan_t)
@@ -59,8 +60,6 @@
 
         constexpr nan_t nan {};
     }
-
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
