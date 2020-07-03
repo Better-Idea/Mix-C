@@ -45,7 +45,7 @@ tuple<foo::member_list> xx;
     // 成员变量指针的魔法
     #define xroot   ((*(root_t *)this).*first)
 
-    namespace xuser::origin{
+    namespace mixc::gc_tuple::origin{
         using namespace inc;
 
         template<class root_t, class member_list> union tuple;
