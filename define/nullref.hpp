@@ -1,11 +1,11 @@
 #ifndef xpack_define_nullref_t
 #define xpack_define_nullref_t
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::define_nullref_t
-        #include"define/base_type.hpp"
-        #include"memop/addressof.hpp"
-        #include"macro/xgc.hpp"
+    #undef  xuser
+    #define xuser mixc::define_nullref_t
+    #include"define/base_type.hpp"
+    #include"memop/addressof.hpp"
+    #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::define_nullref_t{
