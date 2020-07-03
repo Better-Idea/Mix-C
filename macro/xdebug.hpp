@@ -14,7 +14,8 @@
         #define xdebug(token,...)                               \
         if (token > 0 and ([&](asciis func){                    \
             using namespace ::mixc::macro_private_log::origin;  \
-            log(for_debug, __FILE__, __LINE__,                  \
+            log(                                                \
+                for_debug, __FILE__, __LINE__,                  \
                 func, #__VA_ARGS__ ",", __VA_ARGS__);           \
             return true;                                        \
         })(__func__))

@@ -15,7 +15,8 @@
                 }                                                                   \
                 else{                                                               \
                     using namespace ::mixc::macro_private_log::origin;              \
-                    log(for_fail, __FILE__, __LINE__, name, # __VA_ARGS__);         \
+                    log(                                                            \
+                        for_fail, __FILE__, __LINE__, name, # __VA_ARGS__);         \
                     return error;                                                   \
                 }                                                                   \
             })(__func__, __VA_ARGS__), 0))
