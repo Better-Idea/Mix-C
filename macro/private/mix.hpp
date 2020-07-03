@@ -6,8 +6,9 @@
     #define xuser mixc::macro_private_mix
     #include"define/base_type.hpp"
     #include"meta/more_fit.hpp"
+    #pragma pop_macro("xuser")
     
-    namespace xuser::origin{
+    namespace mixc::macro_private_mix::origin{
         enum classify_type_t{
             is_unsigned_t,
             is_signed_t,
@@ -16,6 +17,7 @@
             is_str_t,
             is_ptr_t,
         };
+
         struct mix{
             union{
                 f64          f;
@@ -68,7 +70,6 @@
         };
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
