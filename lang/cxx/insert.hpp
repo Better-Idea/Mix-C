@@ -14,8 +14,10 @@
     #include"lang/cxx.hpp"
     #include"macro/xindex_rollback.hpp"
     #include"memop/copy.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_insert{
         template<class item>
         struct core : inc::cxx<item> {
             using base_t = inc::cxx<item>;
@@ -37,8 +39,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_insert::xuser {

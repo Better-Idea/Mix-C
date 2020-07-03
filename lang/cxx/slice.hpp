@@ -14,8 +14,10 @@
     #include"lang/cxx.hpp"
     #include"macro/xdebug_fail.hpp"
     #include"macro/xindex_rollback.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_slice{
         // using item = char;
         // template<class item> struct core;
         // template<>
@@ -74,8 +76,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_slice::xuser {

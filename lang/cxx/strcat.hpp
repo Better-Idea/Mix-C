@@ -14,8 +14,10 @@
     #include"interface/initializer_list.hpp"
     #include"lang/cxx.hpp"
     #include"meta/is_same.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_strcat{
         template<class item>
         struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
@@ -45,8 +47,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_strcat::xuser{

@@ -15,6 +15,8 @@
     #include"interface/initializer_list.hpp"
     #include"lang/cxx/index_of_first.hpp"
     #include"lang/cxx.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_index_of_last_miss{
         template<class item>
@@ -39,8 +41,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_index_of_last_miss::xuser{

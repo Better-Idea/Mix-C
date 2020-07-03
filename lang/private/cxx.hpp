@@ -1,12 +1,13 @@
 #ifndef xpack_lang_cxx
 #define xpack_lang_cxx
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::lang_cxx
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xprop.hpp"
-        #include"macro/xsv.hpp"
+    #undef  xuser
+    #define xuser mixc::lang_cxx
+    #include"define/base_type.hpp"
+    #include"interface/seqptr.hpp"
+    #include"macro/xgc.hpp"
+    #include"macro/xprop.hpp"
+    #include"macro/xsv.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx{
@@ -21,6 +22,8 @@
                 xpro(count, uxx)
             );
         public:
+            xseqptr(item_t)
+
             cxx() : 
                 cxx(& empty, 0) {}
 
@@ -46,7 +49,11 @@
                 cxx(holder.ptr(), holder.length()){
             }
 
-            item_t & operator [](uxx index) const {
+            item_t & operator [](uxx index){
+                return the.ptr[index];
+            }
+
+            item_t const & operator [](uxx index) const {
                 return the.ptr[index];
             }
 

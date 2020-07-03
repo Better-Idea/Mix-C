@@ -24,8 +24,10 @@
     #include"memop/fill.hpp"
     #include"meta/more_fit.hpp"
     #include"meta/unsigned_type.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_strlize{
         constexpr char lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
         constexpr char upper[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -289,16 +291,9 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_strlize::xuser{
-    using ::mixc::lang_cxx_strlize::lower;
-    using ::mixc::lang_cxx_strlize::upper;
-    using ::mixc::lang_cxx_strlize::float_format_t;
-    using ::mixc::lang_cxx_strlize::int_format_t;
-
     template<class final, class item>
     struct cxx : xusing_lang_cxx::cxx<final, item>{
         using xusing_lang_cxx::cxx<final, item>::cxx;
@@ -314,11 +309,16 @@ namespace mixc::lang_cxx_strlize::xuser{
         }                                                                                       \
                                                                                                 \
         cxx(type value, inc::numeration_t base, inc::can_alloc<item> alloc) :                   \
-            cxx(value, int_format_t::fmt_n,  base, lower, alloc){                               \
+            cxx(value, int_format_t::fmt_n, base, lower, alloc){                                \
         }                                                                                       \
                                                                                                 \
-        cxx(type value, inc::numeration_t base, asciis lut, inc::can_alloc<item> alloc){        \
-            thex = the.strlize(value, int_format_t::fmt_n, type(base), lut, alloc);             \
+        cxx(type value, inc::numeration_t base, asciis lut, inc::can_alloc<item> alloc) :       \
+            cxx(value, int_format_t::fmt_n, base, lower, alloc){                                \
+        }                                                                                       \
+                                                                                                \
+        cxx(type value, int_format_t fmt,                                                       \
+            inc::numeration_t base, asciis lut, inc::can_alloc<item> alloc){                    \
+            thex = the.strlize(value, fmt, type(base), lut, alloc);                             \
         }
 
         xgen(u08);
@@ -329,6 +329,7 @@ namespace mixc::lang_cxx_strlize::xuser{
         xgen(i16);
         xgen(i32);
         xgen(i64);
+        #undef  xgen
 
         cxx(f64 value, inc::can_alloc<item> alloc){
             thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, not_exist, alloc);
@@ -356,7 +357,9 @@ namespace mixc::lang_cxx_strlize::xuser{
             ptr[0] = value;
         }
 
-        #undef  xgen
+        cxx(item const * value, inc::can_alloc<item> alloc){
+            thex = the_t(value).clone(alloc);
+        }
     };
 }
 
@@ -364,6 +367,7 @@ namespace xuser::inc{
     using ::mixc::lang_cxx_strlize::lower;
     using ::mixc::lang_cxx_strlize::upper;
     using ::mixc::lang_cxx_strlize::float_format_t;
+    using ::mixc::lang_cxx_strlize::int_format_t;
 }
 
 #include"math/numeration_t.hpp"

@@ -24,10 +24,12 @@
     #include"memory/new.hpp"
     #include"meta/is_same.hpp"
     #include"meta/more_fit.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
     #define xjson(...)  #__VA_ARGS__
 
-    namespace xuser {
+    namespace mixc::lang_cxx_parse_json{
         enum class json_type_t {
             json_object,
             json_string,
@@ -373,8 +375,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_parse_json::xuser {

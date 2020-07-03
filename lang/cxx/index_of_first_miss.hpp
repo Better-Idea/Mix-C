@@ -15,8 +15,10 @@
     #include"interface/initializer_list.hpp"
     #include"lang/cxx/index_of_first.hpp"
     #include"lang/cxx.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_index_of_first_miss{
         template<class item>
         struct core : inc::cxx<item> {
             using base_t = inc::cxx<item>;
@@ -39,8 +41,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_index_of_first_miss::xuser {

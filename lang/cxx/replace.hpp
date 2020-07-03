@@ -16,8 +16,10 @@
     #include"lang/cxx/index_of_first.hpp"
     #include"lang/cxx.hpp"
     #include"memop/copy.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_replace{
         // using item = char;
         // template<class item> struct core;
         // template<>
@@ -103,8 +105,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_replace::xuser{

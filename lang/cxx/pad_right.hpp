@@ -6,16 +6,18 @@
 #define xpack_lang_cxx_pad_right
     #pragma push_macro("xuser")
     #pragma push_macro("xusing_lang_cxx")
-        #undef  xusing_lang_cxx
-        #undef  xuser
-        #define xuser mixc::lang_cxx_pad_right
-        #include"define/base_type.hpp"
-        #include"interface/can_alloc.hpp"
-        #include"lang/cxx.hpp"
-        #include"memop/copy.hpp"
-        #include"memop/fill.hpp"
+    #undef  xusing_lang_cxx
+    #undef  xuser
+    #define xuser mixc::lang_cxx_pad_right
+    #include"define/base_type.hpp"
+    #include"interface/can_alloc.hpp"
+    #include"lang/cxx.hpp"
+    #include"memop/copy.hpp"
+    #include"memop/fill.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_pad_right{
         template<class item>
         struct core : inc::cxx<item> {
             using inc::cxx<item>::cxx;
@@ -31,8 +33,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_pad_right::xuser{

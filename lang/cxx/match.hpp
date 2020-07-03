@@ -16,8 +16,10 @@
     #include"lang/wxx.hpp"
     #include"lang/cxx/parse.hpp"
     #include"lang/cxx.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_match{
         template<class unsigned_t = uxx>
         struct pair {
             unsigned_t offset;
@@ -97,8 +99,6 @@
         };
     }
 
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace mixc::lang_cxx_match::xuser{

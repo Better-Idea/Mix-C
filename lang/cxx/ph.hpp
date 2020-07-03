@@ -22,8 +22,10 @@
     #include"meta/remove_ptr.hpp"
     #include"meta/unsigned_type.hpp"
     #include"mixc.hpp"
+    #pragma pop_macro("xusing_lang_cxx")
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::lang_cxx_ph{
         /*
          * h{}  hex
          * H{}  upper hex 
@@ -88,7 +90,7 @@
                 return thex;
             }
 
-            final & r(uxx align_right_width, char padding_char){
+            final & r(uxx align_right_width, char padding_char = ' '){
                 the.align_mode              = align_right;
                 the.align_width             = align_right_width;
                 the.left_padding_char       = padding_char;
@@ -264,8 +266,8 @@
 
     }
 
-    namespace xuser::ph{
-        using xuser::place_holder_group;
+    namespace mixc::lang_cxx_ph::ph{
+        using mixc::lang_cxx_ph::place_holder_group;
 
         xhex(h , not with_prefix, not keep_leading_zero, inc::lower);
         xhex(H , not with_prefix, not keep_leading_zero, inc::upper);
@@ -284,8 +286,8 @@
         xbin(zb, not with_prefix,     keep_leading_zero, inc::lower);
 
         template<class a0, class ... args>
-        struct v : xuser::v<v<a0, args...>, a0, args...>{
-            using base_t = xuser::v<v<a0, args...>, a0, args...>;
+        struct v : mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>{
+            using base_t = mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>;
             v(){}
             v(a0 const & first, args const & ... rest) : 
                 base_t(first, rest...){}
@@ -300,7 +302,7 @@
         xstr(char16_t, words);
     }
 
-    namespace xuser{
+    namespace mixc::lang_cxx_ph{
         template<class ... args> struct phg_core;
         template<class a0, class ... args>
         struct phg_core<a0, args...> : phg_core<args...>{
@@ -349,7 +351,7 @@
         };
     }
 
-    namespace xuser::ph{ // place_holder
+    namespace mixc::lang_cxx_ph::ph{ // place_holder
         template<class a0, class ... args>
         struct phg{ // place_holder group
             phg(a0 const & first, args const & ... list)
@@ -372,8 +374,6 @@
     #undef  xnum
     #undef  xopt 
     #undef  xmate
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc::ph{
