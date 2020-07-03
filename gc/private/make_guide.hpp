@@ -6,13 +6,13 @@
 #ifndef xpack_gc_make_guide
 #define xpack_gc_make_guide
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::gc_make_guide
-        #include"define/base_type.hpp"
-        #include"gc/private/routing.hpp"
-        #include"gc/private/collect.hpp"
-        #include"meta/is_class.hpp"
-        #include"meta_seq/tlist.hpp"
+    #undef  xuser
+    #define xuser mixc::gc_make_guide
+    #include"define/base_type.hpp"
+    #include"gc/private/routing.hpp"
+    #include"gc/private/collect.hpp"
+    #include"meta/is_class.hpp"
+    #include"meta_seq/tlist.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::gc_make_guide{

@@ -25,8 +25,9 @@
     #include"meta_seq/tlist.hpp"
     #include"meta_seq/tin.hpp"
     #include"meta_seq/vlist.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::gc_ref{
         using namespace inc;
         using visited_ptr_t = voidp;
 
@@ -262,8 +263,8 @@
         };
     }
 
-    namespace xuser::origin{
-        using xuser::empty_array;
+    namespace mixc::gc_ref::origin{
+        using mixc::gc_ref::empty_array;
 
         template<class impl, class type>
         using ref_ptr = meta<
@@ -289,7 +290,7 @@
             true
         >;
     }
-    #pragma pop_macro("xuser")
+
 #endif
 
 namespace xuser::inc{

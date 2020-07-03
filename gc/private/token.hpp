@@ -9,6 +9,7 @@
     #include"lock/atom_or.hpp"
     #include"lock/atom_sub.hpp"
     #include"macro/xdebug.hpp"
+    #pragma pop_macro("xuser")
 
     namespace mixc::gc_tuple{
         template<class root_t, class list> union tuple;
@@ -27,7 +28,7 @@
         template<class t> void free_with_destroy(t *, memory_size);
     }
 
-    namespace xuser::origin{
+    namespace mixc::gc_token::origin{
         constexpr uxx step = uxx(1);
 
         struct token {
@@ -98,7 +99,7 @@
             template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
         };
     }
-    #pragma pop_macro("xuser")
+
 #endif
 
 namespace xuser::inc{

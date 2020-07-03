@@ -40,6 +40,7 @@ tuple<foo::member_list> xx;
     #include"meta_seq/tlist.hpp"
     #include"meta_seq/vlist.hpp"
     #include"meta_seq/tin.hpp"
+    #pragma pop_macro("xuser")
 
     // 成员变量指针的魔法
     #define xroot   ((*(root_t *)this).*first)
@@ -84,7 +85,7 @@ tuple<foo::member_list> xx;
         };
     }
     #undef  xroot
-    #pragma pop_macro("xuser")
+
 #endif
 
 namespace xuser::inc{

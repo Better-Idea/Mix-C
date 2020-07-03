@@ -11,19 +11,19 @@ search_list 期初是一个只有根类型 root 的集合。
 #ifndef xpack_gc_collect
 #define xpack_gc_collect
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::gc_collect
-        #include"define/base_type.hpp"
-        #include"meta/remove_membership.hpp"
-        #include"meta_seq/tdistinct_append.hpp"
-        #include"meta_seq/tfilter.hpp"
-        #include"meta_seq/tin.hpp"
-        #include"meta_seq/tkv.hpp"
-        #include"meta_seq/tlist.hpp"
-        #include"meta_seq/tmarge.hpp"
-        #include"meta_seq/tpop_by.hpp"
-        #include"meta_seq/tselector_key.hpp"
-        #include"meta_seq/tselector_val.hpp"
+    #undef  xuser
+    #define xuser mixc::gc_collect
+    #include"define/base_type.hpp"
+    #include"meta/remove_membership.hpp"
+    #include"meta_seq/tdistinct_append.hpp"
+    #include"meta_seq/tfilter.hpp"
+    #include"meta_seq/tin.hpp"
+    #include"meta_seq/tkv.hpp"
+    #include"meta_seq/tlist.hpp"
+    #include"meta_seq/tmarge.hpp"
+    #include"meta_seq/tpop_by.hpp"
+    #include"meta_seq/tselector_key.hpp"
+    #include"meta_seq/tselector_val.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::gc_collect{
