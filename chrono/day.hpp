@@ -1,12 +1,12 @@
 #ifndef xpack_chrono_day
 #define xpack_chrono_day
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::chrono_day
-        #include"chrono/private/day.hpp"
-        #include"chrono/private/lut.hpp"
-        #include"chrono/date.hpp"
-        #include"define/base_type.hpp"
+    #undef  xuser
+    #define xuser mixc::chrono_day
+    #include"chrono/private/day.hpp"
+    #include"chrono/private/lut.hpp"
+    #include"chrono/date.hpp"
+    #include"define/base_type.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::chrono_day::origin{

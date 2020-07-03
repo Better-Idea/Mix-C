@@ -1,3 +1,9 @@
+#ifdef xuser
+    #undef xuser
+#endif
+
+#define xuser mixc::chrono_private_extern
+
 #include"configure.hpp"
 #include"chrono/+.hpp"
 

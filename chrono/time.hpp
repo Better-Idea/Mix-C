@@ -1,9 +1,9 @@
 #ifndef xpack_chrono_time
 #define xpack_chrono_time
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::chrono_time
-        #include"define/base_type.hpp"
+    #undef  xuser
+    #define xuser mixc::chrono_time
+    #include"define/base_type.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::chrono_time::origin{
