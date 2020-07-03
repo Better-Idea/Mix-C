@@ -5,8 +5,9 @@
     #define xuser mixc::memory_private_tiny_allocator
     #include"define/base_type.hpp"
     #include<malloc.h>
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::memory_private_tiny_allocator{
         voidp malloc(size_t bytes){
             return ::malloc(bytes);
         }
@@ -24,5 +25,4 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
