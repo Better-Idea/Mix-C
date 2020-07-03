@@ -1,14 +1,14 @@
 #ifndef xpack_algo_insert
 #define xpack_algo_insert
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::algo_insert
-        #include"define/base_type.hpp"
-        #include"interface/initializer_list.hpp"
-        #include"interface/ranger.hpp"
-        #include"macro/xindex_rollback.hpp"
-        #include"macro/xdebug_fail.hpp"
-        #include"memop/copy.hpp"
+    #undef  xuser
+    #define xuser mixc::algo_insert
+    #include"define/base_type.hpp"
+    #include"interface/initializer_list.hpp"
+    #include"interface/ranger.hpp"
+    #include"macro/xindex_rollback.hpp"
+    #include"macro/xdebug_fail.hpp"
+    #include"memop/copy.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_insert{

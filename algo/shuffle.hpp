@@ -1,13 +1,13 @@
 #ifndef xpack_algo_shuffle
 #define xpack_algo_shuffle
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::algo_shuffle
-        #include"define/base_type.hpp"
-        #include"interface/ranger.hpp"
-        #include"math/random.hpp"
-        #include"memop/addressof.hpp"
-        #include"memop/swap.hpp"
+    #undef  xuser
+    #define xuser mixc::algo_shuffle
+    #include"define/base_type.hpp"
+    #include"interface/ranger.hpp"
+    #include"math/random.hpp"
+    #include"memop/addressof.hpp"
+    #include"memop/swap.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_shuffle{

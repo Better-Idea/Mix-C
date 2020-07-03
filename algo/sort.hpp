@@ -1,13 +1,13 @@
 #ifndef xpack_algo_sort
 #define xpack_algo_sort
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::algo_sort
-        #include"algo/heap_root.hpp"
-        #include"define/base_type.hpp"
-        #include"interface/can_compare.hpp"
-        #include"interface/ranger.hpp"
-        #include"macro/xcmp.hpp"
+    #undef  xuser
+    #define xuser mixc::algo_sort
+    #include"algo/heap_root.hpp"
+    #include"define/base_type.hpp"
+    #include"interface/can_compare.hpp"
+    #include"interface/ranger.hpp"
+    #include"macro/xcmp.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_sort{

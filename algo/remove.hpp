@@ -1,13 +1,13 @@
 #ifndef xpack_algo_remove
 #define xpack_algo_remove
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::algo_remove
-        #include"define/base_type.hpp"
-        #include"interface/ranger.hpp"
-        #include"macro/xindex_rollback.hpp"
-        #include"macro/xdebug_fail.hpp"
-        #include"memop/swap.hpp"
+    #undef  xuser
+    #define xuser mixc::algo_remove
+    #include"define/base_type.hpp"
+    #include"interface/ranger.hpp"
+    #include"macro/xindex_rollback.hpp"
+    #include"macro/xdebug_fail.hpp"
+    #include"memop/swap.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_remove{

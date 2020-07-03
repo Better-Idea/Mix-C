@@ -5,11 +5,11 @@
 #ifndef xpack_algo_binary_search
 #define xpack_algo_binary_search
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::algo_binary_search
-        #include"define/base_type.hpp"
-        #include"interface/can_compare.hpp"
-        #include"interface/ranger.hpp"
+    #undef  xuser
+    #define xuser mixc::algo_binary_search
+    #include"define/base_type.hpp"
+    #include"interface/can_compare.hpp"
+    #include"interface/ranger.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::algo_binary_search{
