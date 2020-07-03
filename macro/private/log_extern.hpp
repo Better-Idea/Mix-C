@@ -2,7 +2,7 @@
 #define xpack_macro_private_log_extern
     #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser mixc::macro_private_log
+    #define xuser mixc::macro_private_log_extern
     #include"configure.hpp"
     #include"define/base_type.hpp"
     #include"macro/private/log.hpp"
@@ -11,10 +11,15 @@
     #include"io/tty.hpp"
     #include"lang/cxx/index_of_last.hpp"
     #include"lang/cxx.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin{
+    namespace mixc::macro_private_log::inc{
+        using namespace ::mixc::macro_private_log_extern::inc;
+    }
+
+    namespace mixc::macro_private_log::origin{
         template<class ... args>
-        void log_core(type_t id, asciis file, uxx line, asciis func_name, args const & ... contents){
+        void log_core(log_type_t id, asciis file, uxx line, asciis func_name, args const & ... contents){
             using namespace inc;
             using namespace inc::ph;
             static uxx skip = 0;
@@ -28,20 +33,21 @@
                 }
             #endif
 
-            asciis type_list[2];
+            asciis type_list[3];
             type_list[for_debug] = "DBUG";
             type_list[for_fail ] = "FAIL";
+            type_list[for_test ] = "TEST";
             
             file += skip;
             tty.write(type_list[id], " | ", v{file, ':', line}.l(40), " | ", v{func_name}.l(20), " | ", contents...);
         }
 
-        void log(type_t id, asciis file, uxx line, asciis func_name, asciis message){
+        void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message){
             log_core(id, file, line, func_name, message, '\n');
         }
 
         void log_core(
-            type_t      type, 
+            log_type_t  type, 
             asciis      file, 
             uxx         line, 
             asciis      func_name, 
@@ -67,7 +73,7 @@
 
                 switch(items->fmt){
                 case classify_type_t::is_char_t:        tty.write(':', items->c); break;
-                // case classify_type_t::is_float_t:   tty.write(':', items->f); break;
+                case classify_type_t::is_float_t:       tty.write(':', items->f); break;
                 case classify_type_t::is_ptr_t:         tty.write(':', items->v); break;
                 case classify_type_t::is_signed_t:      tty.write(':', items->i); break;
                 case classify_type_t::is_str_t:         tty.write(':', items->s); break;
@@ -80,5 +86,5 @@
             tty.write_line();
         }
     }
-    #pragma pop_macro("xuser")
+
 #endif
