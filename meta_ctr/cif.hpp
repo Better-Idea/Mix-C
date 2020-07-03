@@ -1,9 +1,9 @@
 #ifndef xpack_meta_ctr_cif
 #define xpack_meta_ctr_cif
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::meta_ctr_cif
-        #include"define/base_type.hpp"
+    #undef  xuser
+    #define xuser mixc::meta_ctr_cif
+    #include"define/base_type.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::meta_ctr_cif{
