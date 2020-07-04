@@ -2,8 +2,9 @@
 **创立该项目的初衷是想加深对 C++ 的理解，并思考标准库是否可以实现的更好。**
 **一个人的力量是有限和渺小的，我需要能一起并肩作战的伙伴**
 
+## 推荐点
 该项目有诸多亮点，包括但不限于以下：
--	内存管理算法，让 4KB 以下的小内存的分配与回收效率有超过三倍的提升，性能超越 google 的 tcmalloc，并有效的减少了内存碎片。该算法已从 old/ 旧代码中迁移完毕并增强了原有功能。
+-	内存管理算法，让 4KB 以下的小内存的分配与回收效率有超过三倍的提升，性能超越 google 的 tcmalloc，并有效的减少了内存碎片。该算法已从 old/ 旧代码中迁移完毕并增强了原有功能。  
 https://github.com/Better-Idea/Mix-C/blob/master/memory/private/tiny_allocator.hpp
 
 -	半伪随机数生成算法：一款高质量的伪随机数生成算法，速度比线性同余更快，周期比 mt19937更长（理论上没有周期）  
@@ -23,3 +24,40 @@ https://github.com/Better-Idea/Mix-C/blob/master/algo/mmu.hpp
 -	现代 GC：该算法是图论和引用计数器结合的产物， 能有效的解决环形引用并代价低廉，其原理简单但结构复杂， 完整的部分涉及内存分配器 + 线程 + 智能指针 + 模板元函数式编程。  
 https://github.com/Better-Idea/Mix-C/tree/master/gc
 
+
+## 包含范式
+### 作用介绍
+情况一：我们希望 a.hpp 中包含的 vector 不出现在 b.cpp 的 std 命名空间中
+```C++
+// a.hpp
+#pragma once
+#include<vector>
+...
+
+// b.cpp
+#include"a.hpp"
+...
+```
+
+情况二：提供最小包含，不需要的功能不包含。C++ 认为少就是多，但这不是 std::string 孱弱的理由，我们以 lang/cxx/ 底层字符串库为例，为您提供避免过度设计的指引。
+```C++
+// a.hpp 只包含 lang/cxx/index_of_first 功能
+#pragma once
+#include"lang/cxx/index_of_first.hpp"
+#include"lang/cxx.hpp"
+...
+
+// b.hpp 只包含 lang/cxx/align_center 和 lang/cxx/align_right 功能
+#pragma once
+#include"lang/cxx/align_center.hpp"
+#include"lang/cxx/align_right.hpp"
+#include"lang/cxx.hpp"
+
+// c.hpp 包含 lang/cxx/ 中所有功能
+#pragma once
+#include"lang/cxx/+.hpp"
+#include"lang/cxx.hpp"
+...
+```
+
+实际的包含范式与以上写法有所出入，下面将我们介绍规范的写法。
