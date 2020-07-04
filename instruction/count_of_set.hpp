@@ -1,11 +1,10 @@
 #ifndef xpack_instruction_count_of_set
 #define xpack_instruction_count_of_set
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::instruction_count_of_set
-        #include"configure.hpp"
-        #include"define/base_type.hpp"
-        #include<x86intrin.h>
+    #undef  xuser
+    #define xuser mixc::instruction_count_of_set
+    #include"configure.hpp"
+    #include"define/base_type.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::instruction_count_of_set{
