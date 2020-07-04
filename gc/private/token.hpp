@@ -9,6 +9,7 @@
     #include"lock/atom_or.hpp"
     #include"lock/atom_sub.hpp"
     #include"macro/xdebug.hpp"
+    #include"macro/xtypeid.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::gc_tuple{
