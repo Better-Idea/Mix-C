@@ -6,7 +6,6 @@
     #define xuser mixc::macro_xdebug
     #include"configure.hpp"
     #include"macro/xlink.hpp"
-    #include"macro/xtypeid.hpp"
     #include"macro/private/log.hpp"
     #pragma pop_macro("xuser")
 
