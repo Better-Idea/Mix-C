@@ -356,10 +356,6 @@ namespace mixc::lang_cxx_strlize::xuser{
             thex = the_t{ ptr, 1 };
             ptr[0] = value;
         }
-
-        cxx(item const * value, inc::can_alloc<item> alloc){
-            thex = the_t(value).clone(alloc);
-        }
     };
 }
 
