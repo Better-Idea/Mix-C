@@ -12,6 +12,7 @@
             for_debug,
             for_fail,
             for_test,
+            for_hint,
         };
 
         extern void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message);
