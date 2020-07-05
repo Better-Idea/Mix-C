@@ -119,11 +119,56 @@
                 c08 str6 = "aaa";
 
                 xhint(str1, str2, str3, str4, str5, str6);
-                xhint(str1.compare(str2));
-                xhint(str3.compare(str4));
-                xhint(str4.compare(str5));
-                xhint(str4.compare(str5, ignore_case<char>));
-                xhint(str4.compare(str6));
+                xhint(str1.compare_fastly(str2));
+                xhint(str3.compare_fastly(str4));
+                xhint(str4.compare_fastly(str5));
+                xhint(str4.compare_fastly(str5, ignore_case<char>));
+                xhint(str4.compare_fastly(str6));
+                tty.write_line();
+            }
+
+            {
+                // cxx::index_of_first
+                tty.write_line("cxx::index_of_first");
+                tty.write_line("0123456789a123456789a123456789a");
+                c08 str1     = "i love c++, do you love it";
+                tty.write_line(str1);
+                xhint(str1.index_of_first("love"));
+                xhint(str1.index_of_first("LOVE", ignore_case<char>));
+                xhint(str1.index_of_first('c'));
+                xhint(str1.index_of_first('C', ignore_case<char>));
+                xhint(str1.index_of_first("java"), not_exist);
+
+                str1.index_of_first("love", [](uxx match_index){
+                    xhint(match_index);
+                });
+                tty.write_line();
+            }
+
+            {
+                // cxx::index_of_first_miss
+                tty.write_line("cxx::index_of_first_miss");
+                tty.write_line("0123456789a123456789a123456789a");
+                c08 str1     = "    ....i love c++";
+                tty.write_line(str1);
+                xhint(str1.index_of_first_miss(' '));
+                xhint(str1.index_of_first_miss({ ' ', '.' }));
+                tty.write_line();
+            }
+
+            {
+                // cxx::index_of_last
+                tty.write_line("cxx::index_of_last");
+                tty.write_line("0123456789a123456789a123456789a");
+                c08 str1     = "1st c++, 2nd c++, 3rd C++";
+                tty.write_line(str1);
+                xhint(str1.index_of_last("c++"));
+                xhint(str1.index_of_last("c++", ignore_case<char>));
+                xhint(str1.index_of_last("C++"));
+
+                str1.index_of_last("c++", [](uxx match_index){
+                    xhint(match_index);
+                }, ignore_case<char>);
                 tty.write_line();
             }
         }
