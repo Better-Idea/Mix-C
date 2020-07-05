@@ -9,11 +9,11 @@
     #undef  xusing_lang_cxx
     #undef  xuser
     #define xuser mixc::lang_cxx_index_of_first
-    #include"define/base_type.hpp"
     #include"interface/can_callback.hpp"
     #include"interface/can_compare.hpp"
     #include"interface/initializer_list.hpp"
     #include"lang/cxx.hpp"
+    #include"mixc.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
@@ -41,6 +41,10 @@
                     }
                 }
                 return not_exist;
+            }
+
+            uxx index_of_first(item const & value, inc::can_compare<item> compare) const {
+                return index_of_first(xref value, 1, compare);
             }
 
             template<class compare_invoke>
@@ -85,8 +89,8 @@
                         return;
                     }
                     else{
+                        match(cur - the + i);
                         cur = cur.backward(i + value.length());
-                        match(i);
                     }
                 }
             }
