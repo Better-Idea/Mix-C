@@ -27,7 +27,7 @@ https://github.com/Better-Idea/Mix-C/tree/master/gc
 
 ## 包含范式
 ### 作用介绍
-情况一：我们希望 a.hpp 中包含的 vector 不出现在 b.cpp 的 std 命名空间中
+情况一：假设在 `b.cpp` 中并没有用到 `a.hpp` 中包含的 `vector`，我们希望能在 `b.cpp` 中隐藏 `std::vector`
 ```C++
 // a.hpp
 #pragma once
@@ -39,12 +39,15 @@ https://github.com/Better-Idea/Mix-C/tree/master/gc
 ...
 ```
 
-情况二：提供最小包含，不需要的功能不包含。C++ 认为少就是多，但这不是 std::string 孱弱的理由，我们以 lang/cxx/ 底层字符串库为例，为您提供避免过度设计的指引。
+情况二：提供最小包含，不需要的功能不包含。C++ 认为少就是多，但这不是 `std::string` 孱弱的理由，我们以 `lang/cxx/` 底层字符串库为例，为您提供避免过度设计的指引。
 ```C++
-// a.hpp 只包含 lang/cxx/index_of_first 功能
 #pragma once
 #include"lang/cxx/index_of_first.hpp"
 #include"lang/cxx.hpp"
+...
+// 实例 foo 只会包含 index_of_first 和 cxx 中的基础功能
+inc::cxx foo = "hello powerful cat! do you love cat?";
+uxx i        = foo.index_of_first("cat");
 ...
 
 // b.hpp 只包含 lang/cxx/align_center 和 lang/cxx/align_right 功能
@@ -57,6 +60,13 @@ https://github.com/Better-Idea/Mix-C/tree/master/gc
 #pragma once
 #include"lang/cxx/+.hpp"
 #include"lang/cxx.hpp"
+...
+```
+
+情况三：头文件包含了类似 **stdio.h** 这样的库，在不增加 .cpp 文件的情况下怎么隐藏不必要的符号名称
+```C++
+// a.hpp
+#include<stdio.h>
 ...
 ```
 
