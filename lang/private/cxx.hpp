@@ -24,15 +24,15 @@
         public:
             xseqptr(item_t)
 
-            cxx() : 
-                cxx(& empty, 0) {}
-
-            cxx(cxx const &) = default;
+            cxx() : cxx(& empty, 0) {}
+            cxx(cxx const &)        = default;
+            cxx(decltype(nullptr))  = delete;
 
             constexpr cxx(const item_t * str) : 
                 ptr((item_t *)str), count(0) {
                 for(uxx i = 0; str[i++]; count = i);
             }
+
 
             template<class final_t>
             cxx(cxx<final_t, item_t> const & self) : 
