@@ -28,11 +28,11 @@
             core(base_t const & self) : 
                 base_t(self){}
 
-            uxx index_of_last_miss(item const * value, uxx count) const {
+            uxx index_of_last_miss(item const * value, uxx count, inc::can_compare<item> compare) const {
                 the_t token = { value, count };
 
                 for (uxx i = the.length(); i--; ){
-                    if (token.index_of_first(the[i]) == not_exist){
+                    if (token.index_of_first(the[i], compare) == not_exist){
                         return i;
                     }
                 }
