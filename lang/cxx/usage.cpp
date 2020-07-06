@@ -131,7 +131,7 @@
                 // cxx::index_of_first
                 tty.write_line("cxx::index_of_first");
                 tty.write_line("0123456789a123456789a123456789a");
-                c08 str1     = "i love c++, do you love it";
+                c08 str1 = "i love c++, do you love it";
                 tty.write_line(str1);
                 xhint(str1.index_of_first("love"));
                 xhint(str1.index_of_first("LOVE", ignore_case<char>));
@@ -139,6 +139,7 @@
                 xhint(str1.index_of_first('C', ignore_case<char>));
                 xhint(str1.index_of_first("java"), not_exist);
 
+                // 正序遍历所有以 "love" 开头的索引
                 str1.index_of_first("love", [](uxx match_index){
                     xhint(match_index);
                 });
@@ -149,7 +150,7 @@
                 // cxx::index_of_first_miss
                 tty.write_line("cxx::index_of_first_miss");
                 tty.write_line("0123456789a123456789a123456789a");
-                c08 str1     = "    ....i love c++";
+                c08 str1 = "    ....i love c++";
                 tty.write_line(str1);
                 xhint(str1.index_of_first_miss(' '));
                 xhint(str1.index_of_first_miss({ ' ', '.' }));
@@ -160,15 +161,97 @@
                 // cxx::index_of_last
                 tty.write_line("cxx::index_of_last");
                 tty.write_line("0123456789a123456789a123456789a");
-                c08 str1     = "1st c++, 2nd c++, 3rd C++";
+                c08 str1 = "1st c++, 2nd c++, 3rd C++";
                 tty.write_line(str1);
                 xhint(str1.index_of_last("c++"));
                 xhint(str1.index_of_last("c++", ignore_case<char>));
                 xhint(str1.index_of_last("C++"));
 
+                // 反序遍历所有以 "love" 开头的索引
                 str1.index_of_last("c++", [](uxx match_index){
                     xhint(match_index);
                 }, ignore_case<char>);
+
+                tty.write_line();
+            }
+
+            {
+                // cxx::index_of_last_miss
+                tty.write_line("cxx::index_of_last_miss");
+                tty.write_line("0123456789a123456789a123456789a");
+                c08 str1 = "hello?balabla...balabala...";
+                tty.write_line(str1);
+                xhint(str1.index_of_last_miss({ 'a', 'b', 'l', '.' }));
+                tty.write_line();
+            }
+
+            {
+                // cxx::insert
+                tty.write_line("cxx::insert");
+                tty.write_line("0123456789a123456789a123456789a");
+                c08 str1 = "a^2 = c^2";
+                tty.write_line(str1);
+
+                // 从 3 好索引插入 " + b^2"
+                xhint(str1.insert(3, " + b^2", alloc));
+                
+                c08 str2 = "";
+                xhint(str2);
+
+                // 将 "anything" 插入到末尾
+                xhint(str2.insert(-1, "anything", alloc));
+
+                c08 str3 = "love you";
+                xhint(str3);
+                xhint(str3.insert(-1, " 3000 times", alloc));
+                tty.write_line();
+            }
+
+            {
+                // cxx::is_contains
+                tty.write_line("cxx::is_contains");
+                c08 str1 = "cat is a kind of Liquid";
+                tty.write_line(str1);
+                xhint(str1.is_contains("cat"));
+                xhint(str1.is_contains("CAT"));
+                xhint(str1.is_contains("CAT", ignore_case<char>));
+                xhint(str1.is_contains(' '));
+                xhint(str1.is_contains("kind"));
+                xhint(str1.is_contains("of"));
+                xhint(str1.is_contains("liquid"));
+                xhint(str1.is_contains("liquid", ignore_case<char>));
+                tty.write_line();
+            }
+
+            {
+                // cxx::is_ends_with
+                tty.write_line("cxx::is_ends_with");
+                c08 str1 = "doesn't kill you will makes you stronger";
+                xhint(str1);
+
+                // 任何串都不以空串结尾
+                xhint(str1.is_ends_with(""));
+
+                // 除空串外，任何串可以都自己结尾
+                xhint(str1.is_ends_with(str1));
+                xhint(str1.is_ends_with("stronger"));
+                xhint(str1.is_ends_with("Stronger", ignore_case<char>));
+                tty.write_line();
+            }
+
+            {
+                // cxx::is_starts_with
+                tty.write_line("cxx::is_starts_with");
+                c08 str1 = "PowerfulCat is the most strongest cat";
+                xhint(str1);
+
+                // 任何串都不以空串开头
+                xhint(str1.is_starts_with(""));
+
+                // 除空串外，任何串可以都自己结尾
+                xhint(str1.is_starts_with(str1));
+                xhint(str1.is_starts_with("Powerful"));
+                xhint(str1.is_starts_with("POWERFULCAT", ignore_case<char>));
                 tty.write_line();
             }
         }
