@@ -32,7 +32,7 @@
                 }
                 return the.backward(
                     the.length() - value.length()
-                ).compare_fastly(value) == 0;
+                ).compare_fastly(value, compare) == 0;
             }
         };
     }
