@@ -5,8 +5,9 @@
     #define xuser mixc::macro_xdefer
     #include"mixc.hpp"
     #include"macro/xlink.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser {
+    namespace mixc::macro_xdefer {
         template<class lambda>
         struct defer : lambda {
             xgc_fields(
@@ -29,6 +30,5 @@
         };
     }
 
-    #define xdefer      auto && xlink2(__release, __COUNTER__) = ::mixc::macro_xdefer::sugar() * [&]()
-    #pragma pop_macro("xuser")
+    #define xdefer      auto && xlink2(__release, __LINE__) = ::mixc::macro_xdefer::sugar() * [&]()
 #endif
