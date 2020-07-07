@@ -32,7 +32,7 @@
         using visited_ptr_t = voidp;
 
         xstruct(
-            xiam(info_t)
+            xname(info_t)
         )
             uxx can_arrive_root : 1;
             uxx visited         : sizeof(uxx) * 8 - 1;
@@ -65,10 +65,10 @@
 
         template<class impl, class item, class attribute, bool is_array>
         xstruct(
-            xiam(meta, <impl, item, attribute, is_array>),
-            xpub(self_management),
-            xhas(attribute),
-            xhas(item)
+            xtmpl(meta, impl, item, attribute, is_array),
+            xpubb(self_management),
+            xasso(attribute),
+            xasso(item)
         )
             using the_length  = typename cif<is_array, token_plus, token>::result;
             using token_mix_t = token_mix<item, attribute, the_length>;
@@ -260,7 +260,7 @@
                     )
                 );
             }
-        };
+        $
     }
 
     namespace mixc::gc_ref::origin{

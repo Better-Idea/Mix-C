@@ -10,9 +10,9 @@
     namespace mixc::define_bitbind{
         template<class type, class bit_type = bool>
         xstruct(
-            xiam(bitbind, <type, bit_type>),
-            xitm(ptr,  type *),
-            xitm(mask, type)
+            xtmpl(bitbind, type, bit_type),
+            xprif(ptr,  type *),
+            xprif(mask, type)
         )
             bitbind() : bitbind(nullptr, 0) {}
             bitbind(type * bits, uxx index){
@@ -39,7 +39,7 @@
             operator bit_type(){
                 return bit_type((ptr[0] & mask) != 0);
             }
-        };
+        $
     }
 
 #endif

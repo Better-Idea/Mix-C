@@ -4,6 +4,7 @@
     #undef  xuser
     #define xuser mixc::io_private_tty_color_t
     #include"define/base_type.hpp"
+    #pragma pop_macro("xuser")
 
     namespace mixc::io_private_tty_color_t{
         enum class tty_color_t : u08 {
@@ -45,7 +46,6 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

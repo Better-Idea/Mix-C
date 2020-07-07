@@ -16,8 +16,8 @@
         template<class func> struct can_callback;
         template<class ret, class ... args> 
         xstruct(
-            ximx(can_callback<ret(args...)>),
-            xpub(inc::callable_t)
+            xspec(can_callback, ret(args...)),
+            xpubb(inc::callable_t)
         )
             using base_t = inc::callable_t;
             using signature = inc::signature<ret, args...>;

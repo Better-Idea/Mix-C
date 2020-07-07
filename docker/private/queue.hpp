@@ -18,14 +18,14 @@
     namespace mixc::docker_queue {
         template<class item_t>
         xstruct(
-            xiam(queue_t, <item_t>),
-            xpub(inc::self_management),
-            xpub(inc::disable_copy),
-            xhas(item_t)
+            xtmpl(queue_t, item_t),
+            xpubb(inc::self_management),
+            xpubb(inc::disable_copy),
+            xasso(item_t)
         )
             xstruct(
-                xiam(node),
-                xpub(inc::struct_t<item_t>)
+                xname(node),
+                xpubb(inc::struct_t<item_t>)
             )
                 node * next;
             public:

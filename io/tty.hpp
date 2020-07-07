@@ -15,7 +15,7 @@
 
     namespace mixc::io_tty::origin{
         xstruct(
-            xiam(tty_t)
+            xname(tty_t)
         )
             using final = tty_t;
 

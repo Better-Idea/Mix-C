@@ -12,16 +12,16 @@
         template<class type, bool is_class> struct struct_t;
         template<class type>
         xstruct(
-            ximx(struct_t<type, true>),
-            xpub(type)
+            xspec(struct_t, type, true),
+            xpubb(type)
         )
             using type::type;
         $
 
         template<class type>
         xstruct(
-            ximx(struct_t<type, false>),
-            xitm(data, type)
+            xspec(struct_t, type, false),
+            xprif(data, type)
         )
             template<class ... args>
             struct_t(args const & ... list) : 
@@ -39,7 +39,7 @@
 
         template<>
         xstruct(
-            ximx(struct_t<void, false>)
+            xspec(struct_t, void, false)
         ) $
     }
 

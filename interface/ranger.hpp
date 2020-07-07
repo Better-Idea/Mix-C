@@ -65,7 +65,7 @@
 
         template<class item_t>
         xstruct(
-            xiam(ranger, <item_t>)
+            xtmpl(ranger, item_t)
         )
         private:
             base    dat;

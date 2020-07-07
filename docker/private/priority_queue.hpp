@@ -24,9 +24,9 @@
 
         template<class item_t>
         xstruct(
-            xiam(priority_queue_t, <items_t>),
-            xpub(inc::self_management),
-            xitm(items, inc::darray<item_t>)
+            xtmpl(priority_queue_t, items_t),
+            xpubb(inc::self_management),
+            xprif(items, inc::darray<item_t>)
         )
         private:
             docker_t & origin() const {

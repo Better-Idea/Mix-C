@@ -18,9 +18,9 @@
 
         // bend close interval
         xstruct(
-            xiam(cc),
-            xitm(pleft, ixx),
-            xitm(pright, ixx)
+            xname(cc),
+            xprof(pleft, ixx),
+            xprof(pright, ixx)
         )
             using final = cc;
 
@@ -43,9 +43,7 @@
 
             void normalize(uxx length){
                 cc::normalize(length);
-                right(
-                    right() - (left() <= right() ? 1 : -1)
-                );
+                pright -= pleft <= pright ? 1 : -1;
             }
         };
 
@@ -55,9 +53,7 @@
 
             void normalize(uxx length){
                 cc::normalize(length);
-                left(
-                    left() + (left() <= right() ? 1 : -1)
-                );
+                pleft += pleft <= pright ? 1 : -1;
             }
         };
 
@@ -69,12 +65,8 @@
                 cc::normalize(length);
                 auto asc = left() <= right();
 
-                left(
-                    left() + (asc ? 1 : -1)
-                );
-                right(
-                    right() - (asc ? 1 : -1)
-                );
+                pleft  += asc ? 1 : -1;
+                pright -= asc ? 1 : -1;
             }
         };
 

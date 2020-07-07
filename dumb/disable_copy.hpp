@@ -8,7 +8,7 @@
 
     namespace mixc::dumb_disable_copy {
         xstruct(
-            xiam(disable_copy)
+            xname(disable_copy)
         )
             disable_copy() = default;
             disable_copy(disable_copy const &) = delete;

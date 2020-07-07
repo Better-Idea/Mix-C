@@ -36,7 +36,7 @@
 
         template<class key_t, class val_t>
         xstruct(
-            xiam(pair, <key_t, val_t>)
+            xtmpl(pair, key_t, val_t)
         )
             key_t    key;
             val_t    value;
@@ -48,9 +48,9 @@
 
         template<class key_t, class val_t>
         xstruct(
-            xiam(node, <key_t, val_t>),
-            xhas(key_t),
-            xhas(val_t)
+            xtmpl(node, key_t, val_t),
+            xasso(key_t),
+            xasso(val_t)
         )
             using pair_t   = pair<key_t, val_t>;
             using mirror_t = u08[sizeof(pair_t)];
@@ -168,12 +168,12 @@
 
         template<class key_t, class val_t>
         xstruct(
-            xiam(hashmap_t, <key_t, val_t>),
-            xpub(inc::self_management),
-            xpub(inc::disable_copy),
-            xitm(lines,  uxx),
-            xitm(count,  uxx),
-            xitm(nodes,  node<key_t, val_t> *)
+            xtmpl(hashmap_t, key_t, val_t),
+            xpubb(inc::self_management),
+            xpubb(inc::disable_copy),
+            xprif(lines,  uxx),
+            xprif(count,  uxx),
+            xprif(nodes,  node<key_t, val_t> *)
         )
         private:
             using pair_t   = pair<key_t, val_t>;

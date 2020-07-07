@@ -87,10 +87,10 @@
         using items_t = char[size];
 
         xstruct(
-            xiam(tty_key),
-            xitm(type, key_type),
-            xitm(w08, items_t<5>),
-            xitm(w16, char16_t)
+            xname(tty_key),
+            xprif(type, key_type),
+            xprif(w08, items_t<5>),
+            xprif(w16, char16_t)
         )
             using final = tty_key;
         public:

@@ -8,7 +8,7 @@
 
     namespace mixc::dumb_dummy_t{
         xstruct(
-            xiam(dummy_t)
+            xname(dummy_t)
         )
             template<class ... args>
             constexpr dummy_t(args const & ...){}

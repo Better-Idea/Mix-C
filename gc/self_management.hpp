@@ -16,7 +16,7 @@
 
     namespace mixc::gc_self_management{
         xstruct(
-            xiam(self_management)
+            xname(self_management)
         ) $
     }
 

@@ -11,34 +11,32 @@
     #include"gc/self_management.hpp"
     #include"interface/ranger.hpp"
     #include"lock/atom_swap.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_stack{
         template<class item_t>
-        struct stack_t : inc::self_management, inc::disable_copy {
-            typedef struct node : inc::struct_t<item_t>{
-                xgc_fields(
-                    xiam(node, inc::struct_t<item_t>),
-                    xpub(next, node *)
-                );
-            public:
-                template<class ... args>
-                node(args const & ... list) :
-                    inc::struct_t<item_t>(list...){
-                    next = nullptr;
-                }
-            } * nodep;
-
-            xgc_fields(
-                xiam(stack_t<item_t>, inc::self_management, inc::disable_copy),
-                xpro(ptop, mutable nodep),
-                xhas(node)
-            ) {
-                // TODO:====================================================================
-                return false;
+        xstruct(
+            xtmpl(node, item_t),
+            xpubb(inc::struct_t<item_t>),
+            xpubf(next, node<item_t> *)
+        )
+            template<class ... args>
+            node(args const & ... list) :
+                inc::struct_t<item_t>(list...){
+                next = nullptr;
             }
+        $
+
+        template<class item_t>
+        xstruct(
+            xtmpl(stack_t),
+            xpubb(inc::self_management),
+            xpubb(inc::disable_copy),
+            xprof(ptop, mutable node<item_t> *)
+        )
+            using nodep = node *;
         public:
             stack_t() : 
                 ptop(nullptr){
@@ -96,15 +94,9 @@
                 return r;
             }
 
-            item_t & top(){
-                return *(item_t *)ptop;
-            }
+            xpubget_pubset(top, &)
 
-            item_t const & top() const {
-                return *(item_t *)ptop;
-            }
-
-            bool is_empty() const {
+            xpubgetx(is_empty, bool){
                 return ptop == nullptr;
             }
         };

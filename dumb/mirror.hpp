@@ -12,8 +12,8 @@
 
         template<class type>
         xstruct(
-            xiam(mirror, <type>),
-            xitm(bytes, item_t<type>)
+            xtmpl(mirror, type),
+            xprif(bytes, item_t<type>)
         )
             mirror(): bytes{0}{}
             mirror(type const & value){
@@ -31,7 +31,7 @@
 
         template<>
         xstruct(
-            ximx(mirror<void>)
+            xspec(mirror, void)
         ) $
     }
 

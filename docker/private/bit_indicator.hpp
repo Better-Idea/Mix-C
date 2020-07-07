@@ -13,7 +13,7 @@
     namespace mixc::docker_bit_indicator{
         template<uxx bits>
         xstruct(
-            xiam(bit_indicator_t, <bits>)
+            xtmpl(bit_indicator_t, bits)
         )
             void set(uxx index){
                 set(index, [](bits_t & p, bits_t val){

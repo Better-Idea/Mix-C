@@ -6,43 +6,41 @@
 #define xpack_docker_darray_pushpop
 	#pragma push_macro("xuser")
 	#pragma push_macro("xusing_docker_darray")
-		#undef  xuser
-		#define xuser mixc::docker_darray_pushpop
-		#include"define/base_type.hpp"
-		#include"docker/darray.hpp"
-        #include"docker/transmitter.hpp"
-        #include"docker/private/pushpop_t.hpp"
-        #include"dumb/mirror.hpp"
-        #include"memory/new.hpp"
-        #include"memop/addressof.hpp"
-        #include"memop/cast.hpp"
-        #include"memop/copy.hpp"
+    #undef  xuser
+    #define xuser mixc::docker_darray_pushpop
+    #include"define/base_type.hpp"
+    #include"docker/darray.hpp"
+    #include"docker/transmitter.hpp"
+    #include"docker/private/pushpop_t.hpp"
+    #include"dumb/mirror.hpp"
+    #include"macro/xstruct.hpp"
+    #include"memory/new.hpp"
+    #include"memop/addressof.hpp"
+    #include"memop/cast.hpp"
+    #include"memop/copy.hpp"
 	#pragma pop_macro("xusing_docker_darray")
 	#pragma pop_macro("xuser")
 
 	namespace mixc::docker_darray_pushpop {
         template<class base_t> struct extern_fields;
         template<> 
-        struct extern_fields<void>{
-            xgc_fields(
-                xiam(extern_fields<void>),
-                xpub(count, uxx)
-            );
-        public:
+        xstruct(
+            xspec(extern_fields, void),
+            xpubf(count, uxx)
+        )
             extern_fields() : 
                 count(0){}
-        };
+        $
 
         template<class base_t>
-        struct extern_fields : base_t {
-            xgc_fields(
-                xiam(extern_fields<base_t>),
-                xpub(count, uxx)
-            );
-        public:
+        xstruct(
+            xtmpl(extern_fields, base_t),
+            xpubb(base_t),
+            xpubf(count, uxx)
+        )
             extern_fields() : 
                 count(0), base_t() {}
-        };
+        $
 
 		template<class item_t, uxx rank, class attribute>
 		struct core : inc::darray<item_t, rank, extern_fields<attribute>> {

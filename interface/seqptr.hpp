@@ -29,7 +29,7 @@
         template<class item_t> struct seqptr;
         template<class item_t>
         xstruct(
-            xiam(seqptr, <item_t>)
+            xtmpl(seqptr, item_t)
         )
         private:
             item_t * ptr = nullptr;

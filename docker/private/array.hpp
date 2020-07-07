@@ -14,8 +14,8 @@
 
         template<class type, uxx count = 0, uxx ... rest>
         xstruct(
-            xiam(array_t, <type, count, rest...>),
-            xitm(data, items_t<type, count>)
+            xtmpl(array_t, type, count, rest...),
+            xprif(data, items_t<type, count>)
         )
             using item_t = typename array_t<type, rest...>::the_t;
         public:

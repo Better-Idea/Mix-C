@@ -10,7 +10,7 @@
 
     namespace mixc::define_nullref_t{
         xstruct(
-            xiam(nullref_t)
+            xname(nullref_t)
         )
             template<class a> friend auto operator == (a const & value, nullref_t) {
                 volatile auto ptr = inc::addressof(value);

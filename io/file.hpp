@@ -6,6 +6,8 @@
     #include"mixc.hpp"
     #include"dumb/disable_copy.hpp"
     #include"interface/seqptr.hpp"
+    #include"macro/xstruct.hpp"
+    #pragma pop_macro("xuser")
 
     namespace mixc::io_file::origin{
         enum class access_mode_t{
@@ -14,12 +16,12 @@
             read_write  = 0x3,
         };
 
-        struct file : inc::disable_copy {
-            xgc_fields(
-                xiam(file),
-                xpri(fd,   mutable i32),
-                xpri(path, mutable asciis)
-            );
+        xstruct(
+            xname(file),
+            xpubb(inc::disable_copy),
+            xprif(fd, mutable i32),
+            xprif(path, mutalb asciis)
+        )
             using final = the_t;
         private:
             file(i32 stdfd) : fd(stdfd), path(""){}
@@ -50,10 +52,9 @@
             uxx write(inc::seqptr<item_t> seq) const {
                 return write(seq, seq.length() * sizeof(item_t));
             }
-        };
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

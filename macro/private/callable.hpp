@@ -9,12 +9,10 @@
 
     namespace mixc::macro_private_callable{
         xstruct(
-            xiam(callable_t)
+            xname(callable_t),
+            xprof(__object, void *),
+            xprof(__func_list, void **)
         )
-        protected:
-            void  *   __object;
-            void  **  __func_list;
-        public:
             callable_t(){
                 __object    = nullptr;
                 __func_list = nullptr;
