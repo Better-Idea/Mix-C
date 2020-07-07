@@ -12,7 +12,6 @@
     #include"define/base_type.hpp"
     #include"interface/can_alloc.hpp"
     #include"lang/cxx.hpp"
-    #include"macro/xgc.hpp"
     #include"memop/copy.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")

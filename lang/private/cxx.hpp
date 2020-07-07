@@ -5,22 +5,19 @@
     #define xuser mixc::lang_cxx
     #include"define/base_type.hpp"
     #include"interface/seqptr.hpp"
-    #include"macro/xgc.hpp"
-    #include"macro/xprop.hpp"
+    #include"macro/xstruct.hpp"
     #include"macro/xsv.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx{
         template<class final, class item_t>
-        struct cxx{
+        xstruct(
+            xiam(cxx, <final, item_t>),
+            xitm(ptr, item_t *),
+            xitm(plength, uxx)
+        )
         private:
             inline static item_t empty = item_t(0);
-        public:
-            xgc_fields(
-                xiam(cxx<final, item_t>),
-                xpro(ptr,   item_t *),
-                xpro(count, uxx)
-            );
         public:
             xseqptr(item_t)
 
@@ -29,8 +26,8 @@
             cxx(decltype(nullptr))  = delete;
 
             constexpr cxx(const item_t * str) : 
-                ptr((item_t *)str), count(0) {
-                for(uxx i = 0; str[i++]; count = i);
+                ptr((item_t *)str), plength(0) {
+                for(uxx i = 0; str[i++]; plength = i);
             }
 
 
@@ -40,8 +37,8 @@
             }
 
             template<class type>
-            cxx(type const * ptr, uxx count) : 
-                ptr((item_t *)ptr), count(count) {
+            cxx(type const * ptr, uxx length) : 
+                ptr((item_t *)ptr), plength(length) {
                 static_assert(sizeof(type) == sizeof(item_t));
             }
 
@@ -66,9 +63,9 @@
             }
 
             final backward(uxx value) const {
-                auto tmp = thex;
-                tmp.ptr += value;
-                tmp.count -= uxx(value);
+                auto tmp     = thex;
+                tmp.ptr     += value;
+                tmp.plength -= uxx(value);
                 return tmp;
             }
 
@@ -78,28 +75,24 @@
                 );
             }
 
-            final shorten(uxx count) const {
-                auto tmp = thex;
-                tmp.count -= count;
+            final shorten(uxx length) const {
+                auto tmp     = thex;
+                tmp.plength -= length;
                 return tmp;
             }
 
-            final elongate(uxx count) const {
+            final elongate(uxx length) const {
                 return shorten(
-                    uxx(-ixx(count))
+                    uxx(-ixx(length))
                 );
             }
 
         public:
-            xpubget_pubset(length, uxx){
-                xr{ return the.count; }
-                xw{ the.count = value; }
-            };
-
-            xpubget(is_empty, bool){
+            xpubget_pubset(length)
+            xpubgetx(is_empty, bool){
                 return length() == 0;
             };
-        };
+        $
     }
 
     #if xis_os64

@@ -248,7 +248,7 @@
                 // 任何串都不以空串开头
                 xhint(str1.is_starts_with(""));
 
-                // 除空串外，任何串可以都自己结尾
+                // 除空串外，任何串可以都自己开始
                 xhint(str1.is_starts_with(str1));
                 xhint(str1.is_starts_with("Powerful"));
                 xhint(str1.is_starts_with("POWERFULCAT", ignore_case<char>));

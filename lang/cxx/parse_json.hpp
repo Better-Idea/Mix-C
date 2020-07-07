@@ -79,7 +79,9 @@
             json_string_t<index_t>      name;
             json_value_t<index_t>       value;
 
-            xgc_fields(xiam(json_pair_t<index_t>));
+            xgc_fields(
+                xiam(json_pair_t<index_t>)
+            );
         };
 
         template<class item_t>

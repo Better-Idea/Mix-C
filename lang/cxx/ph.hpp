@@ -49,11 +49,16 @@
          * more... to be continue
          */
 
-        struct place_holder_group{};
+        xstruct(
+            xiam(place_holder_group)
+        ) $
 
         template<class final, class type = void> struct base_ph;
         template<class final>
-        struct base_ph<final, void> : place_holder_group{
+        xstruct(
+            ximx(base_ph<final, void>),
+            xpub(place_holder_group)
+        )
         protected:
             u08         align_mode          : 2  = 0;
             u08         numeration          : 6  = 10;
@@ -66,10 +71,6 @@
                 align_left,
                 align_right,
             };
-
-            xgc_fields(
-                xiam(base_ph<final, void>)
-            );
         public:
             final & c(uxx align_center_width, char left_padding_char, char right_padding_char){
                 the.align_mode              = align_center;
@@ -120,19 +121,19 @@
                     return mem + pad_width;
                 }
             }
-        };
+        $
 
         template<class final, class type>
-        struct base_ph : base_ph<final, void>{
-            xgc_fields(
-                xiam(base_ph),
-                xpro(value, type)
-            );
+        xstruct(
+            xiam(base_ph, <final, type>),
+            xpub(base_ph<final, void>),
+            xitm_pro(value, type)
+        )
         public:
             base_ph(){}
             base_ph(type const & value) : 
                 value(value){}
-        };
+        $
 
         #define xopt                                                                            \
             inc::c08 operator >> (inc::can_alloc<char> alloc) { return output(alloc); }         \
