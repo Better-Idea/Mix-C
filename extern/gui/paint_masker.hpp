@@ -8,18 +8,18 @@
     #include"extern/gui/private/addressing.hpp"
     #include"extern/gui/private/try_draw_result_t.hpp"
     #include"math/index_system.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin {
+    namespace mixc::extern_gui_paint_masker::origin {
         using inc::try_paint_result_t;
 
         template<uxx width, uxx height>
-        struct paint_masker : inc::addressing<width, height>{
+        xstruct(
+            xtmpl(paint_masker, width, height),
+            xpubb(inc::addressing<width, height>)
+        )
         private:
             inc::bit_indicator<width * height> idc;
-
-            xgc_fields(
-                xiam(paint_masker<width, height>)
-            );
         public:
             try_paint_result_t try_paint(uxx x, uxx y){
                 auto index = the(x, y);
@@ -46,10 +46,9 @@
                     }
                 }
             }
-        };
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc {

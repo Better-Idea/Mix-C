@@ -9,21 +9,21 @@
     #include"extern/gui/private/try_draw_result_t.hpp"
     #include"math/index_system.hpp"
     #include"memop/swap.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin {
+    namespace mixc::extern_gui_paint_masker_plus::origin {
         using inc::try_paint_result_t;
 
         template<uxx width, uxx height>
-        struct paint_masker_plus : inc::addressing<width, height>{
+        xstruct(
+            xtmpl(paint_masker_plus, width, height),
+            xpubb(inc::addressing<width, height>)
+        )
         private:
             using masker = inc::bit_indicator<width * height>;
             masker   idc[2];
             masker * idc_a;
             masker * idc_b;
-
-            xgc_fields(
-                xiam(paint_masker_plus<width, height>)
-            );
         public:
             paint_masker_plus() : 
                 idc_a(idc), idc_b(idc + 1){
@@ -66,10 +66,9 @@
                     mid = start = end;
                 }while(true);
             }
-        };
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc {
