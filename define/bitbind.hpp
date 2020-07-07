@@ -4,20 +4,16 @@
     #undef  xuser
     #define xuser mixc::define_bitbind
     #include"define/base_type.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::define_bitbind{
         template<class type, class bit_type = bool>
-        struct bitbind{
-            using final = bitbind;
-            
-            xgc_fields(
-                xiam(bitbind<type, bit_type>),
-                xpro(ptr,  type *);
-                xpro(mask, type);
-            );
-        public:
+        xstruct(
+            xiam(bitbind, <type, bit_type>),
+            xitm(ptr,  type *),
+            xitm(mask, type)
+        )
             bitbind() : bitbind(nullptr, 0) {}
             bitbind(type * bits, uxx index){
                 this->bind(bits, index);

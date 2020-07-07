@@ -5,15 +5,13 @@
     #define xuser mixc::define_nullref_t
     #include"define/base_type.hpp"
     #include"memop/addressof.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::define_nullref_t{
-        struct nullref_t{
-            xgc_fields(
-                xiam(nullref_t)
-            );
-        public:
+        xstruct(
+            xiam(nullref_t)
+        )
             template<class a> friend auto operator == (a const & value, nullref_t) {
                 volatile auto ptr = inc::addressof(value);
                 return voidp(ptr) == nullptr;
@@ -38,7 +36,7 @@
             operator a & () const {
                 return *(a *)this;
             }
-        };
+        $
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wnull-dereference"

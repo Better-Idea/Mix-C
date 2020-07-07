@@ -4,15 +4,10 @@
     #undef  xuser
     #define xuser mixc::define_nan
     #include"define/base_type.hpp"
-    #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
     
     namespace mixc::define_nan{
         struct nan_t{
-            xgc_fields(
-                xiam(nan_t)
-            );
-        public:
             constexpr nan_t(){}
 
             friend inline auto operator == (f32 value, nan_t) {

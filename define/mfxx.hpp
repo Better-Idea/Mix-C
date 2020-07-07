@@ -4,7 +4,6 @@
     #undef  xuser
     #define xuser mixc::define_mfxx
     #include"define/base_type.hpp"
-    #include"macro/xgc.hpp"
     #pragma pop_macro("xuser")
     
     namespace mixc::define_mfxx{
