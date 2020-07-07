@@ -19,14 +19,14 @@
         // bend close interval
         xstruct(
             xname(cc),
-            xprof(pleft, ixx),
-            xprof(pright, ixx)
+            xprof(pleft, uxx),
+            xprof(pright, uxx)
         )
             using final = cc;
 
             template<class left_t, class right_t = ixx>
             cc(left_t left, right_t right = right_t(-1)) : 
-                pleft(ixx(left)), pright(ixx(right)){}
+                pleft(left), pright(right){}
 
             void normalize(uxx length){
                 xindex_rollback(length, pleft,  +1);
@@ -35,7 +35,7 @@
 
             xpubget_proset(left)
             xpubget_proset(right)
-        };
+        $
 
         // left close right open interval
         struct co : cc{
@@ -63,7 +63,7 @@
 
             void normalize(uxx length){
                 cc::normalize(length);
-                auto asc = left() <= right();
+                auto asc = pleft <= pright;
 
                 pleft  += asc ? 1 : -1;
                 pright -= asc ? 1 : -1;
