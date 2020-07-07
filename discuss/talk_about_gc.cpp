@@ -13,43 +13,36 @@
     namespace xuser{
         struct ax;
         struct bx;
-        struct ax{
-            xgc_fields(
-                xiam(ax),
-                xpub(a, inc::shared_ptr<ax>),
-                xpub(b, inc::shared_ptr<bx>),
-                xpub(c, inc::shared_ptr<uxx>)
-            );
-        };
+        
+        xstruct(
+            xiam(ax),
+            xitm_pub(a, inc::shared_ptr<ax>),
+            xitm_pub(b, inc::shared_ptr<bx>),
+            xitm_pub(c, inc::shared_ptr<uxx>)
+        ) $
 
-        struct bx{
-            xgc_fields(
-                xiam(bx),
-                xpub(a, inc::shared_ptr<ax>),
-                xpub(b, inc::shared_ptr<bx>)
-            );
-        };
+        xstruct(
+            xiam(bx),
+            xitm_pub(a, inc::shared_ptr<ax>),
+            xitm_pub(b, inc::shared_ptr<bx>)
+        ) $
 
         struct dx;
-        struct cx{
-            xgc_fields(
-                xiam(cx),
-                xpub(items, 
-                    inc::darray<
-                        inc::shared_ptr<dx>, 
-                        1, 
-                        inc::shared_ptr<cx>
-                    >
-                )
-            );
-        };
+        xstruct(
+            xiam(cx),
+            xitm_pub(items, 
+                inc::darray<
+                    inc::shared_ptr<dx>, 
+                    1, 
+                    inc::shared_ptr<cx>
+                >
+            )
+        ) $
 
-        struct dx{
-            xgc_fields(
-                xiam(dx),
-                xpub(c, inc::shared_ptr<cx>)
-            );
-        };
+        xstruct(
+            xiam(dx),
+            xitm_pub(c, inc::shared_ptr<cx>)
+        ) $
 
         void test(){
             using namespace inc;
