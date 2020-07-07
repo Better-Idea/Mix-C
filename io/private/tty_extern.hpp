@@ -480,10 +480,6 @@ namespace xuser::origin{
 
         key     = decode(key_str, & rest);
         key_str = key_str.backward(key_str.length() - rest);
-
-        if (auto v = key.value(); key.is_char()) {
-            WideCharToMultiByte(CP_ACP, 0, LPCWCH(& v), 1, (LPSTR)key.multi_bytes_char(), sizeof(inc::tty_key::items_t), NULL, NULL);
-        }
         return key;
     }
 

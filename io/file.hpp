@@ -20,7 +20,7 @@
             xname(file),
             xpubb(inc::disable_copy),
             xprif(fd, mutable i32),
-            xprif(path, mutalb asciis)
+            xprif(path, mutable asciis)
         )
             using final = the_t;
         private:

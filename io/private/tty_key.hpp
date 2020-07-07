@@ -89,8 +89,8 @@
         xstruct(
             xname(tty_key),
             xprif(type, key_type),
-            xprif(w08, items_t<5>),
-            xprif(w16, char16_t)
+            xprif(w08,  items_t<5>),
+            xprif(w16,  char16_t)
         )
             using final = tty_key;
         public:
@@ -119,7 +119,10 @@
 
             xpubget_pubsetx(value, char16_t)
                 xr { return the.w16; }
-                xw { the.w16 = value; }
+                xw { 
+                    the.w16 = value;
+                    // TODO:w16 to w08 ======================================================
+                }
 
             xpubgetx(multi_bytes_char, asciis){
                 return w08;
