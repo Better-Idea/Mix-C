@@ -1,8 +1,8 @@
-#ifndef xpack_gc_token
-#define xpack_gc_token
+#ifndef xpack_gc_private_token
+#define xpack_gc_private_token
     #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser mixc::gc_token
+    #define xuser mixc::gc_private_token
     #include"define/base_type.hpp"
     #include"dumb/dummy_t.hpp"
     #include"lock/atom_add.hpp"
@@ -12,8 +12,8 @@
     #include"macro/xtypeid.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::gc_tuple{
-        template<class root_t, class list> union tuple;
+    namespace mixc::gc_private_tuple{
+        template<class root_t> struct tuple;
     }
 
     namespace mixc::gc_ref{
@@ -29,14 +29,14 @@
         template<class t> void free_with_destroy(t *, memory_size);
     }
 
-    namespace mixc::gc_token::origin{
+    namespace mixc::gc_private_token::origin{
         constexpr uxx step = uxx(1);
 
         struct token {
             token(uxx) : record(step) { }
         protected:
-            template<class impl, class a, class b, bool is_array> friend struct mixc::gc_ref::meta;
-            template<class root_t, class list> friend union mixc::gc_tuple::tuple;
+            template<class, class, class, bool> friend struct mixc::gc_ref::meta;
+            template<class> friend struct mixc::gc_private_tuple::tuple;
 
             constexpr auto this_length() { return uxx(0); }
             constexpr auto this_length(uxx) { }
@@ -104,5 +104,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::gc_token::origin;
+    using namespace ::mixc::gc_private_token::origin;
 }

@@ -14,8 +14,8 @@
     #include"gc/private/tuple.hpp"
     #include"lock/atom_swap.hpp"
     #include"macro/xdebug.hpp"
-    #include"macro/xgc.hpp"
     #include"macro/xis_nullptr.hpp"
+    #include"macro/xstruct.hpp"
     #include"memory/allocator.hpp"
     #include"memop/addressof.hpp"
     #include"memop/cast.hpp"
@@ -31,11 +31,9 @@
         using namespace inc;
         using visited_ptr_t = voidp;
 
-        struct info_t {
-            xgc_fields(
-                xiam(info_t)
-            );
-        public:
+        xstruct(
+            xiam(info_t)
+        )
             uxx can_arrive_root : 1;
             uxx visited         : sizeof(uxx) * 8 - 1;
 
@@ -45,7 +43,7 @@
             operator uxx (){
                 return uxxp(this)[0];
             }
-        };
+        $
 
         struct empty_t : token_plus{
             byte empty[48] = { 0 };
@@ -66,16 +64,18 @@
         inline static bool                              need_free_whole_ring;
 
         template<class impl, class item, class attribute, bool is_array>
-        struct meta : self_management {
+        xstruct(
+            xiam(meta, <impl, item, attribute, is_array>),
+            xpub(self_management),
+            xhas(attribute),
+            xhas(item)
+        )
             using the_length  = typename cif<is_array, token_plus, token>::result;
             using token_mix_t = token_mix<item, attribute, the_length>;
 
-            xgc_fields(
-                xiam(meta<impl, item, attribute, is_array>),
-                xhas(attribute),
-                xhas(item)
-            ) {
-                using tuplep = tuple<attribute, typename attribute::member_list> *;
+            template<class guide>
+            bool routing() {
+                using tuplep = tuple<attribute> *;
 
                 bool can_arrive_root = false;
 
@@ -86,7 +86,7 @@
                 xdebug(im_gc_meta_routing, mem, xtypeid(attribute).name, mem->owners(), the.length());
 
                 if constexpr (tin<guide, item>){
-                    using tuplep = tuple<item, typename item::member_list> *;
+                    using tuplep = tuple<item> *;
 
                     for(uxx i = 0; i < the.length(); i++){
                         can_arrive_root |= tuplep(xref the[i])->template routing<guide>();

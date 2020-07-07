@@ -11,15 +11,13 @@
     #undef  xuser
     #define xuser mixc::gc_self_management
     #include"define/base_type.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::gc_self_management{
-        struct self_management{
-            xgc_fields(
-                xiam(self_management)
-            );
-        };
+        xstruct(
+            xiam(self_management)
+        ) $
     }
 
 #endif

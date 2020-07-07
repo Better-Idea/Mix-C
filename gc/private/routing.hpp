@@ -6,11 +6,11 @@
 说明：采用这种方式保存方便通过 bfs（宽度优先搜索算法）筛选出所有构成环形引用的类型组
 */
 
-#ifndef xpack_gc_routing
-#define xpack_gc_routing
+#ifndef xpack_gc_private_routing
+#define xpack_gc_private_routing
     #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser mixc::gc_routing
+    #define xuser mixc::gc_private_routing
     #include"define/base_type.hpp"
     #include"meta/is_class.hpp"         
     #include"meta_seq/tappend.hpp"
@@ -21,7 +21,7 @@
     #include"meta_seq/tmarge.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::gc_routing{
+    namespace mixc::gc_private_routing{
         using namespace inc;
 
         template<class root>
@@ -110,5 +110,5 @@
 #endif
 
 namespace xuser::inc{
-    using ::mixc::gc_routing::routing;
+    using ::mixc::gc_private_routing::routing;
 }
