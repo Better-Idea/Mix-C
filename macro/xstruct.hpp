@@ -2,8 +2,8 @@
  * 在使用 xpubget_pubsetx 构建属性范式时，请勿使用 __COUNTER__ 
  * 在使用 xstruct 宏时不要出现多余的逗号，像这样
  * xstruct(
- *     xiam(foo),
- *     xitm(bar, type), <- 多余的逗号
+ *     xname(foo),
+ *     xprif(bar, type), <- 多余的逗号
  * )
  */
 
@@ -61,100 +61,126 @@
 
     #define __ignore__(...)
 
-    #define __xexpand__
-    #define __xexpand_iam__(...)
-    #define __xexpand_imx__(...)
-    #define __xexpand_pub__(...)                public      __VA_ARGS__, 
-    #define __xexpand_pro__(...)                protected   __VA_ARGS__, 
-    #define __xexpand_pri__(...)                private     __VA_ARGS__, 
-    #define __xexpand_itm__(...)
-    #define __xexpand_itm_pub__(...)
-    #define __xexpand_itm_pro__(...)
-    #define __xexpand_itm_pri__(...)
-    #define __xexpand_has__(...)
-
-    #define __xbase__
-    #define __xbase_iam__(...)
-    #define __xbase_imx__(...)
-    #define __xbase_pub__(...)                  , __VA_ARGS__
-    #define __xbase_pro__(...)                  , __VA_ARGS__
-    #define __xbase_pri__(...)                  , __VA_ARGS__
-    #define __xbase_itm__(...)
-    #define __xbase_itm_pub__(...)
-    #define __xbase_itm_pro__(...)
-    #define __xbase_itm_pri__(...)
-    #define __xbase_has__(...)
-    
-    #define __xplaced__
-    #define __xplaced_iam__(name,...)           name __VA_ARGS__
-    #define __xplaced_imx__(...)                __VA_ARGS__
-    #define __xplaced_pub__(...)                , __VA_ARGS__
-    #define __xplaced_pro__(...)                , __VA_ARGS__
-    #define __xplaced_pri__(...)                , __VA_ARGS__
-    #define __xplaced_itm__(...)
-    #define __xplaced_itm_pub__(...)
-    #define __xplaced_itm_pro__(...)
-    #define __xplaced_itm_pri__(...)
-    #define __xplaced_has__(...)
-
+    // 结构名
     #define __xstruct__
-    #define __xstruct_iam__(name,...)           name
-    #define __xstruct_imx__(...)                __VA_ARGS__
-    #define __xstruct_pub__(...)
-    #define __xstruct_pro__(...)
-    #define __xstruct_pri__(...)
-    #define __xstruct_itm__(...)
-    #define __xstruct_itm_pub__(...)
-    #define __xstruct_itm_pro__(...)
-    #define __xstruct_itm_pri__(...)
-    #define __xstruct_has__(...)
-    
+    #define __xstruct_name__(...)               __VA_ARGS__
+    #define __xstruct_tmpl__(name,...)          name
+    #define __xstruct_spec__(name,...)          name<__VA_ARGS__>
+    #define __xstruct_pubb__(...)
+    #define __xstruct_prob__(...)
+    #define __xstruct_prib__(...)
+    #define __xstruct_pubf__(...)
+    #define __xstruct_prof__(...)
+    #define __xstruct_prif__(...)
+    #define __xstruct_asso__(...)
+
+    // 基类
+    #define __xexpand__
+    #define __xexpand_name__(...)
+    #define __xexpand_tmpl__(...)
+    #define __xexpand_spec__(...)
+    #define __xexpand_pubb__(...)               public      __VA_ARGS__, 
+    #define __xexpand_prob__(...)               protected   __VA_ARGS__, 
+    #define __xexpand_prib__(...)               private     __VA_ARGS__, 
+    #define __xexpand_pubf__(...)
+    #define __xexpand_prof__(...)
+    #define __xexpand_prif__(...)
+    #define __xexpand_asso__(...)
+
+    // the_t 别名
     #define __xthe__
-    #define __xthe_imx__(...)                   __VA_ARGS__
-    #define __xthe_iam__(name,...)              name __VA_ARGS__
-    #define __xthe_pub__(...)
-    #define __xthe_pro__(...)
-    #define __xthe_pri__(...)
-    #define __xthe_itm__(...)
-    #define __xthe_itm_pub__(...)
-    #define __xthe_itm_pro__(...)
-    #define __xthe_itm_pri__(...)
-    #define __xthe_has__(...)
+    #define __xthe_name__(...)                  __VA_ARGS__
+    #define __xthe_tmpl__(name,...)             name<__VA_ARGS__>
+    #define __xthe_spec__(name,...)             name<__VA_ARGS__>
+    #define __xthe_pubb__(...)
+    #define __xthe_prob__(...)
+    #define __xthe_prib__(...)
+    #define __xthe_pubf__(...)
+    #define __xthe_prof__(...)
+    #define __xthe_prif__(...)
+    #define __xthe_asso__(...)
 
+    // base_list 基类清单
+    #define __xbase__
+    #define __xbase_name__(...)
+    #define __xbase_tmpl__(...)
+    #define __xbase_spec__(...)
+    #define __xbase_pubb__(...)                 , __VA_ARGS__
+    #define __xbase_prob__(...)                 , __VA_ARGS__
+    #define __xbase_prib__(...)                 , __VA_ARGS__
+    #define __xbase_pubf__(...)
+    #define __xbase_prof__(...)
+    #define __xbase_prif__(...)
+    #define __xbase_asso__(...)
+
+    // member_list 所有成员清单
+    #define __xplaced__
+    #define __xplaced_name__(...)               __VA_ARGS__
+    #define __xplaced_tmpl__(name,...)          name<__VA_ARGS__>
+    #define __xplaced_spec__(name,...)          name<__VA_ARGS__>
+    #define __xplaced_pubb__(...)               , __VA_ARGS__
+    #define __xplaced_prob__(...)               , __VA_ARGS__
+    #define __xplaced_prib__(...)               , __VA_ARGS__
+    #define __xplaced_pubf__(...)
+    #define __xplaced_prof__(...)
+    #define __xplaced_prif__(...)
+    #define __xplaced_asso__(...)
+
+    // 字段
     #define __xfield__
-    #define __xfield_imx__(...)
-    #define __xfield_iam__(...)
-    #define __xfield_pub__(...)
-    #define __xfield_pro__(...)
-    #define __xfield_pri__(...)
-    #define __xfield_itm__(name,...)            __VA_ARGS__ name;
-    #define __xfield_itm_pub__(name,...)        public:     __VA_ARGS__ name;
-    #define __xfield_itm_pro__(name,...)        protected:  __VA_ARGS__ name;
-    #define __xfield_itm_pri__(name,...)        private:    __VA_ARGS__ name;
-    #define __xfield_has__(...)
+    #define __xfield_name__(...)
+    #define __xfield_tmpl__(...)
+    #define __xfield_spec__(...)
+    #define __xfield_pubb__(...)
+    #define __xfield_prob__(...)
+    #define __xfield_prib__(...)
+    #define __xfield_pubf__(name,...)           public:     __VA_ARGS__ name;
+    #define __xfield_prof__(name,...)           protected:  __VA_ARGS__ name;
+    #define __xfield_prif__(name,...)           private:    __VA_ARGS__ name;
+    #define __xfield_asso__(...)
 
+    // 非基类成员字段指针
     #define __xmlist__
-    #define __xmlist_imx__(...)
-    #define __xmlist_iam__(...)
-    #define __xmlist_pub__(...)
-    #define __xmlist_pro__(...)
-    #define __xmlist_pri__(...)
-    #define __xmlist_itm__(name,...)            , & the_t::name
-    #define __xmlist_itm_pub__(name,...)        , & the_t::name
-    #define __xmlist_itm_pro__(name,...)        , & the_t::name
-    #define __xmlist_itm_pri__(name,...)        , & the_t::name
-    #define __xmlist_has__(...)                 , & ::mixc::macro_xstruct::fake<__VA_ARGS__>::item
+    #define __xmlist_name__(...)
+    #define __xmlist_tmpl__(...)
+    #define __xmlist_spec__(...)
+    #define __xmlist_pubb__(...)
+    #define __xmlist_prob__(...)
+    #define __xmlist_prib__(...)
+    #define __xmlist_pubf__(name,...)           , & the_t::name
+    #define __xmlist_prof__(name,...)           , & the_t::name
+    #define __xmlist_prif__(name,...)           , & the_t::name
+    #define __xmlist_asso__(...)                , & ::mixc::macro_xstruct::fake<__VA_ARGS__>::item
 
-    #define ximx(...)                           imx__(__VA_ARGS__)
-    #define xiam(...)                           iam__(__VA_ARGS__)
-    #define xpub(...)                           pub__(__VA_ARGS__)
-    #define xpro(...)                           pro__(__VA_ARGS__)
-    #define xpri(...)                           pri__(__VA_ARGS__)
-    #define xitm(...)                           itm__(__VA_ARGS__)
-    #define xitm_pub(...)                       itm_pub__(__VA_ARGS__)
-    #define xitm_pro(...)                       itm_pro__(__VA_ARGS__)
-    #define xitm_pri(...)                       itm_pri__(__VA_ARGS__)
-    #define xhas(...)                           has__(__VA_ARGS__)
+    // 普通类
+    #define xname(...)                          name__(__VA_ARGS__)
+
+    // 模板类
+    #define xtmpl(...)                          tmpl__(__VA_ARGS__)
+
+    // 特化模板类
+    #define xspec(...)                          spec__(__VA_ARGS__)
+
+    // 公有的基类 (public base)
+    #define xpubb(...)                          pubb__(__VA_ARGS__)
+
+    // 受保护的基类 (protected base)
+    #define xprob(...)                          prob__(__VA_ARGS__)
+
+    // 私有基类 (private base)
+    #define xprib(...)                          prib__(__VA_ARGS__)
+
+    // 公有字段 (public field)
+    #define xpubf(...)                          pubf__(__VA_ARGS__)
+
+    // 受保护的字段 (protected field)
+    #define xprof(...)                          prof__(__VA_ARGS__)
+
+    // 私有的字段 (private field)
+    #define xprif(...)                          prif__(__VA_ARGS__)
+
+    // 与该结构关联的类型 (association)
+    #define xasso(...)                          asso__(__VA_ARGS__)
 
     #define xstruct(...)                                                            \
     struct __xlist__(__xstruct_, __VA_ARGS__) :                                     \
