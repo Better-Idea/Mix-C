@@ -4,9 +4,9 @@
     #undef  xuser
     #define xuser mixc::math_index_system
     #include"define/base_type.hpp"
-    #include"macro/xgc.hpp"
     #include"macro/xindex_rollback.hpp"
     #include"macro/xitf.hpp"
+    #include"macro/xstruct.hpp"
     #pragma pop_macro("xuser")
     
     namespace mixc{
@@ -17,13 +17,13 @@
         );
 
         // bend close interval
-        struct cc{
-            xgc_fields(
-                xiam(cc),
-                xpro(pleft,  ixx),
-                xpro(pright, ixx)
-            );
-        public:
+        xstruct(
+            xiam(cc),
+            xitm(pleft, ixx),
+            xitm(pright, ixx)
+        )
+            using final = cc;
+
             template<class left_t, class right_t = ixx>
             cc(left_t left, right_t right = right_t(-1)) : 
                 pleft(ixx(left)), pright(ixx(right)){}
@@ -33,13 +33,8 @@
                 xindex_rollback(length, pright, +1);
             }
 
-            uxx left() const {
-                return pleft;
-            }
-
-            uxx right() const {
-                return pright;
-            }
+            xpubget_proset(left)
+            xpubget_proset(right)
         };
 
         // left close right open interval
@@ -48,7 +43,9 @@
 
             void normalize(uxx length){
                 cc::normalize(length);
-                pright -= (pleft <= pright ? 1 : -1);
+                right(
+                    right() - (left() <= right() ? 1 : -1)
+                );
             }
         };
 
@@ -58,7 +55,9 @@
 
             void normalize(uxx length){
                 cc::normalize(length);
-                pleft += (pleft <= pright ? 1 : -1);
+                left(
+                    left() + (left() <= right() ? 1 : -1)
+                );
             }
         };
 
@@ -68,9 +67,14 @@
 
             void normalize(uxx length){
                 cc::normalize(length);
-                auto asc = pleft <= pright;
-                pleft  += (asc ? 1 : -1);
-                pright -= (asc ? 1 : -1);
+                auto asc = left() <= right();
+
+                left(
+                    left() + (asc ? 1 : -1)
+                );
+                right(
+                    right() - (asc ? 1 : -1)
+                );
             }
         };
 
