@@ -15,6 +15,7 @@
     #include"dumb/place_holder.hpp"
     #include"macro/private/xlist.hpp"
     #include"macro/xdummy.hpp"
+    #include"macro/xlink.hpp"
     #include"meta/remove_ref.hpp"
     #include"meta_seq/tlist.hpp"
     #include"meta_seq/vlist.hpp"
@@ -58,68 +59,90 @@
         };
     }
 
+    #define __ignore__(...)
 
     #define __xexpand__
-    #define __xexpand_itm__(...)
     #define __xexpand_iam__(...)
     #define __xexpand_imx__(...)
     #define __xexpand_pub__(...)                public      __VA_ARGS__, 
     #define __xexpand_pro__(...)                protected   __VA_ARGS__, 
     #define __xexpand_pri__(...)                private     __VA_ARGS__, 
+    #define __xexpand_itm__(...)
+    #define __xexpand_itm_pub__(...)
+    #define __xexpand_itm_pro__(...)
+    #define __xexpand_itm_pri__(...)
     #define __xexpand_has__(...)
 
     #define __xbase__
-    #define __xbase_itm__(...)
     #define __xbase_iam__(...)
     #define __xbase_imx__(...)
     #define __xbase_pub__(...)                  , __VA_ARGS__
     #define __xbase_pro__(...)                  , __VA_ARGS__
     #define __xbase_pri__(...)                  , __VA_ARGS__
+    #define __xbase_itm__(...)
+    #define __xbase_itm_pub__(...)
+    #define __xbase_itm_pro__(...)
+    #define __xbase_itm_pri__(...)
     #define __xbase_has__(...)
     
     #define __xplaced__
-    #define __xplaced_itm__(...)
     #define __xplaced_iam__(name,...)           name __VA_ARGS__
     #define __xplaced_imx__(...)                __VA_ARGS__
     #define __xplaced_pub__(...)                , __VA_ARGS__
     #define __xplaced_pro__(...)                , __VA_ARGS__
     #define __xplaced_pri__(...)                , __VA_ARGS__
+    #define __xplaced_itm__(...)
+    #define __xplaced_itm_pub__(...)
+    #define __xplaced_itm_pro__(...)
+    #define __xplaced_itm_pri__(...)
     #define __xplaced_has__(...)
 
     #define __xstruct__
-    #define __xstruct_itm__(...)
     #define __xstruct_iam__(name,...)           name
     #define __xstruct_imx__(...)                __VA_ARGS__
     #define __xstruct_pub__(...)
     #define __xstruct_pro__(...)
     #define __xstruct_pri__(...)
+    #define __xstruct_itm__(...)
+    #define __xstruct_itm_pub__(...)
+    #define __xstruct_itm_pro__(...)
+    #define __xstruct_itm_pri__(...)
     #define __xstruct_has__(...)
     
     #define __xthe__
-    #define __xthe_itm__(...)
     #define __xthe_imx__(...)                   __VA_ARGS__
     #define __xthe_iam__(name,...)              name __VA_ARGS__
     #define __xthe_pub__(...)
     #define __xthe_pro__(...)
     #define __xthe_pri__(...)
+    #define __xthe_itm__(...)
+    #define __xthe_itm_pub__(...)
+    #define __xthe_itm_pro__(...)
+    #define __xthe_itm_pri__(...)
     #define __xthe_has__(...)
 
     #define __xfield__
-    #define __xfield_itm__(name,...)            __VA_ARGS__ name;
     #define __xfield_imx__(...)
     #define __xfield_iam__(...)
     #define __xfield_pub__(...)
     #define __xfield_pro__(...)
     #define __xfield_pri__(...)
+    #define __xfield_itm__(name,...)            __VA_ARGS__ name;
+    #define __xfield_itm_pub__(name,...)        public:     __VA_ARGS__ name;
+    #define __xfield_itm_pro__(name,...)        protected:  __VA_ARGS__ name;
+    #define __xfield_itm_pri__(name,...)        private:    __VA_ARGS__ name;
     #define __xfield_has__(...)
 
     #define __xmlist__
-    #define __xmlist_itm__(name,...)            , & the_t::name
     #define __xmlist_imx__(...)
     #define __xmlist_iam__(...)
     #define __xmlist_pub__(...)
     #define __xmlist_pro__(...)
     #define __xmlist_pri__(...)
+    #define __xmlist_itm__(name,...)            , & the_t::name
+    #define __xmlist_itm_pub__(name,...)        , & the_t::name
+    #define __xmlist_itm_pro__(name,...)        , & the_t::name
+    #define __xmlist_itm_pri__(name,...)        , & the_t::name
     #define __xmlist_has__(...)                 , & ::mixc::macro_xstruct::fake<__VA_ARGS__>::item
 
     #define ximx(...)                           imx__(__VA_ARGS__)
@@ -128,6 +151,9 @@
     #define xpro(...)                           pro__(__VA_ARGS__)
     #define xpri(...)                           pri__(__VA_ARGS__)
     #define xitm(...)                           itm__(__VA_ARGS__)
+    #define xitm_pub(...)                       itm_pub__(__VA_ARGS__)
+    #define xitm_pro(...)                       itm_pro__(__VA_ARGS__)
+    #define xitm_pri(...)                       itm_pri__(__VA_ARGS__)
     #define xhas(...)                           has__(__VA_ARGS__)
 
     #define xstruct(...)                                                            \
@@ -200,19 +226,19 @@
     #define xpriget_proset(name,...)                    xpriget_prosetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
     #define xpriget_priset(name,...)                    xpriget_prisetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
 
-    #define xpubsetx(name,...)                          __set__(public      , name, __VA_ARGS__) private: xw xdummy(__COUNTER__, __COUNTER__)
-    #define xprosetx(name,...)                          __set__(protected   , name, __VA_ARGS__) private: xw xdummy(__COUNTER__, __COUNTER__)
-    #define xprisetx(name,...)                          __set__(private     , name, __VA_ARGS__) private: xw xdummy(__COUNTER__, __COUNTER__)
+    #define xpubsetx(name,...)                          __set__(public      , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) xw
+    #define xprosetx(name,...)                          __set__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) xw
+    #define xprisetx(name,...)                          __set__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) xw
 
     #define xpubset(name,...)                           xpubsetx(name, __VA_ARGS__) { the_t::p ## name = value; }
     #define xproset(name,...)                           xprosetx(name, __VA_ARGS__) { the_t::p ## name = value; }
     #define xpriset(name,...)                           xprisetx(name, __VA_ARGS__) { the_t::p ## name = value; }
 
-    #define xpubgetx(name,...)                          __get__(public      , name, __VA_ARGS__) private: __VA_ARGS__ xr xdummy(__COUNTER__, __COUNTER__)
-    #define xprogetx(name,...)                          __get__(protected   , name, __VA_ARGS__) private: __VA_ARGS__ xr xdummy(__COUNTER__, __COUNTER__)
-    #define xprigetx(name,...)                          __get__(private     , name, __VA_ARGS__) private: __VA_ARGS__ xr xdummy(__COUNTER__, __COUNTER__)
+    #define xpubgetx(name,...)                          __get__(public      , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
+    #define xprogetx(name,...)                          __get__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
+    #define xprigetx(name,...)                          __get__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
 
-    #define xpubget(name,...)                           xpubgetx(name,__VA_ARGS__) xr { return the_t::p ## name; }
-    #define xproget(name,...)                           xprogetx(name,__VA_ARGS__) xr { return the_t::p ## name; }
-    #define xpriget(name,...)                           xprigetx(name,__VA_ARGS__) xr { return the_t::p ## name; }
+    #define xpubget(name,...)                           xpubgetx(name,__VA_ARGS__) { return the_t::p ## name; }
+    #define xproget(name,...)                           xprogetx(name,__VA_ARGS__) { return the_t::p ## name; }
+    #define xpriget(name,...)                           xprigetx(name,__VA_ARGS__) { return the_t::p ## name; }
 #endif

@@ -27,7 +27,8 @@
                     static char the_name[len + leave_out + 1/* \0 */] = { 0 };
 
                     if constexpr (is_class<the_type>){
-                        auto ptr = the_type::__self_name;
+                        // auto ptr = the_type::__self_name;
+                        auto ptr = "";
                         the_name[len + 0] = '.';
                         the_name[len + 1] = '.';
                         the_name[len + 2] = '.';
