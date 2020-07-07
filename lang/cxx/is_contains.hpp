@@ -16,32 +16,38 @@
     #include"lang/cxx.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
+
+    namespace mixc::lang_cxx_is_contains{
+        template<class final, class base, class item>
+        struct meta : base{
+            using base::base;
+            using the_t = inc::cxx<item>;
+
+            bool is_contains(
+                item                   value,
+                inc::can_compare<item> compare = inc::default_compare<item>) const {
+                return the.index_of_first(value, compare) != not_exist;
+            }
+
+            bool is_contains(
+                inc::initializer_list<item> values,
+                inc::can_compare<item>      compare = inc::default_compare<item>) const {
+                return the.index_of_first(values.begin(), values.size(), compare) != not_exist;
+            }
+
+            bool is_contains(
+                final                  value,
+                inc::can_compare<item> compare = inc::default_compare<item>) const {
+                return the.index_of_first(value, compare) != not_exist;
+            }
+        };
+    }
+
 #endif
 
 namespace mixc::lang_cxx_is_contains::xuser{
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item>{
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = inc::cxx<item>;
-
-        bool is_contains(
-            item                   value,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.index_of_first(value, compare) != not_exist;
-        }
-
-        bool is_contains(
-            inc::initializer_list<item> values,
-            inc::can_compare<item>      compare = inc::default_compare<item>) const {
-            return the.index_of_first(values.begin(), values.size(), compare) != not_exist;
-        }
-
-        bool is_contains(
-            final                  value,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.index_of_first(value, compare) != not_exist;
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #undef  xusing_lang_cxx

@@ -35,22 +35,25 @@
                 ).compare_fastly(value, compare) == 0;
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base {
+            using base::base;
+            using the_t = ::mixc::lang_cxx_is_ends_with::core<item>;
+
+            bool is_ends_with(
+                final                  value, 
+                inc::can_compare<item> compare = inc::default_compare<item>) const {
+                return the.is_ends_with(value, compare);
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_is_ends_with::xuser{
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item> {
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = ::mixc::lang_cxx_is_ends_with::core<item>;
-
-        bool is_ends_with(
-            final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.is_ends_with(value, compare);
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #undef  xusing_lang_cxx

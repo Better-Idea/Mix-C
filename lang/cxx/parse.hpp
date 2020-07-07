@@ -182,34 +182,37 @@
 
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base{
+            using base::base;
+            using the_t = core<item>;
+
+            template<class target>
+            parse_result<target> parse() const {
+                return parse<target>(inc::numeration_t::dec);
+            }
+
+            template<class target>
+            parse_result<target> parse(inc::numeration_t raidx) const {
+                if constexpr (inc::is_float<target>){
+                    return the.template parse<target>(10);
+                }
+                else if constexpr (xis_os64 or sizeof(target) <= sizeof(uxx)){
+                    return the.template parse<uxx>(uxx(raidx));
+                }
+                else if constexpr (xis_os32){
+                    return the.template parse<inc::unsigned_type<target>>(uxx(raidx));
+                }
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_parse::xuser{
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item>{
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-
-        template<class target>
-        parse_result<target> parse() const {
-            return parse<target>(inc::numeration_t::dec);
-        }
-
-        template<class target>
-        parse_result<target> parse(inc::numeration_t base) const {
-            if constexpr (inc::is_float<target>){
-                return the.template parse<target>(10);
-            }
-            else if constexpr (xis_os64 or sizeof(target) <= sizeof(uxx)){
-                return the.template parse<uxx>(uxx(base));
-            }
-            else if constexpr (xis_os32){
-                return the.template parse<inc::unsigned_type<target>>(uxx(base));
-            }
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #include"math/numeration_t.hpp"

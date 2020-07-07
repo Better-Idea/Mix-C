@@ -50,14 +50,14 @@
          */
 
         xstruct(
-            xiam(place_holder_group)
+            xname(place_holder_group)
         ) $
 
         template<class final, class type = void> struct base_ph;
         template<class final>
         xstruct(
-            ximx(base_ph<final, void>),
-            xpub(place_holder_group)
+            xspec(base_ph, final, void),
+            xpubb(place_holder_group)
         )
         protected:
             u08         align_mode          : 2  = 0;
@@ -125,9 +125,9 @@
 
         template<class final, class type>
         xstruct(
-            xiam(base_ph, <final, type>),
-            xpub(base_ph<final, void>),
-            xitm_pro(value, type)
+            xtmpl(base_ph, final, type),
+            xpubb(base_ph<final, void>),
+            xprof(value, type)
         )
         public:
             base_ph(){}

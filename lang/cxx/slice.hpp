@@ -74,28 +74,31 @@
                 return the_t(buf, target_length);
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base {
+            using base::base;
+            using the_t = core<item>;
+
+            final slice(ixx start, ixx end) const {
+                return the.slice(start, end);
+            }
+
+            final slice(ixx start, inc::can_alloc<item> alloc) const {
+                return slice(start, -1, alloc);
+            }
+
+            final slice(ixx start, ixx end, inc::can_alloc<item> alloc) const {
+                return the.slice(start, end, alloc);
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_slice::xuser {
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item> {
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-
-        final slice(ixx start, ixx end) const {
-            return the.slice(start, end);
-        }
-
-        final slice(ixx start, inc::can_alloc<item> alloc) const {
-            return slice(start, -1, alloc);
-        }
-
-        final slice(ixx start, ixx end, inc::can_alloc<item> alloc) const {
-            return the.slice(start, end, alloc);
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #undef  xusing_lang_cxx

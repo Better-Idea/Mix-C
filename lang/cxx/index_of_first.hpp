@@ -95,42 +95,45 @@
                 }
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base {
+            using base::base;
+            using the_t = core<item>;
+
+            uxx index_of_first(
+                item                   value, 
+                inc::can_compare<item> compare = inc::default_compare<item>) const {
+                return the.index_of_first(& value, 1, compare);
+            }
+
+            uxx index_of_first(
+                inc::initializer_list<item> values, 
+                inc::can_compare<item>      compare = inc::default_compare<item>) const {
+                return the.index_of_first(values.begin(), values.size(), compare);
+            }
+
+            uxx index_of_first(
+                final                  value, 
+                inc::can_compare<item> compare = inc::default_compare<item>) const {
+                return the.index_of_first(value, compare);
+            }
+
+            final & index_of_first(
+                final                              value, 
+                inc::can_callback<void(uxx index)> match,
+                inc::can_compare<item>             compare = inc::default_compare<item>) const {
+                the.index_of_first(value, match, compare);
+                return thex;
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_index_of_first::xuser {
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item> {
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-
-        uxx index_of_first(
-            item                   value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.index_of_first(& value, 1, compare);
-        }
-
-        uxx index_of_first(
-            inc::initializer_list<item> values, 
-            inc::can_compare<item>      compare = inc::default_compare<item>) const {
-            return the.index_of_first(values.begin(), values.size(), compare);
-        }
-
-        uxx index_of_first(
-            final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.index_of_first(value, compare);
-        }
-
-        final & index_of_first(
-            final                              value, 
-            inc::can_callback<void(uxx index)> match,
-            inc::can_compare<item>             compare = inc::default_compare<item>) const {
-            the.index_of_first(value, match, compare);
-            return thex;
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #undef  xusing_lang_cxx

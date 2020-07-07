@@ -80,7 +80,7 @@
             json_value_t<index_t>       value;
 
             xgc_fields(
-                xiam(json_pair_t<index_t>)
+                xname(json_pair_t<index_t>)
             );
         };
 
@@ -375,21 +375,24 @@
                 return { the, the.template parse_value<index_t>(i, mem) };
             }
         };
+
+        template<class final, class base, class item_t>
+        struct meta : base {
+            using base::base;
+            using the_t = core<item_t>;
+
+            template<class index_t = u32>
+            auto parse_json(inc::can_alloc<byte> alloc) {
+                return the.template parse_json<final, index_t>(alloc);
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_parse_json::xuser {
-    template<class final, class item_t>
-    struct cxx : xusing_lang_cxx::cxx<final, item_t> {
-        using xusing_lang_cxx::cxx<final, item_t>::cxx;
-        using the_t = core<item_t>;
-
-        template<class index_t = u32>
-        auto parse_json(inc::can_alloc<byte> alloc) {
-            return the.template parse_json<final, index_t>(alloc);
-        }
-    };
+    template<class final, class item>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 namespace xuser::inc::json_type{

@@ -12,9 +12,9 @@
     namespace mixc::lang_cxx{
         template<class final, class item_t>
         xstruct(
-            xiam(cxx, <final, item_t>),
-            xitm(ptr, item_t *),
-            xitm(plength, uxx)
+            xtmpl(cxx, final, item_t),
+            xprif(ptr, item_t *),
+            xprif(plength, uxx)
         )
         private:
             inline static item_t empty = item_t(0);
@@ -89,9 +89,10 @@
 
         public:
             xpubget_pubset(length)
+
             xpubgetx(is_empty, bool){
                 return length() == 0;
-            };
+            }
         $
     }
 

@@ -32,20 +32,23 @@
                 return r;
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base {
+            using base::base;
+            using the_t = core<item>;
+
+            final clone(inc::can_alloc<item> alloc) const {
+                return the.clone(alloc);
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_clone::xuser {
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item> {
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-
-        final clone(inc::can_alloc<item> alloc) const {
-            return the.clone(alloc);
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #undef  xusing_lang_cxx

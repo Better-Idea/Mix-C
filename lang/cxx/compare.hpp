@@ -37,22 +37,25 @@
                 return ixx(the.length() - value.length());
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base {
+            using base::base;
+            using the_t = core<item>;
+
+            ixx compare(
+                final                  value, 
+                inc::can_compare<item> compare = inc::default_compare<item>) const {
+                return the.compare(value, compare);
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_compare::xuser{
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item> {
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-
-        ixx compare(
-            final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
-            return the.compare(value, compare);
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 #undef  xusing_lang_cxx

@@ -289,74 +289,77 @@
                 return r;
             }
         };
+
+        template<class final, class base, class item>
+        struct meta : base{
+            using base::base;
+            using the_t = core<item>;
+
+            #define xgen(type)                                                                      \
+            meta(type value, inc::can_alloc<item> alloc) :                                          \
+                meta(value, int_format_t::fmt_n, inc::numeration_t::dec, lower, alloc){             \
+            }                                                                                       \
+                                                                                                    \
+            meta(type value, asciis lut, inc::can_alloc<item> alloc) :                              \
+                meta(value, int_format_t::fmt_n, inc::numeration_t::dec, lut, alloc){               \
+            }                                                                                       \
+                                                                                                    \
+            meta(type value, inc::numeration_t radix, inc::can_alloc<item> alloc) :                 \
+                meta(value, int_format_t::fmt_n, radix, lower, alloc){                              \
+            }                                                                                       \
+                                                                                                    \
+            meta(type value, inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc) :     \
+                meta(value, int_format_t::fmt_n, radix, lower, alloc){                              \
+            }                                                                                       \
+                                                                                                    \
+            meta(type value, int_format_t fmt,                                                      \
+                inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc){                   \
+                thex = the.strlize(value, fmt, type(radix), lut, alloc);                            \
+            }
+
+            xgen(u08);
+            xgen(u16);
+            xgen(u32);
+            xgen(u64);
+            xgen(i08);
+            xgen(i16);
+            xgen(i32);
+            xgen(i64);
+            #undef  xgen
+
+            meta(f64 value, inc::can_alloc<item> alloc){
+                thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, not_exist, alloc);
+            }
+
+            meta(f64 value, float_format_t mode, inc::can_alloc<item> alloc){
+                thex = the.template strlize<f64>(value, mode, not_exist, alloc);
+            }
+
+            meta(f64 value, uxx number_of_significa, inc::can_alloc<item> alloc){
+                thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, number_of_significa, alloc);
+            }
+
+            meta(f64 value, float_format_t mode, uxx number_of_significa, inc::can_alloc<item> alloc){
+                thex = the.template strlize<f64>(value, mode, number_of_significa, alloc);
+            }
+
+            meta(final value, inc::can_alloc<item> alloc){
+                thex = the_t(value).clone(alloc);
+            }
+
+            meta(item value, inc::can_alloc<item> alloc){
+                item * ptr = alloc(1);
+                thex = the_t{ ptr, 1 };
+                ptr[0] = value;
+            }
+        };
     }
 
 #endif
 
 namespace mixc::lang_cxx_strlize::xuser{
     template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item>{
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
-
-        #define xgen(type)                                                                      \
-        cxx(type value, inc::can_alloc<item> alloc) :                                           \
-            cxx(value, int_format_t::fmt_n, inc::numeration_t::dec, lower, alloc){              \
-        }                                                                                       \
-                                                                                                \
-        cxx(type value, asciis lut, inc::can_alloc<item> alloc) :                               \
-            cxx(value, int_format_t::fmt_n, inc::numeration_t::dec, lut, alloc){                \
-        }                                                                                       \
-                                                                                                \
-        cxx(type value, inc::numeration_t base, inc::can_alloc<item> alloc) :                   \
-            cxx(value, int_format_t::fmt_n, base, lower, alloc){                                \
-        }                                                                                       \
-                                                                                                \
-        cxx(type value, inc::numeration_t base, asciis lut, inc::can_alloc<item> alloc) :       \
-            cxx(value, int_format_t::fmt_n, base, lower, alloc){                                \
-        }                                                                                       \
-                                                                                                \
-        cxx(type value, int_format_t fmt,                                                       \
-            inc::numeration_t base, asciis lut, inc::can_alloc<item> alloc){                    \
-            thex = the.strlize(value, fmt, type(base), lut, alloc);                             \
-        }
-
-        xgen(u08);
-        xgen(u16);
-        xgen(u32);
-        xgen(u64);
-        xgen(i08);
-        xgen(i16);
-        xgen(i32);
-        xgen(i64);
-        #undef  xgen
-
-        cxx(f64 value, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, not_exist, alloc);
-        }
-
-        cxx(f64 value, float_format_t mode, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, mode, not_exist, alloc);
-        }
-
-        cxx(f64 value, uxx number_of_significa, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, number_of_significa, alloc);
-        }
-
-        cxx(f64 value, float_format_t mode, uxx number_of_significa, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, mode, number_of_significa, alloc);
-        }
-
-        cxx(final value, inc::can_alloc<item> alloc){
-            thex = the_t(value).clone(alloc);
-        }
-
-        cxx(item value, inc::can_alloc<item> alloc){
-            item * ptr = alloc(1);
-            thex = the_t{ ptr, 1 };
-            ptr[0] = value;
-        }
-    };
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
 namespace xuser::inc{
