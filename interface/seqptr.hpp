@@ -6,9 +6,10 @@
     #include"define/base_type.hpp"
     #include"interface/initializer_list.hpp"
     #include"interface/ranger.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #include"math/index_system.hpp"
     #include"memop/signature.hpp"
+    #pragma pop_macro("xuser")
     
     #define xseqptr(...)                                                            \
     ::mixc::interface_seqptr::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {  \
@@ -24,15 +25,13 @@
     }                                                                               \
     xranger(__VA_ARGS__)
 
-    namespace xuser{
+    namespace mixc::interface_seqptr{
         template<class item_t> struct seqptr;
-
         template<class item_t>
-        struct seqptr{
+        xstruct(
+            xiam(seqptr, <item_t>)
+        )
         private:
-            xgc_fields(
-                xiam(seqptr<item_t>)
-            );
             item_t * ptr = nullptr;
             uxx      len = 0;
         public:
@@ -71,10 +70,9 @@
             }
 
             xseqptr(item_t);
-        };
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
