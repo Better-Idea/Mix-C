@@ -9,8 +9,9 @@
     #include"math/index_system.hpp"
     #include"memop/addressof.hpp"
     #include"memop/signature.hpp"
-    
-    namespace xuser{
+    #pragma pop_macro("xuser") 
+
+    namespace mixc::interface_ranger{
         enum : uxx{
             positive    = 0,
             negtive     = uxx(-1)
@@ -63,12 +64,11 @@
         };
 
         template<class item_t>
-        struct ranger{
+        xstruct(
+            xiam(ranger, <item_t>)
+        )
         private:
             base    dat;
-            xgc_fields(
-                xiam(ranger<item_t>)
-            );
         public:
             ranger(){}
 
@@ -136,7 +136,7 @@
                 }
                 return r;
             }
-        };
+        $
 
         #define xranger(...)                                                        \
         ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i){   \
@@ -151,7 +151,6 @@
         }
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
