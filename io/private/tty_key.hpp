@@ -6,11 +6,11 @@
     #include"algo/binary_search.hpp"
     #include"define/base_type.hpp"
     #include"docker/array.hpp"
-    #include"macro/xgc.hpp"
-    #include"macro/xprop.hpp"
+    #include"macro/xstruct.hpp"
     #include"memop/bit.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::io_private_tty_key{
         namespace func_key{
             enum : u08 {
                 esc     = 0x80,
@@ -82,68 +82,61 @@
         };
     }
 
-    namespace xuser::origin{
-        struct tty_key{
-            using final = tty_key;
-            using items_t = char[5];
+    namespace mixc::io_private_tty_key::origin{
+        template<uxx size>
+        using items_t = char[size];
 
-            xgc_fields(
-                xiam(tty_key),
-                xpri(type, key_type),
-                xpri(w08,  items_t),
-                xpri(w16,  char16_t)
-            );
+        xstruct(
+            xiam(tty_key),
+            xitm(type, key_type),
+            xitm(w08, items_t<5>),
+            xitm(w16, char16_t)
+        )
+            using final = tty_key;
         public:
             constexpr tty_key() :
                 type{}, w08{}, w16{}{}
 
-            xpubget_pubset(is_char, bool){
+            xpubget_pubsetx(is_char, bool)
                 xr { return inc::bit(the.type, key_type::is_char); }
                 xw { inc::bit(& the.type, key_type::is_char, value); }
-            };
 
-            xpubget_pubset(is_func, bool){
+            xpubget_pubsetx(is_func, bool)
                 xr { return inc::bit(the.type, key_type::is_func); }
                 xw { inc::bit(& the.type, key_type::is_func, value); }
-            };
 
-            xpubget_pubset(has_shift, bool){
+            xpubget_pubsetx(has_shift, bool)
                 xr { return inc::bit(the.type, key_type::has_shift); }
                 xw { inc::bit(& the.type, key_type::has_shift, value); }
-            };
 
-            xpubget_pubset(has_alt, bool){
+            xpubget_pubsetx(has_alt, bool)
                 xr { return inc::bit(the.type, key_type::has_alt); }
                 xw { inc::bit(& the.type, key_type::has_alt, value); }
-            };
 
-            xpubget_pubset(has_ctrl, bool){
+            xpubget_pubsetx(has_ctrl, bool)
                 xr { return inc::bit(the.type, key_type::has_ctrl); }
                 xw { inc::bit(& the.type, key_type::has_ctrl, value); }
-            };
 
-            xpubget_pubset(value, char16_t){
+            xpubget_pubsetx(value, char16_t)
                 xr { return the.w16; }
                 xw { the.w16 = value; }
-            };
 
-            xpubget(multi_bytes_char, asciis){
+            xpubgetx(multi_bytes_char, asciis){
                 return w08;
-            };
+            }
 
             // 临时设施 ============================================
-            xpubget(func_name, asciis){
+            xpubgetx(func_name, asciis){
                 for(uxx i = 0; i < func_map.length(); i++){
                     if (auto & f = func_map[i]; f.v == the.value()){
                         return f.name;
                     }
                 }
                 return "not func-key";
-            };
-        };
+            }
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

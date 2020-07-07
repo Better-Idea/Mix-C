@@ -8,43 +8,40 @@
     #include"io/private/tty_key.hpp"
     #include"lang/cxx/ph.hpp"
     #include"lang/cxx.hpp"
+    #include"macro/xstruct.hpp"
     #include"mixc.hpp"
-    #include"macro/xprop.hpp"
     #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::io_tty::origin{
-        struct tty_t{
-            xgc_fields(
-                xiam(tty_t)
-            );
+        xstruct(
+            xiam(tty_t)
+        )
             using final = tty_t;
-        public:
+
             tty_t(){
                 // backcolor(inc::tty_color::black);
                 forecolor(inc::tty_color::light_gray);
                 cursor_visiable(true);
             }
 
-            xpubget_pubset(backcolor, inc::tty_color_t){
+            xpubget_pubsetx(backcolor, inc::tty_color_t)
                 xr { return inc::backcolor(); }
                 xw { inc::backcolor(value); }
-            };
 
-            xpubget_pubset(cursor_visiable, bool){
+            xpubget_pubsetx(cursor_visiable, bool)
                 xr { return inc::cursor_visiable(); }
                 xw { inc::cursor_visiable(value); }
-            };
 
-            xpubget_pubset(forecolor, inc::tty_color_t){
+            xpubget_pubsetx(forecolor, inc::tty_color_t)
                 xr { return inc::forecolor(); }
                 xw { inc::forecolor(value); }
-            };
 
-            xpubget(read_key, inc::tty_key){
+            xpubgetx(read_key, inc::tty_key){
                 return inc::read_key(false);
-            };
+            }
 
+        public:
             final & clear() const {
                 inc::clear();
                 return thex;
@@ -86,7 +83,7 @@
                 write(list..., '\n');
                 return thex;
             }
-        };
+        $
 
         inline static tty_t tty;
     }
