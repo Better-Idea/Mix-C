@@ -13,24 +13,24 @@
     namespace xuser{
         struct ax;
         struct bx;
-        
+
         xstruct(
-            xiam(ax),
-            xitm_pub(a, inc::shared_ptr<ax>),
-            xitm_pub(b, inc::shared_ptr<bx>),
-            xitm_pub(c, inc::shared_ptr<uxx>)
+            xname(ax),
+            xpubf(a, inc::shared_ptr<ax>),
+            xpubf(b, inc::shared_ptr<bx>),
+            xpubf(c, inc::shared_ptr<uxx>)
         ) $
 
         xstruct(
-            xiam(bx),
-            xitm_pub(a, inc::shared_ptr<ax>),
-            xitm_pub(b, inc::shared_ptr<bx>)
+            xname(bx),
+            xpubf(a, inc::shared_ptr<ax>),
+            xpubf(b, inc::shared_ptr<bx>)
         ) $
 
         struct dx;
         xstruct(
-            xiam(cx),
-            xitm_pub(items, 
+            xname(cx),
+            xpubf(items, 
                 inc::darray<
                     inc::shared_ptr<dx>, 
                     1, 
@@ -40,8 +40,8 @@
         ) $
 
         xstruct(
-            xiam(dx),
-            xitm_pub(c, inc::shared_ptr<cx>)
+            xname(dx),
+            xpubf(c, inc::shared_ptr<cx>)
         ) $
 
         void test(){
