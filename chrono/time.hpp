@@ -3,12 +3,14 @@
     #pragma push_macro("xuser")
     #undef  xuser
     #define xuser mixc::chrono_time
-    #include"define/base_type.hpp"
+    #include"mixc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::chrono_time::origin{
         template<class final, class field_t = u32>
-        struct time_t{
+        xstruct(
+            xtmpl(time_t, final, field_t)
+        )
             time_t(u32 hour = 0, u32 minute = 0, u32 second = 0, u32 milisecond = 0) :
                 pmilisecond(milisecond),
                 psecond(second),
@@ -31,7 +33,7 @@
             field_t psecond         : 6;
             field_t pminute         : 6;
             field_t phour           : sizeof(field_t) * 8 - 22;
-        };
+        $
 
         struct time : time_t<time, u64>{
             using time_t<time, u64>::time_t;

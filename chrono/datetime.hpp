@@ -5,7 +5,7 @@
     #define xuser mixc::chrono_datetime
     #include"chrono/date.hpp"
     #include"chrono/time.hpp"
-    #include"define/base_type.hpp"
+    #include"mixc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::chrono_datetime{
@@ -14,7 +14,11 @@
 
     namespace mixc::chrono_datetime::origin{
         template<class final>
-        struct datetime_t : date_t<final>, time_t<final>{
+        xstruct(
+            xtmpl(datetime_t, final),
+            xpubb(date_t<final>),
+            xpubb(time_t<final>)
+        )
             using date_t<final>::date_t;
 
             datetime_t(
@@ -32,7 +36,7 @@
             bool is_valid() const {
                 return date_t<final>::is_valid() and time_t<final>::is_valid() and time_t<final>::hour() <= 23;
             }
-        };
+        $
 
         struct datetime : datetime_t<datetime>{
             using datetime_t<datetime>::datetime_t;

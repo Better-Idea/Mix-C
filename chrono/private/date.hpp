@@ -1,12 +1,11 @@
 #ifndef xpack_chrono_private_date
 #define xpack_chrono_private_date
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::chrono_date
-        #include"chrono/private/lut.hpp"
-        #include"define/base_type.hpp"
-        #include"macro/xgc.hpp"
-        #include"memop/cmp.hpp"
+    #undef  xuser
+    #define xuser mixc::chrono_date
+    #include"chrono/private/lut.hpp"
+    #include"memop/cmp.hpp"
+    #include"mixc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::chrono_day::origin{
@@ -37,10 +36,9 @@
 
         template<class final> struct date_t;
 
-        struct date{
-            xgc_fields(
-                xiam(date)
-            );
+        xstruct(
+            xname(date)
+        )
             using final = date;
         public:
             day_t           operator -  (date  value) const;
