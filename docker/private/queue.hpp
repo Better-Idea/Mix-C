@@ -11,33 +11,31 @@
     #include"gc/self_management.hpp"
     #include"interface/ranger.hpp"
     #include"lock/atom_swap.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_queue {
         template<class item_t>
-        struct queue_t : inc::self_management, inc::disable_copy {
-            typedef struct node : inc::struct_t<item_t> {
-                xgc_fields(
-                    xiam(node, inc::struct_t<item_t>),
-                    xpub(next,  node *)
-                );
+        xstruct(
+            xiam(queue_t, <item_t>),
+            xpub(inc::self_management),
+            xpub(inc::disable_copy),
+            xhas(item_t)
+        )
+            xstruct(
+                xiam(node),
+                xpub(inc::struct_t<item_t>)
+            )
+                node * next;
             public:
                 template<class ... args>
                 node(args const & ... list) : 
                     inc::struct_t<item_t>(list...), next(nullptr){}
-            } * nodep;
+            $
 
-            xgc_fields(
-                xiam(queue_t<item_t>, inc::self_management, inc::disable_copy),
-                xpro(pend, node *),
-                xhas(node)
-            ){
-                // TODO:====================================================================
-                return false;
-            }
-
+            using nodep = node *;
+            nodep pend;
         public:
             queue_t():
                 pend(nullptr) {

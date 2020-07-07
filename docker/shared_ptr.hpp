@@ -5,19 +5,13 @@
     #define xuser mixc::docker_shared_ptr
     #include"define/base_type.hpp"
     #include"gc/ref.hpp"
-    #include"macro/xgc.hpp"
 
-    namespace xuser::origin{
+    namespace xuser{
         template<class type> struct shared_ptr;
         template<class type>
         struct shared_ptr : inc::ref_ptr<shared_ptr<type>, type>{
             using base_t = inc::ref_ptr<shared_ptr<type>, type>;
-
-            xgc_fields(
-                xiam(shared_ptr<type>, base_t)
-            ){
-                return base_t::template routing<guide>();
-            }
+            using the_t  = shared_ptr<type>;
         public:
             shared_ptr() = default;
 
@@ -62,5 +56,5 @@
 #endif
 
 namespace xuser::inc{
-    using namespace mixc::docker_shared_ptr::origin;
+    using ::mixc::docker_shared_ptr::shared_ptr;
 }

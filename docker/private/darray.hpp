@@ -7,7 +7,6 @@
     #include"dumb/dummy_t.hpp"
     #include"gc/ref.hpp"
     #include"interface/seqptr.hpp"
-    #include"macro/xgc.hpp"
     #include"memory/new.hpp"
     #pragma pop_macro("xuser")
     

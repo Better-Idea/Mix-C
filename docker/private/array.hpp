@@ -5,19 +5,19 @@
     #define xuser mixc::docker_array
     #include"define/base_type.hpp"
     #include"interface/seqptr.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_array{
-        template<class type, uxx count = 0, uxx ... rest>
-        struct array_t{
-            using item_t = typename array_t<type, rest...>::the_t;
-            using items  = item_t[count];
+        template<class type, uxx count>
+        using items_t = type[count];
 
-            xgc_fields(
-                xiam(array_t<type, count, rest...>),
-                xpro(data, items)
-            );
+        template<class type, uxx count = 0, uxx ... rest>
+        xstruct(
+            xiam(array_t, <type, count, rest...>),
+            xitm(data, items_t<type, count>)
+        )
+            using item_t = typename array_t<type, rest...>::the_t;
         public:
             xseqptr(item_t);
 

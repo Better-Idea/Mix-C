@@ -7,12 +7,14 @@
     #include"instruction/index_of_first_set.hpp"
     #include"instruction/index_of_last_set.hpp"
     #include"interface/ranger.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::docker_bit_indicator{
         template<uxx bits>
-        struct bit_indicator_t{
+        xstruct(
+            xiam(bit_indicator_t, <bits>)
+        )
             void set(uxx index){
                 set(index, [](bits_t & p, bits_t val){
                     p |= val;
@@ -199,11 +201,7 @@
                 lv1 ? 2  : 1;
 
             bits_t data[size] = {0};
-
-            xgc_fields(
-                xiam(bit_indicator_t<bits>)
-            );
-        };
+        $
 
         template<class final, uxx bits>
         struct bit_indicator : bit_indicator_t<bits>{

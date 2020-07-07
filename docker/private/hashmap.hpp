@@ -11,7 +11,7 @@
     #include"dumb/disable_copy.hpp"
     #include"gc/self_management.hpp"
     #include"macro/xdebug.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #include"math/align.hpp"
     #include"memop/addressof.hpp"
     #include"memop/copy.hpp"
@@ -35,154 +35,151 @@
         };
 
         template<class key_t, class val_t>
-        struct hashmap_t : inc::self_management, inc::disable_copy {
-        private:
-            typedef struct pair{
-                xgc_fields(
-                    xiam(pair)
-                );
-            public:
-                key_t    key;
-                val_t    value;
+        xstruct(
+            xiam(pair, <key_t, val_t>)
+        )
+            key_t    key;
+            val_t    value;
 
-                pair(){}
-                pair(key_t const & key, val_t const & value) : 
-                    key(key), value(value){}
-            } * pairp;
+            pair(){}
+            pair(key_t const & key, val_t const & value) : 
+                key(key), value(value){}
+        $
 
-            struct node{
-                using mirror_t = u08[sizeof(pair)];
+        template<class key_t, class val_t>
+        xstruct(
+            xiam(node, <key_t, val_t>),
+            xhas(key_t),
+            xhas(val_t)
+        )
+            using pair_t   = pair<key_t, val_t>;
+            using mirror_t = u08[sizeof(pair_t)];
 
-                xgc_fields(
-                    xiam(node),
-                    xpub(next,      node *),
-                    xpub(mirror,    mirror_t),
-                    xhas(key_t),
-                    xhas(val_t)
-                );
-            public:
+            node *      next;
+            mirror_t    mirror;
 
-                node() : next(this) {}
-                node(key_t const & key, val_t const & value, bool with_copy_operator) :  next(nullptr) {
-                    if (with_copy_operator){
-                        new (mirror) pair(key, value);
-                    }
-                    else{
-                        inc::copy(xref the->key, key);
-                        inc::copy(xref the->value, value);
-                    }
+            node() : next(this) {}
+            node(key_t const & key, val_t const & value, bool with_copy_operator) :  next(nullptr) {
+                if (with_copy_operator){
+                    new (mirror) pair_t(key, value);
+                }
+                else{
+                    inc::copy(xref the->key, key);
+                    inc::copy(xref the->value, value);
+                }
+            }
+
+            hashmap_set_result set(
+                key_t const &   key, 
+                val_t const &   value, 
+                bool            with_copy_operator = true){
+
+                // 约定 next == this 表示的是空节点
+                if (is_empty()){
+                    new (this) node(key, value, with_copy_operator);
+                    return hashmap_set_result::success;
                 }
 
-                hashmap_set_result set(
-                    key_t const &   key, 
-                    val_t const &   value, 
-                    bool            with_copy_operator = true){
-
-                    // 约定 next == this 表示的是空节点
-                    if (is_empty()){
-                        new (this) node(key, value, with_copy_operator);
+                for(auto cur = this; ; cur = cur->next){
+                    if (cur[0]->key == key){
+                        cur[0]->value   = value;
+                        return hashmap_set_result::override;
+                    }
+                    if (cur->next == nullptr){
+                        cur->next       = inc::alloc_with_initial<node>(key, value, with_copy_operator);
                         return hashmap_set_result::success;
                     }
+                }
+            }
 
-                    for(auto cur = this; ; cur = cur->next){
+            val_t & get(key_t const & key) const {
+                if (is_empty() == false){
+                    for(auto cur = this; cur != nullptr; cur = cur->next){
                         if (cur[0]->key == key){
-                            cur[0]->value   = value;
-                            return hashmap_set_result::override;
-                        }
-                        if (cur->next == nullptr){
-                            cur->next       = inc::alloc_with_initial<node>(key, value, with_copy_operator);
-                            return hashmap_set_result::success;
+                            return cur[0]->value;
                         }
                     }
                 }
+                return inc::nullref;
+            }
 
-                val_t & get(key_t const & key) const {
-                    if (is_empty() == false){
-                        for(auto cur = this; cur != nullptr; cur = cur->next){
-                            if (cur[0]->key == key){
-                                return cur[0]->value;
-                            }
-                        }
-                    }
-                    return inc::nullref;
-                }
+            inc::transmitter<pair_t> take_out(key_t const & key){
+                inc::transmitter<pair_t> r;
 
-                inc::transmitter<pair> take_out(key_t const & key){
-                    inc::transmitter<pair> r;
-
-                    if (is_empty()){
-                        return r;
-                    }
-
-                    auto cur = this, pre = this;
-                    for(; cur != nullptr; pre = cur, cur = cur->next){
-                        if (cur[0]->key == key){
-                            break;
-                        }
-                    }
-
-                    // 未找到
-                    if (cur == nullptr){
-                        return r;
-                    }
-
-                    r = *(pair *)cur->mirror;
-
-                    // cur 不是首元
-                    if (cur != this){
-                        pre->next = cur->next;
-                        inc::free(cur);
-                    }
-                    // cur 是首元但存在后继元素
-                    else if (next != nullptr){
-                        auto tmp = next;
-                        the = next[0];
-                        inc::free(tmp);
-                    }
-                    // cur 是首元且无后继
-                    // 标记此节点为空
-                    else{
-                        next = this;
-                    }
+                if (is_empty()){
                     return r;
                 }
 
-                void free(){
-                    if (is_empty()){
-                        return;
+                auto cur = this, pre = this;
+                for(; cur != nullptr; pre = cur, cur = cur->next){
+                    if (cur[0]->key == key){
+                        break;
                     }
-                    while(next != nullptr){
-                        auto temp = next;
-                        temp[0]->~pair();
-                        next      = next->next;
-                        inc::free(temp);
-                    }
-                    the->~pair();
-                    the.next = this;
                 }
 
-                bool is_empty() const {
-                    return next == this;
+                // 未找到
+                if (cur == nullptr){
+                    return r;
                 }
 
-                pair * operator->() const {
-                    return (pair *)mirror;
-                }
-            };
+                r = *(pair_t *)cur->mirror;
 
+                // cur 不是首元
+                if (cur != this){
+                    pre->next = cur->next;
+                    inc::free(cur);
+                }
+                // cur 是首元但存在后继元素
+                else if (next != nullptr){
+                    auto tmp = next;
+                    the = next[0];
+                    inc::free(tmp);
+                }
+                // cur 是首元且无后继
+                // 标记此节点为空
+                else{
+                    next = this;
+                }
+                return r;
+            }
+
+            void free(){
+                if (is_empty()){
+                    return;
+                }
+                while(next != nullptr){
+                    auto temp = next;
+                    temp[0]->~pair();
+                    next      = next->next;
+                    inc::free(temp);
+                }
+                the->~pair();
+                the.next = this;
+            }
+
+            bool is_empty() const {
+                return next == this;
+            }
+
+            pair_t * operator->() const {
+                return (pair_t *)mirror;
+            }
+        $
+
+        template<class key_t, class val_t>
+        xstruct(
+            xiam(hashmap_t, <key_t, val_t>),
+            xpub(inc::self_management),
+            xpub(inc::disable_copy),
+            xitm(lines,  uxx),
+            xitm(count,  uxx),
+            xitm(nodes,  node<key_t, val_t> *)
+        )
+        private:
+            using pair_t   = pair<key_t, val_t>;
             static constexpr uxx multi         = 4;
             static constexpr uxx start_capcity = 16;
 
-            xgc_fields(
-                xiam(hashmap_t<key_t, val_t>, inc::self_management),
-                xpro(lines,  uxx),
-                xpro(count,  uxx),
-                xpro(nodes,  node *),
-                xhas(node)
-            ){
-                // TODO:====================================================================
-                return false;
-            }
             /*构造/析构区*/
         public:
             hashmap_t() : hashmap_t(start_capcity){}
@@ -206,7 +203,7 @@
             }
 
             inc::transmitter<val_t> take_out(key_t const & key) {
-                inc::transmitter<pair>  mem;
+                inc::transmitter<pair_t>  mem;
                 inc::transmitter<val_t> r;
                 auto index = addressing(key);
                 
@@ -226,7 +223,7 @@
             }
 
             the_t & remove(key_t const & key, hashmap_remove_result * state = nullptr) {
-                inc::transmitter<pair> mem; // 如果存在 key，则自动析构从 take_out 带出来的 pair
+                inc::transmitter<pair_t> mem; // 如果存在 key，则自动析构从 take_out 带出来的 pair
                 auto index = addressing(key);
                 
                 if (nodes[index].take_out(key, xref mem); state != nullptr){
@@ -351,23 +348,23 @@
 
             void free() {
                 inc::free(nodes, inc::memory_size(
-                    lines * sizeof(node)
+                    lines * sizeof(node<key_t, val_t>)
                 ));
                 nodes = nullptr;
             }
 
-            static node * alloc(uxx counts){
+            static node<key_t, val_t> * alloc(uxx counts){
                 auto bytes = inc::memory_size(
-                    counts * sizeof(node)
+                    counts * sizeof(node<key_t, val_t>)
                 );
-                auto nodes = inc::alloc<node>(bytes);
+                auto nodes = inc::alloc<node<key_t, val_t>>(bytes);
 
                 for (uxx i = 0; i < counts; i++){
-                    new (nodes + i) node();
+                    new (nodes + i) node<key_t, val_t>();
                 }
                 return nodes;
             }
-        };
+        $
 
         template<class final, class key_t, class val_t>
         struct hashmap : hashmap_t<key_t, val_t> {

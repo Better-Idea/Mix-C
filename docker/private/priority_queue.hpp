@@ -12,7 +12,7 @@
     #include"dumb/struct_t.hpp"
     #include"dumb/mirror.hpp"
     #include"gc/self_management.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #include"memop/cast.hpp"
     #pragma pop_macro("xuser")
 
@@ -23,18 +23,11 @@
         //struct priority_queue_t<item_t> : inc::self_management {
 
         template<class item_t>
-        struct priority_queue_t : inc::self_management {
-            using mirror_item_t = inc::mirror<item_t>;
-            using docker_t      = inc::darray<item_t>;
-
-            xgc_fields(
-                xiam(priority_queue_t<item_t>, inc::self_management),
-                xpri(items, inc::darray<mirror_item_t>),
-                xhas(inc::darray<item_t>)
-            ) {
-                // TODO:====================================================================
-                return false;
-            }
+        xstruct(
+            xiam(priority_queue_t, <items_t>),
+            xpub(inc::self_management),
+            xitm(items, inc::darray<item_t>)
+        )
         private:
             docker_t & origin() const {
                 return inc::cast<docker_t>(items);
@@ -46,7 +39,7 @@
             }
 
             void clear() {
-                origin().clear();
+                items.clear();
             }
 
             uxx length() const {
@@ -54,22 +47,22 @@
             }
 
             item_t & root() {
-                return origin()[0];
+                return items[0];
             }
             
             item_t const & root() const {
-                return origin()[0];
+                return items[0];
             }
 
             void push(item_t const & value) {
                 items.push(value);
-                inc::heap_root<item_t>::push(origin(), items.length() - 1, value);
+                inc::heap_root<item_t>::push(items, items.length() - 1, value);
             }
 
             inc::transmitter<item_t> pop() {
                 auto length = items.length();
-                inc::transmitter<item_t> r = origin()[0];
-                inc::heap_root<item_t>::pop(origin(), length, items[length - 1]);
+                inc::transmitter<item_t> r = items[0];
+                inc::heap_root<item_t>::pop(items, length, items[length - 1]);
                 items.pop();
                 return r;
             }
