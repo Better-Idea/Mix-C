@@ -4,27 +4,25 @@
     #undef  xuser
     #define xuser mixc::dumb_struct_t
     #include"define/base_type.hpp"
-    #include"macro/xgc.hpp"
+    #include"macro/xstruct.hpp"
     #include"meta/is_class.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::dumb_struct_t{
         template<class type, bool is_class> struct struct_t;
         template<class type>
-        struct struct_t<type, true> : type {
-            xgc_fields(
-                xiam(struct_t<type, true>, type)
-            );
-        public:
+        xstruct(
+            ximx(struct_t<type, true>),
+            xpub(type)
+        )
             using type::type;
-        };
+        $
 
         template<class type>
-        struct struct_t<type, false>{
-            xgc_fields(
-                xiam(struct_t<type, false>),
-                xpro(data, type)
-            );
-        public:
+        xstruct(
+            ximx(struct_t<type, false>),
+            xitm(data, type)
+        )
             template<class ... args>
             struct_t(args const & ... list) : 
                 data(list...){
@@ -37,21 +35,19 @@
             operator const type & () const {
                 return data;
             }
-        };
+        $
 
         template<>
-        struct struct_t<void, false>{
-            xgc_fields(
-                xiam(struct_t<void, false>)
-            );
-        };
+        xstruct(
+            ximx(struct_t<void, false>)
+        ) $
     }
 
-    namespace xuser::origin{
+    namespace mixc::dumb_struct_t::origin{
         template<class type>
-        using struct_t = xuser::struct_t<type, inc::is_class<type>>;
+        using struct_t = mixc::dumb_struct_t::struct_t<type, inc::is_class<type>>;
     }
-    #pragma pop_macro("xuser")
+
 #endif
 
 namespace xuser::inc{

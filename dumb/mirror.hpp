@@ -4,16 +4,17 @@
     #undef  xuser
     #define xuser mixc::dumb_mirror
     #include"mixc.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::dumb_mirror{
         template<class type>
-        struct mirror{
-            using items_t = u08 [sizeof(type)];
-            xgc_fields(
-                xiam(mirror<type>),
-                xpri(bytes, items_t)
-            );
-        public:
+        using item_t = u08 [sizeof(type)];
+
+        template<class type>
+        xstruct(
+            xiam(mirror, <type>),
+            xitm(bytes, item_t<type>)
+        )
             mirror(): bytes{0}{}
             mirror(type const & value){
                 this[0] = *(mirror<type> *)(xref value);
@@ -26,17 +27,14 @@
             constexpr uxx length() const {
                 return sizeof(type);
             }
-        };
+        $
 
         template<>
-        struct mirror<void>{
-            xgc_fields(
-                xiam(mirror<void>)
-            );
-        };
+        xstruct(
+            ximx(mirror<void>)
+        ) $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

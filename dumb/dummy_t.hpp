@@ -4,19 +4,17 @@
     #undef  xuser
     #define xuser mixc::dumb_dummy_t
     #include"mixc.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
-        struct dummy_t {
-            xgc_fields(
-                xiam(dummy_t)
-            );
-        public:
+    namespace mixc::dumb_dummy_t{
+        xstruct(
+            xiam(dummy_t)
+        )
             template<class ... args>
             constexpr dummy_t(args const & ...){}
-        };
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{

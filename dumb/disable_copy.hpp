@@ -4,22 +4,20 @@
     #undef  xuser
     #define xuser mixc::dumb_disable_copy
     #include"mixc.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser::origin {
-        struct disable_copy {
-            xgc_fields(
-                xiam(disable_copy)
-            );
-        public:
+    namespace mixc::dumb_disable_copy {
+        xstruct(
+            xiam(disable_copy)
+        )
             disable_copy() = default;
             disable_copy(disable_copy const &) = delete;
             void operator=(disable_copy const &) = delete;
-        };
+        $
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc {
-    using ::mixc::dumb_disable_copy::origin::disable_copy;
+    using ::mixc::dumb_disable_copy::disable_copy;
 }

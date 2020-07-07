@@ -13,16 +13,14 @@ auto function(args const & ... list){
     #undef  xuser
     #define xuser mixc::dumb_implicit
     #include"mixc.hpp"
+    #pragma pop_macro("xuser")
 
-    namespace xuser{
+    namespace mixc::dumb_implicit{
         template<class a>
-        struct implicit{
-            xgc_fields(
-                xiam(implicit<a>),
-                xpub(value, a)
-            );
-        public:
-
+        xstruct(
+            xiam(implicit),
+            xitm(value, a)
+        )
             template<class b>
             implicit(b const & value) : 
                 value((a)(b &)value) {}
@@ -37,7 +35,6 @@ auto function(args const & ... list){
         };
     }
 
-    #pragma pop_macro("xuser")
 #endif
 
 namespace xuser::inc{
