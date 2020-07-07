@@ -11,7 +11,10 @@
     #define xuser mixc::lang_cxx_parse
     #include"configure.hpp"
     #include"define/base_type.hpp"
+    #include"define/nan.hpp"
+    #include"define/inf.hpp"
     #include"docker/transmitter.hpp"
+    #include"lang/cxx/compare.hpp"
     #include"lang/cxx.hpp"
     #include"math/numeration_t.hpp"
     #include"math/pow.hpp"
@@ -88,7 +91,16 @@
 
                 if constexpr (inc::is_float<target>){
                     // 浮点目前只有 10 进制表示
+                    // inf
+                    // nan
                     // [+-]{0,1}/d*(/./d+){0,1}([eE][+-]/d+){0,1}
+                    if (the_t("nan").compare({ cur, 3 }) == 0){
+                        return is_neg ? -target(inc::nan) : target(inc::nan);
+                    }
+                    if (the_t("inf").compare({ cur, 3 }) == 0){
+                        return target(is_neg ? inc::inf_neg : inc::inf_pos);
+                    }
+
                     auto   token        = cur;
                     auto   miss_digital = false;
                     auto   miss_decimal = true;
@@ -179,7 +191,6 @@
                     }
                     return value;
                 }
-
             }
         };
 
