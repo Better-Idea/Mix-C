@@ -111,7 +111,7 @@
             u32 pday            : 5;
             u32 pmonth          : 4;
             u32 pyear           : 23;
-        };
+        $
 
         template<class finalx>
         struct date_t : date{

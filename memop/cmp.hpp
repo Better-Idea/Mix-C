@@ -1,13 +1,13 @@
 #ifndef xpack_memop_cmp
 #define xpack_memop_cmp
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::memop_cmp
-        #include"define/base_type.hpp"
-        #include"meta/is_class.hpp"
-        #include"meta/is_enum.hpp"
-        #include"meta/is_union.hpp"
-        #include"memop/seqlize.hpp"
+    #undef  xuser
+    #define xuser mixc::memop_cmp
+    #include"define/base_type.hpp"
+    #include"meta/is_class.hpp"
+    #include"meta/is_enum.hpp"
+    #include"meta/is_union.hpp"
+    #include"memop/seqlize.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::memop_cmp{
