@@ -32,7 +32,7 @@
 
             template<class type>
             mix(type value){
-                constexpr uxx index = inc::more_fit<
+                using result = inc::more_fit<
                     type,
                     i08,    i16,    i32,    i64,
                     u08,    u16,    u32,    u64,
@@ -42,27 +42,27 @@
                     char
                 >;
 
-                if constexpr (index < 4){
+                if constexpr (result::index < 4){
                     i   = i64(value); // maybe is enum class
                     fmt = is_signed_t;
                 }
-                else if constexpr(index < 8){
+                else if constexpr(result::index < 8){
                     u   = u64(value);
                     fmt = is_unsigned_t;
                 }
-                else if constexpr(index < 10){
+                else if constexpr(result::index < 10){
                     f   = value;
                     fmt = is_float_t;
                 }
-                else if constexpr(index < 11){
+                else if constexpr(result::index < 11){
                     s   = value;
                     fmt = is_str_t;
                 }
-                else if constexpr(index < 12){
+                else if constexpr(result::index < 12){
                     v   = value;
                     fmt = is_ptr_t;
                 }
-                else if constexpr(index < 13){
+                else if constexpr(result::index < 13){
                     c   = value;
                     fmt = is_char_t;
                 }
