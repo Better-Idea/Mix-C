@@ -22,12 +22,13 @@
             using item_t = typename darray_t<type, rank - 1, attribute>::the_t;
             using base_t = inc::ref_array<the_t, item_t, attribute>;
             using base_t::operator[];
+
+            static inline the_t empty{::length(0)};
         public:
             xseqptr(item_t);
 
             darray_t() : 
-                darray_t(inc::empty_array){
-                static_assert(base_t::header_size() <= sizeof(inc::empty_array));
+                darray_t(empty) {
             }
 
             darray_t(darray_t const &) = default;

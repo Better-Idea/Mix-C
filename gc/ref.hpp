@@ -45,22 +45,9 @@
             }
         $
 
-        struct empty_t : token_plus{
-            byte empty[48] = { 0 };
-
-            empty_t() : token_plus(0) {}
-
-            template<class type>
-            operator type () const {
-                auto self = this;
-                return inc::cast<type>(self);
-            }
-        };
-
         inline static hashmap<visited_ptr_t, info_t>    gc_map;
         inline static uxx                               degree_dvalue;
         inline static visited_ptr_t                     root;
-        inline static empty_t const                     empty_array;
         inline static bool                              need_free_whole_ring;
 
         template<class impl, class item, class attribute, bool is_array>
@@ -264,8 +251,6 @@
     }
 
     namespace mixc::gc_ref::origin{
-        using mixc::gc_ref::empty_array;
-
         template<class impl, class type>
         using ref_ptr = meta<
             impl, 
