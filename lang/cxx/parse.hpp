@@ -17,7 +17,8 @@
     #include"lang/cxx/compare.hpp"
     #include"lang/cxx.hpp"
     #include"math/numeration_t.hpp"
-    #include"math/pow.hpp"
+    #include"math/exp10.hpp"
+    #include"math/expr10.hpp"
     #include"meta/is_float.hpp"
     #include"meta/unsigned_type.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -102,8 +103,10 @@
                     }
 
                     auto   token        = cur;
+                    auto   token_tmp    = cur;
                     auto   miss_digital = false;
                     auto   miss_decimal = true;
+                    auto   is_neg_exp   = false;
                     target result       = 0;
                     target mul          = 0.1;
                     u32    exp          = 0;
@@ -149,16 +152,31 @@
                             return result;
                         }
 
-                        cur    += 1;
-                        token   = cur;
-                        exp     = part(exp, xref cur);
+                        cur         += 1;
+                        token_tmp    = token = cur;
 
-                        if (token != cur){
-                            result *= inc::pow<target>(10, exp);
+                        if (cur[0] == '-'){
+                            cur     += 1;
+                            token   += 1;
+                            is_neg_exp = true;
+                        }
+                        else if (cur[0] == '+'){
+                            cur     += 1;
+                            token   += 1;
+                        }
+
+                        exp = part(exp, xref cur);
+
+                        if (token == cur){
+                            cur = token_tmp - 1; // 回滚到字符 'e' or 'E' 之前一个字符
+                        }
+                        else if (is_neg_exp){
+                            result *= inc::expr10(exp);
                         }
                         else{
-                            cur -= 1; // 回滚到字符 'e' or 'E'
+                            result *= inc::exp10(exp);
                         }
+
                         if (cur == end){
                             return result;
                         }
