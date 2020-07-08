@@ -78,10 +78,6 @@
         struct json_pair_t {
             json_string_t<index_t>      name;
             json_value_t<index_t>       value;
-
-            xgc_fields(
-                xname(json_pair_t<index_t>)
-            );
         };
 
         template<class item_t>
@@ -121,9 +117,9 @@
 
             template<class key_t>
             the_t operator[](key_t const & index) const {
-                constexpr auto i = inc::more_fit<key_t, final, uxx>;
+                using match_t = inc::more_fit<key_t, final, uxx>;
 
-                if constexpr(i == 0){
+                if constexpr(match_t::index == 0){
                     auto & obj = origin().object[0];
                     auto   key = inc::cxx<item_t>(index);
 
@@ -137,7 +133,7 @@
                     }
                     return {};
                 }
-                else if constexpr(i == 1){
+                else if constexpr(match_t::index == 1){
                     return { json, origin().array[0][index] };
                 }
             }
@@ -191,9 +187,9 @@
 
         template<class item_t>
         struct core : inc::cxx<item_t> {
-            using base_t = inc::cxx<item>;
+            using base_t = inc::cxx<item_t>;
             using base_t::base_t;
-            using the_t = core<item>;
+            using the_t = core<item_t>;
 
             core(base_t const & self) : 
                 base_t(self){}
