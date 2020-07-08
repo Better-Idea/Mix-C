@@ -12,6 +12,7 @@
     #include"lock/atom_swap.hpp"
     #include"macro/xindex_rollback.hpp"
     #undef  private
+    #pragma pop_macro("xuser")
 
     namespace mixc::io_file{
         using namespace xuser::inc;
@@ -74,5 +75,5 @@
             return ::write(the.fd, buffer, bytes);
         }
     }
-    #pragma pop_macro("xuser")
+
 #endif

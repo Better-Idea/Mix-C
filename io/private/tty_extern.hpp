@@ -161,8 +161,6 @@ ASC+F12    : 1b,5b,32,34,3b,38,7e,
 #endif
 
 #define xuser mixc::io_private_tty
-#include<unistd.h>
-#include<sys/file.h>
 #include<stdio.h>
 #include"algo/binary_search.hpp"
 #include"configure.hpp"
@@ -226,7 +224,7 @@ namespace xuser::origin{
     bool the_cursor_visiable = true;
 
     void print_core(asciis str, uxx length){
-        ::write(STDOUT_FILENO, str, length);
+        fwrite(str, 1, length, stdout);
     }
 
     inc::tty_color_t backcolor() {
