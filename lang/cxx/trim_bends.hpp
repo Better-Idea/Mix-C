@@ -30,23 +30,20 @@
             core(base_t const & self) : 
                 base_t(self){}
 
-            auto trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
+            the_t trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
                 auto token  = the_t(values.begin(), values.size());
-                auto offset = the.index_of_first_miss(values);
+                auto r      = the;
 
-                if (offset == not_exist){
-                    return the_t();
+                if (auto index = the.index_of_first_miss(values); index != not_exist){
+                    r       = r.backward(index);
                 }
-
-                auto temp = the.backward(offset);
-                temp.length(
-                    temp.index_of_last_miss(values)
-                );
-
+                if (auto index = r.index_of_last_miss(values); index != not_exist){
+                    r       = r.length(index + 1);
+                }
                 if (alloc != nullptr){
-                    temp = temp.clone(alloc);
+                    r       = r.clone(alloc);
                 }
-                return temp;
+                return r;
             }
         };
 

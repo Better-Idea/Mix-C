@@ -29,18 +29,16 @@
                 base_t(self){}
 
             auto trim_start(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
-                auto token  = the_t(values.begin(), values.begin());
-                auto offset = the.index_of_first_miss(values);
+                auto token  = the_t(values.begin(), values.size());
+                auto r      = the;
 
-                if (offset == not_exist){
-                    return the_t();
+                if (auto index = the.index_of_first_miss(values); index != not_exist){
+                    r       = r.backward(index);
                 }
-                if (alloc == nullptr){
-                    return the.backward(offset);
+                if (alloc != nullptr){
+                    r       = r.clone(alloc);
                 }
-                else {
-                    return the.backward(offset).clone(alloc);
-                }
+                return r;
             }
         };
 
@@ -48,6 +46,10 @@
         struct meta : base {
             using base::base;
             using the_t = core<item>;
+
+            final trim_start(item value, inc::can_alloc<item> alloc = nullptr) const {
+                return the.trim_start({ value }, alloc);
+            }
 
             final trim_start(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
                 return the.trim_start(values, alloc);

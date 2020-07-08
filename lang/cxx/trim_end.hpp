@@ -29,22 +29,16 @@
                 base_t(self){}
 
             auto trim_end(inc::initializer_list<item> values, inc::can_alloc<item> alloc) {
-                auto temp  = the;
-                auto token = the_t(values.begin(), values.size());
+                auto token  = the_t(values.begin(), values.size());
+                auto r      = the;
 
-                temp.length(
-                    temp.index_of_last_miss(values)
-                );
-
-                if (alloc == nullptr){
-                    return temp;
+                if (auto index = r.index_of_last_miss(values); index != not_exist){
+                    r       = r.length(index + 1);
                 }
-                else if (temp.length() == not_exist){
-                    return the_t();
+                if (alloc != nullptr){
+                    r       = r.clone(alloc);
                 }
-                else{
-                    return temp.clone(alloc);
-                }
+                return r;
             }
         };
 
