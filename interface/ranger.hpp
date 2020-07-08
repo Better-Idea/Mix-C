@@ -138,16 +138,16 @@
             }
         $
 
-        #define xranger(...)                                                        \
-        ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i){   \
-            using namespace ::mixc::interface_ranger;                               \
-            if (i.normalize(this->length());                                        \
-                i.left() <= i.right()){                                             \
-                return base(this, i.left(), i.right() - i.left() + 1, positive);    \
-            }                                                                       \
-            else{                                                                   \
-                return base(this, i.left() + 1, i.left() - i.right() + 1, negtive); \
-            }                                                                       \
+        #define xranger(...)                                                               \
+        ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i) const {   \
+            using namespace ::mixc::interface_ranger;                                      \
+            if (i.normalize(this->length());                                               \
+                i.left() <= i.right()){                                                    \
+                return base(this, i.left(), i.right() - i.left() + 1, positive);           \
+            }                                                                              \
+            else{                                                                          \
+                return base(this, i.left() + 1, i.left() - i.right() + 1, negtive);        \
+            }                                                                              \
         }
     }
 
