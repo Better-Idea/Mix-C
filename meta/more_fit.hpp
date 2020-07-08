@@ -64,10 +64,9 @@
                 }
                 else if constexpr (inc::has_cast<first, source>){
                     if constexpr
-                       (next::has_implicit_cast and 
-                       (next::different >= 0 and (diff <= 0 or diff >= next::different) or
-                       (next::different < 0 and (diff <= next::different)))
-                    ){
+                        (next::has_implicit_cast and (
+                        (next::different >= 0 and (diff <= 0 or diff >= next::different)) or
+                        (next::different < 0 and diff <= next::different))) {
                         return next();
                     }
                     else{
