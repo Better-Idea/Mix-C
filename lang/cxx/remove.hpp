@@ -12,7 +12,7 @@
     #include"define/base_type.hpp"
     #include"interface/can_alloc.hpp"
     #include"lang/cxx.hpp"
-    #include"macro/xindex_rollback.hpp"
+    #include"math/index_system.hpp"
     #include"memop/copy.hpp"
     #include"memop/swap.hpp"
     #pragma pop_macro("xusing_lang_cxx")
@@ -28,18 +28,15 @@
             core(base_t const & self) : 
                 base_t(self){}
 
-            auto remove(ixx start, ixx endx, inc::can_alloc<item> alloc) const {
-                xindex_rollback(the.length(), start);
-                xindex_rollback(the.length(), endx);
+            auto remove(iinterval range, inc::can_alloc<item> alloc) const {
+                range.normalize(the.length());
 
-                if (start > endx){
-                    inc::swap(& start, & endx);
-                }
-
-                auto  len = the.length() - (endx - start);
+                auto  left  = range.left();
+                auto  right = range.right();
+                auto  len   = the.length() - (right - left + 1);
                 the_t r { alloc(len), len };
-                inc::copy_with_operator(r        , the       , start);
-                inc::copy_with_operator(r + start, the + endx, len - start);
+                inc::copy_with_operator(r       , the            , left);
+                inc::copy_with_operator(r + left, the + right + 1, len - left);
                 return r;
             }
         };
@@ -49,12 +46,8 @@
             using base::base;
             using the_t = core<item>;
 
-            final remove(ixx start, inc::can_alloc<item> alloc) const {
-                return the.remove(start, -1, alloc);
-            }
-
-            final remove(ixx start, ixx endx, inc::can_alloc<item> alloc) const {
-                return the.remove(start, endx, alloc);
+            final remove(iinterval range, inc::can_alloc<item> alloc) const {
+                return the.remove(range, alloc);
             }
         };
     }
