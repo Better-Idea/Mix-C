@@ -202,7 +202,7 @@
 
             v(){}
             v(a0 const & first, args const & ... rest) : 
-                item(first), base_t(rest...){
+                base_t(rest...), item(first) {
             }
 
             template<class item_t>
@@ -327,7 +327,7 @@
             using base_t = phg_core<args...>;
         public:
             phg_core(a0 const & first, args const & ... list) : 
-                item(first), base_t(list...){
+                base_t(list...), item(first) {
             }
 
             template<class item_t>

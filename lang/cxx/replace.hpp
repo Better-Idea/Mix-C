@@ -30,13 +30,14 @@
             core(base_t const & self) : 
                 base_t(self){}
 
+            static constexpr uxx buf_size = 64;
+
             auto replace(
                 the_t                   old_value, 
                 the_t                   new_value, 
                 inc::can_compare<item>  compare, 
                 inc::can_alloc<item>    alloc) const {
 
-                constexpr uxx buf_size = 64;
                 struct {
                     uxx              i = 0;
                     uxx              buf[buf_size];
