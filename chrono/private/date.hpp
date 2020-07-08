@@ -108,9 +108,9 @@
 
             static date now();
         protected:
-            u32 pday            : 5;
-            u32 pmonth          : 4;
             u32 pyear           : 23;
+            u32 pmonth          : 4;
+            u32 pday            : 5;
         $
 
         template<class finalx>
