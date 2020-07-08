@@ -21,11 +21,6 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_replace{
-        // using item = char;
-        // template<class item> struct core;
-        // template<>
-        // struct core<item> : inc::cxx<item> {
-
         template<class item>
         struct core : inc::cxx<item> {
             using base_t = inc::cxx<item>;
