@@ -104,8 +104,13 @@
                 case classify_type_t::is_float_t:       tty.write(':', items->f); break;
                 case classify_type_t::is_ptr_t:         tty.write(':', items->v); break;
                 case classify_type_t::is_signed_t:      tty.write(':', items->i); break;
-                case classify_type_t::is_str_t:         tty.write(':', "\"", items->s, "\""); break;
                 case classify_type_t::is_unsigned_t:    tty.write(':', items->u); break;
+                case classify_type_t::is_str_t:
+                    tty.write(':', "\"", items->slen == not_exist ? 
+                        inc::c08{items->s} : inc::c08{items->s, items->slen}, 
+                        "\""
+                    );
+                    break;
                 default: 
                     xdebug_fail("classify_type_t miss match");
                     break;
