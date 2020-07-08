@@ -46,7 +46,7 @@
             mfxx(float_type value) : value(value) { }
 
             constexpr mfxx(equivalent_type sign, equivalent_type exp, equivalent_type decimal) : 
-                sign(sign), exp(exp), decimal(decimal) {}
+                decimal(decimal), exp(exp), sign(sign) {}
 
             operator float_type & () {
                 return value;
