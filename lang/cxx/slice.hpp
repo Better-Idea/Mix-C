@@ -13,16 +13,11 @@
     #include"interface/can_alloc.hpp"
     #include"lang/cxx.hpp"
     #include"macro/xdebug_fail.hpp"
-    #include"macro/xindex_rollback.hpp"
+    #include"math/index_system.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_slice{
-        // using item = char;
-        // template<class item> struct core;
-        // template<>
-        // struct core<item> : inc::cxx<item> {
-
         template<class item>
         struct core : inc::cxx<item> {
             using base_t = inc::cxx<item>;
@@ -32,43 +27,39 @@
             core(base_t const & self) : 
                 base_t(self){}
 
-            void rollback(ixx & start, ixx & end) const {
-                xindex_rollback(the.length(), start);
-                xindex_rollback(the.length(), end);
-
-                xdebug_fail(start >= the.length());
-                xdebug_fail(end   >= the.length());
+            auto slice(iinterval range) const {
+                range.normalize(the.length());
+                auto left = range.left();
+                auto right = range.right();
+                xdebug_fail(left > right);
+                return the.backward(left).length(right - left + 1);
             }
 
-            auto slice(ixx start, ixx end) const {
-                rollback(start, end);
-                xdebug_fail(start > end);
-                return the.backward(start).length(end - start + 1);
-            }
-
-            auto slice(ixx start, ixx end, inc::can_alloc<item> alloc) const {
-                rollback(start, end);
+            auto slice(iinterval range, inc::can_alloc<item> alloc) const {
+                range.normalize(the.length());
+                ixx left  = ixx(range.left());
+                ixx right = ixx(range.right());
 
                 uxx    target_length;
                 item * buf;
                 item * temp;
 
-                if (start <= end) {
-                    target_length   = uxx(end - start + 1);
+                if (left <= right) {
+                    target_length   = uxx(right - left + 1);
                     temp            = buf = alloc(target_length);
-                    while(start <= end){
-                        temp[0]     = the[start];
+                    while(left <= right){
+                        temp[0]     = the[uxx(left)];
                         temp       += 1;
-                        start      += 1;
+                        left       += 1;
                     }
                 }
                 else{
-                    target_length   = uxx(start - end + 1);
+                    target_length   = uxx(left - right + 1);
                     temp            = buf = alloc(target_length);
-                    while(start >= end){
-                        temp[0]     = the[start];
+                    while(left >= right){
+                        temp[0]     = the[uxx(left)];
                         temp       += 1;
-                        start      -= 1;
+                        left       -= 1;
                     }
                 }
                 return the_t(buf, target_length);
@@ -80,16 +71,12 @@
             using base::base;
             using the_t = core<item>;
 
-            final slice(ixx start, ixx end) const {
-                return the.slice(start, end);
+            final slice(iinterval range) const {
+                return the.slice(range);
             }
 
-            final slice(ixx start, inc::can_alloc<item> alloc) const {
-                return slice(start, -1, alloc);
-            }
-
-            final slice(ixx start, ixx end, inc::can_alloc<item> alloc) const {
-                return the.slice(start, end, alloc);
+            final slice(iinterval range, inc::can_alloc<item> alloc) const {
+                return the.slice(range, alloc);
             }
         };
     }

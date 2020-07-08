@@ -27,7 +27,7 @@
                 base_t(self){}
 
             auto reverse(inc::can_alloc<item> alloc) const {
-                return the.slice(-1, 0, alloc);
+                return the.slice(oc{-1, 0}, alloc);
             }
         };
 
