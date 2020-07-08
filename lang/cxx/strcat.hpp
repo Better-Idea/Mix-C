@@ -9,19 +9,23 @@
     #undef  xusing_lang_cxx
     #undef  xuser
     #define xuser mixc::lang_cxx_strcat
-    #include"define/base_type.hpp"
     #include"interface/can_alloc.hpp"
     #include"interface/initializer_list.hpp"
+    #include"lang/cxx/clone.hpp"
     #include"lang/cxx.hpp"
-    #include"meta/is_same.hpp"
+    #include"mixc.hpp"
     #pragma pop_macro("xusing_lang_cxx")
     #pragma pop_macro("xuser")
 
     namespace mixc::lang_cxx_strcat{
         template<class item>
         struct core : inc::cxx<item> {
-            using inc::cxx<item>::cxx;
+            using base_t = inc::cxx<item>;
+            using base_t::base_t;
             using the_t = core<item>;
+
+            core(base_t const & self) : 
+                base_t(self){}
 
             auto strcat(the_t * list, uxx length, inc::can_alloc<item> alloc) const {
                 uxx total_length = the.length();
@@ -31,9 +35,10 @@
                 }
 
                 auto ptr = alloc(total_length);
+                auto tmp = ptr;
                 auto set = [&](uxx length){
-                    auto mem = ptr;
-                    ptr     += length;
+                    auto mem = tmp;
+                    tmp     += length;
                     return mem;
                 };
 
@@ -52,11 +57,11 @@
             using the_t = core<item>;
 
             final strcat(final values, inc::can_alloc<item> alloc) const {
-                return the.strcat(& values, 1, alloc);
+                return the.strcat((the_t *)(xref values), 1, alloc);
             }
 
             final strcat(inc::initializer_list<final> values, inc::can_alloc<item> alloc) const {
-                return the.strcat(values.begin(), values.size(), alloc);
+                return the.strcat((the_t *)values.begin(), values.size(), alloc);
             }
         };
     }
