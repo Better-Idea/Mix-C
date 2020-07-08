@@ -12,6 +12,7 @@
     #include"define/base_type.hpp"
     #include"docker/darray.hpp"
     #include"interface/can_alloc.hpp"
+    #include"interface/can_callback.hpp"
     #include"interface/can_compare.hpp"
     #include"lang/cxx/index_of_first.hpp"
     #include"lang/cxx.hpp"
@@ -35,10 +36,10 @@
                 base_t(self){}
 
             auto replace(
-                the_t                     old_value, 
-                the_t                     new_value, 
-                inc::can_compare<item>    compare, 
-                inc::can_alloc<item> alloc) const {
+                the_t                   old_value, 
+                the_t                   new_value, 
+                inc::can_compare<item>  compare, 
+                inc::can_alloc<item>    alloc) const {
 
                 constexpr uxx buf_size = 64;
                 struct {
@@ -69,37 +70,50 @@
 
                 the.index_of_first(old_value, [&](uxx index){
                     pack.push(index);
-                });
+                }, compare);
 
                 the_t r { alloc(pack.total_length), pack.total_length };
                 the_t target     = r;
                 the_t source     = the;
                 bool  only_stack = pack.i < buf_size;
                 uxx   top        = only_stack ? pack.i : buf_size;
+                uxx   last_index = 0;
 
-                auto && replace = [&](uxx length){
-                    inc::copy_with_operator(target, source, length);
-                    target = target.backward(length);
-                    source = source.backward(length + old_value.length());
-                    inc::copy_with_operator(target, new_value, length = new_value.length());
-                    target = target.backward(length);
+
+                auto && replace = [&](uxx index/*要移除字符串的索引*/){
+                    // 将 source 要移除字符串之前的保留字符串拷贝到 target
+                    auto 
+                    head_length = index - last_index;
+                    inc::copy_with_operator(target, source, head_length);
+                    target      = target.backward(head_length);
+                    head_length = head_length + old_value.length();
+                    source      = source.backward(head_length);
+                    inc::copy_with_operator(target, new_value, new_value.length());
+                    target      = target.backward(new_value.length());
+                    last_index  = index + old_value.length();
                 };
 
-                auto && remove = [&](uxx length){
-                    inc::copy_with_operator(target, source, length);
-                    target = target.backward(length);
-                    source = source.backward(length + old_value.length());
+                auto && remove = [&](uxx index){
+                    auto 
+                    head_length = index - last_index;
+                    inc::copy_with_operator(target, source, head_length);
+                    target      = target.backward(head_length);
+                    source      = source.backward(head_length + old_value.length());
+                    last_index  = index + old_value.length();
                 };
+
+                using change_t = inc::can_callback<void(uxx)>;
 
                 auto && change = 
-                    new_value.is_empty() ?  remove :  replace;
+                    new_value.is_empty() ? change_t(remove) : change_t(replace);
 
                 for(uxx i = 0; i < top; i++){
                     change(pack.buf[i]);
                 }
-                for(ixx i = 0; i < ixx(pack.i - buf_size); i++){
+                for(uxx i = 0; ixx(i) < ixx(pack.i - buf_size); i++){
                     change(pack.heap[i]);
                 }
+                inc::copy_with_operator(target, source, source.length());
                 return r;
             }
         };
