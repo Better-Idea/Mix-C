@@ -58,10 +58,28 @@
         using member_list_partial = vlist<rest...>;
 
         template<class type>
-        struct fake{
-            type * item = nullptr;
-        };
+        struct fake{ type * item = nullptr; };
     }
+
+    template<uxx index>
+    using __dph = mixc::dumb_place_holder::place_holder<index, true>;
+
+    template<class self, class ... list>
+    using __dfc = typename mixc::macro_xstruct::data_field_collector<self, list...>::member_list;
+
+    template<class ignore, class ... rest>
+    using __bl  = mixc::macro_xstruct::base_list<ignore, rest...>;
+
+    template<auto ignore, auto ... rest>
+    using __mlp = mixc::macro_xstruct::member_list_partial<ignore, rest...>;
+
+    template<class type>
+    using __fak = mixc::macro_xstruct::fake<type>;
+
+    template<class type>
+    using __rr  = ::mixc::meta_remove_ref::remove_ref<type>;
+    
+    static inline uxx __class_id = 0x80000000;
 
     #define __ignore__(...)
 
@@ -154,19 +172,31 @@
     #define __xmlist_pubf__(name,...)           , & the_t::name
     #define __xmlist_prof__(name,...)           , & the_t::name
     #define __xmlist_prif__(name,...)           , & the_t::name
-    #define __xmlist_asso__(...)                , & ::mixc::macro_xstruct::fake<__VA_ARGS__>::item
+    #define __xmlist_asso__(...)                , & __fak<__VA_ARGS__>::item
 
-    #define __xname__
-    #define __xname_name__(...)                 #__VA_ARGS__
-    #define __xname_tmpl__(name,...)            #name
-    #define __xname_spec__(name,...)            #name
-    #define __xname_pubb__(...)
-    #define __xname_prob__(...)
-    #define __xname_prib__(...)
-    #define __xname_pubf__(...)
-    #define __xname_prof__(...)
-    #define __xname_prif__(...)
-    #define __xname_asso__(...)
+    #define __xtype__
+    #define __xtype_name__(...)                 #__VA_ARGS__
+    #define __xtype_tmpl__(name,...)            #name
+    #define __xtype_spec__(name,...)            #name
+    #define __xtype_pubb__(...)
+    #define __xtype_prob__(...)
+    #define __xtype_prib__(...)
+    #define __xtype_pubf__(...)
+    #define __xtype_prof__(...)
+    #define __xtype_prif__(...)
+    #define __xtype_asso__(...)
+
+    #define __xitem__
+    #define __xitem_name__(...)
+    #define __xitem_tmpl__(...)
+    #define __xitem_spec__(...)
+    #define __xitem_pubb__(...)
+    #define __xitem_prob__(...)
+    #define __xitem_prib__(...)
+    #define __xitem_pubf__(name,...)            #name,
+    #define __xitem_prof__(name,...)            #name,
+    #define __xitem_prif__(name,...)            #name,
+    #define __xitem_asso__(...)                 "",
 
     // 普通类
     #define xname(...)                          name__(__VA_ARGS__)
@@ -201,55 +231,66 @@
     #define xstruct(...)                                                            \
     struct __xlist__(__xstruct_, __VA_ARGS__) :                                     \
            __xlist__(__xexpand_, __VA_ARGS__)                                       \
-           ::mixc::dumb_place_holder::place_holder<__COUNTER__> {                   \
+           __dph<__COUNTER__> {                                                     \
         using the_t = __xlist__(__xthe_, __VA_ARGS__);                              \
-        private:                                                                    \
             __xlist__(__xfield_, __VA_ARGS__)                                       \
+        private:                                                                    \
             enum{ __start = __COUNTER__ + 1 };                                      \
-            static constexpr auto __my_name = __xlist__(__xname_, __VA_ARGS__);     \
+            static constexpr auto __my_name =                                       \
+                __xlist__(__xtype_, __VA_ARGS__);                                   \
+            static inline uxx __my_class_id = __class_id++;                         \
+            static constexpr asciis __my_field_name[] =                             \
+                { __xlist__(__xitem_, __VA_ARGS__) };                               \
             template<class, class>                                                  \
             friend union ::mixc::macro_xtypeid::__typeid;                           \
+            template<uxx __end>                                                     \
+            void operator()(__dph<__end>);                                          \
+            template<uxx __foo>                                                     \
+            static decltype(nullptr) __field_name(__dph<__foo>);                    \
         public:                                                                     \
-        using base_list = ::mixc::macro_xstruct::base_list<                         \
+        using base_list = __bl<                                                     \
             void/*ignore*/ __xlist__(__xbase_, __VA_ARGS__)                         \
         >;                                                                          \
-        using member_list_partial = mixc::macro_xstruct::member_list_partial<       \
+        using member_list_partial = __mlp<                                          \
             nullptr/*ignore*/ __xlist__(__xmlist_, __VA_ARGS__)                     \
         >;                                                                          \
-        using member_list = typename ::mixc::macro_xstruct::data_field_collector<   \
+        using member_list = __dfc<                                                  \
             __xlist__(__xplaced_, __VA_ARGS__)                                      \
-        >::member_list;
+        >;
 
-    #define $        };
+    #define $   private: static void __field_name(__dph<(__COUNTER__ - __start) / 4>);  };
 
-    #define __get__(get_modify,name,...)                                            \
+    #define __get_core__(count,get_modify,name,...)                                 \
+    private:                                                                        \
+        static constexpr auto __field_name(__dph<(count - __start) / 4>) {          \
+            return #name;                                                           \
+        }                                                                           \
     get_modify:                                                                     \
         __VA_ARGS__ name() const {                                                  \
-            return the(::mixc::dumb_place_holder::                                  \
-                place_holder<(__COUNTER__ - __start) / 4>()                         \
-            );                                                                      \
+            return the(__dph<(count - __start) / 4>());                             \
         }                                                                           \
-        final & name(::mixc::meta_remove_ref::remove_ref<__VA_ARGS__> * receive){   \
+
+    #define __get__(get_modify,name,...)                                            \
+        __get_core__(__COUNTER__, get_modify, name, __VA_ARGS__)                    \
+        final & name(__rr<__VA_ARGS__> * receive){                                  \
             receive[0] = name();                                                    \
             return thex;                                                            \
-        }                                                                           \
+        }
 
     #define __set__(set_modify,name,...)                                            \
     set_modify:                                                                     \
         final & name(__VA_ARGS__ value){                                            \
-            the(::mixc::dumb_place_holder::                                         \
-                place_holder<(__COUNTER__ - __start) / 4>(), value                  \
-            );                                                                      \
+            the(__dph<(__COUNTER__ - __start) / 4>(), value);                       \
             return thex;                                                            \
-        }                                                                           \
+        }
 
     #define __getset__(get_modify,set_modify,name,...)                              \
         __get__(get_modify,name,__VA_ARGS__)                                        \
         __set__(set_modify,name,__VA_ARGS__)                                        \
     private:
 
-    #define xw                                          template<class __type> void operator()(::mixc::dumb_place_holder::place_holder<(__COUNTER__ - __start) / 4>, __type const & value)
-    #define xr                                          operator()(::mixc::dumb_place_holder::place_holder<(__COUNTER__ - __start) / 4>)
+    #define xw                                          template<class __type> void operator()(__dph<(__COUNTER__ - __start) / 4>, __type const & value)
+    #define xr                                          operator()(__dph<(__COUNTER__ - __start) / 4>)
 
     #define xpubget_pubsetx(name,...)                   __getset__(public   , public    , name, __VA_ARGS__) __VA_ARGS__ 
     #define xpubget_prosetx(name,...)                   __getset__(public   , protected , name, __VA_ARGS__) __VA_ARGS__ 

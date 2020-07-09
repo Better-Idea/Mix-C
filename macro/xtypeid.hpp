@@ -4,17 +4,19 @@
     #undef  xuser
     #define xuser mixc::macro_xtypeid
     #include"define/base_type.hpp"
-    #include"dumb/place_holder.hpp"
-    #include"meta/is_same.hpp"
+    #include"meta/is_belong_to.hpp"
     #include"meta/is_class.hpp"
+    #include"meta/is_same.hpp"
     #include"meta/remove_const.hpp"
     #include"meta/remove_ref.hpp"
+    #include"meta_seq/tlist.hpp"
+    #include"meta_seq/vlist.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_xtypeid{
         using namespace inc;
 
-        template<class type, class dummy = place_holder<0>> union __typeid;
+        template<class type, class dummy = void> union __typeid;
         template<class type>
         union __typeid<type> {
             using the_type = remove_ref<
@@ -91,7 +93,7 @@
                     enum { __start = __COUNTER__ + 1 };
 
                     if constexpr (is_class<the_type>){
-                        return the_type::__class_id;
+                        return the_type::__my_class_id;
                     }
 
                     xgen(char)
@@ -129,6 +131,37 @@
                     return operator uxx();
                 }
             } class_id;
+
+            template<class callback>
+            void foreach_fields(type const & value, callback const & call){
+                using bl    = typename type::base_list;
+                foreach_base(bl(), value, call);
+            }
+        private:
+            template<class callback, class expand, class base, class ... rest_base>
+            void foreach_base(tlist<base, rest_base...>, expand const & child, callback const & call){
+                using bl    = typename base::base_list;
+
+                foreach_base(bl(), (base &)child/*二重李氏转换*/, call);
+                foreach_base(tlist<rest_base...>(), child/*李氏转换*/, call);
+            }
+
+            template<class callback, class expand>
+            void foreach_base(tlist<>, expand const & child, callback const & call){
+                using mlp   = typename expand::member_list_partial;
+                foreach_fields(0, mlp(), child, call);
+            }
+
+            template<class callback, class expand, auto field_ptr, auto ... rest_field_ptr>
+            void foreach_fields(uxx i, vlist<field_ptr, rest_field_ptr...>, expand const & current, callback const & call){
+                if constexpr (is_belong_to<expand, decltype(field_ptr)>){
+                    call(i, expand::__my_field_name[i], current.*field_ptr);
+                }
+                foreach_fields(i + 1, vlist<rest_field_ptr...>(), current, call);
+            }
+
+            template<class callback, class expand>
+            void foreach_fields(uxx, vlist<>, expand const &, callback const &){}
         };
     }
 
