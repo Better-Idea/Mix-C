@@ -22,6 +22,10 @@
     #include"meta_seq/vmarge.hpp"
     #pragma pop_macro("xuser")
 
+    namespace mixc::macro_xtypeid{
+        template<class type, class dummy> union __typeid;
+    }
+
     namespace mixc::macro_xstruct{
         using namespace inc;
 
@@ -152,6 +156,18 @@
     #define __xmlist_prif__(name,...)           , & the_t::name
     #define __xmlist_asso__(...)                , & ::mixc::macro_xstruct::fake<__VA_ARGS__>::item
 
+    #define __xname__
+    #define __xname_name__(...)                 #__VA_ARGS__
+    #define __xname_tmpl__(name,...)            #name
+    #define __xname_spec__(name,...)            #name
+    #define __xname_pubb__(...)
+    #define __xname_prob__(...)
+    #define __xname_prib__(...)
+    #define __xname_pubf__(...)
+    #define __xname_prof__(...)
+    #define __xname_prif__(...)
+    #define __xname_asso__(...)
+
     // 普通类
     #define xname(...)                          name__(__VA_ARGS__)
 
@@ -190,6 +206,9 @@
         private:                                                                    \
             __xlist__(__xfield_, __VA_ARGS__)                                       \
             enum{ __start = __COUNTER__ + 1 };                                      \
+            static constexpr auto __my_name = __xlist__(__xname_, __VA_ARGS__);     \
+            template<class, class>                                                  \
+            friend union ::mixc::macro_xtypeid::__typeid;                           \
         public:                                                                     \
         using base_list = ::mixc::macro_xstruct::base_list<                         \
             void/*ignore*/ __xlist__(__xbase_, __VA_ARGS__)                         \

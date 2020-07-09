@@ -1,20 +1,22 @@
 #ifndef xpack_macro_xtypeid
 #define xpack_macro_xtypeid
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::macro_xtypeid
-        #include"define/base_type.hpp"
-        #include"meta/is_same.hpp"
-        #include"meta/is_class.hpp"
-        #include"meta/remove_const.hpp"
-        #include"meta/remove_ref.hpp"
+    #undef  xuser
+    #define xuser mixc::macro_xtypeid
+    #include"define/base_type.hpp"
+    #include"dumb/place_holder.hpp"
+    #include"meta/is_same.hpp"
+    #include"meta/is_class.hpp"
+    #include"meta/remove_const.hpp"
+    #include"meta/remove_ref.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_xtypeid{
         using namespace inc;
 
+        template<class type, class dummy = place_holder<0>> union __typeid;
         template<class type>
-        union __typeid {
+        union __typeid<type> {
             using the_type = remove_ref<
                 remove_const<type>
             >;
@@ -27,8 +29,7 @@
                     static char the_name[len + leave_out + 1/* \0 */] = { 0 };
 
                     if constexpr (is_class<the_type>){
-                        // auto ptr = the_type::__self_name;
-                        auto ptr = "";
+                        auto ptr = the_type::__my_name;
                         the_name[len + 0] = '.';
                         the_name[len + 1] = '.';
                         the_name[len + 2] = '.';
