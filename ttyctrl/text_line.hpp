@@ -1,17 +1,15 @@
 #ifndef xpack_ttyctrl_text_line
 #define xpack_ttyctrl_text_line
     #pragma push_macro("xuser")
-        #undef  xuser
-        #define xuser mixc::ttyctrl_text_line
-        #include"algo/insert.hpp"
-        #include"algo/remove.hpp"
-        #include"define/base_type.hpp"
-        #include"docker/darray.hpp"
-        #include"macro/xgc.hpp"
-        #include"macro/xindex_rollback.hpp"
-        #include"macro/xprop.hpp"
-        #include"memop/copy.hpp"
-        #include"memop/swap.hpp"
+    #undef  xuser
+    #define xuser mixc::ttyctrl_text_line
+    #include"algo/insert.hpp"
+    #include"algo/remove.hpp"
+    #include"docker/darray.hpp"
+    #include"macro/xindex_rollback.hpp"
+    #include"memop/copy.hpp"
+    #include"memop/swap.hpp"
+    #include"mixc.hpp"
     #pragma pop_macro("xuser")
 
     namespace mixc::ttyctrl_text_line{
@@ -22,23 +20,21 @@
             }
         }
 
-        struct text_line{
-            xgc_fields(
-                xiam(text_line),
-                xpri(ptext          ,   inc::darray<char16_t>),
-                xpri(pleft          ,   u16),
-                xpri(ptop           ,   u16),
-                xpri(pcolumn        ,   u16),
-                xpri(pcursor_column ,   u16),
-                xpri(pcursor_index  ,   u32),
-                xpri(plength        ,   u32),
-            );
-
+        xstruct(
+            xname(text_line),
+            xprif(ptext          ,   inc::darray<char16_t>),
+            xprif(pleft          ,   u16),
+            xprif(ptop           ,   u16),
+            xprif(pcolumn        ,   u16),
+            xprif(pcursor_column ,   u16),
+            xprif(pcursor_index  ,   u32),
+            xprif(plength        ,   u32)
+        )
             using final = the_t;
 
             enum{ over_boundary = true, };
 
-            xpriget(capacity, uxx){
+            xprigetx(capacity, uxx){
                 return the.ptext.length();
             }
         public:
@@ -51,34 +47,15 @@
                 return the.ptext[uxx(index)];
             }
 
-            xpubget(length, uxx){ 
+            xpubgetx(length, uxx){ 
                 return the.ptext.length();
             }
 
-            xpubget_pubset(left, uxx){
-                xr { return the.pleft; }
-                xw { the.pleft = value; }
-            };
-
-            xpubget_pubset(top, uxx){
-                xr { return the.ptop; }
-                xw { the.ptop = value; }
-            };
-
-            xpubget_pubset(column, uxx){
-                xr { return the.pcolumn; }
-                xw { the.pcolumn = value; }
-            };
-
-            xpubget_pubset(cursor_index, uxx){
-                xr { return the.pcursor_index; }
-                xw { the.pcursor_index = value; }
-            };
-
-            xpubget_pubset(cursor_column, uxx){
-                xr { return the.pcursor_column; }
-                xw { the.pcursor_column = value; }
-            };
+            xpubget_pubset(left)
+            xpubget_pubset(top)
+            xpubget_pubset(column)
+            xpubget_pubset(cursor_index)
+            xpubget_pubset(cursor_column)
 
             bool go_left(){
                 if (the.pcursor_column != the.pleft){
@@ -157,9 +134,9 @@
                     ::length{new_length}
                 };
                 inc::copy(compact, the.ptext, compact.length());
-                inc::swap(xref the.ptext, xref compact);
+                the.ptext.swap(xref compact);
             }
-        };
+        $
     }
 #endif
 
