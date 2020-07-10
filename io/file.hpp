@@ -19,14 +19,13 @@
         xstruct(
             xname(file),
             xpubb(inc::disable_copy),
-            xprif(fd, mutable i32),
+            xprif(fd,   mutable ixx),
             xprif(path, mutable asciis)
         )
             using final = the_t;
-        private:
-            file(i32 stdfd) : fd(stdfd), path(""){}
         public:
-            file() : fd(-1), path("") {}
+            file();
+            file(asciis path) : path(path){}
             file(asciis path, access_mode_t mode, bstate * result = nullptr) {
                 the.open(path, mode, result);
             }

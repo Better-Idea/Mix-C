@@ -3,22 +3,94 @@
     #pragma push_macro("xuser")
     #undef  xuser
     #define xuser mixc::io_private_file
-    #define private public
-    #include<unistd.h>
-    #include<sys/file.h>
-    #include<sys/stat.h>
     #include"define/base_type.hpp"
     #include"io/file.hpp"
     #include"lock/atom_swap.hpp"
     #include"macro/xindex_rollback.hpp"
-    #undef  private
     #pragma pop_macro("xuser")
 
     namespace mixc::io_file{
-        using namespace xuser::inc;
+        using namespace ::mixc::io_private_file::inc;
     }
 
+    #if xis_windows
     namespace mixc::io_file::origin{
+        file::file() : fd(0), path("") {}
+
+        u64 file::length() const {
+            u64 size = 0;
+            GetFileSizeEx(HANDLE(fd), PLARGE_INTEGER(& size));
+            return size;
+        }
+
+        file & file::open(asciis path, access_mode_t mode, bstate * result) const {
+            i32 type = 0;
+
+            switch(mode){
+            case access_mode_t::read_only:  type = GENERIC_READ;                    break;
+            case access_mode_t::write_only: type = GENERIC_WRITE;                   break;
+            case access_mode_t::read_write: type = GENERIC_READ | GENERIC_WRITE;    break;
+            }
+
+            the.close();
+            the.path = path;
+            the.fd   = (ixx)CreateFileA(path, type, FILE_SHARE_VALID_FLAGS, NULL, CREATE_NEW, NULL, NULL);
+
+            if (the.fd == -1){
+                the.fd = (ixx)CreateFileA(path, type, FILE_SHARE_VALID_FLAGS, NULL, OPEN_EXISTING, NULL, NULL);
+            }
+            if (result != nullptr){
+                result[0] = the.fd == -1 ? fail : success;
+            }
+            return thex;
+        }
+
+        file & file::close() const {
+            if (atom_swap<ixx>(& fd, 0) > 0){
+                CloseHandle(HANDLE(fd));
+            }
+            return thex;
+        }
+
+        file & file::forward(u64 offset) const {
+            return backward(u64(0) - offset);
+        }
+
+        file & file::backward(u64 offset) const {
+            SetFilePointerEx(HANDLE(the.fd), *PLARGE_INTEGER(& offset), NULL, FILE_CURRENT);
+            return thex;
+        }
+
+        file & file::seek(i64 offset) const {
+            if (offset < 0){
+                offset = -offset - 1;
+                SetFilePointerEx(HANDLE(the.fd), *PLARGE_INTEGER(& offset), NULL, FILE_END);
+            }
+            else{
+                SetFilePointerEx(HANDLE(the.fd), *PLARGE_INTEGER(& offset), NULL, FILE_BEGIN);
+            }
+            return thex;
+        }
+
+        uxx file::read(voidp buffer, uxx bytes) const {
+            u64 size = 0;
+            ReadFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
+            return size;
+        }
+
+        uxx file::write(void const * buffer, uxx bytes) const {
+            u64 size = 0;
+            WriteFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
+            return size;
+        }
+    }
+    #else
+    #include<unistd.h>
+    #include<sys/file.h>
+    #include<sys/stat.h>
+    namespace mixc::io_file::origin{
+        file::file() : fd(-1), path("") {}
+
         u64 file::length() const {
             struct stat sta = {};
             stat(path, & sta);
@@ -45,8 +117,7 @@
         }
 
         file & file::close() const {
-            static_assert(decltype(fd)(-1) < 0);
-            if (atom_swap(& fd, -1) >= 0){
+            if (atom_swap<ixx>(& fd, -1) >= 0){
                 ::close(fd);
             }
             return thex;
@@ -75,5 +146,5 @@
             return ::write(the.fd, buffer, bytes);
         }
     }
-
+    #endif
 #endif
