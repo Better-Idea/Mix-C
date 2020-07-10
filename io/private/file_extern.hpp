@@ -83,7 +83,26 @@
             WriteFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
             return size;
         }
+
+        void file::remove() const{
+            DeleteFileA(the.path);
+        }
+
+        void file::move_to(asciis new_path) const{
+            MoveFileA(the.path, new_path);
+        }
+
+        void file::copy_to(asciis new_path) const{
+            CopyFileA(the.path, new_path, true/*override*/);
+        }
+
+        bool file::is_exist() const{
+            auto word = GetFileAttributesA(the.path);
+            return word != INVALID_FILE_ATTRIBUTES;
+        }
     }
+
+
     #else
     #include<unistd.h>
     #include<sys/file.h>

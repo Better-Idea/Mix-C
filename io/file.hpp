@@ -33,14 +33,19 @@
                 the.close();
             }
 
-            u64     length() const;
+            u64     length()                                const;
             final & open(asciis path, access_mode_t mode, bstate * result = nullptr) const;
-            final & close() const;
-            final & forward(u64 offset) const;
-            final & backward(u64 offset) const;
-            final & seek(i64 offset) const;
-            uxx     read(voidp buffer, uxx bytes) const;
-            uxx     write(void const * buffer, uxx bytes) const;
+            final & close()                                 const;
+            final & forward(u64 offset)                     const;
+            final & backward(u64 offset)                    const;
+            final & seek(i64 offset)                        const;
+            uxx     read(voidp buffer, uxx bytes)           const;
+            uxx     write(void const * buffer, uxx bytes)   const;
+
+            void    remove()                                const;
+            void    move_to(asciis new_path)                const;
+            void    copy_to(asciis new_path)                const;
+            bool    is_exist()                              const;
 
             template<class item_t>
             uxx read(inc::seqptr<item_t> seq) const {
