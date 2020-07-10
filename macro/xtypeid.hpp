@@ -154,7 +154,7 @@
 
             template<class callback, class expand, auto field_ptr, auto ... rest_field_ptr>
             void foreach_fields(uxx i, vlist<field_ptr, rest_field_ptr...>, expand const & current, callback const & call){
-                if constexpr (is_belong_to<expand, decltype(field_ptr)>){
+                if constexpr (is_belong_to<expand, field_ptr>){
                     call(i, expand::__my_field_name[i], current.*field_ptr);
                 }
                 foreach_fields(i + 1, vlist<rest_field_ptr...>(), current, call);
