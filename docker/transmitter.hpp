@@ -12,10 +12,9 @@
         private:
             bool phas_hold_value = true;
         public:
-            transmitter(){}
+            transmitter(): phas_hold_value(false){}
             transmitter(type const & value) : 
                 inc::struct_t<type>(value){
-                phas_hold_value = false;
             }
 
             auto & operator=(type const & value){
