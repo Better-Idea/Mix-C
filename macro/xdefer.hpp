@@ -9,17 +9,14 @@
 
     namespace mixc::macro_xdefer {
         template<class lambda>
-        xstruct(
-            xtmpl(defer, lambda),
-            xpubb(lambda)
-        )
+        struct defer : lambda{
             defer(lambda const & call) : 
                 lambda(call){
             }
             ~defer(){
                 lambda::operator()();
             }
-        $
+        };
 
         struct sugar{
             template<class lambda>
