@@ -16,6 +16,9 @@
             xpubb(type)
         )
             using type::type;
+
+            struct_t(type const & value) : 
+                type(value){}
         $
 
         template<class type>
