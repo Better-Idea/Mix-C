@@ -20,7 +20,6 @@
     #include"memop/addressof.hpp"
     #include"memop/cast.hpp"
     #include"meta/is_class.hpp"
-    #include"meta/is_same.hpp"
     #include"meta_ctr/cif.hpp"
     #include"meta_seq/tlist.hpp"
     #include"meta_seq/tin.hpp"
@@ -66,6 +65,7 @@
 
                 bool can_arrive_root = false;
 
+                // 无法通向 root 的死路
                 if (mem == nullptr){
                     return false;
                 }
@@ -80,13 +80,22 @@
                     }
                 }
 
+                // 我们把经过的节点存下来
+                // 如果是首次经过就让它遍历成员节点
+                // 如果该节点可以通往 root，那么曾经拜访过该节点的附和节点也可以通往根节点
+                // 实际过程如下：
+                // root --> 此节点 --> 附和节点 -> 此节点
+                //             |   
+                //             +-----> 其他节点 -> root
+                // 在此时附和节点不能确定此节点是否还存在可以通往 root 的路径，所以指示暂时的让此节点的 visited 访问计数器加一
+                // 而计数汇总的工作则是交给此节点来完成
                 if (auto & info = gc_map.get(mem); info == nullref){
                     info_t      this_node;
-                    attribute * ptr             = mem; // lis convert
+                    attribute * ptr             = mem; // 李氏转换
                     this_node.can_arrive_root   = mem == root;
-                    this_node.visited           = mem != root;
+                    this_node.visited           = mem != root; // 除了根节点，其他节点都有直接的入边（表示从前一个节点到此节点）
                     gc_map.set(mem, this_node);
-                    xdebug(im_gc_meta_routing, "set to gc_map");
+                    xdebug(im_gc_meta_routing, mem, "set to gc_map");
                     can_arrive_root |= tuplep(ptr)->template routing<guide>();
 
                     if (can_arrive_root){
@@ -111,7 +120,12 @@
             bool can_release(){
                 bool    state;
                 root                    = mem;
-                the.template routing<guide>();
+
+                // not can_arrive_root
+                if (not the.template routing<guide>()){
+                    return false;
+                }
+
                 state                   = degree_dvalue == 0;
                 degree_dvalue           = 0;
                 return state;
@@ -141,32 +155,34 @@
         protected:
             ~meta(){
                 using guide = decltype(make_guide<impl>());
-                constexpr bool need_gc = not is_same<guide, tlist<>>;
-                token_mix_t *  tmp = nullptr;
+                constexpr bool need_gc = guide::length != 0;
+                token_mix_t *  ptr = nullptr;
                 uxx            cnt;
 
-                if (tmp = atom_swap(& mem, tmp); tmp == nullptr) { // enter only once
+                if (ptr = atom_swap(& mem, ptr); ptr == nullptr) { // enter only once
                     return;
                 }
 
-                auto & old = cast<the_t>(tmp);
+                auto & old = cast<the_t>(ptr);
+                cnt        = ptr->owners_dec();
+                xdebug(im_gc__meta, xtypeid(attribute).name, cnt, ptr);
 
                 if constexpr (not need_gc){
-                    if (cnt = tmp->owners_dec(); cnt == 0){
+                    if (cnt == 0){
                         old.free();
                     }
-                    xdebug(im_gc__meta, xtypeid(attribute).name, cnt, tmp);
-                    return;
                 }
                 else if (need_free_whole_ring){
-                    if (auto && i = gc_map.take_out(tmp); i.has_hold_value() and i.can_arrive_root){
+                    if (auto && i = gc_map.take_out(ptr); i.has_hold_value() and i.can_arrive_root){
                         old.free();
                     }
-                    return;
                 }
-                else if (tmp->owners_dec(); old.template can_release<guide>()){
+                else if (cnt == 0){
+                    old.free();
+                }
+                else if (old.template can_release<guide>()){
                     need_free_whole_ring = true;
-                    gc_map.take_out(tmp);
+                    gc_map.take_out(ptr);
                     old.free();
                     gc_map.clear();
                     need_free_whole_ring = false;
