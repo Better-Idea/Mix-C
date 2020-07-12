@@ -2,8 +2,6 @@
     #undef xuser
 #endif
 
-#define xuser mixc::chrono_private_extern
-
 #include"configure.hpp"
 #include"chrono/+.hpp"
 
@@ -33,6 +31,45 @@
             return datetime(t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
         }
     }
+#endif
 
+#if xis_linux
+    #include<time.h>
+    #include<sys/time.h>
+    
+    namespace mixc::chrono_date::origin{
+        date date::now(){
+            auto t = *localtime(nullptr);
+            return date(1900 + t.tm_year, 1 + t.tm_mon, t.tm_mday);
+        }
+    }
+
+    namespace mixc::chrono_time::origin{
+        time time::now(){
+            while(true){
+                timeval low;
+                auto    high = *localtime(nullptr);
+                gettimeofday(& low, nullptr);
+
+                if (low.tv_sec == high.tm_sec){
+                    return time(high.tm_hour, high.tm_min, high.tm_sec, (low.tv_usec + 10) / 1000);
+                }
+            }
+        }
+    }
+
+    namespace mixc::chrono_datetime::origin{
+        datetime datetime::now(){
+            while(true){
+                timeval low;
+                auto    high = *localtime(nullptr);
+                gettimeofday(& low, nullptr);
+
+                if (low.tv_sec == high.tm_sec){
+                    return datetime(1900 + high.tm_year, 1 + high.tm_mon, high.tm_mday, high.tm_hour, high.tm_min, high.tm_sec, (low.tv_usec + 10) / 1000);
+                }
+            }
+        }
+    }
 #endif
 
