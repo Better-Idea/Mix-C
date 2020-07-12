@@ -4,155 +4,70 @@
 - 部分 ctrl+字母 和 ascii 的转义符重合，比如 \a \b \t \v \n
 
 查表:
-l          : 1b,5b,44,
-shift+l    : 1b,5b,31,3b,32,44,
-ALT+l      : 1b,5b,31,3b,33,44,
-ctr+l      : 1b,5b,31,3b,35,44,
-CS+l       : 1b,5b,31,3b,36,44,
-CA+l       : 1b,5b,31,3b,37,44,
-t          : 1b,5b,41,
-shift+t    : 1b,5b,31,3b,32,41,
-ALT+t      : 1b,5b,31,3b,33,41,
-ctr+t      : 1b,5b,31,3b,35,41,
-CS+t       : 1b,5b,31,3b,36,41,
-CA+t       : 1b,5b,31,3b,37,41,
-r          : 1b,5b,43,
-shift+r    : 1b,5b,31,3b,32,43,
-ALT+r      : 1b,5b,31,3b,33,43,
-ctr+r      : 1b,5b,31,3b,35,43,
-CS+r       : 1b,5b,31,3b,36,43,
-CA+r       : 1b,5b,31,3b,37,43,
-b          : 1b,5b,42,
-shift+b    : 1b,5b,31,3b,32,42,
-ALT+b      : 1b,5b,31,3b,33,42,
-ctr+b      : 1b,5b,31,3b,35,42,
-CS+b       : 1b,5b,31,3b,36,42,
-CA+b       : 1b,5b,31,3b,37,42,
+p0 <=> 1b 5b
+p1 <=> 1b 5b 31
+p2 <=> 1b 5b 31 3b
+p3 <=> 1b 5b 32
 
-del
-1b,5b,33,7e,
-1b,5b,33,3b,32,7e,
-1b,5b,33,3b,33,7e,
-1b,5b,33,3b,35,7e,
-
-ins
-1b,5b,32,7e,
-1b,5b,32,3b,35,7e,
-1b,5b,32,3b,32,7e,
-1b,5b,32,3b,33,7e,
-
-Home       : 1b,5b,48,
-PgUp       : 1b,5b,35,7e,
-End        : 1b,5b,46,
-PgDn       : 1b,5b,36,7e,
+        top         buttom      right       left        delete            insert            end         home        pgup              pgdn             
+none    p0 41       p0 42       p0 43       p0 44       p0 33 7e          p0 32 7e          p0 46       p0 48       p0 35             p0 36            
+shift   p2 32 41    p2 32 42    p2 32 43    p2 32 44    p0 33 3b 32 44    p0 32 3b 32 7e    p2 32 46    p2 32 48    p0 35 3b 32 7e    p0 36 3b 32 7e   
+alt     p2 33 41    p2 33 42    p2 33 43    p2 33 44    p0 33 3b 33 44    p0 32 3b 33 7e    p2 33 46    p2 33 48    p0 35 3b 33 7e    p0 36 3b 33 7e   
+s+a     p2 34 41    p2 34 42    p2 34 43    p2 34 44    p0 33 3b 34 44    p0 32 3b 34 7e    p2 34 46    p2 34 48    p0 35 3b 34 7e    p0 36 3b 34 7e   
+ctrl    p2 35 41    p2 35 42    p2 35 43    p2 35 44    p0 33 3b 35 44    p0 32 3b 35 7e    p2 35 46    p2 35 48    p0 35 3b 35 7e    p0 36 3b 35 7e   
+c+s     p2 36 41    p2 36 42    p2 36 43    p2 36 44    p0 33 3b 36 44    p0 32 3b 36 7e    p2 36 46    p2 36 48    p0 35 3b 36 7e    p0 36 3b 36 7e   
+c+a     p2 37 41    p2 37 42    p2 37 43    p2 37 44    p0 33 3b 37 44    p0 32 3b 37 7e    p2 37 46    p2 37 48    p0 35 3b 37 7e    p0 36 3b 37 7e   
+c+s+a   p2 38 41    p2 38 42    p2 38 43    p2 38 44    p0 33 3b 38 44    p0 32 3b 38 7e    p2 38 46    p2 38 48    p0 35 3b 38 7e    p0 36 3b 38 7e   
 
 
-Home
-PgUp
-End
-PgDn
+        f1          f2          f3          f4          f5               f6               f7               f8               f9               f10              f11              f12               
+none    1b 4f 50    1b 4f 51    1b 4f 52    1b 4f 53    p1 35 7e         p1 37 7e         p1 38 7e         p1 39 7e         p3 30 7e         p3 31 7e         p3 33 7e         p3 34 7e         
+shift   p2 32 50    p2 32 51    p2 32 52    p2 32 53    p1 35 3b 32 7e   p1 37 3b 32 7e   p1 38 3b 32 7e   p1 39 3b 32 7e   p3 30 3b 32 7e   p3 31 3b 32 7e   p3 33 3b 32 7e   p3 34 3b 32 7e   
+alt     p2 33 50    p2 33 51    p2 33 52    p2 33 53    p1 35 3b 33 7e   p1 37 3b 33 7e   p1 38 3b 33 7e   p1 39 3b 33 7e   p3 30 3b 33 7e   p3 31 3b 33 7e   p3 33 3b 33 7e   p3 34 3b 33 7e   
+s+a     p2 34 50    p2 34 51    p2 34 52    p2 34 53    p1 35 3b 34 7e   p1 37 3b 34 7e   p1 38 3b 34 7e   p1 39 3b 34 7e   p3 30 3b 34 7e   p3 31 3b 34 7e   p3 33 3b 34 7e   p3 34 3b 34 7e   
+ctrl    p2 35 50    p2 35 51    p2 35 52    p2 35 53    p1 35 3b 35 7e   p1 37 3b 35 7e   p1 38 3b 35 7e   p1 39 3b 35 7e   p3 30 3b 35 7e   p3 31 3b 35 7e   p3 33 3b 35 7e   p3 34 3b 35 7e   
+c+s     p2 36 50    p2 36 51    p2 36 52    p2 36 53    p1 35 3b 36 7e   p1 37 3b 36 7e   p1 38 3b 36 7e   p1 39 3b 36 7e   p3 30 3b 36 7e   p3 31 3b 36 7e   p3 33 3b 36 7e   p3 34 3b 36 7e   
+c+a     p2 37 50    p2 37 51    p2 37 52    p2 37 53    p1 35 3b 37 7e   p1 37 3b 37 7e   p1 38 3b 37 7e   p1 39 3b 37 7e   p3 30 3b 37 7e   p3 31 3b 37 7e   p3 33 3b 37 7e   p3 34 3b 37 7e   
+c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3b 38 7e   p1 38 3b 38 7e   p1 39 3b 38 7e   p3 30 3b 38 7e   p3 31 3b 38 7e   p3 33 3b 38 7e   p3 34 3b 38 7e   
 
-ALT:Home    : 1b,5b,31,3b,33,48,
-ALT:PgUp    : 1b,5b,35,3b,33,7e,
-ALT:End     : 1b,5b,31,3b,33,46,
-ALT:PgDn    : 1b,5b,36,3b,33,7e,
+void decode(){
+    char c0, c1, c2, c3, c4, c5, c6, c7;
+    uxx  k;
 
-F1         : 1b,4f,50,
-SHIFT+F1   : 1b,5b,31,3b,32,50,
-ALT+F1     : 1b,5b,31,3b,33,50,
-AS+F1      : 1b,5b,31,3b,34,50,
-CTRL+F1    : 1b,5b,31,3b,35,50,
-CS+F1      : 1b,5b,31,3b,36,50,
-CA+F1      : 1b,5b,31,3b,37,50,
-ASC+F1     : 1b,5b,31,3b,38,50,
-F2         : 1b,4f,51,
-SHIFT+F2   : 1b,5b,31,3b,32,51,
-ALT+F2     : 1b,5b,31,3b,33,51,
-AS+F2      : 1b,5b,31,3b,34,51,
-CTRL+F2    : 1b,5b,31,3b,35,51,
-CS+F2      : 1b,5b,31,3b,36,51,
-CA+F2      : 1b,5b,31,3b,37,51,
-ASC+F2     : 1b,5b,31,3b,38,51,
-F3         : 1b,4f,52,
-SHIFT+F3   : 1b,5b,31,3b,32,52,
-ALT+F3     : 1b,5b,31,3b,33,52,
-AS+F3      : 1b,5b,31,3b,34,52,
-CTRL+F3    : 1b,5b,31,3b,35,52,
-CS+F3      : 1b,5b,31,3b,36,52,
-CA+F3      : 1b,5b,31,3b,37,52,
-ASC+F3     : 1b,5b,31,3b,38,52,
-F4         : 1b,4f,53,
-SHIFT+F4   : 1b,5b,31,3b,32,53,
-ALT+F4     : 1b,5b,31,3b,33,53,
-AS+F4      : 1b,5b,31,3b,34,53,
-CTRL+F4    : 1b,5b,31,3b,35,53,
-CS+F4      : 1b,5b,31,3b,36,53,
-CA+F4      : 1b,5b,31,3b,37,53,
-ASC+F4     : 1b,5b,31,3b,38,53,
-F5         : 1b,5b,31,35,7e,
-SHIFT+F5   : 1b,5b,31,35,3b,32,7e,
-ALT+F5     : 1b,5b,31,35,3b,33,7e,
-AS+F5      : 1b,5b,31,35,3b,34,7e,
-CTRL+F5    : 1b,5b,31,35,3b,35,7e,
-CS+F5      : 1b,5b,31,35,3b,36,7e,
-CA+F5      : 1b,5b,31,35,3b,37,7e,
-ASC+F5     : 1b,5b,31,35,3b,38,7e,
-F6         : 1b,5b,31,37,7e,
-SHIFT+F6   : 1b,5b,31,37,3b,32,7e,
-ALT+F6     : 1b,5b,31,37,3b,33,7e,
-AS+F6      : 1b,5b,31,37,3b,34,7e,
-CTRL+F6    : 1b,5b,31,37,3b,35,7e,
-CS+F6      : 1b,5b,31,37,3b,36,7e,
-CA+F6      : 1b,5b,31,37,3b,37,7e,
-ASC+F6     : 1b,5b,31,37,3b,38,7e,
-F7         : 1b,5b,31,38,7e,
-SHIFT+F7   : 1b,5b,31,38,3b,32,7e,
-ALT+F7     : 1b,5b,31,38,3b,33,7e,
-AS+F7      : 1b,5b,31,38,3b,34,7e,
-CTRL+F7    : 1b,5b,31,38,3b,35,7e,
-CS+F7      : 1b,5b,31,38,3b,36,7e,
-CA+F7      : 1b,5b,31,38,3b,37,7e,
-ASC+F7     : 1b,5b,31,38,3b,38,7e,
-F8         : 1b,5b,31,39,7e,
-SHIFT+F8   : 1b,5b,31,39,3b,32,7e,
-ALT+F8     : 1b,5b,31,39,3b,33,7e,
-AS+F8      : 1b,5b,31,39,3b,34,7e,
-CTRL+F8    : 1b,5b,31,39,3b,35,7e,
-CS+F8      : 1b,5b,31,39,3b,36,7e,
-CA+F8      : 1b,5b,31,39,3b,37,7e,
-ASC+F8     : 1b,5b,31,39,3b,38,7e,
-F9         : 1b,5b,32,30,7e,
-SHIFT+F9   : 1b,5b,32,30,3b,32,7e,
-ALT+F9     : 1b,5b,32,30,3b,33,7e,
-AS+F9      : 1b,5b,32,30,3b,34,7e,
-CTRL+F9    : 1b,5b,32,30,3b,35,7e,
-CS+F9      : 1b,5b,32,30,3b,36,7e,
-CA+F9      : 1b,5b,32,30,3b,37,7e,
-ASC+F9     : 1b,5b,32,30,3b,38,7e,
-F10        : 1b,5b,32,31,7e,
-SHIFT+F10  : 1b,5b,32,31,3b,32,7e,
-ALT+F10    : 1b,5b,32,31,3b,33,7e,
-AS+F10     : 1b,5b,32,31,3b,34,7e,
-CTRL+F10   : 1b,5b,32,31,3b,35,7e,
-CS+F10     : 1b,5b,32,31,3b,36,7e,
-CA+F10     : 1b,5b,32,31,3b,37,7e,
-ASC+F10    : 1b,5b,32,31,3b,38,7e,
-F11        : 1b,5b,32,33,7e,
-SHIFT+F11  : 1b,5b,32,33,3b,32,7e,
-ALT+F11    : 1b,5b,32,33,3b,33,7e,
-AS+F11     : 1b,5b,32,33,3b,34,7e,
-CTRL+F11   : 1b,5b,32,33,3b,35,7e,
-CS+F11     : 1b,5b,32,33,3b,36,7e,
-CA+F11     : 1b,5b,32,33,3b,37,7e,
-ASC+F11    : 1b,5b,32,33,3b,38,7e,
-F12        : 1b,5b,32,34,7e,
-SHIFT+F12  : 1b,5b,32,34,3b,32,7e,
-ALT+F12    : 1b,5b,32,34,3b,33,7e,
-AS+F12     : 1b,5b,32,34,3b,34,7e,
-CTRL+F12   : 1b,5b,32,34,3b,35,7e,
-CS+F12     : 1b,5b,32,34,3b,36,7e,
-CA+F12     : 1b,5b,32,34,3b,37,7e,
-ASC+F12    : 1b,5b,32,34,3b,38,7e,
+    auto key_direction = [](char key){
+        switch(key){
+        case 0x41: return top;
+        case 0x42: return buttom;
+        case 0x43: return right;
+        case 0x44: return left;
+        default:   return unknown;
+        }
+    };
+
+    auto key_modify = [](char key){
+        switch(key){
+        case 0x32: return shift;
+        case 0x33: return shift;
+        case 0x34: return shift;
+        case 0x35: return shift;
+        case 0x36: return shift;
+        case 0x37: return shift;
+        case 0x38: return shift;
+        }
+    };
+
+    if (c0 = get(); a0 == 0x1b){
+        c1 = get();
+        k  = key_direction();
+
+        if (k != unknown){
+            return k;
+        }
+        if (c1 == 0x5b){
+
+        }
+    }
+}
 
 */
 
@@ -181,10 +96,14 @@ ASC+F12    : 1b,5b,32,34,3b,38,7e,
     #include<fcntl.h>
     #include<termios.h>
     #include<unistd.h>
+    #include<wchar.h>
 #endif
 
 namespace xuser::origin{
-    inc::tty_key const unknown_key{};
+    inc::tty_key const  unknown_key{};
+    inc::c16            key_str;
+    char16_t            buf_key[8];
+    uxx                 rest;
 
     union color_t{
         using the_t = color_t;
@@ -361,7 +280,6 @@ namespace xuser::origin{
 
     #if xis_linux
     using namespace inc::func_key;
-    using namespace io_private;
 
     void forecolor(inc::tty_color_t value) {
         using namespace inc::tty_color;
@@ -385,76 +303,76 @@ namespace xuser::origin{
         constexpr asciis map[] = {
             "\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[90m", "\e[91m", "\e[92m", "\e[93m", "\e[94m", "\e[95m", "\e[96m", "\e[97m",
         };
-        print_core(map[uxx(index)]);
+        print_core(map[uxx(value)], 5);
     }
 
     void backcolor(inc::tty_color_t value) {
         constexpr asciis map[]{
             "\e[40m", "\e[41m", "\e[42m", "\e[43m", "\e[44m", "\e[45m", "\e[46m", "\e[47m", "\e[100m", "\e[101m", "\e[102m", "\e[103m", "\e[104m", "\e[105m", "\e[106m", "\e[107m",
         };
-        print_core(map[uxx(index)]);
+        print_core(map[uxx(value)], 5);
     }
 
     void clear(){
-        print_core("\e[0m\e[0;0H\e[2J");
+        print_core("\e[0m\e[0;0H\e[2J", 14);
         // backcolor(back);
         forecolor(color.fore);
-        flush();
-    }
-
-    void cursor_visiable(bool value){
-        cursor_visiable = true;
-        print_core(value ? "\e[?25h" : "\e[?25l");
         print_flush();
     }
 
-    struct ini{
-        ini(){
+    void cursor_visiable(bool value){
+        the_cursor_visiable = true;
+        print_core(value ? "\e[?25h" : "\e[?25l", 6);
+        print_flush();
+    }
+
+    void configure(bool echo){
+        static bool is_echo   = false;
+        static bool is_inited = false;
+
+        if (uxx echo_mask = echo ? 0 : ECHO; not is_inited or (is_echo != echo)){
+            is_inited   = true;
+            is_echo     = echo;
             termios oldattr;
             tcgetattr(STDIN_FILENO, & oldattr);
-            oldattr.c_lflag     &= ~(ICANON | ECHO | ECHOE | ISIG);
+            oldattr.c_lflag     &= ~(ICANON | echo_mask | ECHOE | ISIG);
             oldattr.c_cc[VSTART] = 0xff;
             oldattr.c_cc[VSTOP]  = 0xff;
             tcsetattr(STDIN_FILENO, TCSANOW, & oldattr);
         }
-    } __ini;
-
-    uxx hit(){
-        auto oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
-        uxx v = uxx(getchar());
-        fcntl(STDIN_FILENO, F_SETFL, oldf);
-        return v;
     }
 
-    constexpr uxx buf_size = 16;
-    u08           buf[buf_size + 1];
-    uxx           rest = 0;
+    inc::tty_key read_key(bool echo){
+        inc::tty_key key;
+        configure(echo);
 
-    inc::tty_key read_key(){
-        // u08p          end = buf + buf_size;
-        // u08p          ptr = buf;
-        // ptr[0]            = getchar(); // 阻塞读取
-        // ptr              += 1;
+        if (key_str.length() == 0){
+            // 阻塞式读取
+            buf_key[0] = (char16_t)getchar();
 
-        // while(ptr < end){
-        //    if (auto v = hit(); v == not_exist){ // 非阻塞读取
-        //        break;
-        //    }
-        //    else{
-        //        ptr[0] = u08(v);
-        //        ptr   += 1;
-        //    }
-        // }
-        // ptr[0] = '\0'; // end
+            // 非阻塞式读取
+            auto oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+            fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
 
-        // return decode(inc::c08{ buf, ptr - buf }, & rest);
+            for(rest = 1; rest < sizeof(buf_key) / sizeof(buf_key[0]); rest++){
+                if (auto v = getchar(); v == -1){
+                    break;
+                }
+                else{
+                    buf_key[rest] = v;
+                }
+            }
+
+            fcntl(STDIN_FILENO, F_SETFL, oldf);
+            key_str = { buf_key, rest };
+        }
+
+        key     = decode(key_str, & rest);
+        key_str = key_str.backward(key_str.length() - rest);
+        return key;
     }
+
     #elif xis_windows
-
-    char16_t buf_key[8];
-    uxx      rest;
-    inc::c16 key_str;
 
     inc::tty_key read_key(bool echo){
         // need lock ===================================
