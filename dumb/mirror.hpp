@@ -3,28 +3,51 @@
     #pragma push_macro("xuser")
     #undef  xuser
     #define xuser mixc::dumb_mirror
+    #include"memory/new.hpp"
     #include"mixc.hpp"
     #pragma pop_macro("xuser")
 
-    namespace mixc::dumb_mirror{
+    namespace mixc::dumb_mirror::origin{
+        enum class construction_t{
+            ignore,
+            execute,
+        };
+
         template<class type>
         using item_t = u08 [sizeof(type)];
 
         template<class type>
         xstruct(
             xtmpl(mirror, type),
-            xprif(bytes, item_t<type>)
+            xprif(data, item_t<type>)
         )
-            mirror(): bytes{0}{}
-            mirror(type const & value){
-                this[0] = *(mirror<type> *)(xref value);
+            mirror(): data{0}{}
+            mirror(type const & value, construction_t mode){
+                if (mode == construction_t::ignore){
+                    this[0] = *(mirror<type> *)(xref value);
+                }
+                else{
+                    new (data) type(value);
+                }
+            }
+
+            void assign(type const & value){
+                new (this) the_t(value, construction_t::ignore);
+            }
+
+            void assign_with_operator(type const & value){
+                operator type &() = value;
+            }
+
+            type * operator->(){
+                return (type *)data;
             }
 
             operator type & (){
-                return *(type *)bytes;
+                return *(type *)data;
             }
 
-            constexpr uxx length() const {
+            constexpr uxx bytes() const {
                 return sizeof(type);
             }
         $
@@ -38,5 +61,5 @@
 #endif
 
 namespace xuser::inc{
-    using ::mixc::dumb_mirror::mirror;
+    using namespace ::mixc::dumb_mirror::origin;
 }
