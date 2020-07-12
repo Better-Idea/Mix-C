@@ -38,31 +38,33 @@
         template<class key_t, class val_t>
         xstruct(
             xtmpl(node, key_t, val_t),
-            xpubf(key, key_t),
-            xpubf(val, val_t)
+            xpubf(key, inc::mirror<key_t>),
+            xpubf(val, inc::mirror<val_t>),
+            xasso(key_t),
+            xasso(val_t)
         )
-            // 避免误导 GC 判断
+            // 结构嵌套，避免误导 GC 判断
             node * next;
 
             node() : next(this) {}
-            node(key_t const & key, val_t const & val) : 
-                key(key), val(val), next(nullptr) {
+            node(key_t const & key, val_t const & val, inc::construction_t mode) : 
+                key(key, mode), val(val, mode), next(nullptr) {
             }
 
             hashmap_set_result set(key_t const & key, val_t const & value){
                 // 约定 next == this 表示的是空节点，首元 next == nullptr 表示只有首元一个节点
                 if (is_empty()){
-                    new (this) node(key, value);
+                    new (this) node(key, value, inc::construction_t::execute);
                     return hashmap_set_result::success;
                 }
 
                 for(auto cur = this; ; cur = cur->next){
                     if (cur->key == key){
-                        cur->val    = value;
+                        cur->val.assign_with_operator(value);
                         return hashmap_set_result::override;
                     }
                     if (cur->next == nullptr){
-                        cur->next   = inc::alloc_with_initial<the_t>(key, value);
+                        cur->next   = inc::alloc_with_initial<the_t>(key, value, inc::construction_t::execute);
                         return hashmap_set_result::success;
                     }
                 }
@@ -126,11 +128,14 @@
                 }
                 while(next != nullptr){
                     auto temp = next;
-                    temp->~node();
+                    temp->val->~val_t();
+                    temp->key->~key_t();
                     next      = next->next;
                     inc::free(temp);
                 }
-                the.~node();
+
+                the.val->~val_t();
+                the.key->~key_t();
                 the.next = this;
             }
 
@@ -176,13 +181,18 @@
             }
 
             inc::transmitter<val_t> take_out(key_t const & key) {
-                auto index      = addressing(key);
-                auto can_relase = false;
-                
-                if (auto & pair = nodes[index].take_out(key, xref can_relase); pair == inc::nullref){
+                auto   index      = addressing(key);
+                auto   can_relase = false;
+                auto & pair       = nodes[index].take_out(key, xref can_relase);
+
+                if (pair == inc::nullref){
                     return inc::transmitter<val_t>();
                 }
-                else if (inc::transmitter<val_t> r = pair.val; can_relase){
+                else{
+                    count -= 1; // 需要计数========================================
+                }
+
+                if (inc::transmitter<val_t> r = (val_t &)pair.val; can_relase){
                     inc::free_with_destroy(xref pair);
                     return r;
                 }
@@ -238,6 +248,8 @@
             the_t & take_out(key_t const & key, val_t * value, hashmap_take_out_result * state = nullptr) {
                 auto sta = hashmap_take_out_result::item_not_exist;
 
+                // count -= 1; 注意计数问题========================================
+                // 这里间接调用了 count -= 1 的 take_out 则无需考虑此问题
                 if (auto && r = take_out(key); r.has_hold_value()){
                     value[0]  = r;
                     sta       = hashmap_take_out_result::success;
@@ -272,10 +284,9 @@
             }
 
             the_t & resize(uxx capcity){
-                inc::mirror<the_t> mem = the;
-                new(& mem) the_t(capcity);
-                resize_to(mem);
-                inc::copy(this, mem);
+                the_t new_hash_map{ capcity };
+                the.resize_to(new_hash_map);
+                inc::swap(xref new_hash_map, xref the);
                 return the;
             }
 
