@@ -133,8 +133,9 @@ SUM(环内指向) == SUM(出度)
 对于环对象，复杂度等于环上节点的个数  
 如果不需要实时释放，那么释放任务会被堆叠起来，先批量让计数器减一，再去除重复的释放任务后依次释放，理论上堆积的越多复杂度越低。  
 
-## 可用性探讨
-https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_gc.cpp
+## 可用性探讨 + 补充阅读
+https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_gc.cpp  
+https://github.com/Better-Idea/Mix-C/blob/master/discuss/some_body/README.md  
 
 ## 展望
 **Back GC Thread 只是作为一个代称，代指 gc 方，可以根据需求决定是否需要用多线程来管理**  
@@ -178,3 +179,4 @@ push 0x1000
 0x1010
 0x1000
 ```
+
