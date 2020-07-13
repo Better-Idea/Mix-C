@@ -4,7 +4,7 @@
     #endif
 
     namespace xuser::inc{
-        template<class key_t, class value_t>
+        template<class key_t, class value_t = void>
         struct hashmap : xusing_docker_hashmap::hashmap<
                 hashmap<key_t, value_t>, 
                 key_t, value_t
