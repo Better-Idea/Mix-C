@@ -27,9 +27,9 @@
             base(){}
 
             template<class object>
-            base(object * ptr, uxx ofs, uxx len, uxx msk) : 
-                ptr(ptr),
-                itr(convert(ptr)),
+            base(object const * ptr, uxx ofs, uxx len, uxx msk) : 
+                ptr((object *)ptr),
+                itr(convert((object *)ptr)),
                 ofs(ofs),
                 len(len),
                 msk(msk){
@@ -83,7 +83,7 @@
             )
             #endif
             ranger(random_access_t const & impl){
-                dat = base(xref impl, 0, impl.length(), positive);
+                dat = base(xref (random_access_t &)impl, 0, impl.length(), positive);
             }
 
             ranger(inc::initializer_list<item_t> impl){
