@@ -44,7 +44,7 @@ xstruct(
         }
 
         for(auto cur = this; ; cur = cur->next){
-            if (cur->key == key){
+            if ((key_t &)cur->key == (key_t &)key){
                 cur->xarg_item.assign_with_operator(xarg_item);
                 return hashmap_set_result::override;
             }
@@ -58,7 +58,7 @@ xstruct(
     xarg_item_t & get(key_t const & key){
         if (not is_empty()){
             for(auto cur = this; cur != nullptr; cur = cur->next){
-                if (cur->key == key){
+                if ((key_t &)cur->key == (key_t &)key){
                     return cur->xarg_item;
                 }
             }
@@ -78,7 +78,7 @@ xstruct(
             if (cur == nullptr){
                 return inc::nullref;
             }
-            if (cur->key == key){
+            if ((key_t &)cur->key == (key_t &)key){
                 break;
             }
             pre = cur;
@@ -180,6 +180,25 @@ protected:
 
     /*接口区*/
 public:
+    // 临时设施
+    template<class callback>
+    void foreach(callback const & call){
+        for(uxx i = 0, index = 0; i < the.count; i++){
+            if (auto cur = xref nodes[i]; cur->is_empty()){
+                continue;
+            }
+            else while(cur != nullptr){
+                #ifdef xarg_has_val_t
+                call(index, (key_t const &)cur->key, (val_t const &)cur->val);
+                #else
+                call(index, (key_t const &)cur->val);
+                #endif
+                cur  = cur->next;
+                index += 1;
+            }
+        }
+    }
+
     xarg_item_t & get(key_t const & key) const {
         uxx index = addressing(key);
         xdebug(im_docker_hashmap_get, index);
@@ -281,7 +300,7 @@ private:
     uxx addressing(key_t const & key) const {
         auto hash  = inc::hash(key);
         auto index = hash & mask();
-        xdebug(im_docker_hashmap_addressing, hash, index);
+        xdebug(im_docker_hashmap_addressing, voidp(hash), index);
         return index;
     }
 
