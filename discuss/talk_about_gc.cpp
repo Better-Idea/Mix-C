@@ -108,7 +108,24 @@
                 xhint("step:13");
             }
             xhint("step:14");
+
+            {
+                // 其实我们更推荐这么写
+                // 这样可以减少栈上环对象的个数，避免无用的析构操作
+                shared_ptr<N3_t> n3(ini_now);
+                shared_ptr<N1_t> n1(ini_now);
+                auto & n2_1 = n1->na(ini_now);
+                auto & n2_2 = n2_1->na(ini_now);
+                auto & n2_3 = n2_2->na(ini_now);
+                auto & n2_4 = n2_3->na(ini_now);
+                n2_1->nb = n2_3;
+                n2_3->nc = n3;
+                n2_4->na = n2_2;
+                xhint("step:15");
+            }
+            xhint("step:16");
         }
+
     }
 
     int main(){
