@@ -19,6 +19,7 @@
     #include"memory/allocator.hpp"
     #include"memop/addressof.hpp"
     #include"memop/cast.hpp"
+    #include"meta/is_based_on.hpp"
     #include"meta/is_class.hpp"
     #include"meta_ctr/cif.hpp"
     #include"meta_seq/tlist.hpp"
@@ -75,8 +76,15 @@
                 if constexpr (tin<guide, item>){
                     using tuplep = tuple<item> *;
 
-                    for(uxx i = 0; i < the.length(); i++){
-                        can_arrive_root |= tuplep(xref the[i])->template routing<guide>();
+                    if constexpr (is_based_on<self_management, item>){
+                        for(uxx i = 0; i < the.length(); i++){
+                            can_arrive_root |= the[i].template routing<guide>();
+                        }
+                    }
+                    else{
+                        for(uxx i = 0; i < the.length(); i++){
+                            can_arrive_root |= tuplep(xref the[i])->template routing<guide>();
+                        }
                     }
                 }
 
