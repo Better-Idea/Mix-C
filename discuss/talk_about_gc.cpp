@@ -4,7 +4,6 @@
     #undef  xuser
     #define xuser mixc::talk_about_gc
     #include"define/base_type.hpp"
-    #include"docker/array.hpp"
     #include"docker/darray.hpp"
     #include"docker/shared_ptr.hpp"
     #include"macro/xhint.hpp"
@@ -49,6 +48,12 @@
         xstruct(
             xname(N3_t),
             xpubf(name, asciis)
+        ) $
+
+
+        xstruct(
+            xname(N4_t),
+            xpubf(n, darray<shared_ptr<N4_t>>)
         ) $
 
         void test(){
@@ -124,8 +129,14 @@
                 xhint("step:15");
             }
             xhint("step:16");
-        }
 
+            {
+                shared_ptr<N4_t> n4(ini_now);
+                n4->n(length{4}, n4); // 给数组每个都赋值 n4
+                xhint("step:17");
+            }
+            xhint("step:18");
+        }
     }
 
     int main(){
