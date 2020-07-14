@@ -89,13 +89,14 @@
         xstruct(
             xname(tty_key),
             xprif(type, key_type),
-            xprif(w08,  items_t<5>),
-            xprif(w16,  char16_t)
+            xprif(w08,  items_t<4>),
+            xprif(w16,  char16_t),
+            xprif(mlen, u08)
         )
             using final = tty_key;
         public:
             constexpr tty_key() :
-                type{}, w08{}, w16{}{}
+                type{key_type(0)}, w08{'\0'}, w16('\0'), mlen(0){}
 
             xpubget_pubsetx(is_char, bool)
                 xr { return inc::bit(the.type, key_type::is_char); }
@@ -120,9 +121,33 @@
             xpubget_pubsetx(value, char16_t)
                 xr { return the.w16; }
                 xw { 
-                    the.w16 = value;
-                    // TODO:w16 to w08 ======================================================
+                    if (the.w16 = value; value >= 0x800){
+                        w08[0] = 0xe0 | ((value >> 12));
+                        w08[1] = 0x80 | ((value >> 6) & 0x3f);
+                        w08[2] = 0x80 | ((value & 0x3f));
+                        w08[3] = '\0';
+                        mlen = 3;
+                    }
+                    else if (value >= 0x80){
+                        w08[0] = 0xc0 | ((value >> 6));
+                        w08[1] = 0x80 | ((value & 0x3f));
+                        w08[2] = '\0';
+                        mlen = 2;
+                    }
+                    else{
+                        w08[0] = value;
+                        w08[1] = '\0';
+                        mlen = 1;
+                    }
                 }
+
+            xpubgetx(multi_bytes_char_capacity, uxx){
+                return sizeof(w08);
+            }
+
+            xpubgetx(multi_bytes_char_length, uxx){
+                return mlen;
+            }
 
             xpubgetx(multi_bytes_char, asciis){
                 return w08;

@@ -27,12 +27,8 @@
         public:
             xseqptr(item_t);
 
-            darray_t() : 
-                darray_t(empty) {
-            }
-
+            darray_t() : darray_t(empty) {}
             darray_t(darray_t const &) = default;
-            
 
             darray_t(::length length) :
                 base_t(length) {}

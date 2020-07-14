@@ -76,7 +76,7 @@
                     u08 mirror[sizeof(the_t)];
 
                     auto & new_array = * new(mirror) the_t(
-                        inc::length(capacity() * 2 + 1)
+                        ::length(capacity() * 2 + 1)
                     );
 
                     inc::copy(new_array, the, length());

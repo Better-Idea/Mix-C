@@ -364,12 +364,12 @@
 
             struct cmd_t{
                 void operator()(void * cpu){
-                    inc::signature<void>::call(& cpu, cmd);
+                    inc::signature<void()>::call(& cpu, cmd);
                 }
 
                 template<class lambda>
                 void operator= (lambda const & func){
-                    cmd = inc::signature<void>::check(& lambda::operator());
+                    cmd = inc::signature<void()>::check(& lambda::operator());
                 }
             private:
                 voidp cmd;

@@ -23,7 +23,7 @@
             return size;
         }
 
-        file & file::open(asciis path, access_mode_t mode, bstate * result) const {
+        file & file::open(asciis path, access_mode_t mode, bstate_t * result) const {
             i32 type = 0;
 
             switch(mode){
@@ -116,7 +116,7 @@
             return sta.st_size;
         }
 
-        file & file::open(asciis path, access_mode_t mode, bstate * result) const {
+        file & file::open(asciis path, access_mode_t mode, bstate_t * result) const {
             i32 type = 0;
 
             switch(mode){

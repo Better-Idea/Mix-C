@@ -26,7 +26,7 @@
         public:
             file();
             file(asciis path) : path(path){}
-            file(asciis path, access_mode_t mode, bstate * result = nullptr) {
+            file(asciis path, access_mode_t mode, bstate_t * result = nullptr) {
                 the.open(path, mode, result);
             }
             ~file(){
@@ -34,7 +34,7 @@
             }
 
             u64     length()                                const;
-            final & open(asciis path, access_mode_t mode, bstate * result = nullptr) const;
+            final & open(asciis path, access_mode_t mode, bstate_t * result = nullptr) const;
             final & close()                                 const;
             final & forward(u64 offset)                     const;
             final & backward(u64 offset)                    const;

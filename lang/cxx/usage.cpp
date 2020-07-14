@@ -192,7 +192,7 @@
                 c08 str1 = "a^2 = c^2";
                 tty.write_line(str1);
 
-                // 从 3 好索引插入 " + b^2"
+                // 从 3 号索引插入 " + b^2"
                 xhint(str1.insert(3, " + b^2", alloc));
                 
                 c08 str2 = "";

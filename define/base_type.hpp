@@ -46,7 +46,7 @@
 
     namespace mixc::base_type{
         template<int> struct env{};
-        
+
         template<>
         struct env<4>{
             using ixx       = i32;
@@ -65,16 +65,19 @@
     using ixxp          = ixx *;
     using uxxp          = uxx *;
 
-    enum class bstate{ // binary state
+    enum class bstate_t{ // binary state
         fail,
         success,
     };
 
+    enum class loop_t{
+        finish,
+        go_on,
+    };
+
     constexpr uxx       not_exist    = uxx(-1);
     constexpr uxx       magic_number = 19961212;
-    constexpr bstate    fail         = bstate::fail;
-    constexpr bstate    success      = bstate::success;
-    
+
     enum class ini {};
     constexpr ini ini_now = ini(0);
 
@@ -88,7 +91,3 @@
     };
 
 #endif
-
-namespace xuser{
-    using namespace ::mixc::base_type;
-}

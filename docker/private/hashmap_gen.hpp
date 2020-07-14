@@ -113,20 +113,20 @@ xstruct(
         }
         while(next != nullptr){
             auto temp = next;
-            temp->val->~val_t();
+            temp->key->~key_t();
 
             #ifdef xarg_has_val_t
-                temp->key->~key_t();
+            temp->val->~val_t();
             #endif
 
             next      = next->next;
             inc::free(temp);
         }
 
-        the.val->~val_t();
+        the.key->~key_t();
 
         #ifdef xarg_has_val_t
-            the.key->~key_t();
+        the.val->~val_t();
         #endif
 
         the.next = this;
@@ -181,13 +181,16 @@ protected:
         the.free();
     }
 
-    using foreach_invoke = void(uxx index, key_t key xarg_val_t_decl);
+    using foreach_invoke_with_loop_t = loop_t(uxx index, key_t const & key xarg_val_t_decl);
+    using foreach_invoke             = void(uxx index, key_t const & key xarg_val_t_decl);
 
     // 临时设施
-    void foreach(inc::can_callback<void(uxx, node_t *)> const & call){
+    void foreach(inc::can_callback<loop_t(uxx, node_t *)> const & call){
         for(uxx i = uxx(-1), index = 0; not_exist != (i = bmp.index_of_first_set(i + 1));){
             for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next, index++){
-                call(index, cur);
+                if (call(index, cur) == loop_t::finish){
+                    return;
+                }
             }
         }
     }
@@ -195,11 +198,22 @@ protected:
     /*接口区*/
 public:
     void foreach(inc::can_callback<foreach_invoke> const & call){
-        foreach([&](uxx index, node_t cur){
+        foreach([&](uxx index, node_t * cur){
             #ifdef xarg_has_val_t
                 call(index, (key_t const &)cur->key, (val_t const &)cur->val);
             #else
                 call(index, (key_t const &)cur->key);
+            #endif
+            return loop_t::go_on;
+        });
+    }
+
+    void foreach(inc::can_callback<foreach_invoke_with_loop_t> const & call){
+        foreach([&](uxx index, node_t * cur){
+            #ifdef xarg_has_val_t
+                return call(index, (key_t const &)cur->key, (val_t const &)cur->val);
+            #else
+                return call(index, (key_t const &)cur->key);
             #endif
         });
     }
