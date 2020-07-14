@@ -40,7 +40,7 @@
                 the.fd = (ixx)CreateFileA(path, type, FILE_SHARE_VALID_FLAGS, NULL, OPEN_EXISTING, NULL, NULL);
             }
             if (result != nullptr){
-                result[0] = the.fd == -1 ? fail : success;
+                result[0] = the.fd == -1 ? bstate_t::fail : bstate_t::success;
             }
             return thex;
         }
