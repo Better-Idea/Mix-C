@@ -12,6 +12,10 @@
         xstruct(
             xtmpl(bit_indicator_t, bits)
         )
+        public:
+            constexpr uxx length(){
+                return bits;
+            }
         private:
             static constexpr uxx lv0 = bits / inc::bwidth + (bits % inc::bwidth != 0);
             static constexpr uxx lv1 = lv0 <= 1 ? 0 : lv0 / inc::bwidth + (lv0 % inc::bwidth != 0);

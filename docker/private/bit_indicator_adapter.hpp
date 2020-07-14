@@ -8,6 +8,7 @@
 #include"instruction/index_of_last_set.hpp"
 #include"interface/ranger.hpp"
 #include"macro/xstruct.hpp"
+#include"memop/zeros.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_bit_indicator_adapter::origin{
@@ -106,6 +107,10 @@ namespace mixc::docker_bit_indicator_adapter::origin{
         xpubb(base_t)
     )
         using base_t::base_t;
+
+        void clear(){
+            inc::zeros(base_t::bmp(), base_t::size() * sizeof(uxx));
+        }
 
         void set(uxx index){
             bmp_set(index, base_t::bmp(), base_t::level_lut(), base_t::height(), [](uxx & p, uxx val){

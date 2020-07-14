@@ -13,15 +13,20 @@
     #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
 
+    namespace mixc::docker_hashmap{
+        template<class key_t, class val_t> struct hashmap_t;
+    }
+
     namespace mixc::docker_dbit_indicator{
         xstruct(
             xname(dbit_indicator_t),
             xpubb(inc::disable_copy),
             xprif(pbmp      , uxx *),
             xprif(pheight   , uxx),
-            xprif(psize     , uxx),
-            xprif(pneed_free, bool)
+            xprif(psize     , uxx)
         )
+            template<class key_t, class val_t> friend struct mixc::docker_hashmap::hashmap_t;
+
             using final = the_t;
 
             dbit_indicator_t() : 
@@ -29,7 +34,6 @@
 
             dbit_indicator_t(uxx bits, inc::can_alloc<uxx> alloc){
                 uxx buf[sizeof(uxx) * 8 / inc::bwidth + 1];
-
                 the.pheight = 0;
                 the.psize   = 0;
 
@@ -40,6 +44,7 @@
                     the.psize         += bits;
                 }while(bits > 1);
 
+                the.size(psize);
                 the.bmp(
                     alloc(cost())
                 );
@@ -49,7 +54,7 @@
                 }
 
                 inc::zeros(the.bmp(), the.size() * sizeof(uxx));
-                the.pneed_free = false;
+                the.need_free(false);
             }
 
             dbit_indicator_t(uxx bits) : 
@@ -60,12 +65,12 @@
                         }
                     );
                 }){
-                the.pneed_free = true;
+                the.need_free(true);
             }
 
         protected:
             ~dbit_indicator_t(){
-                if (not the.pneed_free){
+                if (not the.need_free()){
                     return;
                 }
 
@@ -78,18 +83,27 @@
             }
 
             xproget(height)
-            xproget_priset(size)
+            xproget_prisetx(size, uxx)
+                xr{ return the.psize >> 1; }
+                xw{ 
+                    the.psize &= 1;
+                    the.psize |= value << 1;
+                }
 
             xproget_prisetx(bmp, uxx *)
                 xr{ return the.pbmp; }
                 xw{ the.pbmp = value + the.height(); }
+
+            xpriget_prisetx(need_free, bool)
+                xr{ return the.psize & 1; }
+                xw{ the.psize = value ? the.psize | 1 : the.psize & (uxx(-1) << 1); }
 
             xprogetx(level_lut, uxx *){
                 return the.pbmp - the.height();
             }
 
             xprigetx(cost, inc::memory_size){
-                return inc::memory_size(the.psize + the.pheight);
+                return inc::memory_size(the.size() + the.height());
             }
 
             xprigetx(cost_bytes, inc::memory_size){
