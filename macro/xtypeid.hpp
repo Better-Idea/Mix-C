@@ -16,9 +16,11 @@
     namespace mixc::macro_xtypeid{
         using namespace inc;
 
+        struct __dummy{};
+
         template<class type, class dummy> struct __typeid;
         template<class type>
-        struct __typeid_core {
+        struct __typeid<type, __dummy> {
             using the_type = remove_ref<
                 remove_const<type>
             >;
@@ -131,11 +133,10 @@
                     return operator uxx();
                 }
             } class_id;
-
         };
 
-        template<class type>
-        struct __typeid<type, void> : __typeid_core<type> {
+        template<class type, class dummy>
+        struct __typeid : __typeid<type, __dummy> {
             template<class callback>
             void foreach_fields(type const & value, callback const & call){
                 using bl    = typename type::base_list;
@@ -170,7 +171,7 @@
 
         
         template<>
-        struct __typeid<void, void> : __typeid_core<void>{};
+        struct __typeid<void, void> : __typeid<void, __dummy>{};
     }
 
     #define xtypeid(...)      mixc::macro_xtypeid::__typeid<__VA_ARGS__, void>()
