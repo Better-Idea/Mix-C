@@ -9,6 +9,9 @@
     #include"memory/new.hpp"
     #include"macro/xdebug.hpp"
     #include"macro/xdebug_fail.hpp"
+    #include"instruction/bit_test.hpp"
+    #include"instruction/bit_test_and_set.hpp"
+    #include"instruction/bit_test_and_reset.hpp"
 
     namespace xuser{
         extern voidp malloc(size_t bytes);
@@ -20,6 +23,10 @@
             node * previous;
             node * next;
         } * nodep;
+
+        typedef struct node_plus : node{
+            uxx    blocks;
+        } * node_plusp;
 
         enum : uxx{
             scale                   = sizeof(uxx) * 8,
@@ -49,48 +56,97 @@
 
         typedef struct page_header{
         private:
-            // 在此对 bit_indicator 包装一下
-            // 在外部间接访问 idc 时
-            // 对外使用下标 [1, max_bits] 实际对应 idc 的 [0, max_bits - 1]
-            inc::bit_indicator<max_bits> idc;
+            u08 bmp[max_bits / 8] = {0};
+            struct pair{ nodep begin = nullptr; uxx length = 0; };
         public:
             page_header();
 
-            uxx index_of_first_set(uxx begin){
-                return idc.index_of_first_set(begin - 1) + 1;
-            }
-            uxx index_of_last_set(uxx end){
-                return idc.index_of_last_set(end - 1) + 1;
-            }
             bool get(uxx index){
-                return idc.get(index - 1);
+                index += 1;
+                return inc::bit_test(bmp[index >> 3], index & 0x7);
             }
+
+            // 标记占用
             void set(uxx index){
-                idc.set(index - 1);
+                index += 1;
+                inc::bit_test_and_set(xref bmp[index >> 3], index & 0x7);
             }
+
+            // 标记空闲
             void reset(uxx index){
-                idc.reset(index - 1);
+                index += 1;
+                inc::bit_test_and_reset(xref bmp[index >> 3], index & 0x7);
             }
+
+            uxx index_of(nodep node){
+                return node - nodep(this + 1);
+            }
+
+            pair left_free_block_of(nodep cur){
+                if (uxx index = index_of(cur); get(index - 1)){
+                    return pair{};
+                }
+                else if (get(index - 2)){
+                    return pair{ cur - 1, 1 };
+                }
+                else{
+                    auto len = *uxxp(cur - 1);
+                    return pair{ cur - len ,len };
+                }
+            }
+
+            pair right_free_block_of(nodep cur, uxx length){
+                if ((mask_to_get_offset & uxx(cur += length)) == 0){
+                    return {};
+                }
+                if (uxx index = index_of(cur); get(index)){
+                    return {};
+                }
+                else if (get(index + 1)){
+                    return { cur, 1 };
+                }
+                else{
+                    return { cur, node_plusp(cur)->blocks };
+                }
+            }
+
+            nodep first_block(){
+                return nodep(this + 1);
+            }
+
+            void set_rest(nodep cur, uxx length){
+                if (length <= 1){
+                    return;
+                }
+                (node_plusp(cur))->blocks   = length;
+                (uxxp(cur + length - 1))[0] = length;
+            }
+
+            void mark_in_use(nodep cur, uxx length){
+                uxx index = index_of(cur);
+                set(index);
+                set(index + length - 1);
+            }
+
+            void mark_free(nodep cur, uxx length){
+                uxx index = index_of(cur);
+                reset(index);
+                reset(index + length - 1);
+            }
+
             page_header * previous;
             page_header * next;
         } * page_headerp;
 
         enum : uxx{
-            // 每一个页都包含 page_header 首部，首部之后的内存是可以分配的
-            // 页第一个可用块的索引
-            index_of_bottom_block   = (sizeof(page_header) + scale_one - 1) / scale_one,
-
-            // 页最后一个可以块的索引
-            index_of_top_block      = (page_bytes / scale_one - 1),
-
             // 一个页一共有多少可用块
             page_block_count        = (page_bytes - sizeof(page_header)) / scale_one,
         };
 
         inline page_header::page_header(){
             // 设置哨兵位
-            set(index_of_bottom_block - 1);
-            set(index_of_top_block + 1);
+            set(uxx(-1));
+            set(page_block_count);
         }
 
         // 必须是 2 的次幂
@@ -110,17 +166,25 @@
                 return pneed_free_count;
             }
 
+            uxx alive_pages(){
+                return palive_pages;
+            }
+
             voidp alloc(uxx bytes){
                 pused_bytes         += bytes;
                 pneed_free_count    += 1;
 
                 auto require_size_index = (bytes - 1) / scale_one;
+                auto miss = false;
 
                 // slot 中置位位表示空闲的块
                 // 选择最接近但不小于所需大小的块
                 if (require_size_index < boundary){
                     if (auto closest_index = slot.index_of_first_set(require_size_index); closest_index != not_exist){
                         return take_out(closest_index, require_size_index, slot, free_list_array);
+                    }
+                    else{
+                        miss = true;
                     }
                 }
                 if (require_size_index < page_block_count){
@@ -136,78 +200,66 @@
                     return;
                 }
 
-                pused_bytes         -= bytes;
-                pneed_free_count    -= 1;
+                pused_bytes           -= bytes;
+                pneed_free_count      -= 1;
 
                 auto return_size_index = (bytes - 1) / scale_one;
 
                 if (return_size_index >= page_block_count){
+                    palive_pages       -= 1;
                     xuser::free(ptr);
                     return;
                 }
 
-                auto   block = nodep(ptr);
-                auto & idc   = get_page_header_by(block);
-                auto   base  = nodep(& idc);
-                auto   begin = index_of(block);
-                auto   left  = begin;
-                auto   right = begin + return_size_index;
-                uxx    count;
+                auto   cur             = nodep(ptr);
+                auto & bmp             = get_page_header_by(cur);
+                auto   block_index     = bmp.index_of(cur);
 
-                xdebug_fail(left < index_of_bottom_block){
-                    xdebug(im_memory_tiny_allocator_free, left, index_of_bottom_block, ptr, bytes, "unexcept release address");
+                xdebug_fail(bmp.get(page_block_count) == 0){
+                    xdebug(im_memory_tiny_allocator_free, block_index, bmp.get(block_index), ptr, bytes, "maybe repeated release");
                     return;
                 }
-                xdebug_fail(idc.get(left) == 0){
-                    xdebug(im_memory_tiny_allocator_free, left, idc.get(begin), ptr, bytes, "maybe repeated release");
+                xdebug_fail(bmp.get(block_index) == 0){
+                    xdebug(im_memory_tiny_allocator_free, block_index, bmp.get(block_index), ptr, bytes, "maybe repeated release");
                     return;
                 }
 
-                auto except_right = idc.index_of_first_set(begin + 1);
-                xdebug_fail(right > except_right){
-                    xdebug(im_memory_tiny_allocator_free, left, right, except_right, ptr, bytes, "unexcept release bytes");
-                    return;
+                auto free_block = cur;
+                auto free_size  = return_size_index + 1;
+                auto left       = bmp.left_free_block_of(cur);
+                auto right      = bmp.right_free_block_of(cur, free_size);
+
+                if (bmp.mark_free(cur, return_size_index + 1); left.begin != nullptr){
+                    bmp.mark_free(left.begin, left.length);
+                    free_block  = left.begin;
+                    free_size  += left.length;
+                    remove(left.begin, left.length);
                 }
-
-                idc.reset(left);
-                idc.reset(right);
-
-                // 若左边相邻块空闲
-                // 因为左、右边界都设置了哨兵位，所以 index_of_xxxx_set 返回值不会是 not_exist
-                if (idc.get(left - 1) == 0){
-                    left    = idc.index_of_last_set(left - 1) + 1;
-                    remove(& base[left], begin - left);
-                }
-
-                // 若右边相邻块空闲
-                if (idc.get(right + 1) == 0){
-                    right   = idc.index_of_first_set(right + 1) - 1;
-                    remove(& base[begin + return_size_index + 1], right - begin);
+                if (right.begin != nullptr){
+                    free_size  += right.length;
+                    bmp.mark_free(right.begin, right.length);
+                    remove(right.begin, right.length);
                 }
 
                 // 整个页都空闲时就释放该页
-                if (count = right - left + 1; count == page_block_count){
-                    origin_free(page_headerp(base));
+                if (free_size == page_block_count){
+                    origin_free(xref bmp);
                     return;
                 }
 
                 // 否则合成的更大的空闲块放回对应的链表数组中
-                if (count > boundary){
-                    append(block, count / boundary - 1, slot_plus, free_list_array_plus);
-                }
-                else{
-                    append(block, count - 1, slot, free_list_array);
-                }
+                append(free_block, free_size);
             }
 
         private:
             void origin_free(page_header * ptr){
-                auto next = ptr->next;
-                auto prev = ptr->previous;
+                auto next      = ptr->next;
+                auto prev      = ptr->previous;
                 xuser::free_aligned(ptr);
+                palive_pages   -= 1;
 
                 if (next == ptr){
-                    page_list = nullptr;
+                    page_list  = nullptr;
                     return;
                 }
                 if (ptr == page_list){
@@ -220,14 +272,13 @@
 
             voidp origin_alloc(uxx require_size_index){
                 // 超出管理范畴
-                if (require_size_index > page_block_count){
+                if (palive_pages += 1; require_size_index > page_block_count){
                     return xuser::malloc((require_size_index + 1) * scale_one);
                 }
 
                 auto meta   = xuser::malloc_aligned(page_bytes, page_bytes);
                 auto page   = new(meta) page_header;
-                page->set(index_of_bottom_block);
-                page->set(index_of_bottom_block + require_size_index);
+                auto first  = page->first_block();
 
                 if (page_list == nullptr){
                     page_list               = page;
@@ -240,63 +291,44 @@
                     first->previous         = page;
                     page->next              = first;
                 }
-
-                auto base   = nodep(page);
-                auto first  = & base[index_of_bottom_block];
                 return split(first, page_block_count, require_size_index);
             }
 
-            voidp take_out(uxx closest_index, uxx require_size_index, indicator_t & slot, node ** free_list_array){
-                auto first = free_list_array[closest_index];
-                auto next  = first->next;
-                
+            voidp take_out(uxx closest_index, uxx require_size_index, indicator_t & slot, node ** free_list){
+                auto header = free_list[closest_index];
+                auto next   = header->next;
+
                 // 若当前元素时该链表中最后一个元素，则将该位置的 slot 设置为空
-                if (next == first){
+                if (next == header){
                     slot.reset(closest_index);
                 }
-                // 否则让下一个元素顶替 first 的位置
+                // 否则让下一个元素顶替 header 的位置
                 else{
-                    next->previous                  = first->previous;
-                    first->previous->next           = next;
-                    free_list_array[closest_index]  = next;
+                    next->previous           = header->previous;
+                    header->previous->next   = next;
+                    free_list[closest_index] = next;
                 }
 
-                auto & idc          = get_page_header_by(first);
-                auto   begin        = index_of(first);
-                auto   end          = idc.index_of_first_set(begin + 1);
-
-                // 在 first 块所在的页中标记该块所占用的范围，以便为块合并提供指引
-                idc.set(begin);
-                idc.set(begin + require_size_index);
-                xdebug(im_memory_tiny_allocator_take_out, 
-                    begin, 
-                    idc.get(begin),
-                    begin + require_size_index,
-                    idc.get(begin + require_size_index)
-                );
-
-                auto   total_size   = end - begin;
-                return split(first, total_size, require_size_index);
+                if (free_list == free_list_array){
+                    return split(header, closest_index + 1, require_size_index);
+                }
+                else{
+                    return split(header, node_plusp(header)->blocks, require_size_index);
+                }
             }
 
-            voidp split(nodep first, uxx total_size, uxx require_size_index){
-                // 从 first 开始的地址
-                // [0, require_size_index] 属于要分配出去的块
-                // (require_size_index, real_size) 属于结余的块
-                // 将结余部分返回对应的 slot
-                auto   require_size = require_size_index + 1;
-                auto   rest         = first + require_size;
-                auto   rest_size    = total_size - require_size;
-
-                xdebug(im_memory_tiny_allocator_split, first, rest, total_size, require_size, rest_size);
-
-                if (rest_size > boundary){
-                    append(rest, rest_size * scale_one / scale_two - 1, slot_plus, free_list_array_plus);
+            voidp split(nodep header, uxx total_size, uxx require_size_index){
+                if (get_page_header_by(header).mark_in_use(header, require_size_index + 1);
+                    total_size > require_size_index + 1){
+                    auto require_size    = require_size_index + 1;
+                    auto rest            = header + require_size;
+                    auto rest_size       = total_size - require_size;
+                    auto rest_size_index = rest_size - 1;
+                    xdebug(im_memory_tiny_allocator_split, header, rest, total_size, require_size, rest_size);
+                    xdebug_fail(rest_size > total_size);
+                    append(rest, rest_size);
                 }
-                else if (rest_size != 0){
-                    append(rest, rest_size - 1, slot, free_list_array);
-                }
-                return first;
+                return header;
             }
 
             void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
@@ -309,35 +341,48 @@
                     block->previous         = block;
                 }
                 else{
-                    auto first              = free_list_array[index];
-                    block->previous         = first->previous;
-                    block->next             = first;
-                    first->previous->next   = block;
-                    first->previous         = block;
+                    auto header             = free_list_array[index];
+                    block->previous         = header->previous;
+                    block->next             = header;
+                    header->previous->next  = block;
+                    header->previous        = block;
                 }
             }
 
-            void remove(node * block, uxx block_size){
-                auto   block_size_index     = block_size - 1;
-                auto   is_plus              = block_size_index >= boundary;
-                auto   next                 = block->next;
-                auto & free_list            = is_plus ? 
-                    this->free_list_array_plus[block_size_index = block_size / boundary - 1] : 
-                    this->free_list_array[block_size_index];
-                auto & slot                 = is_plus ?
-                    this->slot_plus :
-                    this->slot;
+            void append(node * rest, uxx rest_size){
+                auto rest_size_index = rest_size - 1;
+
+                if (get_page_header_by(rest).set_rest(rest, rest_size); rest_size_index < boundary){
+                    append(rest, rest_size_index, slot, free_list_array);
+                }
+                else {
+                    append(rest, rest_size_index / boundary - 1, slot_plus, free_list_array_plus);
+                }
+            }
+
+            void remove(nodep block, uxx index, indicator_t & slot, nodep * free_list){
+                auto next = block->next;
+                auto prev = block->previous;
+                xdebug(im_memory_tiny_allocator_remove, block, next, index);
 
                 if (next == block){
-                    slot.reset(block_size_index);
+                    slot.reset(index);
                     return;
                 }
-                if (block == free_list){
-                    free_list = next;
+                if (block == free_list[index]){
+                    free_list[index] = next;
                 }
+                next->previous = prev;
+                prev->next     = next;
+            }
 
-                block->previous->next = next;
-                next->previous = block->previous;
+            void remove(node * block, uxx block_size){
+                if (auto block_size_index = block_size - 1; block_size_index < boundary){
+                    remove(block, block_size_index, slot, free_list_array);
+                }
+                else{
+                    remove(block, block_size_index / boundary - 1, slot_plus, free_list_array_plus);
+                }
             }
 
             page_header & get_page_header_by(node * ptr){
@@ -346,14 +391,9 @@
                 return *((page_header *)begin);
             }
 
-            uxx index_of(node * ptr){
-                // 页内分配的最小单位为 16Byte 的块
-                auto offset = uxx(ptr) & mask_to_get_offset;
-                return offset / scale_one;
-            }
-
             indicator_t     slot;
             indicator_t     slot_plus;
+            uxx             palive_pages         = 0;
             uxx             pused_bytes         = 0;
             uxx             pneed_free_count    = 0;
             page_header *   page_list           = nullptr;

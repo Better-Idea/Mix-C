@@ -79,6 +79,10 @@
         inline uxx need_free_count(){
             return mem.need_free_count();
         }
+
+        inline uxx alive_pages(){
+            return mem.alive_pages();
+        }
     }
     #pragma pop_macro("xuser")
 
