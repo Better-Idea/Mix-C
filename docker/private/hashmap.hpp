@@ -6,10 +6,12 @@
     #include"algo/hash.hpp"
     #include"define/base_type.hpp"
     #include"define/nullref.hpp"
+    #include"docker/dbit_indicator.hpp"
     #include"docker/transmitter.hpp"
     #include"dumb/mirror.hpp"
     #include"dumb/disable_copy.hpp"
     #include"gc/self_management.hpp"
+    #include"interface/can_callback.hpp"
     #include"macro/xdebug.hpp"
     #include"macro/xstruct.hpp"
     #include"math/align.hpp"
@@ -35,9 +37,9 @@
             override,
         };
 
-        template<class key_t, class val_t = void>               struct node;
-        template<class key_t, class val_t = void>               struct hashmap_t;
-        template<class final, class key_t, class val_t = void>  struct hashmap;
+        template<class key_t, class val_t>              struct node;
+        template<class key_t, class val_t>              struct hashmap_t;
+        template<class final, class key_t, class val_t> struct hashmap;
 
         #define xarg_has_val_t
         #include"docker/private/hashmap_gen.hpp"

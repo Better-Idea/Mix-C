@@ -145,24 +145,27 @@ xstruct(
     xpubb(inc::disable_copy),
     xprif(lines,  uxx),
     xprif(count,  uxx),
+    xprif(bmp  ,  inc::dbit_indicator),
     xprif(nodes,  node<key_t, val_t> *)
 )
     using node_t   = node<key_t, val_t>;
 #else
 template<class key_t>
 xstruct(
-    xspec(hashmap_t, key_t),
+    xspec(hashmap_t, key_t, void),
     xpubb(inc::self_management),
     xpubb(inc::disable_copy),
     xprif(lines,  uxx),
     xprif(count,  uxx),
-    xprif(nodes,  node<key_t> *)
+    xprif(bmp  ,  inc::dbit_indicator),
+    xprif(nodes,  node<key_t, void> *)
 )
-    using node_t   = node<key_t>;
+    using node_t   = node<key_t, void>;
 #endif
 private:
     static constexpr uxx multi         = 4;
     static constexpr uxx start_capcity = 16;
+    using final    = the_t;
 
     /*构造/析构区*/
 public:
@@ -170,7 +173,7 @@ public:
     hashmap_t(uxx start_capcity) : 
         lines(inc::align(start_capcity)), 
         count(0), 
-        nodes(the_t::alloc(lines)) {
+        nodes(the_t::alloc(xref bmp, lines)) {
     }
 protected:
     ~hashmap_t(){
@@ -178,25 +181,27 @@ protected:
         the.free();
     }
 
-    /*接口区*/
-public:
+    using foreach_invoke = void(uxx index, key_t key xarg_val_t_decl);
+
     // 临时设施
-    template<class callback>
-    void foreach(callback const & call){
-        for(uxx i = 0, index = 0; i < the.count; i++){
-            if (auto cur = xref nodes[i]; cur->is_empty()){
-                continue;
-            }
-            else while(cur != nullptr){
-                #ifdef xarg_has_val_t
-                call(index, (key_t const &)cur->key, (val_t const &)cur->val);
-                #else
-                call(index, (key_t const &)cur->val);
-                #endif
-                cur  = cur->next;
-                index += 1;
+    void foreach(inc::can_callback<void(uxx, node_t *)> const & call){
+        for(uxx i = uxx(-1), index = 0; not_exist != (i = bmp.index_of_first_set(i + 1));){
+            for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next, index++){
+                call(index, cur);
             }
         }
+    }
+
+    /*接口区*/
+public:
+    void foreach(inc::can_callback<foreach_invoke> const & call){
+        foreach([&](uxx index, node_t cur){
+            #ifdef xarg_has_val_t
+                call(index, (key_t const &)cur->key, (val_t const &)cur->val);
+            #else
+                call(index, (key_t const &)cur->key);
+            #endif
+        });
     }
 
     xarg_item_t & get(key_t const & key) const {
@@ -208,7 +213,8 @@ public:
     inc::transmitter<xarg_item_t> take_out(key_t const & key) {
         auto   index      = addressing(key);
         auto   can_relase = false;
-        auto & item       = nodes[index].take_out(key, xref can_relase);
+        auto & node       = nodes[index];
+        auto & item       = node.take_out(key, xref can_relase);
 
         if (item == inc::nullref){
             return inc::transmitter<xarg_item_t>();
@@ -217,22 +223,24 @@ public:
             count -= 1; // 需要计数========================================
         }
 
-        if (inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item; can_relase){
+        inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item;
+
+        if (can_relase){
             inc::free_with_destroy(xref item);
-            return r;
         }
-        else{
-            return r;
+        if (node.is_empty()){
+            bmp.reset(index);
         }
+        return r;
     }
 
     the_t & clear() {
         if (nodes != nullptr){
-            for(uxx i = 0; i < lines; i++){
+            for(uxx i = 0; not_exist != (i = bmp.pop_first());){
                 nodes[i].free();
             }
+            count = 0;
         }
-        the.count = 0;
         return the;
     }
 
@@ -253,15 +261,24 @@ public:
     }
 
     the_t & set(key_t const & key xarg_val_t_decl, hashmap_set_result * state = nullptr){
-        if (lines == ++count){
-            resize(lines * multi);
-        }
-
-        auto index = addressing(key);
+        auto   index = addressing(key);
+        auto & node = nodes[index];
         xdebug(im_docker_hashmap_set, index, key xarg_val);
 
-        if (auto sta = nodes[index].set(key xarg_val); state != nullptr){
+        if (node.is_empty()){
+            bmp.set(index);
+        }
+
+        auto sta = node.set(key xarg_val);
+
+        if (state != nullptr){
             state[0] = sta;
+        }
+        if (sta == hashmap_set_result::success){
+            count   += 1;
+        }
+        if (lines == count){
+            resize(lines * multi);
         }
         return the;
     }
@@ -281,17 +298,17 @@ public:
         return the;
     }
 
-    /* 属性区 */
-public:
-    bool is_empty() const {
-        return length() == 0;
-    }
-
     bool is_contains(key_t const & key) const {
         return get(key) != inc::nullref;
     }
 
-    uxx length() const {
+    /* 属性区 */
+public:
+    xpubgetx(is_empty, bool){
+        return length() == 0;
+    }
+
+    xpubgetx(length, uxx) {
         return count;
     }
 
@@ -304,55 +321,63 @@ private:
         return index;
     }
 
-    the_t & resize(uxx capcity){
+    void resize(uxx capcity){
         the_t new_hash_map{ capcity };
         the.resize_to(new_hash_map);
         inc::swap(xref new_hash_map, xref the);
-        return the;
     }
 
     // 该函数用于 hashmap_t 内部扩容和压缩
     // 要求 map 是新分配的空间，并且内部无元素
-    the_t & resize_to(the_t & map) {
-        for(uxx i = 0; i < lines; i++){
-            if (nodes[i].is_empty()){
-                continue;
-            }
-
-            auto & header = nodes[i];
-
-            #ifdef xarg_has_val_t
-            map.nodes[
-                map.addressing(header.key)
-            ].set(header.key, header.val);
-            #else
-            map.nodes[
-                map.addressing(header.key)
-            ].set(header.key);
-            #endif
-
-            for(auto cur = header.next; cur != nullptr;){
-                auto new_hash   = map.addressing(cur->key);
-                auto new_host   = map.nodes + new_hash;
-                auto host_next  = new_host->next;
-                auto cur_next   = cur->next;
-
-                if (new_host->is_empty()){
-                    new_host[0]          = cur[0];
-                    new_host->next       = nullptr;
-                    inc::free(cur);
-                }
-                else{
-                    new_host->next       = cur;
-                    new_host->next->next = host_next;
-                }
-                cur             = cur_next;
-            }
+    void resize_to(the_t & map) {
+        if (nodes != nullptr){
+            return;
         }
 
+        for(uxx i = 0; not_exist != (i = bmp.pop_first());){
+            auto   cur     = xref nodes[i];
+            auto   index   = map.addressing(cur->key);
+            auto & node    = map.nodes[index];
+
+            // 旧的 hashmap 首元不可以当作普通节点一样挂到新的 hashmap 中
+            // 因为它是数组中的一个元素，而不是通过 inc::alloc 分配得到的独立节点
+            if (node.is_empty()){
+                node       = cur[0];
+                node.next  = nullptr;
+                map.bmp.set(index);
+            }
+            else if (auto next = inc::alloc_with_initial<node_t>(*cur); node.next == nullptr){
+                node.next  = next;
+                next->next = nullptr;
+            }
+            else{
+                next->next = node.next;
+                node.next  = next;
+            }
+
+            for(cur = cur->next; nullptr != cur;){
+                auto   next    = cur->next; 
+                auto   index   = map.addressing(cur->key);
+                auto & node    = map.nodes[index];
+
+                if (node.is_empty()){
+                    node       = cur[0];
+                    node.next  = nullptr;
+                    map.bmp.set(index);
+                    inc::free(cur);
+                }
+                else if (node.next == nullptr){
+                    node.next  = cur;
+                    cur->next  = nullptr;
+                }
+                else{
+                    cur->next  = node.next;
+                    node.next  = cur;
+                }
+                cur            = next;
+            }
+        }
         map.count = count;
-        the.free();
-        return map;
     }
 
     uxx mask() const {
@@ -361,20 +386,28 @@ private:
 
     void free() {
         inc::free(nodes, inc::memory_size(
-            lines * sizeof(node_t)
+            lines * sizeof(node_t) + bmp.cost_bytes()
         ));
         nodes = nullptr;
     }
 
-    static node_t * alloc(uxx counts){
-        auto bytes = inc::memory_size(
-            counts * sizeof(node_t)
-        );
-        auto nodes = inc::alloc<node_t>(bytes);
+    static node_t * alloc(inc::dbit_indicator * bmp, uxx node_count){
+        node_t * nodes = nullptr;
 
-        for (uxx i = 0; i < counts; i++){
-            new (nodes + i) node_t();
-        }
+        new (bmp) inc::dbit_indicator(node_count,
+            [&](uxx length) -> uxx * {
+                auto bytes = inc::memory_size(
+                    node_count * sizeof(node_t) + sizeof(uxx) * length
+                );
+
+                nodes = inc::alloc<node_t>(bytes);
+
+                for (uxx i = 0; i < node_count; i++){
+                    new (xref nodes[i]) node_t();
+                }
+                return uxxp(nodes + node_count);
+            }
+        );
         return nodes;
     }
 $
@@ -385,8 +418,8 @@ struct hashmap : hashmap_t<key_t, val_t> {
     using the_t = hashmap_t<key_t, val_t>;
 #else
 template<class final, class key_t>
-struct hashmap<final, key_t> : hashmap_t<key_t> {
-    using the_t = hashmap_t<key_t>;
+struct hashmap<final, key_t, void> : hashmap_t<key_t, void> {
+    using the_t = hashmap_t<key_t, void>;
 #endif
     using the_t::the_t;
     using the_t::take_out;
