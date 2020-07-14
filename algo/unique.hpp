@@ -14,10 +14,10 @@
         using namespace inc;
 
         template<class item_t>
-        using alloc_invoke = can_callback<ranger<item_t>(length)>;
+        using unique_alloc_invoke = can_callback<ranger<item_t>(length)>;
 
         template<class item_t>
-        inline ranger<item_t> unique(ranger<item_t> range, alloc_invoke<item_t> alloc){
+        inline ranger<item_t> unique(ranger<item_t> range, unique_alloc_invoke<item_t> alloc){
             using mirror_t = mirror<item_t>;
             if (range.length() == 0){
                 return alloc(length{0});
@@ -47,7 +47,7 @@
     }
 
     namespace mixc::algo_unique::origin{
-        using mixc::algo_unique::alloc_invoke;
+        using mixc::algo_unique::unique_alloc_invoke;
         using mixc::algo_unique::unique;
     }
 
