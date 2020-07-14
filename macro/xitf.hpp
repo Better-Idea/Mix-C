@@ -69,7 +69,7 @@ int main(){
         template<int __invoke_id, class __ret, class ... __args>
         struct __invoke_t : private __invoke_table_t{
             __ret operator()(__args ... args) const {
-                return inc::signature<__ret, __args...>::call(
+                return inc::signature<__ret(__args...)>::call(
                     object, 
                     funcs[__invoke_id], 
                     args...
@@ -81,7 +81,7 @@ int main(){
         #define __check_invoke_tmpl__(...)
         #define __check_invoke_cast__(...)
         #define __check_invoke_item__(func_name,ret_type,...)                                       \
-            and inner::signature<ret_type, ## __VA_ARGS__>::has(& object::func_name)
+            and inner::signature<ret_type(__VA_ARGS__)>::has(& object::func_name)
 
         #define __map_invoke__
         #define __map_invoke_tmpl__(...)
@@ -90,7 +90,7 @@ int main(){
             inner::signature<__VA_ARGS__>::check(& object::operator __VA_ARGS__);
         #define __map_invoke_item__(func_name,ret_type,...)                                         \
             __table->funcs[__COUNTER__ - __start] =                                                 \
-            inner::signature<ret_type, ## __VA_ARGS__>::check(& object::func_name);
+            inner::signature<ret_type(__VA_ARGS__)>::check(& object::func_name);
         
         #define __emplace_invoke__
         #define __emplace_invoke_tmpl__(...)

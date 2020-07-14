@@ -46,7 +46,7 @@
 
             template<class item_t>
             item_t & access(uxx index) const {
-                return inc::signature<item_t &, uxx>::call(ptr, itr, (index ^ msk) + ofs);
+                return inc::signature<item_t &(uxx)>::call(ptr, itr, (index ^ msk) + ofs);
             }
 
         private:
@@ -78,8 +78,8 @@
             template<class random_access_t> 
             #if not xfor_msvc_hint
             requires(
-                inc::signature<item_t &, uxx>::has(& random_access_t::operator[]) and
-                inc::signature<uxx>::has(& random_access_t::length) 
+                inc::signature<item_t & (uxx)>::has(& random_access_t::operator[]) and
+                inc::signature<uxx()>::has(& random_access_t::length) 
             )
             #endif
             ranger(random_access_t const & impl){

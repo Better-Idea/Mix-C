@@ -20,7 +20,7 @@
             xpubb(inc::callable_t)
         )
             using base_t = inc::callable_t;
-            using signature = inc::signature<ret, args...>;
+            using signature = inc::signature<ret(args...)>;
             using base_t::operator=;
             using base_t::operator==;
 
