@@ -43,7 +43,15 @@
                 return (type *)data;
             }
 
+            const type * operator->() const {
+                return (type *)data;
+            }
+
             operator type & (){
+                return *(type *)data;
+            }
+
+            operator type & () const {
                 return *(type *)data;
             }
 
