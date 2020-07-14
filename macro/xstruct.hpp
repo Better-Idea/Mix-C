@@ -23,7 +23,7 @@
     #pragma pop_macro("xuser")
 
     namespace mixc::macro_xtypeid{
-        template<class type, class dummy> union __typeid;
+        template<class type, class dummy> struct __typeid;
     }
 
     namespace mixc::macro_xstruct{
@@ -242,7 +242,7 @@
             static constexpr asciis __my_field_name[] =                             \
                 { __xlist__(__xitem_, __VA_ARGS__) };                               \
             template<class, class>                                                  \
-            friend union ::mixc::macro_xtypeid::__typeid;                           \
+            friend struct ::mixc::macro_xtypeid::__typeid;                          \
             template<uxx __end>                                                     \
             void operator()(__dph<__end>);                                          \
             template<uxx __foo>                                                     \
@@ -324,7 +324,7 @@
     #define xprogetx(name,...)                          __get__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
     #define xprigetx(name,...)                          __get__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
 
-    #define xpubget(name,...)                           xpubgetx(name,__VA_ARGS__) { return the_t::p ## name; }
-    #define xproget(name,...)                           xprogetx(name,__VA_ARGS__) { return the_t::p ## name; }
-    #define xpriget(name,...)                           xprigetx(name,__VA_ARGS__) { return the_t::p ## name; }
+    #define xpubget(name,...)                           xpubgetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
+    #define xproget(name,...)                           xprogetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
+    #define xpriget(name,...)                           xprigetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
 #endif
