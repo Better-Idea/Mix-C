@@ -4,7 +4,7 @@
         {
             "type": "shell",
             "label": "g++ build active file",
-            "command": "g++.exe",
+            "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
                 "-std=c++2a",
@@ -23,7 +23,7 @@
         {
             "type": "shell",
             "label": "g++ build extern_api.o",
-            "command": "g++.exe",
+            "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
                 "-std=c++2a",
@@ -42,7 +42,7 @@
         {
             "type": "shell",
             "label": "clang++ build active file",
-            "command": "clang++.exe",
+            "command": "clang++",
             "args": [
                 "-I${workspaceFolder}",
                 "-std=c++2a",
@@ -62,7 +62,7 @@
         {
             "type": "shell",
             "label": "clang++ build extern_api.o",
-            "command": "clang++.exe",
+            "command": "clang++",
             "args": [
                 "-I${workspaceFolder}",
                 "-std=c++2a",
