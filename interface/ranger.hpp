@@ -1,155 +1,198 @@
 #ifndef xpack_interface_ranger
 #define xpack_interface_ranger
-    #pragma push_macro("xuser")
-    #undef  xuser
-    #define xuser mixc::interface_ranger
-    #include"configure.hpp"
-    #include"define/base_type.hpp"
-    #include"interface/initializer_list.hpp"
-    #include"math/index_system.hpp"
-    #include"memop/addressof.hpp"
-    #include"memop/signature.hpp"
-    #pragma pop_macro("xuser") 
+#pragma push_macro("xuser")
+#undef  xuser
+#define xuser mixc::interface_ranger
+#include"configure.hpp"
+#include"define/base_type.hpp"
+#include"interface/initializer_list.hpp"
+#include"math/index_system.hpp"
+#include"memop/signature.hpp"
+#pragma pop_macro("xuser") 
 
-    namespace mixc::interface_ranger{
-        enum : uxx{
-            positive    = 0,
-            negtive     = uxx(-1)
-        };
+namespace mixc::interface_ranger{
+    using namespace inc;
 
-        struct base{
-            voidp   ptr = nullptr;
-            voidp   itr = nullptr;
-            uxx     ofs = 0;
-            uxx     len = 0;
-            uxx     msk = 0;
+    xstruct(
+        xname(base)
+    )
+        base(){}
 
-            base(){}
-
-            template<class object>
-            base(object const * ptr, uxx ofs, uxx len, uxx msk) : 
-                ptr((object *)ptr),
-                itr(convert((object *)ptr)),
-                ofs(ofs),
-                len(len),
-                msk(msk){
-            }
-
-            template<class item_t>
-            base(inc::initializer_list<item_t> * ptr, uxx ofs, uxx len, uxx msk) : 
-                ptr((item_t *)(item_t const *)ptr->begin()),
-                itr(voidp(& access_initializer_list<item_t>)),
-                ofs(ofs),
-                len(len),
-                msk(msk){
-            }
-
-            template<class item_t>
-            item_t & access(uxx index) const {
-                return inc::signature<item_t &(uxx)>::call(ptr, itr, (index ^ msk) + ofs);
-            }
-
-        private:
-            template<class item_t>
-            static item_t & access_initializer_list(item_t * ptr, uxx index){
-                return ptr[index];
-            }
-
-            template<class object>
-            static voidp convert(object * list){
-                using item_t = decltype(list[0][0]);
-                item_t & (object::*ptr)(uxx) = & object::operator[];
-                return *(voidp *)& ptr;
-            }
-        };
+        template<class object>
+        base(object const * ptr, uxx len, uxx ofs):
+            ptr((object *)ptr),
+            itr((voidp *)& itrs<object, decltype((*(object *)ptr)[uxx(0)])>),
+            len(len),
+            ofs(ofs){
+        }
 
         template<class item_t>
-        xstruct(
-            xtmpl(ranger, item_t)
-        )
-        private:
-            base    dat;
-        public:
-            ranger(){}
+        base(inc::initializer_list<item_t> const * ptr, uxx len, uxx ofs):
+            ptr((item_t *)ptr->begin()),
+            itr((voidp *)& itrsx<item_t>),
+            len(len),
+            ofs(ofs){
+        }
 
-            ranger(base impl) : 
-                dat(impl){}
+        template<class object>
+        base(object const * ptr, uxx len, uxx ofs, bool negtive_order): 
+            base(ptr, len, ofs){
+            turn_negtive_order();
+        }
 
-            template<class random_access_t> 
-            #if not xfor_msvc_hint
-            requires(
-                inc::signature<item_t & (uxx)>::has(& random_access_t::operator[]) and
-                inc::signature<uxx()>::has(& random_access_t::length) 
-            )
-            #endif
-            ranger(random_access_t const & impl){
-                dat = base(xref (random_access_t &)impl, 0, impl.length(), positive);
-            }
+        bool is_positive_order() const {
+            return (uxx(itr) & mask) == 0;
+        }
 
-            ranger(inc::initializer_list<item_t> impl){
-                dat = base(xref impl, 0, impl.size(), positive);
-            }
+        bool is_negtive_order() const {
+            return (uxx(itr) & mask) != 0;
+        }
 
-            uxx length() const {
-                return dat.len;
-            }
+        uxx length() const {
+            return len;
+        }
+    protected:
+        voidp    ptr = nullptr;
+        voidp *  itr = nullptr;
+        uxx      len = 0;
+        uxx      ofs = 0;
 
-            item_t & operator[](uxx index){
-                return dat.access<item_t>(index);
-            }
+        void turn_positive_order() {
+            itr = (voidp *)(uxx(itr) & ~mask);
+        }
 
-            item_t & operator[](uxx index) const {
-                return dat.access<item_t>(index);
-            }
+        void turn_negtive_order() {
+            itr = (voidp *)(uxx(itr) | sizeof(uxx));
+        }
+    private:
+        template<class object, class ret>
+        static ret * return_type_core(ret &(object::*)(uxx)){
+            return (ret *)nullptr;
+        }
 
-            bool is_positive() const {
-                return dat.msk == positive;
-            }
+        template<class object, class return_type>
+        return_type pos(uxx index){
+            return (*(object *)ptr)[ofs + index];
+        }
 
-            ranger<item_t> range(iinterval i){
-                ranger<item_t> r = the;
-                i.normalize(the.length());
+        template<class object, class return_type>
+        return_type neg(uxx index){
+            return (*(object *)ptr)[ofs - index];
+        }
 
-                if (is_positive()){ // 正序
-                    if (i.left() <= i.right()){ // 正序
-                        r.dat.ofs += i.left();
-                        r.dat.len  = i.right() - i.left() + 1;
-                        r.dat.msk  = positive;
-                    }
-                    else{ // 反序
-                        r.dat.ofs += i.left();
-                        r.dat.len  = i.left() - i.right() + 1;
-                        r.dat.msk  = negtive;
-                    }
+        template<class return_type>
+        return_type & posx(uxx index){
+            return ((return_type *)ptr)[ofs + index];
+        }
+
+        template<class return_type>
+        return_type & negx(uxx index){
+            return ((return_type *)ptr)[ofs - index];
+        }
+
+        enum{ mask = sizeof(uxx) * 2 - 1 };
+
+        template<class object, class return_type>
+        alignas(mask + 1) static inline voidp itrs[] = {
+            inc::signature<return_type(uxx)>::check(& base::pos<object, return_type>),
+            inc::signature<return_type(uxx)>::check(& base::neg<object, return_type>),
+        };
+
+        template<class return_type>
+        alignas(mask + 1) static inline voidp itrsx[] = {
+            inc::signature<return_type &(uxx)>::check(& base::posx<return_type>),
+            inc::signature<return_type &(uxx)>::check(& base::negx<return_type>),
+        };
+    protected:
+        template<class item_t>
+        item_t access(uxx index) {
+            return inc::signature<item_t(uxx)>::call(this, itr[0], index);
+        }
+    $
+
+    template<class object, class item_t>
+    concept ranger_format = requires(object range, item_t item, uxx length, uxx index){
+        item   = (item_t)range[index];
+        length = range.length();
+    };
+
+    template<class item_t>
+    xstruct(
+        xtmpl(ranger, item_t),
+        xpubb(base)
+    )
+    public:
+        ranger(){}
+        ranger(base impl) : 
+            base(impl){}
+
+        template<class object> 
+        #if not xfor_msvc_hint
+        requires(ranger_format<object, item_t &>)
+        #endif
+        ranger(object const & impl) : 
+            base(xref impl, impl.length(), 0){
+        }
+
+        template<uxx len> 
+        ranger(item_t origin_array[len]) : 
+            base(xref origin_array, len, 0){
+        }
+
+        ranger(inc::initializer_list<item_t> impl):
+            base(xref impl, impl.size(), 0){
+        }
+
+        item_t & operator[](uxx index){
+            return access<item_t &>(index);
+        }
+
+        item_t & operator[](uxx index) const {
+            return access<item_t &>(index);
+        }
+
+        ranger<item_t> range(iinterval i){
+            ranger<item_t> r = the;
+            i.normalize(the.length());
+
+            if (is_positive_order()){ // 正序
+                if (i.left() <= i.right()){ // 正序
+                    r.ofs += i.left();
+                    r.len  = i.right() - i.left() + 1;
                 }
                 else{ // 反序
-                    if (i.left() <= i.right()){ // 反序 & 正序 -> 反序
-                        r.dat.ofs -= i.left();
-                        r.dat.len  = i.right() - i.left() + 1;
-                        r.dat.msk  = negtive;
-                    }
-                    else{ // 反序 & 反序 -> 正序
-                        r.dat.ofs -= i.left() + 1;
-                        r.dat.len  = i.left() - i.right() + 1;
-                        r.dat.msk  = positive;
-                    }
+                    r.ofs += i.left();
+                    r.len  = i.left() - i.right() + 1;
+                    r.turn_negtive_order();
                 }
-                return r;
             }
-        $
-
-        #define xranger(...)                                                               \
-        ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i) const {   \
-            using namespace ::mixc::interface_ranger;                                      \
-            if (i.normalize(this->length());                                               \
-                i.left() <= i.right()){                                                    \
-                return base(this, i.left(), i.right() - i.left() + 1, positive);           \
-            }                                                                              \
-            else{                                                                          \
-                return base(this, i.left() + 1, i.left() - i.right() + 1, negtive);        \
-            }                                                                              \
+            else{ // 反序
+                if (i.left() <= i.right()){ // 反序 & 正序 -> 反序
+                    r.ofs -= i.left();
+                    r.len  = i.right() - i.left() + 1;
+                }
+                else{ // 反序 & 反序 -> 正序
+                    r.ofs -= i.left();
+                    r.len  = i.left() - i.right() + 1;
+                    r.turn_positive_order();
+                }
+            }
+            return r;
         }
+    $
+
+    #define xranger(...)                                                               \
+    ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i) const {   \
+        using namespace ::mixc::interface_ranger;                                      \
+        if (i.normalize(this->length());                                               \
+            i.left() <= i.right()){                                                    \
+            return base(this, i.right() - i.left() + 1, i.left());                     \
+        }                                                                              \
+        else{                                                                          \
+            return base(this, i.left() - i.right() + 1, i.left(), true);               \
+        }                                                                              \
     }
+}
 
 #endif
 

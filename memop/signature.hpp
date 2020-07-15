@@ -17,9 +17,9 @@ namespace mixc::memop_signature{
                 union {                                                                 \
                     voidp               result;                                         \
                     decltype(this_call) mem;                                            \
-                };                                                                      \
-                mem = this_call;                                                        \
-                return result;                                                          \
+                }u;                                                                     \
+                u.mem = this_call;                                                      \
+                return u.result;                                                        \
             }
         xgen()
         xgen(const)
@@ -38,9 +38,9 @@ namespace mixc::memop_signature{
             union {
                 voidp  mem;
                 ret (* result)(voidp, args...);
-            };
-            mem = this_call;
-            return result(self, list...);
+            } u;
+            u.mem = this_call;
+            return u.result(self, list...);
         }
     };
 }
