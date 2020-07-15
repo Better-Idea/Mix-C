@@ -145,6 +145,7 @@ xstruct(
     xpubb(inc::disable_copy),
     xprif(lines,  uxx),
     xprif(count,  uxx),
+    xprif(seed ,  uxx),
     xprif(bmp  ,  inc::dbit_indicator),
     xprif(nodes,  node<key_t, val_t> *)
 )
@@ -157,6 +158,7 @@ xstruct(
     xpubb(inc::disable_copy),
     xprif(lines,  uxx),
     xprif(count,  uxx),
+    xprif(seed ,  uxx),
     xprif(bmp  ,  inc::dbit_indicator),
     xprif(nodes,  node<key_t, void> *)
 )
@@ -170,9 +172,11 @@ private:
     /*构造/析构区*/
 public:
     hashmap_t() : hashmap_t(start_capcity){}
-    hashmap_t(uxx start_capcity) : 
+    hashmap_t(uxx start_capcity) : hashmap_t(start_capcity, inc::random<uxx>()){}
+    hashmap_t(uxx start_capcity, uxx seed) : 
         lines(inc::align(start_capcity)), 
         count(0), 
+        seed(seed),
         nodes(the_t::alloc(xref bmp, lines)) {
     }
 protected:
@@ -329,14 +333,14 @@ public:
     /*私有区*/
 private:
     uxx addressing(key_t const & key) const {
-        auto hash  = inc::hash(key);
+        auto hash  = inc::hash(key, seed);
         auto index = hash & mask();
         xdebug(im_docker_hashmap_addressing, voidp(hash), index);
         return index;
     }
 
     void resize(uxx capcity){
-        the_t new_hash_map{ capcity };
+        the_t new_hash_map{ capcity, seed };
         the.resize_to(new_hash_map);
         inc::swap(xref new_hash_map, xref the);
     }

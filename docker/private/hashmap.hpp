@@ -15,6 +15,7 @@
     #include"macro/xdebug.hpp"
     #include"macro/xstruct.hpp"
     #include"math/align.hpp"
+    #include"math/random.hpp"
     #include"memop/addressof.hpp"
     #include"memop/copy.hpp"
     #include"memop/swap.hpp"
