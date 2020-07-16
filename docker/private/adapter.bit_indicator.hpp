@@ -1,8 +1,8 @@
-#ifndef xpack_docker_private_bit_indicator_adapter
-#define xpack_docker_private_bit_indicator_adapter
+#ifndef xpack_docker_adapter_bit_indicator
+#define xpack_docker_adapter_bit_indicator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_bit_indicator_adapter
+#define xuser mixc::docker_adapter_bit_indicator
 #include"define/base_type.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"instruction/index_of_last_set.hpp"
@@ -11,7 +11,7 @@
 #include"memop/zeros.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_bit_indicator_adapter::origin{
+namespace mixc::docker_adapter_bit_indicator::origin{
     #if xis_os64
         static constexpr uxx step_exp = 6;
         static constexpr uxx bwidth   = 64;
@@ -103,7 +103,7 @@ namespace mixc::docker_bit_indicator_adapter::origin{
     - base_t::height()
     */
     xstruct(
-        xname(bit_indicator_adapter),
+        xname(adapter_bit_indicator_t),
         xpubb(base_t)
     )
         using base_t::base_t;
@@ -200,8 +200,8 @@ namespace mixc::docker_bit_indicator_adapter::origin{
     $
 
     template<class final, class base>
-    struct bit_indicator : bit_indicator_adapter<base>{
-        using the_t = bit_indicator_adapter<base>;
+    struct adapter_bit_indicator : adapter_bit_indicator_t<base>{
+        using the_t = adapter_bit_indicator_t<base>;
         using the_t::the_t;
         using the_t::pop_first;
         using the_t::pop_last;
@@ -269,5 +269,5 @@ namespace mixc::docker_bit_indicator_adapter::origin{
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::docker_bit_indicator_adapter::origin;
+    using namespace ::mixc::docker_adapter_bit_indicator::origin;
 }
