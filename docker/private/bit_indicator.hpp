@@ -169,4 +169,5 @@ namespace mixc::docker_bit_indicator{
 }
 #endif
 
+#undef  xusing_docker_bit_indicator
 #define xusing_docker_bit_indicator     ::mixc::docker_bit_indicator
