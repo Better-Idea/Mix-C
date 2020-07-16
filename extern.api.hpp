@@ -1,0 +1,6 @@
+#include"chrono/private/extern.+.hpp"
+#include"io/private/extern.file.hpp"
+#include"io/private/extern.tty.hpp"
+#include"macro/private/extern.log.hpp"
+#include"memory/private/extern.allocator.hpp"
+#include"memory/private/extern.malloc.hpp"
