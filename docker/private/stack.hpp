@@ -6,6 +6,7 @@
 #include"define/base_type.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/adapter.pushpop.hpp"
+#include"docker/private/single_linked_node.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/struct_t.hpp"
 #include"gc/self_management.hpp"
@@ -17,29 +18,18 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_stack{
-    template<class item_t>
-    xstruct(
-        xtmpl(node_t, item_t),
-        xpubb(inc::struct_t<item_t>),
-        xpubf(next, node_t<item_t> *)
-    )
-        template<class ... args>
-        node_t(args const & ... list) :
-            inc::struct_t<item_t>(list...), next(nullptr){
-        }
-    $
-
     template<class final, class item_t>
     xstruct(
         xtmpl(stack_t, final, item_t),
         xpubb(inc::self_management),
         xpubb(inc::disable_copy),
-        xprof(ptop, mutable node_t<item_t> *)
+        xprof(ptop, mutable inc::single_linked_node<item_t> *)
     )
-        using node      = node_t<item_t>;
+        using node      = inc::single_linked_node<item_t>;
         using nodep     = node *;
         using iteratorx = inc::iteratorx<item_t &> const &;
         using iterator  = inc::iterator <item_t &> const &;
+        // 构造析构区
     public:
         stack_t() : 
             ptop(nullptr){
@@ -48,33 +38,8 @@ namespace mixc::docker_stack{
         ~stack_t() {
             clear();
         }
+        // 公有函数区
     public:
-        struct itr{
-            itr(nodep top = nullptr) : 
-                ptop(top){
-            }
-            item_t * operator -> (){
-                return & operator item_t & ();
-            }
-            item_t const * operator -> () const {
-                return & operator item_t & ();
-            }
-            operator item_t & (){
-                return ptop[0];
-            }
-            operator item_t const & () const {
-                return ptop[0];
-            }
-            bool finished() const {
-                return ptop == nullptr;
-            }
-            itr next() const {
-                return itr(ptop->next);
-            }
-        private:
-            nodep ptop;
-        };
-
         void clear() {
             nodep cur = inc::atom_swap(& the.ptop, nodep(nullptr));
             nodep tmp;
@@ -97,26 +62,22 @@ namespace mixc::docker_stack{
             return r;
         }
 
+        // 迭代器区
+    public:
         final & foreach(iteratorx itr){
-            nodep cur   = the.ptop;
-            uxx   index = 0;
-            while(cur != nullptr){
-                if (itr(index, cur[0]) == loop_t::finish){
-                    break;
-                }
-                cur     = cur->next;
-                index  += 1;
-            }
+            inc::foreach(ptop, itr);
             return thex;
         }
 
         final & foreach(iterator itr){
-            return foreach([&](uxx index, item_t & value){
+            inc::foreach(ptop, [&](uxx index, item_t & value){
                 itr(index, value);
                 return loop_t::go_on;
             });
+            return thex;
         }
-
+        // 属性区
+    public:
         xpubget_pubset(top, &)
 
         xpubgetx(is_empty, bool){
