@@ -11,7 +11,7 @@
 
 namespace mixc::memory_alloctor{
     voidp malloc(uxx bytes);
-    void free(voidp ptr, uxx bytes);
+    void  mfree(voidp ptr, uxx bytes);
 }
 
 namespace mixc::memory_alloctor::origin{
@@ -53,7 +53,7 @@ namespace mixc::memory_alloctor::origin{
     template<class type>
     inline void free(type * ptr, memory_size bytes){
         xdebug(im_free, xtypeid(type).name, ptr, bytes);
-        free(ptr, bytes);
+        mfree(ptr, bytes);
     }
 
     template<class type>

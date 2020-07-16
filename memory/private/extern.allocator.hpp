@@ -14,7 +14,7 @@ namespace mixc::memory_alloctor{
         return mem.alloc(bytes);
     }
 
-    void free(voidp ptr, uxx bytes){
+    void mfree(voidp ptr, uxx bytes){
         mem.free(ptr, bytes);
     }
 }
