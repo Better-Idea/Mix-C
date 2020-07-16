@@ -146,7 +146,7 @@ xstruct(
     xprif(lines,  uxx),
     xprif(count,  uxx),
     xprif(seed ,  uxx),
-    xprif(bmp  ,  inc::dbit_indicator),
+    xprif(bmp  ,  inc::bit_indicator<>),
     xprif(nodes,  node<key_t, val_t> *)
 )
     using node_t   = node<key_t, val_t>;
@@ -159,7 +159,7 @@ xstruct(
     xprif(lines,  uxx),
     xprif(count,  uxx),
     xprif(seed ,  uxx),
-    xprif(bmp  ,  inc::dbit_indicator),
+    xprif(bmp  ,  inc::bit_indicator<>),
     xprif(nodes,  node<key_t, void> *)
 )
     using node_t   = node<key_t, void>;
@@ -409,10 +409,10 @@ private:
         nodes = nullptr;
     }
 
-    static node_t * alloc(inc::dbit_indicator * bmp, uxx node_count){
+    static node_t * alloc(inc::bit_indicator<> * bmp, uxx node_count){
         node_t * nodes = nullptr;
 
-        new (bmp) inc::dbit_indicator(node_count,
+        new (bmp) inc::bit_indicator<>(node_count,
             [&](uxx length) -> uxx * {
                 auto bytes = inc::memory_size(
                     node_count * sizeof(node_t) + sizeof(uxx) * length
