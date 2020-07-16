@@ -10,7 +10,7 @@
                 "-std=c++2a",
                 "-fconcepts",
                 "-g",
-                "${workspaceFolder}/extern_api_g++.o",
+                "${workspaceFolder}/extern.api_g++.o",
                 "${file}",
                 "-o",
                 "${workspaceFolder}/../${fileBasenameNoExtension}"
@@ -22,7 +22,7 @@
         },
         {
             "type": "shell",
-            "label": "g++ build extern_api.o",
+            "label": "g++ build extern.api.o",
             "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
@@ -31,7 +31,7 @@
                 "-mavx",
                 "-mavx2",
                 "-O2",
-                "${workspaceFolder}/extern_api_g++.cpp",
+                "${workspaceFolder}/extern.api_g++.cpp",
                 "-c",
             ],
             "problemMatcher": [
@@ -49,7 +49,7 @@
                 "-mavx",
                 "-mavx2",
                 "-g",
-                "${workspaceFolder}/extern_api_clang++.o",
+                "${workspaceFolder}/extern.api_clang++.o",
                 "${file}",
                 "-o",
                 "${workspaceFolder}/../${fileBasenameNoExtension}"
@@ -61,7 +61,7 @@
         },
         {
             "type": "shell",
-            "label": "clang++ build extern_api.o",
+            "label": "clang++ build extern.api.o",
             "command": "clang++",
             "args": [
                 "-I${workspaceFolder}",
@@ -69,7 +69,7 @@
                 "-mavx",
                 "-mavx2",
                 "-O2",
-                "${workspaceFolder}/extern_api_clang++.cpp",
+                "${workspaceFolder}/extern.api_clang++.cpp",
                 "-c"
             ],
             "problemMatcher": [
