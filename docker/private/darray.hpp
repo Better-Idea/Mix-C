@@ -1,15 +1,29 @@
+// 注意：
+// darray 默认是空数组，此时 attribute 域是不允许访问的
+// darray::length() == 0
+// darray::is_empty() == true
+// darray::operator==(nullptr) == true
+// darray::operator=(nullptr) 默认是将该数组指向空数组而不是 nullptr
+// 如非必要请勿创建长度 ::length(0) 的数组
+// 创建长度为 0 的数组与默认空数组的不同点
+// darray::operator==(nullptr) == false
 #ifndef xpack_docker_darray
 #define xpack_docker_darray
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_darray
 #include"docker/private/adapter.foreach.hpp"
+#include"dumb/struct_t.hpp"
 #include"gc/ref.hpp"
+#include"macro/xis_nullptr.hpp"
 #include"memory/new.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_darray{
+    static inline uxx   empty_array[32];
+    static inline voidp empty_array_ptr = empty_array;
+
     template<class type, uxx rank, class attribute>
     struct darray_t : public inc::ref_array<
         darray_t<type, rank, attribute>,
@@ -21,12 +35,13 @@ namespace mixc::docker_darray{
         using item_t = typename darray_t<type, rank - 1, attribute>::the_t;
         using base_t = inc::ref_array<the_t, item_t, attribute>;
         using base_t::operator[];
-
-        static inline the_t empty{::length(0)};
     public:
         xseqptr(item_t);
 
-        darray_t() : darray_t(empty) {}
+        darray_t() : 
+            darray_t(*(the_t *)& empty_array_ptr) {
+            static_assert(sizeof(empty_array) >= sizeof(inc::struct_t<attribute>));
+        }
         darray_t(darray_t const &) = default;
 
         darray_t(::length length) :
@@ -43,6 +58,16 @@ namespace mixc::docker_darray{
             new (metap(this)) base_t(length, list...);
             return the;
         }
+
+        the_t & operator=(decltype(nullptr)){
+            base_t::operator=(nullptr);
+            new (this) the_t(*(the_t *)& empty_array_ptr);
+            return the;
+        }
+
+        xis_nullptr(
+            the == the_t(*(the_t *)& empty_array_ptr)
+        )
 
         bool is_empty() const {
             return length() == 0;
