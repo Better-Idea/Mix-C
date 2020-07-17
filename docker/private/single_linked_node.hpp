@@ -22,12 +22,21 @@ namespace mixc::docker_single_linked_node::origin {
     $
 
     template<class item_t>
-    inline void foreach(single_linked_node<item_t> * node, inc::iteratorx<item_t &> const & itr){
-        for(; node != nullptr; node = node->next){
-            if (itr(node[0]) == loop_t::finish){
+    inline void foreach(
+        single_linked_node<item_t> *                         node, 
+        inc::iteratorx<single_linked_node<item_t> *> const & itr){
+        for(uxx i = 0; node != nullptr; node = node->next, i++){
+            if (itr(i, node) == loop_t::finish){
                 break;
             }
         }
+    }
+
+    template<class item_t>
+    inline void foreach(single_linked_node<item_t> * node, inc::iteratorx<item_t &> const & itr){
+        foreach(node, [&](uxx index, single_linked_node<item_t> * cur){
+            return itr(index, cur);
+        });
     }
 }
 
