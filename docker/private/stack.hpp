@@ -1,3 +1,6 @@
+// 注意：
+// 虽然 stack::push、stack::pop 等函数用了原子操作
+// 但只保证了同一操作的原子性，如果想要同时使用 push/pop 需要上锁
 #ifndef xpack_docker_stack
 #define xpack_docker_stack
 #pragma push_macro("xuser")
@@ -25,10 +28,17 @@ namespace mixc::docker_stack{
         xpubb(inc::disable_copy),
         xprof(ptop, mutable inc::single_linked_node<item_t> *)
     )
+    private:
         using node      = inc::single_linked_node<item_t>;
         using nodep     = node *;
         using iteratorx = inc::iteratorx<item_t &> const &;
         using iterator  = inc::iterator <item_t &> const &;
+
+        template<class guide>
+        bool routing(){
+            
+        }
+
         // 构造析构区
     public:
         stack_t() : 
@@ -38,6 +48,11 @@ namespace mixc::docker_stack{
         ~stack_t() {
             clear();
         }
+
+        // 私有静态字段
+    private:
+        static inline nodep wait_free = nullptr;
+
         // 公有函数区
     public:
         void clear() {
@@ -57,8 +72,9 @@ namespace mixc::docker_stack{
 
         inc::transmitter<item_t> pop() {
             inc::transmitter<item_t> r = ptop[0];
+            nodep next = ptop->next;
             inc::free_with_destroy<node>(ptop);
-            ptop = ptop->next;
+            ptop = next;
             return r;
         }
 
