@@ -175,16 +175,12 @@
                 pneed_free_count    += 1;
 
                 auto require_size_index = (bytes - 1) / scale_one;
-                auto miss = false;
 
                 // slot 中置位位表示空闲的块
                 // 选择最接近但不小于所需大小的块
                 if (require_size_index < boundary){
                     if (auto closest_index = slot.index_of_first_set(require_size_index); closest_index != not_exist){
                         return take_out(closest_index, require_size_index, slot, free_list_array);
-                    }
-                    else{
-                        miss = true;
                     }
                 }
                 if (require_size_index < page_block_count){
@@ -317,18 +313,18 @@
                 }
             }
 
-            voidp split(nodep header, uxx total_size, uxx require_size_index){
-                if (get_page_header_by(header).mark_in_use(header, require_size_index + 1);
+            voidp split(nodep cur, uxx total_size, uxx require_size_index){
+                if (get_page_header_by(cur).mark_in_use(cur, require_size_index + 1);
                     total_size > require_size_index + 1){
                     auto require_size    = require_size_index + 1;
-                    auto rest            = header + require_size;
+                    auto rest            = cur + require_size;
                     auto rest_size       = total_size - require_size;
                     auto rest_size_index = rest_size - 1;
-                    xdebug(im_memory_tiny_allocator_split, header, rest, total_size, require_size, rest_size);
+                    xdebug(im_memory_tiny_allocator_split, cur, rest, total_size, require_size, rest_size);
                     xdebug_fail(rest_size > total_size);
                     append(rest, rest_size);
                 }
-                return header;
+                return cur;
             }
 
             void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
