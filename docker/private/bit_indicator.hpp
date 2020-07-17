@@ -17,6 +17,7 @@ namespace mixc::docker_hashmap{
 }
 
 namespace mixc::docker_bit_indicator{
+    // bits != 0 时该模板是使用静态内存分配
     template<uxx bits = 0>
     xstruct(
         xtmpl(bit_indicator_t, bits)
@@ -66,13 +67,15 @@ namespace mixc::docker_bit_indicator{
         uxx data[size()] = {0};
     $
 
+    // 动态内存分配的位图
     template<>
     xstruct(
         xspec(bit_indicator_t),
         xpubb(inc::disable_copy),
         xprif(pbmp      , uxx *),
         xprif(pheight   , uxx),
-        xprif(psize     , uxx)
+        xprif(psize     , uxx),
+        xprif(pbits     , uxx)
     )
         template<class key_t, class val_t> friend struct mixc::docker_hashmap::hashmap_t;
 
@@ -94,8 +97,9 @@ namespace mixc::docker_bit_indicator{
             }while(bits > 1);
 
             the.size(psize);
+            the.bits(bits);
             the.bmp(
-                alloc(cost())
+                alloc(count())
             );
 
             for(uxx i = 0; i < the.pheight; i++){
@@ -147,21 +151,22 @@ namespace mixc::docker_bit_indicator{
             xr{ return the.psize & 1; }
             xw{ the.psize = value ? the.psize | 1 : the.psize & (uxx(-1) << 1); }
 
+        // 位图是分层的，在 64bit 系统，上层用 1bit 表示下层 64bit 位组中是否有置位位
+        // 该属性存放了每次层一共有多少个字
         xprogetx(level_lut, uxx *){
             return the.pbmp - the.height();
         }
 
-        xprigetx(cost, inc::memory_size){
+        // 动态内存部分一共有多少个字
+        xprigetx(count, inc::memory_size){
             return inc::memory_size(the.size() + the.height());
         }
 
         xprigetx(cost_bytes, inc::memory_size){
-            return inc::memory_size(cost() * sizeof(uxx));
+            return inc::memory_size(count() * sizeof(uxx));
         }
 
-        xpubgetx(length, uxx){
-            return the.level_lut()[0];
-        }
+        xpubget_priset(bits);
     $
 
     template<class final, uxx bits>
@@ -169,5 +174,4 @@ namespace mixc::docker_bit_indicator{
 }
 #endif
 
-#undef  xusing_docker_bit_indicator
 #define xusing_docker_bit_indicator     ::mixc::docker_bit_indicator
