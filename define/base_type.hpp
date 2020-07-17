@@ -49,21 +49,24 @@
 
         template<>
         struct env<4>{
-            using ixx       = i32;
-            using uxx       = u32;
+            using ixx              = i32;
+            using uxx              = u32;
+            using thread_counter_t = u16;
         };
 
         template<>
         struct env<8>{
-            using ixx       = i64;
-            using uxx       = u64;
+            using ixx              = i64;
+            using uxx              = u64;
+            using thread_counter_t = u32;
         };
     }
 
-    using ixx           = mixc::base_type::env<sizeof(void *)>::ixx;
-    using uxx           = mixc::base_type::env<sizeof(void *)>::uxx;
-    using ixxp          = ixx *;
-    using uxxp          = uxx *;
+    using ixx               = mixc::base_type::env<sizeof(void *)>::ixx;
+    using uxx               = mixc::base_type::env<sizeof(void *)>::uxx;
+    using thread_counter_t  = mixc::base_type::env<sizeof(void *)>::thread_counter_t;
+    using ixxp              = ixx *;
+    using uxxp              = uxx *;
 
     enum class bstate_t{ // binary state
         fail,
