@@ -23,17 +23,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_hashmap{
-    enum class hashmap_remove_result{
+    enum class hashmap_remove_result_t{
         success,
         item_not_exist,
     };
 
-    enum class hashmap_take_out_result{
+    enum class hashmap_take_out_result_t{
         success,
         item_not_exist,
     };
 
-    enum class hashmap_set_result{
+    enum class hashmap_set_result_t{
         success,
         override,
     };
@@ -48,9 +48,9 @@ namespace mixc::docker_hashmap{
 }
 
 namespace mixc::docker_hashmap::origin{
-    using ::mixc::docker_hashmap::hashmap_remove_result;
-    using ::mixc::docker_hashmap::hashmap_take_out_result;
-    using ::mixc::docker_hashmap::hashmap_set_result;
+    using ::mixc::docker_hashmap::hashmap_remove_result_t;
+    using ::mixc::docker_hashmap::hashmap_take_out_result_t;
+    using ::mixc::docker_hashmap::hashmap_set_result_t;
 }
 
 #endif
