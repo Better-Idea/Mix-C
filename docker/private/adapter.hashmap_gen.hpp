@@ -2,8 +2,9 @@
 template<class key_t, class val_t>
 xstruct(
     xtmpl(node, key_t, val_t),
-    xpubf(key, inc::mirror<key_t>),
-    xpubf(val, inc::mirror<val_t>),
+    xpubf(key , inc::mirror<key_t>),
+    xpubf(val , inc::mirror<val_t>),
+    xpubf(next, node<key_t, val_t> *),
     xasso(key_t),
     xasso(val_t)
 )
@@ -19,7 +20,8 @@ xstruct(
 template<class key_t>
 xstruct(
     xspec(node, key_t, void),
-    xpubf(key, inc::mirror<key_t>),
+    xpubf(key , inc::mirror<key_t>),
+    xpubf(next, node<key_t, void> *),
     xasso(key_t)
 )
     node(key_t const & key, inc::construction_t mode) : 
@@ -31,26 +33,24 @@ xstruct(
     #define xarg_item_t         key_t
     #define xarg_item           key
 #endif
-    // 结构嵌套，避免误导 GC 判断
-    node * next;
 
     node() : next(this) {}
 
-    hashmap_set_result set(key_t const & key xarg_val_t_decl){
+    hashmap_set_result_t set(key_t const & key xarg_val_t_decl){
         // 约定 next == this 表示的是空节点，首元 next == nullptr 表示只有首元一个节点
         if (is_empty()){
             new (this) node(key xarg_val, inc::construction_t::execute);
-            return hashmap_set_result::success;
+            return hashmap_set_result_t::success;
         }
 
         for(auto cur = this; ; cur = cur->next){
             if ((key_t &)cur->key == (key_t &)key){
                 cur->xarg_item.assign_with_operator(xarg_item);
-                return hashmap_set_result::override;
+                return hashmap_set_result_t::override;
             }
             if (cur->next == nullptr){
                 cur->next   = inc::alloc_with_initial<the_t>(key xarg_val, inc::construction_t::execute);
-                return hashmap_set_result::success;
+                return hashmap_set_result_t::success;
             }
         }
     }
@@ -262,11 +262,11 @@ public:
         return the;
     }
 
-    the_t & remove(key_t const & key, hashmap_remove_result * state = nullptr) {
+    the_t & remove(key_t const & key, hashmap_remove_result_t * state = nullptr) {
         if (auto && r = tale_out(key); state != nullptr){
             state[0] = r.has_hold_value() ? 
-                hashmap_remove_result::success :
-                hashmap_remove_result::item_not_exist;
+                hashmap_remove_result_t::success :
+                hashmap_remove_result_t::item_not_exist;
         }
         return the;
     }
@@ -278,7 +278,7 @@ public:
         return the;
     }
 
-    the_t & set(key_t const & key xarg_val_t_decl, hashmap_set_result * state = nullptr){
+    the_t & set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr){
         auto   index = addressing(key);
         auto & node = nodes[index];
         xdebug(im_docker_hashmap_set, index, key xarg_val);
@@ -292,7 +292,7 @@ public:
         if (state != nullptr){
             state[0] = sta;
         }
-        if (sta == hashmap_set_result::success){
+        if (sta == hashmap_set_result_t::success){
             count   += 1;
         }
         if (lines == count){
@@ -301,14 +301,14 @@ public:
         return the;
     }
 
-    the_t & take_out(key_t const & key, xarg_item_t * value, hashmap_take_out_result * state = nullptr) {
-        auto sta = hashmap_take_out_result::item_not_exist;
+    the_t & take_out(key_t const & key, xarg_item_t * value, hashmap_take_out_result_t * state = nullptr) {
+        auto sta = hashmap_take_out_result_t::item_not_exist;
 
         // count -= 1; 注意计数问题========================================
         // 这里间接调用了 count -= 1 的 take_out 则无需考虑此问题
         if (auto && r = take_out(key); r.has_hold_value()){
             value[0]  = r;
-            sta       = hashmap_take_out_result::success;
+            sta       = hashmap_take_out_result_t::success;
         }
         if (state){
             state[0]  = sta;
@@ -446,7 +446,7 @@ struct hashmap<final, key_t, void> : hashmap_t<key_t, void> {
         return (final &)the.clear();
     }
 
-    final & remove(key_t const & key, hashmap_remove_result * state = nullptr) {
+    final & remove(key_t const & key, hashmap_remove_result_t * state = nullptr) {
         return (final &)the.remove(key, state);
     }
 
@@ -454,11 +454,11 @@ struct hashmap<final, key_t, void> : hashmap_t<key_t, void> {
         return (final &)the.resize();
     }
 
-    final & set(key_t const & key xarg_val_t_decl, hashmap_set_result * state = nullptr) {
+    final & set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr) {
         return (final &)the.set(key xarg_val, state);
     }
 
-    final & take_out(key_t const & key, xarg_item_t * val, hashmap_take_out_result * state = nullptr) {
+    final & take_out(key_t const & key, xarg_item_t * val, hashmap_take_out_result_t * state = nullptr) {
         return (final &)the.take_out(key, val, state);
     }
 };
