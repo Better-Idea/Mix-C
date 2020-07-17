@@ -4,6 +4,8 @@
 
 #define xuser mixc::memory_alloctor
 #include"define/base_type.hpp"
+#include"docker/hashmap.hpp"
+#include"gc/ref.hpp"
 #include"memory/private/tiny_allocator.hpp"
 
 namespace mixc::memory_alloctor{
@@ -31,4 +33,13 @@ namespace mixc::memory_alloctor::origin{
     uxx alive_pages(){
         return mem.alive_pages();
     }
+}
+
+namespace mixc::gc_ref{
+    using namespace xuser::inc;
+
+    hashmap<visited_ptr_t, info_t>    gc_map;
+    uxx                               degree_dvalue;
+    visited_ptr_t                     root;
+    bool                              can_free_whole_ring;
 }
