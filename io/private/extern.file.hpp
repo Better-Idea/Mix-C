@@ -14,6 +14,7 @@
     }
 
     #if xis_windows
+    #include<Windows.h>
     namespace mixc::io_file::origin{
         file::file() : fd(0), path("") {}
 
@@ -34,10 +35,10 @@
 
             the.close();
             the.path = path;
-            the.fd   = (ixx)CreateFileA(path, type, FILE_SHARE_VALID_FLAGS, NULL, CREATE_NEW, NULL, NULL);
+            the.fd   = (ixx)CreateFileA(path, type, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, CREATE_NEW, NULL, NULL);
 
             if (the.fd == -1){
-                the.fd = (ixx)CreateFileA(path, type, FILE_SHARE_VALID_FLAGS, NULL, OPEN_EXISTING, NULL, NULL);
+                the.fd = (ixx)CreateFileA(path, type, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, NULL, NULL);
             }
             if (result != nullptr){
                 result[0] = the.fd == -1 ? bstate_t::fail : bstate_t::success;
