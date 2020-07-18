@@ -1,9 +1,13 @@
 #pragma once
 #define xmixc                       "Mix-C"
 
-#define xuse_xdebug                 1
-#define xuse_xdebug_fail            1
+// debug
+#define xuse_xdebug                 0
+#define xuse_xdebug_fail            0
 #define xuse_xdebug_short_path      1
+
+// memory
+#define xuse_libc_malloc            0
 
 // select os
 #define xis_windows                 1
