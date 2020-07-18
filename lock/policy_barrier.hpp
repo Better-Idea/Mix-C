@@ -68,18 +68,21 @@ namespace mixc::lock_policy_barrier{
     };
 
     template<class ... rules>
+    using state_t = fit_bits<sizeof...(rules) * max_concurrency>;
+
+    template<class ... rules>
     xstruct(
         xtmpl(policy_barrier, rules...),
-        xprif(state, fit_bits<sizeof...(rules)>)
+        xprif(state, state_t<rules...>)
     )
         using rule_list = decltype(
             make_order(dummy_previous(), tlist<>(), tlist<rules...>())
         );
 
-        using bits_t = fit_bits<sizeof...(rules)>;
+        using bits_t = state_t<rules...>;
 
         template<auto operation>
-        [[nodiscard]] uxx try_lock(){
+        uxx try_lock(){
             using rule  = typename tget<rule_list, operation>::item;
             uxx mutex   = ~rule::also;
             uxx mask    = uxx(1) << (uxx(operation) * max_concurrency);
@@ -123,7 +126,7 @@ namespace mixc::lock_policy_barrier{
         }
 
         template<auto operation>
-        [[nodiscard]] uxx lock(){
+        uxx lock(){
             while(true){
                 if (uxx channel = try_lock<operation>(); channel != not_exist){
                     return channel;
