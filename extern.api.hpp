@@ -1,6 +1,7 @@
 #include"chrono/private/extern.+.hpp"
 #include"io/private/extern.file.hpp"
 #include"io/private/extern.tty.hpp"
+#include"lock/private/extern.thread_yield.hpp"
 #include"macro/private/extern.log.hpp"
 #include"memory/private/extern.allocator.hpp"
 #include"memory/private/extern.malloc.hpp"
