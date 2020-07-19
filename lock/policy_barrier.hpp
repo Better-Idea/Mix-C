@@ -81,6 +81,8 @@ namespace mixc::lock_policy_barrier{
 
         using bits_t = state_t<rules...>;
 
+        policy_barrier() : state(0){}
+
         template<auto operation>
         uxx try_lock(){
             using rule  = typename tget<rule_list, operation>::item;
