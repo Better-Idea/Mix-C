@@ -19,7 +19,7 @@ namespace mixc::lock_policy_barrier{
     using namespace inc;
 
     enum{
-        max_concurrency      = 6,
+        max_concurrency      = 4,
         max_concurrency_mask = (1 << max_concurrency) - 1,
     };
 
@@ -86,33 +86,33 @@ namespace mixc::lock_policy_barrier{
 
         template<auto operation>
         uxx try_lock(){
-            using rule  = typename tget<rule_list, operation>::item;
-            uxx mutex   = ~rule::also;
-            uxx begin   = uxx(operation) * max_concurrency;
-            uxx mask    = uxx(1) << begin;
-            uxx group   = uxx(max_concurrency_mask) << begin;
-            uxx top     = begin + max_concurrency;
+            using rule    = typename tget<rule_list, operation>::item;
+            uxx mutex     = ~rule::also;
+            uxx begin     = uxx(operation) * max_concurrency;
+            uxx candicate = uxx(1) << begin;
+            uxx group     = uxx(max_concurrency_mask) << begin;
+            uxx top       = begin + max_concurrency;
 
             // 可以执行相同的操作
             if constexpr ((rule::master & rule::also) and max_concurrency > 1){
                 while(true){
-                    uxx candicate = index_of_first_set(~state & group);
-                    if (candicate >= top){
+                    uxx index = index_of_first_set(~state & group);
+                    if (index >= top){
                         return not_exist;
                     }
 
-                    uxx index = uxx(1) << candicate;
-                    uxx old   = atom_fetch_or<bits_t>(xref state, index);
+                    uxx candicate = uxx(1) << index;
+                    uxx old       = atom_fetch_or<bits_t>(xref state, candicate);
 
                     // 存在互斥操作
                     if ((old & mutex) != 0){
                         if ((old & index) == 0){
-                            atom_and<bits_t>(xref state, ~index);
+                            atom_and<bits_t>(xref state, ~candicate);
                         }
                         return not_exist;
                     }
                     // 当前位未被占用，则使用通道 candicate
-                    else if ((old & index) == 0){
+                    else if ((old & candicate) == 0){
                         return candicate;
                     }
                 }
@@ -120,18 +120,18 @@ namespace mixc::lock_policy_barrier{
             // 相同的操作不能同时进行
             else{
                 // 当前位被占用，无法操作
-                uxx old = atom_fetch_or<bits_t>(xref state, mask);
-                if (old & mask){
+                uxx old = atom_fetch_or<bits_t>(xref state, candicate);
+                if (old & candicate){
                     return not_exist;
                 }
 
                 // 后判断互斥操作，因为此处的 operation 可以与自己互斥
                 if (old & mutex){
-                    atom_and<bits_t>(xref state, ~mask);
+                    atom_and<bits_t>(xref state, ~candicate);
                     return not_exist;
                 }
                 else{
-                    return 0;
+                    return candicate;
                 }
             }
         }
@@ -156,8 +156,7 @@ namespace mixc::lock_policy_barrier{
         template<auto operation>
         void unlock(uxx channel){
             using rule  = typename tget<rule_list, operation>::item;
-            uxx mask    = uxx(1) << (uxx(operation) * max_concurrency + channel);
-            atom_and<bits_t>(xref state, ~mask);
+            atom_and<bits_t>(xref state, ~channel);
         }
     $
 }
