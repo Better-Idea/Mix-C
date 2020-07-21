@@ -1,5 +1,18 @@
 // 注意：
-// - 在使用 when<>::can<> 模板时，参数可以不按顺序，但必须保证参数是从 0 到 n 每次步进为 1
+// - 在使用 when<>::can<> 模板时，when 语句可以不按顺序，但必须保证连续性
+//   可以是 do_sth0, do_sth1 或 do_sth1, do_sth2 这样组合，但不能是 do_sth0, do_sth2 这样中间缺少的组合
+//   enum opr{
+//      do_sth0,
+//      do_sth1,
+//      do_sth2,
+//      ...
+//   };
+//   policy_barrier<
+//                      // 这里推荐用表格的格式填参数
+//                      // do_sth0, do_sth1, do_sth2
+//      when<do_sth1>::can<         do_sth1>,
+//      when<do_sth0>::can<do_sth0,          do_sth2>, 
+//   >
 // - 下文的同步区代指使用 policy_barrier 进行同步协调的函数
 // - 每一个 when 语句至少需要消耗 1bit 指示位，请保证消耗的指示位总数不超过机器字长 uxx 的总位数
 // 
