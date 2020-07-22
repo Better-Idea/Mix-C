@@ -93,4 +93,9 @@
         uxx value;
     };
 
+    #if !__GNUC__
+    #define not     !
+    #define and     && 
+    #define or      ||
+    #endif
 #endif
