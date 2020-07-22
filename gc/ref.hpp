@@ -58,7 +58,7 @@ namespace mixc::gc_ref{
         xasso(item_t)
     )
     private:
-        using the_length  = typename cif<is_array, token_plus, token>::result;
+        using the_length  = cif<is_array, token_plus, token>;
         using token_mix_t = token_mix<item_t, attribute_t, the_length>;
 
         template<class guide>
@@ -284,11 +284,7 @@ namespace mixc::gc_ref::origin{
     using ref_ptr = meta<
         final, 
         dummy_type, 
-        typename cif<
-            is_class<type>,
-            type,
-            struct_type<type>
-        >::result,
+        cif<is_class<type>, type, struct_type<type>>,
         false
     >;
 
@@ -296,11 +292,7 @@ namespace mixc::gc_ref::origin{
     using ref_array = meta<
         final, 
         item_t, 
-        typename cif<
-            is_class<attribute_t>,
-            attribute_t,
-            struct_type<attribute_t>
-        >::result,
+        cif<is_class<attribute_t>, attribute_t, struct_type<attribute_t>>,
         true
     >;
 }

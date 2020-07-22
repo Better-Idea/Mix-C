@@ -17,11 +17,11 @@ namespace mixc::meta_seq_tsub{
     template<class minus, class first, class ... args>
     struct tsub<tlist<first, args...>, minus>{
     private:
-        using item = typename cif<
+        using item = cif<
             tin<minus, first>,
             tlist<>,
             tlist<first>
-        >::result;
+        >;
 
         using next = 
             typename tsub<tlist<args...>, minus>::new_list;

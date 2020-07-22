@@ -8,14 +8,17 @@
 
 namespace mixc::meta_ctr_cif{
     template<bool condition, class if_true, class if_false>
-    struct cif{
+    struct meta{
         using result = if_true;
     };
 
     template<class if_true, class if_false>
-    struct cif<false, if_true, if_false>{
+    struct meta<false, if_true, if_false>{
         using result = if_false;
     };
+
+    template<bool condition, class if_true, class if_false>
+    using cif = typename meta<condition, if_true, if_false>::result;
 }
 
 #endif
