@@ -50,7 +50,7 @@ namespace mixc::lock_policy_barrier{
 
     template<class raw_data_list, auto ... index>
     constexpr uxx share_mask<raw_data_list, vlist<index...>> = 
-        (... | tget<raw_data_list, index>::item::mask);
+        (... | tget<raw_data_list, index>::mask);
 
     template<uxx offset, uxx max_con, class share_list>
     struct raw_data{
@@ -175,7 +175,7 @@ namespace mixc::lock_policy_barrier{
 
         template<auto operation>
         uxx try_lock(){
-            using raw           = typename tget<raw_data_list, uxx(operation)>::item;
+            using raw           = tget<raw_data_list, uxx(operation)>;
             constexpr uxx mutex = ~share_mask<raw_data_list, typename raw::share_for>;
 
             // 可以执行相同的操作

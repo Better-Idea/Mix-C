@@ -17,11 +17,7 @@ namespace mixc::meta_function{
         static constexpr uxx args_count = sizeof...(list);                  \
         using return_type = ret_type;                                       \
         template<ixx index>                                                 \
-        struct args {                                                       \
-            using result = typename mixc::meta_seq_tget::tget<              \
-                mixc::meta_seq_tlist::tlist<list...>, index                 \
-            >::result;                                                      \
-        };                                                                  \
+        using args = inc::tget<inc::tlist<list...>, index>;                 \
     };
 
     #define gen_arg class object, 
