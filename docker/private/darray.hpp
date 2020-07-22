@@ -13,7 +13,7 @@
 #undef  xuser
 #define xuser mixc::docker_darray
 #include"docker/private/adapter.foreach.hpp"
-#include"dumb/struct_t.hpp"
+#include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"memory/new.hpp"
@@ -40,7 +40,7 @@ namespace mixc::docker_darray{
 
         darray_t() : 
             darray_t(*(the_t *)& empty_array_ptr) {
-            static_assert(sizeof(empty_array) >= sizeof(inc::struct_t<attribute>));
+            static_assert(sizeof(empty_array) >= sizeof(inc::struct_type<attribute>));
         }
         darray_t(darray_t const &) = default;
 

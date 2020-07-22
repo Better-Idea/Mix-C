@@ -5,7 +5,7 @@
 #define xuser mixc::docker_queue
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
-#include"dumb/struct_t.hpp"
+#include"dumb/struct_type.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/adapter.foreach.hpp"
 #include"docker/private/single_linked_node.hpp"

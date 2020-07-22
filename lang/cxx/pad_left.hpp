@@ -1,51 +1,51 @@
 #ifndef xusing_lang_cxx
-    #include"lang/private/cxx.hpp"
+#include"lang/private/cxx.hpp"
 #endif
 
 #ifndef xpack_lang_cxx_pad_left
 #define xpack_lang_cxx_pad_left
-    #pragma push_macro("xuser")
-    #pragma push_macro("xusing_lang_cxx")
-    #undef  xusing_lang_cxx
-    #undef  xuser
-    #define xuser mixc::lang_cxx_pad_left
-    #include"define/base_type.hpp"
-    #include"interface/can_alloc.hpp"
-    #include"lang/cxx.hpp"
-    #include"memop/copy.hpp"
-    #include"memop/fill.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+#pragma push_macro("xuser")
+#pragma push_macro("xusing_lang_cxx")
+#undef  xusing_lang_cxx
+#undef  xuser
+#define xuser mixc::lang_cxx_pad_left
+#include"define/base_type.hpp"
+#include"interface/can_alloc.hpp"
+#include"lang/cxx.hpp"
+#include"memop/copy.hpp"
+#include"memop/fill.hpp"
+#pragma pop_macro("xusing_lang_cxx")
+#pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_pad_left{
-        template<class item>
-        struct core : inc::cxx<item> {
-            using base_t = inc::cxx<item>;
-            using base_t::base_t;
-            using the_t = core<item>;
+namespace mixc::lang_cxx_pad_left{
+    template<class item>
+    struct core : inc::cxx<item> {
+        using base_t = inc::cxx<item>;
+        using base_t::base_t;
+        using the_t = core<item>;
 
-            core(base_t const & self) : 
-                base_t(self){}
+        core(base_t const & self) : 
+            base_t(self){}
 
-            auto pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
-                uxx                     length = the.length() + count;
-                the_t                   r(alloc(length), length);
-                inc::fill_with_operator(r, value, count);
-                inc::copy_with_operator(r.backward(count), the, the.length());
-                return r;
-            }
-        };
+        auto pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
+            uxx                     length = the.length() + count;
+            the_t                   r(alloc(length), length);
+            inc::fill_with_operator(r, value, count);
+            inc::copy_with_operator(r.backward(count), the, the.length());
+            return r;
+        }
+    };
 
-        template<class final, class base, class item>
-        struct meta : base {
-            using base::base;
-            using the_t = core<item>;
+    template<class final, class base, class item>
+    struct meta : base {
+        using base::base;
+        using the_t = core<item>;
 
-            final pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
-                return the.pad_left(count, value, alloc);
-            }
-        };
-    }
+        final pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
+            return the.pad_left(count, value, alloc);
+        }
+    };
+}
 
 #endif
 

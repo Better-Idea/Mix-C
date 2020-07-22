@@ -71,7 +71,6 @@ namespace mixc::memory_alloctor::origin{
 }
 #endif
 
-
 namespace mixc::gc_ref{
     using namespace xuser::inc;
 

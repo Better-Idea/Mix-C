@@ -1,66 +1,66 @@
 #ifndef xusing_lang_cxx
-    #include"lang/private/cxx.hpp"
+#include"lang/private/cxx.hpp"
 #endif
 
 #ifndef xpack_lang_cxx_trim_bends
 #define xpack_lang_cxx_trim_bends
-    #pragma push_macro("xuser")
-    #pragma push_macro("xusing_lang_cxx")
-    #undef  xusing_lang_cxx
-    #undef  xuser
-    #define xuser mixc::lang_cxx_trim_bends
-    #include"define/base_type.hpp"
-    #include"interface/can_alloc.hpp"
-    #include"interface/initializer_list.hpp"
-    #include"lang/cxx/clone.hpp"
-    #include"lang/cxx/index_of_first_miss.hpp"
-    #include"lang/cxx/index_of_last_miss.hpp"
-    #include"lang/cxx.hpp"
-    #include"meta/is_same.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+#pragma push_macro("xuser")
+#pragma push_macro("xusing_lang_cxx")
+#undef  xusing_lang_cxx
+#undef  xuser
+#define xuser mixc::lang_cxx_trim_bends
+#include"define/base_type.hpp"
+#include"interface/can_alloc.hpp"
+#include"interface/initializer_list.hpp"
+#include"lang/cxx/clone.hpp"
+#include"lang/cxx/index_of_first_miss.hpp"
+#include"lang/cxx/index_of_last_miss.hpp"
+#include"lang/cxx.hpp"
+#include"meta/is_same.hpp"
+#pragma pop_macro("xusing_lang_cxx")
+#pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_trim_bends{
-        template<class item>
-        struct core : inc::cxx<item> {
-            using base_t = inc::cxx<item>;
-            using base_t::base_t;
-            using the_t = core<item>;
+namespace mixc::lang_cxx_trim_bends{
+    template<class item>
+    struct core : inc::cxx<item> {
+        using base_t = inc::cxx<item>;
+        using base_t::base_t;
+        using the_t = core<item>;
 
-            core(base_t const & self) : 
-                base_t(self){}
+        core(base_t const & self) : 
+            base_t(self){}
 
-            the_t trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
-                auto token  = the_t(values.begin(), values.size());
-                auto r      = the;
+        the_t trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
+            auto token  = the_t(values.begin(), values.size());
+            auto r      = the;
 
-                if (auto index = the.index_of_first_miss(values); index != not_exist){
-                    r       = r.backward(index);
-                }
-                if (auto index = r.index_of_last_miss(values); index != not_exist){
-                    r       = r.length(index + 1);
-                }
-                if (alloc != nullptr){
-                    r       = r.clone(alloc);
-                }
-                return r;
+            if (auto index = the.index_of_first_miss(values); index != not_exist){
+                r       = r.backward(index);
             }
-        };
-
-        template<class final, class base, class item>
-        struct meta : base{
-            using base::base;
-            using the_t = core<item>;
-
-            final trim_bends(item value, inc::can_alloc<item> alloc = nullptr) const {
-                return the.trim_bends({ value }, alloc);
+            if (auto index = r.index_of_last_miss(values); index != not_exist){
+                r       = r.length(index + 1);
             }
-
-            final trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
-                return the.trim_bends(values, alloc);
+            if (alloc != nullptr){
+                r       = r.clone(alloc);
             }
-        };
-    }
+            return r;
+        }
+    };
+
+    template<class final, class base, class item>
+    struct meta : base{
+        using base::base;
+        using the_t = core<item>;
+
+        final trim_bends(item value, inc::can_alloc<item> alloc = nullptr) const {
+            return the.trim_bends({ value }, alloc);
+        }
+
+        final trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
+            return the.trim_bends(values, alloc);
+        }
+    };
+}
 
 #endif
 

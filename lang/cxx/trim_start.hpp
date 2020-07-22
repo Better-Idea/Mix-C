@@ -1,61 +1,61 @@
 #ifndef xusing_lang_cxx
-    #include"lang/private/cxx.hpp"
+#include"lang/private/cxx.hpp"
 #endif
 
 #ifndef xpack_lang_cxx_trim_start
 #define xpack_lang_cxx_trim_start
-    #pragma push_macro("xuser")
-    #pragma push_macro("xusing_lang_cxx")
-    #undef  xusing_lang_cxx
-    #undef  xuser
-    #define xuser mixc::lang_cxx_trim_start
-    #include"define/base_type.hpp"
-    #include"interface/can_alloc.hpp"
-    #include"interface/initializer_list.hpp"
-    #include"lang/cxx/clone.hpp"
-    #include"lang/cxx/index_of_first_miss.hpp"
-    #include"lang/cxx.hpp"
-    #pragma pop_macro("xusing_lang_cxx")
-    #pragma pop_macro("xuser")
+#pragma push_macro("xuser")
+#pragma push_macro("xusing_lang_cxx")
+#undef  xusing_lang_cxx
+#undef  xuser
+#define xuser mixc::lang_cxx_trim_start
+#include"define/base_type.hpp"
+#include"interface/can_alloc.hpp"
+#include"interface/initializer_list.hpp"
+#include"lang/cxx/clone.hpp"
+#include"lang/cxx/index_of_first_miss.hpp"
+#include"lang/cxx.hpp"
+#pragma pop_macro("xusing_lang_cxx")
+#pragma pop_macro("xuser")
 
-    namespace mixc::lang_cxx_trim_start{
-        template<class item>
-        struct core : inc::cxx<item> {
-            using base_t = inc::cxx<item>;
-            using base_t::base_t;
-            using the_t = core<item>;
+namespace mixc::lang_cxx_trim_start{
+    template<class item>
+    struct core : inc::cxx<item> {
+        using base_t = inc::cxx<item>;
+        using base_t::base_t;
+        using the_t = core<item>;
 
-            core(base_t const & self) : 
-                base_t(self){}
+        core(base_t const & self) : 
+            base_t(self){}
 
-            auto trim_start(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
-                auto token  = the_t(values.begin(), values.size());
-                auto r      = the;
+        auto trim_start(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
+            auto token  = the_t(values.begin(), values.size());
+            auto r      = the;
 
-                if (auto index = the.index_of_first_miss(values); index != not_exist){
-                    r       = r.backward(index);
-                }
-                if (alloc != nullptr){
-                    r       = r.clone(alloc);
-                }
-                return r;
+            if (auto index = the.index_of_first_miss(values); index != not_exist){
+                r       = r.backward(index);
             }
-        };
-
-        template<class final, class base, class item>
-        struct meta : base {
-            using base::base;
-            using the_t = core<item>;
-
-            final trim_start(item value, inc::can_alloc<item> alloc = nullptr) const {
-                return the.trim_start({ value }, alloc);
+            if (alloc != nullptr){
+                r       = r.clone(alloc);
             }
+            return r;
+        }
+    };
 
-            final trim_start(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
-                return the.trim_start(values, alloc);
-            }
-        };
-    }
+    template<class final, class base, class item>
+    struct meta : base {
+        using base::base;
+        using the_t = core<item>;
+
+        final trim_start(item value, inc::can_alloc<item> alloc = nullptr) const {
+            return the.trim_start({ value }, alloc);
+        }
+
+        final trim_start(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
+            return the.trim_start(values, alloc);
+        }
+    };
+}
 
 #endif
 

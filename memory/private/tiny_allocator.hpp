@@ -207,23 +207,12 @@
                     return;
                 }
 
-                auto   cur             = nodep(ptr);
-                auto & bmp             = get_page_header_by(cur);
-                auto   block_index     = bmp.index_of(cur);
-
-                xdebug_fail(bmp.get(page_block_count) == 0){
-                    xdebug(im_memory_tiny_allocator_free, block_index, bmp.get(block_index), ptr, bytes, "maybe repeated release");
-                    return;
-                }
-                xdebug_fail(bmp.get(block_index) == 0){
-                    xdebug(im_memory_tiny_allocator_free, block_index, bmp.get(block_index), ptr, bytes, "maybe repeated release");
-                    return;
-                }
-
-                auto free_block = cur;
-                auto free_size  = return_size_index + 1;
-                auto left       = bmp.left_free_block_of(cur);
-                auto right      = bmp.right_free_block_of(cur, free_size);
+                auto   cur        = nodep(ptr);
+                auto & bmp        = get_page_header_by(cur);
+                auto   free_block = cur;
+                auto   free_size  = return_size_index + 1;
+                auto   left       = bmp.left_free_block_of(cur);
+                auto   right      = bmp.right_free_block_of(cur, free_size);
 
                 if (bmp.mark_free(cur, return_size_index + 1); left.begin != nullptr){
                     bmp.mark_free(left.begin, left.length);
@@ -319,7 +308,6 @@
                     auto require_size    = require_size_index + 1;
                     auto rest            = cur + require_size;
                     auto rest_size       = total_size - require_size;
-                    auto rest_size_index = rest_size - 1;
                     xdebug(im_memory_tiny_allocator_split, cur, rest, total_size, require_size, rest_size);
                     xdebug_fail(rest_size > total_size);
                     append(rest, rest_size);

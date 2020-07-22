@@ -1,17 +1,13 @@
 #ifdef xuser
 #ifndef xusing_docker_bit_indicator
-    #include"docker/private/bit_indicator.hpp"
+#include"docker/private/bit_indicator.hpp"
 #endif
+#include"macro/xfinal.hpp"
 
 namespace xuser::inc{
     template<uxx bits = 0>
-    struct bit_indicator : xusing_docker_bit_indicator::bit_indicator<
-            bit_indicator<bits>, bits
-        >{
-        using xusing_docker_bit_indicator::bit_indicator<
-            bit_indicator<bits>, bits
-        >::bit_indicator;
-    };
+    xfinal_tmpl(xusing_docker_bit_indicator, bit_indicator, bits);
 }
+
 #undef xusing_docker_bit_indicator
 #endif

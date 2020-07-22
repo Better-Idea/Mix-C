@@ -1,15 +1,15 @@
 #ifndef xpack_math_max
 #define xpack_math_max
-    #ifdef max
-        #undef max
-    #endif
+#ifdef max
+    #undef max
+#endif
 
-    namespace mixc::math_max{
-        template<class type>
-        inline type max(type left, type right){
-            return left > right ? left : right;
-        }
+namespace mixc::math_max{
+    template<class type>
+    inline type max(type left, type right){
+        return left > right ? left : right;
     }
+}
 
 #endif
 

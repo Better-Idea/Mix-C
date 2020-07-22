@@ -6,8 +6,8 @@
 #include"define/base_type.hpp"
 #include"define/nullref.hpp"
 #include"docker/hashmap.hpp"
-#include"dumb/dummy_t.hpp"
-#include"dumb/struct_t.hpp"
+#include"dumb/dummy_type.hpp"
+#include"dumb/struct_type.hpp"
 #include"gc/self_management.hpp"
 #include"gc/private/make_guide.hpp"
 #include"gc/private/token.hpp"
@@ -283,11 +283,11 @@ namespace mixc::gc_ref::origin{
     template<class final, class type>
     using ref_ptr = meta<
         final, 
-        dummy_t, 
+        dummy_type, 
         typename cif<
             is_class<type>,
             type,
-            struct_t<type>
+            struct_type<type>
         >::result,
         false
     >;
@@ -299,7 +299,7 @@ namespace mixc::gc_ref::origin{
         typename cif<
             is_class<attribute_t>,
             attribute_t,
-            struct_t<attribute_t>
+            struct_type<attribute_t>
         >::result,
         true
     >;

@@ -3,7 +3,7 @@
 namespace mixc::macro_xvolatile{
     template<class type>
     inline volatile type & access(type const & value){
-        return (volatile type & )value;
+        return *(volatile type *)& value;
     }
 }
 

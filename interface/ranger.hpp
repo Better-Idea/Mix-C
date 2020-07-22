@@ -3,11 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_ranger
-#include"configure.hpp"
-#include"define/base_type.hpp"
 #include"interface/initializer_list.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser") 
 
 namespace mixc::interface_ranger{

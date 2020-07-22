@@ -1,30 +1,31 @@
 #ifndef xusing_lang_wxx
-    #include"lang/private/wxx.hpp"
+#include"lang/private/wxx.hpp"
 #endif
 
 #ifndef xpack_lang_wxx_is_lower
 #define xpack_lang_wxx_is_lower
-    #pragma push_macro("xuser")
-    #pragma push_macro("xusing_lang_wxx")
-        #undef  xusing_lang_wxx
-        #undef  xuser
-        #define xuser mixc::lang_wxx_is_lower
-        #include"define/base_type.hpp"
-        #include"lang/wxx.hpp"
-    #pragma pop_macro("xusing_lang_wxx")
-    #pragma pop_macro("xuser")
+#pragma push_macro("xuser")
+#pragma push_macro("xusing_lang_wxx")
+#undef  xusing_lang_wxx
+#undef  xuser
+#define xuser mixc::lang_wxx_is_lower
+#include"define/base_type.hpp"
+#include"lang/wxx.hpp"
+#pragma pop_macro("xusing_lang_wxx")
+#pragma pop_macro("xuser")
 
-    namespace mixc::lang_wxx_is_lower{
-        template<class type>
-        struct core : inc::wxx<type>{
-            using inc::wxx<type>::wxx;
-            using the_t = core<type>;
+namespace mixc::lang_wxx_is_lower{
+    template<class type>
+    struct core : inc::wxx<type>{
+        using inc::wxx<type>::wxx;
+        using the_t = core<type>;
 
-            auto is_lower() const {
-                return 'a' <= the.data and the.data <= 'z';
-            }
-        };
-    }
+        auto is_lower() const {
+            return 'a' <= the.data and the.data <= 'z';
+        }
+    };
+}
+
 #endif
 
 namespace mixc::lang_wxx_is_lower::xuser{

@@ -1,19 +1,13 @@
 #ifdef xuser
-    #ifndef xusing_docker_hashmap
-        #include"docker/private/hashmap.hpp"
-    #endif
+#ifndef xusing_docker_hashmap
+#include"docker/private/hashmap.hpp"
+#endif
+#include"macro/xfinal.hpp"
 
-    namespace xuser::inc{
-        template<class key_t, class value_t = void>
-        struct hashmap : xusing_docker_hashmap::hashmap<
-                hashmap<key_t, value_t>, 
-                key_t, value_t
-            >{
-            using xusing_docker_hashmap::hashmap<
-                hashmap<key_t, value_t>, 
-                key_t, value_t
-            >::hashmap;
-        };
-    }
-    #undef xusing_docker_hashmap
+namespace xuser::inc{
+    template<class key_t, class val_t = void>
+    xfinal_tmpl(xusing_docker_hashmap, hashmap, key_t, val_t);
+}
+
+#undef  xusing_docker_hashmap
 #endif

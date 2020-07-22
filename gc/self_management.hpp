@@ -7,18 +7,18 @@
 
 #ifndef xpack_gc_self_management
 #define xpack_gc_self_management
-    #pragma push_macro("xuser")
-    #undef  xuser
-    #define xuser mixc::gc_self_management
-    #include"define/base_type.hpp"
-    #include"macro/xstruct.hpp"
-    #pragma pop_macro("xuser")
+#pragma push_macro("xuser")
+#undef  xuser
+#define xuser mixc::gc_self_management
+#include"define/base_type.hpp"
+#include"macro/xstruct.hpp"
+#pragma pop_macro("xuser")
 
-    namespace mixc::gc_self_management{
-        xstruct(
-            xname(self_management)
-        ) $
-    }
+namespace mixc::gc_self_management{
+    xstruct(
+        xname(self_management)
+    ) $
+}
 
 #endif
 
