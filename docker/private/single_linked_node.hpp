@@ -5,6 +5,7 @@
 #define xuser mixc::docker_single_linked_node
 #include"dumb/struct_type.hpp"
 #include"interface/iterator.hpp"
+#include"lock/atom_swap.hpp"
 #include"lock/mutex.hpp"
 #include"meta_ctr/cif.hpp"
 #include"mixc.hpp"
@@ -47,7 +48,7 @@ namespace mixc::docker_single_linked_node{
         xspec(meta, item_t, void),
         xpubf(ptop, mutable origin::single_linked_node<item_t> *)
     )
-        template<auto opr, class callback>
+        template<auto/*dummy*/, class callback>
         void lock(callback const & call){
             inc::mutex::lock(xref ptop, 0, call);
         }
@@ -59,7 +60,30 @@ namespace mixc::docker_single_linked_node{
 
     namespace origin{
         template<class item_t, class barrier_t, bool with_lock>
-        using node_field = meta<item_t, inc::cif<with_lock, barrier_t, void>>;
+        xstruct(
+            xtmpl(node_field, item_t, barrier_t, with_lock),
+            xpubb(meta<item_t, inc::cif<with_lock, barrier_t, void>>)
+        )
+            using nodep  = origin::single_linked_node<item_t> *;
+            using base_t = meta<item_t, inc::cif<with_lock, barrier_t, void>>;
+
+            static nodep origin(nodep node){
+                return nodep(uxx(node) & base_t::mask); 
+            }
+
+            nodep top(){
+                return origin(base_t::ptop);
+            }
+
+            nodep swap_top(nodep value){
+                nodep masked_top = inc::atom_swap<nodep>(xref base_t::ptop, masked(value));
+                return origin(masked_top);
+            }
+
+            static nodep masked(nodep node){
+                return nodep(uxx(node) | ~base_t::mask);
+            }
+        $
     }
 }
 
