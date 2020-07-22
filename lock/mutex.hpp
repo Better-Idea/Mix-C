@@ -46,7 +46,8 @@ namespace mixc::lock_mutex::origin{
         template<class type>
         static lock_state_t try_lock(type * field, uxx index){
             using ut = inc::unsigned_type<type>;
-            return atom_fetch_or<ut>((ut *)field, ut(1) << index) ?
+            ut mask  = ut(1) << index;
+            return inc::atom_fetch_or<ut>((ut *)field, mask) & mask ?
                 lock_state_t::blocked : lock_state_t::accept;
         }
 
@@ -54,7 +55,7 @@ namespace mixc::lock_mutex::origin{
         static void unlock(type * field, uxx index){
             using ut = inc::unsigned_type<type>;
             ut mask  = ~(ut(1) << index);
-            atom_and<ut>((ut *)field, mask);
+            inc::atom_and<ut>((ut *)field, mask);
         }
 
         template<class type, class callback>
@@ -66,7 +67,6 @@ namespace mixc::lock_mutex::origin{
             unlock(field, index);
         }
     $
-
 }
 
 #endif
