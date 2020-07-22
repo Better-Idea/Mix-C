@@ -31,6 +31,7 @@
 #include"lock/private/thread_yield.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"meta/fit_bits.hpp"
+#include"meta/is_same.hpp"
 #include"meta_seq/tget.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/vin.hpp"
@@ -160,17 +161,17 @@ namespace mixc::lock_policy_barrier{
     );
 
     template<class ... rules>
-    using state_t = typename pair_t<rules...>::bits_t;
+    using bits_t = typename pair_t<rules...>::bits_t;
 
-    template<class ... rules>
+    template<class bits_t, class ... rules>
     xstruct(
-        xtmpl(policy_barrier, rules...),
-        xprif(state, state_t<rules...>)
+        xtmpl(policy_barrier_t, bits_t, rules...),
+        xprif(state, bits_t)
     )
-        using bits_t        = decltype(state);
+        using rule_list     = tlist<rules...>;
         using raw_data_list = typename pair_t<rules...>::new_list;
 
-        policy_barrier() : state(0){}
+        policy_barrier_t() : state(0){}
 
         template<auto operation>
         uxx try_lock(){
@@ -189,7 +190,7 @@ namespace mixc::lock_policy_barrier{
 
                 // 存在互斥操作
                 if ((old & mutex) != 0){
-                    if ((old & index) == 0){
+                    if ((old & candicate) == 0) {
                         atom_and<bits_t>(xref state, bits_t(~candicate));
                     }
                     return not_exist;
@@ -239,10 +240,29 @@ namespace mixc::lock_policy_barrier{
             atom_and<bits_t>(xref state, bits_t(~channel));
         }
     $
+
+    struct force_machine_word{};
+
+    template<class first, class ... rules>
+    inline auto configure(){
+        if constexpr (is_same<force_machine_word, first>){
+            return policy_barrier_t<uxx, rules...>();
+        }
+        else{
+            return policy_barrier_t<
+                bits_t<first, rules...>, 
+                first, rules...
+            >();
+        }
+    }
+
+    template<class first, class ... rules>
+    using policy_barrier = decltype(configure<first, rules...>());
 }
 
 namespace mixc::lock_policy_barrier::origin{
     using mixc::lock_policy_barrier::policy_barrier;
+    using mixc::lock_policy_barrier::force_machine_word;
     using mixc::lock_policy_barrier::when;
 }
 
