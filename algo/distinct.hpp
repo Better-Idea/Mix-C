@@ -1,22 +1,22 @@
-#ifndef xpack_algo_unique
-#define xpack_algo_unique
+#ifndef xpack_algo_distinct
+#define xpack_algo_distinct
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_unique
+#define xuser mixc::algo_distinct
 #include"docker/hashmap.hpp"
 #include"interface/ranger.hpp"
 #include"interface/can_callback.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::algo_unique{
+namespace mixc::algo_distinct{
     using namespace inc;
 
     template<class item_t>
-    using unique_alloc_invoke = can_callback<ranger<item_t>(length)>;
+    using distinct_alloc_invoke = can_callback<ranger<item_t>(length)>;
 
     template<class item_t>
-    inline ranger<item_t> unique(ranger<item_t> range, unique_alloc_invoke<item_t> alloc){
+    inline ranger<item_t> distinct(ranger<item_t> range, distinct_alloc_invoke<item_t> alloc){
         if (range.length() == 0){
             return alloc(length{0});
         }
@@ -44,13 +44,13 @@ namespace mixc::algo_unique{
     }
 }
 
-namespace mixc::algo_unique::origin{
-    using mixc::algo_unique::unique_alloc_invoke;
-    using mixc::algo_unique::unique;
+namespace mixc::algo_distinct::origin{
+    using mixc::algo_distinct::distinct_alloc_invoke;
+    using mixc::algo_distinct::distinct;
 }
 
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::algo_unique::origin;
+    using namespace ::mixc::algo_distinct::origin;
 }
