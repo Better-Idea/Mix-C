@@ -7,7 +7,6 @@
 #include"interface/iterator.hpp"
 #include"lock/atom_swap.hpp"
 #include"lock/mutex.hpp"
-#include"meta_ctr/cif.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -59,13 +58,13 @@ namespace mixc::docker_single_linked_node{
     $
 
     namespace origin{
-        template<class item_t, class barrier_t, bool with_lock>
+        template<class item_t, class barrier_t>
         xstruct(
-            xtmpl(node_field, item_t, barrier_t, with_lock),
-            xpubb(meta<item_t, inc::cif<with_lock, barrier_t, void>>)
+            xtmpl(node_field, item_t, barrier_t),
+            xpubb(meta<item_t, barrier_t>)
         )
             using nodep  = origin::single_linked_node<item_t> *;
-            using base_t = meta<item_t, inc::cif<with_lock, barrier_t, void>>;
+            using base_t = meta<item_t, barrier_t>;
 
             static nodep origin(nodep node){
                 return nodep(uxx(node) & base_t::mask); 
