@@ -7,7 +7,7 @@
 #define xuse_xdebug_short_path      1
 
 // memory
-#define xuse_libc_malloc            0
+#define xuse_libc_malloc            1
 
 // select os
 #define xis_windows                 1
@@ -39,7 +39,7 @@
 #endif
 
 // temporarily setting ========================================
-#if __clang__ or __GNUC__
+#if __clang__ || __GNUC__
     #define xfor_msvc_hint          0
 #else
     #define xfor_msvc_hint          1
