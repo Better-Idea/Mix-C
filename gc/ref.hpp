@@ -49,6 +49,8 @@ namespace mixc::gc_ref{
     extern uxx                               degree_dvalue;
     extern visited_ptr_t                     root;
     extern bool                              can_free_whole_ring;
+    static inline uxx                        empty_array[32];
+    static inline voidp                      empty_array_ptr = empty_array;
 
     template<class final, class item_t, class attribute_t, bool is_array>
     xstruct(
@@ -170,11 +172,9 @@ namespace mixc::gc_ref{
             }
 
             // 当有多个线程对该对象赋值时，该原子操作可以保证正确性
-            cast<the_t>(atom_swap(& mem, value.mem)).~meta();
-
-            // 虽然作者想这么写，奈何优化器喜欢暴力强拆
-            // the_t & old = cast<the_t>(atom_swap(& mem, value.mem));
-            // old         = nullptr;
+            token_mix_t * m   = atom_swap(& mem, value.mem);
+            the_t         old;
+            old.mem = m;
             return thex;
         }
 
@@ -189,29 +189,34 @@ namespace mixc::gc_ref{
             if (ptr = atom_swap(& mem, ptr); ptr == nullptr) { // enter only once
                 return thex;
             }
+            if constexpr (is_array) {
+                if (voidp(ptr) == empty_array_ptr) {
+                    return thex;
+                }
+            }
 
             // 后面的代码可以推送给后台 gc 线程
-            the_t & old = cast<the_t>(ptr);
+            auto old    = (the_t *)& ptr;
             cnt         = ptr->owners_dec();
             xdebug(im_gc__meta, xtypeid(attribute_t).name, cnt, ptr);
 
             if constexpr (not need_gc){
                 if (cnt == 0){
-                    old.free();
+                    old->free();
                 }
             }
             else if (can_free_whole_ring){
                 if (auto && i = gc_map.take_out(ptr); i.has_hold_value() and i.can_arrive_root){
-                    old.free();
+                    old->free();
                 }
             }
             else if (cnt == 0){
-                old.free();
+                old->free();
             }
-            else if (old.template can_release<guide>()){
+            else if (old->template can_release<guide>()){
                 can_free_whole_ring = true;
                 gc_map.take_out(ptr);
-                old.free();
+                old->free();
                 gc_map.clear();
                 can_free_whole_ring = false;
             }
@@ -280,6 +285,9 @@ namespace mixc::gc_ref{
 }
 
 namespace mixc::gc_ref::origin{
+    using mixc::gc_ref::empty_array;
+    using mixc::gc_ref::empty_array_ptr;
+
     template<class final, class type>
     using ref_ptr = meta<
         final, 

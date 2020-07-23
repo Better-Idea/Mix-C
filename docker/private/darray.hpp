@@ -1,3 +1,4 @@
+#pragma warning(disable:4819)
 // 注意：
 // darray 默认是空数组，此时 attribute 域是不允许访问的
 // darray::length() == 0
@@ -21,9 +22,6 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_darray{
-    static inline uxx   empty_array[32];
-    static inline voidp empty_array_ptr = empty_array;
-
     template<class type, uxx rank, class attribute>
     struct darray_t : public inc::ref_array<
         darray_t<type, rank, attribute>,
@@ -39,8 +37,8 @@ namespace mixc::docker_darray{
         xseqptr(item_t);
 
         darray_t() : 
-            darray_t(*(the_t *)& empty_array_ptr) {
-            static_assert(sizeof(empty_array) >= sizeof(inc::struct_type<attribute>));
+            darray_t(*(the_t *)& inc::empty_array_ptr) {
+            static_assert(sizeof(inc::empty_array) >= sizeof(inc::struct_type<attribute>));
         }
         darray_t(darray_t const &) = default;
 
@@ -61,12 +59,12 @@ namespace mixc::docker_darray{
 
         the_t & operator=(decltype(nullptr)){
             base_t::operator=(nullptr);
-            new (this) the_t(*(the_t *)& empty_array_ptr);
+            new (this) the_t(*(the_t *)& inc::empty_array_ptr);
             return the;
         }
 
         xis_nullptr(
-            the == the_t(*(the_t *)& empty_array_ptr)
+            the == the_t(*(the_t *)& inc::empty_array_ptr)
         )
 
         bool is_empty() const {
