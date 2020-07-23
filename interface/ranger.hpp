@@ -92,13 +92,13 @@ namespace mixc::interface_ranger{
         enum{ mask = sizeof(uxx) * 2 - 1 };
 
         template<class object, class return_type>
-        alignas(mask + 1) static inline voidp itrs[] = {
+        static inline voidp itrs[] = {
             inc::signature<return_type(uxx)>::check(& base::pos<object, return_type>),
             inc::signature<return_type(uxx)>::check(& base::neg<object, return_type>),
         };
 
         template<class return_type>
-        alignas(mask + 1) static inline voidp itrsx[] = {
+        static inline voidp itrsx[] = {
             inc::signature<return_type &(uxx)>::check(& base::posx<return_type>),
             inc::signature<return_type &(uxx)>::check(& base::negx<return_type>),
         };
@@ -126,7 +126,7 @@ namespace mixc::interface_ranger{
             base(impl){}
 
         template<class object> 
-        #if not xfor_msvc_hint
+        #if not xis_msvc
         requires(ranger_format<object, item_t &>)
         #endif
         ranger(object const & impl) : 

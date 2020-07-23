@@ -2,7 +2,7 @@
 #define xmixc                       "Mix-C"
 
 // debug
-#define xuse_xdebug                 0
+#define xuse_xdebug                 1
 #define xuse_xdebug_fail            0
 #define xuse_xdebug_short_path      1
 
@@ -38,9 +38,8 @@
     #error "you can select only one between xis_os64 and xis_os32"
 #endif
 
-// temporarily setting ========================================
 #if __clang__ || __GNUC__
-    #define xfor_msvc_hint          0
-#else
-    #define xfor_msvc_hint          1
+    #define xis_msvc          0
+#elif _MSVC_LANG
+    #define xis_msvc          1
 #endif

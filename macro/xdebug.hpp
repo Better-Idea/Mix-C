@@ -1,6 +1,7 @@
 #ifndef xpack_macro_xdebug
 #define xpack_macro_xdebug
 #pragma warning(disable:4390)
+#pragma warning(disable:4819)
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xdebug

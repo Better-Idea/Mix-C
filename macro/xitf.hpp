@@ -1,3 +1,4 @@
+#pragma warning(disable:4819)
 /*
 注意：===============================================================
 xitf 内部使用了显式的 this_call 调用，需要留意可能的 ABI 问题
@@ -117,7 +118,7 @@ namespace mixc::macro_xitf{
     #define xitem(...)      item__(__VA_ARGS__)
     #define xtmpl(...)      tmpl__(__VA_ARGS__)
 
-    #if xfor_msvc_hint
+    #if xis_msvc
     #define xitf(name,...)                                                                      \
     namespace inner{                                                                            \
         using namespace ::mixc::macro_xitf;                                                     \

@@ -8,7 +8,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_cast{
-    #if xfor_msvc_hint
+    #if xis_msvc
         template<class target, class source>
         struct meta{
         private:

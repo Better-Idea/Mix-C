@@ -1,4 +1,5 @@
 #include"chrono/private/extern.+.hpp"
+#include"instruction/private/extern.isa.hpp"
 #include"io/private/extern.file.hpp"
 #include"io/private/extern.tty.hpp"
 #include"lock/private/extern.thread_yield.hpp"

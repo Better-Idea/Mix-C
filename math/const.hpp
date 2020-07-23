@@ -25,8 +25,8 @@ namespace mixc::math_const::origin{
     template<> inline constexpr u16 max_value_of<u16> = 65535;
     template<> inline constexpr u32 max_value_of<u32> = 4294967295;
     template<> inline constexpr u64 max_value_of<u64> = 18446744073709551615ULL;
-    template<> inline constexpr f32 max_value_of<f32> = 3.40282347e+38;
-    template<> inline constexpr f64 max_value_of<f64> = 1.7976931348623157e+308;
+    template<> inline constexpr f32 max_value_of<f32> = f32(3.40282347e+38);
+    template<> inline constexpr f64 max_value_of<f64> = f64(1.7976931348623157e+308);
 
     template<> inline constexpr i08 min_value_of<i08> = -128;
     template<> inline constexpr i16 min_value_of<i16> = -32768;
@@ -36,8 +36,8 @@ namespace mixc::math_const::origin{
     template<> inline constexpr u16 min_value_of<u16> = 0;
     template<> inline constexpr u32 min_value_of<u32> = 0;
     template<> inline constexpr u64 min_value_of<u64> = 0;
-    template<> inline constexpr f32 min_value_of<f32> = -3.40282347e+38;
-    template<> inline constexpr f64 min_value_of<f64> = -1.7976931348623157e+308;
+    template<> inline constexpr f32 min_value_of<f32> = f32(-3.40282347e+38);
+    template<> inline constexpr f64 min_value_of<f64> = f64(-1.7976931348623157e+308);
 }
 
 #endif

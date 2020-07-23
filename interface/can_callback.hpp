@@ -27,7 +27,7 @@ namespace mixc::interface_can_callback{
         can_callback(){}
         can_callback(decltype(nullptr)){}
 
-        #if xfor_msvc_hint
+        #if xis_msvc
             template<class object>
             can_callback(object const &){}
         #else

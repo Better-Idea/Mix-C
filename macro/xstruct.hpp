@@ -1,3 +1,4 @@
+#pragma warning(disable:4819)
 /* 注意：
  * 在使用 xpubget_pubsetx 构建属性范式时，请勿使用 __COUNTER__ 
  * 在使用 xstruct 宏时不要出现多余的逗号，像这样
@@ -109,13 +110,26 @@ static inline uxx __class_id = 0x80000000;
 #define __xexpand_name__(...)
 #define __xexpand_tmpl__(...)
 #define __xexpand_spec__(...)
-#define __xexpand_pubb__(...)               public      __VA_ARGS__, 
-#define __xexpand_prob__(...)               protected   __VA_ARGS__, 
-#define __xexpand_prib__(...)               private     __VA_ARGS__, 
+#define __xexpand_pubb__(...)               , public      __VA_ARGS__
+#define __xexpand_prob__(...)               , protected   __VA_ARGS__
+#define __xexpand_prib__(...)               , private     __VA_ARGS__
 #define __xexpand_pubf__(...)
 #define __xexpand_prof__(...)
 #define __xexpand_prif__(...)
 #define __xexpand_asso__(...)
+
+// 基类
+#define __xexpand_first__
+#define __xexpand_first_name__(...)
+#define __xexpand_first_tmpl__(...)
+#define __xexpand_first_spec__(...)
+#define __xexpand_first_pubb__(...)         : public      __VA_ARGS__ 
+#define __xexpand_first_prob__(...)         : protected   __VA_ARGS__ 
+#define __xexpand_first_prib__(...)         : private     __VA_ARGS__ 
+#define __xexpand_first_pubf__(...)
+#define __xexpand_first_prof__(...)
+#define __xexpand_first_prif__(...)
+#define __xexpand_first_asso__(...)
 
 // the_t 别名
 #define __xthe__
@@ -237,9 +251,8 @@ static inline uxx __class_id = 0x80000000;
 #define xasso(...)                          asso__(__VA_ARGS__)
 
 #define xstruct(...)                                                            \
-struct __xlist__(__xstruct_, __VA_ARGS__) :                                     \
-        __xlist__(__xexpand_, __VA_ARGS__)                                      \
-        __dph<__COUNTER__> {                                                    \
+struct __xlist__(__xstruct_, __VA_ARGS__)                                       \
+       __xlist3__(__xexpand_first_, __xexpand_first_, __xexpand_, __VA_ARGS__) {\
     using the_t = __xlist__(__xthe_, __VA_ARGS__);                              \
         __xlist__(__xfield_, __VA_ARGS__)                                       \
     private:                                                                    \
@@ -248,7 +261,7 @@ struct __xlist__(__xstruct_, __VA_ARGS__) :                                     
             __xlist__(__xtype_, __VA_ARGS__);                                   \
         static inline uxx __my_class_id = __class_id++;                         \
         static constexpr asciis __my_field_name[] =                             \
-            { __xlist__(__xitem_, __VA_ARGS__) };                               \
+            { __xlist__(__xitem_, __VA_ARGS__)  ""/*dummy*/ };                  \
         template<class, class>                                                  \
         friend struct ::mixc::macro_xtypeid::__typeid;                          \
         template<class>                                                         \

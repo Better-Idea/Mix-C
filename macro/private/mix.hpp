@@ -1,6 +1,5 @@
 #ifndef xpack_macro_private_mix
 #define xpack_macro_private_mix
-#pragma GCC diagnostic ignored "-Wempty-body"
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_private_mix

@@ -9,7 +9,10 @@
 
 namespace mixc::instruction_time_stamp{
     inline u64 time_stamp(){
-        #if xis_x86
+        #if xis_msvc
+            extern u64 rdtsc();
+            return rdtsc();
+        #elif xis_x86
             return __builtin_ia32_rdtsc();
         #endif
     }

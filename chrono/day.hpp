@@ -21,9 +21,9 @@ namespace mixc::chrono_day::origin{
     }
 
     inline day::operator date(){
-        constexpr uxx a = 400 * 365 + 97; // 完整的 400 年共有的天数
-        constexpr uxx b = 100 * 365 + 24; // 完整的 100 年共有的天数
-        constexpr uxx c = 4 * 365 + 1;    // 完整的 4   年共有的天数
+        constexpr u32 a = 400 * 365 + 97; // 完整的 400 年共有的天数
+        constexpr u32 b = 100 * 365 + 24; // 完整的 100 年共有的天数
+        constexpr u32 c = 4 * 365 + 1;    // 完整的 4   年共有的天数
 
         auto v0 = pvalue + 1;
         auto p0 = v0 / a * 400;
