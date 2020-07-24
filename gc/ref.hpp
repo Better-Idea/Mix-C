@@ -21,6 +21,7 @@
 #include"memop/cast.hpp"
 #include"meta/is_based_on.hpp"
 #include"meta/is_class.hpp"
+#include"meta/is_same.hpp"
 #include"meta_ctr/cif.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
@@ -50,7 +51,7 @@ namespace mixc::gc_ref{
     extern visited_ptr_t                     root;
     extern bool                              can_free_whole_ring;
     static inline uxx                        empty_array[32];
-    static inline voidp                      empty_array_ptr = empty_array;
+    static inline voidp                      empty_array_ptr   = empty_array;
 
     template<class final, class item_t, class attribute_t, bool is_array>
     xstruct(
@@ -142,8 +143,10 @@ namespace mixc::gc_ref{
         meta(::length length, args const & ... list) {
             mem = alloc(length);
 
-            for(uxx i = 0; i < length; i++) {
-                new (mem->ptr(i)) item_t(list...);
+            if constexpr (not is_same<void, item_t>){
+                for(uxx i = 0; i < length; i++) {
+                    new(mem->item_ptr(i)) item_t(list...);
+                }
             }
         }
 
@@ -161,14 +164,10 @@ namespace mixc::gc_ref{
         ~meta(){
             the = nullptr;
         }
-
-        auto operator -> () const{
-            return mem;
-        }
     public:
         final & operator = (the_t const & value){
             if (value.mem != nullptr){ 
-                value->owners_inc();
+                value.mem->owners_inc();
             }
 
             // 当有多个线程对该对象赋值时，该原子操作可以保证正确性
@@ -189,38 +188,43 @@ namespace mixc::gc_ref{
             if (ptr = atom_swap(& mem, ptr); ptr == nullptr) { // enter only once
                 return thex;
             }
+
+            // 后面的代码可以推送给后台 gc 线程
             if constexpr (is_array) {
                 if (voidp(ptr) == empty_array_ptr) {
                     return thex;
                 }
             }
 
-            // 后面的代码可以推送给后台 gc 线程
-            auto old    = (the_t *)& ptr;
-            cnt         = ptr->owners_dec();
+            auto old = (the_t *)& ptr;
+
+            if (can_free_whole_ring){
+                if constexpr (not need_gc){
+                    if (ptr->owners_dec() == 0){
+                        old->free();
+                    }
+                }
+                else if (auto && i = gc_map.take_out(ptr); i.has_hold_value()){
+                    if (i.can_arrive_root){
+                        old->free();
+                    }
+                }
+                return thex;
+            }
+
+            cnt = ptr->owners_dec();
             xdebug(im_gc__meta, xtypeid(attribute_t).name, cnt, ptr);
 
-            if constexpr (not need_gc){
-                if (cnt == 0){
-                    old->free();
-                }
-            }
-            else if (can_free_whole_ring){
-                if (auto && i = gc_map.take_out(ptr); i.has_hold_value() and i.can_arrive_root){
-                    old->free();
-                }
-            }
-            else if (cnt == 0){
+            if (cnt == 0){
                 old->free();
             }
-            else if (old->template can_release<guide>()){
-                can_free_whole_ring = true;
-                gc_map.take_out(ptr);
-                old->free();
-                gc_map.clear();
-                can_free_whole_ring = false;
-            }
-            else{
+            else if constexpr (need_gc){
+                if (old->template can_release<guide>()){
+                    can_free_whole_ring = true;
+                    gc_map.take_out(ptr);
+                    old->free();
+                    can_free_whole_ring = false;
+                }
                 gc_map.clear();
             }
             return thex;
@@ -240,19 +244,16 @@ namespace mixc::gc_ref{
 
     protected:
         operator item_t * () {
-            return xref mem[0][0];
+            return mem[0].item_ptr(0);
         }
 
-        operator item_t const * () const {
-            return xref mem[0][0];
-        }
-
-        item_t & operator [] (uxx index){
-            return mem[0][index];
-        }
-
-        const item_t & operator [] (uxx index) const {
-            return mem[0][index];
+        attribute_t * operator->(){
+            if constexpr (is_same<void, attribute_t>){
+                return nullptr;
+            }
+            else{
+                return mem; // 李氏转换
+            }
         }
 
         uxx length() const {
@@ -266,20 +267,24 @@ namespace mixc::gc_ref{
         token_mix_t * mem;
 
         template<class ... args> auto alloc(uxx length, args const & ... list) {
-            return alloc_with_initial<token_mix_t>(
-                memory_size(
-                    sizeof(token_mix_t) + length * sizeof(item_t)
-                ),
-                length, list...
-            );
+            return alloc_with_initial<token_mix_t>(size(length), length, list...);
         }
 
         void free(){
-            free_with_destroy(mem,
-                memory_size(
-                    sizeof(token_mix_t) + mem->this_length() * sizeof(item_t)
-                )
-            );
+            free_with_destroy(mem, size(mem->this_length()));
+        }
+
+        memory_size size(uxx length){
+            if constexpr (is_same<void, item_t>){
+                return memory_size(
+                    sizeof(token_mix_t)
+                );
+            }
+            else{
+                return memory_size(
+                    sizeof(token_mix_t) + length * sizeof(item_t)
+                );
+            }
         }
     $
 }
@@ -289,20 +294,10 @@ namespace mixc::gc_ref::origin{
     using mixc::gc_ref::empty_array_ptr;
 
     template<class final, class type>
-    using ref_ptr = meta<
-        final, 
-        dummy_type, 
-        cif<is_class<type>, type, struct_type<type>>,
-        false
-    >;
+    using ref_ptr = meta<final, void, type, false>;
 
     template<class final, class item_t, class attribute_t = void>
-    using ref_array = meta<
-        final, 
-        item_t, 
-        cif<is_class<attribute_t>, attribute_t, struct_type<attribute_t>>,
-        true
-    >;
+    using ref_array = meta<final, item_t, attribute_t, true>;
 }
 
 #endif

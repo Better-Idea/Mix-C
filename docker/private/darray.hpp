@@ -32,7 +32,6 @@ namespace mixc::docker_darray{
         using the_t  = darray_t<type, rank, attribute>;
         using item_t = typename darray_t<type, rank - 1, attribute>::the_t;
         using base_t = inc::ref_array<the_t, item_t, attribute>;
-        using base_t::operator[];
     public:
         xseqptr(item_t);
 
@@ -61,6 +60,14 @@ namespace mixc::docker_darray{
             base_t::operator=(nullptr);
             new (this) the_t(*(the_t *)& inc::empty_array_ptr);
             return the;
+        }
+
+        item_t & operator[](uxx index){
+            return base_t::ptr()[index];
+        }
+
+        item_t const & operator[](uxx index) const {
+            return base_t::ptr()[index];
         }
 
         xis_nullptr(
