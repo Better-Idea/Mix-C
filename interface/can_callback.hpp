@@ -27,26 +27,21 @@ namespace mixc::interface_can_callback{
         can_callback(){}
         can_callback(decltype(nullptr)){}
 
-        #if xis_msvc
-            template<class object>
-            can_callback(object const &){}
-        #else
-            // 在 requires 中使用 is_same 代替 more_fit 达到区分 lambda 的目的
-            template<class object> requires ( 
-                inc::is_same<
-                    decltype(& object::operator()),
-                    ret(object::*)(args...) const
-                > or 
-                inc::is_same<
-                    decltype(& object::operator()),
-                    ret(object::*)(args...)
-                > 
-            )
-            can_callback(object const & impl){
-                __object    = inc::addressof(impl);
-                __func_list = (void **)signature::check(& object::operator());
-            }
-        #endif
+        // 在 requires 中使用 is_same 代替 more_fit 达到区分 lambda 的目的
+        template<class object> requires ( 
+            inc::is_same<
+                decltype(& object::operator()),
+                ret(object::*)(args...) const
+            > or 
+            inc::is_same<
+                decltype(& object::operator()),
+                ret(object::*)(args...)
+            > 
+        )
+        can_callback(object const & impl){
+            __object    = inc::addressof(impl);
+            __func_list = (void **)signature::check(& object::operator());
+        }
 
         ret operator()(args ... list) const {
             return signature::call(__object, (void *)__func_list, list...);
