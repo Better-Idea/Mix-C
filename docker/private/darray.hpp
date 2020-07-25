@@ -50,9 +50,8 @@ namespace mixc::docker_darray{
 
         template<class ... args>
         auto & operator()(::length length, args const & ... list){
-            using metap = base_t *;
-            the.~base_t();
-            new (metap(this)) base_t(length, list...);
+            base_t::operator=(nullptr);
+            new (this) base_t(length, list...);
             return the;
         }
 

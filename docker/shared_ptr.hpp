@@ -11,8 +11,9 @@ namespace mixc::docker_shared_ptr{
     template<class type> struct shared_ptr;
     template<class type>
     struct shared_ptr : inc::ref_ptr<shared_ptr<type>, type>{
-        using base_t = inc::ref_ptr<shared_ptr<type>, type>;
         using the_t  = shared_ptr<type>;
+        using base_t = inc::ref_ptr<shared_ptr<type>, type>;
+        using base_t::operator=;
     public:
         shared_ptr() = default;
 
@@ -25,18 +26,17 @@ namespace mixc::docker_shared_ptr{
 
         template<class ... args>
         shared_ptr<type> & operator()(::ini, args const & ... list){
-            using metap = base_t *;
-            the.~base_t();
+            base_t::operator=(nullptr);
             new (this) base_t(::length(0), list...);
             return the;
         }
 
         operator type & () {
-            return * the.operator->();
+            return * base_t::operator->();
         }
 
         operator type const & () const {
-            return * the.operator->();
+            return * base_t::operator->();
         }
 
         type const * operator->() const {

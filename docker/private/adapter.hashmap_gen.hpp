@@ -113,20 +113,24 @@ xstruct(
         }
         while(next != nullptr){
             auto temp = next;
-            temp->key->~key_t();
+            key_t * k = temp->key.operator->();
+            k->~key_t();
 
             #ifdef xarg_has_val_t
-            temp->val->~val_t();
+            val_t * v = temp->val.operator->();
+            v->~val_t();
             #endif
 
             next      = next->next;
             inc::free(temp);
         }
 
-        the.key->~key_t();
+        key_t * k = the.key.operator->();
+        k->~key_t();
 
         #ifdef xarg_has_val_t
-        the.val->~val_t();
+        val_t * v = the.val.operator->();
+        v->~val_t();
         #endif
 
         the.next = this;
