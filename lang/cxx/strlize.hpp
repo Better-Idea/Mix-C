@@ -266,7 +266,7 @@ namespace mixc::lang_cxx_strlize{
             do {
                 ptr[0] = lut[u % base];
                 ptr   += 1;
-                u     /= base;
+                u     /= unsigned_t(base);
             } while(u != 0);
 
             uxx    len = ptr - buf;
