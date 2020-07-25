@@ -41,10 +41,10 @@ namespace mixc::interface_seqptr{
             ptr(ptr), len(len){}
 
         template<class object> requires(
-            inner::signature<uxx()>::has(& object::length) and
+            inc::signature<uxx()>::has(& object::length) and
             (
-                inner::signature<item_t const *()>::has(& object::operator item_t const *) or
-                inner::signature<item_t *()>::has(& object::operator item_t *)
+                inc::signature<item_t const *()>::has(& object::operator item_t const *) or
+                inc::signature<item_t *()>::has(& object::operator item_t *)
             )
         )
         seqptr(object const & impl){
