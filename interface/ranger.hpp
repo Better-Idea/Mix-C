@@ -4,6 +4,7 @@
 #undef  xuser
 #define xuser mixc::interface_ranger
 #include"interface/initializer_list.hpp"
+#include"macro/xalign.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
 #include"mixc.hpp"
@@ -12,61 +13,18 @@
 namespace mixc::interface_ranger{
     using namespace inc;
 
+    template<class object>
+    static inline xalign(sizeof(voidp) * 2) voidp itrs[2];
+
     xstruct(
         xname(base)
     )
-        base(){}
-
-        template<class object>
-        base(object const * ptr, uxx len, uxx ofs):
-            ptr((object *)ptr),
-            itr((voidp *)& itrs<object, decltype((*(object *)ptr)[uxx(0)])>),
-            len(len),
-            ofs(ofs){
-        }
-
-        template<class item_t>
-        base(inc::initializer_list<item_t> const * ptr, uxx len, uxx ofs):
-            ptr((item_t *)ptr->begin()),
-            itr((voidp *)& itrsx<item_t>),
-            len(len),
-            ofs(ofs){
-        }
-
-        template<class object>
-        base(object const * ptr, uxx len, uxx ofs, bool negtive_order): 
-            base(ptr, len, ofs){
-            turn_negtive_order();
-        }
-
-        bool is_positive_order() const {
-            return (uxx(itr) & mask) == 0;
-        }
-
-        bool is_negtive_order() const {
-            return (uxx(itr) & mask) != 0;
-        }
-
-        uxx length() const {
-            return len;
-        }
-    protected:
-        voidp    ptr = nullptr;
-        voidp *  itr = nullptr;
-        uxx      len = 0;
-        uxx      ofs = 0;
-
-        void turn_positive_order() {
-            itr = (voidp *)(uxx(itr) & ~mask);
-        }
-
-        void turn_negtive_order() {
-            itr = (voidp *)(uxx(itr) | sizeof(uxx));
-        }
     private:
-        template<class object, class ret>
-        static ret * return_type_core(ret &(object::*)(uxx)){
-            return (ret *)nullptr;
+        enum{ mask = sizeof(uxx) * 2 - 1 };
+        
+        void check() {
+            constexpr uxx mask = the.mask << 1 | 1;
+            xdebug_fail((uxx(base::itr) & mask) != 0);
         }
 
         template<class object, class return_type>
@@ -88,24 +46,67 @@ namespace mixc::interface_ranger{
         return_type & negx(uxx index){
             return ((return_type *)ptr)[ofs - index];
         }
-
-        enum{ mask = sizeof(uxx) * 2 - 1 };
-
-        template<class object, class return_type>
-        static inline voidp itrs[] = {
-            inc::signature<return_type(uxx)>::check(& base::pos<object, return_type>),
-            inc::signature<return_type(uxx)>::check(& base::neg<object, return_type>),
-        };
-
-        template<class return_type>
-        static inline voidp itrsx[] = {
-            inc::signature<return_type &(uxx)>::check(& base::posx<return_type>),
-            inc::signature<return_type &(uxx)>::check(& base::negx<return_type>),
-        };
+        
     protected:
+        voidp    ptr = nullptr;
+        voidp *  itr = nullptr;
+        uxx      len = 0;
+        uxx      ofs = 0;
+
+        void turn_positive_order() {
+            itr = (voidp *)(uxx(itr) & ~mask);
+        }
+
+        void turn_negtive_order() {
+            itr = (voidp *)(uxx(itr) | sizeof(uxx));
+        }
+
         template<class item_t>
         item_t access(uxx index) {
             return inc::signature<item_t(uxx)>::call(this, itr[0], index);
+        }
+    public:
+        base(){}
+
+        template<class object>
+        base(object const * ptr, uxx len, uxx ofs):
+            ptr((object *)ptr),
+            itr(itrs<object>),
+            len(len),
+            ofs(ofs){
+            using ret_type = decltype((*(object *)ptr)[uxx(0)]);
+            itr[0] = inc::signature<ret_type(uxx)>::check(& base::pos<object, ret_type>);
+            itr[1] = inc::signature<ret_type(uxx)>::check(& base::neg<object, ret_type>);
+            check();
+        }
+
+        template<class item_t>
+        base(inc::initializer_list<item_t> const * ptr, uxx len, uxx ofs):
+            ptr((item_t *)ptr->begin()),
+            itr(itrs<item_t>),
+            len(len),
+            ofs(ofs){
+            itr[0] = inc::signature<item_t & (uxx)>::check(& base::posx<item_t>);
+            itr[1] = inc::signature<item_t & (uxx)>::check(& base::negx<item_t>);
+            check();
+        }
+
+        template<class object>
+        base(object const * ptr, uxx len, uxx ofs, bool negtive_order): 
+            base(ptr, len, ofs){
+            turn_negtive_order();
+        }
+
+        bool is_positive_order() const {
+            return (uxx(itr) & mask) == 0;
+        }
+
+        bool is_negtive_order() const {
+            return (uxx(itr) & mask) != 0;
+        }
+
+        uxx length() const {
+            return len;
         }
     $
 
@@ -125,10 +126,8 @@ namespace mixc::interface_ranger{
         ranger(base impl) : 
             base(impl){}
 
-        template<class object> 
-        #if not xis_msvc
+        template<class object>
         requires(ranger_format<object, item_t &>)
-        #endif
         ranger(object const & impl) : 
             base(xref impl, impl.length(), 0){
         }
