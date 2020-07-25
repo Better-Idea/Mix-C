@@ -38,10 +38,7 @@ namespace mixc::define_nullref_t{
         }
     $
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wnull-dereference"
-    static inline const nullref_t & nullref = *(nullref_t *)nullptr;
-    #pragma GCC diagnostic pop
+    static inline const nullref_t & nullref = (nullref_t &) *(volatile nullref_t *)nullptr;
 }
 
 #endif
