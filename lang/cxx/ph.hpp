@@ -73,8 +73,8 @@ namespace mixc::lang_cxx_ph{
         };
     public:
         final & c(uxx align_center_width, char left_padding_char, char right_padding_char){
-            the.align_mode              = align_center;
-            the.align_width             = align_center_width;
+            the.align_mode              = u08(align_center);
+            the.align_width             = u32(align_center_width);
             the.left_padding_char       = left_padding_char;
             the.right_padding_char      = right_padding_char;
             return thex;
@@ -85,15 +85,15 @@ namespace mixc::lang_cxx_ph{
         }
 
         final & l(uxx align_left_width, char padding_char = ' '){
-            the.align_mode              = align_left;
-            the.align_width             = align_left_width;
+            the.align_mode              = u08(align_left);
+            the.align_width             = u32(align_left_width);
             the.right_padding_char      = padding_char;
             return thex;
         }
 
         final & r(uxx align_right_width, char padding_char = ' '){
-            the.align_mode              = align_right;
-            the.align_width             = align_right_width;
+            the.align_mode              = u08(align_right);
+            the.align_width             = u32(align_right_width);
             the.left_padding_char       = padding_char;
             return thex;
         }
@@ -209,7 +209,8 @@ namespace mixc::lang_cxx_ph{
         inc::cxx<item_t> output(uxx length){
             inc::cxx<item_t> buf;
             inc::cxx<item_t>(item, [&](uxx this_length){
-                buf = base_t::template output<item_t>(length + this_length);
+                base_t * base = this;
+                buf = base->template output<item_t>(length + this_length);
                 buf = buf.forward(this_length);
                 return (item_t *)buf;
             });
@@ -312,14 +313,11 @@ namespace mixc::lang_cxx_ph{
             if constexpr (inc::is_based_on<place_holder_group, a0>){
                 return (a0 *)nullptr;
             }
-            else if constexpr (inc::has_cast<asciis, a0>){
+            else if constexpr (inc::has_cast<asciis, a0> or not inc::is_ptr<a0>){
                 return (ph::v<a0> *)nullptr;
-            }
-            else if constexpr (inc::is_ptr<a0>){
-                return (ph::zX<a0> *)nullptr;
             }
             else{
-                return (ph::v<a0> *)nullptr;
+                return (ph::zX<a0> *)nullptr;
             }
         }
 
@@ -334,7 +332,8 @@ namespace mixc::lang_cxx_ph{
         inc::cxx<item_t> output(uxx old_length){
             inc::cxx<item_t> ret;
             item.template output<item_t>([&](uxx length) -> item_t * {
-                ret = base_t::template output<item_t>(old_length + length);
+                base_t * base = this;
+                ret = base->template output<item_t>(old_length + length);
                 ret = ret.forward(length);
                 return ret;
             });

@@ -149,7 +149,7 @@ namespace mixc::lang_cxx_strlize{
             f.full              = re > 0 ? rd << re : rd >> -re;
 
             do{
-                ptr[0]          = f.digital + '0';
+                ptr[0]          = item(f.digital + '0');
                 ptr            += 1;
                 i              += 1;
                 f.digital       = 0;
@@ -212,11 +212,11 @@ namespace mixc::lang_cxx_strlize{
                 char tmp[3];
                 ptr[0]          = uxx(mode) & uxx(float_format_t::fmt_1p2E3) ? 'E' : 'e';
                 ptr            += 1;
-                tmp[0]          = exp / 100;
+                tmp[0]          = char(exp / 100);
                 exp            %= 100;
-                tmp[1]          = exp / 10;
+                tmp[1]          = char(exp / 10);
                 exp            %= 10;
-                tmp[2]          = exp;
+                tmp[2]          = char(exp);
 
                 while(tmp[i] == 0){
                     i += 1;
@@ -230,7 +230,7 @@ namespace mixc::lang_cxx_strlize{
                     ptr        += 1;
                 }
                 while(i < 3){
-                    ptr[0] = tmp[i] + '0';
+                    ptr[0]      = tmp[i] + '0';
                     ptr        += 1;
                     i          += 1;
                 }
@@ -269,9 +269,9 @@ namespace mixc::lang_cxx_strlize{
                 u     /= base;
             } while(u != 0);
 
-            auto len = ptr - buf;
-            auto mem = alloc(len + is_neg);
-            auto r   = the_t(mem, len + is_neg);
+            uxx    len = ptr - buf;
+            item * mem = alloc(len + is_neg);
+            the_t  r   = the_t(mem, len + is_neg);
 
             if (is_neg){
                 mem[0] = '-';
@@ -285,7 +285,6 @@ namespace mixc::lang_cxx_strlize{
             for(uxx i = 0; i < len; i++){
                 mem[i] = buf[len - i - 1];
             }
-
             return r;
         }
     };
