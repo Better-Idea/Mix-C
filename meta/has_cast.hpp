@@ -8,30 +8,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_cast{
-    #if xis_msvc
-        template<class target, class source>
-        struct meta{
-        private:
-            static u08 test(target){
-                return true;
-            }
-            static u16 test(...){
-                return false;
-            }
-        public:
-            static constexpr bool result = sizeof(
-                decltype(test(*(source *)nullptr))
-            ) == 1;
-        };
-
-        template<class target, class source>
-        constexpr bool has_cast = meta<target, source>::result;
-    #else
-        template<class target, class source>
-        concept has_cast = requires(target tar, source src){
-            tar = src;
-        };
-    #endif
+    template<class target, class source>
+    concept has_cast = requires(target tar, source src){
+        tar = src;
+    };
 }
 
 #endif
