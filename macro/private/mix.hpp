@@ -13,8 +13,8 @@ namespace mixc::lang_cxx{
 
 namespace mixc::macro_private_mix::origin{
     template<class seq_type>
-    concept is_asciis_seq = requires(seq_type val){
-        (asciis)val;
+    concept is_asciis_seq = requires(seq_type val, asciis tmp){
+        tmp = val;
         val.length();
     };
 
