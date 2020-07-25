@@ -10,10 +10,18 @@
 #pragma pop_macro("xuser")
 
 namespace mixc{
-    xitf(iinterval,
-        xitem(normalize, void, uxx),
-        xitem(left, uxx),
-        xitem(right, uxx)
+    xitf(
+        xname(iinterval),
+        xfunc(normalize, 
+            xret(void), 
+            xarg(length, uxx)
+        ),
+        xfunc(left, 
+            xret(uxx)
+        ),
+        xfunc(right, 
+            xret(uxx)
+        )
     );
 
     // bend close interval
