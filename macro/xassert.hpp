@@ -16,7 +16,7 @@ namespace mixc::macro_xassert{
         u32 error_count     = 0;
         u32 case_count      = 0;
 
-        result(asciis name, uxx error_threshold = 128) : 
+        result(asciis name, u32 error_threshold = 128) : 
             error_threshold(error_threshold){
             inc::tty.write_line("TEST | ", name);
         }
