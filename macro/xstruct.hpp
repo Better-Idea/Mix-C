@@ -1,4 +1,3 @@
-#pragma warning(disable:4819)
 /* 注意：
  * 在使用 xpubget_pubsetx 构建属性范式时，请勿使用 __COUNTER__ 
  * 在使用 xstruct 宏时不要出现多余的逗号，像这样
@@ -15,12 +14,13 @@
 #define xuser mixc::macro_xstruct
 #include"dumb/place_holder.hpp"
 #include"macro/private/xlist.hpp"
+#include"macro/private/word.hpp"
 #include"macro/xdummy.hpp"
 #include"macro/xlink.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/vlist.hpp"
-#include"meta_seq/vmarge.hpp"
+#include"meta_seq/vmerge.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xtypeid{
@@ -42,18 +42,18 @@ namespace mixc::macro_xstruct{
     struct data_field_collector{
     private:
         template<class a0, class ... args, auto ... result>
-        static auto marge(vlist<result...>){
-            typename vmarge<vlist<result...>, a0>::new_list items;
+        static auto merge(vlist<result...>){
+            typename vmerge<vlist<result...>, a0>::new_list items;
 
             if constexpr (sizeof...(args) == 0){
                 return items;
             }
             else{
-                return marge<args...>(items);
+                return merge<args...>(items);
             }
         }
     public:
-        using member_list = decltype(marge<
+        using member_list = decltype(merge<
                 typename self::member_list_partial,
                 typename list::member_list...
             >(vlist<>())
@@ -220,35 +220,6 @@ static inline uxx __class_id = 0x80000000;
 #define __xitem_prif__(name,...)            #name,
 #define __xitem_asso__(...)                 "",
 
-// 普通类
-#define xname(...)                          name__(__VA_ARGS__)
-
-// 模板类
-#define xtmpl(...)                          tmpl__(__VA_ARGS__)
-
-// 特化模板类
-#define xspec(...)                          spec__(__VA_ARGS__)
-
-// 公有的基类 (public base)
-#define xpubb(...)                          pubb__(__VA_ARGS__)
-
-// 受保护的基类 (protected base)
-#define xprob(...)                          prob__(__VA_ARGS__)
-
-// 私有基类 (private base)
-#define xprib(...)                          prib__(__VA_ARGS__)
-
-// 公有字段 (public field)
-#define xpubf(...)                          pubf__(__VA_ARGS__)
-
-// 受保护的字段 (protected field)
-#define xprof(...)                          prof__(__VA_ARGS__)
-
-// 私有的字段 (private field)
-#define xprif(...)                          prif__(__VA_ARGS__)
-
-// 与该结构关联的类型 (association)
-#define xasso(...)                          asso__(__VA_ARGS__)
 
 #define xstruct(...)                                                            \
 struct __xlist__(__xstruct_, __VA_ARGS__)                                       \
