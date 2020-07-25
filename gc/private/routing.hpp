@@ -18,7 +18,7 @@
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tkv.hpp"
 #include"meta_seq/tin.hpp"
-#include"meta_seq/tmarge.hpp"
+#include"meta_seq/tmerge.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_routing{
@@ -90,9 +90,9 @@ namespace mixc::gc_private_routing{
             else{
                 using member_list = typename new_root_without_membership::member_list::type_list;
                 using current_kvlst = typename attach<new_root_without_membership, member_list>::new_list;
-                using new_active_list = typename tmarge<current_active_list, member_list>::new_list;
+                using new_active_list = typename tmerge<current_active_list, member_list>::new_list;
                 using new_visited_list = typename tappend<visited_list, new_root_without_membership>::new_list;
-                using new_result_kvlist = typename tmarge<result_kvlist, current_kvlst>::new_list;
+                using new_result_kvlist = typename tmerge<result_kvlist, current_kvlst>::new_list;
                 return invoke(new_active_list(), new_result_kvlist(), new_visited_list());
             }
         }

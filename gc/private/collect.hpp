@@ -20,7 +20,7 @@ search_list 期初是一个只有根类型 root 的集合。
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tkv.hpp"
 #include"meta_seq/tlist.hpp"
-#include"meta_seq/tmarge.hpp"
+#include"meta_seq/tmerge.hpp"
 #include"meta_seq/tpop_by.hpp"
 #include"meta_seq/tselector_key.hpp"
 #include"meta_seq/tselector_val.hpp"
@@ -43,7 +43,7 @@ namespace mixc::gc_private_collect{
             else{
                 using rest_kvlist       = typename pair::new_list;
                 using parents_list      = typename tfilter<item_kvlist, tselector_val>::new_list;
-                using new_children_list = typename tmarge<tlist<args...>, parents_list>::new_list;
+                using new_children_list = typename tmerge<tlist<args...>, parents_list>::new_list;
                 using new_result        = typename tdistinct_append<result_list, first>::new_list;
                 return invoke(
                     rest_kvlist(),

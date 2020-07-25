@@ -1,18 +1,18 @@
-#ifndef xpack_meta_seq_tdistinct_marge
-#define xpack_meta_seq_tdistinct_marge
+#ifndef xpack_meta_seq_tdistinct_merge
+#define xpack_meta_seq_tdistinct_merge
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tdistinct_marge
+#define xuser mixc::meta_seq_tdistinct_merge
 #include"define/base_type.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::meta_seq_tdistinct_marge{
+namespace mixc::meta_seq_tdistinct_merge{
     using namespace inc;
 
     template<class list_a, class list_b>
-    struct tdistinct_marge{
+    struct tdistinct_merge{
     private:
         template<class first, class ... args, class ... result_args>
         static auto invoke(tlist<first, args...>, tlist<result_args...>){
@@ -44,5 +44,5 @@ namespace mixc::meta_seq_tdistinct_marge{
 #endif
 
 namespace xuser::inc{
-    using ::mixc::meta_seq_tdistinct_marge::tdistinct_marge;
+    using ::mixc::meta_seq_tdistinct_merge::tdistinct_merge;
 }

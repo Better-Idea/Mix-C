@@ -6,7 +6,7 @@
 #include"define/base_type.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
-#include"meta_seq/tmarge.hpp"
+#include"meta_seq/tmerge.hpp"
 #include"meta_ctr/cif.hpp"
 #pragma pop_macro("xuser")
 
@@ -27,7 +27,7 @@ namespace mixc::meta_seq_tsub{
             typename tsub<tlist<args...>, minus>::new_list;
     public:
         using new_list = 
-            typename tmarge<item, next>::new_list;
+            typename tmerge<item, next>::new_list;
     };
 
     template<class minus>
