@@ -94,7 +94,7 @@ namespace mixc::chrono_date::origin{
             if (month() > 1){
                 auto m       = month() - 1;
                 auto max_day = days_of_month(is_leap(), m);
-                return date(year(), m, max_day);
+                return date(year(), m, u32(max_day));
             }
             else{
                 return date(year() - 1, 12, 31);
