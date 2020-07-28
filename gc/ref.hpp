@@ -243,7 +243,7 @@ namespace mixc::gc_ref{
         }
 
     protected:
-        operator item_t * () {
+        operator item_t * () const {
             return mem[0].item_ptr(0);
         }
 
