@@ -45,29 +45,16 @@ namespace mixc::lang_cxx{
             cxx_t(holder.ptr(), holder.length()){
         }
 
-        item_t & operator [](uxx index){
-            return the.ptr[index];
-        }
-
-        item_t const & operator [](uxx index) const {
+        item_t & operator [](uxx index) const {
             return the.ptr[index];
         }
 
         template<class number_t>
-        item_t & operator [](number_t const & index){
+        item_t & operator [](number_t const & index) const {
             return the.ptr[(uxx)(number_t &)index];
         }
 
-        template<class number_t>
-        item_t const & operator [](number_t const & index) const {
-            return the.ptr[(uxx)(number_t &)index];
-        }
-
-        operator item_t *(){
-            return the.ptr;
-        }
-
-        operator const item_t *() const {
+        operator item_t *() const {
             return the.ptr;
         }
 
