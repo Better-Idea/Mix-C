@@ -39,7 +39,7 @@ namespace mixc::define_mfxx{
         }
 
         ixx real_dec() const {
-            return u64(1) << decimal_bits | the.decimal;
+            return ixx(u64(1) << decimal_bits | the.decimal);
         }
 
         mfxx() : value(0) { }
