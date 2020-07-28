@@ -60,12 +60,17 @@ namespace mixc::docker_darray{
             return the;
         }
 
-        item_t & operator[](uxx index){
-            return base_t::ptr()[index];
+        operator item_t *() const {
+            return base_t::operator item_t * ();
         }
 
-        item_t const & operator[](uxx index) const {
-            return base_t::ptr()[index];
+        item_t & operator[](uxx index) const {
+            return base_t::operator item_t * ()[index];
+        }
+
+        template<class number_t>
+        item_t & operator[](number_t const & index) const {
+            return the[(uxx)(number_t &)index];
         }
 
         xis_nullptr(
