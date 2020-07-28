@@ -227,10 +227,10 @@ namespace mixc::lang_cxx_parse{
             if constexpr (inc::is_float<target>){
                 return the.template parse<target>(10);
             }
-            else if constexpr (xis_os64 or sizeof(target) <= sizeof(uxx)){
+            if constexpr (sizeof(target) <= sizeof(uxx)){
                 return the.template parse<uxx>(uxx(raidx));
             }
-            else if constexpr (xis_os32){
+            else{
                 return the.template parse<inc::unsigned_type<target>>(uxx(raidx));
             }
         }
