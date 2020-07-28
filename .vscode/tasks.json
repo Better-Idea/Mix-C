@@ -9,11 +9,15 @@
                 "-I${workspaceFolder}",
                 "-std=c++2a",
                 "-fconcepts",
+                "-mavx",
+                "-mavx2",
+                "-fopenmp",
+                "-Wno-empty-body",
                 "-g",
                 "${workspaceFolder}/extern.api_g++.o",
                 "${file}",
                 "-o",
-                "${workspaceFolder}/../${fileBasenameNoExtension}"
+                "${workspaceFolder}/../main.exe"
             ],
             "problemMatcher": [
                 "$gcc"
@@ -48,11 +52,12 @@
                 "-std=c++2a",
                 "-mavx",
                 "-mavx2",
+                "-Wno-empty-body",
                 "-g",
                 "${workspaceFolder}/extern.api_clang++.o",
                 "${file}",
                 "-o",
-                "${workspaceFolder}/../${fileBasenameNoExtension}"
+                "${workspaceFolder}/../main.exe"
             ],
             "problemMatcher": [
                 "$gcc"
@@ -68,6 +73,7 @@
                 "-std=c++2a",
                 "-mavx",
                 "-mavx2",
+                "-Wno-empty-body",
                 "-O2",
                 "${workspaceFolder}/extern.api_clang++.cpp",
                 "-c"
