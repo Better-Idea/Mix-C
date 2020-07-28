@@ -23,7 +23,7 @@ namespace mixc::lang_cxx{
 
         cxx_t() : cxx_t(& empty, 0) {}
         cxx_t(cxx_t const &)        = default;
-        cxx_t(decltype(nullptr))  = delete;
+        cxx_t(decltype(nullptr))    = delete;
 
         constexpr cxx_t(const item_t * str) : 
             ptr((item_t *)str), plength(0) {
@@ -51,6 +51,16 @@ namespace mixc::lang_cxx{
 
         item_t const & operator [](uxx index) const {
             return the.ptr[index];
+        }
+
+        template<class number_t>
+        item_t & operator [](number_t const & index){
+            return the.ptr[(uxx)(number_t &)index];
+        }
+
+        template<class number_t>
+        item_t const & operator [](number_t const & index) const {
+            return the.ptr[(uxx)(number_t &)index];
         }
 
         operator item_t *(){
