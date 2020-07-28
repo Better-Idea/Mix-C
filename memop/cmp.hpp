@@ -16,7 +16,8 @@ namespace mixc::memop_cmp{
         if constexpr(inc::is_class<a> or inc::is_enum<a> or inc::is_union<a>){
             auto l = inc::seqlize(left);
             auto r = inc::seqlize(right);
-            for (auto i = 0; i < l.length(); i++){
+
+            for (uxx i = 0; i < l.length(); i++){
                 if (ixx s = cmp(l[i], r[i]); s != 0){
                     return s;
                 }
