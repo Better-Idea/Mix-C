@@ -7,27 +7,32 @@
 #define xuse_xdebug_short_path      1
 
 // select memory allocator
-#define xuse_libc_malloc            0
+#define xuse_libc_malloc            1
 
-// select os-bits
-#define xis_os64                    1
-#define xis_os32                    0
+// auto select os-bits
+#if __i386 || __i386__ || __i686  || __i686__
+    #define xis_os32                1
+#elif __x86_64 || __x86_64__ || _M_X64
+    #define xis_os64                1
+#else
+    #define xis_os32                1
+#endif
 
 // auto select os
-#if     _WIN32 || _WIN64 || __WIN32__ || __WIN64__
+#if _WIN32 || _WIN64 || __WIN32__ || __WIN64__
     #define xis_windows             1
-#elif   __linux__
+#elif   __linux__ || __linux
     #define xis_linux               1
 #endif
 
 // auto select architecture
-#if     __x86_64__ || _M_IX86 || _M_X64
+#if __i386 || _X86_ || __x86_64 || __x86_64__ || _M_IX86 || _M_X64
     #define xis_x86                 1
 #elif   __arm__
     #define xis_arm                 1
 #endif
 
-#if     _MSVC_LANG
+#if _MSVC_LANG
     #define xis_msvc                1
 #endif
 
