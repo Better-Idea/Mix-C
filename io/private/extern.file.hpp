@@ -77,13 +77,13 @@ namespace mixc::io_file::origin{
     uxx file::read(voidp buffer, uxx bytes) const {
         u64 size = 0;
         ReadFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
-        return size;
+        return uxx(size);
     }
 
     uxx file::write(void const * buffer, uxx bytes) const {
         u64 size = 0;
         WriteFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
-        return size;
+        return uxx(size);
     }
 
     void file::remove() const{
