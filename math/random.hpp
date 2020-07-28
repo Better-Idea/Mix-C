@@ -11,7 +11,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_random{
-    namespace{
+    namespace inner{
         inline static u64 x = inc::time_stamp();
         inline static u64 y = inc::time_stamp() * magic_number;
 
