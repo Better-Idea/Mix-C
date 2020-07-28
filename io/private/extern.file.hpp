@@ -35,10 +35,10 @@ namespace mixc::io_file::origin{
 
         the.close();
         the.path = path;
-        the.fd   = (ixx)CreateFileA(path, type, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, CREATE_NEW, NULL, NULL);
+        the.fd   = (ixx)CreateFileA(path, type, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, CREATE_NEW, 0, NULL);
 
         if (the.fd == -1){
-            the.fd = (ixx)CreateFileA(path, type, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, NULL, NULL);
+            the.fd = (ixx)CreateFileA(path, type, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
         }
         if (result != nullptr){
             result[0] = the.fd == -1 ? bstate_t::fail : bstate_t::success;
@@ -130,7 +130,7 @@ namespace mixc::io_file::origin{
         the.fd   = ::open(path, type);
 
         if (result != nullptr){
-            result[0] = the.fd == -1 ? fail : success;
+            result[0] = the.fd == -1 ? bstate_t::fail : bstate_t::success;
         }
         return thex;
     }

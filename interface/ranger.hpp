@@ -23,7 +23,7 @@ namespace mixc::interface_ranger{
         enum{ mask = sizeof(uxx) * 2 - 1 };
         
         void check() {
-            constexpr uxx mask = the.mask << 1 | 1;
+            constexpr uxx mask = base::mask << 1 | 1;
             xdebug_fail((uxx(base::itr) & mask) != 0);
         }
 

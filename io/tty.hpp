@@ -58,25 +58,21 @@ namespace mixc::io_tty::origin{
         template<class a0, class ... args>
         final & write(a0 const & first, args const & ... list) const {
             using namespace inc::ph;
-            char   buf_stack[128];
-            char * buf_heap   = nullptr;
-            auto   buf_length = 0;
-            auto   content    = phg { first, list... } >> [&](uxx length) {
-                auto ptr = buf_stack;
+            char      buf_stack[128];
+            char *    buf_heap   = nullptr;
+            inc::c08  content    = phg { first, list... } >> [&](uxx length) {
+                auto ptr         = buf_stack;
 
-                if (length >= sizeof(buf_stack) / sizeof(buf_stack[0])){
+                if (length > sizeof(buf_stack) / sizeof(buf_stack[0])){
                     ptr = buf_heap = inc::alloc<char>(
-                        inc::memory_size(length + 1) // 1 for '\0'
+                        inc::memory_size(length)
                     );
                 }
-
-                buf_length  = length;
-                ptr[length] = '\0';
                 return ptr;
             };
 
             if (inc::print_core(asciis(content), content.length()); buf_heap != nullptr){
-                inc::free(buf_heap, inc::memory_size(buf_length + 1));
+                inc::free(buf_heap, inc::memory_size(content.length()));
             }
             return thex;
         }

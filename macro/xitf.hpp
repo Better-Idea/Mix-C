@@ -60,6 +60,7 @@ int main(){
 #include"macro/private/word.hpp"
 #include"memop/addressof.hpp"
 #include"memop/signature.hpp"
+#include"memory/new.hpp"
 #include"meta/has_cast.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tappend.hpp"

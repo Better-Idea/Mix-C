@@ -121,24 +121,25 @@ namespace mixc::io_private_tty_key::origin{
         xpubget_pubsetx(value, char16_t)
             xr { return the.w16; }
             xw { 
-                if (the.w16 = value; value >= 0x800){
-                    w08[0] = 0xe0 | ((value >> 12));
-                    w08[1] = 0x80 | ((value >> 6) & 0x3f);
-                    w08[2] = 0x80 | ((value & 0x3f));
-                    w08[3] = '\0';
-                    mlen = 3;
-                }
-                else if (value >= 0x80){
-                    w08[0] = 0xc0 | ((value >> 6));
-                    w08[1] = 0x80 | ((value & 0x3f));
-                    w08[2] = '\0';
-                    mlen = 2;
-                }
-                else{
-                    w08[0] = value;
-                    w08[1] = '\0';
-                    mlen = 1;
-                }
+                //if (the.w16 = value; value >= 0x800){
+                //    w08[0] = 0xe0 | ((value >> 12));
+                //    w08[1] = 0x80 | ((value >> 6) & 0x3f);
+                //    w08[2] = 0x80 | ((value & 0x3f));
+                //    w08[3] = '\0';
+                //    mlen = 3;
+                //}
+                //else if (value >= 0x80){
+                //    w08[0] = 0xc0 | ((value >> 6));
+                //    w08[1] = 0x80 | ((value & 0x3f));
+                //    w08[2] = '\0';
+                //    mlen = 2;
+                //}
+                //else{
+                //    w08[0] = value;
+                //    w08[1] = '\0';
+                //    mlen = 1;
+                //}
+                // TODO:========================================================
             }
 
         xpubgetx(multi_bytes_char_capacity, uxx){
