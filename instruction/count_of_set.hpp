@@ -10,17 +10,18 @@
 namespace mixc::instruction_count_of_set{
     template<class type>
     inline uxx count_of_set(type v){
-        if constexpr (xis_x86){
-            if constexpr (xis_os64){
+        #if xis_x86
+            #if xis_os64
                 return __builtin_popcountll(v);
-            }
-            else if constexpr (sizeof(v) == 8){
-                return __builtin_popcount(v & u32(-1)) + __builtin_popcount(u64(v) >> 32);
-            }
-            else {
-                return __builtin_popcount(v);
-            }
-        }
+            #else
+                if constexpr (sizeof(v) == 8){
+                    return __builtin_popcount(v & u32(-1)) + __builtin_popcount(u64(v) >> 32);
+                }
+                else {
+                    return __builtin_popcount(v);
+                }
+            #endif
+        #endif
     }
 }
 
