@@ -1,4 +1,3 @@
-#pragma warning(disable:4819)
 // 注意：
 // darray 默认是空数组，此时 attribute 域是不允许访问的
 // darray::length() == 0

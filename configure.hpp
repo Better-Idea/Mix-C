@@ -14,14 +14,14 @@
 #define xis_os32                    0
 
 // auto select os
-#if     __WIN32__ or __WIN64__
+#if     _WIN32 || _WIN64 || __WIN32__ || __WIN64__
     #define xis_windows             1
 #elif   __linux__
     #define xis_linux               1
 #endif
 
 // auto select architecture
-#if     __x86_64__
+#if     __x86_64__ || _M_IX86 || _M_X64
     #define xis_x86                 1
 #elif   __arm__
     #define xis_arm                 1

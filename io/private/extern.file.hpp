@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_private_file
+#include"configure.hpp"
 #include"define/base_type.hpp"
 #include"io/file.hpp"
 #include"lock/atom_swap.hpp"
