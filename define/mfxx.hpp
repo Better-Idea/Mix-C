@@ -38,8 +38,8 @@ namespace mixc::define_mfxx{
             return ixx(the.exp) - exp_offset;
         }
 
-        ixx real_dec() const {
-            return ixx(u64(1) << decimal_bits | the.decimal);
+        i64 real_dec() const {
+            return i64(u64(1) << decimal_bits | the.decimal);
         }
 
         mfxx() : value(0) { }
