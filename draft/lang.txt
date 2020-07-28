@@ -1,0 +1,36 @@
+using space.*
+using space.module
+using space.module0, module1, module2
+
++ struct struct_name{
+    + type      public_field;
+    # type      protected_field;
+    - type      private_field;
+
+    - u08.u07   bit_field0;
+    - u08.u01   bit_field1;
+
+    @ static
+    + s08       name;
+};
+
++ return_type struct_name.public_function(){
+    if  struct_name.name == "cat" {
+        return xxx;
+    }
+    elif xxxx {
+        return xxx;
+    }
+    else {
+        return xxx;
+    }
+}
+
++ u08 sturct_name.bit_field0{
+    + get;
+    - set{
+        field.bit_field0 = value;
+    }
+}
+
+
