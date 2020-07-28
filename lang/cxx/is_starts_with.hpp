@@ -32,7 +32,7 @@ namespace mixc::lang_cxx_is_starts_with{
             }
             return the_t(the)
                 .length(value.length())
-                .compare_fastly(value) == 0;
+                .compare_fastly(value, compare) == 0;
         }
     };
 
