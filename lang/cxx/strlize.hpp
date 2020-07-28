@@ -143,9 +143,10 @@ namespace mixc::lang_cxx_strlize{
                 u64 full;
             }f;
 
+            // 这里用 auto 就好了，m 可能是 f32 或 f64，所以返回值类型不是固定的
             auto rd             = m.real_dec();
             auto re             = m.real_exp();
-            auto i              = 0;
+            uxx  i              = 0;
             f.full              = re > 0 ? rd << re : rd >> -re;
 
             do{
@@ -182,7 +183,7 @@ namespace mixc::lang_cxx_strlize{
                     return the_t(tmp, length);
                 }
 
-                auto has_dot    = exp + 1 < i;
+                auto has_dot    = exp + 1 < ixx(i);
                 auto plus       = has_dot ? uxx(0) : uxx(exp + 1 - i);
                 auto digi_len   = has_dot ? exp + 1 : i;
                 auto length     = (ptr - buf) + plus + uxx(has_dot);
