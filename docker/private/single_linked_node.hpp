@@ -66,6 +66,10 @@ namespace mixc::docker_single_linked_node{
             using nodep  = origin::single_linked_node<item_t> *;
             using base_t = meta<item_t, barrier_t>;
 
+            node_field(){
+                base_t::ptop = nullptr;
+            }
+
             static nodep origin(nodep node){
                 return nodep(uxx(node) & base_t::mask); 
             }

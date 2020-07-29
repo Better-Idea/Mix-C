@@ -5,8 +5,8 @@
 #include"macro/xfinal.hpp"
 
 namespace xuser::inc {
-    template<class item_t>
-    xfinal_tmpl(xusing_docker_queue, queue, item_t);
+    template<class item_t, class barrier_t = void>
+    xfinal_tmpl(xusing_docker_queue, queue, item_t, barrier_t);
 }
 
 #undef  xusing_docker_queue
