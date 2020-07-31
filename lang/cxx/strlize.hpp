@@ -76,10 +76,6 @@ namespace mixc::lang_cxx_strlize{
 
             uxx precious        = origin_number_of_significa;
 
-            if (origin_number_of_significa > 16){
-                precious        = 16;
-            }
-
             xgen(inc::nan, "nan")
             xgen(inc::inf_pos, "+inf")
             xgen(inc::inf_neg, "-inf")
@@ -91,6 +87,9 @@ namespace mixc::lang_cxx_strlize{
             auto m              = inc::mf64(value);
             auto is_neg         = false;
 
+            if (origin_number_of_significa > m.precious()){
+                precious        = m.precious();
+            }
             if (value < 0){
                 value           = -value;
                 ptr[0]          = '-';
@@ -327,21 +326,27 @@ namespace mixc::lang_cxx_strlize{
         xgen(i64);
         #undef  xgen
 
-        meta(f64 value, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, not_exist, alloc);
+        #define xgen(type)                                                                                      \
+        meta(type value, inc::can_alloc<item> alloc){                                                           \
+            thex = the.template strlize<type>(value, float_format_t::fmt_1p2e3, not_exist, alloc);              \
+        }                                                                                                       \
+                                                                                                                \
+        meta(type value, float_format_t mode, inc::can_alloc<item> alloc){                                      \
+            thex = the.template strlize<type>(value, mode, not_exist, alloc);                                   \
+        }                                                                                                       \
+                                                                                                                \
+        meta(type value, uxx number_of_significa, inc::can_alloc<item> alloc){                                  \
+            thex = the.template strlize<type>(value, float_format_t::fmt_1p2e3, number_of_significa, alloc);    \
+        }                                                                                                       \
+                                                                                                                \
+        meta(type value, float_format_t mode, uxx number_of_significa, inc::can_alloc<item> alloc){             \
+            thex = the.template strlize<type>(value, mode, number_of_significa, alloc);                         \
         }
 
-        meta(f64 value, float_format_t mode, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, mode, not_exist, alloc);
-        }
-
-        meta(f64 value, uxx number_of_significa, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, float_format_t::fmt_1p2e3, number_of_significa, alloc);
-        }
-
-        meta(f64 value, float_format_t mode, uxx number_of_significa, inc::can_alloc<item> alloc){
-            thex = the.template strlize<f64>(value, mode, number_of_significa, alloc);
-        }
+        xgen(f32)
+        xgen(f64)
+        xgen(f80)
+        #undef  xgen
 
         meta(final value, inc::can_alloc<item> alloc){
             thex = the_t(value).clone(alloc);
