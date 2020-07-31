@@ -10,37 +10,27 @@ namespace mixc::define_nan{
     struct nan_t{
         constexpr nan_t(){}
 
-        friend inline auto operator == (f32 value, nan_t) {
-            return !(value == value);
+        #define xgen(type)                                      \
+        friend inline auto operator == (type value, nan_t) {    \
+            return !(value == value);                           \
+        }                                                       \
+                                                                \
+        friend inline auto operator == (nan_t, type value) {    \
+            return !(value == value);                           \
+        }                                                       \
+                                                                \
+        friend inline auto operator != (type value, nan_t) {    \
+            return (value == value);                            \
+        }                                                       \
+                                                                \
+        friend inline auto operator != (nan_t, type value) {    \
+            return (value == value);                            \
         }
 
-        friend inline auto operator == (nan_t, f32 value) {
-            return !(value == value);
-        }
-
-        friend inline auto operator == (f64 value, nan_t) {
-            return !(value == value);
-        }
-
-        friend inline auto operator == (nan_t, f64 value) {
-            return !(value == value);
-        }
-
-        friend inline auto operator != (f32 value, nan_t) {
-            return (value == value);
-        }
-
-        friend inline auto operator != (nan_t, f32 value) {
-            return (value == value);
-        }
-
-        friend inline auto operator != (f64 value, nan_t) {
-            return (value == value);
-        }
-
-        friend inline auto operator != (nan_t, f64 value) {
-            return (value == value);
-        }
+        xgen(f32)
+        xgen(f64)
+        xgen(f80)
+        #undef  xgen
 
         operator f32 () const{
             auto v = u32(-1) >> 1;
