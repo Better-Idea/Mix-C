@@ -14,19 +14,15 @@ namespace mixc::docker_array{
     template<class type, uxx count = 0, uxx ... rest>
     xstruct(
         xtmpl(array_t, type, count, rest...),
-        xprif(data, items_t<type, count>)
+        xprif(data, mutable items_t<typename array_t<type, rest...>::the_t, count>)
     )
         using item_t = typename array_t<type, rest...>::the_t;
     public:
         template<class ... args>
         array_t(args const & ... list) : 
-            data { item_t(list)... } {}
-        
-        item_t & operator[] (uxx index) {
-            return data[index];
-        }
+            data { (item_t)(list)... } {}
 
-        const item_t & operator[] (uxx index) const {
+        item_t & operator[] (uxx index) const {
             return data[index];
         }
 
@@ -34,11 +30,7 @@ namespace mixc::docker_array{
             return count;
         }
 
-        operator item_t *(){
-            return data;
-        }
-
-        operator const item_t *() const {
+        operator item_t *() const {
             return data;
         }
     };
