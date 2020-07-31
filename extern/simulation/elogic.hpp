@@ -233,16 +233,15 @@ namespace mixc::elogic::origin{
         template_dat<__opt_cnt> dat;                        \
     }; inline void name::broadcast(uxx index_signal)
 
-
     /* 常用的逻辑门预定义
-     * - enand 与非门
+     * - enand  与非门
+     * - eand   与门
+     * - enor   或非门
+     * - eor    或门
+     * - enot   非门
      */
 
-    xgate(enand, 
-        xipt(a), 
-        xipt(b),
-        xopt(o)){
-        
+    xgate(enand, xipt(a), xipt(b), xopt(o)){
         if (a == L or b == L){
             o = H;
         }
@@ -256,6 +255,74 @@ namespace mixc::elogic::origin{
             o = X;
         }
     }
+
+    xgate(eand, xipt(a), xipt(b), xopt(o)){
+        if (a == L or b == L){
+            o = L;
+        }
+        else if (a == H and b == H){
+            o = H;
+        }
+        else if (a == Z and b == Z){
+            o = Z;
+        }
+        else{
+            o = X;
+        }
+    }
+
+    xgate(enor, xipt(a), xipt(b), xopt(o)){
+        if (a == L and b == L){
+            o = H;
+        }
+        else if (a == H or b == H){
+            o = L;
+        }
+        else if (a == Z and b == Z){
+            o = Z;
+        }
+        else{
+            o = X;
+        }
+    }
+
+    xgate(eor, xipt(a), xipt(b), xopt(o)){
+        if (a == L and b == L){
+            o = L;
+        }
+        else if (a == H or b == H){
+            o = H;
+        }
+        else if (a == Z and b == Z){
+            o = Z;
+        }
+        else{
+            o = X;
+        }
+    }
+
+    xgate(enot, xipt(a), xopt(o)){
+        if (a == L){
+            o = H;
+        }
+        else if (a == H){
+            o = L;
+        }
+        else{
+            o = a;
+        }
+    }
+
+    /*
+    nand n0, n1;
+    n0.a = n1.o;
+    n1.a = n0.o;
+
+    n1.o    -> output_type
+    map opt -> {ipt...}
+    */
+
+
 }
 
 #endif
