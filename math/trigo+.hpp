@@ -1,3 +1,5 @@
 #include"math/cos.hpp"
+#include"math/csc.hpp"
+#include"math/sec.hpp"
 #include"math/sin.hpp"
 #include"math/tan.hpp"
