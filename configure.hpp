@@ -1,13 +1,34 @@
 #pragma once
 #define xmixc                       "Mix-C"
 
-// debug options
+/* mixc::xdebug ====================================================
+ * 
+ * =================================================================*/
 #define xuse_xdebug                 0
 #define xuse_xdebug_fail            0
 #define xuse_xdebug_short_path      1
 
+/* mixc::math =======================================================
+ * 
+ * =================================================================*/
+#define xuse_math_tan_lut8x16       0
+#define xuse_math_tan_lut4x256      1
+
+#if xuse_math_tan_lut8x16 + xuse_math_tan_lut4x256 != 1
+    #error "you can just select one lookup table policy for math::tan"
+#endif
+
+
+/* mixc::memory =====================================================
+ * 
+ * =================================================================*/
+
 // select memory allocator
 #define xuse_libc_malloc            1
+
+/* mixc::auto =======================================================
+ * 
+ * =================================================================*/
 
 // auto select os-bits
 #if __i386 || __i386__ || __i686  || __i686__
