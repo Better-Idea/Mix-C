@@ -55,9 +55,8 @@ namespace mixc::math_tan{
 
 
     extern f64 tan(f64 x){
+        // 作者吐槽：_mmxxx_i32gather_xxx 让作者很失望，好看不好用，性能还不及分次单独访问内存
         using namespace inc;
-
-
 
         mf64 m    = x;
         auto deci = 
