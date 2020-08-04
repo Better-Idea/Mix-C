@@ -10,9 +10,11 @@ namespace mixc::math_const::origin{
     inline constexpr f64 pi        = 3.141592653589793238463;
     inline constexpr f64 e         = 2.718281828459045235360;
     inline constexpr f64 sqrt_2    = 1.414213562373095048802;
+    inline constexpr f64 sqrtr_2   = 1.0 / sqrt_2;
     inline constexpr f64 log2_e    = 1.442695040888963407360;
-    inline constexpr f64 log10_2   = 0.301029995663981195226;
     inline constexpr f64 log2_10   = 3.321928094887362347810;
+    inline constexpr f64 ln_2      = 0.693147180559945309417;
+    inline constexpr f64 log10_2   = 0.301029995663981195226;
 
     template<class a> inline constexpr a max_value_of = a();
     template<class a> inline constexpr a min_value_of = a();
