@@ -14,6 +14,9 @@ namespace mixc::math_const::origin{
     inline constexpr f64 log2_e    = 1.442695040888963407360;
     inline constexpr f64 log2_10   = 3.321928094887362347810;
     inline constexpr f64 ln_2      = 0.693147180559945309417;
+    inline constexpr f64 ln_10     = 2.302585092994045684018;
+    inline constexpr f64 lnr_2     = 1.0 / ln_2;
+    inline constexpr f64 lnr_10    = 1.0 / ln_10;
     inline constexpr f64 log10_2   = 0.301029995663981195226;
 
     template<class a> inline constexpr a max_value_of = a();
