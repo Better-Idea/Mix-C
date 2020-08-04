@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 #define xhint(...) {                                    \
-    using namespace ::mixc::macro_private_log::origin;  \
-    log(for_hint, __FILE__, __LINE__,                   \
+    using namespace ::mixc::macro_private_log;          \
+    origin::log(origin::for_hint, __FILE__, __LINE__,   \
         __func__, #__VA_ARGS__ ",", __VA_ARGS__);       \
 }
 #endif
