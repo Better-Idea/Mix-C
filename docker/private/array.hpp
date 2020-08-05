@@ -26,6 +26,11 @@ namespace mixc::docker_array{
             return data[index];
         }
 
+        template<class number_t>
+        item_t & operator[] (number_t const & index) const {
+            return data[(uxx)(number_t &)index];
+        }
+
         constexpr uxx length() const {
             return count;
         }
