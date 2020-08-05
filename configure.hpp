@@ -18,6 +18,13 @@
     #error "you can just select one lookup table policy for math::tan"
 #endif
 
+#define xuse_math_ln_lut8x16        0
+#define xuse_math_ln_lut4x256       1
+
+#if xuse_math_tan_ln8x16 + xuse_math_ln_lut4x256 != 1
+    #error "you can just select one lookup table policy for math::ln"
+#endif
+
 
 /* mixc::memory =====================================================
  * 
