@@ -6,48 +6,7 @@
 #include"configure.hpp"
 #include"define/mfxx.hpp"
 #include"macro/xalign.hpp"
-#include"math/cos.hpp"
-#include"math/sin.hpp"
 #include"math/tan.hpp"
-#include"memop/cast.hpp"
-
-namespace mixc::math_cos{
-    using namespace ::mixc::math_private;
-
-    extern f64 cos(f64 x){
-        f64 t  = inc::tan(0.5 * x);
-        f64 tt = t * t;
-        return (1.0 - tt) / (1 + tt);
-    }
-}
-
-namespace mixc::math_csc{
-    using namespace ::mixc::math_private;
-
-    extern f64 csc(f64 x){
-        f64 t = inc::tan(0.5 * x);
-        return (1.0 + t * t) / (2.0 * t);
-    }
-}
-
-namespace mixc::math_sec{
-    using namespace ::mixc::math_private;
-
-    extern f64 sec(f64 x){
-        f64 t  = inc::tan(0.5 * x);
-        f64 tt = t * t;
-        return (1 + tt) / (1.0 - tt);
-    }
-}
-
-namespace mixc::math_sin{
-    using namespace ::mixc::math_private;
-
-    extern f64 sin(f64 x){
-        f64 t = inc::tan(0.5 * x);
-        return 2.0 * t / (1.0 + t * t);
-    }
-}
 
 namespace mixc::math_tan{
     using namespace ::mixc::math_private;
@@ -75,7 +34,7 @@ namespace mixc::math_tan{
     };
     #endif
 
-    extern f64 tan(f64 x){
+    extern f64 tan_unsafe(f64 x){
         // 作者吐槽：_mmxxx_i32gather_xxx 让作者很失望，好看不好用，性能还不及分次单独访问内存
         using namespace inc;
 

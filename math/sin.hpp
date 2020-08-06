@@ -4,14 +4,18 @@
 #undef  xuser
 #define xuser mixc::math_sin
 #include"define/base_type.hpp"
+#include"math/tan.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_sin{
-    extern f64 sin(f64 x);
+namespace mixc::math_sin::origin{
+    inline f64 sin_unsafe(f64 x){
+        f64 t = inc::tan_unsafe(0.5 * x);
+        return 2.0 * t / (1.0 + t * t);
+    }
 }
 
 #endif
 
 namespace xuser::inc{
-    using ::mixc::math_sin::sin;
+    using namespace ::mixc::math_sin::origin;
 }
