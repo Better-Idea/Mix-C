@@ -55,10 +55,7 @@ namespace mixc::math_ln{
 
         // 由 ln'(x) = 1/x 可知 ln(1 + x) = x when x -> 1/inf 
         // 但实际上 ln(1+x) 是略小于 x 的，下方进行简单的矫正
-        auto adjust = mf64(1.12/*经验值*/).real_exp(-52 - 26); 
-        auto linear = mf64(1.0).real_exp(-52) - adjust;
-        auto rem    = linear * m.decimal;
-        auto r      = sum + rem;
+        auto r      = sum + m - 1;
         return r;
     }
 }
