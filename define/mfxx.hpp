@@ -37,18 +37,26 @@ namespace mixc::define_mfxx{
             return the;
         }
 
+        ixx real_exp_unsafe() const {
+            return ixx(the.exp) - exp_offset;
+        }
+
         ixx real_exp() const {
             if (the == 0){
                 return 0;
             }
-            return ixx(the.exp) - exp_offset;
+            return real_exp_unsafe();
+        }
+
+        u64 real_dec_unsafe() const {
+            return u64(u64(1) << decimal_bits | the.decimal);
         }
 
         u64 real_dec() const {
             if (the == 0){
                 return 0;
             }
-            return u64(u64(1) << decimal_bits | the.decimal);
+            return real_dec_unsafe();
         }
 
         mfxx() : value(0) { }
