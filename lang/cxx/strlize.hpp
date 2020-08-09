@@ -82,20 +82,19 @@ namespace mixc::lang_cxx_strlize{
             xgen(0, "0")
             #undef  xgen
 
-            char buf[32];
+            char buf[64];
             auto ptr            = buf;
-            auto m              = inc::mf64(value);
+            auto m              = inc::mfxx<type>{value};
             auto is_neg         = false;
 
             if (origin_number_of_significa > m.precious()){
                 precious        = m.precious();
             }
-            if (value < 0){
-                value           = -value;
+            if (m < 0){
+                m               = -m;
                 ptr[0]          = '-';
                 ptr            += 1;
                 is_neg          = true;
-                m               = inc::mf64(value);
             }
             else if (uxx(mode) & uxx(float_format_t::fmt_s1p2e3)){
                 ptr[0]          = '+';
@@ -154,7 +153,7 @@ namespace mixc::lang_cxx_strlize{
                 i              += 1;
                 f.digital       = 0;
                 f.full         *= 10;
-            } while(f.decimal != 0 and i < precious);
+            } while(f.full != 0 and i < precious);
 
             if (origin_number_of_significa == not_exist){
                 while(ptr[-1] == '0'){
@@ -236,18 +235,23 @@ namespace mixc::lang_cxx_strlize{
                 }
             }
 
-            auto length         = (ptr - buf) + 1/*dot*/;
+            auto dis            = ptr - buf;
+            auto has_dot        = dis > 1 ? 1 : 0;
+            auto length         = dis + has_dot;
             auto mem            = alloc(length);
             auto tmp            = mem;
 
             inc::copy_with_operator(mem, buf, num_part - buf);
             mem                += num_part - buf;
             mem[0]              = num_part[0];
-            mem                += 1;
-            num_part           += 1;
-            mem[0]              = '.';
-            mem                += 1;
-            inc::copy_with_operator(mem, num_part, ptr - num_part);
+
+            if (has_dot){
+                mem                += 1;
+                num_part           += 1;
+                mem[0]              = '.';
+                mem                += 1;
+                inc::copy_with_operator(mem, num_part, ptr - num_part);
+            }
             return the_t(tmp, length);
         }
 

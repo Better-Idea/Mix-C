@@ -38,13 +38,13 @@ namespace mixc::math_tan{
         // 作者吐槽：_mmxxx_i32gather_xxx 让作者很失望，好看不好用，性能还不及分次单独访问内存
         using namespace inc;
 
-        mf64 m    = x;
+        auto m    = mf64{x};
         auto deci = 
             m.real_exp() < 0 ? 
             m.real_dec() >> -m.real_exp() : 
             m.real_dec() <<  m.real_exp();
 
-        auto prec = (52LL - 32);
+        auto prec = m.decimal_bits() - 32;
         auto olde = m.real_exp();
         auto e    = prec - olde;
         auto t    = m;

@@ -36,7 +36,7 @@ namespace mixc::math_ln{
             return nan;
         }
 
-        auto m      = mf64(x);
+        auto m      = mf64{x};
         auto sum    = m.real_exp() * ln_2;
         m.real_exp(0);
 
@@ -44,7 +44,7 @@ namespace mixc::math_ln{
         // ln(x) = left:ln(x / a0 / a1 / a2 / ... / an) + right:{ln(a0) + ln(a1) + ln(a2) + ln(an)}
         // 此算法通过迭代让 left 部分等于 ln(1)
         // 查表除以 an 变换成乘以 1.0/an (以除法代替乘法)
-        for(uxx i = 0, shift = 52 - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
+        for(uxx i = 0, shift = m.decimal_bits() - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
             auto idx    = m.decimal >> shift;
             auto pair   = lut[i][idx];
             auto mul    = pair[0];

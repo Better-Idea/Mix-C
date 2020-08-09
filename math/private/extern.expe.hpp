@@ -49,7 +49,7 @@ namespace mixc::math_expe::origin{
         mf64 r          = qr.remainder;
         mf64 linear     = r;
         uxx  s          = uxx(-r.real_exp_unsafe());
-        uxx  sft        = s + 52 - lut_length * step/*线性区*/;
+        uxx  sft        = s + r.decimal_bits() - lut_length * step/*线性区*/;
         u64  dec        = r.real_dec_unsafe() >> sft;
         linear.decimal  = dec << sft;
         r              -= linear;
