@@ -8,17 +8,16 @@
 #undef  xuser
 #define xuser mixc::algo_binary_search
 #include"define/base_type.hpp"
+#include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/ranger.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_binary_search{
-    template<class item_t>
-    inline auto match_template(
-        inc::ranger<item_t> const & range,
-        item_t              const & value,
-        inc::can_compare<item_t>    compare) {
+    using can_search = inc::can_callback<ixx(uxx)>;
 
+    template<class compare_invoke>
+    inline auto match_core(uxx length, compare_invoke const & compare) {
         struct result_t {
             uxx match;
             uxx less_then_target;
@@ -32,7 +31,6 @@ namespace mixc::algo_binary_search{
         };
 
         result_t result;
-        uxx      length = range.length();
         uxx      left   = 0;
         uxx      center = length >> 1;
         uxx      right  = length - 1;
@@ -40,7 +38,7 @@ namespace mixc::algo_binary_search{
         ixx      cmp    = 0;
 
         for (; left <= right; center = (left + right) >> 1) {
-            if (backup = center, cmp = compare(range[center], value); cmp > 0) {
+            if (backup = center, cmp = compare(center); cmp > 0) {
                 if (right = center - 1; i64(ixx(right)) < 0){
                     break;
                 }
@@ -70,7 +68,18 @@ namespace mixc::algo_binary_search{
         }
         return result;
     }
-    
+
+    template<class item_t>
+    inline auto match_template(
+        inc::ranger<item_t> const & range,
+        item_t              const & value,
+        inc::can_compare<item_t>    compare) {
+
+        return match_core(range.length(), [&](uxx current){
+            return compare(range[current], value);
+        });
+    }
+
     template<class item_t>
     struct binary_search{
         // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
@@ -82,21 +91,38 @@ namespace mixc::algo_binary_search{
         }
 
         // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
-        static uxx match_up(
+        static uxx greater_equals(
             inc::ranger<item_t> const & range,
             item_t              const & value, 
+            inc::can_compare<item_t>    compare = inc::default_compare<item_t>) {
+            auto result = match_template(range, value, compare);
+            return result.match == not_exist ? result.grater_then_target : result.match;
+        }
+
+        // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
+        static uxx less_equals(
+            inc::ranger<item_t> const & range,
+            item_t              const & value,
             inc::can_compare<item_t>    compare = inc::default_compare<item_t>) {
             auto result = match_template(range, value, compare);
             return result.match == not_exist ? result.less_then_target : result.match;
         }
 
-        // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
-        static uxx match_down(
-            inc::ranger<item_t> const & range,
-            item_t              const & value,
-            inc::can_compare<item_t>    compare = inc::default_compare<item_t>) {
-            auto result = match_template(range, value, compare);
+        // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
+        static uxx match(uxx length, can_search const & compare) {
+            return match_core(length, compare).match;
+        }
+
+        // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
+        static uxx greater_equals(uxx length, can_search const & compare) {
+            auto result = match_core(length, compare);
             return result.match == not_exist ? result.grater_then_target : result.match;
+        }
+
+        // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
+        static uxx less_equals(uxx length, can_search const & compare) {
+            auto result = match_core(length, compare);
+            return result.match == not_exist ? result.less_then_target : result.match;
         }
     };
 }
