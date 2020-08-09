@@ -46,12 +46,12 @@ namespace mixc::interface_ranger{
         return_type & negx(uxx index){
             return ((return_type *)ptr)[ofs - index];
         }
-        
+
     protected:
-        voidp    ptr = nullptr;
-        voidp *  itr = nullptr;
-        uxx      len = 0;
-        uxx      ofs = 0;
+        mutable voidp    ptr = nullptr;
+        mutable voidp *  itr = nullptr;
+        mutable uxx      len = 0;
+        mutable uxx      ofs = 0;
 
         void turn_positive_order() {
             itr = (voidp *)(uxx(itr) & ~mask);
@@ -62,7 +62,7 @@ namespace mixc::interface_ranger{
         }
 
         template<class item_t>
-        item_t access(uxx index) {
+        item_t access(uxx index) const {
             return inc::signature<item_t(uxx)>::call(this, itr[0], index);
         }
     public:
