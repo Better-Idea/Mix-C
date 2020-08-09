@@ -18,9 +18,11 @@ namespace mixc::docker_array{
     )
         using item_t = typename array_t<type, rest...>::the_t;
     public:
+        array_t() : data(){}
+
         template<class ... args>
-        array_t(args const & ... list) : 
-            data { (item_t)(list)... } {}
+        array_t(item_t const & first, args const & ... list) : 
+            data { first, list... } {}
 
         item_t & operator[] (uxx index) const {
             return data[index];
