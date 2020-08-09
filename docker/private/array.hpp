@@ -22,7 +22,7 @@ namespace mixc::docker_array{
 
         template<class ... args>
         array_t(item_t const & first, args const & ... list) : 
-            data { first, list... } {}
+            data { first, ((item_t)list)... } {}
 
         item_t & operator[] (uxx index) const {
             return data[index];
