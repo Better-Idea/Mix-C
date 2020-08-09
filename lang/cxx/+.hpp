@@ -29,4 +29,3 @@
 #include"lang/cxx/trim_bends.hpp"
 #include"lang/cxx/trim_end.hpp"
 #include"lang/cxx/trim_start.hpp"
-#include"lang/cxx/usage.cpp"
