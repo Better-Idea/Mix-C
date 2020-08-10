@@ -17,7 +17,7 @@ namespace mixc::math_expe{
         return lut_ee0_een31[x & mask_low] * lut_een32_een704[x >> shift];
     }
 
-    inline f64 expe(uxx x){
+    inline f64 exper(uxx x){
         if (x >= sizeof(lut_ee0_een31) / sizeof(lut_ee0_een31[0]) * sizeof(lut_een32_een704) / sizeof(lut_een32_een704[0])){
             return inc::inf_pos;
         }
