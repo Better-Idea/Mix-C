@@ -34,10 +34,10 @@ namespace mixc::memop_signature{
         xgen(const)
         #undef xgen
 
-        static ret call(voidp self, voidp this_call, args ... list){
+        static ret call(const void * self, voidp this_call, args ... list){
             union {
                 voidp  mem;
-                ret (* result)(voidp, args...);
+                ret (* result)(const void *, args...);
             } u;
             u.mem = this_call;
             return u.result(self, list...);

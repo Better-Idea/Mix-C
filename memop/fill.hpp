@@ -11,7 +11,7 @@ namespace mixc::memop_fill{
     template<bool with_operator, class a, class b>
     inline void fill_core(a & target, b const & source, uxx count) {
         for (uxx i = 0; i < count; i++) {
-            if constexpr(with_operator){
+            if constexpr (with_operator){
                 target[i] = (b &)source;
             }
             else{
