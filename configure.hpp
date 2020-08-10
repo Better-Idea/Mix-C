@@ -18,20 +18,26 @@
     #error "you can just select one lookup table policy for math::tan"
 #endif
 
-#define xuse_math_ln_lut6x16        0
-#define xuse_math_ln_lut3x256       1
+#define xuse_math_ln_lut6x16        1
+#define xuse_math_ln_lut3x256       0
 
 #if xuse_math_ln_lut6x16 + xuse_math_ln_lut3x256 != 1
     #error "you can just select one lookup table policy for math::ln"
 #endif
 
-#define xuse_math_expe_lut6x16        0
-#define xuse_math_expe_lut3x256       1
+#define xuse_math_expe_lut6x16      1
+#define xuse_math_expe_lut3x256     0
 
 #if xuse_math_expe_lut6x16 + xuse_math_expe_lut3x256 != 1
     #error "you can just select one lookup table policy for math::expe"
 #endif
 
+#define xuse_math_sqrt_lut6x16      0
+#define xuse_math_sqrt_lut3x256     1
+
+#if xuse_math_sqrt_lut6x16 + xuse_math_sqrt_lut3x256 != 1
+    #error "you can just select one lookup table policy for math::sqrt"
+#endif
 
 /* mixc::memory =====================================================
  * 

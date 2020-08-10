@@ -7,6 +7,7 @@
 #include"macro/private/extern.log.hpp"
 #include"math/private/extern.expe.hpp"
 #include"math/private/extern.ln.hpp"
+#include"math/private/extern.sqrt.hpp"
 #include"math/private/extern.trigo+.hpp"
 #include"memory/private/extern.allocator.hpp"
 #include"memory/private/extern.malloc.hpp"
