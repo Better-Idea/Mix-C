@@ -50,7 +50,7 @@ namespace mixc::gc_private_routing{
             static auto invoke(tlist<first, args...>, tlist<result_args...>){
                 using without_membership = typename origin<first>::type;
 
-                if constexpr(is_class<without_membership>){
+                if constexpr (is_class<without_membership>){
                     return invoke(
                         tlist<args...>(),
                         tlist<result_args..., tkv<without_membership, current>>()
@@ -82,7 +82,7 @@ namespace mixc::gc_private_routing{
             using new_root_without_membership = typename origin<new_root>::type;
             using current_active_list = typename pair::new_list;
             
-            if constexpr(
+            if constexpr (
                 is_class<new_root_without_membership> == false or 
                 tin<visited_list, new_root_without_membership>){
                 return invoke(current_active_list(), result_kvlist(), visited_list());

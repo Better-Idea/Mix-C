@@ -19,7 +19,7 @@ namespace mixc::gc_private_make_guide{
     template<class root>
     inline auto make_guide() {
         using namespace inc;
-        if constexpr(is_class<root>){
+        if constexpr (is_class<root>){
             using routing_result = typename routing<root>::result_kvlist;
             using guide = typename collect<root, routing_result>::result_list;
             return guide();

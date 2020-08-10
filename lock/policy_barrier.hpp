@@ -82,7 +82,7 @@ namespace mixc::lock_policy_barrier{
 
         template<class previous, class first, class ... rest, class ... result>
         static auto make_order(previous, tlist<result...>, tlist<first, rest...>){
-            if constexpr(previous::master + 1 == first::master){
+            if constexpr (previous::master + 1 == first::master){
                 return make_order(first(), tlist<result..., first>(), tlist<rest...>());
             }
             else{

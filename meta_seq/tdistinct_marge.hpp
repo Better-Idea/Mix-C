@@ -16,7 +16,7 @@ namespace mixc::meta_seq_tdistinct_merge{
     private:
         template<class first, class ... args, class ... result_args>
         static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            if constexpr(tin<tlist<result_args...>, first>){
+            if constexpr (tin<tlist<result_args...>, first>){
                 return invoke(
                     tlist<args...>(), 
                     tlist<result_args...>()

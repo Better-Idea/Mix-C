@@ -37,7 +37,7 @@ namespace mixc::gc_private_collect{
             using pair              = tpop_by<current_kvlist, first, tselector_key>;
             using item_kvlist       = typename pair::item_list;
 
-            if constexpr(tin<result_list, first> or item_kvlist::length == 0){
+            if constexpr (tin<result_list, first> or item_kvlist::length == 0){
                 return invoke(kv, tlist<args...>(), result);
             }
             else{

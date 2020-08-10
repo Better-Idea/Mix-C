@@ -57,7 +57,7 @@ namespace mixc::math_random{
                 }
             }
         }
-        else if constexpr(inc::is_same<type, bool>){
+        else if constexpr (inc::is_same<type, bool>){
             return inner::random() % 2 == 0;
         }
         else{

@@ -12,13 +12,13 @@ namespace mixc::meta_fit_bits{
         static auto invoke(){
             static_assert(bits <= 64);
 
-            if constexpr(bits <= 8){
+            if constexpr (bits <= 8){
                 return u08();
             }
-            else if constexpr(bits <= 16){
+            else if constexpr (bits <= 16){
                 return u16();
             }
-            else if constexpr(bits <= 32){
+            else if constexpr (bits <= 32){
                 return u32();
             }
             else{

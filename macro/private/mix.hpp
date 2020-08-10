@@ -61,23 +61,23 @@ namespace mixc::macro_private_mix::origin{
                 i       = i64(value); // maybe is enum class
                 fmt     = is_signed_t;
             }
-            else if constexpr(result::index < 9){
+            else if constexpr (result::index < 9){
                 u       = u64(value);
                 fmt     = is_unsigned_t;
             }
-            else if constexpr(result::index < 11){
+            else if constexpr (result::index < 11){
                 f       = value;
                 fmt     = is_float_t;
             }
-            else if constexpr(result::index < 12){
+            else if constexpr (result::index < 12){
                 s       = value;
                 fmt     = is_str_t;
             }
-            else if constexpr(result::index < 13){
+            else if constexpr (result::index < 13){
                 v       = value;
                 fmt     = is_ptr_t;
             }
-            else if constexpr(result::index < 14){
+            else if constexpr (result::index < 14){
                 c       = value;
                 fmt     = is_char_t;
             }

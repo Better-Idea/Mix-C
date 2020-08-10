@@ -13,7 +13,7 @@
 namespace mixc::memop_cmp{
     template<class a>
     inline ixx cmp(a const & left, a const & right){
-        if constexpr(inc::is_class<a> or inc::is_enum<a> or inc::is_union<a>){
+        if constexpr (inc::is_class<a> or inc::is_enum<a> or inc::is_union<a>){
             auto l = inc::seqlize(left);
             auto r = inc::seqlize(right);
 

@@ -19,7 +19,7 @@ namespace mixc::meta_seq_tdistinct{
         static auto invoke(tlist<first, args...>, tlist<result_args...>){
             using old_list = tlist<result_args...>;
             using new_list = tlist<result_args..., first>;
-            if constexpr(tin<tlist<result_args...>, first>){
+            if constexpr (tin<tlist<result_args...>, first>){
                 return invoke(
                     tlist<args...>(),
                     old_list()

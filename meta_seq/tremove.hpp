@@ -16,7 +16,7 @@ namespace mixc::meta_seq_tremove{
     private:
         template<class first, class ... args, class ... result_args>
         static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            if constexpr(is_same<first, item>){
+            if constexpr (is_same<first, item>){
                 return invoke(tlist<args...>(), tlist<result_args...>());
             }
             else{

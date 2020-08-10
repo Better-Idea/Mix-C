@@ -20,7 +20,7 @@ namespace mixc::meta_seq_tpop_by{
             tlist<args...> src;
             using current_key = typename selector<first>::item;
 
-            if constexpr(is_same<current_key, key>){
+            if constexpr (is_same<current_key, key>){
                 return invoke(src, tlist<tlist<vals..., first> , tlist<rest...>> ());
             }
             else{

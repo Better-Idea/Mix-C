@@ -119,7 +119,7 @@ namespace mixc::lang_cxx_parse_json{
         the_t operator[](key_t const & index) const {
             using match_t = inc::more_fit<key_t, final, uxx>;
 
-            if constexpr(match_t::index == 0){
+            if constexpr (match_t::index == 0){
                 auto & obj = origin().object[0];
                 auto   key = inc::cxx<item_t>(index);
 
@@ -133,7 +133,7 @@ namespace mixc::lang_cxx_parse_json{
                 }
                 return {};
             }
-            else if constexpr(match_t::index == 1){
+            else if constexpr (match_t::index == 1){
                 return { json, origin().array[0][index] };
             }
         }
