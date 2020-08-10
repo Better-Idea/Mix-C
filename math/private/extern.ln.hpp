@@ -5,7 +5,6 @@
 #define xuser mixc::math_ln
 #include"configure.hpp"
 #include"define/mfxx.hpp"
-#include"define/nan.hpp"
 #include"macro/xalign.hpp"
 #include"math/const.hpp"
 
@@ -29,12 +28,8 @@ namespace mixc::math_ln{
     constexpr uxx step = 8;
     #endif
 
-    f64 ln(f64 x){
+    f64 ln_unsafe(f64 x){
         using namespace inc;
-
-        if (x <= 0){
-            return nan;
-        }
 
         auto m      = mf64{x};
         auto sum    = m.real_exp() * ln_2;
@@ -43,13 +38,12 @@ namespace mixc::math_ln{
         // ln(a / b) = ln(a) - ln(b)
         // ln(x) = left:ln(x / a0 / a1 / a2 / ... / an) + right:{ln(a0) + ln(a1) + ln(a2) + ln(an)}
         // 此算法通过迭代让 left 部分等于 ln(1)
-        // 查表除以 an 变换成乘以 1.0/an (以除法代替乘法)
         for(uxx i = 0, shift = m.decimal_bits() - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
             auto idx    = m.decimal >> shift;
             auto pair   = lut[i][idx];
-            auto mul    = pair[0];
+            auto mdiv   = pair[0]; // 倒数乘法代替除法
             auto add    = pair[1];
-            m          *= mul;
+            m          *= mdiv;
             sum        += add;
         }
 
