@@ -14,8 +14,11 @@
 #include"define/mfxx.hpp"
 #include"define/nan.hpp"
 #include"interface/can_alloc.hpp"
+#include"interface/can_callback.hpp"
 #include"lang/cxx/clone.hpp"
 #include"lang/cxx.hpp"
+#include"math/min.hpp"
+#include"math/max.hpp"
 #include"math/numeration_t.hpp"
 #include"math/exp10.hpp"
 #include"math/expr10.hpp"
@@ -30,6 +33,44 @@
 namespace mixc::lang_cxx_strlize{
     constexpr char lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
     constexpr char upper[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    constexpr bool is_scientific_notation = true;
+
+    // Abstract：
+    //                   precious
+    //                   |||||||||
+    //              real   decimal = max(0, precious - leading_zeros)
+    //                ||   |||||
+    // +1.23456e-3 -> +0.001234500
+    //                   ||     ||
+    //                   ||     trailing_zeros = precious - leading_zeros - decimal
+    //                   leading_zeros
+    //
+    //               real    trailing_zeros = min(0, precious - rest)
+    //               |||||   |||
+    // +1.23456e3 -> +1234.56000
+    //                     ||
+    //                     rest = num_len - (exp + 1)
+    //                     ||
+    //                     decimal = min(precious, rest)
+    //                     |||||
+    //                     precious
+    //
+    //               real       precious
+    //               |||||||    ||||
+    // +1.23456e8 -> +123456000.0000
+    //  | |||||             |||
+    //  nul_len             expanding_zeros
+    template<class item_t>
+    using format_invoke = inc::can_callback<
+        inc::cxx<item_t>(
+            inc::cxx<item_t>        real,
+            uxx                     expanding_zeros,
+            uxx                     leading_zeros,
+            inc::cxx<item_t>        decimal,
+            uxx                     trailing_zeros,
+            inc::cxx<item_t>        exp
+        )
+    >;
 
     enum class float_format_t{
         // 注意：不要改变枚举的顺序，下文依赖该顺序
@@ -65,38 +106,37 @@ namespace mixc::lang_cxx_strlize{
             base_t(self){}
 
         template<class type>
-        auto strlize(type value, float_format_t mode, uxx origin_number_of_significa, inc::can_alloc<item> alloc) const {
-            #define xgen(v,str)                     \
-            if (value == v){                        \
-                auto len = sizeof(str) - 1;         \
-                auto mem = alloc(len);              \
-                inc::copy(mem, str, len);           \
-                return the_t(mem, len);             \
+        static auto strlize(type value, bool is_scientific_notation, uxx precious, format_invoke<item> invoke){
+            #define xgen(v,str)                                         \
+            if (value == v){                                            \
+                the_t  real = value < 0 ? "-" str : "+" str;            \
+                return invoke(real, 0, 0, "", 0, "");                   \
             }
 
-            uxx precious        = origin_number_of_significa;
-
             xgen(inc::nan, "nan")
-            xgen(inc::inf_pos, "+inf")
-            xgen(inc::inf_neg, "-inf")
-            xgen(0, "0")
+            xgen(inc::inf, "inf")
+
             #undef  xgen
 
             char buf[64];
+            char buf_exp[8]     = {'+'};
+            auto pce            = ixx(precious);
             auto ptr            = buf;
             auto m              = inc::mfxx<type>{value};
             auto is_neg         = false;
 
-            if (origin_number_of_significa > m.precious()){
-                precious        = m.precious();
+            // 默认 precious 是 not_exist (max_value_of<uxx>)
+            if (uxx(pce) > m.precious() + 1){
+                pce             = ixx(m.precious());
             }
+
             if (m < 0){
                 m               = -m;
                 ptr[0]          = '-';
                 ptr            += 1;
                 is_neg          = true;
             }
-            else if (uxx(mode) & uxx(float_format_t::fmt_s1p2e3)){
+            else{
                 ptr[0]          = '+';
                 ptr            += 1;
             }
@@ -106,21 +146,24 @@ namespace mixc::lang_cxx_strlize{
             auto exp            = ixx(e);
             auto is_neg_exp     = false;
 
+            if (not is_scientific_notation){
+                m              += inc::expr10_unsafe(pce) * 0.5;
+            }
+
             // 以乘法代替除法
-            // 此处不能用 exp <= 0，因为后续转换中假定整数部分为 0
-            if (exp < 0){ 
-                exp             = -exp;
+            if (exp < 0){
                 is_neg_exp      = true;
-                m              *= inc::exp10(uxx(exp));
+                m              *= inc::exp10_unsafe(uxx(-exp));
 
                 if (m < 1.0){
                     m          *= 10;
-                    exp        += 1;
+                    exp        -= 1;
                 }
+    
+                buf_exp[0]      = '-';
             }
-            // 1/10^exp
-            else{
-                m              *= inc::expr10(uxx(exp));
+            else if (exp > 0){
+                m              *= inc::expr10_unsafe(uxx(exp));
 
                 if (m >= 10){
                     m          *= 0.1;
@@ -128,10 +171,26 @@ namespace mixc::lang_cxx_strlize{
                 }
             }
 
-            if (origin_number_of_significa != not_exist){
-                auto plus       = inc::expr10(uxx(precious)) * 5.00000000005;
-                m              += plus;
+            if (is_scientific_notation){
+                if (exp > pce){
+                    m          += inc::exp10_unsafe(exp - pce) * 0.5;
+                }
+                else{
+                    m          += inc::expr10_unsafe(pce - exp) * 0.5;
+                }
             }
+
+            if (exp < 0){
+                exp = -exp;
+            }
+
+            auto exp_tmp        = exp;
+            auto exp_str        = the_t(buf_exp, 4);
+            buf_exp[1]          = '0' + exp_tmp / 100;
+            exp_tmp            %= 100;
+            buf_exp[2]          = '0' + exp_tmp / 10;
+            exp_tmp            %= 10;
+            buf_exp[3]          = '0' + exp_tmp;
 
             union{
                 struct{
@@ -141,118 +200,147 @@ namespace mixc::lang_cxx_strlize{
                 u64 full;
             }f;
 
-            // 这里用 auto 就好了，m 可能是 f32 或 f64，所以返回值类型不是固定的
+            // 这里用 auto 就好了，m 可能是 mf32 或 mf64，所以返回值类型不是固定的
             auto rd             = m.real_dec();
             auto re             = m.real_exp();
-            uxx  i              = 0;
+            auto dec_bits       = 0;
             f.full              = re > 0 ? rd << re : rd >> -re;
 
             do{
                 ptr[0]          = item(f.digital + '0');
                 ptr            += 1;
-                i              += 1;
+                dec_bits       += 1;
                 f.digital       = 0;
                 f.full         *= 10;
-            } while(f.full != 0 and i < precious);
+            } while(f.full != 0 and dec_bits < m.precious());
 
-            if (origin_number_of_significa == not_exist){
-                while(ptr[-1] == '0'){
-                    ptr        -= 1;
-                    i          -= 1;
+            if (is_scientific_notation){
+                while(ptr > num_part + 1 and ptr[-1] == '0'){
+                    ptr--;
                 }
+                auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - dec_bits), 0);
+                auto dec_len    = inc::min<uxx>(precious, uxx(ptr - num_part - 1));
+                return invoke(the_t(buf, 1/*sign*/ + 1/*real*/), 0, 0, the_t(num_part + 1, dec_len), ctz, exp_str);
             }
 
-            // 一般计数法
-            if (uxx(mode) >= uxx(float_format_t::fmt_n)){
-                if (is_neg_exp){
-                    auto length = (ptr - buf) + exp + 1/*dot*/;
-                    auto mem    = alloc(length);
-                    auto tmp    = mem;
+            auto num_len        = ptr - num_part;
 
-                    // 复制正负号
-                    inc::copy_with_operator(mem, buf, num_part - buf);
-                    mem        += num_part - buf;
-                    mem[0]      = '0';
-                    mem[1]      = '.';
-                    mem        += 2;
-                    inc::fill_with_operator(mem, '0', exp - 1);
-                    mem        += exp - 1;
-                    inc::copy_with_operator(mem, num_part, ptr - num_part);
-                    return the_t(tmp, length);
+            if (is_neg_exp and exp != 0){
+                auto real       = the_t(is_neg ? "-0" : "+0");
+                auto decimal    = the_t(num_part, num_len);
+                auto clz        = inc::min<uxx>(exp - 1, precious);
+                auto ctz        = uxx(0);
+
+                if (precious != not_exist){
+                    decimal.length(
+                        inc::min<uxx>(precious - clz, num_len)
+                    );
+                    ctz         = precious - clz - decimal.length();
                 }
-
-                auto has_dot    = exp + 1 < ixx(i);
-                auto plus       = has_dot ? uxx(0) : uxx(exp + 1 - i);
-                auto digi_len   = has_dot ? exp + 1 : i;
-                auto length     = (ptr - buf) + plus + uxx(has_dot);
-                auto mem        = alloc(length);
-                auto tmp        = mem;
-
-                inc::copy_with_operator(mem, buf, num_part - buf);
-                mem            += num_part - buf;
-                inc::copy_with_operator(mem, num_part, digi_len);
-                mem            += digi_len;
-                num_part       += digi_len;
-
-                if (has_dot){
-                    mem[0]      = '.';
-                    mem        += 1;
-                    inc::copy_with_operator(mem, num_part, ptr - num_part);
-                }
-                else{
-                    inc::fill_with_operator(mem, '0', plus);
-                }
-                return the_t(tmp, length);
+                return invoke(real, 0/*expanding_zeros*/, clz/*leading zeros*/, decimal, ctz/*trailing zeros*/, exp_str);
             }
-
-            // 最多 3 位指数
-            // 科学计数法
-            if (uxx i = 0; exp != 0){
-                char tmp[3];
-                ptr[0]          = uxx(mode) & uxx(float_format_t::fmt_1p2E3) ? 'E' : 'e';
-                ptr            += 1;
-                tmp[0]          = char(exp / 100);
-                exp            %= 100;
-                tmp[1]          = char(exp / 10);
-                exp            %= 10;
-                tmp[2]          = char(exp);
-
-                while(tmp[i] == 0){
-                    i += 1;
-                }
-                if (is_neg_exp){
-                    ptr[0]      = '-';
-                    ptr        += 1;
-                }
-                else if (uxx(mode) & uxx(float_format_t::fmt_1p2es3)){
-                    ptr[0]      = '+';
-                    ptr        += 1;
-                }
-                while(i < 3){
-                    ptr[0]      = tmp[i] + '0';
-                    ptr        += 1;
-                    i          += 1;
-                }
+            else{
+                auto expand     = ixx(exp + 1/*real*/ - num_len);
+                auto cez        = inc::max<ixx>(0, expand);
+                auto rest       = inc::max<ixx>(0, -expand);
+                auto dec_len    = inc::min<uxx>(precious, uxx(rest));
+                auto real       = the_t(buf, exp + 1/*sign*/ + 1/*real*/ - cez);
+                auto decimal    = the_t(real + real.length(), dec_len);
+                auto clz        = 0;
+                auto ctz        = precious == not_exist ? 0 : inc::max<ixx>(0, ixx(precious) - rest);
+                return invoke(real, cez/*expanding_zeros*/, clz/*leading zeros*/, decimal, ctz/*trailing zeros*/, exp_str);
             }
+        }
 
-            auto dis            = ptr - buf;
-            auto has_dot        = dis > 1 ? 1 : 0;
-            auto length         = dis + has_dot;
-            auto mem            = alloc(length);
-            auto tmp            = mem;
+        template<class type>
+        static auto strlize(
+            type                    value,
+            float_format_t          mode, 
+            uxx                     precious, 
+            inc::can_alloc<item>    alloc){
 
-            inc::copy_with_operator(mem, buf, num_part - buf);
-            mem                += num_part - buf;
-            mem[0]              = num_part[0];
+            auto with_e = uxx(mode) >= uxx(float_format_t::fmt_n) ? 
+                not is_scientific_notation: is_scientific_notation;
 
-            if (has_dot){
+            return strlize(value, with_e, precious, [&](
+                base_t              real,
+                uxx                 expanding_zeros,
+                uxx                 leading_zeros,
+                base_t              decimal,
+                uxx                 trailing_zeros,
+                base_t              exp
+            )-> base_t {
+
+                // 不强制使用实数部分正负号
+                if (not (uxx(mode) & uxx(float_format_t::fmt_s1p2e3)) and real[0] == '+'){
+                    real = real.backward(1);
+                }
+
+                // 一般记数法
+                if (not with_e){
+                    auto dec_len    = decimal.length() + trailing_zeros;
+
+                    if (dec_len != 0){
+                        dec_len    += 1; // dot
+                    }
+
+                    auto len        = real.length() + expanding_zeros + leading_zeros + dec_len;
+                    auto mem        = alloc(len);
+                    auto ptr        = mem;
+
+                    adv::copy_with_operator_unsafe(mem, real, real.length());
+                    mem            += real.length();
+                    inc::fill_with_operator(mem, '0', expanding_zeros);
+                    mem            += expanding_zeros;
+
+                    if (dec_len == 0){
+                        return the_t(ptr, len);
+                    }
+
+                    mem[0]          = '.';
+                    mem            += 1;
+                    inc::fill_with_operator(mem, '0', leading_zeros);
+                    mem            += leading_zeros;
+                    adv::copy_with_operator_unsafe(mem, decimal, decimal.length());
+                    mem            += decimal.length();
+                    inc::fill_with_operator(mem, '0', trailing_zeros);
+                    return the_t(ptr, len);
+                }
+
+                // 不强制使用指数部分的正负号
+                if (not (uxx(mode) & uxx(float_format_t::fmt_1p2es3)) and exp[0] == '+'){
+                    exp             = exp.backward(1);
+                }
+
+                auto dec_len        = decimal.length() == 0 ?
+                    0 : 1/*dot*/ +  decimal.length();
+                auto e_len          = exp.length() == 0 ?
+                    0 : 1/*e*/ + exp.length();
+                auto e              = uxx(mode) & uxx(float_format_t::fmt_1p2E3) ? 'E' : 'e';
+                auto len            = real.length() + dec_len + trailing_zeros + e_len;
+                auto mem            = alloc(len);
+                auto ptr            = mem;
+
+                adv::copy_with_operator_unsafe(mem, real, real.length());
+                mem                += real.length();
+
+                if (e_len == 0){
+                    return the_t(ptr, len);
+                }
+                if (dec_len != 0){
+                    mem[0]         = '.';
+                    mem           += 1;
+                }
+
+                adv::copy_with_operator_unsafe(mem, decimal, decimal.length());
+                mem                += decimal.length();
+                inc::fill_with_operator(mem, '0', trailing_zeros);
+                mem                += trailing_zeros;
+                mem[0]              = e;
                 mem                += 1;
-                num_part           += 1;
-                mem[0]              = '.';
-                mem                += 1;
-                inc::copy_with_operator(mem, num_part, ptr - num_part);
-            }
-            return the_t(tmp, length);
+                adv::copy_with_operator_unsafe(mem, exp, exp.length());
+                return the_t(ptr, len);
+            });
         }
 
         template<class type>
@@ -339,12 +427,12 @@ namespace mixc::lang_cxx_strlize{
             thex = the.template strlize<type>(value, mode, not_exist, alloc);                                   \
         }                                                                                                       \
                                                                                                                 \
-        meta(type value, uxx number_of_significa, inc::can_alloc<item> alloc){                                  \
-            thex = the.template strlize<type>(value, float_format_t::fmt_1p2e3, number_of_significa, alloc);    \
+        meta(type value, uxx precious, inc::can_alloc<item> alloc){                                  \
+            thex = the.template strlize<type>(value, float_format_t::fmt_1p2e3, precious, alloc);    \
         }                                                                                                       \
                                                                                                                 \
-        meta(type value, float_format_t mode, uxx number_of_significa, inc::can_alloc<item> alloc){             \
-            thex = the.template strlize<type>(value, mode, number_of_significa, alloc);                         \
+        meta(type value, float_format_t mode, uxx precious, inc::can_alloc<item> alloc){             \
+            thex = the.template strlize<type>(value, mode, precious, alloc);                         \
         }
 
         xgen(f32)
