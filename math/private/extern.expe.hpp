@@ -43,7 +43,7 @@ namespace mixc::math_expe::origin{
             x = -x;
         }
 
-        auto qr         = div_unsafe(x, 1.0);
+        auto qr         = adv::div_unsafe(x, 1.0);
         uxx  q          = uxx(qr.quotient);
         f64  m          = expe_unsafe(q);
         mf64 r          = qr.remainder;

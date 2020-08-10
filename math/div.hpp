@@ -20,9 +20,6 @@ namespace mixc::math_div{
         auto rem = tmp - que;
         return quo_rem_pair<type>{ que, rem };
     }
-}
-namespace mixc::math_div::origin{
-    using mixc::math_div::quo_rem_pair;
 
     inline quo_rem_pair<f32> div_unsafe(f32 a, f32 b){
         return div_unsafe_core<f32>(a, b);
@@ -39,6 +36,6 @@ namespace mixc::math_div::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::math_div::origin;
+namespace xuser::adv{
+    using ::mixc::math_div::div_unsafe;
 }

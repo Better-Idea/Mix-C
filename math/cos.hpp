@@ -17,6 +17,6 @@ namespace mixc::math_cos::origin{
 
 #endif
 
-namespace xuser::inc{
+namespace xuser::adv{
     using namespace ::mixc::math_cos::origin;
 }

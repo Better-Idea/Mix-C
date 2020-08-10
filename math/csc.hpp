@@ -16,6 +16,6 @@ namespace mixc::math_csc::origin{
 
 #endif
 
-namespace xuser::inc{
+namespace xuser::adv{
     using namespace ::mixc::math_csc::origin;
 }

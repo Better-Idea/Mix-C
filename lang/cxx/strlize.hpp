@@ -25,7 +25,6 @@
 #include"math/const.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"
-#include"meta/more_fit.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -91,6 +90,10 @@ namespace mixc::lang_cxx_strlize{
         fmt_sn             , // "+n"
     };
 
+    constexpr uxx force_real_part_sign  = uxx(float_format_t::fmt_s1p2e3);
+    constexpr uxx force_exp_part_sign   = uxx(float_format_t::fmt_1p2es3);
+    constexpr uxx force_upper_e         = uxx(float_format_t::fmt_1p2E3);
+
     enum class int_format_t{
         fmt_n               ,
         fmt_sn              ,
@@ -126,7 +129,7 @@ namespace mixc::lang_cxx_strlize{
             auto is_neg         = false;
 
             // 默认 precious 是 not_exist (max_value_of<uxx>)
-            if (uxx(pce) > m.precious() + 1){
+            if (uxx(pce) > m.precious()){
                 pce             = ixx(m.precious());
             }
 
@@ -147,13 +150,13 @@ namespace mixc::lang_cxx_strlize{
             auto is_neg_exp     = false;
 
             if (not is_scientific_notation){
-                m              += inc::expr10_unsafe(pce) * 0.5;
+                m              += adv::expr10_unsafe(pce) * 0.5;
             }
 
             // 以乘法代替除法
             if (exp < 0){
                 is_neg_exp      = true;
-                m              *= inc::exp10_unsafe(uxx(-exp));
+                m              *= adv::exp10_unsafe(uxx(-exp));
 
                 if (m < 1.0){
                     m          *= 10;
@@ -163,7 +166,7 @@ namespace mixc::lang_cxx_strlize{
                 buf_exp[0]      = '-';
             }
             else if (exp > 0){
-                m              *= inc::expr10_unsafe(uxx(exp));
+                m              *= adv::expr10_unsafe(uxx(exp));
 
                 if (m >= 10){
                     m          *= 0.1;
@@ -173,10 +176,10 @@ namespace mixc::lang_cxx_strlize{
 
             if (is_scientific_notation){
                 if (exp > pce){
-                    m          += inc::exp10_unsafe(exp - pce) * 0.5;
+                    m          += adv::exp10_unsafe(exp - pce) * 0.5;
                 }
                 else{
-                    m          += inc::expr10_unsafe(pce - exp) * 0.5;
+                    m          += adv::expr10_unsafe(pce - exp) * 0.5;
                 }
             }
 
@@ -255,10 +258,11 @@ namespace mixc::lang_cxx_strlize{
         template<class type>
         static auto strlize(
             type                    value,
-            float_format_t          mode, 
+            float_format_t          modes, 
             uxx                     precious, 
             inc::can_alloc<item>    alloc){
 
+            auto mode   = uxx(modes);
             auto with_e = uxx(mode) >= uxx(float_format_t::fmt_n) ? 
                 not is_scientific_notation: is_scientific_notation;
 
@@ -272,7 +276,7 @@ namespace mixc::lang_cxx_strlize{
             )-> base_t {
 
                 // 不强制使用实数部分正负号
-                if (not (uxx(mode) & uxx(float_format_t::fmt_s1p2e3)) and real[0] == '+'){
+                if (not (mode & force_real_part_sign) and real[0] == '+'){
                     real = real.backward(1);
                 }
 
@@ -308,7 +312,7 @@ namespace mixc::lang_cxx_strlize{
                 }
 
                 // 不强制使用指数部分的正负号
-                if (not (uxx(mode) & uxx(float_format_t::fmt_1p2es3)) and exp[0] == '+'){
+                if (not (mode & force_exp_part_sign) and exp[0] == '+'){
                     exp             = exp.backward(1);
                 }
 
@@ -316,7 +320,7 @@ namespace mixc::lang_cxx_strlize{
                     0 : 1/*dot*/ +  decimal.length();
                 auto e_len          = exp.length() == 0 ?
                     0 : 1/*e*/ + exp.length();
-                auto e              = uxx(mode) & uxx(float_format_t::fmt_1p2E3) ? 'E' : 'e';
+                auto e              = mode & force_upper_e ? 'E' : 'e';
                 auto len            = real.length() + dec_len + trailing_zeros + e_len;
                 auto mem            = alloc(len);
                 auto ptr            = mem;
