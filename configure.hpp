@@ -11,8 +11,8 @@
 /* mixc::math =======================================================
  * 
  * =================================================================*/
-#define xuse_math_tan_lut8x16       0
-#define xuse_math_tan_lut4x256      1
+#define xuse_math_tan_lut8x16       1
+#define xuse_math_tan_lut4x256      0
 
 #if xuse_math_tan_lut8x16 + xuse_math_tan_lut4x256 != 1
     #error "you can just select one lookup table policy for math::tan"
@@ -32,8 +32,8 @@
     #error "you can just select one lookup table policy for math::expe"
 #endif
 
-#define xuse_math_sqrt_lut6x16      0
-#define xuse_math_sqrt_lut3x256     1
+#define xuse_math_sqrt_lut6x16      1
+#define xuse_math_sqrt_lut3x256     0
 
 #if xuse_math_sqrt_lut6x16 + xuse_math_sqrt_lut3x256 != 1
     #error "you can just select one lookup table policy for math::sqrt"
