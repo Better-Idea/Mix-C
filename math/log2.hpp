@@ -9,6 +9,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_log2{
+    inline f64 log2_unsafe(f64 x){
+        return adv::ln_unsafe(x) * inc::lnr_2; // 等效除以 ln_2
+    }
+
     inline f64 log2(f64 x){
         return inc::ln(x) * inc::lnr_2; // 等效除以 ln_2
     }
@@ -18,4 +22,8 @@ namespace mixc::math_log2{
 
 namespace xuser::inc{
     using ::mixc::math_log2::log2;
+}
+
+namespace xuser::adv{
+    using ::mixc::math_log2::log2_unsafe;
 }
