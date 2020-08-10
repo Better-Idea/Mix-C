@@ -6,54 +6,83 @@
 #include"define/base_type.hpp"
 #include"dumb/mirror.hpp"
 #include"memop/addressof.hpp"
+#include"memop/zeros.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_copy{
     template<class a, class b = a>
     inline void copy(a * des, b const & src){
         using mp = inc::mirror<a> *;
-        *mp(des) = *mp(xref src);
+        enum{
+            dis = sizeof(a) - sizeof(b)
+        };
+        auto m   = *mp(xref src);
+        
+        // 高位 0 扩展
+        if constexpr (dis > 0){
+            inc::zeros(u08p(xref m) + sizeof(b), dis);
+        }
+        *mp(des) = m;
     }
 
-    template<bool with_operator, class a, class b>
+    constexpr bool with_operator = true;
+    constexpr bool is_safe       = true;
+
+    template<bool is_safe, bool with_operator, class a, class b>
     inline void copy_core(a & target, b const & source, uxx count) {
-        struct itr{ 
-            uxx begin; uxx end; uxx step;
-        };
+        if constexpr (is_safe){
+            struct itr{ 
+                uxx begin; uxx end; uxx step;
+            };
 
-        itr i = xref target[0] > xref source[0] ? 
-            itr{ count - 1, uxx(-1), uxx(-1) } : 
-            itr{ 0, count, 1 };
+            itr i = xref target[0] > xref source[0] ? 
+                itr{ count - 1, uxx(-1), uxx(-1) } : 
+                itr{ 0, count, 1 };
 
-        for(; i.begin != i.end; i.begin += i.step){
-            if constexpr(with_operator){
-                target[i.begin] = source[i.begin];
+            for(; i.begin != i.end; i.begin += i.step){
+                if constexpr (with_operator){
+                    target[i.begin] = source[i.begin];
+                }
+                else{
+                    copy(xref target[i.begin], source[i.begin]);
+                }
             }
-            else{
-                copy(xref target[i.begin], source[i.begin]);
+        }
+        else{
+            while(count-- > 0){
+                if constexpr (with_operator){
+                    target[count] = source[count];
+                }
+                else{
+                    copy(xref target[count], source[count]);
+                }
             }
         }
     }
 
-    template<class a, class b = a>
-    inline void copy_with_operator(a & target, b const & source, uxx count){
-        copy_core<true, a, b>(target, source, count);
+    #define xgen(name,is_safe,with_opr)                                         \
+    template<class a, class b = a>                                              \
+    inline void name(a & target, b const & source, uxx count){                  \
+        copy_core<is_safe, with_opr, a, b>((a &)target, source, count);         \
+    }                                                                           \
+                                                                                \
+    template<class a, class b = a>                                              \
+    inline void name(a && target, b const & source, uxx count){                 \
+        name((a &)target, source, count);                                       \
     }
 
-    template<class a, class b = a>
-    inline void copy_with_operator(a && target, b const & source, uxx count){
-        copy_core<true, a, b>((a &)target, source, count);
-    }
+    // 无运算符重载的拷贝
+    // 适合于无线程竞争的环境
+    xgen(copy                     ,     is_safe, not with_operator)
 
-    template<class a, class b = a>
-    inline void copy(a & target, b const & source, uxx count) {
-        copy_core<false, a, b>(target, source, count);
-    }
+    // 带运算符重载的拷贝(更安全，但可能会引入额外的复杂度)
+    xgen(copy_with_operator       ,     is_safe,     with_operator)
 
-    template<class a, class b = a>
-    inline void copy(a && target, b const & source, uxx count) {
-        copy_core<false, a, b>((a &)target, source, count);
-    }
+    // 不安全版本
+    // 无重合检查，适合于两个没有交集数组间的拷贝操作
+    xgen(copy_unsafe              , not is_safe, not with_operator)
+    xgen(copy_with_operator_unsafe, not is_safe,     with_operator)
+    #undef xgen
 }
 
 #endif
@@ -61,4 +90,9 @@ namespace mixc::memop_copy{
 namespace xuser::inc{
     using ::mixc::memop_copy::copy;
     using ::mixc::memop_copy::copy_with_operator;
+}
+
+namespace xuser::adv{
+    using ::mixc::memop_copy::copy_unsafe;
+    using ::mixc::memop_copy::copy_with_operator_unsafe;
 }
