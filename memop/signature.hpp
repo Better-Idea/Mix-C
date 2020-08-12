@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_signature
+#include"configure.hpp"
 #include"define/base_type.hpp"
 #pragma pop_macro("xuser")
 
@@ -35,12 +36,21 @@ namespace mixc::memop_signature{
         #undef xgen
 
         static ret call(const void * self, voidp this_call, args ... list){
+            typedef struct foo{} * foop;
             union {
-                voidp  mem;
-                ret (* result)(const void *, args...);
+                voidp       mem;
+                ret (     * gnu_call)(const void *, args...);
+                ret (foo::* msvc_call)(args...);
             } u;
+
             u.mem = this_call;
-            return u.result(self, list...);
+
+            // 该来的还是来了，this call 的 ABI 问题
+            #if xis_msvc
+            return (foop(self)->*u.msvc_call)(list...);
+            #else
+            return u.gnu_call(self, list...);
+            #endif
         }
     };
 }
