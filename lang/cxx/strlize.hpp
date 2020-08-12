@@ -121,8 +121,8 @@ namespace mixc::lang_cxx_strlize{
 
             #undef  xgen
 
-            char buf[64];
-            char buf_exp[8]     = {'+'};
+            item buf[64];
+            item buf_exp[8]     = {'+'};
             auto pce            = ixx(precious);
             auto ptr            = buf;
             auto m              = inc::mfxx<type>{value};
@@ -189,11 +189,11 @@ namespace mixc::lang_cxx_strlize{
 
             auto exp_tmp        = exp;
             auto exp_str        = the_t(buf_exp, 4);
-            buf_exp[1]          = '0' + exp_tmp / 100;
+            buf_exp[1]          = item('0' + exp_tmp / 100);
             exp_tmp            %= 100;
-            buf_exp[2]          = '0' + exp_tmp / 10;
+            buf_exp[2]          = item('0' + exp_tmp / 10);
             exp_tmp            %= 10;
-            buf_exp[3]          = '0' + exp_tmp;
+            buf_exp[3]          = item('0' + exp_tmp);
 
             union{
                 struct{
@@ -273,7 +273,7 @@ namespace mixc::lang_cxx_strlize{
                 base_t              decimal,
                 uxx                 trailing_zeros,
                 base_t              exp
-            )-> base_t {
+            ) {
 
                 // 不强制使用实数部分正负号
                 if (not (mode & force_real_part_sign) and real[0] == '+'){
@@ -298,7 +298,7 @@ namespace mixc::lang_cxx_strlize{
                     mem            += expanding_zeros;
 
                     if (dec_len == 0){
-                        return the_t(ptr, len);
+                        return base_t(ptr, len);
                     }
 
                     mem[0]          = '.';
@@ -308,7 +308,7 @@ namespace mixc::lang_cxx_strlize{
                     adv::copy_with_operator_unsafe(mem, decimal, decimal.length());
                     mem            += decimal.length();
                     inc::fill_with_operator(mem, '0', trailing_zeros);
-                    return the_t(ptr, len);
+                    return base_t(ptr, len);
                 }
 
                 // 不强制使用指数部分的正负号
@@ -329,7 +329,7 @@ namespace mixc::lang_cxx_strlize{
                 mem                += real.length();
 
                 if (e_len == 0){
-                    return the_t(ptr, len);
+                    return base_t(ptr, len);
                 }
                 if (dec_len != 0){
                     mem[0]         = '.';
@@ -343,7 +343,7 @@ namespace mixc::lang_cxx_strlize{
                 mem[0]              = e;
                 mem                += 1;
                 adv::copy_with_operator_unsafe(mem, exp, exp.length());
-                return the_t(ptr, len);
+                return base_t(ptr, len);
             });
         }
 
