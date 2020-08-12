@@ -21,13 +21,17 @@ namespace mixc::algo_distinct{
             return alloc(length{0});
         }
 
+        hashmap_set_result_t   r;
         hashmap<item_t *, uxx> map(
             length{range.length()}
         );
 
         for(uxx i = 0, ii = 0; i < range.length(); i++){
-            if (auto key = xref range[i]; not map.is_contains(key)){
-                map.set(key, ii);
+            auto key = xref range[i];
+            map.set(key, ii, xref r);
+            
+            // 如果之前不存在
+            if (r != hashmap_set_result_t::override){
                 ii += 1;
             }
         }
