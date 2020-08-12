@@ -6,7 +6,7 @@
 #include"define/base_type.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_tan::origin{
+namespace mixc::math_tan{
     f64 tan_unsafe(f64 x);
     f64 tan(f64 x);
 }
@@ -14,5 +14,9 @@ namespace mixc::math_tan::origin{
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::math_tan::origin;
+    using ::mixc::math_tan::tan;
+}
+
+namespace xuser::adv{
+    using ::mixc::math_tan::tan_unsafe;
 }
