@@ -31,6 +31,10 @@ namespace mixc::math_sqrt{
     extern f64 sqrt_unsafe(f64 x){
         using namespace inc;
 
+        if (x == 0){
+            return 0;
+        }
+
         // sqrt(x) = sqrt(x.xxx * 2^exp) = sqrt(x.xxx) * 2^(exp/2)
         mf64 m          = x;
         f64  r          = 1.0;

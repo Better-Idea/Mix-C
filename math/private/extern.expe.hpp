@@ -45,7 +45,7 @@ namespace mixc::math_expe::origin{
 
         auto qr         = adv::div_unsafe(x, 1.0);
         uxx  q          = uxx(qr.quotient);
-        f64  m          = expe_unsafe(q);
+        f64  m          = adv::expe_unsafe(q);
         mf64 r          = qr.remainder;
         mf64 linear     = r;
         uxx  s          = uxx(-r.real_exp_unsafe());
