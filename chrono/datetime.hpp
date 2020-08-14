@@ -33,6 +33,11 @@ namespace mixc::chrono_datetime::origin{
             time_t<final>(hour, minute, second, milisecond){
         }
 
+        datetime_t(date_t<final> date, time_t<final> time): 
+            date_t<final>(date), 
+            time_t<final>(time){
+        }
+
         bool is_valid() const {
             return date_t<final>::is_valid() and time_t<final>::is_valid() and time_t<final>::hour() <= 23;
         }

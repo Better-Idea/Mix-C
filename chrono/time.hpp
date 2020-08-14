@@ -18,6 +18,8 @@ namespace mixc::chrono_time::origin{
             phour(hour){
         }
 
+        time_t(time_t const &) = default;
+
         #include"chrono/private/xgen.hpp"
         xgen(milisecond);
         xgen(second);

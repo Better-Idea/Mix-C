@@ -37,39 +37,52 @@
     #include<time.h>
     #include<sys/time.h>
     
+    namespace{
+        inline auto time_now(){
+            timezone z;
+            timeval  t;
+            gettimeofday(& t, & z);
+            t.tv_sec -= z.tz_minuteswest * 60.
+            return t;
+        }
+
+        inline auto calc_date(timeval t){
+            using namespace mixc::chrono_date::origin;
+            return date(1970, 1, 1) + day_t(t.tv_sec / (3600 * 24));
+        }
+
+        inline auto calc_time(timeval t){
+            using namespace mixc::chrono_time::origin;
+            auto s    = t.tv_sec % 60;
+            auto m    = t.tv_sec / 60 % 60;
+            auto h    = t.tv_sec / 3600 % 24;
+            return time(h, m, s, t.tv_usec / 1000);
+        }
+    }
+
     namespace mixc::chrono_date::origin{
         date date::now(){
-            auto t = *localtime(nullptr);
-            return date(1900 + t.tm_year, 1 + t.tm_mon, t.tm_mday);
+            return calc_date(
+                time_now()
+            );
         }
     }
 
     namespace mixc::chrono_time::origin{
         time time::now(){
-            while(true){
-                timeval low;
-                auto    high = *localtime(nullptr);
-                gettimeofday(& low, nullptr);
-
-                if (low.tv_sec == high.tm_sec){
-                    return time(high.tm_hour, high.tm_min, high.tm_sec, (low.tv_usec + 10) / 1000);
-                }
-            }
+            return calc_time(
+                time_now()
+            );
         }
     }
 
     namespace mixc::chrono_datetime::origin{
         datetime datetime::now(){
-            while(true){
-                timeval low;
-                auto    high = *localtime(nullptr);
-                gettimeofday(& low, nullptr);
-
-                if (low.tv_sec == high.tm_sec){
-                    return datetime(1900 + high.tm_year, 1 + high.tm_mon, high.tm_mday, high.tm_hour, high.tm_min, high.tm_sec, (low.tv_usec + 10) / 1000);
-                }
-            }
+            auto t = time_now();
+            return datetime(
+                calc_date(t),
+                calc_time(t)
+            );
         }
     }
 #endif
-
