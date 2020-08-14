@@ -55,7 +55,7 @@ namespace mixc::extern_isa_cpu::origin{
         ifbe,
         ifbt,
         ifge,
-        ifgt
+        ifgt,
         ifle,
         iflt,
         ifeq,
@@ -146,7 +146,7 @@ namespace mixc::extern_isa_cpu::origin{
 
                 if constexpr (inc::is_same<type, f32> or inc::is_same<type, f64>){
                     auto bits = sizeof(type) * 8;
-                    if (total_bits < bits/*bits*/){
+                    if (total_bits < bits){
                         imm <<= bits - total_bits;
                     }
                     return inc::cast<type>(imm);
@@ -263,26 +263,26 @@ namespace mixc::extern_isa_cpu::origin{
 
             auto i          = ins.opc - movsb/*begin*/;
             auto info       = inc::cast<mov_t>(i);
-            auto m          = res_t(info.target_type != is_uint ? 
+            auto m          = res_t(info.target_type != is_u64 ? 
                 info.target_type/*f32/f64*/ : 
                 info.target_type/*uint*/ + info.with_sign_extern/*is int if this value eq 1*/
             );
 
             switch(mode[ins.opa] = m){
             case is_f32:
-                info.with_sign_extern ? 
-                    ra.rf32 = sign_extern(rb, info.scale) :
-                    ra.rf32 = zero_extern(rb, info.scale);
+                ra.rf32 = info.with_sign_extern ? 
+                    sign_extern(rb, info.scale) :
+                    zero_extern(rb, info.scale);
                 break;
             case is_f64:
-                info.with_sign_extern ? 
-                    ra.rf64 = sign_extern(rb, info.scale) :
-                    ra.rf64 = zero_extern(rb, info.scale);
+                ra.rf64 = info.with_sign_extern ? 
+                    sign_extern(rb, info.scale) :
+                    zero_extern(rb, info.scale);
                 break;
             default:
-                info.with_sign_extern ? 
-                    ra.ri64 = sign_extern(rb, info.scale) :
-                    ra.ri64 = zero_extern(rb, info.scale);
+                ra.ri64 = info.with_sign_extern ? 
+                    sign_extern(rb, info.scale) :
+                    zero_extern(rb, info.scale);
                 break;
             }
         }
@@ -326,10 +326,14 @@ namespace mixc::extern_isa_cpu::origin{
             auto & rb = regs[ins.opb];
             auto   m  = f8_t(ins.opc & 0x7);
 
-            xgen(i64)
+            if (mode[ins.opa] == is_i64){
+                xgen(rti64.i64, i64)
+            }
+            else{
+                xgen(rti64.u64, u64)
+            }
         }
         #undef  xgen
-
 
         void add(){
             f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
@@ -366,20 +370,36 @@ namespace mixc::extern_isa_cpu::origin{
 
         void sft(){
             f8x(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
+                // i as mask
+                // c 为正数表示右移，为负数表示左移
                 if (i == 0){
                     i = decltype(i)(-1);
                 }
                 else{
                     i = (1ull << i) - 1;
                 }
-                if (sizeof(b) * 8 <= c or c <= -8 * sizeof(b)){
-                    a = 0;
+
+                enum{ bits = 8 * sizeof(b) };
+
+                if (bits < c or c < -bits){
+                    a       = 0;
+                    sta.cf  = 0;
+                }
+                else if (c == bits){
+                    a       = 0;
+                    sta.cf  = (b >> (bits - 1)) & 1;
+                }
+                else if (c == -bits){
+                    a       = 0;
+                    sta.cf  = b & 1;
                 }
                 else if (c >= 0){
-                    a = (b << c) & i;
+                    a       = (b << c) & i;
+                    sta.cf  = (b >> (bits - c) & 1;
                 }
                 else{
-                    a = (b >> (0 - c)) & i;
+                    a       = (b >> ( 0 - c)) & i;
+                    sta.cf  = (b >> (-1 - c)) & 1;
                 }
             });
         }
@@ -403,10 +423,10 @@ namespace mixc::extern_isa_cpu::origin{
                 rim.load(ins.opb, 4/*bits*/);
 
                 switch(c4_t(ins.opc)){
-                case is_f32: rb = rim.read_with_clear<f32>(); break;
-                case is_f64: rb = rim.read_with_clear<f64>(); break;
-                case is_u64: rb = rim.read_with_clear<u64>(); break;
-                case is_i64: rb = rim.read_with_clear<i64>(); break;
+                case is_f32: rb.rf32 = rim.read_with_clear<f32>(); break;
+                case is_f64: rb.rf64 = rim.read_with_clear<f64>(); break;
+                case is_u64: rb.ru64 = rim.read_with_clear<u64>(); break;
+                case is_i64: rb.ri64 = rim.read_with_clear<i64>(); break;
                 }
 
                 if (c4_t(ins.opc) == c4ia){
@@ -459,7 +479,7 @@ namespace mixc::extern_isa_cpu::origin{
                 sta.cf = a != 0;
             });
         }
-
+        
 
     };
 }
