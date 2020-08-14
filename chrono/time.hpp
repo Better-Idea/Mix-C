@@ -18,7 +18,17 @@ namespace mixc::chrono_time::origin{
             phour(hour){
         }
 
-        time_t(time_t const &) = default;
+        template<class finalx, class f>
+        time_t(time_t<finalx, f> const & value) : 
+            time_t(
+                value.phour,
+                value.pminute,
+                value.psecond,
+                value.pmilisecond
+            ){
+        }
+
+        template<class, class> friend struct time_t;
 
         #include"chrono/private/xgen.hpp"
         xgen(milisecond);

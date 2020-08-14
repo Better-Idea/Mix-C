@@ -39,24 +39,24 @@
     
     namespace{
         inline auto time_now(){
-            timezone z;
-            timeval  t;
+            struct ::timezone z;
+            struct ::timeval  t;
             gettimeofday(& t, & z);
-            t.tv_sec -= z.tz_minuteswest * 60.
+            t.tv_sec -= z.tz_minuteswest * 60;
             return t;
         }
 
         inline auto calc_date(timeval t){
-            using namespace mixc::chrono_date::origin;
-            return date(1970, 1, 1) + day_t(t.tv_sec / (3600 * 24));
+            return 
+                mixc::chrono_date::origin::date(1970, 1, 1) + 
+                mixc::chrono_day::origin::day(t.tv_sec / (3600 * 24));
         }
 
         inline auto calc_time(timeval t){
-            using namespace mixc::chrono_time::origin;
             auto s    = t.tv_sec % 60;
             auto m    = t.tv_sec / 60 % 60;
             auto h    = t.tv_sec / 3600 % 24;
-            return time(h, m, s, t.tv_usec / 1000);
+            return mixc::chrono_time::origin::time(h, m, s, t.tv_usec / 1000);
         }
     }
 

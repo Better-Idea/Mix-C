@@ -33,7 +33,7 @@ namespace mixc::chrono_datetime::origin{
             time_t<final>(hour, minute, second, milisecond){
         }
 
-        datetime_t(date_t<final> date, time_t<final> time): 
+        datetime_t(date date, time time): 
             date_t<final>(date), 
             time_t<final>(time){
         }

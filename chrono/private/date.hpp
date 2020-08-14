@@ -54,8 +54,6 @@ namespace mixc::chrono_date::origin{
             pyear(year), pmonth(month), pday(day){
         }
 
-        date(date const &) = default;
-
         #include"chrono/private/xgen.hpp"
         xgen(day);
         xgen(month);
@@ -119,6 +117,9 @@ namespace mixc::chrono_date::origin{
     struct date_t : date{
         using date::date;
         using final = finalx;
+
+        date_t(date const & value) : 
+            date(value){}
 
         #include"chrono/private/xgen.hpp"
         xgen(day);
