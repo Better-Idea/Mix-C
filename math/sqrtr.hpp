@@ -10,11 +10,11 @@
 
 namespace mixc::math_sqrtr{
     inline f64 sqrtr_unsafe(f64 x){
-        return 1.0 / inc::sqrt_unsafe(x);
+        return 1.0 / adv::sqrt_unsafe(x);
     }
 
     inline f64 sqrtr(f64 x){
-        if (x < 0){
+        if (x <= 0){
             return inc::nan;
         }
         return sqrtr_unsafe(x);
@@ -23,10 +23,10 @@ namespace mixc::math_sqrtr{
 
 #endif
 
-namespace xuser::adv{
-    using ::mixc::math_sqrtr::sqrtr_unsafe;
+namespace xuser::inc{
+    using ::mixc::math_sqrtr::sqrtr;
 }
 
-namespace xuser::inc{
+namespace xuser::adv{
     using ::mixc::math_sqrtr::sqrtr_unsafe;
 }

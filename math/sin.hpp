@@ -7,15 +7,15 @@
 #include"math/tan.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_sin::origin{
+namespace mixc::math_sin{
     inline f64 sin_unsafe(f64 x){
-        f64 t = inc::tan_unsafe(0.5 * x);
+        f64 t = adv::tan_unsafe(0.5 * x);
         return 2.0 * t / (1.0 + t * t);
     }
 }
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::math_sin::origin;
+namespace xuser::adv{
+    using ::mixc::math_sin::sin_unsafe;
 }

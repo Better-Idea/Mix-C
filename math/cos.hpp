@@ -9,9 +9,9 @@
 
 namespace mixc::math_cos::origin{
     inline f64 cos_unsafe(f64 x){
-        f64 t  = inc::tan_unsafe(0.5 * x);
+        f64 t  = adv::tan_unsafe(0.5 * x);
         f64 tt = t * t;
-        return (1.0 - tt) / (1 + tt);
+        return (1.0 - tt) / (1.0 + tt);
     }
 }
 

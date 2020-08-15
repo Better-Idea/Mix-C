@@ -20,10 +20,10 @@ namespace mixc::math_sqrt{
 
 #endif
 
-namespace xuser::adv{
-    using ::mixc::math_sqrt::sqrt_unsafe;
+namespace xuser::inc{
+    using ::mixc::math_sqrt::sqrt;
 }
 
-namespace xuser::inc{
+namespace xuser::adv{
     using ::mixc::math_sqrt::sqrt_unsafe;
 }
