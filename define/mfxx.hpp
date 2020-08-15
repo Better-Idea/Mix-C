@@ -52,15 +52,18 @@ namespace mixc::define_mfxx{
             return real_exp_unsafe();
         }
 
+        // 注意：
+        // f80 与 f64, f32 的小数部分不同，f80 没有隐藏位
         u64 real_dec_unsafe() const {
-            return u64(u64(1) << dec_bits | the.decimal);
+            if (not inc::is_same<float_type, f80>){
+                return u64(u64(1) << dec_bits | the.decimal);
+            }
+            else{
+                return u64(the.decimal);
+            }
         }
 
-        // 对于 f80 需要用扩展精度的整数
-        // TODO:=========================================================
         u64 real_dec() const {
-            static_assert(not inc::is_same<float_type, f80>, "TODO: mfxx::real_dec need more bits integer");
-
             if (the == 0){
                 return 0;
             }
@@ -78,7 +81,7 @@ namespace mixc::define_mfxx{
         }
 
         constexpr uxx decimal_bits_full(){
-            return dec_bits + 1;
+            return dec_bits + not inc::is_same<float_type, f80>;
         }
 
         constexpr uxx precious(){
@@ -93,44 +96,31 @@ namespace mixc::define_mfxx{
             return value;
         }
     $
-}
 
-namespace mixc::define_mfxx::origin{
     using mf32 = mixc::define_mfxx::mfxx<f32, u32, 23, 8 , (1 <<  8) - 1, 7 >;
     using mf64 = mixc::define_mfxx::mfxx<f64, u64, 52, 11, (1 << 10) - 1, 17>;
     using mf80 = mixc::define_mfxx::mfxx<f80, u64, 64, 15, (1 << 14) - 1, 19>;
 
-    template<class> struct mfxx;
-    template<> 
-    xstruct(
-        xspec(mfxx, f32), xpubb(mf32)
-    )
-        using mf32::mf32;
+    template<class> struct base;
+    template<>      struct base<f32> : mf32{ using mf32::mfxx; };
+    template<>      struct base<f64> : mf64{ using mf64::mfxx; };
+    template<>      struct base<f80> : mf80{ using mf80::mfxx; };
+}
 
-        mfxx(f32 value){
-            the.value = value;
-        }
-    $
-    
-    template<> 
-    xstruct(
-        xspec(mfxx, f64), xpubb(mf64)
-    )
-        using mf64::mf64;
+namespace mixc::define_mfxx::origin{
+    using mixc::define_mfxx::mf32;
+    using mixc::define_mfxx::mf64;
+    using mixc::define_mfxx::mf80;
 
-        mfxx(f64 value){
-            the.value = value;
-        }
-    $
-    
-    template<> 
+    template<class float_t> 
     xstruct(
-        xspec(mfxx, f80), xpubb(mf80)
+        xtmpl(mfxx, float_t), 
+        xpubb(base<float_t>)
     )
-        using mf80::mf80;
+        using base<float_t>::base;
 
-        mfxx(f80 value){
-            the.value = value;
+        mfxx(float_t value) : 
+            base<float_t>(value){
         }
     $
 }
