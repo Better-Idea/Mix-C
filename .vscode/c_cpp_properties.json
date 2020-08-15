@@ -19,7 +19,7 @@
             ],
             "defines": [],
             "windowsSdkVersion": "10.0.18362.0",
-            "compilerPath": "C:/cygwin64/bin/g++.exe",
+            "compilerPath": "C:/TDM-GCC-64/bin/g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++20",
             "intelliSenseMode": "clang-x64"
