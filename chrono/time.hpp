@@ -37,9 +37,29 @@ namespace mixc::chrono_time::origin{
         xgen(hour);
         #undef  xgen
 
-        bool is_valid() const {
+        xpubgetx(is_valid, bool){
             return pminute <= 59 and psecond <= 59 and pmilisecond <= 999;
         }
+
+        xpubget_pubsetx(total_milisecond, u64)
+            xr{
+                auto ms = 
+                    u64(pmilisecond) + 
+                    u64(psecond) * (1000) + 
+                    u64(pminute) * (60 * 1000) + 
+                    u64(phour)   * (60 * 60 * 1000);
+                return ms;
+            }
+            xw{
+                phour       = value / (60 * 60 * 1000);
+                value      %= (60 * 60 * 1000);
+                pminute     = value / (60 * 1000);
+                value      %= (60 * 1000);
+                psecond     = value / (1000);
+                value      %= (1000);
+                pmilisecond = value;
+            }
+
     protected:
         field_t pmilisecond     : 10;
         field_t psecond         : 6;
