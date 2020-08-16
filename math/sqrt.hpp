@@ -8,6 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_sqrt{
+    // 注意：
+    // 此 unsafe 函数不带定义域检查，需要使用者保证 x > 0
     extern f64 sqrt_unsafe(f64 x);
 
     inline f64 sqrt(f64 x){

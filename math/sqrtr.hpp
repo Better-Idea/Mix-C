@@ -9,6 +9,9 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_sqrtr{
+    // 注意：
+    // 此 unsafe 函数不带定义域检查，需要使用者保证 x > 0
+    // 当 x = 0 时，result -> inf
     inline f64 sqrtr_unsafe(f64 x){
         return 1.0 / adv::sqrt_unsafe(x);
     }
