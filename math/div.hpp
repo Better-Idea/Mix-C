@@ -37,7 +37,7 @@ namespace mixc::math_div{
         if (ma.real_exp() - mb.real_exp() <= ma.decimal_bits()){
             return div_unsafe(a, b);
         }
-        return quo_rem_pair<type>{ a / b, inc::mod(a, b) };
+        return quo_rem_pair<type>{ a / b, (type)inc::mod(a, b) };
     }
 
     inline quo_rem_pair<f32> div(f32 a, f32 b){
