@@ -63,6 +63,37 @@
         };
     }
 
+    struct u128{
+        u64 low;
+        u64 high;
+
+        auto & l(u64 value){
+            low = value;
+            return this[0];
+        }
+
+        auto & h(u64 value){
+            high = value;
+            return this[0];
+        }
+    };
+
+    template<class type>
+    struct quo_rem_pair{
+        type quotient;
+        type remainder;
+
+        auto & q(type value){
+            quotient = value;
+            return this[0];
+        }
+
+        auto & r(type value){
+            remainder = value;
+            return this[0];
+        }
+    };
+
     using ixx               = mixc::base_type::env<sizeof(void *)>::ixx;
     using uxx               = mixc::base_type::env<sizeof(void *)>::uxx;
     using thread_counter_t  = mixc::base_type::env<sizeof(void *)>::thread_counter_t;
