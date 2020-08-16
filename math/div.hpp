@@ -13,7 +13,7 @@ namespace mixc::math_div{
     inline quo_rem_pair<type> div_unsafe_core(type a, type b){
         auto tmp = a / b;
         auto que = (type)(i64)tmp;
-        auto rem = tmp - que;
+        auto rem = (tmp - que) * b;
         return quo_rem_pair<type>{ que, rem };
     }
 
@@ -34,7 +34,7 @@ namespace mixc::math_div{
         auto ma = inc::mfxx{a};
         auto mb = inc::mfxx{b};
         
-        if (ma.real_exp() - mb.real_exp() <= ma.decimal_bits()){
+        if (ma.real_exp() - mb.real_exp() <= ixx(ma.decimal_bits())){
             return div_unsafe(a, b);
         }
         return quo_rem_pair<type>{ a / b, (type)inc::mod(a, b) };
