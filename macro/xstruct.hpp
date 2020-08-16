@@ -283,7 +283,7 @@ set_modify:                                                                     
     __set__(set_modify,name,__VA_ARGS__)                                        \
 private:
 
-#define xw                                          template<class __type> void operator()(__dph<(__COUNTER__ - __start) / 4>, __type const & value)
+#define xw                                          template<class __type> void operator()(__dph<(__COUNTER__ - __start) / 4>, __type & value)
 #define xr                                          operator()(__dph<(__COUNTER__ - __start) / 4>)
 
 #define xpubget_pubsetx(name,...)                   __getset__(public   , public    , name, __VA_ARGS__) __VA_ARGS__ 
@@ -321,4 +321,7 @@ private:
 #define xpubget(name,...)                           xpubgetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
 #define xproget(name,...)                           xprogetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
 #define xpriget(name,...)                           xprigetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
+
+// 指示 value 属于属性范式的一部分，是个弱关键字
+#define value                                       value
 #endif
