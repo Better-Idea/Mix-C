@@ -17,6 +17,7 @@ namespace mixc::extern_isa_cpu::origin{
         imm             = 0,
 
         // 赋值指令
+        // f32 <- u08/i08/u16/i16/u32/i32/u64/i64
         movsb           = 16,
         movsbx          ,
         movsw           ,
@@ -26,6 +27,8 @@ namespace mixc::extern_isa_cpu::origin{
         movsq           ,
         movsqx          ,
 
+        // 赋值指令
+        // f64 <- u08/i08/u16/i16/u32/i32/u64/i64
         movfb           ,
         movfbx          ,
         movfw           ,
@@ -35,22 +38,40 @@ namespace mixc::extern_isa_cpu::origin{
         movfq           ,
         movfqx          ,
 
+        // 赋值指令
+        // u64 <- u08/u16/u32/u64
+        // i64 <- i08/i16/i32/i64
         movqb           ,
         movqbx          ,
         movqw           ,
         movqwx          ,
         movqd           ,
         movqdx          ,
-        movqs           ,
-        movqf           ,
-
-        movss           ,
-        movff           ,
         movqq           ,
         movqqx          ,
 
+        // 赋值指令
+        // f32 <- f32/f64
+        // f64 <- f32/f64
+        // u64 <- f32/f64
+        // i64 <- f32/f64
+        movss           ,
+        movsf           ,
+        movfs           ,
+        movff           ,
+        movqs           ,
+        movqf           ,
+        movqsx          ,
+        movqfx          ,
+
+        // 广播赋值
+        bdcss           ,
+        bdcff           = bdcss + 4,
+        bdcqq           = bdcff + 4,
+        bdcqqx          = bdcqq + 4,
+
         // 转移指令
-        ifae            = 64,
+        ifae            = bdcqqx + 4,
         ifat,
         ifbe,
         ifbt,
@@ -69,6 +90,37 @@ namespace mixc::extern_isa_cpu::origin{
         jal,
         ret,
 
+        // 读取内存
+        // u64 <- mu08/mu16/mu32/mu64
+        // i64 <- mi08/mi16/mi32/mi64
+        // f32 <- mf32
+        // f64 <- mf64
+        ldb,
+        ldbx,
+        ldw,
+        ldwx,
+        ldd,
+        lddx,
+        ldq,
+        ldqx,
+        lds,
+        ldf,
+        // idx_rsv0,
+        // idx_rsv1,
+        // idx_rsv2,
+        // idx_rsv3,
+        pop             = ldf + 5,
+        pops,
+
+        stb,
+        stw,
+        std,
+        stq,
+        // stx_rsv0,
+        // stx_rsv1,
+        push            = stq + 3,
+        pushs,
+
         // 算数、逻辑运算、比较
         add,
         sub             = add   + 8,
@@ -78,31 +130,8 @@ namespace mixc::extern_isa_cpu::origin{
         cmp             = sft   + 8,
         band            = cmp   + 4,
         bor             = band  + 4,
-        bnand           = bor   + 4,
-        bxor            = bnand + 4,
-
-        // 读取内存
-        ldb             = bxor  + 4,
-        ldw,
-        ldd,
-        ldq,
-        ldbx,
-        ldwx,
-        lddx,
-        ldqx,
-        lds,
-        ldf,
-        pop,
-        pops,
-
-        stb,
-        stw,
-        std,
-        stq,
-        push,
-        pushs,
-        // std_rsv0,
-        // std_rsv1,
+        bxor            = bor   + 4,
+        bnand           = bxor  + 4,
     };
 
     enum f4_t{
