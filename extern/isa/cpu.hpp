@@ -12,7 +12,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_isa_cpu::origin{
-    enum cmd_t{
+    enum cmd_t : u08{
         // 立即数加载
         imm             = 0,
 
@@ -64,65 +64,63 @@ namespace mixc::extern_isa_cpu::origin{
         movqsx          ,
         movqfx          ,
 
-        // 广播赋值
+        // 广播式赋值
         bdcss           ,
         bdcff           = bdcss + 4,
         bdcqq           = bdcff + 4,
         bdcqqx          = bdcqq + 4,
 
         // 转移指令
-        ifae            = bdcqqx + 4,
-        ifat,
-        ifbe,
-        ifbt,
-        ifge,
-        ifgt,
-        ifle,
-        iflt,
-        ifeq,
-        ifz             = ifeq,
-        ifne,
-        ifnz            = ifne,
-        ifcf,
-        ifnc,
-        ifof,
-        jmp,
-        jal,
-        ret,
+        ifge            = bdcqqx + 4,
+        ifgt            ,
+        ifle            ,
+        iflt            ,
+        ifeq            ,
+        ifne            ,
+        ifz             ,
+        ifnz            ,
+        ifcf            ,
+        ifnc            ,
+        ifof            ,
+        ifno            ,
+        jmp             ,
+        ret             ,
+        jali            ,
+        jalr            ,
 
         // 读取内存
         // u64 <- mu08/mu16/mu32/mu64
         // i64 <- mi08/mi16/mi32/mi64
         // f32 <- mf32
         // f64 <- mf64
-        ldb,
-        ldbx,
-        ldw,
-        ldwx,
-        ldd,
-        lddx,
-        ldq,
-        ldqx,
-        lds,
-        ldf,
+        ldb             ,
+        ldbx            ,
+        ldw             ,
+        ldwx            ,
+        ldd             ,
+        lddx            ,
+        ldq             ,
+        ldqx            ,
+        lds             ,
+        ldf             ,
         // idx_rsv0,
         // idx_rsv1,
         // idx_rsv2,
         // idx_rsv3,
         pop             = ldf + 5,
-        pops,
+        pops            ,
 
-        stb,
-        stw,
-        std,
-        stq,
+        stb             ,
+        stw             ,
+        std             ,
+        stq             ,
         // stx_rsv0,
         // stx_rsv1,
         push            = stq + 3,
-        pushs,
+        pushs           ,
 
         // 算数、逻辑运算、比较
-        add,
+        add             ,
         sub             = add   + 8,
         mul             = sub   + 8,
         div             = mul   + 8,
@@ -132,6 +130,22 @@ namespace mixc::extern_isa_cpu::origin{
         bor             = band  + 4,
         bxor            = bor   + 4,
         bnand           = bxor  + 4,
+
+        // 读取用户扩展寄存器
+        rduxr           = bnand + 4,
+
+        // 写入用户扩展寄存器
+        wruxr           ,
+    };
+
+    enum rduxr_t{
+        st              , // 读取临时 f32 结果寄存器
+        ft              , // 读取临时 f64 结果寄存器
+        qt              , // 读取临时 i64/u64 结果寄存器
+        sta             , // 读取状态寄存器
+        mod             , // 预定除法余数
+        proh            , // 预定乘法高位
+        sfto            , // 预定移位溢出位组
     };
 
     enum f4_t{
@@ -168,6 +182,7 @@ namespace mixc::extern_isa_cpu::origin{
 
             template<class type>
             type read_with_clear(){
+                // 返回时执行
                 xdefer{
                     imm         = 0;
                     total_bits  = 0;
@@ -184,11 +199,12 @@ namespace mixc::extern_isa_cpu::origin{
                     if (total_bits == 0){
                         return 0;
                     }
-                    if (inc::index_of_last_set(imm) == total_bits){
-                        imm |= (u64(1) << total_bits) - 1;
+                    if (inc::index_of_last_set(imm) == total_bits - 1){
+                        imm |= u64(-1) << total_bits;
                     }
                     return type(imm);
                 }
+                // no else
             }
         private:
             u64 imm         = 0;
@@ -198,7 +214,10 @@ namespace mixc::extern_isa_cpu::origin{
         union reg_t{
             u08     ru08;
             u16     ru16;
-            u32     ru32;
+            struct{
+                u32 ru32;
+                u32 rh32;
+            };
             u64     ru64;
             i08     ri08;
             i16     ri16;
@@ -218,8 +237,6 @@ namespace mixc::extern_isa_cpu::origin{
                 };
                 u08 im;
             };
-
-            enum{ sp = 0, };
         };
 
         typedef enum register_state_t{
@@ -235,23 +252,30 @@ namespace mixc::extern_isa_cpu::origin{
             u08  target_type        : 2;
         };
 
+        struct mov2_t{
+            u08 is_f32              : 1;
+            u08 is_target           : 2;
+        };
+
         struct sta_t{
-            u08 cf                  : 1;
-            u08 zf                  : 1;
             u08 gt                  : 1;
+            u08 eq                  : 1;
+            u08 zf                  : 1;
+            u08 cf                  : 1;
+            u08 of                  : 1;
         };
 
         enum{
             general_purpose_register_count  = 16,
         };
 
-        imm_t   rim;
-        ins_t   ins;
+        imm_t   rim;   // 立即数寄存器
+        ins_t   ins;   // 指令寄存器
         reg_t   regs[general_purpose_register_count];
         reg_t   rtf32; // 临时 f32 寄存器
         reg_t   rtf64; // 临时 f64 寄存器
         reg_t   rti64; // 临时 i64 寄存器
-        sta_t   sta;
+        sta_t   sta;   // 状态寄存器
         res_t   mode[general_purpose_register_count];
 
         static i64 sign_extern(reg_t val, uxx scale){
@@ -274,45 +298,44 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void mov(){
-            auto & ra           = regs[ins.opa];
-            auto & rb           = regs[ins.opb];
+            auto & ra   = regs[ins.opa];
+            auto & rb   = regs[ins.opb];
+            auto   i    = ins.opc - movsb/*begin*/;
 
             if (ins.opc >= movss){
-                mode[ins.opa]   = res_t(ins.opc & 0x3);
+                auto   info = inc::cast<mov_t>(i);
+                auto   m    = res_t(info.target_type != is_u64 ? 
+                    info.target_type/*f32/f64*/ : 
+                    info.target_type/*uint*/ + info.with_sign_extern/*is int if this value eq 1*/
+                );
 
-                if (mode[ins.opa] == is_f32){
-                    ra.ru64     = 0;
-                    ra.rf32     = rb.rf32;
+                switch(mode[ins.opa] = m){
+                case is_f32:
+                    ra.rf32 = info.with_sign_extern ? 
+                        sign_extern(rb, info.scale) :
+                        zero_extern(rb, info.scale);
+                    break;
+                case is_f64:
+                    ra.rf64 = info.with_sign_extern ? 
+                        sign_extern(rb, info.scale) :
+                        zero_extern(rb, info.scale);
+                    break;
+                default:
+                    ra.ri64 = info.with_sign_extern ? 
+                        sign_extern(rb, info.scale) :
+                        zero_extern(rb, info.scale);
+                    break;
                 }
-                else{
-                    ra          = rb;
-                }
-                return;
             }
+            else{
+                auto info = inc::cast<mov2_t>(i);
 
-            auto i          = ins.opc - movsb/*begin*/;
-            auto info       = inc::cast<mov_t>(i);
-            auto m          = res_t(info.target_type != is_u64 ? 
-                info.target_type/*f32/f64*/ : 
-                info.target_type/*uint*/ + info.with_sign_extern/*is int if this value eq 1*/
-            );
-
-            switch(mode[ins.opa] = m){
-            case is_f32:
-                ra.rf32 = info.with_sign_extern ? 
-                    sign_extern(rb, info.scale) :
-                    zero_extern(rb, info.scale);
-                break;
-            case is_f64:
-                ra.rf64 = info.with_sign_extern ? 
-                    sign_extern(rb, info.scale) :
-                    zero_extern(rb, info.scale);
-                break;
-            default:
-                ra.ri64 = info.with_sign_extern ? 
-                    sign_extern(rb, info.scale) :
-                    zero_extern(rb, info.scale);
-                break;
+                switch(mode[ins.opa] = res_t(info.is_target)){
+                case is_f32: ra.rf32 = info.is_f32 ? f32(rb.rf32) : f32(rb.rf64); ra.rh32 = 0; return;
+                case is_f64: ra.rf64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
+                case is_u64: ra.ru64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
+                default:     ra.ri64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
+                }
             }
         }
 
@@ -381,7 +404,7 @@ namespace mixc::extern_isa_cpu::origin{
                 c     *= i;
                 a      = b - c;
                 sta.gt = b > c;
-                sta.zf = b == c;
+                sta.eq = b == c;
             });
         }
 
