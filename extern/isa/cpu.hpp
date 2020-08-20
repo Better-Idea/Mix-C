@@ -278,6 +278,11 @@ namespace mixc::extern_isa_cpu::origin{
             u08 is_target           : 2;
         };
 
+        struct bor_t{
+            u64 shift               : 6;
+            u64 mask                : 6;
+        };
+
         struct sta_t{
             u64 gt                  : 1;
             u64 eq                  : 1;
@@ -612,10 +617,10 @@ namespace mixc::extern_isa_cpu::origin{
 
             #define xgen(type)                                                                              \
             switch(sb){                                                                                     \
-            case is_f32: sta.zf = f80(type) == f80(rb.rf32); sta.gt = f80(type) > f80(rb.rf32); break;      \
-            case is_f64: sta.zf = f80(type) == f80(rb.rf64); sta.gt = f80(type) > f80(rb.rf64); break;      \
-            case is_u64: sta.zf = f80(type) == f80(rb.ru64); sta.gt = f80(type) > f80(rb.ru64); break;      \
-            case is_i64: sta.zf = f80(type) == f80(rb.ri64); sta.gt = f80(type) > f80(rb.ri64); break;      \
+            case is_f32: sta.eq = f80(type) == f80(rb.rf32); sta.gt = f80(type) > f80(rb.rf32); break;      \
+            case is_f64: sta.eq = f80(type) == f80(rb.rf64); sta.gt = f80(type) > f80(rb.rf64); break;      \
+            case is_u64: sta.eq = f80(type) == f80(rb.ru64); sta.gt = f80(type) > f80(rb.ru64); break;      \
+            case is_i64: sta.eq = f80(type) == f80(rb.ri64); sta.gt = f80(type) > f80(rb.ri64); break;      \
             }
 
             switch(sa){
@@ -628,35 +633,32 @@ namespace mixc::extern_isa_cpu::origin{
             #undef  xgen
         }
 
+        #define xgen(...)                                                  \
+        f8qx(with_hidden_imm, [&](auto & a, auto b, auto x, auto i){       \
+            auto  m = (inc::cast<bor_t>(i));                               \
+            auto  c = (u64(x) >> m.shift) & (u64(-1)) >> m.mask);          \
+            a       = __VA_ARGS__;                                         \
+            sta.zf  = a == 0;                                              \
+        });
+
         void band(){
-            f8x(not with_hidden_imm, [&](auto & a, auto b, auto c, auto){
-                a = b & c;
-                sta.cf = a != 0;
-            });
+            xgen(b & c)
         }
 
         void bor(){
-            f8x(not with_hidden_imm, [&](auto & a, auto b, auto c, auto){
-                a = b | c;
-                sta.cf = a != 0;
-            });
+            xgen(b | c)
         }
 
         void bnand(){
-            f8x(not with_hidden_imm, [&](auto & a, auto b, auto c, auto){
-                a = ~(b & c);
-                sta.cf = a != 0;
-            });
+            xgen(~(b & c))
         }
 
         void bxor(){
-            f8x(not with_hidden_imm, [&](auto & a, auto b, auto c, auto){
-                a = b ^ c;
-                sta.cf = a != 0;
-            });
+            xgen(b ^ c)
+            #undef xgen
         }
-        
 
+        
     };
 }
 
