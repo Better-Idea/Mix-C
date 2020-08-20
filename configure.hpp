@@ -77,6 +77,10 @@
     #define xis_msvc                1
 #endif
 
+#if __clang__
+    #define xis_clang               1
+#endif
+
 // check
 #if xis_os64 + xis_os32 != 1
     static_assert(xis_os64 and (sizeof(voidp) == 8));
