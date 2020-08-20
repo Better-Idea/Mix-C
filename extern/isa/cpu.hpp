@@ -122,9 +122,7 @@ namespace mixc::extern_isa_cpu::origin{
         ldft            ,
         // idx_rsv0,
         // idx_rsv1,
-        // idx_rsv2,
-        // idx_rsv3,
-        pop             = ldft + 11,
+        pop             = ldft + 3,
         pops            ,
 
         stb             ,
@@ -137,7 +135,11 @@ namespace mixc::extern_isa_cpu::origin{
         stqt            ,
         // stx_rsv0,
         // stx_rsv1,
-        push            = stq + 3,
+        // stx_rsv2,
+        // stx_rsv3,
+        // stx_rsv4,
+        // stx_rsv5,
+        push            = stq + 6,
         pushs           ,
 
         // 算数、逻辑运算、比较
@@ -300,18 +302,25 @@ namespace mixc::extern_isa_cpu::origin{
             u64 psfto               : 5;
         };
 
+        // 段偏式
+        struct seg_t{
+            u64 offset              : 32;
+            u64 segment             : 32;
+        };
+
         enum{
             general_purpose_register_count  = 0x10,
             no_predetermined                = 0x10,
         };
 
-        imm_t   rim;   // 立即数寄存器
-        ins_t   ins;   // 指令寄存器
+        imm_t   rim;    // 立即数寄存器
+        ins_t   ins;    // 指令寄存器
         reg_t   regs[general_purpose_register_count];
-        reg_t   rs;    // 临时 f32 寄存器
-        reg_t   rf;    // 临时 f64 寄存器
-        reg_t   rq;    // 临时 i64/ 寄存器
-        sta_t   sta;   // 状态寄存器
+        reg_t   rs;     // 临时 f32 寄存器
+        reg_t   rf;     // 临时 f64 寄存器
+        reg_t   rq;     // 临时 r64 寄存器
+        sta_t   sta;    // 状态寄存器
+        seg_t   pc;     // 程序计数器
         res_t   mode[general_purpose_register_count];
 
         static i64 sign_extern(reg_t val, uxx scale){
@@ -373,6 +382,34 @@ namespace mixc::extern_isa_cpu::origin{
                 default:     ra.ri64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
                 }
             }
+        }
+
+        void ifx(bool match){
+            auto offset = rim.load(ins.im, 8/*bits*/).read_with_clear<u64>();
+
+            if (not match){
+                pc.offset += offset * sizeof(ins_t);
+            }
+        }
+
+        #define xgen(name,...)  void name(){ ifx(__VA_ARGS__); }
+
+        xgen(ifge, sta.gt or sta.eq)
+        xgen(ifgt, sta.gt)
+        xgen(ifle, not (sta.gt))
+        xgen(iflt, not (sta.gt or sta.eq))
+        xgen(ifeq, sta.eq)
+        xgen(ifne, not sta.eq)
+        xgen(ifz , sta.zf)
+        xgen(ifnz, not sta.zf)
+        xgen(ifcf, sta.cf)
+        xgen(ifnc, not sta.cf)
+        xgen(ifof, sta.of)
+        xgen(ifno, not sta.of)
+        xgen(jmp , false/*force*/)
+
+        void jal(){
+            // 
         }
 
         static constexpr bool with_hidden_imm = true;
@@ -658,7 +695,7 @@ namespace mixc::extern_isa_cpu::origin{
             #undef xgen
         }
 
-        
+
     };
 }
 
