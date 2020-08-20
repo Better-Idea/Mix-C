@@ -9,8 +9,10 @@
 #include"memop/swap.hpp"
 #include"meta/is_float.hpp"
 #include"meta/is_signed.hpp"
+#include"meta/is_integer.hpp"
 #include"instruction/add.hpp"
 #include"instruction/index_of_last_set.hpp"
+#include"instruction/mul.hpp"
 #include"instruction/shift_left.hpp"
 #include"instruction/shift_right.hpp"
 #include"instruction/sub.hpp"
@@ -280,10 +282,14 @@ namespace mixc::extern_isa_cpu::origin{
             u64 gt                  : 1;
             u64 eq                  : 1;
             u64 zf                  : 1;
+
+            // 上溢
             u64 cf                  : 1;
+
+            // 下溢
             u64 of                  : 1;
 
-            // predetermined
+            // 预设(predetermined)
             u64 pmod                : 5;
             u64 pmulh               : 5;
             u64 psfto               : 5;
@@ -291,7 +297,7 @@ namespace mixc::extern_isa_cpu::origin{
 
         enum{
             general_purpose_register_count  = 0x10,
-            no_predetermined                = 0x1f,
+            no_predetermined                = 0x10,
         };
 
         imm_t   rim;   // 立即数寄存器
@@ -417,7 +423,7 @@ namespace mixc::extern_isa_cpu::origin{
             u128 m      = inc::add(b, c);
             a           = type(m.low);
 
-            if (inc::is_signed<type>){
+            if constexpr (inc::is_signed<type>){
                 auto x0 = u64(b & c) >> 63;
                 auto x1 = u64(b | c) >> 63;
 
@@ -432,6 +438,7 @@ namespace mixc::extern_isa_cpu::origin{
             }
             else{
                 sta.cf  = (m.high);
+                sta.of  = (0);
             }
         }
 
@@ -468,18 +475,66 @@ namespace mixc::extern_isa_cpu::origin{
 
         void mul(){
             f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                if (inc::is_float<decltype(a)>){
+                using ut = decltype(b);
+
+                if constexpr (inc::is_float<ut>){
                     a = b * c + i;
                 }
                 else{
-                    
+                    u128 m; 
+
+                    // 符号位不相等结果为负数，需要符号位扩展
+                    if (inc::is_signed<ut> and u64(b ^ c) >> 63){
+                        m       = inc::mul(u64(b), u64(c)); 
+                        m.high |= u64(-1) << inc::index_of_last_set(m.high);
+                        sta.cf  = 0;
+                        sta.of  = ~m.high != 0;
+                    }
+                    else {
+                        if (inc::is_signed<ut> and b < 0){
+                            m   = inc::mul(u64(-b), u64(-c));
+                        }
+                        else{
+                            m   = inc::mul(u64(b), u64(c));
+                        }
+
+                        sta.cf  = m.high != 0;
+                        sta.of  = 0;
+                    }
+
+                    if (i == 0){
+                        ; // pass
+                    }
+                    else if (not inc::is_signed<ut> or i > 0){
+                        u128 x  = inc::add(m.low, u64(i));
+                        m.low   = x.low;
+                        m.high  = m.high + x.high;
+                    }
+                    else{
+                        u128 x  = inc::sub(m.low, u64(i));
+                        m.low   = x.low;
+                        m.high  = m.high - x.high;
+                    }
+
+                    if (a = m.low; sta.pmulh != no_predetermined){
+                        regs[sta.pmulh] = m.high;
+                        sta.pmulh       = no_predetermined;
+                    }
                 }
             });
         }
 
         void div(){
             f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                a = b / c + i;
+                using ut = decltype(b);
+                a        = b / c + i;
+
+                if constexpr (inc::is_integer<ut>){
+                    if (sta.pmod != no_predetermined){
+                        regs[sta.pmod] = b % c;
+                        sta.pmod = no_predetermined;
+                    }
+                }
             });
         }
 
