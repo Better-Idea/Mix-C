@@ -7,8 +7,13 @@
 #include"macro/xdefer.hpp"
 #include"memop/cast.hpp"
 #include"memop/swap.hpp"
-#include"meta/is_same.hpp"
+#include"meta/is_float.hpp"
+#include"meta/is_signed.hpp"
+#include"instruction/add.hpp"
 #include"instruction/index_of_last_set.hpp"
+#include"instruction/shift_left.hpp"
+#include"instruction/shift_right.hpp"
+#include"instruction/sub.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_isa_cpu::origin{
@@ -95,25 +100,39 @@ namespace mixc::extern_isa_cpu::origin{
         // f64 <- mf64
         ldb             ,
         ldbx            ,
+        ldbt            ,
+        ldbtx           ,
         ldw             ,
         ldwx            ,
+        ldwt            ,
+        ldwtx           ,
         ldd             ,
         lddx            ,
+        lddt            ,
+        lddtx           ,
         ldq             ,
         ldqx            ,
+        ldqt            ,
+        ldqtx           ,
         lds             ,
         ldf             ,
+        ldst            ,
+        ldft            ,
         // idx_rsv0,
         // idx_rsv1,
         // idx_rsv2,
         // idx_rsv3,
-        pop             = ldf + 5,
+        pop             = ldft + 11,
         pops            ,
 
         stb             ,
+        stbt            ,
         stw             ,
+        stwt            ,
         std             ,
+        stdt            ,
         stq             ,
+        stqt            ,
         // stx_rsv0,
         // stx_rsv1,
         push            = stq + 3,
@@ -188,14 +207,15 @@ namespace mixc::extern_isa_cpu::origin{
                     total_bits  = 0;
                 };
 
-                if constexpr (inc::is_same<type, f32> or inc::is_same<type, f64>){
+                if constexpr (inc::is_float<type>){
                     auto bits = sizeof(type) * 8;
                     if (total_bits < bits){
                         imm <<= bits - total_bits;
                     }
                     return inc::cast<type>(imm);
                 }
-                else if constexpr (inc::is_same<type, u64> or inc::is_same<type, i64>){
+                //  inc::is_integer<type>
+                else{
                     if (total_bits == 0){
                         return 0;
                     }
@@ -204,7 +224,6 @@ namespace mixc::extern_isa_cpu::origin{
                     }
                     return type(imm);
                 }
-                // no else
             }
         private:
             u64 imm         = 0;
@@ -258,23 +277,29 @@ namespace mixc::extern_isa_cpu::origin{
         };
 
         struct sta_t{
-            u08 gt                  : 1;
-            u08 eq                  : 1;
-            u08 zf                  : 1;
-            u08 cf                  : 1;
-            u08 of                  : 1;
+            u64 gt                  : 1;
+            u64 eq                  : 1;
+            u64 zf                  : 1;
+            u64 cf                  : 1;
+            u64 of                  : 1;
+
+            // predetermined
+            u64 pmod                : 5;
+            u64 pmulh               : 5;
+            u64 psfto               : 5;
         };
 
         enum{
-            general_purpose_register_count  = 16,
+            general_purpose_register_count  = 0x10,
+            no_predetermined                = 0x1f,
         };
 
         imm_t   rim;   // 立即数寄存器
         ins_t   ins;   // 指令寄存器
         reg_t   regs[general_purpose_register_count];
-        reg_t   rtf32; // 临时 f32 寄存器
-        reg_t   rtf64; // 临时 f64 寄存器
-        reg_t   rti64; // 临时 i64 寄存器
+        reg_t   rs;    // 临时 f32 寄存器
+        reg_t   rf;    // 临时 f64 寄存器
+        reg_t   rq;    // 临时 i64/ 寄存器
         sta_t   sta;   // 状态寄存器
         res_t   mode[general_purpose_register_count];
 
@@ -292,7 +317,7 @@ namespace mixc::extern_isa_cpu::origin{
             auto idx  = 1ull << ((1ull << scale) * 8);
             auto mask = idx - 1;
 
-            // zero exter
+            // zero extern
             val.ri64 = val.ri64 & mask;
             return val.ri64;
         }
@@ -352,10 +377,10 @@ namespace mixc::extern_isa_cpu::origin{
         rim.load(ins.opb, 4/*bits*/);                                                                                                           \
                                                                                                                                                 \
         switch(m){                                                                                                                              \
-        case f8aai : invoke(ra.r ## type , ra.r ## type, rim.read_with_clear<type>(), 0);              return;                                  \
-        case f8aia : invoke(ra.r ## type , rim.read_with_clear<type>(), ra.r ## type, 0);              return;                                  \
-        case f8tai : invoke(rt           , ra.r ## type, rim.read_with_clear<type>(), 0);              return;                                  \
-        case f8tia : invoke(rt           , rim.read_with_clear<type>(), ra.r ## type, 0);              return;                                  \
+        case f8aai : invoke(ra.r ## type , ra.r ## type, rim.read_with_clear<type>(), 0); return;                                               \
+        case f8aia : invoke(ra.r ## type , rim.read_with_clear<type>(), ra.r ## type, 0); return;                                               \
+        case f8tai : invoke(rt           , ra.r ## type, rim.read_with_clear<type>(), 0); return;                                               \
+        case f8tia : invoke(rt           , rim.read_with_clear<type>(), ra.r ## type, 0); return;                                               \
         }
 
         template<class opr>
@@ -365,34 +390,62 @@ namespace mixc::extern_isa_cpu::origin{
             auto   m  = f8_t(ins.opc & 0x7);
 
             switch(res_t(mode[ins.opa])){
-            case is_f32: xgen(rtf32.f32, f32) break;
-            case is_f64: xgen(rtf64.f64, f64) break;
-            case is_u64: xgen(rti64.u64, u64) break;
-            case is_i64: xgen(rti64.i64, i64) break;
+            case is_f32: xgen(rs.f32, f32) break;
+            case is_f64: xgen(rf.f64, f64) break;
+            case is_u64: xgen(rq.u64, u64) break;
+            case is_i64: xgen(rq.i64, i64) break;
             }
         }
 
         template<class opr>
-        void f8x(bool with_hidden_imm, opr const & invoke){
+        void f8qx(bool with_hidden_imm, opr const & invoke){
             auto & ra = regs[ins.opa];
             auto & rb = regs[ins.opb];
             auto   m  = f8_t(ins.opc & 0x7);
 
             if (mode[ins.opa] == is_i64){
-                xgen(rti64.i64, i64)
+                xgen(rq.i64, i64)
             }
             else{
-                xgen(rti64.u64, u64)
+                xgen(rq.u64, u64)
+            }
+            #undef xgen
+        }
+
+        template<class type>
+        void add(type & a, type b, type c){
+            u128 m      = inc::add(b, c);
+            a           = type(m.low);
+
+            if (inc::is_signed<type>){
+                auto x0 = u64(b & c) >> 63;
+                auto x1 = u64(b | c) >> 63;
+
+                // 结果值的符号位
+                auto x2 = u64(a) >> 63;
+
+                // 下溢：同时为负数时，结果符号位变化
+                sta.cf  = (x0 != 0 and x2 == 0);
+
+                // 上溢：同时为正数，结果符号位变化
+                sta.of  = (x1 == 0 and x2 == 1);
+            }
+            else{
+                sta.cf  = (m.high);
             }
         }
-        #undef  xgen
 
         void add(){
             f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
                 if (i == 0){
                     i = 1;
                 }
-                a = b + c * i;
+                if (c *= i; inc::is_float<decltype(a)>){
+                    a = b + c;
+                }
+                else{
+                    add(a, b, c);
+                }
             });
         }
 
@@ -401,8 +454,13 @@ namespace mixc::extern_isa_cpu::origin{
                 if (i == 0){
                     i = 1;
                 }
-                c     *= i;
-                a      = b - c;
+                if (c *= i; inc::is_float<decltype(a)>){
+                    a = b - c;
+                }
+                else{
+                    add(a, b, 0 - c);
+                }
+
                 sta.gt = b > c;
                 sta.eq = b == c;
             });
@@ -410,7 +468,12 @@ namespace mixc::extern_isa_cpu::origin{
 
         void mul(){
             f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                a = b * c + i;
+                if (inc::is_float<decltype(a)>){
+                    a = b * c + i;
+                }
+                else{
+                    
+                }
             });
         }
 
@@ -421,9 +484,8 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void sft(){
-            f8x(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                // i as mask
-                // c 为正数表示右移，为负数表示左移
+            f8qx(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
+                // 默认时保留 a 中的所有位
                 if (i == 0){
                     i = decltype(i)(-1);
                 }
@@ -431,27 +493,34 @@ namespace mixc::extern_isa_cpu::origin{
                     i = (1ull << i) - 1;
                 }
 
-                enum{ bits = 8 * sizeof(b) };
+                u64 overflow_part;
+                i64 bits = i64(c);
 
-                if (bits < c or c < -bits){
-                    a       = 0;
-                    sta.cf  = 0;
-                }
-                else if (c == bits){
-                    a       = 0;
-                    sta.cf  = (b >> (bits - 1)) & 1;
-                }
-                else if (c == -bits){
-                    a       = 0;
-                    sta.cf  = b & 1;
-                }
-                else if (c >= 0){
-                    a       = (b << c) & i;
-                    sta.cf  = (b >> (bits - c) & 1;
+                if (bits >= 0){
+                    u128 m          = inc::shift_right(u64(b), u64(bits));
+                    overflow_part   = m.low;
+                    a               = m.high;
+                    sta.cf          = overflow_part >> 63;
+
+                    if constexpr (inc::is_signed<decltype(b)>){
+                        if (a != 0){
+                            a |= u64(-1) << inc::index_of_last_set(a);
+                        }
+                    }
                 }
                 else{
-                    a       = (b >> ( 0 - c)) & i;
-                    sta.cf  = (b >> (-1 - c)) & 1;
+                    u128 m          = inc::shift_left(u64(b), u64(-bits));
+                    overflow_part   = m.high;
+                    a               = m.low;
+                    sta.cf          = overflow_part & 1;
+                }
+
+                a                 &= i;
+                sta.zf             = a == 0;
+
+                if (sta.psfto != no_predetermined){
+                    regs[sta.psfto] = overflow_part;
+                    sta.psfto       = no_predetermined;
                 }
             });
         }
