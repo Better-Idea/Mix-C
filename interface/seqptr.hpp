@@ -12,7 +12,7 @@
 #pragma pop_macro("xuser")
 
 #define xseqptr(...)                                                                \
-::mixc::interface_seqptr::seqptr<__VA_ARGS__> subseq(::mixc::iinterval i) const {   \
+::mixc::interface_seqptr::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {      \
     using ptr_t  = __VA_ARGS__ *;                                                   \
     using ptrc_t = __VA_ARGS__ const *;                                             \
     auto  len    = the.length();                                                    \
@@ -82,6 +82,10 @@ namespace mixc::interface_seqptr{
             return len;
         }
 
+        the_t subseq(inc::iinterval i) const {
+            return seq(i);
+        }
+    private:
         xseqptr(item_t);
     $
 }
