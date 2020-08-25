@@ -61,9 +61,14 @@ namespace mixc::docker_adapter_bit_indicator::origin{
     template<class callback>
     inline uxx bmp_find(uxx * bmp, const uxx * level_lut, uxx height, callback invoke, uxx boundary){
         auto is_find_last = invoke == & inc::index_of_last_set<uxx>;
+        uxx  w      = boundary >> step_exp;
+
+        if (not is_find_last and w >= level_lut[0]){
+            return not_exist;
+        }
+
         uxx  i      = 0;
         uxx  msk    = is_find_last ? uxx(-1) >> (bwidth - 1 - (boundary & mask)) : uxx(-1) << (boundary & mask);
-        uxx  w      = boundary >> step_exp;
         uxx  r      = invoke(bmp[w] & msk);
 
         if (r != not_exist){
