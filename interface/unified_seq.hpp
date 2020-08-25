@@ -10,25 +10,32 @@
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
+namespace mixc::meta_unified_seq{
+    template<class seq_t>
+    inline auto invoke(){
+        using item_t     = inc::item_origin_of<seq_t>;
+        using plan_a     = inc::seqptr<item_t>;
+        using plan_b     = inc::ranger<item_t>;
+
+        if constexpr (inc::has_cast<plan_a, seq_t>){
+            return plan_a();
+        }
+        else{
+            return plan_b();
+        }
+    }
+}
+
 namespace mixc::meta_unified_seq::origin{
     template<class seq_t>
     concept unified_seq_t = 
         inc::has_cast<inc::seqptr<inc::item_origin_of<seq_t>>, seq_t> or 
         inc::has_cast<inc::ranger<inc::item_origin_of<seq_t>>, seq_t>;
 
-    template<unified_seq_t seq_t, class invoke_t>
-    inline auto unified_seq_call(seq_t const & seq, invoke_t const & call){
-        using item_t     = inc::item_origin_of<seq_t>;
-        using plan_a     = inc::seqptr<item_t>;
-        using plan_b     = inc::ranger<item_t>;
-
-        if constexpr (inc::has_cast<plan_a, seq_t>){
-            return call(plan_a(seq));
-        }
-        else{
-            return call(plan_b(seq));
-        }
-    }
+    template<unified_seq_t seq_t>
+    using unified_seq = decltype(
+        invoke<seq_t>()
+    );
 }
 
 #endif
