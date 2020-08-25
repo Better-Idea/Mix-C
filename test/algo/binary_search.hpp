@@ -5,8 +5,6 @@
 #define xuser mixc::algo_test_binary_search
 #include"algo/binary_search.hpp"
 #include"docker/array.hpp"
-#include"lang/cxx/+.hpp"
-#include"lang/cxx.hpp"
 #include"macro/xassert.hpp"
 #pragma pop_macro("xuser")
 
@@ -42,18 +40,18 @@ namespace mixc::algo_test_binary_search{
         uxx wanted;
         
         for (uxx length = 1; length <= c.length(); length++){
-            auto r = c.range(co{0, length});
+            auto r = c.subseq(co{0, length});
 
             for (uxx find = 0; find < length * 2 + 2; find++){
-                actual = inc::binary_search<uxx>::match(r, find);
+                actual = inc::binary_search::match(r, find);
                 wanted = search(length, find, 0);
                 xassert(actual == wanted or c[actual] == c[wanted], length, find, actual, wanted);
 
-                actual = inc::binary_search<uxx>::less_equals(r, find);
+                actual = inc::binary_search::less_equals(r, find);
                 wanted = search(length, find, 1);
                 xassert(actual == wanted or c[actual] == c[wanted], length, find, actual, wanted);
 
-                actual = inc::binary_search<uxx>::greater_equals(r, find);
+                actual = inc::binary_search::greater_equals(r, find);
                 wanted = search(length, find, 2);
                 xassert(actual == wanted or c[actual] == c[wanted], length, find, actual, wanted);
             }
