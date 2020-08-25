@@ -40,7 +40,7 @@ namespace mixc::algo_test_binary_search{
         uxx wanted;
         
         for (uxx length = 1; length <= c.length(); length++){
-            auto r = c.subseq(co{0, length});
+            auto r = c.range(co{0, length});
 
             for (uxx find = 0; find < length * 2 + 2; find++){
                 actual = inc::binary_search::match(r, find);

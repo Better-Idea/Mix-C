@@ -25,7 +25,7 @@ namespace mixc::algo_test_sort{
                 for(uxx k = 0; k < i; k++){
                     a[k] = b[k] = random<u32>();
                 }
-                auto subseq = b.subseq(co{0, i});
+                auto subseq = b.range(co{0, i});
                 std::sort(a.begin(), a.begin() + i);
                 inc::sort::heap(subseq);
 
