@@ -40,6 +40,11 @@ namespace mixc::interface_seqptr{
         seqptr(item_t * ptr, uxx len) : 
             ptr(ptr), len(len){}
 
+        template<uxx len> 
+        seqptr(item_t origin_array[len]) : 
+            seqptr(origin_array, len){
+        }
+
         template<class object> requires(
             inc::signature<uxx()>::has(& object::length) and
             (

@@ -130,6 +130,10 @@ namespace mixc::interface_ranger{
             base(xref origin_array, len, 0){
         }
 
+        ranger(item_t * origin_array, uxx len) : 
+            base(xref origin_array, len, 0){
+        }
+
         ranger(inc::initializer_list<item_t> impl):
             base(xref impl, impl.size(), 0){
         }
