@@ -15,7 +15,7 @@ namespace mixc::algo_sort{
     struct sort{
         template<inc::unified_seq_t seq_t>
         static void heap(
-            seq_t                               seq,
+            seq_t                      const & seq,
             inc::can_compare<
                 inc::item_origin_of<seq_t>
             >                                   compare = 

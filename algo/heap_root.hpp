@@ -103,9 +103,9 @@ namespace mixc::algo_heap_root{
 
         template<inc::unified_seq_t seq_t>
         static auto pop(
-            seq_t                               seq, 
+            seq_t                       const & seq, 
             uxx                                 length, 
-            inc::item_origin_of<seq_t> const &  insert_value, 
+            inc::item_origin_of<seq_t>  const & insert_value, 
             inc::can_compare<
                 inc::item_origin_of<seq_t>
             >                                   compare = 
