@@ -1,3 +1,10 @@
+/*
+unified_seq 
+- 提供 seqptr<item_t>、ranger<item_t> 两种标准
+- 优先使用 seqptr<item_t> 以实现完整性能
+- 当需要使用反序功能时才会选择 ranger<item_t>
+- seqptr<item_t> 仅支持正序范围的切片访问
+*/
 #ifndef xpack_meta_unified_seq
 #define xpack_meta_unified_seq
 #pragma push_macro("xuser")
