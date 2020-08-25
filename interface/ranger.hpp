@@ -21,11 +21,6 @@ namespace mixc::interface_ranger{
     )
     private:
         enum{ mask = sizeof(uxx) * 2 - 1 };
-        
-        void check() {
-            constexpr uxx mask = base::mask << 1 | 1;
-            xdebug_fail((uxx(base::itr) & mask) != 0);
-        }
 
         template<class object, class return_type>
         return_type pos(uxx index){
@@ -149,7 +144,24 @@ namespace mixc::interface_ranger{
             return access<item_t &>(index);
         }
 
-        ranger<item_t> range(iinterval i){
+        the_t backward(uxx offset) const {
+            if (the_t r = the; is_positive_order()){
+                r.ofs += offset;
+                r.len -= offset;
+                return r;
+            }
+            else{
+                r.ofs -= offset;
+                r.len -= offset;
+                return r;
+            }
+        }
+
+        the_t forward(uxx offset) const {
+            return backward(uxx(0) - offset);
+        }
+
+        ranger<item_t> subseq(iinterval i){
             ranger<item_t> r = the;
             i.normalize(the.length());
 

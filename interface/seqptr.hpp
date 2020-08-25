@@ -11,18 +11,18 @@
 #include"memop/signature.hpp"
 #pragma pop_macro("xuser")
 
-#define xseqptr(...)                                                            \
-::mixc::interface_seqptr::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {  \
-    using ptr_t  = __VA_ARGS__ *;                                               \
-    using ptrc_t = __VA_ARGS__ const *;                                         \
-    auto  len    = the.length();                                                \
-    auto  ptr    = (ptr_t)(ptrc_t)this[0];                                      \
-    i.normalize(len);                                                           \
-    return ::mixc::interface_seqptr::seqptr<__VA_ARGS__>(                       \
-        ptr + i.left(),                                                         \
-        i.right() - i.left() + 1                                                \
-    );                                                                          \
-}                                                                               \
+#define xseqptr(...)                                                                \
+::mixc::interface_seqptr::seqptr<__VA_ARGS__> subseq(::mixc::iinterval i) const {   \
+    using ptr_t  = __VA_ARGS__ *;                                                   \
+    using ptrc_t = __VA_ARGS__ const *;                                             \
+    auto  len    = the.length();                                                    \
+    auto  ptr    = (ptr_t)(ptrc_t)this[0];                                          \
+    i.normalize(len);                                                               \
+    return ::mixc::interface_seqptr::seqptr<__VA_ARGS__>(                           \
+        ptr + i.left(),                                                             \
+        i.right() - i.left() + 1                                                    \
+    );                                                                              \
+}                                                                                   \
 xranger(__VA_ARGS__)
 
 namespace mixc::interface_seqptr{
@@ -63,6 +63,14 @@ namespace mixc::interface_seqptr{
 
         operator item_t const *() const{
             return ptr;
+        }
+
+        the_t backward(uxx offset) const {
+            return the_t(ptr + offset, len - offset);
+        }
+
+        the_t forward(uxx offset) const {
+            return the_t(ptr - offset, len + offset);
         }
 
         uxx length() const {
