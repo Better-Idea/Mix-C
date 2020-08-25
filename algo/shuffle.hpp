@@ -4,16 +4,16 @@
 #undef  xuser
 #define xuser mixc::algo_shuffle
 #include"define/base_type.hpp"
-#include"interface/ranger.hpp"
+#include"interface/unified_seq.hpp"
 #include"math/random.hpp"
 #include"memop/addressof.hpp"
 #include"memop/swap.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_shuffle{
-    template<class item_t>
-    inline void shuffle(inc::ranger<item_t> const & range){
-        uxx length  = range.length();
+    template<inc::unified_seq_t seq_t>
+    inline void shuffle_core(seq_t seq){
+        uxx length  = seq.length();
         uxx i       = 0;
         uxx w       = uxx(1) << (sizeof(uxx) * 8 / 2);
         uxx a;
@@ -28,8 +28,8 @@ namespace mixc::algo_shuffle{
             b %= length;
 
             inc::swap(
-                xref range[a],
-                xref range[b]
+                xref seq[a],
+                xref seq[b]
             );
         }
         else for(; i < length; i++){
@@ -37,10 +37,17 @@ namespace mixc::algo_shuffle{
             b = inc::random<uxx>() % length;
 
             inc::swap(
-                xref range[a],
-                xref range[b]
+                xref seq[a],
+                xref seq[b]
             );
         }
+    }
+
+    template<inc::unified_seq_t seq_t>
+    inline void shuffle(seq_t const & seq){
+        shuffle_core(
+            inc::unified_seq<seq_t>(seq)
+        );
     }
 }
 
