@@ -18,6 +18,12 @@ namespace mixc::interface_can_compare{
         [] xcmp(type){
             return inc::cmp<type>(left, right);
         };
+
+    template<class type>
+    inline auto const & default_compare_neg = 
+        [] xcmp(type){
+            return inc::cmp<type>(right, left);
+        };
 }
 #endif
 
