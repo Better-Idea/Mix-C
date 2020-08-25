@@ -30,7 +30,7 @@ namespace mixc::lang_wxx_is_punctuation{
             static_assert(sizeof(type) <= 2);
             auto end = sizeof(type) == 1 ? ascii_lut_size : -1;
             auto uns = inc::unsigned_type<type>(the);
-            return inc::binary_search<u16>::match(lut.range(co{0, end}), u16(uns)) != not_exist;
+            return inc::binary_search::match(lut.subseq(co{0, end}), u16(uns)) != not_exist;
         }
     };
 }
