@@ -72,15 +72,13 @@ namespace mixc::algo_binary_search{
 
     template<inc::unified_seq_t seq_t>
     inline auto match_template(
-        seq_t                       const & seq,
-        inc::item_origin_of<seq_t>  const & value,
-        inc::can_compare<
-            inc::item_origin_of<seq_t>>     compare) {
+        seq_t                                       const & seq,
+        inc::item_origin_of<seq_t>                  const & value,
+        inc::can_compare< inc::item_origin_of<seq_t> >      compare) {
 
-        return inc::unified_seq_call(seq, [&](auto list){
-            return match_core(list.length(), [&](uxx current){
-                return compare(list[current], value);
-            });
+        inc::unified_seq<seq_t> list(seq);
+        return match_core(list.length(), [&](uxx current){
+            return compare(list[current], value);
         });
     }
 
