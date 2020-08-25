@@ -6,33 +6,37 @@
 #include"algo/heap_root.hpp"
 #include"define/base_type.hpp"
 #include"interface/can_compare.hpp"
-#include"interface/ranger.hpp"
+#include"interface/unified_seq.hpp"
 #include"macro/xcmp.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_sort{
-    template<class item_t>
     struct sort{
-        static void des(
-            inc::ranger<item_t>      range,
-            inc::can_compare<item_t> compare = inc::default_compare<item_t>){
+        template<inc::unified_seq_t seq_t>
+        static void heap(
+            seq_t                               seq,
+            inc::can_compare<
+                inc::item_origin_of<seq_t>
+            >                                   compare = 
+            inc::default_compare<
+                inc::item_origin_of<seq_t>
+            >){
+            
+            inc::unified_seq<seq_t> list(seq);
 
-            for(uxx i = 1, length = range.length(); i < length; i++) {
-                inc::heap_root<item_t>::push(range, i, range[i], compare);
-            }
-
-            for(uxx i = range.length(); --i > 0; ) {
-                range[i] = inc::heap_root<item_t>::pop(range, i + 1, range[i], compare);
-            }
-        }
-
-        static void asc(
-            inc::ranger<item_t>      range,
-            inc::can_compare<item_t> compare = inc::default_compare<item_t>){
-
-            des(range, [&]xcmp(item_t){
+            using item_t = inc::item_origin_of<seq_t>;
+            auto neg = [&]xcmp(item_t){
                 return compare(right, left);
-            });
+            };
+
+            for(uxx i = 1; i < list.length(); i++) {
+                inc::heap_root::push(list, i, list[i], neg);
+            }
+
+            for(uxx i = list.length(); --i > 0; ) {
+                list[i] = inc::heap_root::pop(list, i + 1, list[i], neg);
+            }
         }
     };
 }
