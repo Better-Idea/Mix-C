@@ -303,9 +303,16 @@ namespace mixc::extern_isa_cpu::origin{
         };
 
         // 段偏式
-        struct seg_t{
-            u64 offset              : 32;
-            u64 segment             : 32;
+        union seg_t{
+            struct{
+                u16 position;
+                u16 area;
+            };
+
+            struct{
+                u32 offset;
+                u32 segment;
+            };
         };
 
         enum{
@@ -408,8 +415,12 @@ namespace mixc::extern_isa_cpu::origin{
         xgen(ifno, not sta.of)
         xgen(jmp , false/*force*/)
 
-        void jal(){
-            // 
+        void jal(seg_t address){
+            
+
+            if (address.segment != 0){
+
+            }
         }
 
         static constexpr bool with_hidden_imm = true;
