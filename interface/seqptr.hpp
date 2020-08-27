@@ -9,10 +9,13 @@
 #include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
+#include"meta/is_same.hpp"
+#include"meta/item_origin_of.hpp"
+#include"meta/is_origin_array.hpp"
 #pragma pop_macro("xuser")
 
 #define xseqptr(...)                                                                \
-::mixc::interface_seqptr::seqptr<__VA_ARGS__> seq(::mixc::iinterval i) const {      \
+::mixc::interface_seqptr::seqptr<__VA_ARGS__> subseq(::mixc::iinterval i) const {   \
     using ptr_t  = __VA_ARGS__ *;                                                   \
     using ptrc_t = __VA_ARGS__ const *;                                             \
     auto  len    = the.length();                                                    \
@@ -40,9 +43,13 @@ namespace mixc::interface_seqptr{
         seqptr(item_t * ptr, uxx len) : 
             ptr(ptr), len(len){}
 
-        template<uxx len> 
-        seqptr(item_t origin_array[len]) : 
-            seqptr(origin_array, len){
+        template<class type>
+        requires(
+            inc::is_origin_array<type> and
+            inc::is_same<item_t, inc::item_origin_of<type>>
+        )
+        seqptr(type const & list) :
+            seqptr((item_t *)list, sizeof(type) / sizeof(item_t)){
         }
 
         template<class object> requires(
@@ -82,10 +89,6 @@ namespace mixc::interface_seqptr{
             return len;
         }
 
-        the_t subseq(inc::iinterval i) const {
-            return seq(i);
-        }
-    private:
         xseqptr(item_t);
     $
 }

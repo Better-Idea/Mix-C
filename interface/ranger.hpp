@@ -7,6 +7,9 @@
 #include"macro/xalign.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
+#include"meta/is_same.hpp"
+#include"meta/item_origin_of.hpp"
+#include"meta/is_origin_array.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser") 
 
@@ -125,13 +128,17 @@ namespace mixc::interface_ranger{
             base(xref impl, impl.length(), 0){
         }
 
-        template<uxx len> 
-        ranger(item_t origin_array[len]) : 
+        ranger(item_t * origin_array, uxx len) : 
             base(xref origin_array, len, 0){
         }
 
-        ranger(item_t * origin_array, uxx len) : 
-            base(xref origin_array, len, 0){
+        template<class type>
+        requires(
+            inc::is_origin_array<type> and
+            inc::is_same<item_t, inc::item_origin_of<type>>
+        )
+        ranger(type const & list) :
+            ranger((item_t *)list, sizeof(type) / sizeof(item_t)){
         }
 
         ranger(inc::initializer_list<item_t> impl):
