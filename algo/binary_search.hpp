@@ -32,39 +32,37 @@ namespace mixc::algo_binary_search{
         };
 
         result_t result;
-        uxx      left   = 0;
-        uxx      center = length >> 1;
-        uxx      right  = length - 1;
-        uxx      backup = 0;
+        i64      left   = 0;
+        i64      center = i64(length >> 1);
+        i64      right  = i64(length - 1);
+        i64      backup = 0;
         ixx      cmp    = 0;
 
         for (; left <= right; center = (left + right) >> 1) {
-            if (backup = center, cmp = compare(center); cmp > 0) {
-                if (right = center - 1; i64(ixx(right)) < 0){
-                    break;
-                }
+            if (backup = center, cmp = compare(uxx(center)); cmp > 0) {
+                right = center - 1;
             }
             else if (cmp < 0) {
                 left = center + 1;
             }
             else {
-                result.match = center;
+                result.match = uxx(center);
                 return result;
             }
         }
 
         if (cmp > 0) {
-            result.grater_then_target = backup;
+            result.grater_then_target = uxx(backup);
 
             if (backup > 0) {
-                result.less_then_target = backup - 1;
+                result.less_then_target = uxx(backup - 1);
             }
         }
         else {
-            result.less_then_target = backup;
+            result.less_then_target = uxx(backup);
 
             if (backup + 1 < length) {
-                result.grater_then_target = backup + 1;
+                result.grater_then_target = uxx(backup + 1);
             }
         }
         return result;
