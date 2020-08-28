@@ -73,12 +73,52 @@ namespace mixc::extern_isa_cpu::origin{
 
         // 广播式赋值
         bdcss           ,
-        bdcff           = bdcss + 4,
-        bdcqq           = bdcff + 4,
-        bdcqqx          = bdcqq + 4,
+        bdcsi           = bdcss  + 4,
+        bdcff           = bdcsi  + 4,
+        bdcfi           = bdcff  + 4,
+        bdcqq           = bdcfi  + 4,
+        bdcqi           = bdcqq  + 4,
+        bdcqqx          = bdcqi  + 4,
+        bdcqix          = bdcqqx + 4,
+
+        // 读取内存
+        // u64 <- mu08/mu16/mu32/mu64
+        // i64 <- mi08/mi16/mi32/mi64
+        // f32 <- mf32
+        // f64 <- mf64
+        ldb             = bdcqix + 4,
+        ldbx            = ldb    + 2,
+        ldw             = ldbx   + 2,
+        ldwx            = ldw    + 2,
+        ldd             = ldwx   + 2,
+        lddx            = ldd    + 2,
+        ldq             = lddx   + 2,
+        ldqx            = ldq    + 2,
+
+        lds             = ldqx   + 2,
+        ldf             = lds    + 2,
+
+        pop             = ldf    + 2,
+        push            = pop    + 2,
+
+        // 写入内存
+        // u08/i08 -> mu08
+        // u16/i16 -> mu16
+        // u32/i32 -> mu32
+        // u64/i64 -> mu64
+        stb             = push   + 2,
+        stw             = stb    + 2,
+        std             = stw    + 2,
+        stq             = std    + 2,
+
+        // 比较带转移指令
+        cifge           = stq    + 2,
+        cifgt           = cifge  + 4,
+        cifeq           = cifge  + 4,
+        cifne           = cifeq  + 4,
 
         // 转移指令
-        ifge            = bdcqqx + 4,
+        ifge            = cifne  + 4,
         ifgt            ,
         ifle            ,
         iflt            ,
@@ -95,67 +135,21 @@ namespace mixc::extern_isa_cpu::origin{
         jali            ,
         jalr            ,
 
-        // 读取内存
-        // u64 <- mu08/mu16/mu32/mu64
-        // i64 <- mi08/mi16/mi32/mi64
-        // f32 <- mf32
-        // f64 <- mf64
-        ldb             ,
-        ldbx            ,
-        ldbt            ,
-        ldbtx           ,
-        ldw             ,
-        ldwx            ,
-        ldwt            ,
-        ldwtx           ,
-        ldd             ,
-        lddx            ,
-        lddt            ,
-        lddtx           ,
-        ldq             ,
-        ldqx            ,
-        ldqt            ,
-        ldqtx           ,
-        lds             ,
-        ldf             ,
-        ldst            ,
-        ldft            ,
-        // idx_rsv0,
-        // idx_rsv1,
-        pop             = ldft + 3,
-        pops            ,
-
-        stb             ,
-        stbt            ,
-        stw             ,
-        stwt            ,
-        std             ,
-        stdt            ,
-        stq             ,
-        stqt            ,
-        // stx_rsv0,
-        // stx_rsv1,
-        // stx_rsv2,
-        // stx_rsv3,
-        // stx_rsv4,
-        // stx_rsv5,
-        push            = stq + 6,
-        pushs           ,
-
         // 算数、逻辑运算、比较
         add             ,
-        sub             = add   + 8,
-        mul             = sub   + 8,
-        div             = mul   + 8,
-        sft             = div   + 8,
-        cmp             = sft   + 8,
-        band            = cmp   + 4,
-        bor             = band  + 4,
-        bxor            = bor   + 4,
-        bnand           = bxor  + 4,
+        sub             = add    + 8,
+        mul             = sub    + 8,
+        div             = mul    + 8,
+        shr             = div    + 8,
+        shl             = shr    + 8,
+        cmp             = shl    + 8,
+        band            = cmp    + 4,
+        bor             = band   + 4,
+        bxor            = bor    + 4,
+        bnand           = bxor   + 4,
 
         // 读取用户扩展寄存器
-        rduxr           = bnand + 4,
+        rduxr           = bnand  + 4,
 
         // 写入用户扩展寄存器
         wruxr           ,
