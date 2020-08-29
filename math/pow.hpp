@@ -11,12 +11,9 @@ namespace mixc::math_pow{
     inline type pow(type a, uxx x){
         type r       = 1;
 
-        while(x){
+        for(; x != 0; x >>= 1, a *= a){
             if (x & 1){
                 r *= a;
-            }
-            if (x >>= 1; x != 0){
-                a *= a;
             }
         }
         return r;
