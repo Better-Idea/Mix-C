@@ -20,30 +20,47 @@
 
 namespace mixc::extern_isa_cpu::origin{
     enum cmd_t : u08{
+        // 比较带转移指令
+        // 3bit ra
+        // 3bit rb
+        // 2bit eq/ne/le/lt
+        // 4bit jmp
+        cif             ,
+
+        // 转移指令
+        ifge            = cif    + 16,
+        ifgt            ,
+        ifle            ,
+        iflt            ,
+        ifeq            ,
+        ifne            ,
+        ifzf            ,
+        ifnz            ,
+        ifcf            ,
+        ifnc            ,
+        ifof            ,
+        ifno            ,
+        jmp             ,
+        ret             ,
+        jali            ,
+        jalr            ,
+
         // 立即数加载
-        imm             = 0,
+        imm             ,
 
         // 赋值指令
-        // f32 <- u08/i08/u16/i16/u32/i32/u64/i64
-        movsb           = 16,
-        movsbx          ,
-        movsw           ,
-        movswx          ,
-        movsd           ,
-        movsdx          ,
-        movsq           ,
+        // f32 <- u64/i64/imm.u64/imm.i64
+        movsq           = imm    + 16,
         movsqx          ,
+        movsi           ,
+        movsix          ,
 
         // 赋值指令
-        // f64 <- u08/i08/u16/i16/u32/i32/u64/i64
-        movfb           ,
-        movfbx          ,
-        movfw           ,
-        movfwx          ,
-        movfd           ,
-        movfdx          ,
+        // f64 <- u64/i64/imm.u64/imm.i64
         movfq           ,
         movfqx          ,
+        movsi           ,
+        movsix          ,
 
         // 赋值指令
         // u64 <- u08/u16/u32/u64
@@ -86,7 +103,7 @@ namespace mixc::extern_isa_cpu::origin{
         // i64 <- mi08/mi16/mi32/mi64
         // f32 <- mf32
         // f64 <- mf64
-        ldb             = bdcqix + 4,
+        ldb             ,
         ldbx            = ldb    + 2,
         ldw             = ldbx   + 2,
         ldwx            = ldw    + 2,
@@ -111,58 +128,58 @@ namespace mixc::extern_isa_cpu::origin{
         std             = stw    + 2,
         stq             = std    + 2,
 
-        // 比较带转移指令
-        cifge           = stq    + 2,
-        cifgt           = cifge  + 4,
-        cifeq           = cifge  + 4,
-        cifne           = cifeq  + 4,
-
-        // 转移指令
-        ifge            = cifne  + 4,
-        ifgt            ,
-        ifle            ,
-        iflt            ,
-        ifeq            ,
-        ifne            ,
-        ifz             ,
-        ifnz            ,
-        ifcf            ,
-        ifnc            ,
-        ifof            ,
-        ifno            ,
-        jmp             ,
-        ret             ,
-        jali            ,
-        jalr            ,
-
         // 算数、逻辑运算、比较
-        add             ,
+        band            = stq    + 2,
+        bor             = band   + 4,
+        bxor            = bor    + 4,
+        bnand           = bxor   + 4,
+        add             = bnand  + 4,
         sub             = add    + 8,
         mul             = sub    + 8,
         div             = mul    + 8,
         shr             = div    + 8,
         shl             = shr    + 8,
         cmp             = shl    + 8,
-        band            = cmp    + 4,
-        bor             = band   + 4,
-        bxor            = bor    + 4,
-        bnand           = bxor   + 4,
 
         // 读取用户扩展寄存器
-        rduxr           = bnand  + 4,
+        rduxr           = cmp    + 4,
+
+        // 读取特权扩展寄存器
+        rdpri           = rduxr  + 2,
 
         // 写入用户扩展寄存器
-        wruxr           ,
+        wruxr           = rdpri  + 2,
+
+        // 写入特权扩展寄存器
+        wrpri           = wruxr  + 2,
+
+        // 内部互斥锁
+        lock            = wrpri  + 2,
+
+        // 位操作
+        bop             ,
     };
 
     enum rduxr_t{
         st              , // 读取临时 f32 结果寄存器
         ft              , // 读取临时 f64 结果寄存器
-        qt              , // 读取临时 i64/u64 结果寄存器
         sta             , // 读取状态寄存器
         mod             , // 预定除法余数
         proh            , // 预定乘法高位
         sfto            , // 预定移位溢出位组
+        tms             , // 读取时间戳
+    };
+
+    enum bop_t{
+        // ra   , ra
+        // ra   , rt
+        // rt   , ra
+        // ra^1 , ra
+        lsb             ,            // 最低置位位
+        hsb             = lsb   + 4, // 最高置位位
+        clb             = hsb   + 4, // 清除最低置位位
+        chb             = clb   + 4, // 清除最高置位位
+        sbc             = chb   + 4, // 置位位个数
     };
 
     enum f4_t{
