@@ -477,7 +477,7 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         struct ldx_t{
-            u08                : 5;
+            u08                : 4;
             u08    scale       : 2;
             u08    sign_extern : 1;
             u08    with_rt     : 1;
