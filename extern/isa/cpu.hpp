@@ -20,20 +20,13 @@
 
 namespace mixc::extern_isa_cpu::origin{
     enum cmd_t : u08{
-        // 比较带转移指令
-        // 3bit ra
-        // 3bit rb
-        // 2bit eq/ne/le/lt
-        // 4bit jmp
-        cif             ,
-
         // 转移指令
-        ifge            = cif    + 16,
-        ifgt            ,
-        ifle            ,
-        iflt            ,
         ifeq            ,
         ifne            ,
+        ifle            ,
+        iflt            ,
+        ifge            ,
+        ifgt            ,
         ifzf            ,
         ifnz            ,
         ifcf            ,
@@ -49,23 +42,9 @@ namespace mixc::extern_isa_cpu::origin{
         imm             ,
 
         // 赋值指令
-        // f32 <- u64/i64/imm.u64/imm.i64
-        movsq           = imm    + 16,
-        movsqx          ,
-        movsi           ,
-        movsix          ,
-
-        // 赋值指令
-        // f64 <- u64/i64/imm.u64/imm.i64
-        movfq           ,
-        movfqx          ,
-        movsi           ,
-        movsix          ,
-
-        // 赋值指令
         // u64 <- u08/u16/u32/u64
         // i64 <- i08/i16/i32/i64
-        movqb           ,
+        movqb           = imm + 16,
         movqbx          ,
         movqw           ,
         movqwx          ,
@@ -74,22 +53,27 @@ namespace mixc::extern_isa_cpu::origin{
         movqq           ,
         movqqx          ,
 
-        // 赋值指令
-        // f32 <- f32/f64
-        // f64 <- f32/f64
-        // u64 <- f32/f64
-        // i64 <- f32/f64
         movss           ,
         movsf           ,
+        movsq           ,
+        movsqx          ,
         movfs           ,
         movff           ,
+        movfq           ,
+        movfqx          ,
+
         movqs           ,
-        movqf           ,
         movqsx          ,
+        movqf           ,
         movqfx          ,
+        movsi           ,
+        movsix          ,
+        movfi           ,
+        movfix          ,
+        // 保留 8 个
 
         // 广播式赋值
-        bdcss           ,
+        bdcss           = movfix + 8 + 1,
         bdcsi           = bdcss  + 4,
         bdcff           = bdcsi  + 4,
         bdcfi           = bdcff  + 4,
@@ -103,7 +87,7 @@ namespace mixc::extern_isa_cpu::origin{
         // i64 <- mi08/mi16/mi32/mi64
         // f32 <- mf32
         // f64 <- mf64
-        ldb             ,
+        ldb             = bdcqix + 4,
         ldbx            = ldb    + 2,
         ldw             = ldbx   + 2,
         ldwx            = ldw    + 2,
@@ -184,8 +168,8 @@ namespace mixc::extern_isa_cpu::origin{
 
     enum f4_t{
         f4aab,
+        f4abt,
         f4tab,
-        f4aat,
         f4tai,
     };
 
@@ -193,6 +177,7 @@ namespace mixc::extern_isa_cpu::origin{
         c4ab,
         c4ai,
         c4ia,
+        c4at,
     };
 
     enum f8_t{
@@ -259,6 +244,20 @@ namespace mixc::extern_isa_cpu::origin{
             i64     ri64;
             f32     rf32;
             f64     rf64 = 0;
+
+            reg_t(){}
+            reg_t(f32 v){
+                rf32 = (v);
+            }
+            reg_t(f64 v){
+                rf64 = (v);
+            }
+            reg_t(u64 v){
+                ru64 = (v);
+            }
+            reg_t(i64 v){
+                ri64 = (v);
+            }
         };
 
         struct ins_t{
@@ -271,6 +270,8 @@ namespace mixc::extern_isa_cpu::origin{
                 };
                 u08 im;
             };
+
+            enum{ rt = 15 };
         };
 
         typedef enum register_state_t{
@@ -279,17 +280,6 @@ namespace mixc::extern_isa_cpu::origin{
             is_u64,
             is_i64,
         } res_t;
-
-        struct mov_t{
-            u08  with_sign_extern   : 1;
-            u08  scale              : 2;
-            u08  target_type        : 2;
-        };
-
-        struct mov2_t{
-            u08 is_f32              : 1;
-            u08 is_target           : 2;
-        };
 
         struct bor_t{
             u64 shift               : 6;
@@ -331,14 +321,14 @@ namespace mixc::extern_isa_cpu::origin{
             no_predetermined                = 0x10,
         };
 
-        imm_t   rim;    // 立即数寄存器
-        ins_t   ins;    // 指令寄存器
+        imm_t   rim;                                    // 立即数寄存器
+        ins_t   ins;                                    // 指令寄存器
         reg_t   regs[general_purpose_register_count];
-        reg_t   rs;     // 临时 f32 寄存器
-        reg_t   rf;     // 临时 f64 寄存器
-        reg_t   rq;     // 临时 r64 寄存器
-        sta_t   sta;    // 状态寄存器
-        seg_t   pc;     // 程序计数器
+        reg_t   rs;                                     // 临时 f32 寄存器
+        reg_t   rf;                                     // 临时 f64 寄存器
+        reg_t & rq      = regs[ins_t::rt];              // 临时 r64 寄存器
+        sta_t   sta;                                    // 状态寄存器
+        seg_t   pc;                                     // 程序计数器
         res_t   mode[general_purpose_register_count];
 
         static i64 sign_extern(reg_t val, uxx scale){
@@ -360,101 +350,242 @@ namespace mixc::extern_isa_cpu::origin{
             return val.ri64;
         }
 
-        void mov(){
-            auto & ra   = regs[ins.opa];
-            auto & rb   = regs[ins.opb];
-            auto   i    = ins.opc - movsb/*begin*/;
+        f80 unified_reg(uxx index){
+            switch(mode[index]){
+            case res_t::is_f32: return f80(regs[index].rf32);
+            case res_t::is_f64: return f80(regs[index].rf64);
+            case res_t::is_u64: return f80(regs[index].ru64);
+            // case res_t::is_i64: 
+            default:            return f80(regs[index].ri64);
+            }
+        }
 
-            if (ins.opc >= movss){
-                auto   info = inc::cast<mov_t>(i);
-                auto   m    = res_t(info.target_type != is_u64 ? 
-                    info.target_type/*f32/f64*/ : 
-                    info.target_type/*uint*/ + info.with_sign_extern/*is int if this value eq 1*/
-                );
+        f80 unified_imm(res_t mode){
+            switch(mode){
+            case res_t::is_f32: return f80(rim.read_with_clear<f32>());
+            case res_t::is_f64: return f80(rim.read_with_clear<f64>());
+            case res_t::is_u64: return f80(rim.read_with_clear<u64>());
+            // case res_t::is_i64: 
+            default:            return f80(rim.read_with_clear<i64>());
+            }
+        }
 
-                switch(mode[ins.opa] = m){
-                case is_f32:
-                    ra.rf32 = info.with_sign_extern ? 
-                        sign_extern(rb, info.scale) :
-                        zero_extern(rb, info.scale);
-                    break;
-                case is_f64:
-                    ra.rf64 = info.with_sign_extern ? 
-                        sign_extern(rb, info.scale) :
-                        zero_extern(rb, info.scale);
-                    break;
-                default:
-                    ra.ri64 = info.with_sign_extern ? 
-                        sign_extern(rb, info.scale) :
-                        zero_extern(rb, info.scale);
-                    break;
-                }
+        void cmp(c4_t cmode, uxx ia, uxx ib){
+            f80 a   = unified_reg(ia);
+            f80 b;
+
+            if (cmode == c4ab){
+                b   = unified_reg(ib);
             }
             else{
-                auto info = inc::cast<mov2_t>(i);
-
-                switch(mode[ins.opa] = res_t(info.is_target)){
-                case is_f32: ra.rf32 = info.is_f32 ? f32(rb.rf32) : f32(rb.rf64); ra.rh32 = 0; return;
-                case is_f64: ra.rf64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
-                case is_u64: ra.ru64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
-                default:     ra.ri64 = info.is_f32 ? f64(rb.rf32) : f64(rb.rf64); return;
-                }
+                rim.load(ib, 4/*bits*/);
+                b   = unified_imm(mode[ia]);
             }
+
+            sta.eq  = a == b;
+            sta.gt  = cmode == c4ia ? a < b : a > b;
         }
 
-        void ifx(bool match){
-            auto offset = rim.load(ins.im, 8/*bits*/).read_with_clear<u64>();
-
-            if (not match){
-                pc.offset += offset * sizeof(ins_t);
-            }
-        }
-
-        #define xgen(name,...)  void name(){ ifx(__VA_ARGS__); }
-
-        xgen(ifge, sta.gt or sta.eq)
-        xgen(ifgt, sta.gt)
-        xgen(ifle, not (sta.gt))
-        xgen(iflt, not (sta.gt or sta.eq))
-        xgen(ifeq, sta.eq)
-        xgen(ifne, not sta.eq)
-        xgen(ifz , sta.zf)
-        xgen(ifnz, not sta.zf)
-        xgen(ifcf, sta.cf)
-        xgen(ifnc, not sta.cf)
-        xgen(ifof, sta.of)
-        xgen(ifno, not sta.of)
-        xgen(jmp , false/*force*/)
-
-        void jal(seg_t address){
+        void ifxx(bool condition){
             
+        }
 
-            if (address.segment != 0){
-
+        void ifxx(){
+            switch(rim.load(ins.im, 8/*bits*/); cmd_t(ins.opc)){
+            case cmd_t::ifeq: ifxx(    sta.eq);               break;
+            case cmd_t::ifne: ifxx(not sta.eq);               break;
+            case cmd_t::ifle: ifxx(    sta.eq or not sta.gt); break;
+            case cmd_t::iflt: ifxx(not sta.eq or not sta.gt); break;
+            case cmd_t::ifge: ifxx(    sta.eq or     sta.gt); break;
+            case cmd_t::ifgt: ifxx(not sta.eq or     sta.gt); break;
+            case cmd_t::ifzf: ifxx(    sta.zf);               break;
+            case cmd_t::ifnz: ifxx(not sta.zf);               break;
+            case cmd_t::ifcf: ifxx(    sta.cf);               break;
+            case cmd_t::ifnc: ifxx(not sta.cf);               break;
+            case cmd_t::ifof: ifxx(    sta.of);               break;
+            case cmd_t::ifno: ifxx(not sta.of);               break;
             }
         }
 
-        static constexpr bool with_hidden_imm = true;
+        void asm_mov(){
+            switch(cmd_t(ins.opc)){
+            case cmd_t::movqb : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].ru08; break;
+            case cmd_t::movqbx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri08; break;
+            case cmd_t::movqw : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].ru16; break;
+            case cmd_t::movqwx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri16; break;
+            case cmd_t::movqd : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].ru32; break;
+            case cmd_t::movqdx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri32; break;
+            case cmd_t::movqq : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].ru64; break;
+            case cmd_t::movqqx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri64; break;
 
-        #define xgen(rt,type)                                                                                                                   \
-        switch(m){                                                                                                                              \
-        case f8abti: invoke(ra.r ## type , rb.r ## type , rt           , with_hidden_imm ? rim.read_with_clear<type>() : type(0)); return;      \
-        case f8atbi: invoke(ra.r ## type , rt           , rb.r ## type , with_hidden_imm ? rim.read_with_clear<type>() : type(0)); return;      \
-        case f8aabi: invoke(ra.r ## type , ra.r ## type , rb.r ## type , with_hidden_imm ? rim.read_with_clear<type>() : type(0)); return;      \
-        case f8tabi: invoke(rt           , ra.r ## type , rb.r ## type , with_hidden_imm ? rim.read_with_clear<type>() : type(0)); return;      \
-        }                                                                                                                                       \
-                                                                                                                                                \
-        rim.load(ins.opb, 4/*bits*/);                                                                                                           \
-                                                                                                                                                \
-        switch(m){                                                                                                                              \
-        case f8aai : invoke(ra.r ## type , ra.r ## type, rim.read_with_clear<type>(), 0); return;                                               \
-        case f8aia : invoke(ra.r ## type , rim.read_with_clear<type>(), ra.r ## type, 0); return;                                               \
-        case f8tai : invoke(rt           , ra.r ## type, rim.read_with_clear<type>(), 0); return;                                               \
-        case f8tia : invoke(rt           , rim.read_with_clear<type>(), ra.r ## type, 0); return;                                               \
+            case cmd_t::movss : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = regs[ins.opb].rf32; break;
+            case cmd_t::movsf : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = regs[ins.opb].rf64; break;
+            case cmd_t::movsq : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = regs[ins.opb].ru64; break;
+            case cmd_t::movsqx: mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = regs[ins.opb].ri64; break;
+            case cmd_t::movfs : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = regs[ins.opb].rf32; break;
+            case cmd_t::movff : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = regs[ins.opb].rf64; break;
+            case cmd_t::movfq : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = regs[ins.opb].ru64; break;
+            case cmd_t::movfqx: mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = regs[ins.opb].ri64; break;
+
+            case cmd_t::movqs : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].rf32; break;
+            case cmd_t::movqsx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ru64; break;
+            case cmd_t::movqf : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].rf64; break;
+            case cmd_t::movqfx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri64; break;
+            case cmd_t::movsi : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
+            case cmd_t::movsix: mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
+            case cmd_t::movfi : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
+            case cmd_t::movfix: mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
+            }
+        }
+
+        struct bdc_t{
+            u08         : 6;
+            u08   bank  : 2;
+            u08   bmp   : 4;
+            u08   opb   : 4;
+        };
+
+        void asm_bdc(){
+            auto i      = inc::cast<bdc_t>(ins);
+            auto assign = [&](res_t m, auto v){
+                auto p_v = & regs[i.bank << 2];
+                auto p_m = & mode[i.bank << 2];
+
+                for(uxx idx = i.bmp; idx != 0; idx >>= 1, p_v += 1, p_m += 1){
+                    if (idx & 1){
+                        p_v[0] = v;
+                        p_m[0] = m;
+
+                        if (m == res_t::is_f32){
+                            p_v[0].rh32 = 0;
+                        }
+                    }
+                }
+            };
+
+            switch(cmd_t(ins.opc)){
+            case cmd_t::bdcss : assign(res_t::is_f32, regs[i.opb]);                                       break;
+            case cmd_t::bdcsi : assign(res_t::is_f32, rim.load(i.opb, 4/*bits*/).read_with_clear<f32>()); break;
+            case cmd_t::bdcff : assign(res_t::is_f64, regs[ins.opb]);                                     break;
+            case cmd_t::bdcfi : assign(res_t::is_f64, rim.load(i.opb, 4/*bits*/).read_with_clear<f64>()); break;
+            case cmd_t::bdcqq : assign(res_t::is_u64, regs[ins.opb]);                                     break;
+            case cmd_t::bdcqi : assign(res_t::is_u64, rim.load(i.opb, 4/*bits*/).read_with_clear<u64>()); break;
+            case cmd_t::bdcqqx: assign(res_t::is_u64, regs[ins.opb]);                                     break;
+            case cmd_t::bdcqix: assign(res_t::is_u64, rim.load(i.opb, 4/*bits*/).read_with_clear<i64>()); break;
+            }
+        }
+
+        struct ldx_t{
+            u08                : 5;
+            u08    scale       : 2;
+            u08    sign_extern : 1;
+            u08    with_rt     : 1;
+        };
+
+        void rdmem(reg_t * mem, u64 address, uxx bytes){
+
+        }
+
+        void wrmem(reg_t * mem, u64 address, uxx bytes){
+
+        }
+
+        void asm_ldxx(){
+            auto i                  = inc::cast<ldx_t>(ins);
+            auto bytes              = ins.opc > cmd_t::ldqx ? (ins.opc - cmd_t::ldqx) * 4 : 1 << i.scale;
+            regs[ins.opa].ru64      = 0;
+            rdmem(& regs[ins.opa]/*des*/, i.with_rt ? regs[ins.opb].ru64 + rq.ru64 : regs[ins.opb].ru64/*source*/, bytes);
+
+            if (ins.opc > cmd_t::ldqx){
+                mode[ins.opa]       = ins.opc & 1 ? res_t::is_f64 : res_t::is_f32;
+                return;
+            }
+            if (i.sign_extern){
+                mode[ins.opa]       = res_t::is_i64;
+                regs[ins.opa].ri64  = sign_extern(regs[ins.opa], i.scale);
+            }
+            else{
+                mode[ins.opa]       = res_t::is_u64;
+            }
+        }
+
+        void asm_pop(){
+
+        }
+
+        void asm_push(){
+
+        }
+
+        struct stx_t{
+            u08                 : 5;
+            u08     scale       : 2;
+            u08     with_rt     : 1;
+        };
+
+        void asm_stx(){
+            auto i                  = inc::cast<stx_t>(ins);
+            auto bytes              = 1 << i.scale;
+            wrmem(& regs[ins.opa]/*source*/, i.with_rt ? regs[ins.opb].ru64 + rq.ru64 : regs[ins.opb].ru64/*target*/, bytes);
         }
 
         template<class opr>
-        void f8(bool with_hidden_imm, opr const & invoke){
+        void f4(opr const & invoke){
+            switch(f4_t(ins.opc & 0x3)){
+            case f4_t::f4aab: invoke(modes[ins.opa], regs[ins.opa], regs[ins.opa], regs[ins.opb]);                                       break;
+            case f4_t::f4abt: invoke(modes[ins.opb], regs[ins.opa], regs[ins.opb], regs[ins.opt]);                                       break;
+            case f4_t::f4tab: invoke(modes[ins.opa], regs[ins.rt ], regs[ins.opa], regs[ins.opb]);                                       break;
+            case f4_t::f4tai: invoke(modes[ins.opa], regs[ins.rt ], regs[ins.opa], rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>()); break;
+            }
+        }
+
+        void asm_band(){
+            f4([&](res_t m, reg_t & a, reg_t b, reg_t c){
+                a.ru64 = b.ru64 & c.ru64;
+                sta.zf = a.ru64 == 0;
+            });
+        }
+
+        void asm_bor(){
+            f4([&](res_t m, reg_t & a, reg_t b, reg_t c){
+                a.ru64 = b.ru64 | c.ru64;
+                sta.zf = a.ru64 == 0;
+            });
+        }
+
+        void asm_bxor(){
+            f4([&](res_t m, reg_t & a, reg_t b, reg_t c){
+                a.ru64 = b.ru64 ^ c.ru64;
+                sta.zf = a.ru64 == 0;
+            });
+        }
+
+        void asm_bnand(){
+            f4([&](res_t m, reg_t & a, reg_t b, reg_t c){
+                a.ru64 = ~(b.ru64 & c.ru64);
+                sta.zf = a.ru64 == 0;
+            });
+        }
+
+        #define xgen(rt,type)                                                                       \
+        switch(m){                                                                                  \
+        case f8abti: invoke(ra.r ## type , rb.r ## type , rt          ); return;                    \
+        case f8atbi: invoke(ra.r ## type , rt           , rb.r ## type); return;                    \
+        case f8aabi: invoke(ra.r ## type , ra.r ## type , rb.r ## type); return;                    \
+        case f8tabi: invoke(rt           , ra.r ## type , rb.r ## type); return;                    \
+        }                                                                                           \
+                                                                                                    \
+        rim.load(ins.opb, 4/*bits*/);                                                               \
+                                                                                                    \
+        switch(m){                                                                                  \
+        case f8aai : invoke(ra.r ## type , ra.r ## type, rim.read_with_clear<type>()); return;      \
+        case f8aia : invoke(ra.r ## type , rim.read_with_clear<type>(), ra.r ## type); return;      \
+        case f8tai : invoke(rt           , ra.r ## type, rim.read_with_clear<type>()); return;      \
+        case f8tia : invoke(rt           , rim.read_with_clear<type>(), ra.r ## type); return;      \
+        }
+
+        template<class opr>
+        void f8(opr const & invoke){
             auto & ra = regs[ins.opa];
             auto & rb = regs[ins.opb];
             auto   m  = f8_t(ins.opc & 0x7);
@@ -465,21 +596,6 @@ namespace mixc::extern_isa_cpu::origin{
             case is_u64: xgen(rq.u64, u64) break;
             case is_i64: xgen(rq.i64, i64) break;
             }
-        }
-
-        template<class opr>
-        void f8qx(bool with_hidden_imm, opr const & invoke){
-            auto & ra = regs[ins.opa];
-            auto & rb = regs[ins.opb];
-            auto   m  = f8_t(ins.opc & 0x7);
-
-            if (mode[ins.opa] == is_i64){
-                xgen(rq.i64, i64)
-            }
-            else{
-                xgen(rq.u64, u64)
-            }
-            #undef xgen
         }
 
         template<class type>
@@ -506,12 +622,9 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        void add(){
-            f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                if (i == 0){
-                    i = 1;
-                }
-                if (c *= i; inc::is_float<decltype(a)>){
+        void asm_add(){
+            f8([&](auto & a, auto b, auto c){
+                if (inc::is_float<decltype(a)>){
                     a = b + c;
                 }
                 else{
@@ -521,11 +634,8 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void sub(){
-            f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                if (i == 0){
-                    i = 1;
-                }
-                if (c *= i; inc::is_float<decltype(a)>){
+            f8([&](auto & a, auto b, auto c){
+                if (inc::is_float<decltype(a)>){
                     a = b - c;
                 }
                 else{
@@ -537,18 +647,18 @@ namespace mixc::extern_isa_cpu::origin{
             });
         }
 
-        void mul(){
-            f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
+        void asm_mul(){
+            f8([&](auto & a, auto b, auto c){
                 using ut = decltype(b);
 
                 if constexpr (inc::is_float<ut>){
-                    a = b * c + i;
+                    a = b * c;
                 }
                 else{
                     u128 m; 
 
                     // 符号位不相等结果为负数，需要符号位扩展
-                    if (inc::is_signed<ut> and u64(b ^ c) >> 63){
+                    if (inc::is_signed<ut> and (u64(b ^ c) >> 63)){
                         m       = inc::mul(u64(b), u64(c)); 
                         m.high |= u64(-1) << inc::index_of_last_set(m.high);
                         sta.cf  = 0;
@@ -566,20 +676,6 @@ namespace mixc::extern_isa_cpu::origin{
                         sta.of  = 0;
                     }
 
-                    if (i == 0){
-                        ; // pass
-                    }
-                    else if (not inc::is_signed<ut> or i > 0){
-                        u128 x  = inc::add(m.low, u64(i));
-                        m.low   = x.low;
-                        m.high  = m.high + x.high;
-                    }
-                    else{
-                        u128 x  = inc::sub(m.low, u64(i));
-                        m.low   = x.low;
-                        m.high  = m.high - x.high;
-                    }
-
                     if (a = m.low; sta.pmulh != no_predetermined){
                         regs[sta.pmulh] = m.high;
                         sta.pmulh       = no_predetermined;
@@ -588,10 +684,10 @@ namespace mixc::extern_isa_cpu::origin{
             });
         }
 
-        void div(){
-            f8(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
+        void asm_div(){
+            f8([&](auto & a, auto b, auto c){
                 using ut = decltype(b);
-                a        = b / c + i;
+                a        = b / c;
 
                 if constexpr (inc::is_integer<ut>){
                     if (sta.pmod != no_predetermined){
@@ -602,40 +698,19 @@ namespace mixc::extern_isa_cpu::origin{
             });
         }
 
-        void sft(){
-            f8qx(with_hidden_imm, [&](auto & a, auto b, auto c, auto i){
-                // 默认时保留 a 中的所有位
-                if (i == 0){
-                    i = decltype(i)(-1);
-                }
-                else{
-                    i = (1ull << i) - 1;
-                }
+        void asm_shr(){
+            f8([&](auto & a, auto b, auto c){
+                u64  overflow_part;
+                u128 m              = inc::shift_right(u64(b), u64(c));
+                overflow_part       = m.low;
+                a                   = m.high;
+                sta.cf              = overflow_part >> 63;
 
-                u64 overflow_part;
-                i64 bits = i64(c);
-
-                if (bits >= 0){
-                    u128 m          = inc::shift_right(u64(b), u64(bits));
-                    overflow_part   = m.low;
-                    a               = m.high;
-                    sta.cf          = overflow_part >> 63;
-
-                    if constexpr (inc::is_signed<decltype(b)>){
-                        if (a != 0){
-                            a |= u64(-1) << inc::index_of_last_set(a);
-                        }
-                    }
-                }
-                else{
-                    u128 m          = inc::shift_left(u64(b), u64(-bits));
-                    overflow_part   = m.high;
-                    a               = m.low;
-                    sta.cf          = overflow_part & 1;
+                if (a != 0){
+                    a              |= u64(-1) << inc::index_of_last_set(a);
                 }
 
-                a                 &= i;
-                sta.zf             = a == 0;
+                sta.zf              = a == 0;
 
                 if (sta.psfto != no_predetermined){
                     regs[sta.psfto] = overflow_part;
@@ -644,7 +719,23 @@ namespace mixc::extern_isa_cpu::origin{
             });
         }
 
-        void cmp(){
+        void asm_shl(){
+            f8([&](auto & a, auto b, auto c){
+                u64  overflow_part;
+                u128 m              = inc::shift_left(u64(b), u64(c));
+                overflow_part       = m.high;
+                a                   = m.low;
+                sta.cf              = overflow_part & 1;
+                sta.zf              = a == 0;
+
+                if (sta.psfto != no_predetermined){
+                    regs[sta.psfto] = overflow_part;
+                    sta.psfto       = no_predetermined;
+                }
+            });
+        }
+
+        void asm_cmp(){
             reg_t  ra;
             reg_t  rb;
             res_t  sa;
@@ -691,33 +782,6 @@ namespace mixc::extern_isa_cpu::origin{
 
             #undef  xgen
         }
-
-        #define xgen(...)                                                  \
-        f8qx(with_hidden_imm, [&](auto & a, auto b, auto x, auto i){       \
-            auto  m = (inc::cast<bor_t>(i));                               \
-            auto  c = (u64(x) >> m.shift) & (u64(-1)) >> m.mask);          \
-            a       = __VA_ARGS__;                                         \
-            sta.zf  = a == 0;                                              \
-        });
-
-        void band(){
-            xgen(b & c)
-        }
-
-        void bor(){
-            xgen(b | c)
-        }
-
-        void bnand(){
-            xgen(~(b & c))
-        }
-
-        void bxor(){
-            xgen(b ^ c)
-            #undef xgen
-        }
-
-
     };
 }
 
