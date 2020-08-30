@@ -408,6 +408,11 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
+        void asm_imm(){
+            auto im = inc::cast<u16>(ins) & 0xfff;
+            rim.load(im, 12/*bits*/);
+        }
+
         void asm_mov(){
             switch(cmd_t(ins.opc)){
             case cmd_t::movqb : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].ru08; break;
