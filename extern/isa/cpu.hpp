@@ -471,8 +471,8 @@ namespace mixc::extern_isa_cpu::origin{
             case cmd_t::bdcfi : assign(res_t::is_f64, rim.load(i.opb, 4/*bits*/).read_with_clear<f64>()); break;
             case cmd_t::bdcqq : assign(res_t::is_u64, regs[ins.opb]);                                     break;
             case cmd_t::bdcqi : assign(res_t::is_u64, rim.load(i.opb, 4/*bits*/).read_with_clear<u64>()); break;
-            case cmd_t::bdcqqx: assign(res_t::is_u64, regs[ins.opb]);                                     break;
-            case cmd_t::bdcqix: assign(res_t::is_u64, rim.load(i.opb, 4/*bits*/).read_with_clear<i64>()); break;
+            case cmd_t::bdcqqx: assign(res_t::is_i64, regs[ins.opb]);                                     break;
+            case cmd_t::bdcqix: assign(res_t::is_i64, rim.load(i.opb, 4/*bits*/).read_with_clear<i64>()); break;
             }
         }
 
