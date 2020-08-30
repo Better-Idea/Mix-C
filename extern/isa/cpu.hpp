@@ -5,6 +5,7 @@
 #define xuser mixc::extern_isa_cpu::origin
 #include"define/base_type.hpp"
 #include"macro/xdefer.hpp"
+#include"math/const.hpp"
 #include"memop/cast.hpp"
 #include"memop/swap.hpp"
 #include"meta/is_float.hpp"
@@ -686,13 +687,27 @@ namespace mixc::extern_isa_cpu::origin{
         void asm_div(){
             f8([&](auto & a, auto b, auto c){
                 using ut = decltype(b);
-                a        = b / c;
-
-                if constexpr (inc::is_integer<ut>){
-                    if (sta.pmod != no_predetermined){
-                        regs[sta.pmod] = b % c;
-                        sta.pmod = no_predetermined;
+                if (sta.of = c == 0; sta.of){
+                    if (b > 0){
+                        a   = inc::max_value_of<ut>;
                     }
+                    else if (b < 0){
+                        a   = inc::min_value_of<ut>;
+                    }
+                    else{
+                        a   = 1;
+                    }
+                    return;
+                }
+
+                if constexpr (not inc::is_integer<ut>){
+                    if (sta.pmod != no_predetermined){
+                        regs[sta.pmod]  = b % c;
+                        sta.pmod        = no_predetermined;
+                    }
+                }
+                else{
+                    a       = b / c;
                 }
             });
         }
