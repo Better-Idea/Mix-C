@@ -498,9 +498,8 @@ namespace mixc::extern_isa_cpu::origin{
 
             if (ins.opc > cmd_t::ldqx){
                 mode[ins.opa]       = ins.opc & 1 ? res_t::is_f64 : res_t::is_f32;
-                return;
             }
-            if (i.sign_extern){
+            else if (i.sign_extern){
                 mode[ins.opa]       = res_t::is_i64;
                 regs[ins.opa].ri64  = sign_extern(regs[ins.opa], i.scale);
             }
@@ -611,10 +610,10 @@ namespace mixc::extern_isa_cpu::origin{
                 auto x2 = u64(a) >> 63;
 
                 // 下溢：同时为负数时，结果符号位变化
-                sta.cf  = (x0 != 0 and x2 == 0);
+                sta.of  = (x0 != 0 and x2 == 0);
 
                 // 上溢：同时为正数，结果符号位变化
-                sta.of  = (x1 == 0 and x2 == 1);
+                sta.cf  = (x1 == 0 and x2 == 1);
             }
             else{
                 sta.cf  = (m.high);
