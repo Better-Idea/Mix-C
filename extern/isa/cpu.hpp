@@ -9,8 +9,8 @@
 #include"memop/cast.hpp"
 #include"memop/swap.hpp"
 #include"meta/is_float.hpp"
-#include"meta/is_signed.hpp"
 #include"meta/is_integer.hpp"
+#include"meta/is_signed.hpp"
 #include"instruction/add.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"instruction/mul.hpp"
@@ -155,6 +155,12 @@ namespace mixc::extern_isa_cpu::origin{
         tms             , // 读取时间戳
     };
 
+    enum wruxr_t{
+        st              , // 写入临时 f32 结果寄存器
+        ft              , // 写入临时 f64 结果寄存器
+        sta             , // 写入状态寄存器
+    };
+
     enum bop_t{
         // ra   , ra
         // ra   , rt
@@ -192,7 +198,7 @@ namespace mixc::extern_isa_cpu::origin{
         f8tia,
     };
 
-    struct cpu{
+    struct cpu_t{
         struct imm_t{
             auto & load(uxx value, uxx bits){
                 imm         |= value << total_bits;
@@ -282,11 +288,6 @@ namespace mixc::extern_isa_cpu::origin{
             is_i64,
         } res_t;
 
-        struct bor_t{
-            u64 shift               : 6;
-            u64 mask                : 6;
-        };
-
         struct sta_t{
             u64 gt                  : 1;
             u64 eq                  : 1;
@@ -299,8 +300,13 @@ namespace mixc::extern_isa_cpu::origin{
             u64 of                  : 1;
 
             // 预设(predetermined)
+            // 指定余数存放的寄存器
             u64 pmod                : 5;
+
+            // 指定乘法高位积存放的寄存器
             u64 pmulh               : 5;
+
+            // 指定移位溢出位存放的寄存器
             u64 psfto               : 5;
         };
 
@@ -315,6 +321,11 @@ namespace mixc::extern_isa_cpu::origin{
                 u32 offset;
                 u32 segment;
             };
+
+            seg_t(){}
+            seg_t(u64 address){
+                inc::cast<u64>(this[0]) = address;
+            }
         };
 
         enum{
@@ -327,9 +338,11 @@ namespace mixc::extern_isa_cpu::origin{
         reg_t   regs[general_purpose_register_count];
         reg_t   rs;                                     // 临时 f32 寄存器
         reg_t   rf;                                     // 临时 f64 寄存器
-        reg_t & rq      = regs[ins_t::rt];              // 临时 r64 寄存器
+        reg_t & rt      = regs[ins_t::rt];              // 临时 r64 寄存器
         sta_t   sta;                                    // 状态寄存器
         seg_t   pc;                                     // 程序计数器
+        seg_t   cs;                                     // 调用栈寄存器
+        seg_t   ss;                                     // 堆栈寄存器
         res_t   mode[general_purpose_register_count];
 
         static i64 sign_extern(reg_t val, uxx scale){
@@ -387,11 +400,18 @@ namespace mixc::extern_isa_cpu::origin{
             sta.gt  = cmode == c4ia ? a < b : a > b;
         }
 
-        void ifxx(bool condition){
-            
+        void ifxx(bool contiguous){
+            i64 offset      = rim.read_with_clear<i64>(); 
+
+            // 不满足条件就跳转
+            // 向上跳转（回跳）
+            // 向下跳转
+            if (not contiguous){
+                pc.offset  += u32(offset >= 0 ? offset + 1 : offset - 2) * sizeof(ins_t);
+            }
         }
 
-        void ifxx(){
+        void asm_ifxx(){
             switch(rim.load(ins.im, 8/*bits*/); cmd_t(ins.opc)){
             case cmd_t::ifeq: ifxx(    sta.eq);               break;
             case cmd_t::ifne: ifxx(not sta.eq);               break;
@@ -405,7 +425,16 @@ namespace mixc::extern_isa_cpu::origin{
             case cmd_t::ifnc: ifxx(not sta.cf);               break;
             case cmd_t::ifof: ifxx(    sta.of);               break;
             case cmd_t::ifno: ifxx(not sta.of);               break;
+            case cmd_t::jmp : ifxx(false/*force*/);           break;
             }
+        }
+
+        void asm_ret(){
+
+        }
+
+        void jalx(seg_t address){
+            
         }
 
         void asm_imm(){
@@ -437,10 +466,10 @@ namespace mixc::extern_isa_cpu::origin{
             case cmd_t::movqsx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ru64; break;
             case cmd_t::movqf : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].rf64; break;
             case cmd_t::movqfx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri64; break;
-            case cmd_t::movsi : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
-            case cmd_t::movsix: mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
-            case cmd_t::movfi : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
-            case cmd_t::movfix: mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
+            case cmd_t::movsi : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = (f32)rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
+            case cmd_t::movsix: mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = (f32)rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
+            case cmd_t::movfi : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = (f64)rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
+            case cmd_t::movfix: mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = (f64)rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
             }
         }
 
@@ -500,7 +529,7 @@ namespace mixc::extern_isa_cpu::origin{
             auto i                  = inc::cast<ldx_t>(ins);
             auto bytes              = ins.opc > cmd_t::ldqx ? (ins.opc - cmd_t::ldqx) * 4 : 1 << i.scale;
             regs[ins.opa].ru64      = 0;
-            rdmem(& regs[ins.opa]/*des*/, i.with_rt ? regs[ins.opb].ru64 + rq.ru64 : regs[ins.opb].ru64/*source*/, bytes);
+            rdmem(& regs[ins.opa]/*des*/, i.with_rt ? regs[ins.opb].ru64 + rt.ru64 : regs[ins.opb].ru64/*source*/, bytes);
 
             if (ins.opc > cmd_t::ldqx){
                 mode[ins.opa]       = ins.opc & 1 ? res_t::is_f64 : res_t::is_f32;
@@ -531,7 +560,7 @@ namespace mixc::extern_isa_cpu::origin{
         void asm_stx(){
             auto i                  = inc::cast<stx_t>(ins);
             auto bytes              = 1 << i.scale;
-            wrmem(& regs[ins.opa]/*source*/, i.with_rt ? regs[ins.opb].ru64 + rq.ru64 : regs[ins.opb].ru64/*target*/, bytes);
+            wrmem(& regs[ins.opa]/*source*/, i.with_rt ? regs[ins.opb].ru64 + rt.ru64 : regs[ins.opb].ru64/*target*/, bytes);
         }
 
         template<class opr>
@@ -598,14 +627,14 @@ namespace mixc::extern_isa_cpu::origin{
             switch(res_t(mode[ins.opa])){
             case is_f32: xgen(rs.f32, f32) break;
             case is_f64: xgen(rf.f64, f64) break;
-            case is_u64: xgen(rq.u64, u64) break;
-            case is_i64: xgen(rq.i64, i64) break;
+            case is_u64: xgen(rt.u64, u64) break;
+            case is_i64: xgen(rt.i64, i64) break;
             }
         }
 
         template<class type>
         void add(type & a, type b, type c){
-            u128 m      = inc::add(b, c);
+            u128 m      = inc::add(u64(b), u64(c));
             a           = type(m.low);
 
             if constexpr (inc::is_signed<type>){
@@ -681,7 +710,7 @@ namespace mixc::extern_isa_cpu::origin{
                         sta.of  = 0;
                     }
 
-                    if (a = m.low; sta.pmulh != no_predetermined){
+                    if (a = m.low; sta.pmulh >= no_predetermined){
                         regs[sta.pmulh] = m.high;
                         sta.pmulh       = no_predetermined;
                     }
@@ -706,7 +735,7 @@ namespace mixc::extern_isa_cpu::origin{
                 }
 
                 if constexpr (not inc::is_integer<ut>){
-                    if (sta.pmod != no_predetermined){
+                    if (sta.pmod >= no_predetermined){
                         regs[sta.pmod]  = b % c;
                         sta.pmod        = no_predetermined;
                     }
@@ -731,7 +760,7 @@ namespace mixc::extern_isa_cpu::origin{
 
                 sta.zf              = a == 0;
 
-                if (sta.psfto != no_predetermined){
+                if (sta.psfto >= no_predetermined){
                     regs[sta.psfto] = overflow_part;
                     sta.psfto       = no_predetermined;
                 }
@@ -747,7 +776,7 @@ namespace mixc::extern_isa_cpu::origin{
                 sta.cf              = overflow_part & 1;
                 sta.zf              = a == 0;
 
-                if (sta.psfto != no_predetermined){
+                if (sta.psfto >= no_predetermined){
                     regs[sta.psfto] = overflow_part;
                     sta.psfto       = no_predetermined;
                 }
