@@ -352,32 +352,35 @@ private:
     // 该函数用于 hashmap_t 内部扩容和压缩
     // 要求 map 是新分配的空间，并且内部无元素
     void resize_to(the_t & map) {
-        if (nodes != nullptr){
+        if (nodes == nullptr){
             return;
         }
 
-        for(uxx i = 0; not_exist != (i = bmp.pop_first());){
-            auto   cur     = xref nodes[i];
-            auto   index   = map.addressing(cur->key);
-            auto & node    = map.nodes[index];
+        for(uxx i; not_exist != (i = bmp.pop_first());){
+            auto   old_head    = xref nodes[i];
+            auto   cur         = old_head->next;
+            auto   index       = map.addressing(old_head->key);
+            auto & new_head    = map.nodes[index];
 
             // 旧的 hashmap 首元不可以当作普通节点一样挂到新的 hashmap 中
             // 因为它是数组中的一个元素，而不是通过 inc::alloc 分配得到的独立节点
-            if (node.is_empty()){
-                node       = cur[0];
-                node.next  = nullptr;
+            if (new_head.is_empty()){
+                new_head       = old_head[0];
+                new_head.next  = nullptr;
                 map.bmp.set(index);
             }
-            else if (auto next = inc::alloc_with_initial<node_t>(*cur); node.next == nullptr){
-                node.next  = next;
-                next->next = nullptr;
+            // 只有首元
+            else if (auto next = inc::alloc_with_initial<node_t>(*old_head); new_head.next == nullptr){
+                new_head.next  = next;
+                next->next     = nullptr;
             }
+            // 插入到首元后一个
             else{
-                next->next = node.next;
-                node.next  = next;
+                next->next     = new_head.next;
+                new_head.next  = next;
             }
 
-            for(cur = cur->next; nullptr != cur;){
+            for(old_head->next = old_head/*逻辑清空，next 指向首节点*/; nullptr != cur;){
                 auto   next    = cur->next; 
                 auto   index   = map.addressing(cur->key);
                 auto & node    = map.nodes[index];

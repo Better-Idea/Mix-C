@@ -86,6 +86,9 @@ namespace mixc::docker_bit_indicator{
 
         bit_indicator_t(uxx bits, inc::can_alloc<uxx> alloc){
             uxx buf[sizeof(uxx) * 8 / inc::bwidth + 1];
+
+            // 先设置，之后 bits 会被修改
+            the.bits(bits);
             the.pheight = 0;
             the.psize   = 0;
 
@@ -97,12 +100,11 @@ namespace mixc::docker_bit_indicator{
             }while(bits > 1);
 
             the.size(psize);
-            the.bits(bits);
             the.bmp(
-                alloc(count())
+                alloc(cost_count())
             );
 
-            for(uxx i = 0; i < the.pheight; i++){
+            for(uxx i = 0; i < the.height(); i++){
                 the.level_lut()[i] = buf[i];
             }
 
@@ -158,12 +160,12 @@ namespace mixc::docker_bit_indicator{
         }
 
         // 动态内存部分一共有多少个字
-        xprigetx(count, inc::memory_size){
-            return inc::memory_size(the.size() + the.height());
+        xprigetx(cost_count, uxx){
+            return the.size() + the.height();
         }
 
         xprigetx(cost_bytes, inc::memory_size){
-            return inc::memory_size(count() * sizeof(uxx));
+            return inc::memory_size(cost_count() * sizeof(uxx));
         }
 
         xpubget_priset(bits);
