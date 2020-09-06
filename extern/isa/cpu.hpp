@@ -21,8 +21,14 @@
 
 namespace mixc::extern_isa_cpu::origin{
     enum cmd_t : u08{
+        // 带比较的转移指令
+        cifeq           ,
+        cifne           = cifeq  + 4,
+        cifle           = cifne  + 4,
+        ciflt           = cifle  + 4,
+
         // 转移指令
-        ifeq            ,
+        ifeq            = ciflt  + 4,
         ifne            ,
         ifle            ,
         iflt            ,
@@ -39,13 +45,10 @@ namespace mixc::extern_isa_cpu::origin{
         jali            ,
         jalr            ,
 
-        // 立即数加载
-        imm             ,
-
         // 赋值指令
         // u64 <- u08/u16/u32/u64
         // i64 <- i08/i16/i32/i64
-        movqb           = imm + 16,
+        movqb           ,
         movqbx          ,
         movqw           ,
         movqwx          ,
@@ -71,63 +74,9 @@ namespace mixc::extern_isa_cpu::origin{
         movsix          ,
         movfi           ,
         movfix          ,
-        // 保留 8 个
-
-        // 广播式赋值
-        bdcss           = movfix + 8 + 1,
-        bdcsi           = bdcss  + 4,
-        bdcff           = bdcsi  + 4,
-        bdcfi           = bdcff  + 4,
-        bdcqq           = bdcfi  + 4,
-        bdcqi           = bdcqq  + 4,
-        bdcqqx          = bdcqi  + 4,
-        bdcqix          = bdcqqx + 4,
-
-        // 读取内存
-        // u64 <- mu08/mu16/mu32/mu64
-        // i64 <- mi08/mi16/mi32/mi64
-        // f32 <- mf32
-        // f64 <- mf64
-        ldb             = bdcqix + 4,
-        ldbx            = ldb    + 2,
-        ldw             = ldbx   + 2,
-        ldwx            = ldw    + 2,
-        ldd             = ldwx   + 2,
-        lddx            = ldd    + 2,
-        ldq             = lddx   + 2,
-        ldqx            = ldq    + 2,
-
-        lds             = ldqx   + 2,
-        ldf             = lds    + 2,
-
-        pop             = ldf    + 2,
-        push            = pop    + 2,
-
-        // 写入内存
-        // u08/i08 -> mu08
-        // u16/i16 -> mu16
-        // u32/i32 -> mu32
-        // u64/i64 -> mu64
-        stb             = push   + 2,
-        stw             = stb    + 2,
-        std             = stw    + 2,
-        stq             = std    + 2,
-
-        // 算数、逻辑运算、比较
-        band            = stq    + 2,
-        bor             = band   + 4,
-        bxor            = bor    + 4,
-        bnand           = bxor   + 4,
-        add             = bnand  + 4,
-        sub             = add    + 8,
-        mul             = sub    + 8,
-        div             = mul    + 8,
-        shr             = div    + 8,
-        shl             = shr    + 8,
-        cmp             = shl    + 8,
 
         // 读取用户扩展寄存器
-        rduxr           = cmp    + 4,
+        rduxr           ,
 
         // 读取特权扩展寄存器
         rdpri           = rduxr  + 2,
@@ -138,11 +87,87 @@ namespace mixc::extern_isa_cpu::origin{
         // 写入特权扩展寄存器
         wrpri           = wruxr  + 2,
 
-        // 内部互斥锁
-        lock            = wrpri  + 2,
+        // 立即数加载
+        imm             = wrpri  + 2,
+
+        // 广播式赋值
+        bdcss           = imm    + 16,
+        bdcsi           = bdcss  + 4,
+        bdcff           = bdcsi  + 4,
+        bdcfi           = bdcff  + 4,
+        bdcqq           = bdcfi  + 4,
+        bdcqi           = bdcqq  + 4,
+        bdcqqx          = bdcqi  + 4,
+        bdcqix          = bdcqqx + 4,
+
+        // 读取栈内存
+        ldkq            = bdcqix + 2,
+        ldkqx           = ldkq   + 2,
+        ldks            = ldkqx  + 2,
+        ldkf            = ldks   + 2,
+
+        // 写入栈内存
+        stkq            = ldkf   + 2,
+        stkqx           = stkq   + 2,
+        stks            = stkqx  + 2,
+        stkf            = stks   + 2,
+
+        // 读取内存
+        // u64 <- mu08/mu16/mu32/mu64
+        // i64 <- mi08/mi16/mi32/mi64
+        ldb             = stkf   + 2,
+        ldbx            = ldb    + 2,
+        ldw             = ldbx   + 2,
+        ldwx            = ldw    + 2,
+        ldd             = ldwx   + 2,
+        lddx            = ldd    + 2,
+        ldq             = lddx   + 2,
+        ldqx            = ldq    + 2,
+
+        // 写入内存
+        // u08/i08 -> mu08
+        // u16/i16 -> mu16
+        // u32/i32 -> mu32
+        // u64/i64 -> mu64
+        stb             = ldqx   + 2,
+        stw             = stb    + 2,
+        std             = stw    + 2,
+        stq             = std    + 2,
+
+        // 内存读取
+        // f32 <- mf32
+        // f64 <- mf64
+        lds             = stq    + 2,
+        ldf             = lds    + 2,
+
+        // 比较
+        cmp             = ldf    + 2,
+
+        // 基础逻辑运算
+        band            = cmp    + 4,
+        bor             = band   + 4,
+        bxor            = bor    + 4,
+        bnand           = bxor   + 4,
+
+        // 算术运算
+        add             = bnand  + 4,
+        sub             = add    + 8,
+        mul             = sub    + 8,
+        div             = mul    + 8,
+        shr             = div    + 8,
+        shl             = shr    + 8,
+
+        // 最小最大值
+        miax            = shl    + 8,
+
+        // 交换两个值
+        swap            ,
 
         // 位操作
         bop             ,
+
+        // 内部互斥锁
+        lock            = bop    + 2,
     };
 
     enum rduxr_t{
@@ -832,5 +857,44 @@ namespace mixc::extern_isa_cpu::origin{
         }
     };
 }
+
+void foo(int a0, int a1, int a2){
+
+}
+
+/*
+ * 
+ * bp + 16  arg2
+ * bp + 08  arg1
+ * bp + 00  arg0
+ * 
+ * 0x00 <- 0xff10
+ * 0x04 <- 0xff0c
+ * 
+ * 
+ * 调用框架：
+ * 
+ *      # 保留 n 个单位的内存用于保存返回参数
+ *      keep n
+ *
+ *      ...
+ *      push mem_arg8
+ *      push mem_arg7
+ *      push mem_arg6
+ *      rf   reg_arg5
+ *      re   reg_arg4
+ *      rd   reg_arg3
+ *      rc   reg_arg2
+ *      rb   reg_arg1
+ *      ra   reg_arg0
+ *      r9   reg_ret1
+ *      r8   reg_ret0
+ * 
+ *      jal  foo -> r0, r1
+ * 
+ *      jal  8
+ *      ret  8
+ * 
+ */
 
 #endif
