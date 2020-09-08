@@ -174,19 +174,19 @@ namespace mixc::extern_isa_cpu::origin{
     };
 
     enum rduxr_t{
-        st              , // 读取临时 f32 结果寄存器
-        ft              , // 读取临时 f64 结果寄存器
-        sta             , // 读取状态寄存器
-        mod             , // 预定除法余数
-        proh            , // 预定乘法高位
-        sfto            , // 预定移位溢出位组
-        tms             , // 读取时间戳
+        rdst            , // 读取临时 f32 结果寄存器
+        rdft            , // 读取临时 f64 结果寄存器
+        rdsta           , // 读取状态寄存器
+        rdmod           , // 预定除法余数
+        rdproh          , // 预定乘法高位
+        rdsfto          , // 预定移位溢出位组
+        rdtms           , // 读取时间戳
     };
 
     enum wruxr_t{
-        st              , // 写入临时 f32 结果寄存器
-        ft              , // 写入临时 f64 结果寄存器
-        sta             , // 写入状态寄存器
+        wrst            , // 写入临时 f32 结果寄存器
+        wrft            , // 写入临时 f64 结果寄存器
+        wrsta           , // 写入状态寄存器
     };
 
     enum bop_t{
@@ -308,7 +308,7 @@ namespace mixc::extern_isa_cpu::origin{
                 u08 im;
             };
 
-            enum{ rt = 15 };
+            enum{ opt = 15 };
         };
 
         typedef enum register_state_t{
@@ -409,7 +409,7 @@ namespace mixc::extern_isa_cpu::origin{
         reg_t   regs[general_purpose_register_count];
         reg_t   rs;                                     // 临时 f32 寄存器
         reg_t   rf;                                     // 临时 f64 寄存器
-        reg_t & rt      = regs[ins_t::rt];              // 临时 r64 寄存器
+        reg_t & rt      = regs[ins_t::opt];             // 临时 r64 寄存器
         sta_t   sta;                                    // 状态寄存器
         seg_t   pc;                                     // 程序计数器
         seg_t   cs;                                     // 调用栈寄存器
@@ -577,16 +577,17 @@ namespace mixc::extern_isa_cpu::origin{
             auto i      = inc::cast<bdc_t>(ins);
             auto assign = [&](res_t m, auto v){
                 auto p_v = & regs[i.bank << 2];
-                auto p_m = & mode[i.bank << 2];
 
-                for(uxx idx = i.bmp; idx != 0; idx >>= 1, p_v += 1, p_m += 1){
-                    if (idx & 1){
-                        p_v[0] = v;
-                        p_m[0] = m;
+                for(uxx mask = i.bmp, idx = 0; mask != 0; mask >>= 1, idx++){
+                    if (0 == (mask & 1)){
+                        continue;
+                    }
 
-                        if (m == res_t::is_f32){
-                            p_v[0].rh32 = 0;
-                        }
+                    p_v [idx]               = v;
+                    mode[i.bank << 2 | idx] = m;
+
+                    if (m == res_t::is_f32){
+                        p_v[idx].rh32 = 0;
                     }
                 }
             };
@@ -659,10 +660,10 @@ namespace mixc::extern_isa_cpu::origin{
         template<class opr>
         void f4(opr const & invoke){
             switch(f4_t(ins.opc & 0x3)){
-            case f4_t::f4aab: invoke(modes[ins.opa], regs[ins.opa], regs[ins.opa], regs[ins.opb]);                                       break;
-            case f4_t::f4abt: invoke(modes[ins.opb], regs[ins.opa], regs[ins.opb], regs[ins.opt]);                                       break;
-            case f4_t::f4tab: invoke(modes[ins.opa], regs[ins.rt ], regs[ins.opa], regs[ins.opb]);                                       break;
-            case f4_t::f4tai: invoke(modes[ins.opa], regs[ins.rt ], regs[ins.opa], rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>()); break;
+            case f4_t::f4aab: invoke(mode[ins.opa], regs[ins.opa], regs[ins.opa], regs[ins.opb]);                                       break;
+            case f4_t::f4abt: invoke(mode[ins.opb], regs[ins.opa], regs[ins.opb], regs[ins.opt]);                                       break;
+            case f4_t::f4tab: invoke(mode[ins.opa], regs[ins.opt], regs[ins.opa], regs[ins.opb]);                                       break;
+            case f4_t::f4tai: invoke(mode[ins.opa], regs[ins.opt], regs[ins.opa], rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>()); break;
             }
         }
 
@@ -718,12 +719,28 @@ namespace mixc::extern_isa_cpu::origin{
             auto   m  = f8_t(ins.opc & 0x7);
 
             switch(res_t(mode[ins.opa])){
-            case is_f32: xgen(rs.f32, f32) break;
-            case is_f64: xgen(rf.f64, f64) break;
-            case is_u64: xgen(rt.u64, u64) break;
-            case is_i64: xgen(rt.i64, i64) break;
+            case is_f32: xgen(rs.rf32, f32) break;
+            case is_f64: xgen(rf.rf64, f64) break;
+            case is_u64: xgen(rt.ru64, u64) break;
+            case is_i64: xgen(rt.ri64, i64) break;
             }
         }
+
+        template<class opr>
+        void f8x(opr const & invoke){
+            auto & ra = regs[ins.opa];
+            auto & rb = regs[ins.opb];
+            auto   m  = f8_t(ins.opc & 0x7);
+
+            if (res_t(mode[ins.opa]) == is_i64){
+                xgen(rt.ri64, i64)
+            }
+            else{
+                xgen(rt.ru64, u64)
+            }
+        }
+
+        #undef xgen
 
         template<class type>
         void add(type & a, type b, type c){
@@ -827,20 +844,18 @@ namespace mixc::extern_isa_cpu::origin{
                     return;
                 }
 
-                if constexpr (not inc::is_integer<ut>){
+                if constexpr (inc::is_integer<ut>){
                     if (sta.pmod != no_predetermined){
                         regs[sta.pmod]  = b % c;
                         sta.pmod        = no_predetermined;
                     }
                 }
-                else{
-                    a       = b / c;
-                }
+                a = b / c;
             });
         }
 
         void asm_shr(){
-            f8([&](auto & a, auto b, auto c){
+            f8x([&](auto & a, auto b, auto c){
                 u64  overflow_part;
                 u128 m              = inc::shift_right(u64(b), u64(c));
                 overflow_part       = m.low;
@@ -861,7 +876,7 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void asm_shl(){
-            f8([&](auto & a, auto b, auto c){
+            f8x([&](auto & a, auto b, auto c){
                 u64  overflow_part;
                 u128 m              = inc::shift_left(u64(b), u64(c));
                 overflow_part       = m.high;
