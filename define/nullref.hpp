@@ -10,20 +10,20 @@ namespace mixc::define_nullref_t{
     xstruct(
         xname(nullref_t)
     )
-        template<class a> auto operator == (a const & value) const {
+        template<class a> bool operator == (a const & value) const {
             auto ptr = inc::addressof(value);
             return voidp(ptr) == this;
         }
 
-        template<class a> friend auto operator == (a const & value, nullref_t const & nullref) {
+        template<class a> friend bool operator == (a const & value, nullref_t const & nullref) {
             return nullref == value;
         }
 
-        template<class a> friend auto operator != (a const & value, nullref_t const & nullref) {
+        template<class a> friend bool operator != (a const & value, nullref_t const & nullref) {
             return not (nullref == value);
         }
 
-        template<class a> friend auto operator != (nullref_t const & nullref, a const & value) {
+        template<class a> friend bool operator != (nullref_t const & nullref, a const & value) {
             return not (nullref == value);
         }
 
