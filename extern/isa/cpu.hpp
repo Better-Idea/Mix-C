@@ -157,17 +157,18 @@ namespace mixc::extern_isa_cpu::origin{
         shr             = div    + 8,
         shl             = shr    + 8,
 
+        // 位操作
+        bop             = shl    + 8,
+
         // 最小最大值
-        miax            = shl    + 8,
+        miax            = bop    + 4,
 
         // 交换两个值
         swap            ,
 
-        // 位操作
-        bop             ,
-
         // 内部互斥锁
-        lock            = bop    + 2,
+        lock            ,
+
     };
 
     enum rduxr_t{
@@ -314,11 +315,23 @@ namespace mixc::extern_isa_cpu::origin{
         } res_t;
 
         struct sta_t{
+            // 寄存器类型 2bit * 16
+            // - 00 f32
+            // - 01 f64
+            // - 10 u64
+            // - 11 i64
+            u64 reg_type            : 32;
+
+            // 大于
             u64 gt                  : 1;
+
+            // 等于
             u64 eq                  : 1;
+
+            // 零标志
             u64 zf                  : 1;
 
-            // 上溢
+            // 上溢/进位/借位
             u64 cf                  : 1;
 
             // 下溢
@@ -735,7 +748,7 @@ namespace mixc::extern_isa_cpu::origin{
                         sta.of  = 0;
                     }
 
-                    if (a = m.low; sta.pmulh >= no_predetermined){
+                    if (a = m.low; sta.pmulh != no_predetermined){
                         regs[sta.pmulh] = m.high;
                         sta.pmulh       = no_predetermined;
                     }
@@ -760,7 +773,7 @@ namespace mixc::extern_isa_cpu::origin{
                 }
 
                 if constexpr (not inc::is_integer<ut>){
-                    if (sta.pmod >= no_predetermined){
+                    if (sta.pmod != no_predetermined){
                         regs[sta.pmod]  = b % c;
                         sta.pmod        = no_predetermined;
                     }
@@ -785,7 +798,7 @@ namespace mixc::extern_isa_cpu::origin{
 
                 sta.zf              = a == 0;
 
-                if (sta.psfto >= no_predetermined){
+                if (sta.psfto != no_predetermined){
                     regs[sta.psfto] = overflow_part;
                     sta.psfto       = no_predetermined;
                 }
@@ -801,7 +814,7 @@ namespace mixc::extern_isa_cpu::origin{
                 sta.cf              = overflow_part & 1;
                 sta.zf              = a == 0;
 
-                if (sta.psfto >= no_predetermined){
+                if (sta.psfto != no_predetermined){
                     regs[sta.psfto] = overflow_part;
                     sta.psfto       = no_predetermined;
                 }
