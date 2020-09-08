@@ -169,6 +169,8 @@ namespace mixc::extern_isa_cpu::origin{
         // 内部互斥锁
         lock            ,
 
+        // 调试中断
+        brk             ,
     };
 
     enum rduxr_t{
@@ -557,10 +559,10 @@ namespace mixc::extern_isa_cpu::origin{
             case cmd_t::movqsx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ru64; break;
             case cmd_t::movqf : mode[ins.opa] = res_t::is_u64; regs[ins.opa].ru64 = regs[ins.opb].rf64; break;
             case cmd_t::movqfx: mode[ins.opa] = res_t::is_i64; regs[ins.opa].ri64 = regs[ins.opb].ri64; break;
-            case cmd_t::movsi : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = (f32)rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
-            case cmd_t::movsix: mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = (f32)rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
-            case cmd_t::movfi : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = (f64)rim.load(ins.opb       , 4/*bits*/).read_with_clear<u64>(); break;
-            case cmd_t::movfix: mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = (f64)rim.load(ins.opb | 0x10, 5/*bits*/).read_with_clear<i64>(); break;
+            case cmd_t::movsi : mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = (f32)rim.load(ins.opb, 4/*bits*/).read_with_clear<u64>(); break;
+            case cmd_t::movsix: mode[ins.opa] = res_t::is_f32; regs[ins.opa].rf32 = (f32)rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>(); break;
+            case cmd_t::movfi : mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = (f64)rim.load(ins.opb, 4/*bits*/).read_with_clear<u64>(); break;
+            case cmd_t::movfix: mode[ins.opa] = res_t::is_f64; regs[ins.opa].rf64 = (f64)rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>(); break;
             }
         }
 
@@ -922,10 +924,6 @@ namespace mixc::extern_isa_cpu::origin{
             #undef  xgen
         }
     };
-}
-
-void foo(int a0, int a1, int a2){
-
 }
 
 /*
