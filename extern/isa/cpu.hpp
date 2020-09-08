@@ -225,6 +225,7 @@ namespace mixc::extern_isa_cpu::origin{
     };
 
     struct cpu_t{
+        using the_t = cput_t;
         struct imm_t{
             auto & load(uxx value, uxx bits){
                 imm         |= value << total_bits;
@@ -314,38 +315,67 @@ namespace mixc::extern_isa_cpu::origin{
             is_i64,
         } res_t;
 
+        typedef struct reg_type_group{
+            struct bits_delegate{
+                bits_delegate(u32p bits, uxx offset) : 
+                    bits(bits), offset(offset){
+                }
+
+                operator register_state_t(){
+                    return register_state_t(
+                        (*bits >> offset) & 0x3
+                    );
+                }
+
+                register_state_t operator=(register_state_t value){
+                    *bits &= ~(0x3   << offset);
+                    *bits |=  (value << offset);
+                    return value;
+                }
+            private:
+                u32p bits;
+                uxx  offset;
+            };
+
+            bits_delegate operator [](uxx index){
+                return bits_delegate(xref type_group, index * 2);
+            }
+        private:
+            u32 type_group;
+        } rtg_t;
+
         struct sta_t{
             // 寄存器类型 2bit * 16
             // - 00 f32
             // - 01 f64
             // - 10 u64
             // - 11 i64
-            u64 reg_type            : 32;
+            rtg_t   reg_type;
 
             // 大于
-            u64 gt                  : 1;
+            u32     gt                  : 1;
 
             // 等于
-            u64 eq                  : 1;
+            u32     eq                  : 1;
 
             // 零标志
-            u64 zf                  : 1;
+            u32     zf                  : 1;
 
             // 上溢/进位/借位
-            u64 cf                  : 1;
+            u32     cf                  : 1;
 
             // 下溢
-            u64 of                  : 1;
+            u32     of                  : 1;
 
             // 预设(predetermined)
             // 指定余数存放的寄存器
-            u64 pmod                : 5;
+            u32     pmod                : 5;
 
             // 指定乘法高位积存放的寄存器
-            u64 pmulh               : 5;
+            u32     pmulh               : 5;
 
             // 指定移位溢出位存放的寄存器
-            u64 psfto               : 5;
+            u32     psfto               : 5;
         };
 
         // 段偏式
@@ -381,7 +411,7 @@ namespace mixc::extern_isa_cpu::origin{
         seg_t   pc;                                     // 程序计数器
         seg_t   cs;                                     // 调用栈寄存器
         seg_t   ss;                                     // 堆栈寄存器
-        res_t   mode[general_purpose_register_count];
+        rtg_t & mode    = sta.reg_type;
 
         static i64 sign_extern(reg_t val, uxx scale){
             auto idx  = 1ull << ((1ull << scale) * 8);
@@ -438,6 +468,28 @@ namespace mixc::extern_isa_cpu::origin{
             sta.gt  = cmode == c4ia ? a < b : a > b;
         }
 
+        struct cifxx_t{
+            u08 opc     : 4;
+            u08 mode    : 2;
+            u08 bank    : 2;
+            u08 opa     : 2;
+            u08 opb     : 2;
+            u08 im4     : 4;
+        };
+
+        void asm_cifxx(){
+            auto ins = inc::cast<cifxx_t>(this->ins);
+            auto i   = rim.load(ins.im4, 4/*bits*/);
+            cmp(c4_t::c4ab, ins.bank << 2 | ins.opa, ins.bank << 2 | ins.opb);
+
+            switch(cmd_t(ins.mode | cifeq)){
+            case cifeq: ifxx(    sta.eq);               break;
+            case cifne: ifxx(not sta.eq);               break;
+            case cifle: ifxx(    sta.eq or not sta.gt); break;
+            case ciflt: ifxx(not sta.eq or not sta.gt); break;
+            }
+        }
+
         void ifxx(bool contiguous){
             i64 offset      = rim.read_with_clear<i64>(); 
 
@@ -450,7 +502,7 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void asm_ifxx(){
-            switch(rim.load(ins.im, 8/*bits*/); cmd_t(ins.opc)){
+            switch(rim.load(ins.im, 8/*bits*/); cmd_t(ins.opc | cmd_t::ifeq)){
             case cmd_t::ifeq: ifxx(    sta.eq);               break;
             case cmd_t::ifne: ifxx(not sta.eq);               break;
             case cmd_t::ifle: ifxx(    sta.eq or not sta.gt); break;
