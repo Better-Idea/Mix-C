@@ -225,7 +225,7 @@ namespace mixc::extern_isa_cpu::origin{
     };
 
     struct cpu_t{
-        using the_t = cput_t;
+        using the_t = cpu_t;
         struct imm_t{
             auto & load(uxx value, uxx bits){
                 imm         |= value << total_bits;
@@ -253,7 +253,8 @@ namespace mixc::extern_isa_cpu::origin{
                     if (total_bits == 0){
                         return 0;
                     }
-                    if (inc::index_of_last_set(imm) == total_bits - 1){
+                    if (inc::index_of_last_set(imm) == total_bits - 1 and 
+                       (inc::is_signed<type> or total_bits > 4)){
                         imm |= u64(-1) << total_bits;
                     }
                     return type(imm);
@@ -478,7 +479,7 @@ namespace mixc::extern_isa_cpu::origin{
         };
 
         void asm_cifxx(){
-            auto ins = inc::cast<cifxx_t>(this->ins);
+            auto ins = inc::cast<cifxx_t>(the.ins);
             auto i   = rim.load(ins.im4, 4/*bits*/);
             cmp(c4_t::c4ab, ins.bank << 2 | ins.opa, ins.bank << 2 | ins.opb);
 
