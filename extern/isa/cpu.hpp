@@ -254,7 +254,7 @@ namespace mixc::extern_isa_cpu::origin{
                         return 0;
                     }
                     if (inc::index_of_last_set(imm) == total_bits - 1 and 
-                       (inc::is_signed<type> or total_bits > 4)){
+                       (inc::is_signed<type> or total_bits > 4) and total_bits <= 64){
                         imm |= u64(-1) << total_bits;
                     }
                     return type(imm);
