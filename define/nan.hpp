@@ -1,3 +1,17 @@
+/* 模块：nan
+ * 类型：单例·常量·语法糖
+ * 功能：提供浮点非数 NaN 的标准形式
+ * 用法：
+ * 
+ * // handling
+ * if (float_item == nan){
+ *     ...
+ * }
+ * 
+ * // assign standard NaN
+ * float_item = nan;
+ */
+
 #ifndef xpack_define_nan
 #define xpack_define_nan
 #pragma push_macro("xuser")
