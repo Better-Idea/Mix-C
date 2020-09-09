@@ -45,10 +45,20 @@ namespace mixc::extern_isa_cpu::origin{
         jali            ,
         jalr            ,
 
+        // 广播式赋值
+        bdcss           ,
+        bdcsi           = bdcss  + 4,
+        bdcff           = bdcsi  + 4,
+        bdcfi           = bdcff  + 4,
+        bdcqq           = bdcfi  + 4,
+        bdcqi           = bdcqq  + 4,
+        bdcqqx          = bdcqi  + 4,
+        bdcqix          = bdcqqx + 4,
+
         // 赋值指令
         // u64 <- u08/u16/u32/u64
         // i64 <- i08/i16/i32/i64
-        movqb           ,
+        movqb           = bdcqix + 4,
         movqbx          ,
         movqw           ,
         movqwx          ,
@@ -87,35 +97,10 @@ namespace mixc::extern_isa_cpu::origin{
         // 写入特权扩展寄存器
         wrpri           = wruxr  + 2,
 
-        // 立即数加载
-        imm             = wrpri  + 2,
-
-        // 广播式赋值
-        bdcss           = imm    + 16,
-        bdcsi           = bdcss  + 4,
-        bdcff           = bdcsi  + 4,
-        bdcfi           = bdcff  + 4,
-        bdcqq           = bdcfi  + 4,
-        bdcqi           = bdcqq  + 4,
-        bdcqqx          = bdcqi  + 4,
-        bdcqix          = bdcqqx + 4,
-
-        // 读取栈内存
-        ldkq            = bdcqix + 2,
-        ldkqx           = ldkq   + 2,
-        ldks            = ldkqx  + 2,
-        ldkf            = ldks   + 2,
-
-        // 写入栈内存
-        stkq            = ldkf   + 2,
-        stkqx           = stkq   + 2,
-        stks            = stkqx  + 2,
-        stkf            = stks   + 2,
-
         // 读取内存
         // u64 <- mu08/mu16/mu32/mu64
         // i64 <- mi08/mi16/mi32/mi64
-        ldb             = stkf   + 2,
+        ldb             = wrpri  + 2,
         ldbx            = ldb    + 2,
         ldw             = ldbx   + 2,
         ldwx            = ldw    + 2,
@@ -124,27 +109,33 @@ namespace mixc::extern_isa_cpu::origin{
         ldq             = lddx   + 2,
         ldqx            = ldq    + 2,
 
+        // 读取栈内存
+        ldkq            = ldqx   + 2,
+        ldkqx           = ldkq   + 2,
+        ldks            = ldkqx  + 2,
+        ldkf            = ldks   + 2,
+
+        // 内存读取
+        // f32 <- mf32
+        // f64 <- mf64
+        lds             = ldkf   + 2,
+        ldf             = lds    + 2,
+
         // 写入内存
         // u08/i08 -> mu08
         // u16/i16 -> mu16
         // u32/i32 -> mu32
         // u64/i64 -> mu64
-        stb             = ldqx   + 2,
+        stb             = ldf    + 2 + 2 * 2, // 保留 2x2 空位
         stw             = stb    + 2,
         std             = stw    + 2,
         stq             = std    + 2,
 
-        // 内存读取
-        // f32 <- mf32
-        // f64 <- mf64
-        lds             = stq    + 2,
-        ldf             = lds    + 2,
-
-        // 比较
-        cmp             = ldf    + 2,
+        // 写入栈内存
+        stkq            = stq    + 2, 
 
         // 基础逻辑运算
-        band            = cmp    + 4,
+        band            = stkq   + 2 + 3 * 2, // 保留 3x2 空位
         bor             = band   + 4,
         bxor            = bor    + 4,
         bnand           = bxor   + 4,
@@ -157,8 +148,11 @@ namespace mixc::extern_isa_cpu::origin{
         shr             = div    + 8,
         shl             = shr    + 8,
 
+        // 比较
+        cmp             = shl    + 8,
+
         // 位操作
-        bop             = shl    + 8,
+        bop             = cmp    + 4,
 
         // 最小最大值
         miax            = bop    + 4,
@@ -171,6 +165,9 @@ namespace mixc::extern_isa_cpu::origin{
 
         // 调试中断
         brk             ,
+
+        // 立即数加载
+        imm             = 256 - 16,
     };
 
     enum rduxr_t{
@@ -393,9 +390,11 @@ namespace mixc::extern_isa_cpu::origin{
                 u32 segment;
             };
 
+            u64     address;
+
             seg_t(){}
-            seg_t(u64 address){
-                inc::cast<u64>(this[0]) = address;
+            seg_t(u64 address) : 
+                address(address){
             }
         };
 
@@ -637,22 +636,46 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        void asm_pop(){
+        struct rwss_t{
+            u08                 : 5;
+            u08     type        : 2;
+            u08     side_effect : 1;
+            u08     opa         : 4;
+            u08     im4         : 4;
+        };
 
+        void asm_stkxx(){
+            auto ins           = inc::cast<rwss_t>(the.ins);
+            auto imm           = rim.load(ins.im4, 4/*bits*/).read_with_clear<u64>();
+            auto addr          = ss.address - imm * sizeof(reg_t);
+            wrmem(& regs[ins.opa], addr, sizeof(reg_t));
+
+            if (ins.side_effect){
+                ss.address     = addr;
+            }
         }
 
-        void asm_push(){
+        void asm_ldkxx(){
+            auto ins           = inc::cast<rwss_t>(the.ins);
+            auto imm           = rim.load(ins.im4, 4/*bits*/).read_with_clear<u64>();
+            auto addr          = ss.address + imm * sizeof(reg_t);
+            regs[ins.opa].ru64 = 0;
+            mode[ins.opa]      = res_t(ins.type);
+            rdmem(& regs[ins.opa], addr, sizeof(reg_t));
 
+            if (ins.side_effect){
+                ss.address     = addr;
+            }
         }
 
-        struct stx_t{
+        struct stxx_t{
             u08                 : 5;
             u08     scale       : 2;
             u08     with_rt     : 1;
         };
 
-        void asm_stx(){
-            auto i                  = inc::cast<stx_t>(ins);
+        void asm_stxx(){
+            auto i                  = inc::cast<stxx_t>(ins);
             auto bytes              = 1 << i.scale;
             wrmem(& regs[ins.opa]/*source*/, i.with_rt ? regs[ins.opb].ru64 + rt.ru64 : regs[ins.opb].ru64/*target*/, bytes);
         }
