@@ -1,3 +1,22 @@
+/* 模块：nullref
+ * 类型：单例·常量·语法糖
+ * 功能：通常用于返回引用类型的函数，当函数的输入不是期望值时，可以返回 nullref
+ * 用法：
+ * type & get(uxx index){
+ *     if (index >= this->len){
+ *         return nullref;
+ *     }
+ *     return this->ary[index];
+ * }
+ * 
+ * 注意：请尽量用引用类型接收可能为 nullref 的返回值，必要时需要判断一下返回值是否为 nullref
+ * type & ret = get(10);
+ * if (ret == nullref){
+ *     // may unexpected
+ * }
+ */
+
+
 #ifndef xpack_define_nullref_t
 #define xpack_define_nullref_t
 #pragma push_macro("xuser")
