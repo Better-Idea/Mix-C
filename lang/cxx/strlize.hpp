@@ -157,21 +157,20 @@ namespace mixc::lang_cxx_strlize{
             if (exp < 0){
                 is_neg_exp      = true;
                 m              *= adv::exp10_unsafe(uxx(-exp));
-
-                if (m < 1.0){
-                    m          *= 10;
-                    exp        -= 1;
-                }
-    
                 buf_exp[0]      = '-';
             }
             else if (exp > 0){
                 m              *= adv::expr10_unsafe(uxx(exp));
+            }
 
-                if (m >= 10){
-                    m          *= 0.1;
-                    exp        += 1;
-                }
+            if (m < 1.0){
+                m              *= 10;
+                exp            -= 1;
+                buf_exp[0]      = '-';
+            }
+            else if (m >= 10){
+                m              *= 0.1;
+                exp            += 1;
             }
 
             if (is_scientific_notation){
