@@ -64,8 +64,12 @@
     }
 
     struct u128{
-        u64 low;
-        u64 high;
+        u64 low     = 0;
+        u64 high    = 0;
+
+        u128(){}
+        u128(u64 low, u64 high) : 
+            low(low), high(high){}
 
         auto & l(u64 value){
             low = value;
