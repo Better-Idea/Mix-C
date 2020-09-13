@@ -45,7 +45,7 @@ namespace mixc::memop_signature{
 
             u.mem = this_call;
 
-            // ¸ÃÀ´µÄ»¹ÊÇÀ´ÁË£¬this call µÄ ABI ÎÊÌâ
+            // åº”å¯¹ä¸åŒå¹³å°å…·æœ‰å·®å¼‚çš„ this_call 
             #if xis_msvc
             return (foop(self)->*u.msvc_call)(list...);
             #else
