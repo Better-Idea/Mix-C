@@ -103,6 +103,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xstruct_pubf__(...)
 #define __xstruct_prof__(...)
 #define __xstruct_prif__(...)
+#define __xstruct_pubc__(...)
+#define __xstruct_proc__(...)
+#define __xstruct_pric__(...)
 #define __xstruct_asso__(...)
 
 // 基类
@@ -116,6 +119,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xexpand_pubf__(...)
 #define __xexpand_prof__(...)
 #define __xexpand_prif__(...)
+#define __xexpand_pubc__(...)
+#define __xexpand_proc__(...)
+#define __xexpand_pric__(...)
 #define __xexpand_asso__(...)
 
 // 基类
@@ -129,6 +135,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xexpand_first_pubf__(...)
 #define __xexpand_first_prof__(...)
 #define __xexpand_first_prif__(...)
+#define __xexpand_first_pubc__(...)
+#define __xexpand_first_proc__(...)
+#define __xexpand_first_pric__(...)
 #define __xexpand_first_asso__(...)
 
 // the_t 别名
@@ -142,6 +151,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xthe_pubf__(...)
 #define __xthe_prof__(...)
 #define __xthe_prif__(...)
+#define __xthe_pubc__(...)
+#define __xthe_proc__(...)
+#define __xthe_pric__(...)
 #define __xthe_asso__(...)
 
 // base_list 基类清单
@@ -155,6 +167,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xbase_pubf__(...)
 #define __xbase_prof__(...)
 #define __xbase_prif__(...)
+#define __xbase_pubc__(...)
+#define __xbase_proc__(...)
+#define __xbase_pric__(...)
 #define __xbase_asso__(...)
 
 // member_list 所有成员清单
@@ -168,6 +183,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xplaced_pubf__(...)
 #define __xplaced_prof__(...)
 #define __xplaced_prif__(...)
+#define __xplaced_pubc__(...)
+#define __xplaced_proc__(...)
+#define __xplaced_pric__(...)
 #define __xplaced_asso__(...)
 
 // 字段
@@ -181,6 +199,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xfield_pubf__(name,...)           public:     __VA_ARGS__ name;
 #define __xfield_prof__(name,...)           protected:  __VA_ARGS__ name;
 #define __xfield_prif__(name,...)           private:    __VA_ARGS__ name;
+#define __xfield_pubc__(name,bits,...)      public:     __VA_ARGS__ name    : bits;
+#define __xfield_proc__(name,bits,...)      protected:  __VA_ARGS__ name    : bits;
+#define __xfield_pric__(name,bits,...)      private:    __VA_ARGS__ name    : bits;
 #define __xfield_asso__(...)
 
 // 非基类成员字段指针
@@ -194,6 +215,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xmlist_pubf__(name,...)           , & the_t::name
 #define __xmlist_prof__(name,...)           , & the_t::name
 #define __xmlist_prif__(name,...)           , & the_t::name
+#define __xmlist_pubc__(name,...)
+#define __xmlist_proc__(name,...)
+#define __xmlist_pric__(name,...)
 #define __xmlist_asso__(...)                , & __fak<__VA_ARGS__>::item
 
 #define __xtype__
@@ -206,6 +230,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xtype_pubf__(...)
 #define __xtype_prof__(...)
 #define __xtype_prif__(...)
+#define __xtype_pubc__(...)
+#define __xtype_proc__(...)
+#define __xtype_pric__(...)
 #define __xtype_asso__(...)
 
 #define __xitem__
@@ -218,6 +245,9 @@ static inline uxx __class_id = 0x80000000;
 #define __xitem_pubf__(name,...)            #name,
 #define __xitem_prof__(name,...)            #name,
 #define __xitem_prif__(name,...)            #name,
+#define __xitem_pubc__(name,...)            #name,
+#define __xitem_proc__(name,...)            #name,
+#define __xitem_pric__(name,...)            #name,
 #define __xitem_asso__(...)                 "",
 
 

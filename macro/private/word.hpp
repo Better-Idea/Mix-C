@@ -27,6 +27,15 @@
 // 私有的字段 (private field)
 #define xprif(...)                          prif__(__VA_ARGS__)
 
+// 公有压缩字段 (public compressed field)
+#define xpubc(...)                          pubc__(__VA_ARGS__)
+
+// 受保护的压缩字段 (protected compressed field)
+#define xproc(...)                          proc__(__VA_ARGS__)
+
+// 私有的压缩字段 (private compressed field)
+#define xpric(...)                          pric__(__VA_ARGS__)
+
 // 与该结构关联的类型 (association)
 #define xasso(...)                          asso__(__VA_ARGS__)
 
