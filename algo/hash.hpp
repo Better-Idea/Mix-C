@@ -1,3 +1,13 @@
+/* 模块：hash
+ * 类型：函数单体
+ * 功能：得到一个对象的 hash 值
+ * 用法：
+ * TODO ===========================================================
+ * 
+ * 注意：
+ * - 打算后期再支持序列的 hash
+ */
+
 #ifndef xpack_algo_hash
 #define xpack_algo_hash
 #pragma push_macro("xuser")
@@ -10,7 +20,16 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_hash{
-    inline uxx core(voidp mem, uxx blocks, uxx rest, uxx seed = 0){
+    /* 函数：底层哈希函数
+     * 参数：
+     * - mem 为要 hash 的对象首地址
+     * - blocks 为该对象可分成多少个 uxx 机器字长的块(向下取整)
+     * - rest 为该对象向下取整时剩余的字节数
+     * - seed 为随机数种子，用于避免 hash 攻击
+     * 返回：
+     * - hash 结果
+     */
+    inline uxx hash(voidp mem, uxx blocks, uxx rest, uxx seed = 0){
         uxxp ptr  = (uxxp)mem;
         uxx  mask = (uxx(1) << (rest * 8)) - 1;
         uxx  val  = (ptr[blocks] & mask);
@@ -26,9 +45,16 @@ namespace mixc::algo_hash{
         return x;
     }
 
+    /* 函数：上层哈希函数
+     * 参数：
+     * - value 为要 hash 的对象
+     * - seed 为随机数种子，用于避免 hash 攻击
+     * 返回：
+     * - hash 结果
+     */
     template<class type>
     inline uxx hash(type const & value, uxx seed = 0){
-        return core(inc::addressof(value), sizeof(type) / sizeof(uxx), sizeof(type) % sizeof(uxx), seed);
+        return hash(inc::addressof(value), sizeof(type) / sizeof(uxx), sizeof(type) % sizeof(uxx), seed);
     }
 }
 #endif
