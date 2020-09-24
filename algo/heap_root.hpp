@@ -34,7 +34,7 @@ namespace mixc::algo_heap_root{
      * - compare 为元素比较回调
      */
     template<class item_t, inc::unified_seq_t seq_t>
-    static void push_core(
+    inline void push_core(
         seq_t                       seq,
         item_t const &              value, 
         inc::can_compare<item_t>    compare = inc::default_compare<item_t>){
@@ -70,7 +70,7 @@ namespace mixc::algo_heap_root{
      * - compare 为元素比较回调
      */
     template<class item_t, inc::unified_seq_t seq_t>
-    static auto pop_core(
+    inline auto pop_core(
         seq_t                       seq, 
         item_t const &              insert_value, 
         inc::can_compare<item_t>    compare = inc::default_compare<item_t>){
@@ -118,7 +118,7 @@ namespace mixc::algo_heap_root::origin::heap_root{
      * - compare 为元素比较回调
      */
     template<inc::unified_seq_t seq_t>
-    static void push(
+    inline void push(
         seq_t                       const & seq,
         uxx                                 length,
         inc::item_origin_of<seq_t>  const & value, 
@@ -141,7 +141,7 @@ namespace mixc::algo_heap_root::origin::heap_root{
      * - compare 为元素比较回调
      */
     template<inc::unified_seq_t seq_t>
-    static auto pop(
+    inline auto pop(
         seq_t                       const & seq, 
         uxx                                 length, 
         inc::item_origin_of<seq_t>  const & insert_value, 
