@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_array
-#include"docker/private/adapter.foreach.hpp"
+#include"docker/private/adapter.foreach.array.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -48,7 +48,7 @@ namespace mixc::docker_array{
     };
 
     template<class final, class type, uxx count, uxx ... rest>
-    using array = inc::adapter_foreach<
+    using array = inc::adapter_foreach_array<
         final, 
         array_t<type, count, rest...>,
         type

@@ -1,15 +1,15 @@
-#ifndef xpack_docker_adapter_foreach
-#define xpack_docker_adapter_foreach
+#ifndef xpack_docker_adapter_foreach_array
+#define xpack_docker_adapter_foreach_array
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_adapter_foreach
+#define xuser mixc::docker_adapter_foreach_array
 #include"interface/seqptr.hpp"
 #include"interface/iterator.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_adapter_foreach {
+namespace mixc::docker_adapter_foreach_array {
     template<class final, class base_t, class item_t>
-    struct adapter_foreach : base_t {
+    struct adapter_foreach_array : base_t {
         using the_t     = base_t;
         using iteratorx = inc::iteratorx<item_t &> const &;
         using iterator  = inc::iterator <item_t &> const &;
@@ -50,5 +50,5 @@ namespace mixc::docker_adapter_foreach {
 #endif
 
 namespace xuser::inc {
-	using ::mixc::docker_adapter_foreach::adapter_foreach;
+	using ::mixc::docker_adapter_foreach_array::adapter_foreach_array;
 }

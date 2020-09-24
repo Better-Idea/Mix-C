@@ -7,7 +7,7 @@
 #include"dumb/disable_copy.hpp"
 #include"dumb/struct_type.hpp"
 #include"docker/transmitter.hpp"
-#include"docker/private/adapter.foreach.hpp"
+#include"docker/private/adapter.foreach.array.hpp"
 #include"docker/private/adapter.pushpop.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"

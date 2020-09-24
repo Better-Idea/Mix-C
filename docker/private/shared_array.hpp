@@ -12,7 +12,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_shared_array
-#include"docker/private/adapter.foreach.hpp"
+#include"docker/private/adapter.foreach.array.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
 #include"macro/xis_nullptr.hpp"
@@ -100,7 +100,7 @@ namespace mixc::docker_shared_array{
     };
 
     template<class final, class type, uxx rank, class attribute>
-    using shared_array = inc::adapter_foreach<
+    using shared_array = inc::adapter_foreach_array<
         final, 
         shared_array_t<type, rank, attribute>,
         type
