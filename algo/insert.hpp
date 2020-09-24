@@ -33,6 +33,24 @@ namespace mixc::algo_insert{
         }
     }
 
+    template<class seq_des_t, class seq_src_t = seq_des_t, class seq_val_t = seq_src_t>
+    inline void insert_core(
+        seq_des_t                           target,
+        seq_src_t                           source,
+        ixx                                 index,
+        seq_val_t                           values){
+
+        xindex_rollback(target.length(), index, +1);
+        auto tar   = target.subseq(co{index});
+        inc::copy_with_operator(target, source, index);
+        inc::copy_with_operator(tar, values, values.length());
+        inc::copy_with_operator(
+            tar.subseq(co{values.length()}), 
+            source.subseq(co{index}), 
+            source.length() - index
+        );
+    }
+
     template<inc::unified_seq_t seq_t>
     inline void insert(
         seq_t                       const & target,
@@ -56,24 +74,6 @@ namespace mixc::algo_insert{
         insert_core(
             inc::unified_seq<seq_des_t>(target), index, 
             inc::unified_seq<seq_val_t>(values)
-        );
-    }
-
-    template<class seq_des_t, class seq_src_t = seq_des_t, class seq_val_t = seq_src_t>
-    inline void insert_core(
-        seq_des_t                           target,
-        seq_src_t                           source,
-        ixx                                 index,
-        seq_val_t                           values){
-
-        xindex_rollback(target.length(), index, +1);
-        auto tar   = target.seq(co{index});
-        inc::copy_with_operator(target, source, index);
-        inc::copy_with_operator(tar, values, values.length());
-        inc::copy_with_operator(
-            tar.seq(co{values.length()}), 
-            source.seq(co{index}), 
-            source.length() - index
         );
     }
 
