@@ -4,24 +4,28 @@
 #undef  xuser
 #define xuser mixc::algo_remove
 #include"define/base_type.hpp"
-#include"interface/ranger.hpp"
+#include"interface/seqptr.hpp"
+#include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
-#include"macro/xdebug_fail.hpp"
+#include"memop/copy.hpp"
 #include"memop/swap.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_remove{
-    template<class item_t>
-    inline uxx remove(inc::ranger<item_t> const & target, iinterval range){
-        range.normalize(target.length());
-        auto l = range.left();
-        auto r = range.right();
-        xdebug_fail(l >= target.length());
-        xdebug_fail(r >= target.length());
-
-        if (l > r){
-            inc::swap(& l, & r);
+    #define xgen(tar)                       \
+        range.normalize(tar.length());      \
+        auto l = range.left();              \
+        auto r = range.right();             \
+                                            \
+        if (l > r){                         \
+            inc::swap(xref l, xref r);      \
         }
+
+    template<class seq_tar_t>
+    inline void remove_core(seq_tar_t target, iinterval range){
+        using item_t = inc::item_origin_of<seq_tar_t>;
+        xgen(target);
 
         auto i   = 0;
         auto j   = target.length() - r - 1;
@@ -35,33 +39,50 @@ namespace mixc::algo_remove{
             target[l + i].~item_t();
             i += 1;
         }
-        return len;
     }
 
-    template<class item_t>
-    inline uxx remove(inc::ranger<item_t> const & target, ixx index){
-        xindex_rollback(target.length(), index);
-        return remove<item_t>(target, cc{ index, index });
+    template<class seq_tar_t, class seq_src_t>
+    inline void remove_core(seq_tar_t target, seq_src_t source, iinterval range){
+        xgen(source);
+
+        auto left  = source.subseq(co{0, l});
+        auto right = source.subseq(oo{r, -1});
+        inc::copy_with_operator(target, left, left.length());
+        inc::copy_with_operator(target.subseq(co{l, -1}), right, right.length());
     }
 
-    // template<class item_t>
-    // inline uxx remove(
-    //     inc::ranger<item_t> target, 
-    //     inc::ranger<item_t> source, 
-    //     ixx                 index, 
-    //     inc::ranger<item_t> values){
+    #undef xgen
 
-    //     return len;
-    // }
+    template<inc::unified_seq_t seq_t>
+    inline void remove(seq_t const & target, iinterval range){
+        remove_core(inc::unified_seq<seq_t>(target), range);
+    }
 
-    // template<class item_t>
-    // inline uxx remove(
-    //     inc::ranger<item_t> target, 
-    //     inc::ranger<item_t> source, 
-    //     ixx                 index, 
-    //     item_t const &      values){
-    //     return remove<item_t>(target, source,index, inc::initializer_list<item_t>{ values });
-    // }
+    template<inc::unified_seq_t seq_t>
+    inline void remove(seq_t const & target, ixx i){
+        xindex_rollback(target.length(), i);
+        remove_core(inc::unified_seq<seq_t>(target), cc{i, i});
+    }
+
+    template<inc::unified_seq_t seq_tar_t, inc::unified_seq_t seq_src_t>
+    inline void remove(seq_tar_t const & target, seq_src_t const & source, iinterval range){
+        remove_core(
+            inc::unified_seq<seq_tar_t>(target), 
+            inc::unified_seq<seq_src_t>(source), 
+            range
+        );
+    }
+
+    template<inc::unified_seq_t seq_tar_t, inc::unified_seq_t seq_src_t>
+    inline void remove(seq_tar_t const & target, seq_src_t const & source, ixx i){
+        xindex_rollback(source.length(), i);
+
+        remove_core(
+            inc::unified_seq<seq_tar_t>(target), 
+            inc::unified_seq<seq_src_t>(source), 
+            cc{i, i}
+        );
+    }
 }
 
 #endif
