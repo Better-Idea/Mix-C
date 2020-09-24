@@ -8,18 +8,18 @@
 #include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_transmitter::origin{
+namespace mixc::docker_transmitter{
     template<class type>
     xstruct(
         xtmpl(transmitter, type),
-        xpubb(inc::struct_type<type>)
+        xpubb(inc::struct_type<type>),
+        xprif(phas_hold_value, bool)
     )
-    private:
-        bool phas_hold_value = true;
     public:
         transmitter(): phas_hold_value(false){}
         transmitter(type const & value) : 
-            inc::struct_type<type>(value){
+            inc::struct_type<type>(value), 
+            phas_hold_value(true){
         }
 
         auto & operator=(type const & value){
@@ -35,14 +35,12 @@ namespace mixc::docker_transmitter::origin{
             return this[0];
         }
 
-        bool has_hold_value() const {
-            return phas_hold_value;
-        }
+        xpubget(has_hold_value)
     $
 }
 
 #endif
 
 namespace xuser::inc{
-    using namespace ::mixc::docker_transmitter::origin;
+    using ::mixc::docker_transmitter::transmitter;
 }
