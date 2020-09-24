@@ -60,13 +60,13 @@ namespace mixc::interface_seqptr{
             )
         )
         seqptr(object const & impl){
-            len = impl.length();
+            len = (uxx)impl.length();
             ptr = (item_t *)(item_t const *)impl;
         }
 
         seqptr(inc::initializer_list<item_t> list){
-            len = list.size();
-            ptr = list.begin();
+            len = (uxx)list.size();
+            ptr = (item_t *)list.begin();
         }
 
         operator item_t *(){
