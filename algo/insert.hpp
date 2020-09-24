@@ -4,70 +4,108 @@
 #undef  xuser
 #define xuser mixc::algo_insert
 #include"define/base_type.hpp"
-#include"interface/initializer_list.hpp"
-#include"interface/ranger.hpp"
+#include"interface/seqptr.hpp"
+#include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
-#include"macro/xdebug_fail.hpp"
 #include"memop/copy.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_insert{
-    template<class item_t>
-    inline uxx insert(
-        inc::ranger<item_t> const & target, 
+    template<class seq_des_t, class seq_src_t = seq_des_t>
+    inline void insert_core(
+        seq_des_t                   target, 
         ixx                         index, 
-        inc::ranger<item_t> const & values){
-
+        seq_src_t                   values){
+        
+        using item_t = inc::item_origin_of<seq_des_t>;
         xindex_rollback(target.length(), index, +1);
-        xdebug_fail(index > target.length());
-        auto len = target.length() + values.length();
-        auto i   = target.length();
-        auto j   = values.length();
 
-        while(ixx(i) >= ixx(index)){
-            i -= 1;
+        ixx i   = ixx(target.length());
+        ixx j   = ixx(values.length());
+
+        while(i > index){
+            i            -= 1;
             target[i + j] = target[i];
         }
         for(i = 0; i < j; i++){
-            target[i + index] = values[i];
+            target[i + index] = (item_t)values[i];
         }
-        return len;
     }
 
-    template<class item_t>
-    inline uxx insert(
-        inc::ranger<item_t> const & target,
-        ixx                         index,
-        item_t              const & value){
-        return insert<item_t>(target, index, inc::initializer_list<item_t>{ value });
+    template<inc::unified_seq_t seq_t>
+    inline void insert(
+        seq_t                       const & target,
+        ixx                                 index,
+        inc::item_origin_of<seq_t>  const & value){
+
+        using item_t = inc::item_origin_of<seq_t>;
+
+        insert_core(
+            inc::unified_seq<seq_t>(target), index, 
+            inc::seqptr<item_t>{value}
+        );
     }
 
-    template<class item_t>
-    inline uxx insert(
-        inc::ranger<item_t> target, 
-        inc::ranger<item_t> source, 
-        ixx                 index, 
-        inc::ranger<item_t> values){
+    template<inc::unified_seq_t seq_des_t, inc::unified_seq_t seq_val_t>
+    inline void insert(
+        seq_des_t                   const & target,
+        ixx                                 index,
+        seq_val_t                   const & values){
+
+        insert_core(
+            inc::unified_seq<seq_des_t>(target), index, 
+            inc::unified_seq<seq_val_t>(values)
+        );
+    }
+
+    template<class seq_des_t, class seq_src_t = seq_des_t, class seq_val_t = seq_src_t>
+    inline void insert_core(
+        seq_des_t                           target,
+        seq_src_t                           source,
+        ixx                                 index,
+        seq_val_t                           values){
 
         xindex_rollback(target.length(), index, +1);
-        xdebug_fail(index > target.length());
-        auto len = source.length() + values.length();
-        auto a   = target.range(co{index});
+        auto tar   = target.seq(co{index});
         inc::copy_with_operator(target, source, index);
-        inc::copy_with_operator(a, values, values.length());
-        inc::copy_with_operator(a.range(co{values.length()}), source.range(co{index}), source.length() - index);
-        return len;
+        inc::copy_with_operator(tar, values, values.length());
+        inc::copy_with_operator(
+            tar.seq(co{values.length()}), 
+            source.seq(co{index}), 
+            source.length() - index
+        );
     }
 
-    template<class item_t>
-    inline uxx insert(
-        inc::ranger<item_t> target, 
-        inc::ranger<item_t> source, 
-        ixx                 index, 
-        item_t const &      values){
-        return insert<item_t>(target, source,index, inc::initializer_list<item_t>{ values });
+    template<inc::unified_seq_t seq_tar_t, inc::unified_seq_t seq_src_t, inc::unified_seq_t seq_val_t>
+    inline void insert(
+        seq_tar_t                   const & target,
+        seq_src_t                   const & source,
+        ixx                                 index,
+        seq_val_t                   const & values){
+
+        insert_core(
+            inc::unified_seq<seq_tar_t>(target), 
+            inc::unified_seq<seq_src_t>(source),  index, 
+            inc::unified_seq<seq_val_t>(values)
+        );
+    }
+
+    template<inc::unified_seq_t seq_tar_t, inc::unified_seq_t seq_src_t, class item_t>
+    inline void insert(
+        seq_tar_t                   const & target,
+        seq_src_t                   const & source,
+        ixx                                 index,
+        item_t                      const & value){
+
+        insert_core(
+            inc::unified_seq<seq_tar_t>(target), 
+            inc::unified_seq<seq_src_t>(source),  index, 
+            inc::seqptr<item_t>{value}
+        );
     }
 }
+
 #endif
 
 namespace xuser::inc{
