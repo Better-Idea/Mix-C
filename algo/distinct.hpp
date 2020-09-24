@@ -1,3 +1,13 @@
+/* 模块：distinct
+ * 类型：函数单体
+ * 功能：去除一个序列重复的元素
+ * 用法：
+ * TODO ===========================================================
+ * 
+ * 注意：
+ * - 要求该序列的元素可以两两比较
+ */
+
 #ifndef xpack_algo_distinct
 #define xpack_algo_distinct
 #pragma push_macro("xuser")
@@ -18,6 +28,13 @@ namespace mixc::algo_distinct{
         unified_seq<seq_t>(uxx/*length*/)
     >;
 
+    /* 函数：去除重复元素
+     * 参数：
+     * - seq 为满足 inc::unified_seq_t 格式的模板
+     * - alloc 为新序列分配回调函数
+     * 返回：
+     * - 从 alloc 中分配的序列，里面存放着去重后的元素序列
+     */ 
     template<inc::unified_seq_t seq_t>
     inline auto distinct(
         seq_t const &                   seq, 
