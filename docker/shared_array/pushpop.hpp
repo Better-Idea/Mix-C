@@ -1,15 +1,15 @@
-#ifndef xusing_docker_darray
-#include"docker/private/darray.hpp"
+#ifndef xusing_docker_shared_array
+#include"docker/private/shared_array.hpp"
 #endif
 
-#ifndef xpack_docker_darray_pushpop
-#define xpack_docker_darray_pushpop
+#ifndef xpack_docker_shared_array_pushpop
+#define xpack_docker_shared_array_pushpop
 #pragma push_macro("xuser")
-#pragma push_macro("xusing_docker_darray")
+#pragma push_macro("xusing_docker_shared_array")
 #undef  xuser
-#define xuser mixc::docker_darray_pushpop
+#define xuser mixc::docker_shared_array_pushpop
 #include"define/base_type.hpp"
-#include"docker/darray.hpp"
+#include"docker/shared_array.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/adapter.pushpop.hpp"
 #include"dumb/mirror.hpp"
@@ -18,10 +18,10 @@
 #include"memop/addressof.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
-#pragma pop_macro("xusing_docker_darray")
+#pragma pop_macro("xusing_docker_shared_array")
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_darray_pushpop {
+namespace mixc::docker_shared_array_pushpop {
     template<class base_t> struct extern_fields;
     template<> 
     xstruct(
@@ -43,10 +43,10 @@ namespace mixc::docker_darray_pushpop {
     $
 
     template<class item_t, uxx rank, class attribute>
-    struct core : inc::darray<item_t, rank, extern_fields<attribute>> {
-        using the_t                  = inc::darray<item_t, rank, extern_fields<attribute>>;
+    struct core : inc::shared_array<item_t, rank, extern_fields<attribute>> {
+        using the_t                  = inc::shared_array<item_t, rank, extern_fields<attribute>>;
         using mirror_item_t          = inc::mirror<item_t>;
-        using mirror_without_destroy = inc::darray<mirror_item_t, rank, extern_fields<attribute>>;
+        using mirror_without_destroy = inc::shared_array<mirror_item_t, rank, extern_fields<attribute>>;
         using the_t::the_t;
 
         uxx length() const {
@@ -99,10 +99,10 @@ namespace mixc::docker_darray_pushpop {
 }
 #endif
 
-namespace mixc::docker_darray_pushpop::xuser {
+namespace mixc::docker_shared_array_pushpop::xuser {
     template<class final, class item_t, uxx rank, class attribute>
-    using darray = inc::adapter_pushpop<final, core<item_t, rank, attribute>, item_t>;
+    using shared_array = inc::adapter_pushpop<final, core<item_t, rank, attribute>, item_t>;
 }
 
-#undef  xusing_docker_darray  
-#define xusing_docker_darray  ::mixc::docker_darray_pushpop::xuser
+#undef  xusing_docker_shared_array  
+#define xusing_docker_shared_array  ::mixc::docker_shared_array_pushpop::xuser

@@ -10,7 +10,7 @@
 #undef  xuser
 #define xuser mixc::lang_cxx_replace
 #include"define/base_type.hpp"
-#include"docker/darray.hpp"
+#include"docker/shared_array.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
@@ -43,7 +43,7 @@ namespace mixc::lang_cxx_replace{
                 uxx              buf[buf_size];
                 uxx              total_length;
                 uxx              dis;
-                inc::darray<uxx> heap;
+                inc::shared_array<uxx> heap;
 
                 void push(uxx value){
                     uxx index = i++;
@@ -53,7 +53,7 @@ namespace mixc::lang_cxx_replace{
                         return;
                     }
                     if (index - buf_size - heap.length() == 0){
-                        inc::darray<uxx> new_heap { ::length(index) };
+                        inc::shared_array<uxx> new_heap { ::length(index) };
                         inc::copy_with_operator(new_heap, heap, heap.length());
                         heap = new_heap;
                     }

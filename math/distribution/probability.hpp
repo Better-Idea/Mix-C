@@ -40,7 +40,7 @@ int main(){
 #define xuser mixc::math_distribution_probability
 #include"algo/binary_search.hpp"
 #include"define/base_type.hpp"
-#include"docker/darray.hpp"
+#include"docker/shared_array.hpp"
 #include"docker/array.hpp"
 #include"interface/ranger.hpp"
 #include"math/random.hpp"
@@ -53,7 +53,7 @@ namespace mixc::math_distribution_probability{
     struct probability{
     private:
         using item_t = typename inc::unsigned_type<type>;
-        inc::darray<item_t> guide;
+        inc::shared_array<item_t> guide;
     public:
         probability() = default;
         probability(inc::ranger<type> proportion) : 

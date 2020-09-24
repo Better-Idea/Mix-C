@@ -5,7 +5,7 @@
 #define xuser mixc::ttyctrl_text_line
 #include"algo/insert.hpp"
 #include"algo/remove.hpp"
-#include"docker/darray.hpp"
+#include"docker/shared_array.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
@@ -22,7 +22,7 @@ namespace mixc::ttyctrl_text_line{
 
     xstruct(
         xname(text_line),
-        xprif(ptext          ,   inc::darray<char16_t>),
+        xprif(ptext          ,   inc::shared_array<char16_t>),
         xprif(pleft          ,   u16),
         xprif(ptop           ,   u16),
         xprif(pcolumn        ,   u16),
@@ -130,7 +130,7 @@ namespace mixc::ttyctrl_text_line{
         }
 
         void resize(uxx new_length){
-            inc::darray<char16_t> compact {
+            inc::shared_array<char16_t> compact {
                 ::length{new_length}
             };
             inc::copy(compact, the.ptext, compact.length());

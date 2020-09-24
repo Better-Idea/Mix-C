@@ -10,8 +10,8 @@
 #undef  xuser
 #define xuser mixc::lang_cxx_parse_json
 #include"define/base_type.hpp"
-#include"docker/darray/pushpop.hpp"
-#include"docker/darray.hpp"
+#include"docker/shared_array/pushpop.hpp"
+#include"docker/shared_array.hpp"
 #include"interface/can_alloc.hpp"
 #include"lang/wxx/is_hex.hpp"
 #include"lang/wxx/is_whitespace.hpp"
@@ -249,7 +249,7 @@ namespace mixc::lang_cxx_parse_json{
 
         template<class jlist_t, class jitem_t, class index_t>
         auto parse_list(uxx & i, any & alloc, item_t end_char) {
-            using array   = inc::darray<jitem_t>;
+            using array   = inc::shared_array<jitem_t>;
             jlist_t * obj = nullptr;
             jitem_t * ptr;
             jitem_t   c;

@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::talk_about_gc
 #include"define/base_type.hpp"
-#include"docker/darray.hpp"
+#include"docker/shared_array.hpp"
 #include"docker/shared_ptr.hpp"
 #include"macro/xhint.hpp"
 #include"memory/allocator.hpp"
@@ -53,7 +53,7 @@ namespace mixc::talk_about_gc::inc{
 
     xstruct(
         xname(N4_t),
-        xpubf(n, darray<shared_ptr<N4_t>>)
+        xpubf(n, shared_array<shared_ptr<N4_t>>)
     ) $
 
     void test(){
