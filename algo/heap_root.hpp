@@ -1,3 +1,15 @@
+/* 模块：heap_root
+ * 类型：函数单体
+ * 功能：用于构成大小根堆
+ * 用法：
+ * TODO ===========================================================
+ * 
+ * 注意：
+ * - 函数内部抹掉了序列元素的类型
+ *   内部把元素当做无格式的内存来处理可能会在多线程中导致线程安全问题
+ *   类似智能指针这样带原子操作运算符重载的对象在该函数内部失去原子性
+ */
+
 #ifndef xpack_algo_heap_root
 #define xpack_algo_heap_root
 #pragma push_macro("xuser")
@@ -15,6 +27,12 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_heap_root{
+    /* 函数：大小根堆压栈操作
+     * 参数：
+     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - value 为要压栈的元素
+     * - compare 为元素比较回调
+     */
     template<class item_t, inc::unified_seq_t seq_t>
     static void push_core(
         seq_t                       seq,
@@ -45,6 +63,12 @@ namespace mixc::algo_heap_root{
         new (xref seq[i]) item_t(similarities);
     }
 
+    /* 函数：大小根堆弹栈操作
+     * 参数：
+     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - insert_value 为要插入的元素
+     * - compare 为元素比较回调
+     */
     template<class item_t, inc::unified_seq_t seq_t>
     static auto pop_core(
         seq_t                       seq, 
@@ -83,44 +107,58 @@ namespace mixc::algo_heap_root{
         new (xref seq[i]) item_t(insert_value);
         return wanted;
     }
+}
 
-    struct heap_root{
-        template<inc::unified_seq_t seq_t>
-        static void push(
-            seq_t                       const & seq,
-            uxx                                 length,
-            inc::item_origin_of<seq_t>  const & value, 
-            inc::can_compare<
-                inc::item_origin_of<seq_t>
-            >                                   compare = 
+namespace mixc::algo_heap_root::origin::heap_root{
+    /* 函数：大小根堆压栈操作
+     * 参数：
+     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - length 为序列长度
+     * - value 为要压栈的元素
+     * - compare 为元素比较回调
+     */
+    template<inc::unified_seq_t seq_t>
+    static void push(
+        seq_t                       const & seq,
+        uxx                                 length,
+        inc::item_origin_of<seq_t>  const & value, 
+        inc::can_compare<
+            inc::item_origin_of<seq_t>
+        >                                   compare = 
             inc::default_compare<
                 inc::item_origin_of<seq_t>
             >){
-            push_core<
-                inc::item_origin_of<seq_t>
-            >(inc::unified_seq<seq_t>(seq).subseq(co{0, length}), value, compare);
-        }
+        push_core<
+            inc::item_origin_of<seq_t>
+        >(inc::unified_seq<seq_t>(seq).subseq(co{0, length}), value, compare);
+    }
 
-        template<inc::unified_seq_t seq_t>
-        static auto pop(
-            seq_t                       const & seq, 
-            uxx                                 length, 
-            inc::item_origin_of<seq_t>  const & insert_value, 
-            inc::can_compare<
-                inc::item_origin_of<seq_t>
-            >                                   compare = 
+    /* 函数：大小根堆弹栈操作
+     * 参数：
+     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - length 为序列长度
+     * - insert_value 为要插入的元素
+     * - compare 为元素比较回调
+     */
+    template<inc::unified_seq_t seq_t>
+    static auto pop(
+        seq_t                       const & seq, 
+        uxx                                 length, 
+        inc::item_origin_of<seq_t>  const & insert_value, 
+        inc::can_compare<
+            inc::item_origin_of<seq_t>
+        >                                   compare = 
             inc::default_compare<
                 inc::item_origin_of<seq_t>
             >){
-            return pop_core<
-                inc::item_origin_of<seq_t>
-            >(inc::unified_seq<seq_t>(seq).subseq(co{0, length}), insert_value, compare);
-        }
-    };
+        return pop_core<
+            inc::item_origin_of<seq_t>
+        >(inc::unified_seq<seq_t>(seq).subseq(co{0, length}), insert_value, compare);
+    }
 }
 
 #endif
 
 namespace xuser::inc{
-    using ::mixc::algo_heap_root::heap_root;
+    using namespace ::mixc::algo_heap_root::origin;
 }
