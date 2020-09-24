@@ -1,6 +1,13 @@
-/*
-二分查找 API —— binary_search
-*/
+/* 模块：binary_search
+ * 类型：单例·静态结构
+ * 功能：通过二分搜索指定元素在序列中的索引
+ * 用法：
+ * TODO ===========================================================
+ * 
+ * 注意：
+ * - 被搜索的序列必须是升序的
+ * - 搜索到的元素不一定是第一个匹配的元素，所以和遍历序列得到的索引可能不一样
+ */
 
 #ifndef xpack_algo_binary_search
 #define xpack_algo_binary_search
@@ -17,11 +24,26 @@
 namespace mixc::algo_binary_search{
     using can_search = inc::can_callback<ixx(uxx)>;
 
+    /* 函数：二分匹配模板
+     * 参数：
+     * - length 为被搜索序列的长度
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx compare(uxx index)
+     *   其中 index 为当前参与比较的元素的索引
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - result_t 结构
+     */
     template<class compare_invoke>
     inline auto match_core(uxx length, compare_invoke const & compare) {
         struct result_t {
+            // 刚好匹配的索引
             uxx match;
+
+            // 小于期望值的索引
             uxx less_then_target;
+
+            // 大于期望值的索引
             uxx grater_then_target;
 
             result_t() {
@@ -68,6 +90,16 @@ namespace mixc::algo_binary_search{
         return result;
     }
 
+    /* 函数：二分匹配模板
+     * 参数：
+     * - length 为被搜索序列的长度
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx compare(uxx index)
+     *   其中 index 为当前参与比较的元素的索引
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - result_t 结构
+     */
     template<inc::unified_seq_t seq_t>
     inline auto match_template(
         seq_t                                       const & seq,
