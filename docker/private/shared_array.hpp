@@ -1,17 +1,17 @@
 // 注意：
-// darray 默认是空数组，此时 attribute 域是不允许访问的
-// darray::length() == 0
-// darray::is_empty() == true
-// darray::operator==(nullptr) == true
-// darray::operator=(nullptr) 默认是将该数组指向空数组而不是 nullptr
+// shared_array 默认是空数组，此时 attribute 域是不允许访问的
+// shared_array::length() == 0
+// shared_array::is_empty() == true
+// shared_array::operator==(nullptr) == true
+// shared_array::operator=(nullptr) 默认是将该数组指向空数组而不是 nullptr
 // 如非必要请勿创建长度 ::length(0) 的数组
 // 创建长度为 0 的数组与默认空数组的不同点
-// darray::operator==(nullptr) == false
-#ifndef xpack_docker_darray
-#define xpack_docker_darray
+// shared_array::operator==(nullptr) == false
+#ifndef xpack_docker_shared_array
+#define xpack_docker_shared_array
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_darray
+#define xuser mixc::docker_shared_array
 #include"docker/private/adapter.foreach.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
@@ -20,31 +20,31 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_darray{
+namespace mixc::docker_shared_array{
     template<class type, uxx rank, class attribute>
-    struct darray_t : public inc::ref_array<
-        darray_t<type, rank, attribute>,
+    struct shared_array_t : public inc::ref_array<
+        shared_array_t<type, rank, attribute>,
         typename 
-        darray_t<type, rank - 1, attribute>::the_t,
+        shared_array_t<type, rank - 1, attribute>::the_t,
         attribute
     >{
-        using the_t  = darray_t<type, rank, attribute>;
-        using item_t = typename darray_t<type, rank - 1, attribute>::the_t;
+        using the_t  = shared_array_t<type, rank, attribute>;
+        using item_t = typename shared_array_t<type, rank - 1, attribute>::the_t;
         using base_t = inc::ref_array<the_t, item_t, attribute>;
     public:
         xseqptr(item_t);
 
-        darray_t() : 
-            darray_t(*(the_t *)& inc::empty_array_ptr) {
+        shared_array_t() : 
+            shared_array_t(*(the_t *)& inc::empty_array_ptr) {
             static_assert(sizeof(inc::empty_array) >= sizeof(inc::struct_type<attribute>));
         }
-        darray_t(darray_t const &) = default;
+        shared_array_t(shared_array_t const &) = default;
 
-        darray_t(::length length) :
+        shared_array_t(::length length) :
             base_t(length) {}
 
         template<class ... args>
-        darray_t(::length length, args const & ... list) : 
+        shared_array_t(::length length, args const & ... list) : 
             base_t(length, list...) {}
 
         template<class ... args>
@@ -95,14 +95,14 @@ namespace mixc::docker_darray{
     };
 
     template<class type, class attribute>
-    struct darray_t<type, 0, attribute>{
+    struct shared_array_t<type, 0, attribute>{
         using the_t = type;
     };
 
     template<class final, class type, uxx rank, class attribute>
-    using darray = inc::adapter_foreach<
+    using shared_array = inc::adapter_foreach<
         final, 
-        darray_t<type, rank, attribute>,
+        shared_array_t<type, rank, attribute>,
         type
     >;
 }
@@ -110,4 +110,4 @@ namespace mixc::docker_darray{
 #endif
 
 #include"math/index_system.hpp"
-#define xusing_docker_darray        ::mixc::docker_darray
+#define xusing_docker_shared_array        ::mixc::docker_shared_array

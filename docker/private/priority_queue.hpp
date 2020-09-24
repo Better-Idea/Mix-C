@@ -6,8 +6,8 @@
     #include"algo/heap_root.hpp"
     #include"define/base_type.hpp"
     #include"docker/transmitter.hpp"
-    #include"docker/darray/pushpop.hpp"
-    #include"docker/darray.hpp"
+    #include"docker/shared_array/pushpop.hpp"
+    #include"docker/shared_array.hpp"
     #include"docker/private/adapter.pushpop.hpp"
     #include"dumb/struct_type.hpp"
     #include"dumb/mirror.hpp"
@@ -26,7 +26,7 @@
         xstruct(
             xtmpl(priority_queue_t, items_t),
             xpubb(inc::self_management),
-            xprif(items, inc::darray<item_t>)
+            xprif(items, inc::shared_array<item_t>)
         )
         private:
             docker_t & origin() const {
