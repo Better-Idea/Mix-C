@@ -17,17 +17,17 @@ namespace mixc::docker_hashmap{
 }
 
 namespace mixc::docker_bit_indicator{
-    // bits != 0 时该模板是使用静态内存分配
-    template<uxx bits = 0>
+    // total_bits != 0 时该模板是使用静态内存分配
+    template<uxx total_bits = 0>
     xstruct(
-        xtmpl(bit_indicator_t, bits)
+        xtmpl(bit_indicator_t, total_bits)
     )
     public:
-        constexpr uxx length(){
-            return bits;
+        constexpr uxx total_bits(){
+            return total_bits;
         }
     private:
-        static constexpr uxx lv0 = bits / inc::bwidth + (bits % inc::bwidth != 0);
+        static constexpr uxx lv0 = total_bits / inc::bwidth + (total_bits % inc::bwidth != 0);
         static constexpr uxx lv1 = lv0 <= 1 ? 0 : lv0 / inc::bwidth + (lv0 % inc::bwidth != 0);
         static constexpr uxx lv2 = lv1 <= 1 ? 0 : lv1 / inc::bwidth + (lv1 % inc::bwidth != 0);
         static constexpr uxx lv3 = lv2 <= 1 ? 0 : lv2 / inc::bwidth + (lv2 % inc::bwidth != 0);
@@ -72,10 +72,10 @@ namespace mixc::docker_bit_indicator{
     xstruct(
         xspec(bit_indicator_t),
         xpubb(inc::disable_copy),
-        xprif(pbmp      , uxx *),
-        xprif(pheight   , uxx),
-        xprif(psize     , uxx),
-        xprif(pbits     , uxx)
+        xprif(pbmp          , uxx *),
+        xprif(pheight       , uxx),
+        xprif(psize         , uxx),
+        xprif(ptotal_bits   , uxx)
     )
         template<class key_t, class val_t> friend struct mixc::docker_hashmap::hashmap_t;
 
@@ -84,20 +84,20 @@ namespace mixc::docker_bit_indicator{
         bit_indicator_t() : 
             pbmp(nullptr), pheight(0), psize(0) {}
 
-        bit_indicator_t(uxx bits, inc::can_alloc<uxx> alloc){
+        bit_indicator_t(uxx total_bits, inc::can_alloc<uxx> alloc){
             uxx buf[sizeof(uxx) * 8 / inc::bwidth + 1];
 
-            // 先设置，之后 bits 会被修改
-            the.bits(bits);
+            // 先设置，之后 total_bits 会被修改
+            the.total_bits(total_bits);
             the.pheight = 0;
             the.psize   = 0;
 
             do{
-                bits               = bits / inc::bwidth + (bits % inc::bwidth != 0);
-                buf[the.pheight]   = bits;
+                total_bits         = total_bits / inc::bwidth + (total_bits % inc::bwidth != 0);
+                buf[the.pheight]   = total_bits;
                 the.pheight       += 1;
-                the.psize         += bits;
-            }while(bits > 1);
+                the.psize         += total_bits;
+            }while(total_bits > 1);
 
             the.size(psize);
             the.bmp(
@@ -112,8 +112,8 @@ namespace mixc::docker_bit_indicator{
             the.need_free(false);
         }
 
-        bit_indicator_t(uxx bits) : 
-            bit_indicator_t(bits, [](uxx length){
+        bit_indicator_t(uxx total_bits) : 
+            bit_indicator_t(total_bits, [](uxx length){
                 return inc::alloc<uxx>(
                     inc::memory_size{
                         sizeof(uxx) * length
@@ -168,11 +168,11 @@ namespace mixc::docker_bit_indicator{
             return inc::memory_size(cost_count() * sizeof(uxx));
         }
 
-        xpubget_priset(bits);
+        xpubget_priset(total_bits);
     $
 
-    template<class final, uxx bits>
-    using bit_indicator = inc::adapter_bit_indicator<final, bit_indicator_t<bits>>;
+    template<class final, uxx total_bits>
+    using bit_indicator = inc::adapter_bit_indicator<final, bit_indicator_t<total_bits>>;
 }
 #endif
 
