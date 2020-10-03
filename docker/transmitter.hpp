@@ -15,6 +15,7 @@ namespace mixc::docker_transmitter{
         xpubb(inc::struct_type<type>),
         xprif(phas_hold_value, bool)
     )
+        using final = the_t;
     public:
         transmitter(): phas_hold_value(false){}
         transmitter(type const & value) : 

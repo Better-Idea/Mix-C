@@ -17,17 +17,17 @@ namespace mixc::docker_hashmap{
 }
 
 namespace mixc::docker_bit_indicator{
-    // total_bits != 0 时该模板是使用静态内存分配
-    template<uxx total_bits = 0>
+    // bits != 0 时该模板是使用静态内存分配
+    template<uxx bits = 0>
     xstruct(
-        xtmpl(bit_indicator_t, total_bits)
+        xtmpl(bit_indicator_t, bits)
     )
     public:
         constexpr uxx total_bits(){
-            return total_bits;
+            return bits;
         }
     private:
-        static constexpr uxx lv0 = total_bits / inc::bwidth + (total_bits % inc::bwidth != 0);
+        static constexpr uxx lv0 = bits / inc::bwidth + (bits % inc::bwidth != 0);
         static constexpr uxx lv1 = lv0 <= 1 ? 0 : lv0 / inc::bwidth + (lv0 % inc::bwidth != 0);
         static constexpr uxx lv2 = lv1 <= 1 ? 0 : lv1 / inc::bwidth + (lv1 % inc::bwidth != 0);
         static constexpr uxx lv3 = lv2 <= 1 ? 0 : lv2 / inc::bwidth + (lv2 % inc::bwidth != 0);
