@@ -1,4 +1,4 @@
-# COMMENT SPECIFICATION 0.01
+# COMMENT SPECIFICATION 0.02
 **文档注释规范**草案
 
 ## 模块描述
@@ -61,3 +61,23 @@ namespace mixc::define_nullref_t{
     | 函数单体 |
 
 ```
+
+### 函数注释
+```C++
+/* 函数：去除重复元素
+ * 参数：
+ * - seq 为满足 inc::unified_seq_t 格式的模板
+ * - alloc 为新序列分配回调函数
+ * 返回：
+ * - 从 alloc 中分配的序列，里面存放着去重后的元素序列
+ */ 
+ template<inc::unified_seq_t seq_t>
+ inline auto distinct(seq_t const & seq, distinct_alloc_invoke<seq_t> alloc);
+
+```
+
+#### 属性
+- 函数：关于函数作用的简述
+- 参数：关于参数列表的描述，标准开头为 "- arg_name 为xxxx" 定义参数的作用
+- 返回：描述返回值表示什么
+- 注意：根据函数可能的误用或副作用进行说明
