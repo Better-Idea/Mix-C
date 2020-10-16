@@ -8,10 +8,10 @@
 
 namespace mixc::meta_is_origin_array{
     template<class a>
-    struct meta{ enum { result = false } };
+    struct meta{ enum { result = false }; };
 
     template<class a, uxx length>
-    struct meta<a[length]>{ enum { result = true } };
+    struct meta<a[length]>{ enum { result = true }; };
 
     template<class a>
     concept is_origin_array = meta<a>::result;
