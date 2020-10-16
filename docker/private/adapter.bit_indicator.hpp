@@ -17,7 +17,7 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_adapter_bit_indicator::origin{
+namespace mixc::docker_adapter_bit_indicator{
     static constexpr uxx step_exp = xis_os64 ? 6 : 5;
     static constexpr uxx bwidth   = 1u << step_exp;
     static constexpr uxx bmask    = bwidth - 1;
@@ -139,7 +139,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         return not_exist;
     }
     
-    template<class base_t>
+    template<class final, class base_t>
     /*
     needed:
     - base_t::bmp()
@@ -148,11 +148,11 @@ namespace mixc::docker_adapter_bit_indicator::origin{
     - base_t::height()
     */
     xstruct(
-        xname(adapter_bit_indicator_t),
+        xtmpl(adapter_bit_indicator, final, base_t),
         xpubb(base_t)
     )
         using base_t::base_t;
-    protected:
+
         void clear(){
             inc::zeros(base_t::bmp(), base_t::size() * sizeof(uxx));
         }
@@ -165,8 +165,8 @@ namespace mixc::docker_adapter_bit_indicator::origin{
             });
         }
 
-        template<class seq_t>
-        void bulk_set(seq_t const & index_list){
+        template<inc::unified_seq_t seq_t>
+        void set(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
                 set(index_list[i]);
             }
@@ -179,13 +179,13 @@ namespace mixc::docker_adapter_bit_indicator::origin{
             });
         }
 
-        template<class seq_t>
-        void bulk_reset(seq_t const & index_list){
+        template<inc::unified_seq_t seq_t>
+        void reset(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
                 reset(index_list[i]);
             }
         }
-    public:
+
         /* 函数：得到指定索引的位状态
          * 参数：
          * - index 目标索引
@@ -215,7 +215,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         }
 
         /* 函数：得到第一个置位位索引 */
-        uxx index_of_first_set(){
+        uxx index_of_first_set() const {
             return bmp_find(
                 base_t::bmp(),
                 base_t::size(),
@@ -229,7 +229,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
          * 参数：
          * - start_boundary 为搜索的起始索引
          */
-        uxx index_of_first_set(uxx start_boundary){
+        uxx index_of_first_set(uxx start_boundary) const {
             return bmp_find(
                 not is_find_last,
                 base_t::bmp(),
@@ -240,7 +240,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         }
 
         /* 函数：得到最后一个置位位索引 */
-        uxx index_of_last_set(){
+        uxx index_of_last_set() const {
             return bmp_find(
                 base_t::bmp(),
                 base_t::size(),
@@ -254,7 +254,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
          * 参数：
          * - end_boundary 为搜索的起始索引，从后往前搜索
          */
-        uxx index_of_last_set(uxx end_boundary){
+        uxx index_of_last_set(uxx end_boundary) const {
             return bmp_find(
                 is_find_last,
                 base_t::bmp(),
@@ -264,172 +264,8 @@ namespace mixc::docker_adapter_bit_indicator::origin{
             );
         }
     $
-
-    template<class final, class base>
-    struct adapter_bit_indicator : adapter_bit_indicator_t<base>{
-        using the_t = adapter_bit_indicator_t<base>;
-        using the_t::the_t;
-        using the_t::pop_first;
-        using the_t::pop_last;
-        using the_t::index_of_first_set;
-        using the_t::index_of_last_set;
-        using the_t::get;
-
-        /* 函数：得到第一个置位位索引并对它复位
-         * 参数：
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & pop_first(uxx * value){
-            value[0] = pop_first();
-            return thex;
-        }
-
-        /* 函数：得到最后一个置位位索引并对它复位
-         * 参数：
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & pop_last(uxx * value){
-            value[0] = pop_last();
-            return thex;
-        }
-
-        
-        /* 函数：得到第一个置位位索引
-         * 参数：
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & index_of_first_set(uxx * value){
-            value[0] = index_of_first_set();
-            return thex;
-        }
-
-        /* 函数：从指定索引开始寻找第一个置位位索引
-         * 参数：
-         * - start_boundary 为搜索的起始索引
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & index_of_first_set(uxx start_boundary, uxx * value){
-            value[0] = index_of_first_set(start_boundary);
-            return thex;
-        }
-
-        /* 函数：得到最后一个置位位索引
-         * 参数：
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & index_of_last_set(uxx * value){
-            value[0] = index_of_last_set();
-            return thex;
-        }
-
-        /* 函数：从指定索引开始寻找最后一个置位位索引
-         * 参数：
-         * - end_boundary 为搜索的起始索引，从后往前搜索
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & index_of_last_set(uxx end_boundary, uxx * value){
-            value[0] = index_of_last_set(end_boundary);
-            return thex;
-        }
-
-        /* 函数：得到指定索引的位状态
-         * 参数：
-         * - index 目标索引
-         * - value 为接收结果的内存
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & get(uxx index, bool * value){
-            value[0] = get(index);
-            return thex;
-        }
-
-        /* 函数：将对指定索引的位置位
-         * 参数：
-         * - index 目标索引
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & set(uxx index){
-            the.set(index);
-            return thex;
-        }
-
-        /* 函数：将对指定索引的位设置
-         * 参数：
-         * - index 目标索引
-         * - value 要设置的状态
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & set(uxx index, bool value){
-            value ? the.set(index) : the.reset(index);
-            return thex;
-        }
-
-        /* 函数：通过索引数组将对依次对指定索引的位置位
-         * 参数：
-         * - index_group 目标索引序列
-         * 返回：
-         * - 当前对象的引用
-         */
-        template<inc::unified_seq_t seq_t>
-        final & set(seq_t const & index_group){
-            the.bulk_set(inc::unified_seq<seq_t>{index_group});
-            return thex;
-        }
-
-        /* 函数：通过索引数组将对依次对指定索引的位置位
-         * 参数：
-         * - index_group 目标索引序列
-         * - value 要设置的状态
-         * 返回：
-         * - 当前对象的引用
-         */
-        template<inc::unified_seq_t seq_t>
-        final & set(seq_t const & index_group, bool value){
-            value ? the.bulk_set(inc::unified_seq<seq_t>{index_group}) :
-                the.bulk_reset(inc::unified_seq<seq_t>{index_group});
-            return thex;
-        }
-
-        /* 函数：将对指定索引的位复位
-         * 参数：
-         * - index 目标索引
-         * 返回：
-         * - 当前对象的引用
-         */
-        final & reset(uxx index){
-            the.reset(index);
-            return thex;
-        }
-
-        /* 函数：通过索引数组将对依次对指定索引的位复位
-         * 参数：
-         * - index_group 目标索引序列
-         * 返回：
-         * - 当前对象的引用
-         */
-        template<inc::unified_seq_t seq_t>
-        final & reset(seq_t const & index_group){
-            the.bulk_reset(inc::unified_seq<seq_t>{index_group});
-            return thex;
-        }
-    };
 }
 
 #endif
 
-xexport_space(mixc::docker_adapter_bit_indicator::origin)
+xexport(mixc::docker_adapter_bit_indicator::adapter_bit_indicator)
