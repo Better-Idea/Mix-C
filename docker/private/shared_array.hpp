@@ -12,7 +12,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_shared_array
-#include"docker/private/adapter.foreach.array.hpp"
+#include"docker/private/adapter.array_access.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
 #include"macro/xis_nullptr.hpp"
@@ -21,15 +21,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_shared_array{
-    template<class type, uxx rank, class attribute>
-    struct shared_array_t : public inc::ref_array<
-        shared_array_t<type, rank, attribute>,
-        typename 
-        shared_array_t<type, rank - 1, attribute>::the_t,
-        attribute
-    >{
-        using the_t  = shared_array_t<type, rank, attribute>;
-        using item_t = typename shared_array_t<type, rank - 1, attribute>::the_t;
+    template<class final, class type, uxx rank, class attribute>
+    xstruct(
+        xtmpl(shared_array_t, final, type, rank, attribute),
+        xpubb(inc::ref_array<
+            shared_array_t<final, type, rank, attribute>,
+            typename 
+            shared_array_t<final, type, rank - 1, attribute>::the_t,
+            attribute
+        >)
+    )
+        using item_t = typename shared_array_t<final, type, rank - 1, attribute>::the_t;
         using base_t = inc::ref_array<the_t, item_t, attribute>;
     public:
         xseqptr(item_t);
@@ -38,7 +40,14 @@ namespace mixc::docker_shared_array{
             shared_array_t(*(the_t *)& inc::empty_array_ptr) {
             static_assert(sizeof(inc::empty_array) >= sizeof(inc::struct_type<attribute>));
         }
+
         shared_array_t(shared_array_t const &) = default;
+
+        template<class finalx>
+        shared_array_t(shared_array_t<finalx, type, rank, attribute> const & self) : 
+            shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute> &)self){
+            static_assert(sizeof(self) == sizeof(the_t));
+        }
 
         shared_array_t(::length length) :
             base_t(length) {}
@@ -64,25 +73,12 @@ namespace mixc::docker_shared_array{
             return base_t::operator item_t * ();
         }
 
-        item_t & operator[](uxx index) const {
+        item_t & operator[](uxx index) {
             return base_t::operator item_t * ()[index];
         }
 
-        template<class number_t>
-        item_t & operator[](number_t const & index) const {
-            return the[(uxx)(number_t &)index];
-        }
-
-        xis_nullptr(
-            the == the_t(*(the_t *)& inc::empty_array_ptr)
-        )
-
-        bool is_empty() const {
-            return length() == 0;
-        }
-
-        uxx length() const {
-            return base_t::length();
+        item_t const & operator[](uxx index) const {
+            return base_t::operator item_t * ()[index];
         }
 
         attribute * operator->(){
@@ -92,18 +88,28 @@ namespace mixc::docker_shared_array{
         attribute const * operator->() const {
             return base_t::operator->();
         }
-    };
 
-    template<class type, class attribute>
-    struct shared_array_t<type, 0, attribute>{
+        xis_nullptr(
+            the == the_t(*(the_t *)& inc::empty_array_ptr)
+        )
+
+        xpubgetx(is_empty, bool) {
+            return length() == 0;
+        }
+
+        xpubgetx(length, uxx) {
+            return base_t::length();
+        }
+    $
+
+    template<class final, class type, class attribute>
+    struct shared_array_t<final, type, 0, attribute>{
         using the_t = type;
     };
 
     template<class final, class type, uxx rank, class attribute>
-    using shared_array = inc::adapter_foreach_array<
-        final, 
-        shared_array_t<type, rank, attribute>,
-        type
+    using shared_array = inc::adapter_array_access<
+        shared_array_t<final, type, rank, attribute>, type
     >;
 }
 
