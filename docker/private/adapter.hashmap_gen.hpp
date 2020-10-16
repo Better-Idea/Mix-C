@@ -189,14 +189,19 @@ protected:
         the.free();
     }
 
-    using foreach_invoke_with_loop_t = loop_t(uxx index, key_t const & key xarg_val_t_decl);
-    using foreach_invoke             = void(uxx index, key_t const & key xarg_val_t_decl);
+    template<auto mode, class invoke_t>
+    void foreach_template(invoke_t const & invoke) const {
+        loop_t state = loop_t::go_on;
 
-    // 临时设施
-    void foreach(inc::can_callback<loop_t(uxx, node_t *)> const & call){
         for(uxx i = uxx(-1), index = 0; not_exist != (i = bmp.index_of_first_set(i + 1));){
-            for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next, index++){
-                if (call(index, cur) == loop_t::finish){
+            for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next){
+                #ifdef xarg_has_val_t
+                    xitr_switch(mode, index, state, invoke, (key_t &)cur->key, (val_t &)cur->val);
+                #else
+                    xitr_switch(mode, index, state, invoke, (key_t &)cur->key);
+                #endif
+
+                if (state == loop_t::finish){
                     return;
                 }
             }
@@ -205,26 +210,13 @@ protected:
 
     /*接口区*/
 public:
-    void foreach(inc::can_callback<foreach_invoke> const & call){
-        foreach([&](uxx index, node_t * cur){
-            #ifdef xarg_has_val_t
-                call(index, (key_t const &)cur->key, (val_t const &)cur->val);
-            #else
-                call(index, (key_t const &)cur->key);
-            #endif
-            return loop_t::go_on;
-        });
-    }
-
-    void foreach(inc::can_callback<foreach_invoke_with_loop_t> const & call){
-        foreach([&](uxx index, node_t * cur){
-            #ifdef xarg_has_val_t
-                return call(index, (key_t const &)cur->key, (val_t const &)cur->val);
-            #else
-                return call(index, (key_t const &)cur->key);
-            #endif
-        });
-    }
+    #ifdef xarg_has_val_t
+        xitr_foreach(key_t &, val_t &)
+        xitr_foreach_const(key_t const &, val_t const &)
+    #else
+        xitr_foreach(key_t &)
+        xitr_foreach_const(key_t const &)
+    #endif
 
     xarg_item_t & get(key_t const & key) const {
         uxx index = addressing(key);

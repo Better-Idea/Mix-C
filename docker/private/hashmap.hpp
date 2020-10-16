@@ -12,14 +12,14 @@
 #include"dumb/disable_copy.hpp"
 #include"gc/self_management.hpp"
 #include"interface/can_callback.hpp"
-#include"macro/xdebug.hpp"
-#include"macro/xstruct.hpp"
+#include"interface/iterator.hpp"
 #include"math/align.hpp"
 #include"math/random.hpp"
 #include"memop/addressof.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
 #include"memory/allocator.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_hashmap{
