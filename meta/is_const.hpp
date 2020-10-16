@@ -16,7 +16,7 @@ namespace mixc::meta_is_const{
     };
 
     template<class a>
-    constexpr bool is_const = meta<a>::result;
+    concept is_const = meta<a>::result;
 }
 
 #endif

@@ -20,7 +20,7 @@ namespace mixc::meta_is_float{
     };
 
     template<class a>
-    constexpr bool is_float = meta<a>::result;
+    concept is_float = meta<a>::result;
 }
 
 #endif

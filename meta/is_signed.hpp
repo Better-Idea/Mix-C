@@ -28,7 +28,7 @@ namespace mixc::meta_is_signed{
     };
 
     template<class a>
-    constexpr bool is_signed = meta<a>::result;
+    concept is_signed = meta<a>::result;
 }
 
 #endif

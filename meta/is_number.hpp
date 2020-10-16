@@ -15,7 +15,7 @@ namespace mixc::meta_is_number{
     };
 
     template<class a>
-    constexpr bool is_number = meta<a>::result;
+    concept is_number = meta<a>::result;
 }
 
 #endif

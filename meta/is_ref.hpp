@@ -16,7 +16,7 @@ namespace mixc::meta_is_ref{
     };
 
     template<class a>
-    constexpr bool is_ref = meta<a>::result;
+    concept is_ref = meta<a>::result;
 }
 
 #endif

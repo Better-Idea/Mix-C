@@ -15,7 +15,7 @@ namespace mixc::meta_is_integer{
     };
 
     template<class a>
-    constexpr bool is_integer = meta<a>::result;
+    concept is_integer = meta<a>::result;
 }
 
 #endif

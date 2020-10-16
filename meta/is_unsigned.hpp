@@ -28,7 +28,7 @@ namespace mixc::meta_is_unsigned{
     };
 
     template<class a>
-    constexpr bool is_unsigned = meta<a>::result;
+    concept is_unsigned = meta<a>::result;
 }
 
 #endif

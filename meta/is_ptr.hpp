@@ -28,7 +28,7 @@ namespace mixc::meta_is_ptr{
     };
 
     template<class a>
-    constexpr bool is_ptr = meta<a>::result;
+    concept is_ptr = meta<a>::result;
 }
 
 #endif

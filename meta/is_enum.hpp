@@ -8,7 +8,7 @@
 
 namespace mixc::meta_is_enum{
     template<class a>
-    constexpr bool is_enum = __is_enum(a);
+    concept is_enum = __is_enum(a);
 }
 
 #endif

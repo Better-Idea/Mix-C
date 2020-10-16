@@ -8,7 +8,7 @@
 
 namespace mixc::meta_is_class{
     template<class a>
-    constexpr bool is_class = __is_class(a);
+    concept is_class = __is_class(a);
 }
 
 #endif

@@ -9,7 +9,7 @@
 
 namespace mixc::meta_is_based_on{
     template<class father, class child>
-    constexpr bool is_based_on = __is_base_of(father, child);
+    concept is_based_on = __is_base_of(father, child);
 }
 
 #endif

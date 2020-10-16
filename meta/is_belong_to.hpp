@@ -19,7 +19,7 @@ namespace mixc::meta_is_belong_to{
     };
 
     template<class holder, auto member_ptr>
-    constexpr bool is_belong_to = meta<holder, decltype(member_ptr)>::result;
+    concept is_belong_to = meta<holder, decltype(member_ptr)>::result;
 }
 
 #endif

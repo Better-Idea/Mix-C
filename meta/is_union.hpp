@@ -8,7 +8,7 @@
 
 namespace mixc::meta_is_union{
     template<class a>
-    constexpr bool is_union = __is_union(a);
+    concept is_union = __is_union(a);
 }
 
 #endif

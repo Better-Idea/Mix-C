@@ -17,7 +17,7 @@ namespace mixc::meta_is_volatile{
     };
 
     template<class a>
-    constexpr bool is_volatile = meta<a>::result;
+    concept is_volatile = meta<a>::result;
 }
 
 #endif
