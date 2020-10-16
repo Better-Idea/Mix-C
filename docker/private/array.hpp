@@ -51,7 +51,7 @@ namespace mixc::docker_array{
         xpubgetx(length, uxx){
             return count;
         }
-    };
+    $
 
     template<class final, class type>
     struct array_t<final, type>{
