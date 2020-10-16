@@ -166,7 +166,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         }
 
         template<class seq_t>
-        void set(seq_t const & index_list){
+        void bulk_set(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
                 set(index_list[i]);
             }
@@ -180,7 +180,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         }
 
         template<class seq_t>
-        void reset(seq_t const & index_list){
+        void bulk_reset(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
                 reset(index_list[i]);
             }
@@ -387,7 +387,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
          */
         template<inc::unified_seq_t seq_t>
         final & set(seq_t const & index_group){
-            the.set(inc::unified_seq<seq_t>{index_group});
+            the.bulk_set(inc::unified_seq<seq_t>{index_group});
             return thex;
         }
 
@@ -400,8 +400,8 @@ namespace mixc::docker_adapter_bit_indicator::origin{
          */
         template<inc::unified_seq_t seq_t>
         final & set(seq_t const & index_group, bool value){
-            value ? the.set(inc::unified_seq<seq_t>{index_group}) :
-                the.reset(inc::unified_seq<seq_t>{index_group});
+            value ? the.bulk_set(inc::unified_seq<seq_t>{index_group}) :
+                the.bulk_reset(inc::unified_seq<seq_t>{index_group});
             return thex;
         }
 
@@ -424,7 +424,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
          */
         template<inc::unified_seq_t seq_t>
         final & reset(seq_t const & index_group){
-            the.reset(inc::unified_seq<seq_t>{index_group});
+            the.bulk_reset(inc::unified_seq<seq_t>{index_group});
             return thex;
         }
     };
