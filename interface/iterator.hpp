@@ -36,7 +36,7 @@ namespace mixc::interface_iterator{
         inc::has_cast<iteratorx<a0, args...>, invoke_t> ? itr_has_loop_control | itr_has_index : itr_miss_match;
 
 
-    #define xitr_switch(mode, index,state,invoke,...) {                                                                \
+    #define xitr_switch(mode,index,state,invoke,...) {                                                                \
         using namespace ::mixc::interface_iterator;                                                                    \
         if constexpr (mode == (itr_reduced)) invoke(__VA_ARGS__);                                                      \
         if constexpr (mode == (itr_has_index)) invoke(index, __VA_ARGS__);                                             \
