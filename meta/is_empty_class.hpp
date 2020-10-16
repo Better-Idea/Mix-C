@@ -7,29 +7,19 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_empty_class{
-    template<class a> struct meta {
-    private:
-        static auto invoke(){
-            if constexpr (__is_class(a)){
-                return *(a *)nullptr;
-            }
-            else{
-                struct solid_class{
-                    double item;
-                };
-                return solid_class();
-            }
+    template<class a>
+    inline constexpr bool meta(){
+        if constexpr (__is_class(a)){
+            struct test : a{ char dummy; };
+            return sizeof(test) == 1;
         }
-
-        struct test : decltype(meta<a>::invoke()){
-            char dummy;
-        };
-    public:
-        static constexpr bool result = sizeof(test) == 1;
-    };
+        else{
+            return false;
+        }
+    }
 
     template<class a>
-    constexpr bool is_empty_class = meta<a>::result;
+    concept is_empty_class = meta<a>();
 }
 
 #endif
