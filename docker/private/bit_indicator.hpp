@@ -18,9 +18,9 @@ namespace mixc::docker_hashmap{
 
 namespace mixc::docker_bit_indicator{
     // bits != 0 时该模板是使用静态内存分配
-    template<uxx bits = 0>
+    template<class final, uxx bits = 0>
     xstruct(
-        xtmpl(bit_indicator_t, bits)
+        xtmpl(bit_indicator_t, final, bits)
     )
     public:
         constexpr uxx total_bits(){
@@ -68,9 +68,9 @@ namespace mixc::docker_bit_indicator{
     $
 
     // 动态内存分配的位图
-    template<>
+    template<class final>
     xstruct(
-        xspec(bit_indicator_t),
+        xspec(bit_indicator_t, final),
         xpubb(inc::disable_copy),
         xprif(pbmp          , uxx *),
         xprif(pheight       , uxx),
@@ -78,8 +78,6 @@ namespace mixc::docker_bit_indicator{
         xprif(ptotal_bits   , uxx)
     )
         template<class key_t, class val_t> friend struct mixc::docker_hashmap::hashmap_t;
-
-        using final = the_t;
 
         bit_indicator_t() : 
             pbmp(nullptr), pheight(0), psize(0) {}
@@ -172,7 +170,9 @@ namespace mixc::docker_bit_indicator{
     $
 
     template<class final, uxx total_bits>
-    using bit_indicator = inc::adapter_bit_indicator<final, bit_indicator_t<total_bits>>;
+    using bit_indicator = inc::adapter_bit_indicator<
+        final, bit_indicator_t<final, total_bits>
+    >;
 }
 #endif
 

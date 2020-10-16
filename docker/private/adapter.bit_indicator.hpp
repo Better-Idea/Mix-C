@@ -17,7 +17,7 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_adapter_bit_indicator{
+namespace mixc::docker_adapter_bit_indicator::origin{
     static constexpr uxx step_exp = xis_os64 ? 6 : 5;
     static constexpr uxx bwidth   = 1u << step_exp;
     static constexpr uxx bmask    = bwidth - 1;
@@ -268,4 +268,4 @@ namespace mixc::docker_adapter_bit_indicator{
 
 #endif
 
-xexport(mixc::docker_adapter_bit_indicator::adapter_bit_indicator)
+xexport_space(mixc::docker_adapter_bit_indicator::origin)
