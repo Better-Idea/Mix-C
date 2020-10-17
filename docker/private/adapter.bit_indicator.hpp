@@ -144,24 +144,29 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         return not_exist;
     }
     
-    template<class base_t>
     /*
-    needed:
+    requires:
     - base_t::bmp()
     - base_t::size()
     - base_t::level_lut()
     - base_t::height()
     */
+    template<class base_t>
     xstruct(
         xtmpl(adapter_bit_indicator, base_t),
         xpubb(base_t)
     )
         using base_t::base_t;
 
+        /* 函数：复位所有位 */
         void clear(){
             inc::zeros(base_t::bmp(), base_t::size() * sizeof(uxx));
         }
 
+        /* 函数：将指定索引的位置位
+         * 参数：
+         * - index 为要置位的索引
+         */
         void set(uxx index){
             bmp_set(index, base_t::bmp(), base_t::level_lut(), base_t::height(), [](uxx * p, uxx val){
                 bool has_set = *p != 0;
@@ -170,6 +175,10 @@ namespace mixc::docker_adapter_bit_indicator::origin{
             });
         }
 
+        /* 函数：根据索引数组依次将指定索引的位置位
+         * 参数：
+         * - index_list 为支持 inc::unified_seq_t 接口的对象
+         */
         template<inc::unified_seq_t seq_t>
         void set(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
@@ -177,6 +186,10 @@ namespace mixc::docker_adapter_bit_indicator::origin{
             }
         }
 
+        /* 函数：将指定索引的位复位
+         * 参数：
+         * - index 为要置位的索引
+         */
         void reset(uxx index){
             bmp_set(index, base_t::bmp(), base_t::level_lut(), base_t::height(), [](uxx * p, uxx val){
                 *p &= ~val;
@@ -184,6 +197,10 @@ namespace mixc::docker_adapter_bit_indicator::origin{
             });
         }
 
+        /* 函数：根据索引数组依次将指定索引的位复位
+         * 参数：
+         * - index_list 为支持 inc::unified_seq_t 接口的对象
+         */
         template<inc::unified_seq_t seq_t>
         void reset(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
