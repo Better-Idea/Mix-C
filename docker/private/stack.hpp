@@ -3,20 +3,17 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_stack
-#include"define/base_type.hpp"
 #include"docker/transmitter.hpp"
-#include"docker/private/adapter.pushpop.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/self_management.hpp"
 #include"interface/iterator.hpp"
-#include"interface/ranger.hpp"
 #include"lock/atom_swap.hpp"
 #include"lock/policy_barrier.hpp"
 #include"macro/xmflush.hpp"
-#include"macro/xstruct.hpp"
 #include"memory/allocator.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_stack{
@@ -49,7 +46,7 @@ namespace mixc::docker_stack{
 
     template<class final, class item_t, class lock_t>
     xstruct(
-        xtmpl(stack_t, final, item_t, lock_t),
+        xtmpl(stack, final, item_t, lock_t),
         xprob(node_field<item_t, lock_t>),
         xpubb(self_management),
         xpubb(disable_copy)
@@ -58,8 +55,6 @@ namespace mixc::docker_stack{
         using base_t    = node_field<item_t, lock_t>;
         using node      = single_linked_node<item_t>;
         using nodep     = node *;
-        using iteratorx = iteratorx<item_t &> const &;
-        using iterator  = iterator <item_t &> const &;
 
         template<class guide>
         bool routing(){
@@ -69,11 +64,11 @@ namespace mixc::docker_stack{
 
         // 构造析构区
     public:
-        stack_t(){
+        stack(){
             base_t::ptop = nullptr;
         }
     protected:
-        ~stack_t() {
+        ~stack() {
             clear();
         }
 
@@ -119,28 +114,24 @@ namespace mixc::docker_stack{
         }
 
         // 迭代器区
-    public:
-        final & foreach(iteratorx itr){
+    private:
+        template<auto mode, class interator_t>
+        void foreach_template(interator_t invoke) const {
             lock<opr::foreach>([&](){
-                nodep cur = base_t::top();
-                for(uxx i = 0; cur != nullptr; cur = cur->next, i++){
-                    if (itr(i, cur[0]) == loop_t::finish){
-                        return;
-                    }
-                }
-            });
-            return thex;
-        }
+                nodep  cur   = base_t::top();
+                uxx    index = 0;
+                loop_t state = loop_t::go_on;
 
-        final & foreach(iterator itr){
-            lock<opr::foreach>([&](){
-                nodep cur = base_t::top();
-                for(uxx i = 0; cur != nullptr; cur = cur->next, i++){
-                    itr(i, cur[0]);
+                while(cur != nullptr and state != loop_t::finish){
+                    xitr_switch(mode, index, state, invoke, *cur);
+                    cur = cur->next;
                 }
             });
-            return thex;
         }
+    public:
+        xitr_foreach(item_t &)
+        xitr_foreach_const(item_t const &)
+        
         // 属性区
     public:
         xpubget_pubsetx(top, transmitter<item_t>)
@@ -167,13 +158,9 @@ namespace mixc::docker_stack{
             return base_t::top() == nullptr;
         }
     };
-
-    template<class final, class item_t, class lock>
-    using stack = adapter_pushpop<final, stack_t<final, item_t, lock>, item_t>;
 }
 
 #endif
 
 #define xusing_docker_stack     ::mixc::docker_stack
-#include"math/index_system.hpp"
 
