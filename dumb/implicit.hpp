@@ -18,8 +18,7 @@ auto function(args const & ... list){
     namespace mixc::dumb_implicit{
         template<class a>
         xstruct(
-            xtmpl(implicit, a),
-            xprif(value, a)
+            xtmpl(implicit, a)
         )
             template<class b>
             implicit(b const & value) : 
@@ -32,6 +31,8 @@ auto function(args const & ... list){
             auto operator -> () const {
                 return & value;
             }
+        private:
+            a value;
         $
     }
 
