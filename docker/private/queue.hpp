@@ -89,6 +89,7 @@ namespace mixc::docker_queue {
                 if (auto top = base_t::top(); top != nullptr){
                     new_top->next = top->next;
                     top->next     = new_top;
+                    base_t::swap_top(new_top);
                 }
                 else{
                     new_top->next = new_top;
