@@ -60,11 +60,11 @@ namespace mixc::docker_bit_indicator{
                 lv1 ? 2  : 1;
         }
 
-        uxx * bmp(){
+        uxx * bmp() const {
             return data;
         }
 
-        uxx data[size()] = {0};
+        mutable uxx data[size()] = {0};
     $
 
     // 动态内存分配的位图
@@ -72,10 +72,10 @@ namespace mixc::docker_bit_indicator{
     xstruct(
         xspec(bit_indicator_t, final),
         xpubb(inc::disable_copy),
-        xprif(pbmp          , uxx *),
-        xprif(pheight       , uxx),
-        xprif(psize         , uxx),
-        xprif(ptotal_bits   , uxx)
+        xprif(pbmp          , mutable uxx *),
+        xprif(pheight       , mutable uxx),
+        xprif(psize         , mutable uxx),
+        xprif(ptotal_bits   , mutable uxx)
     )
         template<class key_t, class val_t> friend struct mixc::docker_hashmap::hashmap_t;
 
