@@ -4,6 +4,7 @@
 #undef  xuser
 #define xuser mixc::interface_ranger
 #include"interface/initializer_list.hpp"
+#include"interface/iterator.hpp"
 #include"macro/xalign.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
@@ -198,6 +199,22 @@ namespace mixc::interface_ranger{
             }
             return r;
         }
+
+    private:
+        template<auto mode, class iterator_t>
+        void foreach_template(iterator_t const & invoke, inc::iinterval itv = co{0, -1}){
+            auto r      = subseq(itv);
+            auto state  = loop_t::go_on;
+
+            for(uxx i = 0; i < r.length() and state != loop_t::finish; i++){
+                xitr_switch(mode,i,state,invoke, r[i]);
+            }
+        }
+    public:
+        xitr_foreach (item_t &)
+        xitr_foreachx(item_t &)
+        xitr_foreach_const (item_t const &)
+        xitr_foreachx_const(item_t const &)
     $
 
     #define xranger(...)                                                               \
