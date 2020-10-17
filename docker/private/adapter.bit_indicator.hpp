@@ -1,6 +1,6 @@
 /* 模块：adapter_bit_indicator
  * 类型：适配器
- * 功能：通过将栈/堆 bit_indicator 提供的数据，对外提供位指示器的一系列基础功能
+ * 功能：通过静态分配/动态分配 bit_indicator 提供的数据，对外提供位一致的指示器基础功能
  * 用法：
  * TODO======================================================================================
  */
@@ -18,7 +18,12 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_adapter_bit_indicator::origin{
+    // 64bit 字长 -> 2^6
+    // 32bit 字长 -> 2^5
+    // more todo ...
     static constexpr uxx step_exp = xis_os64 ? 6 : 5;
+
+    // 机器位宽
     static constexpr uxx bwidth   = 1u << step_exp;
     static constexpr uxx bmask    = bwidth - 1;
 
@@ -139,7 +144,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
         return not_exist;
     }
     
-    template<class final, class base_t>
+    template<class base_t>
     /*
     needed:
     - base_t::bmp()
@@ -148,7 +153,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
     - base_t::height()
     */
     xstruct(
-        xtmpl(adapter_bit_indicator, final, base_t),
+        xtmpl(adapter_bit_indicator, base_t),
         xpubb(base_t)
     )
         using base_t::base_t;

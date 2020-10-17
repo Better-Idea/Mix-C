@@ -171,7 +171,7 @@ namespace mixc::docker_bit_indicator{
 
     template<class final, uxx total_bits>
     using bit_indicator = inc::adapter_bit_indicator<
-        final, bit_indicator_t<final, total_bits>
+        bit_indicator_t<final, total_bits>
     >;
 }
 #endif
