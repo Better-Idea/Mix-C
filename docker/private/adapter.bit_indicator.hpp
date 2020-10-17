@@ -152,10 +152,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
     - base_t::height()
     */
     template<class base_t>
-    xstruct(
-        xtmpl(adapter_bit_indicator, base_t),
-        xpubb(base_t)
-    )
+    struct adapter_bit_indicator : base_t{
         using base_t::base_t;
 
         /* 函数：复位所有位 */
@@ -285,7 +282,7 @@ namespace mixc::docker_adapter_bit_indicator::origin{
                 &  inc::index_of_last_set<uxx>, end_boundary
             );
         }
-    $
+    };
 }
 
 #endif
