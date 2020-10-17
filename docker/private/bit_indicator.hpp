@@ -12,10 +12,6 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_hashmap{
-    template<class key_t, class val_t> struct hashmap_t;
-}
-
 namespace mixc::docker_bit_indicator{
     // bits != 0 时该模板是使用静态内存分配
     template<class final, uxx bits = 0>
@@ -77,8 +73,6 @@ namespace mixc::docker_bit_indicator{
         xprif(psize         , mutable uxx),
         xprif(ptotal_bits   , mutable uxx)
     )
-        template<class key_t, class val_t> friend struct mixc::docker_hashmap::hashmap_t;
-
         bit_indicator_t() : 
             pbmp(nullptr), pheight(0), psize(0) {}
 
@@ -162,7 +156,7 @@ namespace mixc::docker_bit_indicator{
             return the.size() + the.height();
         }
 
-        xprigetx(cost_bytes, inc::memory_size){
+        xpubgetx(cost_bytes, inc::memory_size){
             return inc::memory_size(cost_count() * sizeof(uxx));
         }
 
