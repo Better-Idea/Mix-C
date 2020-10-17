@@ -39,7 +39,6 @@ namespace mixc::docker_hashmap{
     };
 
     template<class key_t, class val_t>              struct node;
-    template<class key_t, class val_t>              struct hashmap_t;
     template<class final, class key_t, class val_t> struct hashmap;
 
     #define xarg_has_val_t
