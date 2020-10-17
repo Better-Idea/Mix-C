@@ -21,10 +21,12 @@ namespace mixc::docker_adapter_array_access {
     /* - base_t 为被此结构继承的结构类型，要求 base_t 具有以下函数
      *   item_t & base_t::operator[](uxx) const;
      *   uxx      base_t::length() const;
-     * - item_t 为 base_t 元素类型
+     * requires：
+     * - base_t::item_t
      */
-    template<class base_t, class item_t>
+    template<class base_t>
     struct adapter_array_access : base_t {
+        using item_t            = typename base_t::item_t;
         using the_t             = base_t;
         using base_t::base_t;
         using base_t::operator[];
@@ -36,7 +38,7 @@ namespace mixc::docker_adapter_array_access {
          * 参数：
          * - index 为整数类型
          * 返回：
-         * - 指定索引的元素
+         * - 指定索引的元素的引用
          * 注意：
          * - 该函数支持回绕索引，即索引 -1 表示最后一个元素
          */
@@ -87,7 +89,7 @@ namespace mixc::docker_adapter_array_access {
          * 参数：
          * - index 为整数类型
          * 返回：
-         * - 指定索引的元素
+         * - 指定索引的元素的引用
          * 注意：
          * - 该函数支持回绕索引，即索引 -1 表示最后一个元素
          */
@@ -100,7 +102,7 @@ namespace mixc::docker_adapter_array_access {
          * 参数：
          * - index 为整数类型
          * 返回：
-         * - 指定索引的元素
+         * - 指定索引的元素的引用
          * 注意：
          * - 该函数支持回绕索引，即索引 -1 表示最后一个元素
          */
