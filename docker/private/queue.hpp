@@ -3,20 +3,16 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_queue
-#include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/struct_type.hpp"
 #include"docker/transmitter.hpp"
-#include"docker/private/adapter.foreach.array.hpp"
-#include"docker/private/adapter.pushpop.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"
 #include"interface/iterator.hpp"
-#include"interface/ranger.hpp"
 #include"lock/atom_swap.hpp"
 #include"lock/policy_barrier.hpp"
-#include"macro/xstruct.hpp"
 #include"memory/allocator.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_queue {
@@ -49,7 +45,7 @@ namespace mixc::docker_queue {
 
     template<class final, class item_t, class barrier_t>
     xstruct(
-        xtmpl(queue_t, final, item_t, barrier_t),
+        xtmpl(queue, final, item_t, barrier_t),
         xprib(node_field<item_t, barrier_t>),
         xpubb(self_management),
         xpubb(disable_copy),
@@ -58,10 +54,8 @@ namespace mixc::docker_queue {
         using node      = single_linked_node<item_t>;
         using nodep     = node *;
         using base_t    = node_field<item_t, barrier_t>;
-        using iteratorx = inc::iteratorx<item_t &> const &;
-        using iterator  = inc::iterator <item_t &> const &;
     protected:
-        ~queue_t() {
+        ~queue() {
             clear();
         }
     public:
@@ -131,31 +125,28 @@ namespace mixc::docker_queue {
         }
 
         // 迭代器区
-    public:
-        final & foreach(iteratorx itr){
+    private:
+        template<auto mode, class iterator_t>
+        void foreach_template(iterator_t const & invoke) const {
             lock<opr::foreach>([&](){
-                nodep top = base_t::top();
-                nodep cur = top;
+                nodep  top   = base_t::top();
+                nodep  cur   = top;
+                uxx    index = 0;
+                loop_t state = loop_t::go_on;
 
                 if (top == nullptr){
                     return;
                 }
 
                 do{
-                    if (cur = cur->next; itr(*cur) == loop_t::finish){
-                        return;
-                    }
-                }while(cur != top);
-            });
-            return thex;
-        }
-
-        final & foreach(iterator itr){
-            return foreach([&](uxx index, item_t & value){
-                itr(index, value);
-                return loop_t::go_on;
+                    cur = cur->next;
+                    xitr_switch(mode, index, state, invoke, *cur);
+                }while(cur != top and state != loop_t::finish);
             });
         }
+    public:
+        xitr_foreach(item_t &)
+        xitr_foreach_const(item_t const &)
 
         xpubget_pubsetx(head, transmitter<item_t>)
             xr{
@@ -179,9 +170,6 @@ namespace mixc::docker_queue {
             return base_t::top() == nullptr;
         }
     $
-
-    template<class final, class item_t, class barrier_t>
-    using queue = adapter_pushpop<final, queue_t<final, item_t, barrier_t>, item_t>;
 }
 
 #endif

@@ -32,7 +32,7 @@ namespace mixc::docker_single_linked_node{
         xprif(barrier, barrier_t)
     )
         template<auto opr, class callback>
-        void lock(callback const & call){
+        void lock(callback const & call) const {
             barrier.template lock<opr>(call);
         }
 
@@ -48,7 +48,7 @@ namespace mixc::docker_single_linked_node{
         xpubf(ptop, mutable origin::single_linked_node<item_t> *)
     )
         template<auto/*dummy*/, class callback>
-        void lock(callback const & call){
+        void lock(callback const & call) const {
             inc::mutex::lock(xref ptop, 0, call);
         }
 
@@ -74,16 +74,16 @@ namespace mixc::docker_single_linked_node{
                 return nodep(uxx(node) & base_t::mask); 
             }
 
-            nodep top(){
+            nodep top() const {
                 return origin(base_t::ptop);
             }
 
-            nodep swap_top(nodep value){
+            nodep swap_top(nodep value) const {
                 nodep masked_top = inc::atom_swap<nodep>(xref base_t::ptop, masked(value));
                 return origin(masked_top);
             }
 
-            static nodep masked(nodep node){
+            static nodep masked(nodep node) {
                 return nodep(uxx(node) | ~base_t::mask);
             }
         $
