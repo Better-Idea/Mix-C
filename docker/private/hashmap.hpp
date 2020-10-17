@@ -4,7 +4,6 @@
 #undef  xuser
 #define xuser mixc::docker_hashmap
 #include"algo/hash.hpp"
-#include"define/base_type.hpp"
 #include"define/nullref.hpp"
 #include"docker/bit_indicator.hpp"
 #include"docker/transmitter.hpp"
@@ -13,6 +12,7 @@
 #include"gc/self_management.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/iterator.hpp"
+#include"macro/xdefer.hpp"
 #include"math/align.hpp"
 #include"math/random.hpp"
 #include"memop/addressof.hpp"
@@ -55,8 +55,6 @@ namespace mixc::docker_hashmap::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::docker_hashmap::origin;
-}
-
 #define xusing_docker_hashmap     ::mixc::docker_hashmap
+
+xexport_space(mixc::docker_hashmap::origin)

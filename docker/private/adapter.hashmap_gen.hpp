@@ -142,9 +142,9 @@ xstruct(
 $
 
 #ifdef xarg_has_val_t
-template<class key_t, class val_t>
+template<class final, class key_t, class val_t>
 xstruct(
-    xtmpl(hashmap_t, key_t, val_t),
+    xtmpl(hashmap, final, key_t, val_t),
     xpubb(inc::self_management),
     xpubb(inc::disable_copy),
     xprif(lines,  uxx),
@@ -155,9 +155,9 @@ xstruct(
 )
     using node_t   = node<key_t, val_t>;
 #else
-template<class key_t>
+template<class final, class key_t>
 xstruct(
-    xspec(hashmap_t, key_t, void),
+    xspec(hashmap, final, key_t, void),
     xpubb(inc::self_management),
     xpubb(inc::disable_copy),
     xprif(lines,  uxx),
@@ -171,20 +171,19 @@ xstruct(
 private:
     static constexpr uxx multi         = 4;
     static constexpr uxx start_capcity = 16;
-    using final    = the_t;
 
     /*构造/析构区*/
 public:
-    hashmap_t() : hashmap_t(start_capcity){}
-    hashmap_t(uxx start_capcity) : hashmap_t(start_capcity, inc::random<uxx>()){}
-    hashmap_t(uxx start_capcity, uxx seed) : 
+    hashmap() : hashmap(start_capcity){}
+    hashmap(uxx start_capcity) : hashmap(start_capcity, inc::random<uxx>()){}
+    hashmap(uxx start_capcity, uxx seed) : 
         lines(inc::align(start_capcity)), 
         count(0), 
         seed(seed),
         nodes(the_t::alloc(xref bmp, lines)) {
     }
 protected:
-    ~hashmap_t(){
+    ~hashmap(){
         the.clear();
         the.free();
     }
@@ -224,17 +223,25 @@ public:
         return nodes[index].get(key);
     }
 
-    inc::transmitter<xarg_item_t> take_out(key_t const & key) {
+    inc::transmitter<xarg_item_t> take_out(key_t const & key, hashmap_take_out_result_t * state = nullptr) {
+        auto   tmp_state  = hashmap_take_out_result_t::item_not_exist;
         auto   index      = addressing(key);
         auto   can_relase = false;
         auto & node       = nodes[index];
         auto & item       = node.take_out(key, xref can_relase);
 
+        xdefer{
+            if (state != nullptr) {
+                state[0] = tmp_state;
+            }
+        };
+
         if (item == inc::nullref){
             return inc::transmitter<xarg_item_t>();
         }
         else{
-            count -= 1; // 需要计数========================================
+            tmp_state     = hashmap_take_out_result_t::success;
+            count        -= 1; // 需要计数========================================
         }
 
         inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item;
@@ -248,33 +255,30 @@ public:
         return r;
     }
 
-    the_t & clear() {
+    void clear() {
         if (nodes != nullptr){
             for(uxx i = 0; not_exist != (i = bmp.pop_first());){
                 nodes[i].free();
             }
             count = 0;
         }
-        return the;
     }
 
-    the_t & remove(key_t const & key, hashmap_remove_result_t * state = nullptr) {
+    void remove(key_t const & key, hashmap_remove_result_t * state = nullptr) {
         if (auto && r = tale_out(key); state != nullptr){
             state[0] = r.has_hold_value() ? 
                 hashmap_remove_result_t::success :
                 hashmap_remove_result_t::item_not_exist;
         }
-        return the;
     }
 
-    the_t & resize() {
+    void resize() {
         if (lines >= count * multi * 2 and lines > start_capcity){
             resize(lines / multi);
         }
-        return the;
     }
 
-    the_t & set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr){
+    void set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr){
         auto   index = addressing(key);
         auto & node = nodes[index];
         xdebug(im_docker_hashmap_set, index, key xarg_val);
@@ -294,10 +298,9 @@ public:
         if (lines == count){
             resize(lines * multi);
         }
-        return the;
     }
 
-    the_t & take_out(key_t const & key, xarg_item_t * value, hashmap_take_out_result_t * state = nullptr) {
+    void take_out(key_t const & key, xarg_item_t * value, hashmap_take_out_result_t * state = nullptr) {
         auto sta = hashmap_take_out_result_t::item_not_exist;
 
         // count -= 1; 注意计数问题========================================
@@ -309,7 +312,6 @@ public:
         if (state){
             state[0]  = sta;
         }
-        return the;
     }
 
     bool is_contains(key_t const & key) const {
@@ -341,7 +343,7 @@ private:
         inc::swap(xref new_hash_map, xref the);
     }
 
-    // 该函数用于 hashmap_t 内部扩容和压缩
+    // 该函数用于 hashmap 内部扩容和压缩
     // 要求 map 是新分配的空间，并且内部无元素
     void resize_to(the_t & map) {
         if (nodes == nullptr){
@@ -428,39 +430,6 @@ private:
         return nodes;
     }
 $
-
-#ifdef xarg_has_val_t
-template<class final, class key_t, class val_t>
-struct hashmap : hashmap_t<key_t, val_t> {
-    using the_t = hashmap_t<key_t, val_t>;
-#else
-template<class final, class key_t>
-struct hashmap<final, key_t, void> : hashmap_t<key_t, void> {
-    using the_t = hashmap_t<key_t, void>;
-#endif
-    using the_t::the_t;
-    using the_t::take_out;
-
-    final & clear() {
-        return (final &)the.clear();
-    }
-
-    final & remove(key_t const & key, hashmap_remove_result_t * state = nullptr) {
-        return (final &)the.remove(key, state);
-    }
-
-    final & resize(){
-        return (final &)the.resize();
-    }
-
-    final & set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr) {
-        return (final &)the.set(key xarg_val, state);
-    }
-
-    final & take_out(key_t const & key, xarg_item_t * val, hashmap_take_out_result_t * state = nullptr) {
-        return (final &)the.take_out(key, val, state);
-    }
-};
 
 #ifdef xarg_has_val_t
     #undef xarg_has_val_t
