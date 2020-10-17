@@ -40,10 +40,13 @@ namespace mixc::docker_adapter_array_access {
             uxx    index = 0;
             loop_t state = loop_t::go_on;
 
-            do{
+            for(;; l += step){
                 xitr_switch(mode, index, state, invoke, the[l]);
-                l += step;
-            }while(l != r and state == loop_t::go_on);
+                
+                if (l == r or state == loop_t::finish){
+                    break;
+                }
+            }
         }
     public:
         template<inc::is_integer number_t>
