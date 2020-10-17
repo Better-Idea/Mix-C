@@ -46,11 +46,15 @@ namespace mixc::docker_shared_array{
         template<class finalx>
         shared_array_t(shared_array_t<finalx, type, rank, attribute> const & self) : 
             shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute> &)self){
-            static_assert(sizeof(self) == sizeof(the_t));
         }
 
         shared_array_t(::length length) :
             base_t(length) {}
+
+        template<class ... args>
+        shared_array_t(item_t const & first, args const & ... rest) : 
+            base_t(first, rest...){
+        }
 
         template<class ... args>
         shared_array_t(::length length, args const & ... list) : 
@@ -60,13 +64,20 @@ namespace mixc::docker_shared_array{
         auto & operator()(::length length, args const & ... list){
             base_t::operator=(nullptr);
             new (this) base_t(length, list...);
-            return the;
+            return thex;
+        }
+
+        template<class ... args>
+        auto & operator()(item_t const & first, args const & ... rest){
+            base_t::operator=(nullptr);
+            new (this) base_t(first, rest...);
+            return thex;
         }
 
         the_t & operator=(decltype(nullptr)){
             base_t::operator=(nullptr);
             new (this) the_t(*(the_t *)& inc::empty_array_ptr);
-            return the;
+            return thex;
         }
 
         operator item_t *() const {
@@ -90,7 +101,7 @@ namespace mixc::docker_shared_array{
         }
 
         xis_nullptr(
-            the == the_t(*(the_t *)& inc::empty_array_ptr)
+            the == *(the_t *)& inc::empty_array_ptr
         )
 
         xpubgetx(is_empty, bool) {
@@ -109,7 +120,7 @@ namespace mixc::docker_shared_array{
 
     template<class final, class type, uxx rank, class attribute>
     using shared_array = inc::adapter_array_access<
-        shared_array_t<final, type, rank, attribute>, type
+        shared_array_t<final, type, rank, attribute>
     >;
 }
 

@@ -7,6 +7,7 @@
 #include"define/nullref.hpp"
 #include"docker/hashmap.hpp"
 #include"dumb/dummy_type.hpp"
+#include"dumb/implicit.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/self_management.hpp"
 #include"gc/private/make_guide.hpp"
@@ -139,6 +140,12 @@ namespace mixc::gc_ref{
     public:
         meta() : mem(nullptr) { }
 
+        meta(the_t const & value){
+            if (mem = value.mem; mem != nullptr) {
+                mem->owners_inc();
+            }
+        }
+    protected:
         template<class ... args>
         meta(::length length, args const & ... list) {
             mem = alloc(length);
@@ -151,16 +158,23 @@ namespace mixc::gc_ref{
         }
 
         template<class ... args>
+        meta(item_t const & first, args const & ... rest) {
+            inc::implicit<item_t &> list[] = { (item_t &)first, (item_t &)rest... };
+            uxx count                            = 1 + sizeof...(args);
+            mem                                  = alloc(count);
+
+            if constexpr (not is_same<void, item_t>){
+                for(uxx i = 0; i < count; i++) {
+                    new(mem->item_ptr(i)) item_t(list[i]);
+                }
+            }
+        }
+
+        template<class ... args>
         meta(::ini, args const & ... list) {
             mem = alloc(::length(0), list...);
         }
 
-        meta(the_t const & value){
-            if (mem = value.mem; mem != nullptr) {
-                mem->owners_inc();
-            }
-        }
-    protected:
         ~meta(){
             the = nullptr;
         }
