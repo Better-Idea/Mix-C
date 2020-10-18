@@ -43,12 +43,12 @@ namespace mixc::docker_adapter_array_access {
          * - 该函数支持回绕索引，即索引 -1 表示最后一个元素
          */
         template<inc::is_integer number_t>
-        auto & random_access(number_t const & index) const {
+        item_t & random_access(number_t const & index) const {
             if constexpr (number_t(-1) > 0) {
-                return base_t::operator[](uxx(index));
+                return (item_t &)base_t::operator[](uxx(index));
             }
             else {
-                return base_t::operator[](index >= 0 ? uxx(index) : uxx(length() + index));
+                return (item_t &)base_t::operator[](index >= 0 ? uxx(index) : uxx(length() + index));
             }
         }
 
