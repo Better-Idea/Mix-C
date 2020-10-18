@@ -67,10 +67,23 @@ namespace mixc::docker_shared_array_stacklize {
         }
 
         inc::transmitter<item_t> pop() {
-            uxx i = the.length() - 1;
+            uxx                      i = the.length() - 1;
             inc::transmitter<item_t> r = the[i];
-            the[i].~item_t();
-            the.length(i);
+
+            // 到达容量边界开始缩容
+            // 2^n & (2^n - 1) -> 0
+            if ((i & (i - 1)) == 0){
+                the_t new_array{
+                    ::length(i)
+                };
+
+                inc::copy(new_array, the, i);
+                the.swap(xref new_array);
+            }
+            else{
+                the[i].~item_t();
+                the.length(i);
+            }
             return r;
         }
 
