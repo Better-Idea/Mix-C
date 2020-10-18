@@ -7,12 +7,12 @@
 #include"define/nullref.hpp"
 #include"docker/hashmap.hpp"
 #include"dumb/dummy_type.hpp"
-#include"dumb/implicit.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/self_management.hpp"
 #include"gc/private/make_guide.hpp"
 #include"gc/private/token.hpp"
 #include"gc/private/tuple.hpp"
+#include"instruction/index_of_last_set.hpp"
 #include"lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xis_nullptr.hpp"
@@ -54,9 +54,9 @@ namespace mixc::gc_ref{
     static inline uxx                        empty_array[32];
     static inline voidp                      empty_array_ptr   = empty_array;
 
-    template<class final, class item_t, class attribute_t, bool is_array>
+    template<class final, class item_t, class attribute_t, bool is_array, bool is_binary_aligned_alloc>
     xstruct(
-        xtmpl(meta, final, item_t, attribute_t, is_array),
+        xtmpl(meta, final, item_t, attribute_t, is_array, is_binary_aligned_alloc),
         xpubb(self_management),
         xasso(attribute_t),
         xasso(item_t)
@@ -159,16 +159,20 @@ namespace mixc::gc_ref{
 
         template<class ... args>
         meta(item_t const & first, args const & ... rest) {
-            inc::implicit<item_t &> list[] = { (item_t &)first, (item_t &)rest... };
             uxx count                            = 1 + sizeof...(args);
             mem                                  = alloc(count);
-
-            if constexpr (not is_same<void, item_t>){
-                for(uxx i = 0; i < count; i++) {
-                    new(mem->item_ptr(i)) item_t(list[i]);
-                }
-            }
+            initial(0, first, rest...);
         }
+
+    private:
+        void initial(uxx i){ }
+
+        template<class ... args>
+        void initial(uxx i, item_t const & first, args const & ... rest){
+            new(mem->item_ptr(i)) item_t(first);
+            initial(i + 1, rest...);
+        }
+    protected:
 
         template<class ... args>
         meta(::ini, args const & ... list) {
@@ -274,21 +278,38 @@ namespace mixc::gc_ref{
             return mem->this_length();
         }
 
+        void length(uxx value) const {
+            mem->this_length(value);
+        }
+
         constexpr static uxx header_size(){
             return sizeof(token_mix_t);
         }
+
+        uxx capacity() const {
+            return real(mem->this_length());
+        }
     private:
-        token_mix_t * mem;
+        mutable token_mix_t * mem;
 
-        template<class ... args> auto alloc(uxx length, args const & ... list) {
-            return alloc_with_initial<token_mix_t>(size(length), length, list...);
+        static uxx real(uxx length) {
+            if constexpr (is_binary_aligned_alloc){
+                length = uxx(1) << (inc::index_of_last_set(length - 1) + 1);
+            }
+            return length;
         }
 
-        void free(){
-            free_with_destroy(mem, size(mem->this_length()));
+        template<class ... args> auto alloc(uxx length, args const & ... list) const {
+            uxx real_length = real(length);
+            return alloc_with_initial<token_mix_t>(size(real_length), length, list...);
         }
 
-        memory_size size(uxx length){
+        void free() const {
+            uxx length = capacity();
+            free_with_destroy(mem, size(length));
+        }
+
+        memory_size size(uxx length) const {
             if constexpr (is_same<void, item_t>){
                 return memory_size(
                     sizeof(token_mix_t)
@@ -308,10 +329,10 @@ namespace mixc::gc_ref::origin{
     using mixc::gc_ref::empty_array_ptr;
 
     template<class final, class type>
-    using ref_ptr = meta<final, void, type, false>;
+    using ref_ptr = meta<final, void, type, false, false>;
 
-    template<class final, class item_t, class attribute_t = void>
-    using ref_array = meta<final, item_t, attribute_t, true>;
+    template<class final, class item_t, class attribute_t = void, bool is_binary_aligned_alloc = false>
+    using ref_array = meta<final, item_t, attribute_t, true, is_binary_aligned_alloc>;
 }
 
 #endif

@@ -17,7 +17,7 @@ namespace mixc::gc_private_tuple{
 }
 
 namespace mixc::gc_ref{
-    template<class impl, class a, class b, bool is_array> struct meta;
+    template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> struct meta;
 }
 
 namespace mixc::macro_xsv{
@@ -37,11 +37,11 @@ namespace mixc::gc_private_token::origin{
     )
         token(uxx) : record(step) { }
     protected:
-        template<class, class, class, bool> friend struct mixc::gc_ref::meta;
+        template<class, class, class, bool, bool> friend struct mixc::gc_ref::meta;
         template<class> friend struct mixc::gc_private_tuple::tuple;
 
-        constexpr uxx  this_length() { return uxx(0); }
-        constexpr void this_length(uxx) { }
+        constexpr uxx  this_length() const { return uxx(0); }
+        constexpr void this_length(uxx) const { }
 
         mutable uxx record;
 
@@ -62,16 +62,16 @@ namespace mixc::gc_private_token::origin{
         xname(token_plus),
         xpubb(token)
     )
-        uxx length;
+        mutable uxx length;
 
         token_plus(uxx length) : 
             token(0), length(length) { }
 
-        uxx this_length() {
+        uxx this_length() const {
             return length;
         }
 
-        void this_length(uxx value) {
+        void this_length(uxx value) const {
             length = value;
         }
     $
@@ -106,7 +106,7 @@ namespace mixc::gc_private_token::origin{
             }
         }
 
-        template<class impl, class a, class b, bool is_array> friend struct mixc::gc_ref::meta;
+        template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> friend struct mixc::gc_ref::meta;
         template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
     $
 
@@ -122,7 +122,7 @@ namespace mixc::gc_private_token::origin{
         token_mix(uxx length, args const & ... list) : 
             base_t(length), inc::struct_type<attribute>(list...) {}
 
-        template<class impl, class a, class b, bool is_array> friend struct mixc::gc_ref::meta;
+        template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> friend struct mixc::gc_ref::meta;
         template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
     $
 }
