@@ -21,18 +21,19 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_shared_array{
-    template<class final, class type, uxx rank, class attribute>
+    template<class final, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
     xstruct(
-        xtmpl(shared_array_t, final, type, rank, attribute),
+        xtmpl(shared_array_t, final, type, rank, attribute, is_binary_aligned_alloc),
         xpubb(inc::ref_array<
-            shared_array_t<final, type, rank, attribute>,
+            final,
             typename 
-            shared_array_t<final, type, rank - 1, attribute>::the_t,
-            attribute
+            shared_array_t<final, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t,
+            attribute,
+            is_binary_aligned_alloc
         >)
     )
-        using item_t = typename shared_array_t<final, type, rank - 1, attribute>::the_t;
-        using base_t = inc::ref_array<the_t, item_t, attribute>;
+        using item_t = typename shared_array_t<final, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t;
+        using base_t = inc::ref_array<final, item_t, attribute, is_binary_aligned_alloc>;
     public:
         xseqptr(item_t);
 
@@ -44,8 +45,8 @@ namespace mixc::docker_shared_array{
         shared_array_t(shared_array_t const &) = default;
 
         template<class finalx>
-        shared_array_t(shared_array_t<finalx, type, rank, attribute> const & self) : 
-            shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute> &)self){
+        shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
+            shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> &)self){
         }
 
         shared_array_t(::length length) :
@@ -108,19 +109,19 @@ namespace mixc::docker_shared_array{
             return length() == 0;
         }
 
-        xpubgetx(length, uxx) {
-            return base_t::length();
-        }
+        xpubget_prosetx(length, uxx)
+            xr{ return base_t::length(); }
+            xw{ base_t::length(value); }
     $
 
-    template<class final, class type, class attribute>
-    struct shared_array_t<final, type, 0, attribute>{
+    template<class final, class type, class attribute, bool is_binary_aligned_alloc>
+    struct shared_array_t<final, type, 0, attribute, is_binary_aligned_alloc>{
         using the_t = type;
     };
 
-    template<class final, class type, uxx rank, class attribute>
+    template<class final, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
     using shared_array = inc::adapter_array_access<
-        shared_array_t<final, type, rank, attribute>
+        shared_array_t<final, type, rank, attribute, is_binary_aligned_alloc>
     >;
 }
 

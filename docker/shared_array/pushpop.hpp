@@ -11,7 +11,6 @@
 #include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/transmitter.hpp"
-#include"docker/private/adapter.pushpop.hpp"
 #include"dumb/mirror.hpp"
 #include"macro/xstruct.hpp"
 #include"memory/new.hpp"
