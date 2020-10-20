@@ -75,17 +75,19 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_mmu
-#include"define/base_type.hpp"
-#include"instruction/index_of_last_set.hpp"
 #include"instruction/bit_test_and_reset.hpp"
-#include"memory/allocator.hpp"
+#include"instruction/index_of_last_set.hpp"
+#include"interface/can_alloc.hpp"
+#include"interface/can_free.hpp"
+#include"memop/copy.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_mmu {
     struct pagoff{ uxx page, offset; };
 
     struct addressing{
-        static auto var(uxx present_indicator, uxx address){
+        static pagoff var(uxx present_indicator, uxx address){
             uxx    mask = present_indicator & address;
             pagoff r;
             r.page   = inc::index_of_last_set(mask) + 1;
@@ -97,7 +99,7 @@ namespace mixc::algo_mmu {
             return r;
         }
 
-        static auto fixed(uxx present_indicator, uxx address){
+        static pagoff fixed(uxx present_indicator, uxx address){
             pagoff r;
             uxx mask = present_indicator ^ address;
             r.page   = inc::index_of_last_set(mask);
@@ -106,80 +108,124 @@ namespace mixc::algo_mmu {
         }
     };
 
-    template<uxx small_page_count, uxx step_exp = 8>
-    union page_var{
-        using the_t = page_var<small_page_count, step_exp>;
-    //     static auto alloc(uxx capacity){
-    //         return inc::alloc_with_initial<the_t>(
-    //             inc::memory_size(
-    //                 size(capacity)
-    //             ),
-    //             capacity
-    //         );
-    //     }
-    // protected:
-    //     page_var(uxx capcity) : 
-    //         capcity(capcity), bytes(0){}
+    template<uxx begin_capacity = 1>
+    struct var_array {
+        static_assert((begin_capacity & (begin_capacity - 1)) == 0 and begin_capacity > 0);
 
-        static uxx size(uxx capacity){
-            uxx     i     = (inc::index_of_last_set(capacity) + 1);
-            uxx     mask  = (uxx(1) << small_page_count) - 1;
-            uxx     spc   = (i >> (step_exp)) & mask;
-            uxx     bpc   = (i >> (step_exp + small_page_count));
-            uxx     bytes = (bpc + spc + 2) * sizeof(uxx);
-            return  bytes;
-        }
+        template<class item_t>
+        inline static void push(item_t *** page_table_ptr, uxx * length, item_t const & value, inc::can_alloc<void> alloc, inc::can_free<void> free){
+            auto & len                  = (length[0]);
+            auto & tab                  = (page_table_ptr[0]);
+            auto   need_new_page        = (len & (len - 1)) == 0;
+            auto   new_tab              = (item_t **)nullptr;
+            auto   ptr                  = (item_t *)nullptr;
+            auto   i                    = (uxx)0;
+            auto   ii                   = (uxx)0;
+            auto   mask                 = (uxx)0;
+            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
 
-        template<class type>
-        type & access(uxx address){
-            using typep = type *;
-            auto r = addressing::var(bytes, address);
-
-            if (r.page < step_exp){
-                return typep(spage[0] + r.offset)[0];
-            }
-            if (r.page -= step_exp; r.page < small_page_count){
-                return typep(spage[r.page] + r.offset)[0];
+            if (len == 0) {
+                tab                     = (item_t **)alloc(sizeof(voidp) * 2);
+                tab[0]                  = (item_t *)alloc(sizeof(item_t) * begin_capacity);
+                tab[1]                  = (nullptr);
+                ptr                     = (tab[0]);
+                len                     = (1);
+                new (ptr) item_t(value);
+                return;
             }
 
-            r.page    -= small_page_count;
-            r.offset  &= bpage_mask;
-            return typep(bpage[r.page] + r.offset)[0];
+            ii                          = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            mask                        = (uxx(1) << ii) - 1;
+            i                           = (ii - base);
+
+            if (need_new_page and len >= begin_capacity) {
+                if ((i & 1) == 0) { // i 是偶数页就需要分配新页表
+                    new_tab             = (item_t **)alloc(sizeof(voidp) * (i + 2));
+                    inc::copy(new_tab, tab, i);
+                    free(tab, sizeof(voidp) * i);
+                    tab                 = new_tab;
+                    tab[i]              = nullptr;
+                    tab[i + 1]          = nullptr;
+                    ptr                 = tab[i];
+                }
+
+                if (tab[i] == nullptr) {
+                    ptr                 = (item_t *)alloc(sizeof(item_t) * len);
+                    tab[i]              = (ptr);
+                }
+
+                len                    += (1);
+                new (ptr) item_t(value);
+                return;
+            }
+            else{
+                new (xref tab[i][len & mask]) item_t(value);
+                len                    += 1;
+            }
         }
 
-        uxx    bytes;
-        uxx    capcity;
-        u08 *  spage[small_page_count];
-        u08 *  bpage[1];
+        template<class item_t>
+        inline static void pop(item_t *** page_table_ptr, uxx * length, item_t * value, inc::can_alloc<void> alloc, inc::can_free<void> free){
+            auto & len                  = (length[0]);
+            auto & tab                  = (page_table_ptr[0]);
+            auto & val                  = (value[0]);
+            auto   new_tab              = (item_t **)nullptr;
+            auto   i                    = (uxx)0;
+            auto   ii                   = (uxx)0;
+            auto   mask                 = (uxx)0;
+            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+            auto   need_free_page       = (false);
 
-        static constexpr uxx bpage_size = uxx(1) << (step_exp + small_page_count);
-        static constexpr uxx bpage_mask = bpage_size - 1;
+            len                        -= (1);
+            need_free_page              = (len & (len - 1)) == 0;
+            ii                          = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            mask                        = (uxx(1) << ii) - 1;
+            i                           = (ii - base);
+            val                         = (tab[i][len & mask]);
+            tab[i][len & mask].~item_t();
 
-        #define xgen(name,type)                                                 \
-        struct{                                                                 \
-            type & operator [](uxx address){                                    \
-                return the.template access<type>(address * sizeof(type));       \
-            }                                                                   \
-        } name
-    public:
-        xgen(mu08, u08);
-        xgen(mu16, u16);
-        xgen(mu32, u32);
-        xgen(mu64, u64);
-        xgen(mi08, i08);
-        xgen(mi16, i16);
-        xgen(mi32, i32);
-        xgen(mi64, i64);
-        xgen(mf32, f32);
-        xgen(mf64, f64);
-        #undef xgen
+            if (not need_free_page) {
+                return;
+            }
+            if (len >= begin_capacity * 2 and (i & 1) == 0){
+                if (tab[i + 1]){
+                    free(tab[i + 1], sizeof(item_t) * len * 2);
+                }
+                free(tab[i]    , sizeof(item_t) * len);
+                new_tab = (item_t **)alloc(sizeof(voidp) * i);
+                inc::copy(new_tab, tab, i);
+                free(tab       , sizeof(voidp) * (i + 2));
+                tab                     = new_tab;
+                return;
+            }
+            if (len == 0){
+                free(tab[0]    , sizeof(item_t) * begin_capacity);
+                free(tab[1]    , sizeof(item_t) * begin_capacity);
+                free(tab       , sizeof(voidp) * (2));
+                tab                     = nullptr;
+            }
+        }
+
+        template<class item_t>
+        inline static item_t & access(item_t ** page_table, uxx length){
+            auto   len                  = (length);
+            auto   i                    = (uxx)0;
+            auto   ii                   = (uxx)0;
+            auto   mask                 = (uxx)0;
+            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+
+            len                        -= (1);
+            ii                          = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            mask                        = (uxx(1) << ii) - 1;
+            i                           = (ii - base);
+            auto & val                  = (page_table[i][len & mask]);
+            return val;
+        }
     };
-
 }
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::algo_mmu::addressing;
-    using ::mixc::algo_mmu::page_var;
-}
+xexport(mixc::algo_mmu::pagoff)
+xexport(mixc::algo_mmu::addressing)
+xexport(mixc::algo_mmu::var_array)
