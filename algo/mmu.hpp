@@ -79,22 +79,23 @@
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_free.hpp"
+#include"lock/atom_swap.hpp"
 #include"memop/copy.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_mmu {
-    struct pagoff{ uxx page, offset; };
+    struct pagoff{ uxx i_page, offset; };
 
     struct addressing{
         static pagoff var(uxx present_indicator, uxx address){
             uxx    mask = present_indicator & address;
             pagoff r;
-            r.page   = inc::index_of_last_set(mask) + 1;
+            r.i_page   = inc::index_of_last_set(mask) + 1;
             r.offset = address;
 
-            if (r.page != 0){
-                inc::bit_test_and_reset(& r.offset, r.page);
+            if (r.i_page != 0){
+                inc::bit_test_and_reset(& r.offset, r.i_page);
             }
             return r;
         }
@@ -102,7 +103,7 @@ namespace mixc::algo_mmu {
         static pagoff fixed(uxx present_indicator, uxx address){
             pagoff r;
             uxx mask = present_indicator ^ address;
-            r.page   = inc::index_of_last_set(mask);
+            r.i_page   = inc::index_of_last_set(mask);
             r.offset = address;
             return r;
         }
@@ -110,19 +111,26 @@ namespace mixc::algo_mmu {
 
     template<uxx begin_capacity = 1>
     struct var_array {
+        // begin_capactiy 需要二进制对齐
         static_assert((begin_capacity & (begin_capacity - 1)) == 0 and begin_capacity > 0);
 
         template<class item_t>
-        inline static void push(item_t *** page_table_ptr, uxx * length, item_t const & value, inc::can_alloc<void> alloc, inc::can_free<void> free){
+        inline static void push(
+            item_t ***              page_table_ptr, 
+            uxx    *                length, 
+            item_t const &          value, 
+            inc::can_alloc<void>    alloc, 
+            inc::can_free<void>     free){
+
             auto & len                  = (length[0]);
             auto & tab                  = (page_table_ptr[0]);
-            auto   need_new_page        = (len & (len - 1)) == 0;
+            auto   need_new_page        = (len & (len - 1)) == 0; // 2^n
             auto   new_tab              = (item_t **)nullptr;
             auto   ptr                  = (item_t *)nullptr;
+            auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   ii                   = (uxx)0;
             auto   mask                 = (uxx)0;
-            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+            auto   base                 = (inc::index_of_last_set(begin_capacity - 1)); // index_of_last_set(0) -> uxx(-1)
 
             if (len == 0) {
                 tab                     = (item_t **)alloc(sizeof(voidp) * 2);
@@ -134,24 +142,24 @@ namespace mixc::algo_mmu {
                 return;
             }
 
-            ii                          = (inc::index_of_last_set(len | (begin_capacity - 1)));
-            mask                        = (uxx(1) << ii) - 1;
-            i                           = (ii - base);
+            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i_page                      = (i - base);
+            mask                        = (uxx(1) << i) - 1;
 
             if (need_new_page and len >= begin_capacity) {
-                if ((i & 1) == 0) { // i 是偶数页就需要分配新页表
-                    new_tab             = (item_t **)alloc(sizeof(voidp) * (i + 2));
-                    inc::copy(new_tab, tab, i);
-                    free(tab, sizeof(voidp) * i);
+                if ((i_page & 1) == 0) { // i_page 是偶数页就需要分配新页表
+                    new_tab             = (item_t **)alloc(sizeof(voidp) * (i_page + 2));
+                    inc::copy(new_tab, tab, i_page);
+                    free(tab, sizeof(voidp) * i_page);
                     tab                 = new_tab;
-                    tab[i]              = nullptr;
-                    tab[i + 1]          = nullptr;
-                    ptr                 = tab[i];
+                    tab[i_page]         = nullptr;
+                    tab[i_page + 1]     = nullptr;
+                    ptr                 = tab[i_page];
                 }
 
-                if (tab[i] == nullptr) {
+                if (tab[i_page] == nullptr) {
                     ptr                 = (item_t *)alloc(sizeof(item_t) * len);
-                    tab[i]              = (ptr);
+                    tab[i_page]         = (ptr);
                 }
 
                 len                    += (1);
@@ -159,49 +167,55 @@ namespace mixc::algo_mmu {
                 return;
             }
             else{
-                new (xref tab[i][len & mask]) item_t(value);
+                new (xref tab[i_page][len & mask]) item_t(value);
                 len                    += 1;
             }
         }
 
         template<class item_t>
-        inline static void pop(item_t *** page_table_ptr, uxx * length, item_t * value, inc::can_alloc<void> alloc, inc::can_free<void> free){
+        inline static void pop(
+            item_t ***              page_table_ptr, 
+            uxx    *                length, 
+            item_t *                value, 
+            inc::can_alloc<void>    alloc, 
+            inc::can_free<void>     free){
+
             auto & len                  = (length[0]);
             auto & tab                  = (page_table_ptr[0]);
             auto & val                  = (value[0]);
             auto   new_tab              = (item_t **)nullptr;
+            auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   ii                   = (uxx)0;
             auto   mask                 = (uxx)0;
             auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
             auto   need_free_page       = (false);
 
             len                        -= (1);
             need_free_page              = (len & (len - 1)) == 0;
-            ii                          = (inc::index_of_last_set(len | (begin_capacity - 1)));
-            mask                        = (uxx(1) << ii) - 1;
-            i                           = (ii - base);
-            val                         = (tab[i][len & mask]);
-            tab[i][len & mask].~item_t();
+            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i_page                      = (i - base);
+            mask                        = (uxx(1) << i) - 1;
+            val                         = (tab[i_page][len & mask]);
+            tab[i_page][len & mask].~item_t();
 
             if (not need_free_page) {
                 return;
             }
-            if (len >= begin_capacity * 2 and (i & 1) == 0){
-                if (tab[i + 1]){
-                    free(tab[i + 1], sizeof(item_t) * len * 2);
+            if (len >= begin_capacity * 2 and i_page % 2 == 0){
+                if (tab[i_page + 1]){
+                    free(tab[i_page + 1], sizeof(item_t) * len * 2);
                 }
-                free(tab[i]    , sizeof(item_t) * len);
-                new_tab = (item_t **)alloc(sizeof(voidp) * i);
-                inc::copy(new_tab, tab, i);
-                free(tab       , sizeof(voidp) * (i + 2));
+                free(tab[i_page]    , sizeof(item_t) * len);
+                new_tab = (item_t **)alloc(sizeof(voidp) * i_page);
+                inc::copy(new_tab, tab, i_page);
+                free(tab       , sizeof(voidp) * (i_page + 2));
                 tab                     = new_tab;
                 return;
             }
             if (len == 0){
                 free(tab[0]    , sizeof(item_t) * begin_capacity);
                 free(tab[1]    , sizeof(item_t) * begin_capacity);
-                free(tab       , sizeof(voidp) * (2));
+                free(tab       , sizeof(voidp)  * 2);
                 tab                     = nullptr;
             }
         }
@@ -209,17 +223,62 @@ namespace mixc::algo_mmu {
         template<class item_t>
         inline static item_t & access(item_t ** page_table, uxx length){
             auto   len                  = (length);
+            auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   ii                   = (uxx)0;
             auto   mask                 = (uxx)0;
             auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
 
             len                        -= (1);
-            ii                          = (inc::index_of_last_set(len | (begin_capacity - 1)));
-            mask                        = (uxx(1) << ii) - 1;
-            i                           = (ii - base);
-            auto & val                  = (page_table[i][len & mask]);
+            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i_page                      = (i - base);
+            mask                        = (uxx(1) << i) - 1;
+            auto & val                  = (page_table[i_page][len & mask]);
             return val;
+        }
+
+        template<class item_t>
+        inline static void clear(item_t *** page_table_ptr, uxx * length, inc::can_free<void> free){
+            auto   len                  = inc::atom_swap<uxx>(xref length[0], 0);
+            auto & tab                  = (page_table_ptr[0]);
+
+            if (len == 0){
+                return;
+            }
+
+            auto   i_page               = (uxx)0;
+            auto   i                    = (uxx)0;
+            auto   mask                 = (uxx)0;
+            auto   current_length       = (uxx)begin_capacity;
+            auto   multi                = (uxx)1;
+            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+
+            len                        -= (1);
+            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            mask                        = (uxx(1) << i) - 1;
+            i_page                      = (i - base);
+
+            for(uxx i = 0; i < i_page; i++){
+                for(uxx j = 0; j < current_length; j++){
+                    tab[i][j].~item_t();
+                }
+
+                free(tab[i], sizeof(item_t) * current_length);
+                current_length          = begin_capacity * multi;
+                multi                  *= 2;
+            }
+
+            for(uxx i = 0; i <= (len & mask); i++){
+                tab[i_page][i].~item_t();
+            }
+            free(tab[i_page], sizeof(item_t) * current_length);
+
+            if (i_page % 2 == 0 and tab[i_page += 1] != nullptr){
+                if (i_page > 1){
+                    current_length     *= 2;
+                }
+                free(tab[i_page], sizeof(item_t) * current_length);
+            }
+            free(tab, sizeof(voidp) * (i_page + 1));
         }
     };
 }
