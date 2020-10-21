@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_alloc{
-    template<class item>
-    using can_alloc = inc::can_callback<item *(uxx length)>;
+    template<class item_t>
+    using can_alloc = inc::can_callback<item_t *(uxx)>;
 }
 
 #endif
