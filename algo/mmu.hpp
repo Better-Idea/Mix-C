@@ -221,18 +221,16 @@ namespace mixc::algo_mmu {
         }
 
         template<class item_t>
-        inline static item_t & access(item_t ** page_table, uxx length){
-            auto   len                  = (length);
+        inline static item_t & access(item_t ** page_table, uxx length, uxx index){
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)0;
             auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
 
-            len                        -= (1);
-            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i                           = (inc::index_of_last_set(index | (begin_capacity - 1)));
             i_page                      = (i - base);
             mask                        = (uxx(1) << i) - 1;
-            auto & val                  = (page_table[i_page][len & mask]);
+            auto & val                  = (page_table[i_page][index & mask]);
             return val;
         }
 
