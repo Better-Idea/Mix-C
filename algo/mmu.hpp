@@ -147,7 +147,7 @@ namespace mixc::algo_mmu {
             mask                        = (uxx(1) << i) - 1;
 
             if (need_new_page and len >= begin_capacity) {
-                if ((i_page & 1) == 0) { // i_page 是偶数页就需要分配新页表
+                if (i_page  % 2 == 0) { // i_page 是偶数页就需要分配新页表
                     new_tab             = (item_t **)alloc(sizeof(voidp) * (i_page + 2));
                     inc::copy(new_tab, tab, i_page);
                     free(tab, sizeof(voidp) * i_page);
