@@ -85,35 +85,69 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_mmu {
-    struct pagoff{ uxx i_page, offset; };
+    struct pagoff{ uxx page, offset; };
 
+    /* 结构：寻址器
+     * 描述：让多级页表在逻辑上连续
+     */
     struct addressing{
+        /* 函数：可变大小的内存寻址
+         * 参数：
+         * - present_indicator 为页存在标志。当 2^n 大小的页存在时，第 n 位为置位态
+         *   并且从第一个置位位到最后一个置位位之间必须是连续的 1
+         * - address 为逻辑地址
+         * 返回：
+         * - 页号+偏移的组合地址
+         */
         static pagoff var(uxx present_indicator, uxx address){
             uxx    mask = present_indicator & address;
             pagoff r;
-            r.i_page   = inc::index_of_last_set(mask) + 1;
+            r.page   = inc::index_of_last_set(mask) + 1;
             r.offset = address;
 
-            if (r.i_page != 0){
-                inc::bit_test_and_reset(& r.offset, r.i_page);
+            if (r.page != 0){
+                inc::bit_test_and_reset(& r.offset, r.page);
             }
             return r;
         }
 
+        /* 函数：固定大小的内存寻址
+         * 参数：
+         * - present_indicator 为页存在标志。当 2^n 大小的页存在时，第 n 位为置位态
+         *   所有存在的页的加起来表示一块固定大小的内存，此后存在位不能再修改
+         * - address 为逻辑地址
+         * 返回：
+         * - 页号+偏移的组合地址
+         */
         static pagoff fixed(uxx present_indicator, uxx address){
             pagoff r;
             uxx mask = present_indicator ^ address;
-            r.i_page   = inc::index_of_last_set(mask);
+            r.page   = inc::index_of_last_set(mask);
             r.offset = address;
             return r;
         }
     };
 
-    template<uxx begin_capacity = 1>
+    /* 结构：可变大小数组模板
+     * 参数：
+     * - initial_alloc_length 为数组的起始分配长度，需要二进制对齐且大于 0
+     *   只有第一次和第二次分配时，initial_alloc_length 的值不变，此后每次变为之前的两倍
+     * 注意：
+     * - 创建数组的在未添加元素时是没有分配内存的，只有在添加元素后才会分配内存
+     */
+    template<uxx initial_alloc_length = 1>
+    requires(
+        (initial_alloc_length & (initial_alloc_length - 1)) == 0 and initial_alloc_length > 0
+    )
     struct var_array {
-        // begin_capactiy 需要二进制对齐
-        static_assert((begin_capacity & (begin_capacity - 1)) == 0 and begin_capacity > 0);
-
+        /* 函数：压栈
+         * 参数：
+         * - page_table_ptr 为指向页表数组的指针
+         * - length 为数组长度指针
+         * - value 为要压栈的元素
+         * - alloc 为分配回调
+         * - free 为回收回调
+         */
         template<class item_t>
         inline static void push(
             item_t ***              page_table_ptr, 
@@ -130,11 +164,11 @@ namespace mixc::algo_mmu {
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)0;
-            auto   base                 = (inc::index_of_last_set(begin_capacity - 1)); // index_of_last_set(0) -> uxx(-1)
+            auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1)); // index_of_last_set(0) -> uxx(-1)
 
             if (len == 0) {
                 tab                     = (item_t **)alloc(sizeof(voidp) * 2);
-                tab[0]                  = (item_t *)alloc(sizeof(item_t) * begin_capacity);
+                tab[0]                  = (item_t *)alloc(sizeof(item_t) * initial_alloc_length);
                 tab[1]                  = (nullptr);
                 ptr                     = (tab[0]);
                 len                     = (1);
@@ -142,11 +176,11 @@ namespace mixc::algo_mmu {
                 return;
             }
 
-            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
             mask                        = (uxx(1) << i) - 1;
 
-            if (need_new_page and len >= begin_capacity) {
+            if (need_new_page and len >= initial_alloc_length) {
                 if (i_page  % 2 == 0) { // i_page 是偶数页就需要分配新页表
                     new_tab             = (item_t **)alloc(sizeof(voidp) * (i_page + 2));
                     inc::copy(new_tab, tab, i_page);
@@ -172,6 +206,14 @@ namespace mixc::algo_mmu {
             }
         }
 
+        /* 函数：退栈
+         * 参数：
+         * - page_table_ptr 为指向页表数组的指针
+         * - length 为数组长度指针
+         * - value 为要获取退栈元素的指针
+         * - alloc 为分配回调
+         * - free 为回收回调
+         */
         template<class item_t>
         inline static void pop(
             item_t ***              page_table_ptr, 
@@ -187,12 +229,12 @@ namespace mixc::algo_mmu {
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)0;
-            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+            auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
             auto   need_free_page       = (false);
 
             len                        -= (1);
             need_free_page              = (len & (len - 1)) == 0;
-            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
             mask                        = (uxx(1) << i) - 1;
             val                         = (tab[i_page][len & mask]);
@@ -201,39 +243,51 @@ namespace mixc::algo_mmu {
             if (not need_free_page) {
                 return;
             }
-            if (len >= begin_capacity * 2 and i_page % 2 == 0){
+            if (len >= initial_alloc_length * 2 and i_page % 2 == 0){
                 if (tab[i_page + 1]){
                     free(tab[i_page + 1], sizeof(item_t) * len * 2);
                 }
                 free(tab[i_page]    , sizeof(item_t) * len);
                 new_tab = (item_t **)alloc(sizeof(voidp) * i_page);
                 inc::copy(new_tab, tab, i_page);
-                free(tab       , sizeof(voidp) * (i_page + 2));
+                free(tab            , sizeof(voidp) * (i_page + 2));
                 tab                     = new_tab;
                 return;
             }
             if (len == 0){
-                free(tab[0]    , sizeof(item_t) * begin_capacity);
-                free(tab[1]    , sizeof(item_t) * begin_capacity);
+                free(tab[0]    , sizeof(item_t) * initial_alloc_length);
+                free(tab[1]    , sizeof(item_t) * initial_alloc_length);
                 free(tab       , sizeof(voidp)  * 2);
                 tab                     = nullptr;
             }
         }
 
+        /* 函数：访问
+         * 参数：
+         * - page_table 为页表数组
+         * - length 为数组长度
+         * - index 为要访问元素的索引
+         */
         template<class item_t>
         inline static item_t & access(item_t ** page_table, uxx length, uxx index){
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)0;
-            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+            auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
 
-            i                           = (inc::index_of_last_set(index | (begin_capacity - 1)));
+            i                           = (inc::index_of_last_set(index | (initial_alloc_length - 1)));
             i_page                      = (i - base);
             mask                        = (uxx(1) << i) - 1;
             auto & val                  = (page_table[i_page][index & mask]);
             return val;
         }
 
+        /* 函数：清空
+         * 参数：
+         * - page_table_ptr 为指向页表数组的指针
+         * - length 为数组长度指针
+         * - free 为回收回调
+         */
         template<class item_t>
         inline static void clear(item_t *** page_table_ptr, uxx * length, inc::can_free<void> free){
             auto   len                  = inc::atom_swap<uxx>(xref length[0], 0);
@@ -246,12 +300,12 @@ namespace mixc::algo_mmu {
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)0;
-            auto   current_length       = (uxx)begin_capacity;
+            auto   current_length       = (uxx)initial_alloc_length;
             auto   multi                = (uxx)1;
-            auto   base                 = (inc::index_of_last_set(begin_capacity - 1));
+            auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
 
             len                        -= (1);
-            i                           = (inc::index_of_last_set(len | (begin_capacity - 1)));
+            i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             mask                        = (uxx(1) << i) - 1;
             i_page                      = (i - base);
 
@@ -261,7 +315,7 @@ namespace mixc::algo_mmu {
                 }
 
                 free(tab[i], sizeof(item_t) * current_length);
-                current_length          = begin_capacity * multi;
+                current_length          = initial_alloc_length * multi;
                 multi                  *= 2;
             }
 
