@@ -21,6 +21,15 @@ namespace mixc::docker_priority_queue {
     )
         using mirror = inc::shared_array<inc::mirror<item_t>>;
 
+        priority_queue(){}
+
+        template<class finalx>
+        priority_queue(priority_queue<finalx, item_t> const & object) : 
+            items((inc::shared_array<item_t> &)object.items){}
+
+        priority_queue(::length initial_capacity) : 
+            items(initial_capacity){}
+
         void clear() {
             the_t{}.items.swap(xref items);
         }
@@ -39,6 +48,18 @@ namespace mixc::docker_priority_queue {
             inc::heap_root::pop(items, length, items[length - 1]);
             inc::cast<mirror>(items).pop();
             return r;
+        }
+
+        void swap(the_t * object){
+            items.swap(object);
+        }
+
+        final & operator= (decltype(nullptr)){
+            items = nullptr;
+        }
+
+        final & operator= (the_t const & object){
+            items = object.items;
         }
 
         xpubgetx(root, inc::transmitter<item_t>){
