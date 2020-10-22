@@ -183,13 +183,13 @@ namespace mixc::gc_ref{
             the = nullptr;
         }
     public:
-        final & operator = (the_t const & value){
-            if (value.mem != nullptr){ 
-                value.mem->owners_inc();
+        final & operator = (the_t const & object){
+            if (object.mem != nullptr){ 
+                object.mem->owners_inc();
             }
 
             // 当有多个线程对该对象赋值时，该原子操作可以保证正确性
-            token_mix_t * m   = atom_swap(& mem, value.mem);
+            token_mix_t * m   = atom_swap(& mem, object.mem);
             the_t         old;
             old.mem = m;
             return thex;
@@ -248,16 +248,16 @@ namespace mixc::gc_ref{
             return thex;
         }
 
-        bool operator == (the_t const & value) const {
-            return mem == value.mem;
+        bool operator == (the_t const & object) const {
+            return mem == object.mem;
         }
 
-        bool operator != (the_t const & value) const {
-            return mem != value.mem;
+        bool operator != (the_t const & object) const {
+            return mem != object.mem;
         }
 
-        void swap(the_t * values) {
-            values->mem = atom_swap(& mem, values->mem);
+        void swap(the_t * object) {
+            object->mem = atom_swap(& mem, object->mem);
         }
 
     protected:
