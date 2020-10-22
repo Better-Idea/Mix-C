@@ -78,15 +78,18 @@ void decode(){
 #define xuser mixc::io_private_tty
 #include<stdio.h>
 #include"algo/binary_search.hpp"
+#include"algo/mmu.hpp"
 #include"configure.hpp"
 #include"define/base_type.hpp"
 #include"docker/array.hpp"
+#include"interface/can_alloc.hpp"
 #include"io/private/tty.hpp"
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
 #include"lang/cxx/compare.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
+#include"memory/allocator.hpp"
 
 #if xis_windows
     #include<windows.h>
@@ -397,6 +400,59 @@ namespace xuser::origin{
         key     = decode(key_str, & rest);
         key_str = key_str.backward(key_str.length() - rest);
         return key;
+    }
+
+    template<class item_t>
+    void read_line(inc::can_alloc<item_t> allocx){
+        enum { initial_length = 64 };
+        using var = inc::var_array<initial_length>;
+        item_t      buf[initial_length];
+        item_t **   table       = nullptr;
+        uxx         length      = 0;
+        uxx         read_length = 0;
+        uxx         dummy;
+        auto        read        = sizeof(item_t) == 1 ? xref ReadConsoleA : xref ReadConsoleW;
+        auto        h           = GetStdHandle(STD_INPUT_HANDLE);
+        buf[initial_length - 1] = 0;
+
+        auto alloc = [](uxx bytes) -> voidp {
+            return inc::alloc<u08>(inc::memory_size{bytes});
+        };
+
+        auto free = [](voidp ptr, uxx bytes){
+            inc::free(ptr, inc::memory_size{bytes});
+        };
+
+        do {
+            read(h, buf, initial_length, LPDWORD(xref read_length), NULL);
+
+            if (buf[read_length - 1] == '\n'){
+                read_length         -= 2;
+            }
+            else if(buf[read_length - 1] == '\r'){
+                read_length         -= 1;
+                read(h, & dummy, 1, NULL, NULL);
+            }
+
+            for(uxx i = 0; i < read_length; i++){
+                var::push(xref table, xref length, buf[i], alloc, free);
+            }
+        }while(read_length == initial_length);
+
+        auto target = allocx(length);
+
+        for(uxx i = 0; i < length; i++){
+            target[i] = var::access(table, length, i);
+        }
+        var::clear(xref table, xref length, free);
+    }
+
+    void read_line(inc::can_alloc<char> alloc){
+        read_line<char>(alloc);
+    }
+
+    void read_line(inc::can_alloc<char16_t> alloc){
+        read_line<char16_t>(alloc);
     }
 
     constexpr u08 map[]{

@@ -3,15 +3,17 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_private_tty
-#include"define/base_type.hpp"
-#include"dumb/implicit.hpp"
+#include"interface/can_alloc.hpp"
 #include"io/private/tty_key.hpp"
 #include"io/private/tty_color_t.hpp"
+#include"memory/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_private_tty::origin{
     extern void             print_core(asciis str, uxx length);
     extern inc::tty_key     read_key(bool echo);
+    extern void             read_line(inc::can_alloc<char> alloc);
+    extern void             read_line(inc::can_alloc<char16_t> alloc);
     extern inc::tty_color_t backcolor();
     extern inc::tty_color_t forecolor();
     extern bool             cursor_visiable();
