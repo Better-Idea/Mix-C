@@ -1,76 +1,63 @@
 #ifndef xpack_docker_priority_queue
 #define xpack_docker_priority_queue
-    #pragma push_macro("xuser")
-    #undef  xuser
-    #define xuser mixc::docker_priority_queue
-    #include"algo/heap_root.hpp"
-    #include"define/base_type.hpp"
-    #include"docker/transmitter.hpp"
-    #include"docker/shared_array/pushpop.hpp"
-    #include"docker/shared_array.hpp"
-    #include"docker/private/adapter.pushpop.hpp"
-    #include"dumb/struct_type.hpp"
-    #include"dumb/mirror.hpp"
-    #include"gc/self_management.hpp"
-    #include"macro/xstruct.hpp"
-    #include"memop/cast.hpp"
-    #pragma pop_macro("xuser")
+#pragma push_macro("xuser")
+#undef  xuser
+#define xuser mixc::docker_priority_queue
+#include"algo/heap_root.hpp"
+#include"docker/shared_array/stacklize.hpp"
+#include"docker/shared_array.hpp"
+#include"docker/transmitter.hpp"
+#include"dumb/mirror.hpp"
+#include"macro/xis_nullptr.hpp"
+#include"memop/cast.hpp"
+#include"mixc.hpp"
+#pragma pop_macro("xuser")
 
-    namespace mixc::docker_priority_queue {
-        //template<class item_t> struct priority_queue_t;
-        //using item_t = int;
-        //template<>
-        //struct priority_queue_t<item_t> : inc::self_management {
+namespace mixc::docker_priority_queue {
+    template<class final, class item_t>
+    xstruct(
+        xtmpl(priority_queue, final, item_t),
+        xprif(items, inc::shared_array<item_t>)
+    )
+        using mirror = inc::shared_array<inc::mirror<item_t>>;
 
-        template<class item_t>
-        xstruct(
-            xtmpl(priority_queue_t, items_t),
-            xpubb(inc::self_management),
-            xprif(items, inc::shared_array<item_t>)
+        void clear() {
+            the_t{}.items.swap(xref items);
+        }
+
+        void push(item_t const & value) {
+            // 本次 push 无需拷贝构造
+            inc::cast<mirror>(items).push(inc::mirror<item_t>{});
+
+            // 本次 push 默认内部拷贝构造
+            inc::heap_root::push(items, items.length() - 1, value);
+        }
+
+        inc::transmitter<item_t> pop() {
+            auto length = items.length();
+            inc::transmitter<item_t> r = items[0];
+            inc::heap_root::pop(items, length, items[length - 1]);
+            inc::cast<mirror>(items).pop();
+            return r;
+        }
+
+        xpubgetx(root, inc::transmitter<item_t>){
+            return items[0];
+        }
+
+        xpubgetx(length, uxx){
+            return items.length();
+        }
+
+        xpubgetx(is_empty, bool){
+            return items.length() == 0;
+        }
+
+        xis_nullptr(
+            items == nullptr
         )
-        private:
-            docker_t & origin() const {
-                return inc::cast<docker_t>(items);
-            }
-        public:
-            priority_queue_t() = default;
-            priority_queue_t(uxx start_capacity) : 
-                items(::length(start_capacity)){
-            }
-
-            void clear() {
-                items.clear();
-            }
-
-            uxx length() const {
-                return items.length();
-            }
-
-            item_t & root() {
-                return items[0];
-            }
-            
-            item_t const & root() const {
-                return items[0];
-            }
-
-            void push(item_t const & value) {
-                items.push(value);
-                inc::heap_root<item_t>::push(items, items.length() - 1, value);
-            }
-
-            inc::transmitter<item_t> pop() {
-                auto length = items.length();
-                inc::transmitter<item_t> r = items[0];
-                inc::heap_root<item_t>::pop(items, length, items[length - 1]);
-                items.pop();
-                return r;
-            }
-        };
-
-        template<class final, class item_t>
-        using priority_queue = inc::pushpop_t<final, priority_queue_t<item_t>, item_t>;
-    }
+    };
+}
 #endif
 
 #define xusing_docker_name  ::mixc::docker_priority_queue
