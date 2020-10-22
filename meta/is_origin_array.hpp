@@ -14,7 +14,7 @@ namespace mixc::meta_is_origin_array{
     struct meta<a[length]>{ enum { result = true }; };
 
     template<class a>
-    concept is_origin_array = meta<a>::result;
+    concept is_origin_array = bool(meta<a>::result);
 }
 
 #endif
