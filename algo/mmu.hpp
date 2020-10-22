@@ -163,7 +163,7 @@ namespace mixc::algo_mmu {
             auto   ptr                  = (item_t *)nullptr;
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   mask                 = (uxx)0;
+            auto   mask                 = (uxx)initial_alloc_length - 1;
             auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1)); // index_of_last_set(0) -> uxx(-1)
 
             if (len == 0) {
@@ -178,7 +178,7 @@ namespace mixc::algo_mmu {
 
             i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
-            mask                        = (uxx(1) << i) - 1;
+            mask                       |= (uxx(1) << i) - 1;
 
             if (need_new_page and len >= initial_alloc_length) {
                 if (i_page  % 2 == 0) { // i_page 是偶数页就需要分配新页表
@@ -202,7 +202,7 @@ namespace mixc::algo_mmu {
             }
             else{
                 new (xref tab[i_page][len & mask]) item_t(value);
-                len                    += 1;
+                len                    += (1);
             }
         }
 
@@ -228,7 +228,7 @@ namespace mixc::algo_mmu {
             auto   new_tab              = (item_t **)nullptr;
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   mask                 = (uxx)0;
+            auto   mask                 = (uxx)initial_alloc_length - 1;
             auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
             auto   need_free_page       = (false);
 
@@ -236,7 +236,7 @@ namespace mixc::algo_mmu {
             need_free_page              = (len & (len - 1)) == 0;
             i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
-            mask                        = (uxx(1) << i) - 1;
+            mask                       |= (uxx(1) << i) - 1;
             val                         = (tab[i_page][len & mask]);
             tab[i_page][len & mask].~item_t();
 
@@ -272,12 +272,12 @@ namespace mixc::algo_mmu {
         inline static item_t & access(item_t ** page_table, uxx length, uxx index){
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   mask                 = (uxx)0;
+            auto   mask                 = (uxx)initial_alloc_length - 1;
             auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
 
             i                           = (inc::index_of_last_set(index | (initial_alloc_length - 1)));
             i_page                      = (i - base);
-            mask                        = (uxx(1) << i) - 1;
+            mask                       |= (uxx(1) << i) - 1;
             auto & val                  = (page_table[i_page][index & mask]);
             return val;
         }
@@ -299,14 +299,14 @@ namespace mixc::algo_mmu {
 
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
-            auto   mask                 = (uxx)0;
+            auto   mask                 = (uxx)initial_alloc_length - 1;
             auto   current_length       = (uxx)initial_alloc_length;
             auto   multi                = (uxx)1;
             auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
 
             len                        -= (1);
             i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
-            mask                        = (uxx(1) << i) - 1;
+            mask                       |= (uxx(1) << i) - 1;
             i_page                      = (i - base);
 
             for(uxx i = 0; i < i_page; i++){
