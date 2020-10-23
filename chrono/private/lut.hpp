@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::chrono_private_lut
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_lut{
@@ -12,6 +12,4 @@ namespace mixc::chrono_private_lut{
 }
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::chrono_private_lut;
-}
+xexport_space(mixc::chrono_private_lut)
