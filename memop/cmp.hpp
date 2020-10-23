@@ -3,11 +3,11 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_cmp
-#include"define/base_type.hpp"
 #include"meta/is_class.hpp"
 #include"meta/is_enum.hpp"
 #include"meta/is_union.hpp"
 #include"memop/seqlize.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_cmp{
@@ -32,28 +32,28 @@ namespace mixc::memop_cmp{
     }
 }
 
-#define xcmpop(type)                                                    \
-inline bool operator >  (type const & left, type const & right){        \
-    return mixc::memop_cmp::cmp(left, right) > 0;                       \
-}                                                                       \
-inline bool operator >= (type const & left, type const & right){        \
-    return mixc::memop_cmp::cmp(left, right) >= 0;                      \
-}                                                                       \
-inline bool operator <  (type const & left, type const & right){        \
-    return mixc::memop_cmp::cmp(left, right) <  0;                      \
-}                                                                       \
-inline bool operator <= (type const & left, type const & right){        \
-    return mixc::memop_cmp::cmp(left, right) <= 0;                      \
-}                                                                       \
-inline bool operator == (type const & left, type const & right){        \
-    return mixc::memop_cmp::cmp(left, right) == 0;                      \
-}                                                                       \
-inline bool operator != (type const & left, type const & right){        \
-    return mixc::memop_cmp::cmp(left, right) != 0;                      \
+#define __xcmpop__(friend_token,...)                                                            \
+friend_token inline bool operator >  (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
+    return mixc::memop_cmp::cmp(left, right) > 0;                                               \
+}                                                                                               \
+friend_token inline bool operator >= (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
+    return mixc::memop_cmp::cmp(left, right) >= 0;                                              \
+}                                                                                               \
+friend_token inline bool operator <  (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
+    return mixc::memop_cmp::cmp(left, right) <  0;                                              \
+}                                                                                               \
+friend_token inline bool operator <= (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
+    return mixc::memop_cmp::cmp(left, right) <= 0;                                              \
+}                                                                                               \
+friend_token inline bool operator == (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
+    return mixc::memop_cmp::cmp(left, right) == 0;                                              \
+}                                                                                               \
+friend_token inline bool operator != (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
+    return mixc::memop_cmp::cmp(left, right) != 0;                                              \
 }
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_cmp::cmp;
-}
+#define xcmpop(...)             __xcmpop__(,__VA_ARGS__)
+#define xcmpop_friend(...)      __xcmpop__(friend,__VA_ARGS__)
 
+xexport(mixc::memop_cmp::cmp)
