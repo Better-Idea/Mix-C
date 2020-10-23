@@ -87,6 +87,4 @@ namespace mixc::algo_distinct::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::algo_distinct::origin;
-}
+xexport_space(mixc::algo_distinct::origin)

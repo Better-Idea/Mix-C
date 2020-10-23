@@ -4,13 +4,13 @@
 #undef  xuser
 #define xuser mixc::algo_sort
 #include"algo/heap_root.hpp"
-#include"define/base_type.hpp"
 #include"docker/bit_indicator.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xcmp.hpp"
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_sort{
@@ -113,6 +113,4 @@ namespace mixc::algo_sort{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::algo_sort::sort;
-}
+xexport(mixc::algo_sort::sort)

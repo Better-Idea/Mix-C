@@ -15,7 +15,6 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_heap_root
-#include"define/base_type.hpp"
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
 #include"interface/can_compare.hpp"
@@ -24,6 +23,7 @@
 #include"memop/copy.hpp"
 #include"memory/new.hpp"
 #include"meta/item_origin_of.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_heap_root{
@@ -159,6 +159,4 @@ namespace mixc::algo_heap_root::origin::heap_root{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::algo_heap_root::origin;
-}
+xexport_space(mixc::algo_heap_root::origin)

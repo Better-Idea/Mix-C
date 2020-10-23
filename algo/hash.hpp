@@ -13,10 +13,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_hash
-#include"define/base_type.hpp"
 #include"memop/addressof.hpp"
 #include"instruction/ring_shift_left.hpp"
 #include"instruction/count_of_set.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_hash{
@@ -59,6 +59,4 @@ namespace mixc::algo_hash{
 }
 #endif
 
-namespace xuser::inc{
-    using ::mixc::algo_hash::hash;
-}
+xexport(mixc::algo_hash::hash)

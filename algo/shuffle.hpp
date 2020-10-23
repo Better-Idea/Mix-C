@@ -3,11 +3,11 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_shuffle
-#include"define/base_type.hpp"
 #include"interface/unified_seq.hpp"
 #include"math/random.hpp"
 #include"memop/addressof.hpp"
 #include"memop/swap.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_shuffle{
@@ -53,6 +53,4 @@ namespace mixc::algo_shuffle{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::algo_shuffle::shuffle;
-}
+xexport(mixc::algo_shuffle::shuffle)

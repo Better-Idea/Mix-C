@@ -3,12 +3,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_insert
-#include"define/base_type.hpp"
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
 #include"meta/item_origin_of.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_insert{
@@ -108,6 +108,4 @@ namespace mixc::algo_insert{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::algo_insert::insert;
-}
+xexport(mixc::algo_insert::insert)

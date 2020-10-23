@@ -3,13 +3,13 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_remove
-#include"define/base_type.hpp"
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_remove{
@@ -87,6 +87,4 @@ namespace mixc::algo_remove{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::algo_remove::remove;
-}
+xexport(mixc::algo_remove::remove)
