@@ -265,11 +265,10 @@ namespace mixc::algo_mmu {
         /* 函数：访问
          * 参数：
          * - page_table 为页表数组
-         * - length 为数组长度
          * - index 为要访问元素的索引
          */
         template<class item_t>
-        inline static item_t & access(item_t ** page_table, uxx length, uxx index){
+        inline static item_t & access(item_t ** page_table, uxx index){
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)initial_alloc_length - 1;

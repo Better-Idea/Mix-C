@@ -442,7 +442,7 @@ namespace xuser::origin{
         auto target = allocx(length);
 
         for(uxx i = 0; i < length; i++){
-            target[i] = var::access(table, length, i);
+            target[i] = var::access(table, i);
         }
         var::clear(xref table, xref length, free);
     }
