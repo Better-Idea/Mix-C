@@ -95,6 +95,10 @@ namespace mixc::extern_gui_paint_masker_mini::origin {
             }
         }
 
+        void skip_mask_step(){
+            idc.clear();
+        }
+
         xpubgetx(current_block_index, uxx){
             return i;
         }
