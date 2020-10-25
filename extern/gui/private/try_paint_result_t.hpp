@@ -15,6 +15,4 @@ namespace mixc::extern_gui_private_try_paint_result_t {
 
 #endif
 
-namespace xuser::inc {
-    using ::mixc::extern_gui_private_try_paint_result_t::try_paint_result_t;
-}
+xexport(mixc::extern_gui_private_try_paint_result_t::try_paint_result_t)
