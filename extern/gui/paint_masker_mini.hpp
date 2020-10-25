@@ -14,6 +14,9 @@ namespace mixc::extern_gui_paint_masker_mini::origin {
     using inc::try_paint_result_t;
 
     template<uxx width, uxx height, uxx rows, uxx columns>
+    requires(
+        height % rows == 0 and width % columns == 0
+    )
     xstruct(
         xtmpl(paint_masker_mini, width, height, rows, columns),
         xpubb(inc::addressing<width, height>)
