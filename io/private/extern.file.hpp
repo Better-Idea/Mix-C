@@ -100,7 +100,7 @@ namespace mixc::io_file::origin{
 
     bool file::is_exist() const{
         auto word = GetFileAttributesA(the.path);
-        return word != INVALID_FILE_ATTRIBUTES;
+        return word != INVALID_FILE_ATTRIBUTES and 0 == (word & FILE_ATTRIBUTE_DIRECTORY);
     }
 }
 

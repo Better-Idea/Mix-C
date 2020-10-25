@@ -3,10 +3,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_file
-#include"mixc.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/seqptr.hpp"
-#include"macro/xstruct.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_file::origin{
@@ -61,6 +60,4 @@ namespace mixc::io_file::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::io_file::origin;
-}
+xexport_space(mixc::io_file::origin)
