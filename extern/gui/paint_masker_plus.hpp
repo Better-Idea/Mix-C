@@ -3,12 +3,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_gui_paint_masker_plus
-#include"mixc.hpp"
 #include"docker/bit_indicator.hpp"
 #include"extern/gui/private/addressing.hpp"
-#include"extern/gui/private/try_draw_result_t.hpp"
+#include"extern/gui/private/try_paint_result_t.hpp"
 #include"math/index_system.hpp"
 #include"memop/swap.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_gui_paint_masker_plus::origin {
@@ -71,6 +71,4 @@ namespace mixc::extern_gui_paint_masker_plus::origin {
 
 #endif
 
-namespace xuser::inc {
-    using namespace ::mixc::extern_gui_paint_masker_plus::origin;
-}
+xexport_space(mixc::extern_gui_paint_masker_plus::origin)
