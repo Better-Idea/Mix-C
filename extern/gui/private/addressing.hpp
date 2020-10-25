@@ -8,7 +8,9 @@
 
 namespace mixc::extern_gui_private_addressing::origin {
     template<uxx arg_width, uxx arg_height>
-    struct addressing{
+    xstruct(
+        xtmpl(addressing, arg_width, arg_height)
+    )
     protected:
         uxx operator()(uxx x, uxx y){
             return y * arg_width + x;
