@@ -27,7 +27,7 @@ namespace mixc::draft_file_system{
         u32                 bytes;
         u32                 create_time;
         u32                 modify_time;
-        u32                 reserved        : 24;
+        u32                 reserved        : 27;
         u32                 write_times     : 5;
         page_group          content;
 
@@ -42,7 +42,7 @@ namespace mixc::draft_file_system{
 
     struct direcotry_header{
         u32                 create_time;
-        u32                 reserved        : 24    = 0;
+        u32                 reserved        : 25    = 0;
         u32                 write_times     : 6     = 0;
         u32                 reservedx[6]            = {0};
 
@@ -132,10 +132,10 @@ namespace mixc::draft_file_system{
 
             inc::copy_with_operator(header.name, disk_name, len);
 
-            write(page_of_file_system_header, xref header, sizeof(header));
-            write(page_of_entry, xref entry, sizeof(entry));
-            write(page_of_allocator, xref allocator, sizeof(allocator));
             write(page_of_root_dir, xref root_dir, sizeof(root_dir));
+            write(page_of_allocator, xref allocator, sizeof(allocator));
+            write(page_of_entry, xref entry, sizeof(entry));
+            write(page_of_file_system_header, xref header, sizeof(header));
             return success;
         }
 
