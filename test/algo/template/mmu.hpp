@@ -24,7 +24,7 @@ for(uxx i = 0; i < xinitial_length * 32; i++){
         xassert_eq(j + 1, length);
     }
     for(uxx j = 0; j <= i; j++){
-        auto & current = var_array<xinitial_length>::access(table, length, j);
+        auto & current = var_array<xinitial_length>::access(table, j);
         xassert_eq(j, current.value);
     }
 
@@ -40,7 +40,7 @@ for(uxx i = 0; i < xinitial_length * 32; i++){
         var_array<xinitial_length>::push(xref table, xref length, meta, alloc, free);
     }
     for(uxx j = 0; j <= i; j++){
-        auto & current = var_array<xinitial_length>::access(table, length, j);
+        auto & current = var_array<xinitial_length>::access(table, j);
         xassert_eq(j, current.value);
     }
 
