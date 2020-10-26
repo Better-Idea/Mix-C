@@ -164,7 +164,6 @@ namespace mixc::math_tan{
 #include"math/const.hpp"
 
 namespace mixc::math_atan{
-    #define xuse_math_atan_lut7x16 1
     #if xuse_math_atan_lut7x16
     constexpr auto step = 4;
     constexpr f64  lut[][16] = {

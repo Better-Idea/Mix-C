@@ -18,6 +18,12 @@
     #error "you can just select one lookup table policy for math::tan"
 #endif
 
+#define xuse_math_atan_lut7x16      1
+#define xuse_math_atan_lut4x256     0
+#if xuse_math_atan_lut7x16 + xuse_math_atan_lut4x256 != 1
+    #error "you can just select one lookup table policy for math::atan"
+#endif
+
 #define xuse_math_ln_lut6x16        1
 #define xuse_math_ln_lut3x256       0
 
