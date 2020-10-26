@@ -1,5 +1,6 @@
 #include"chrono/private/extern.+.hpp"
 #include"instruction/private/extern.isa.hpp"
+#include"io/private/extern.dir.hpp"
 #include"io/private/extern.file.hpp"
 #include"io/private/extern.tty.hpp"
 #include"lock/private/extern.atom.hpp"
