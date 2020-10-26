@@ -80,11 +80,11 @@ namespace mixc::io_tty::origin{
             write(list..., '\n');
         }
 
-        void read_line(inc::can_alloc<char> alloc){
+        void read_line(inc::can_alloc<char> alloc) const {
             inc::read_line(alloc);
         }
 
-        void read_line(inc::can_alloc<char16_t> alloc){
+        void read_line(inc::can_alloc<char16_t> alloc) const {
             inc::read_line(alloc);
         }
     $
