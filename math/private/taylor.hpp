@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::math_private_taylor
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 // 生成 4x6 常量系数
@@ -28,7 +28,7 @@ public:                                                             \
 template<class float_t>                                             \
 constexpr float_t coe_ ## name<float_t>::value(uxx n)
 
-namespace mixc::math_private_taylor::imm{
+namespace mixc::math_private_taylor::adv::imm{
     template<class type>
     inline constexpr type factorial(type n){
         if (n <= 1){
@@ -98,10 +98,5 @@ namespace mixc::math_private_taylor::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace mixc::math_private_taylor::origin;
-}
-
-namespace xuser::imm{
-    using namespace mixc::math_private_taylor::imm;
-}
+xexport_space(mixc::math_private_taylor::origin)
+xexport_space_adv(mixc::math_private_taylor::adv)
