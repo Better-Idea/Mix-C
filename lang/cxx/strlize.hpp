@@ -205,7 +205,7 @@ namespace mixc::lang_cxx_strlize{
             // 这里用 auto 就好了，m 可能是 mf32 或 mf64，所以返回值类型不是固定的
             auto rd             = m.real_dec();
             auto re             = m.real_exp();
-            auto dec_bits       = 0;
+            auto dec_bits       = uxx(0);
             f.full              = re > 0 ? rd << re : rd >> -re;
 
             do{

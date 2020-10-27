@@ -172,7 +172,7 @@ private:
     static constexpr uxx multi         = 4;
     static constexpr uxx start_capcity = 16;
 
-    /*构造/析构区*/
+    // 构造/析构区
 public:
     hashmap() : hashmap(start_capcity){}
     hashmap(uxx start_capcity) : hashmap(start_capcity, inc::random<uxx>()){}
@@ -207,7 +207,7 @@ protected:
         }
     }
 
-    /*接口区*/
+    // 接口区
 public:
     #ifdef xarg_has_val_t
         xitr_foreach(key_t &, val_t &)
@@ -318,7 +318,7 @@ public:
         return get(key) != inc::nullref;
     }
 
-    /* 属性区 */
+    // 属性区
 public:
     xpubgetx(is_empty, bool){
         return length() == 0;
@@ -328,7 +328,7 @@ public:
         return count;
     }
 
-    /*私有区*/
+    // 私有区
 private:
     uxx addressing(key_t const & key) const {
         auto hash  = inc::hash(key, seed);
@@ -374,7 +374,8 @@ private:
                 new_head.next  = next;
             }
 
-            for(old_head->next = old_head/*逻辑清空，next 指向首节点*/; nullptr != cur;){
+            // 逻辑清空，next 指向首节点
+            for(old_head->next = old_head; nullptr != cur;){
                 auto   next    = cur->next; 
                 auto   index   = map.addressing(cur->key);
                 auto & node    = map.nodes[index];

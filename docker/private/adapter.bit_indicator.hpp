@@ -21,7 +21,11 @@ namespace mixc::docker_adapter_bit_indicator::origin{
     // 64bit 字长 -> 2^6
     // 32bit 字长 -> 2^5
     // more todo ...
-    static constexpr uxx step_exp = xis_os64 ? 6 : 5;
+    #if xis_os64
+    static constexpr uxx step_exp = 6;
+    #else
+    static constexpr uxx step_exp = 5;
+    #endif
 
     // 机器位宽
     static constexpr uxx bwidth   = 1u << step_exp;

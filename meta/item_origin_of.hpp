@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::meta_item_origin_of
+#include"configure.hpp"
 #include"define/base_type.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta/remove_const.hpp"
@@ -13,7 +14,7 @@ namespace mixc::meta_item_origin_of{
     using item_origin_of = 
         inc::remove_const<
             inc::remove_ref<
-                decltype(((seq_t *)nullptr)[0][0])
+                decltype(seq_t()[0])
             >
         >;
 }

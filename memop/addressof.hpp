@@ -10,9 +10,9 @@ namespace mixc::memop_addressof{
     template<class type> 
     inline type * addressof(type const & value){
         struct inner{
-            inner(type const & value) : value(value){ }
-            type const & value;
-        } got(value);
+            inner(type & value) : value(value){ }
+            type & value;
+        } got((type &)value);
         return (*(type **)& got);
     }
 
