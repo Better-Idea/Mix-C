@@ -81,7 +81,7 @@ namespace mixc::algo_binary_search{
         else {
             result.less_then_target = uxx(backup);
 
-            if (backup + 1 < length) {
+            if (u64(backup + 1) < u64(length)) {
                 result.grater_then_target = uxx(backup + 1);
             }
         }
