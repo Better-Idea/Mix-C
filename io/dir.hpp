@@ -33,7 +33,7 @@ namespace mixc::io_dir::origin{
                 uxx    index = 0;
                 loop_t state = loop_t::go_on;
 
-                dir::foreach_template(for_file/*for_file*/, path, [&](asciis path){
+                dir::foreach_template(for_file, path, [&](asciis path){
                     xitr_switch(mode, index, state, invoke, path);
                     return state;
                 });

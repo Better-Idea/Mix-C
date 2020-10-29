@@ -9,6 +9,7 @@
 
 #if xis_windows
 #include<Windows.h>
+#pragma comment(lib, "Shell32.lib")
 
 namespace mixc::io_dir::origin{
     void dir::remove() const{
@@ -68,66 +69,9 @@ namespace mixc::io_dir::origin{
 }
 
 #else
-#include<unistd.h>
-#include<sys/dir.h>
-#include<sys/stat.h>
+
 namespace mixc::io_dir::origin{
-    dir::dir() : fd(-1), path("") {}
-
-    u64 dir::length() const {
-        struct stat sta = {};
-        stat(path, & sta);
-        return sta.st_size;
-    }
-
-    dir & dir::open(asciis path, access_mode_t mode, bstate_t * result) const {
-        i32 type = 0;
-
-        switch(mode){
-        case access_mode_t::read_only:  type = O_RDONLY; break;
-        case access_mode_t::write_only: type = O_WRONLY; break;
-        case access_mode_t::read_write: type = O_RDWR;   break;
-        }
-
-        the.close();
-        the.path = path;
-        the.fd   = ::open(path, type);
-
-        if (result != nullptr){
-            result[0] = the.fd == -1 ? bstate_t::fail : bstate_t::success;
-        }
-        return thex;
-    }
-
-    dir & dir::close() const {
-        if (atom_swap<ixx>(& fd, -1) >= 0){
-            ::close(fd);
-        }
-        return thex;
-    }
-
-    dir & dir::forward(u64 offset) const {
-        ::lseek(the.fd, 0 - offset, SEEK_CUR);
-        return thex;
-    }
-
-    dir & dir::backward(u64 offset) const {
-        ::lseek(the.fd, offset, SEEK_CUR);
-        return thex;
-    }
-
-    dir & dir::seek(i64 offset) const {
-        ::lseek(the.fd, offset, offset > 0 ? SEEK_SET : SEEK_END);
-        return thex;
-    }
-
-    uxx dir::read(voidp buffer, uxx bytes) const {
-        return ::read(the.fd, buffer, bytes);
-    }
-
-    uxx dir::write(void const * buffer, uxx bytes) const {
-        return ::write(the.fd, buffer, bytes);
-    }
+    
 }
 
 #endif
