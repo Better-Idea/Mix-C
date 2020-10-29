@@ -4,23 +4,23 @@
 #undef  xuser
 #define xuser mixc::meta_item_origin_of
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"meta/is_indexable.hpp"
+#include"meta/item_of.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta/remove_const.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_origin_of{
-    template<class seq_t>
+    template<inc::is_indexable seq_t>
     using item_origin_of = 
         inc::remove_const<
             inc::remove_ref<
-                decltype(seq_t()[0])
+                inc::item_of<seq_t>
             >
         >;
 }
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_item_origin_of::item_origin_of;
-}
+xexport(mixc::meta_item_origin_of::item_origin_of)
