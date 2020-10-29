@@ -18,7 +18,9 @@
 #include"memop/fill.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/is_based_on.hpp"
+#include"meta/is_origin_array.hpp"
 #include"meta/is_ptr.hpp"
+#include"meta/item_origin_of.hpp"
 #include"meta/remove_ptr.hpp"
 #include"meta/unsigned_type.hpp"
 #include"mixc.hpp"
@@ -27,27 +29,27 @@
 
 namespace mixc::lang_cxx_ph{
     /*
-        * h{}  hex
-        * H{}  upper hex 
-        * zh{} hex with leading zero
-        * zH{} upper hex with leading zero
-        * x{}  hex with 0x prefix
-        * X{}  upper hex with 0x prefix
-        * zx{} hex with 0x prefix and leading zero
-        * zX{} upper hex with 0x prefix and leading zero
-        * 
-        * v{}  normal multi-value
-        * f{}  decimal(pending)
-        * 
-        * b{}  bin
-        * zb{} bin with leading zero
-        * 
-        * .l() align left
-        * .r() align right
-        * .c() align center
-        * 
-        * more... to be continue
-        */
+     * h{}  hex
+     * H{}  upper hex 
+     * zh{} hex with leading zero
+     * zH{} upper hex with leading zero
+     * x{}  hex with 0x prefix
+     * X{}  upper hex with 0x prefix
+     * zx{} hex with 0x prefix and leading zero
+     * zX{} upper hex with 0x prefix and leading zero
+     * 
+     * v{}  normal multi-value
+     * f{}  decimal(pending)
+     * 
+     * b{}  bin
+     * zb{} bin with leading zero
+     * 
+     * .l() align left
+     * .r() align right
+     * .c() align center
+     * 
+     * more... to be continue
+     */
 
     xstruct(
         xname(place_holder_group)
@@ -201,6 +203,7 @@ namespace mixc::lang_cxx_ph{
         using base_t = v<final, args...>;
 
         v(){}
+
         v(a0 const & first, args const & ... rest) : 
             base_t(rest...), item(first) {
         }
@@ -217,7 +220,16 @@ namespace mixc::lang_cxx_ph{
             return buf;
         }
     private:
-        a0 item;
+        static auto ph_type(){
+            if constexpr (inc::is_origin_array<a0>){
+                return (const inc::item_origin_of<a0> *)nullptr;
+            }
+            else{
+                return a0();
+            }
+        }
+
+        decltype(ph_type()) item;
     };
 
     template<class final>
@@ -263,9 +275,6 @@ namespace mixc::lang_cxx_ph{
 
     #define xoct(name,prefix,leading_zero,lut)      \
         xnum(name,inc::unsigned_type<type>,inc::numeration::oct,prefix,leading_zero,lut)
-
-    #define xstr(type,ptr) template<uxx n> struct v<type[n]> : v<ptr>{ using v<ptr>::v; }
-
 }
 
 namespace mixc::lang_cxx_ph::ph{
@@ -299,9 +308,6 @@ namespace mixc::lang_cxx_ph::ph{
             return base_t::template output<item_t>(0);
         }
     };
-
-    xstr(char, asciis);
-    xstr(char16_t, words);
 }
 
 namespace mixc::lang_cxx_ph{
@@ -367,7 +373,6 @@ namespace mixc::lang_cxx_ph::ph{ // place_holder
     };
 }
 
-#undef  xstr
 #undef  xbin
 #undef  xoct
 #undef  xhex
