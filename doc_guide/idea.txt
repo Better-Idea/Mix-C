@@ -1,0 +1,36 @@
+## 反射
+- 字段
+- 属性
+- 函数
+- 基类
+
+### 筛选模式
+```
+一个字段/基类可以有 public/protected/private 三种修饰符，我们希望可以通过 xtypeid 获取指定修饰符的列表。
+
+enum {
+    group_zero,
+    group_one,
+};
+
+// 默认使用的是 group_zero（0）组的字段
+// 得到公有和受保护的字段列表
+xtypeid(some_struct).fields<is_pubic, is_protected>;
+
+// 得到标记为 group_one 公有的字段列表
+xtypeid(some_struct).fields<is_pubic, group_one>;
+
+而一个属性本身具有 getter 和 setter，而访问器也具有修饰符
+
+// 获取公有只读和公有读写的属性
+xtypeid(some_struct).props<is_pubget, is_pubget_pubset>;
+
+...
+```
+
+## 原则
+### 关于范式
+- 除非函数调用有连带关系，否则只有属性需要返回 final &
+- 支持包含方式的类需要将 class final 作为第一个模板参数, 该参数表示接口结构
+- 如果希望可以访问被 const 修饰的变量的属性，那么需要提供 const 版本的重载
+...
