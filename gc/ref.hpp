@@ -62,7 +62,16 @@ namespace mixc::gc_ref{
         xasso(item_t)
     )
     private:
-        using the_length  = cif<is_array, token_plus, token>;
+        using the_length  = 
+            cif<is_array>::template
+                select<token_plus>::template
+            ces<token>;
+
+        using the_item_t = 
+            cif<is_array>::template
+                select<item_t>::template
+            ces<dummy_type>;
+
         using token_mix_t = token_mix<item_t, attribute_t, the_length>;
 
         template<class guide>
@@ -158,7 +167,7 @@ namespace mixc::gc_ref{
         }
 
         template<class ... args>
-        meta(item_t const & first, args const & ... rest) {
+        meta(the_item_t const & first, args const & ... rest) {
             uxx count                            = 1 + sizeof...(args);
             mem                                  = alloc(count);
             initial(0, first, rest...);
@@ -168,8 +177,8 @@ namespace mixc::gc_ref{
         void initial(uxx i){ }
 
         template<class ... args>
-        void initial(uxx i, item_t const & first, args const & ... rest){
-            new(mem->item_ptr(i)) item_t(first);
+        void initial(uxx i, the_item_t const & first, args const & ... rest){
+            new(mem->item_ptr(i)) the_item_t(first);
             initial(i + 1, rest...);
         }
     protected:
