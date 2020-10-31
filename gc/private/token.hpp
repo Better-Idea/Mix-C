@@ -122,6 +122,10 @@ namespace mixc::gc_private_token::origin{
         token_mix(uxx length, args const & ... list) : 
             base_t(length), inc::struct_type<attribute>(list...) {}
 
+        attribute * attribute_ptr(){
+            return (attribute *)(inc::struct_type<attribute> *)this;
+        }
+
         template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> friend struct mixc::gc_ref::meta;
         template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
     $

@@ -279,7 +279,7 @@ namespace mixc::gc_ref{
                 return nullptr;
             }
             else{
-                return mem; // 李氏转换
+                return mem->attribute_ptr();
             }
         }
 
