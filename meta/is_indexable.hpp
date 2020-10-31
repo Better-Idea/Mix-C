@@ -8,7 +8,7 @@
 
 namespace mixc::meta_is_indexable{
     template<class seq_t>
-    concept is_indexable = requires(seq_t const items){
+    concept is_indexable = requires(seq_t items){
         items[0];
     };
 }
