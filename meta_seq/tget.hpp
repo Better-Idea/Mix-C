@@ -16,11 +16,14 @@ namespace mixc::meta_seq_tget{
     template<class tlist, ixx index> struct meta;
     template<ixx index, class first, class ... args>
     struct meta<tlist<first, args...>, index>{
-        using item = cif<
-            index == 0 or -index == 1 + sizeof...(args),
-            first,
-            typename meta<tlist<args...>, (index < 0 ? index : index - 1)>::item
-        >;
+        using item = 
+            cif<
+                index == 0 or -index == 1 + sizeof...(args)
+            >::template select<
+                first
+            >::template ces<
+                typename meta<tlist<args...>, (index < 0 ? index : index - 1)>::item
+            >;
     };
 
     template<ixx index>
