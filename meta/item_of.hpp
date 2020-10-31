@@ -10,7 +10,7 @@
 namespace mixc::meta_item_of{
     template<inc::is_indexable seq_t>
     struct meta{
-        static auto & invoke(){
+        static decltype(auto) invoke(){
             seq_t * list = (seq_t *)magic_number;
             return list[0][0];
         }
