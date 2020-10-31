@@ -212,21 +212,18 @@ namespace mixc::lang_cxx_ph{
         inc::cxx<item_t> output(uxx old_length){
             inc::cxx<item_t> buf;
 
+            auto link = [&](uxx this_length){
+                base_t * base = this;
+                buf = base->template output<item_t>(old_length + this_length);
+                buf = buf.forward(this_length);
+                return (item_t *)buf;
+            };
+
             if constexpr (inc::is_based_on<place_holder_group, a0>){
-                item.template output<item_t>([&](uxx length) -> item_t * {
-                    base_t * base = this;
-                    buf = base->template output<item_t>(old_length + length);
-                    buf = buf.forward(length);
-                    return buf;
-                });
+                item.template output<item_t>(link);
             }
             else{
-                inc::cxx<item_t>(item, [&](uxx this_length){
-                    base_t * base = this;
-                    buf = base->template output<item_t>(old_length + this_length);
-                    buf = buf.forward(this_length);
-                    return (item_t *)buf;
-                });
+                inc::cxx<item_t>(item, link);
             }
             return buf;
         }
