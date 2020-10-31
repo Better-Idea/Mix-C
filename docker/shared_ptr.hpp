@@ -3,8 +3,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_shared_ptr
-#include"define/base_type.hpp"
 #include"gc/ref.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_shared_ptr{
@@ -14,8 +14,14 @@ namespace mixc::docker_shared_ptr{
         using the_t  = shared_ptr<type>;
         using base_t = inc::ref_ptr<shared_ptr<type>, type>;
         using base_t::operator=;
+        using base_t::operator==;
+        using base_t::operator!=;
     public:
         shared_ptr() = default;
+
+        shared_ptr(type const & value) : 
+            base_t(::ini_now, value){
+        }
 
         explicit shared_ptr(::ini) : 
             base_t(::ini_now) {}
@@ -48,7 +54,12 @@ namespace mixc::docker_shared_ptr{
         }
 
         type const & operator= (type const & value){
-            operator type & () = value;
+            if (the != nullptr){
+                operator type & () = value;
+            }
+            else{
+                new (this) the_t(value);
+            }
             return value;
         }
     };
@@ -56,6 +67,4 @@ namespace mixc::docker_shared_ptr{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::docker_shared_ptr::shared_ptr;
-}
+xexport(mixc::docker_shared_ptr::shared_ptr)
