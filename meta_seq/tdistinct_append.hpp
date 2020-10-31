@@ -16,7 +16,7 @@ namespace mixc::meta_seq_tdistinct_append{
     template<class item, class ... args>
     struct tdistinct_append<tlist<args...>, item>{
         using new_list = 
-            cif< 
+            typename cif< 
                 tin< tlist<args...>, item > 
             >::template select<
                 tlist<args...>

@@ -228,13 +228,16 @@ namespace mixc::lang_cxx_ph{
             return buf;
         }
     private:
-        inc::cif<
-            inc::is_origin_array<a0>
-        >::template select<
-            const inc::item_origin_of<a0> *
-        >::template ces<
-            a0 // 用 cif 避免 a0 不存在无参构造函数导致 decltype(a0()) 出现编译错误
-        > item;
+        static auto invoke(){
+            if constexpr (inc::is_origin_array<a0>){
+                return (const inc::item_origin_of<a0> *)nullptr;
+            }
+            else{
+                return a0();
+            }
+        }
+
+        decltype(invoke()) item;
     };
 
     template<class final>
@@ -320,7 +323,7 @@ namespace mixc::lang_cxx_ph{
     template<class a0, class ... args>
     struct phg_core<a0, args...> : phg_core<args...>{
     private:
-        inc::cif<
+        typename inc::cif<
             inc::is_based_on<place_holder_group, a0>
         >::template select<
             a0

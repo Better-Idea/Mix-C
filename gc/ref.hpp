@@ -62,15 +62,23 @@ namespace mixc::gc_ref{
         xasso(item_t)
     )
     private:
-        using the_length  = 
-            cif<is_array>::template
-                select<token_plus>::template
-            ces<token>;
+        using the_length =
+            typename cif<
+                is_array
+            >::template select<
+                token_plus
+            >::template ces<
+                token
+            >;
 
         using the_item_t = 
-            cif<is_array>::template
-                select<item_t>::template
-            ces<dummy_type>;
+            typename cif<
+                is_array
+            >::template select<
+                item_t
+            >::template ces<
+                dummy_type
+            >;
 
         using token_mix_t = token_mix<item_t, attribute_t, the_length>;
 

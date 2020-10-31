@@ -22,7 +22,7 @@ namespace mixc::meta_ctr_cif{
         template<class else_if_type>
         struct select{
         private:
-            using t = meta<c1, a1, else_if_type>::result;
+            using t = typename meta<c1, a1, else_if_type>::result;
         public:
             template<bool type_else_if_true>
             using cei = ei<
@@ -30,7 +30,7 @@ namespace mixc::meta_ctr_cif{
             >;
 
             template<class type_else>
-            using ces = meta<c1 | c2, t, type_else>::result;
+            using ces = typename meta<c1 | c2, t, type_else>::result;
         };
     };
 
@@ -44,7 +44,7 @@ namespace mixc::meta_ctr_cif{
             >;
 
             template<class type_else>
-            using ces = meta<if_condition, type_if_true, type_else>::result;
+            using ces = typename meta<if_condition, type_if_true, type_else>::result;
         };
     };
 }
