@@ -21,8 +21,8 @@
 #include"meta/is_origin_array.hpp"
 #include"meta/is_ptr.hpp"
 #include"meta/item_origin_of.hpp"
-#include"meta/remove_ptr.hpp"
 #include"meta/unsigned_type.hpp"
+#include"meta_ctr/cif.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -228,16 +228,13 @@ namespace mixc::lang_cxx_ph{
             return buf;
         }
     private:
-        static auto ph_type(){
-            if constexpr (inc::is_origin_array<a0>){
-                return (const inc::item_origin_of<a0> *)nullptr;
-            }
-            else{
-                return a0();
-            }
-        }
-
-        decltype(ph_type()) item;
+        inc::cif<
+            inc::is_origin_array<a0>
+        >::template select<
+            const inc::item_origin_of<a0> *
+        >::template ces<
+            a0 // 用 cif 避免 a0 不存在无参构造函数导致 decltype(a0()) 出现编译错误
+        > item;
     };
 
     template<class final>
@@ -323,19 +320,18 @@ namespace mixc::lang_cxx_ph{
     template<class a0, class ... args>
     struct phg_core<a0, args...> : phg_core<args...>{
     private:
-        static auto ph_type(){
-            if constexpr (inc::is_based_on<place_holder_group, a0>){
-                return (a0 *)nullptr;
-            }
-            else if constexpr (inc::has_cast<asciis, a0> or not inc::is_ptr<a0>){
-                return (ph::v<a0> *)nullptr;
-            }
-            else{
-                return (ph::zX<a0> *)nullptr;
-            }
-        }
+        inc::cif<
+            inc::is_based_on<place_holder_group, a0>
+        >::template select<
+            a0
+        >::template cei<
+            inc::has_cast<asciis, a0> or not inc::is_ptr<a0>
+        >::template select<
+            ph::v<a0>
+        >::template ces<
+            ph::zX<a0>
+        > item;
 
-        inc::remove_ptr<decltype(ph_type())> item;
         using base_t = phg_core<args...>;
     public:
         phg_core(a0 const & first, args const & ... list) : 
