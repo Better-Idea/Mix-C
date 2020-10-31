@@ -122,7 +122,7 @@ namespace mixc::gc_private_token::origin{
         token_mix(uxx length, args const & ... list) : 
             base_t(length), inc::struct_type<attribute>(list...) {}
 
-        attribute * attribute_ptr(){
+        attribute * attribute_ptr() const {
             return (attribute *)(inc::struct_type<attribute> *)this;
         }
 

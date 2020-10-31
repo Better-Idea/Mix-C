@@ -274,7 +274,7 @@ namespace mixc::gc_ref{
             return mem[0].item_ptr(0);
         }
 
-        attribute_t * operator->(){
+        attribute_t * operator->() const {
             if constexpr (is_same<void, attribute_t>){
                 return nullptr;
             }
