@@ -58,7 +58,9 @@ namespace mixc::docker_shared_ptr{
                 operator type & () = value;
             }
             else{
-                new (this) the_t(value);
+                // new (this) the_t(value);
+                // 避免以上并发赋值时多次初始化
+                the_t{value}.swap(this);
             }
             return value;
         }
