@@ -4,7 +4,14 @@
     #undef min
 #endif
 
-namespace mixc::math_min{
+#pragma push_macro("xuser")
+#undef  xuser
+#define xuser mixc::math_min::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#pragma pop_macro("xuser")
+
+namespace mixc::math_min::origin{
     template<class type>
     inline type min(type left, type right){
         return left < right ? left : right;
@@ -13,6 +20,4 @@ namespace mixc::math_min{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_min::min;
-}
+xexport_space(mixc::math_min::origin)

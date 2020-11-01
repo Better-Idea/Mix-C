@@ -2,8 +2,7 @@
 #define xpack_extern_isa_cpu
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::extern_isa_cpu::origin
-#include"define/base_type.hpp"
+#define xuser mixc::extern_isa_cpu::origin::inc
 #include"macro/xdefer.hpp"
 #include"math/const.hpp"
 #include"memop/cast.hpp"
@@ -17,6 +16,7 @@
 #include"instruction/shift_left.hpp"
 #include"instruction/shift_right.hpp"
 #include"instruction/sub.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_isa_cpu::origin{

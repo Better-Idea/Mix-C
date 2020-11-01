@@ -2,11 +2,10 @@
 #define xpack_io_private_tty_key
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_private_tty_key
+#define xuser mixc::io_private_tty_key::inc
 #include"algo/binary_search.hpp"
-#include"define/base_type.hpp"
 #include"docker/array.hpp"
-#include"macro/xstruct.hpp"
+#include"macro/xexport.hpp"
 #include"memop/bit.hpp"
 #pragma pop_macro("xuser")
 
@@ -83,6 +82,10 @@ namespace mixc::io_private_tty_key{
 }
 
 namespace mixc::io_private_tty_key::origin{
+    namespace func_key{
+        using namespace mixc::io_private_tty_key::func_key;
+    }
+
     template<uxx size>
     using items_t = char[size];
 
@@ -168,10 +171,4 @@ namespace mixc::io_private_tty_key::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::io_private_tty_key::origin;
-}
-
-namespace xuser::inc::func_key{
-    using namespace ::mixc::io_private_tty_key::func_key;
-}
+xexport_space(mixc::io_private_tty_key::origin)

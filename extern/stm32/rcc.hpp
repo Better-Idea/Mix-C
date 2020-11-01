@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_rcc
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_rcc
+        #define xuser mixc::extern_stm32_rcc::inc
         #include"extern/stm32/define.hpp"
         #include"meta/is_same.hpp"
     #pragma pop_macro("xuser")
@@ -431,6 +431,4 @@
 
 #endif
 
-namespace xuser::inc{
-    using namespace mixc::extern_stm32_rcc::origin;
-}
+xexport(mixc::extern_stm32_rcc::rcc)

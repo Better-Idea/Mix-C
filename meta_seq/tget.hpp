@@ -3,8 +3,9 @@
 #define xpack_meta_seq_tget
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tget
+#define xuser mixc::meta_seq_tget::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tnull.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_ctr/cif.hpp"
@@ -37,6 +38,4 @@ namespace mixc::meta_seq_tget{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tget::tget;
-}
+xexport(mixc::meta_seq_tget::tget)

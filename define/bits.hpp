@@ -2,7 +2,7 @@
 #define xpack_define_bits
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_bits
+#define xuser mixc::define_bits::inc
 #include"define/bitbind.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -37,6 +37,4 @@ namespace mixc::define_bits::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::define_bits::origin;
-}
+xexport(mixc::define_bits::bits)

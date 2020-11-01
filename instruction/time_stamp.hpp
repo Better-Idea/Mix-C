@@ -2,9 +2,9 @@
 #define xpack_instruction_time_stamp
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_time_stamp
+#define xuser mixc::instruction_time_stamp::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_time_stamp{
@@ -20,6 +20,4 @@ namespace mixc::instruction_time_stamp{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_time_stamp::time_stamp;
-}
+xexport(mixc::instruction_time_stamp::time_stamp)

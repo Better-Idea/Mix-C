@@ -2,10 +2,11 @@
 #define xpack_math_div
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_div
+#define xuser mixc::math_div::inc
 #include"define/base_type.hpp"
 #include"define/mfxx.hpp"
 #include"instruction/mod.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_div{
@@ -17,6 +18,19 @@ namespace mixc::math_div{
         return quo_rem_pair<type>{ que, rem };
     }
 
+    template<class type>
+    inline quo_rem_pair<type> div_core(type a, type b){
+        auto ma = inc::mfxx{a};
+        auto mb = inc::mfxx{b};
+        
+        if (ma.real_exp() - mb.real_exp() <= ixx(ma.decimal_bits())){
+            return div_unsafe_core(a, b);
+        }
+        return quo_rem_pair<type>{ a / b, (type)inc::mod(a, b) };
+    }
+}
+
+namespace mixc::math_div::origin{
     inline quo_rem_pair<f32> div_unsafe(f32 a, f32 b){
         return div_unsafe_core<f32>(a, b);
     }
@@ -29,16 +43,6 @@ namespace mixc::math_div{
         return div_unsafe_core<f80>(a, b);
     }
 
-    template<class type>
-    inline quo_rem_pair<type> div_core(type a, type b){
-        auto ma = inc::mfxx{a};
-        auto mb = inc::mfxx{b};
-        
-        if (ma.real_exp() - mb.real_exp() <= ixx(ma.decimal_bits())){
-            return div_unsafe(a, b);
-        }
-        return quo_rem_pair<type>{ a / b, (type)inc::mod(a, b) };
-    }
 
     inline quo_rem_pair<f32> div(f32 a, f32 b){
         return div_core<f32>(a, b);
@@ -55,10 +59,4 @@ namespace mixc::math_div{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_div::div;
-}
-
-namespace xuser::adv{
-    using ::mixc::math_div::div_unsafe;
-}
+xexport_space(mixc::math_div::origin)

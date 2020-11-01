@@ -1,13 +1,13 @@
 #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser   simd
-    #include"define/base_type.hpp"
-    #include"instruction/index_of_first_set.hpp"
+    #define xuser   simd::inc
+        #include"instruction/index_of_first_set.hpp"
     #include"instruction/index_of_last_set.hpp"
     #include"immintrin.h"
     #include"math/smaller.hpp"
     #include"memop/copy.hpp"
     #include"simd/x86/sstr.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::simd_x86_sstr{

@@ -2,11 +2,11 @@
 #define xpack_draft_mod
 #pragma push_macro("xuser")
 #undef  xuser   
-#define xuser mixc::draft_mod
-#include"define/base_type.hpp"
+#define xuser mixc::draft_mod::inc
 #include"define/mfxx.hpp"
 #include"instruction/mod.hpp"
 #include"instruction/mul.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 // 小猫的杂货屋

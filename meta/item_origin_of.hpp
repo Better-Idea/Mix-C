@@ -2,13 +2,13 @@
 #define xpack_meta_item_origin_of
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_item_origin_of
+#define xuser mixc::meta_item_origin_of::inc
 #include"configure.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_indexable.hpp"
 #include"meta/item_of.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta/remove_const.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_origin_of{

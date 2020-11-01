@@ -2,9 +2,9 @@
 #define xpack_memory_alloctor
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memory_alloctor
-#include"define/base_type.hpp"
+#define xuser mixc::memory_alloctor::inc
 #include"macro/xdebug.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xtypeid.hpp"
 #include"memory/new.hpp"
 #pragma pop_macro("xuser")
@@ -79,6 +79,4 @@ namespace mixc::memory_alloctor::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::memory_alloctor::origin;
-}
+xexport_space(mixc::memory_alloctor::origin)

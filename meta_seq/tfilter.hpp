@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tfilter
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tfilter
+#define xuser mixc::meta_seq_tfilter::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #pragma pop_macro("xuser")
 
@@ -35,6 +36,4 @@ namespace mixc::meta_seq_tfilter{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tfilter::tfilter;
-}
+xexport(mixc::meta_seq_tfilter::tfilter)

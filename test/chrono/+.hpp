@@ -2,11 +2,11 @@
 #define xpack_test_chrono
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_chrono
+        #define xuser mixc::test_chrono::inc
         #include"chrono/+.hpp"
-        #include"define/base_type.hpp"
-        #include"macro/xassert.hpp"
-    #pragma pop_macro("xuser")
+                #include"macro/xassert.hpp"
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_chrono{
         xtest(chrono){

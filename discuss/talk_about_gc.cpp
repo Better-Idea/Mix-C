@@ -2,12 +2,12 @@
 #define xpack_talk_about_gc
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::talk_about_gc
-#include"define/base_type.hpp"
+#define xuser mixc::talk_about_gc::inc
 #include"docker/shared_array.hpp"
 #include"docker/shared_ptr.hpp"
 #include"macro/xhint.hpp"
 #include"memory/allocator.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::talk_about_gc::inc{
@@ -132,7 +132,7 @@ namespace mixc::talk_about_gc::inc{
 
         {
             shared_ptr<N4_t> n4(ini_now);
-            n4->n(length{4}, n4); // 给数组每个都赋值 n4
+            n4->n(length{4}, n4); // 给数组每个都赋值 n4 32 + 16 + 16
             xhint("step:17", used_bytes());
         }
         xhint("step:18", used_bytes());

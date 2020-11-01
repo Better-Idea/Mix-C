@@ -2,8 +2,9 @@
 #define xpack_math_ln
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_ln
+#define xuser mixc::math_ln::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"define/nan.hpp"
 #pragma pop_macro("xuser")
 
@@ -20,10 +21,4 @@ namespace mixc::math_ln{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_ln::ln;
-}
-
-namespace xuser::adv{
-    using ::mixc::math_ln::ln_unsafe;
-}
+xexport(mixc::math_ln::ln)

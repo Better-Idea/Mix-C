@@ -2,10 +2,10 @@
 #define xpack_test_math_index_system
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::test_math_index_system
-#include"define/base_type.hpp"
+#define xuser mixc::test_math_index_system::inc
 #include"docker/array.hpp"
 #include"macro/xassert.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::test_math_index_system{

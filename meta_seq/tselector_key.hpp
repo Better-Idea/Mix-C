@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tselector_key
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tselector_key
+#define xuser mixc::meta_seq_tselector_key::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/template/tselector.hpp"
 #pragma pop_macro("xuser")
 
@@ -13,6 +14,4 @@ namespace mixc::meta_seq_tselector_key{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tselector_key::tselector_key;
-}
+xexport(mixc::meta_seq_tselector_key::tselector_key)

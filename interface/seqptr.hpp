@@ -2,16 +2,15 @@
 #define xpack_interface_seqptr
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_seqptr
-#include"define/base_type.hpp"
+#define xuser mixc::interface_seqptr::inc
 #include"interface/initializer_list.hpp"
 #include"interface/ranger.hpp"
-#include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
 #include"meta/is_same.hpp"
 #include"meta/item_origin_of.hpp"
 #include"meta/is_origin_array.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 #define xseqptr(...)                                                                \
@@ -111,8 +110,4 @@ namespace mixc::interface_seqptr{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::interface_seqptr::seqptr;
-}
-
-#include"math/index_system.hpp"
+xexport(mixc::interface_seqptr::seqptr)

@@ -2,7 +2,7 @@
     #undef xuser
 #endif
 
-#define xuser mixc::memory_alloctor
+#define xuser mixc::memory_alloctor::inc
 #include"docker/hashmap.hpp"
 #include"gc/ref.hpp"
 #include"memory/private/tiny_allocator.hpp"
@@ -72,7 +72,7 @@ namespace mixc::memory_alloctor::origin{
 #endif
 
 namespace mixc::gc_ref{
-    using namespace xuser::inc;
+    using namespace mixc::memory_alloctor::inc;
 
     hashmap<visited_ptr_t, info_t>    gc_map;
     uxx                               degree_dvalue;

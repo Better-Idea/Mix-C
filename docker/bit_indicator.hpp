@@ -4,7 +4,7 @@
 #endif
 #include"macro/xfinal.hpp"
 
-namespace xuser::inc{
+namespace xuser{
     template<uxx bits = 0>
     xfinal_tmpl(xusing_docker_bit_indicator, bit_indicator, bits);
 }

@@ -2,7 +2,7 @@
 #define xpack_algo_remove
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_remove
+#define xuser mixc::algo_remove::inc
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"

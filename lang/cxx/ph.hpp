@@ -8,11 +8,13 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_ph
+#define xuser mixc::lang_cxx_ph::inc
+#include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"lang/cxx/strlize.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
+#include"macro/xexport.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"
@@ -23,7 +25,6 @@
 #include"meta/item_origin_of.hpp"
 #include"meta/unsigned_type.hpp"
 #include"meta_ctr/cif.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -167,13 +168,13 @@ namespace mixc::lang_cxx_ph{
             return inc::cxx<item_t>(deformation(), n, lut, [this, alloc](uxx length){
                 auto klz_length = sizeof(type) * 8; // keep leading zero length
 
-                if constexpr (n == inc::numeration::hex){
+                if constexpr (n == inc::numeration_t::hex){
                     klz_length /= 4;
                 }
-                else if constexpr (n == inc::numeration::oct){
+                else if constexpr (n == inc::numeration_t::oct){
                     klz_length = klz_length / 3 + (klz_length % 3 != 0);
                 }
-                else if constexpr (n == inc::numeration::bin){
+                else if constexpr (n == inc::numeration_t::bin){
                     ; // klz_length = klz_length;
                 }
 
@@ -276,16 +277,16 @@ namespace mixc::lang_cxx_ph{
         }
     
     #define xhex(name,prefix,leading_zero,lut)      \
-        xnum(name,inc::unsigned_type<type>,inc::numeration::hex,prefix,leading_zero,lut)
+        xnum(name,inc::unsigned_type<type>,inc::numeration_t::hex,prefix,leading_zero,lut)
 
     #define xbin(name,prefix,leading_zero,lut)      \
-        xnum(name,inc::unsigned_type<type>,inc::numeration::bin,prefix,leading_zero,lut)
+        xnum(name,inc::unsigned_type<type>,inc::numeration_t::bin,prefix,leading_zero,lut)
 
     #define xoct(name,prefix,leading_zero,lut)      \
-        xnum(name,inc::unsigned_type<type>,inc::numeration::oct,prefix,leading_zero,lut)
+        xnum(name,inc::unsigned_type<type>,inc::numeration_t::oct,prefix,leading_zero,lut)
 }
 
-namespace mixc::lang_cxx_ph::ph{
+namespace mixc::lang_cxx_ph::origin::ph{
     using mixc::lang_cxx_ph::place_holder_group;
 
     xhex(h , not with_prefix, not keep_leading_zero, inc::lower);
@@ -319,6 +320,8 @@ namespace mixc::lang_cxx_ph::ph{
 }
 
 namespace mixc::lang_cxx_ph{
+    using namespace origin;
+
     template<class ... args> struct phg_core;
     template<class a0, class ... args>
     struct phg_core<a0, args...> : phg_core<args...>{
@@ -364,7 +367,7 @@ namespace mixc::lang_cxx_ph{
     };
 }
 
-namespace mixc::lang_cxx_ph::ph{ // place_holder
+namespace mixc::lang_cxx_ph::origin::ph{ // place_holder
     template<class a0, class ... args>
     struct phg{ // place_holder group
         phg(a0 const & first, args const & ... list)
@@ -388,6 +391,4 @@ namespace mixc::lang_cxx_ph::ph{ // place_holder
 #undef  xmate
 #endif
 
-namespace xuser::inc::ph{
-    using namespace ::mixc::lang_cxx_ph::ph;
-}
+xexport_space(mixc::lang_cxx_ph::origin)

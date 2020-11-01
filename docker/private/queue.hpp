@@ -2,7 +2,7 @@
 #define xpack_docker_queue
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_queue
+#define xuser mixc::docker_queue::inc
 #include"dumb/disable_copy.hpp"
 #include"dumb/struct_type.hpp"
 #include"docker/transmitter.hpp"

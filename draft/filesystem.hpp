@@ -2,7 +2,7 @@
 #define xpack_draft_file_system
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::draft_file_system
+#define xuser mixc::draft_file_system::inc
 #include"interface/can_callback.hpp"
 #include"lang/cxx/is_starts_with.hpp"
 #include"lang/cxx/compare_fastly.hpp"

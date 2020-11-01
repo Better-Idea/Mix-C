@@ -14,7 +14,7 @@
 #define xpack_algo_heap_root
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_heap_root
+#define xuser mixc::algo_heap_root::inc
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
 #include"interface/can_compare.hpp"

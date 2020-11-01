@@ -2,10 +2,9 @@
 #define xpack_docker_transmitter
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_transmitter
-#include"define/base_type.hpp"
+#define xuser mixc::docker_transmitter::inc
 #include"dumb/struct_type.hpp"
-#include"macro/xstruct.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_transmitter{
@@ -42,6 +41,4 @@ namespace mixc::docker_transmitter{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::docker_transmitter::transmitter;
-}
+xexport(mixc::docker_transmitter::transmitter)

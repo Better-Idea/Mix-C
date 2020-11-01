@@ -2,8 +2,8 @@
 #define xpack_instruction_bit_test
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_bit_test
-#include"define/base_type.hpp"
+#define xuser mixc::instruction_bit_test::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_bit_test{
@@ -21,6 +21,4 @@ namespace mixc::instruction_bit_test{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_bit_test::bit_test;
-}
+xexport(mixc::instruction_bit_test::bit_test)

@@ -10,6 +10,6 @@ namespace mixc::meta_has_operator_cast{
 
 #endif
 
-namespace xuser::inc{
+namespace xuser{
     using ::mixc::meta_has_operator_cast::has_operator_cast;
 }

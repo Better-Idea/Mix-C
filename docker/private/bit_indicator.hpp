@@ -9,7 +9,7 @@
 #define xpack_docker_bit_indicator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_bit_indicator
+#define xuser mixc::docker_bit_indicator::inc
 #include"docker/private/adapter.bit_indicator.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"

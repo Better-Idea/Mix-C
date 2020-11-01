@@ -4,7 +4,7 @@
 #endif
 #include"macro/xfinal.hpp"
 
-namespace xuser::inc{
+namespace xuser{
     template<class field_t = u32>
     xfinal_tmpl(xusing_chrono_time, time, field_t);
 }

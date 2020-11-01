@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_pwr
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_pwr
+        #define xuser mixc::extern_stm32_pwr::inc
         #include"extern/stm32/define.hpp"
     #pragma pop_macro("xuser")
 
@@ -179,7 +179,4 @@
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::extern_stm32_pwr::origin;
-}
-
+xexport(mixc::extern_stm32_pwr::pwr)

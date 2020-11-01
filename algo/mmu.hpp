@@ -74,7 +74,7 @@
 #define xpack_algo_mmu
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_mmu
+#define xuser mixc::algo_mmu::inc
 #include"instruction/bit_test_and_reset.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_alloc.hpp"

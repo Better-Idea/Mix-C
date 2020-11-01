@@ -2,9 +2,9 @@
 #define xpack_instruction_mod
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_mod
+#define xuser mixc::instruction_mod::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_mod{
@@ -12,11 +12,16 @@ namespace mixc::instruction_mod{
     inline u64 mod(u128 a, u64 b){
         #if xis_x86
             #if xis_os64
+                #if xis_msvc
+                #pragma message("note here")
+                return 0;
+                #else
                 u64 r = 0;
                 asm(""::"a"(a.low),"d"(a.high),"c"(b));
                 asm("div %rcx");
                 asm("":"=d"(r));
                 return r;
+                #endif
             #endif
         #endif
     }
@@ -24,6 +29,4 @@ namespace mixc::instruction_mod{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_mod::mod;
-}
+xexport(mixc::instruction_mod::mod)

@@ -25,7 +25,7 @@
 #define xpack_lock_policy_barrier
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_policy_barrier
+#define xuser mixc::lock_policy_barrier::inc
 #include"lock/atom_and.hpp"
 #include"lock/atom_fetch_or.hpp"
 #include"lock/private/thread_yield.hpp"
@@ -268,6 +268,4 @@ namespace mixc::lock_policy_barrier::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::lock_policy_barrier::origin;
-}
+xexport(mixc::lock_policy_barrier::policy_barrier)

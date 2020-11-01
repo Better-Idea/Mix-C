@@ -2,8 +2,9 @@
 #define xpack_meta_unsigned_type
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_unsigned_type
+#define xuser mixc::meta_unsigned_type::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_unsigned_type{
@@ -20,6 +21,4 @@ namespace mixc::meta_unsigned_type{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_unsigned_type::unsigned_type;
-}
+xexport(mixc::meta_unsigned_type::unsigned_type)

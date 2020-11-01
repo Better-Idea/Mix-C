@@ -2,7 +2,7 @@
 #define xpack_draft_isa
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::draft_2d
+#define xuser mixc::draft_2d::inc
 #include"math/abs.hpp"
 #include"math/point.hpp"
 #include"math/round.hpp"

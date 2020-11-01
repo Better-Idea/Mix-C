@@ -2,12 +2,12 @@
 #define xpack_gc_queue
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_queue
-#include"define/base_type.hpp"
+#define xuser mixc::gc_queue::inc
 #include"interface/can_callback.hpp"
 #include"lock/atom_fetch_add.hpp"
 #include"lock/atom_swap.hpp"
 #include"memory/allocator.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_queue{
@@ -73,7 +73,4 @@ namespace mixc::gc_queue{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::gc_queue::queue;
-    using ::mixc::gc_queue::release_callback;
-}
+xexport(mixc::gc_queue::queue)

@@ -2,13 +2,12 @@
 #define xpack_test_math_index_system
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_math_index_system
+        #define xuser mixc::test_math_index_system::inc
         // std first
         #include<string.h>
         #include<stdlib.h>
 
-        #include"define/base_type.hpp"
-        #include"io/tty.hpp"
+                #include"io/tty.hpp"
         #include"lang/cxx/compare.hpp"
         #include"lang/cxx/strlize.hpp"
         #include"lang/cxx.hpp"
@@ -18,7 +17,8 @@
         #include"macro/xassert.hpp"
         #include"math/random.hpp"
         #include"simd/x86/sstr.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_math_index_system{
         xtest(sstr_index_of_first){

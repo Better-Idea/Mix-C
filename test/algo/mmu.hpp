@@ -2,7 +2,7 @@
 #define xpack_test_algo_mmu
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::test_algo_mmu
+#define xuser mixc::test_algo_mmu::inc
 #include"algo/mmu.hpp"
 #include"macro/xassert.hpp"
 #include"memory/allocator.hpp"

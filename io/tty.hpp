@@ -2,16 +2,16 @@
 #define xpack_io_tty
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_tty
+#define xuser mixc::io_tty::inc
+#include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"io/private/tty.hpp"
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
-#include"macro/xstruct.hpp"
+#include"macro/xexport.hpp"
 #include"memory/allocator.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_tty::origin{
@@ -94,10 +94,4 @@ namespace mixc::io_tty::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::io_tty::origin;
-}
-
-namespace xuser::inc::ph{
-    using namespace ::mixc::lang_cxx_ph::ph;
-}
+xexport(mixc::io_tty::origin::tty)

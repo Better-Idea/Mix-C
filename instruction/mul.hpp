@@ -2,9 +2,9 @@
 #define xpack_instruction_mul
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_mul
+#define xuser mixc::instruction_mul::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_mul{
@@ -23,6 +23,4 @@ namespace mixc::instruction_mul{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_mul::mul;
-}
+xexport(mixc::instruction_mul::mul)

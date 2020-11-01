@@ -2,16 +2,16 @@
 #define xpack_draft_isa
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::draft_isa
-        #include"define/base_type.hpp"
-        #include"define/bitbind.hpp"
+        #define xuser mixc::draft_isa::inc
+                #include"define/bitbind.hpp"
         #include"instruction/index_of_first_set.hpp"
         #include"instruction/index_of_last_set.hpp"
         #include"macro/xprop.hpp"
         #include"memop/cast.hpp"
         #include"memop/signature.hpp"
         #include"memop/swap.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::draft_isa{
         union bit_range_t{
@@ -1094,148 +1094,4 @@
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::draft_isa::area_t;
-    using ::mixc::draft_isa::bit_range_t;
-    using ::mixc::draft_isa::cpu_t;
-    using ::mixc::draft_isa::opc_t;
-
-    using ::mixc::draft_isa::aai;
-    using ::mixc::draft_isa::aab;
-    using ::mixc::draft_isa::abt;
-    using ::mixc::draft_isa::tab;
-    using ::mixc::draft_isa::tai;
-    using ::mixc::draft_isa::abi;
-    using ::mixc::draft_isa::aib;
-    using ::mixc::draft_isa::atb;
-
-    enum{
-        sp  = opc_t::sp,
-        bp  = opc_t::bp,
-        rt  = opc_t::t,
-        rx  = opc_t::x,
-        r4, r5, r6, r7, r8, r9, ra, rb, rc, rd, re, rf
-    };
-
-    namespace iss{ // instruction set
-        using ::mixc::draft_isa::ldi;
-        using ::mixc::draft_isa::shl;
-        using ::mixc::draft_isa::shr;
-        using ::mixc::draft_isa::sar;
-        using ::mixc::draft_isa::bts;
-        using ::mixc::draft_isa::ldib;
-        using ::mixc::draft_isa::ldiw;
-        using ::mixc::draft_isa::ldid;
-        using ::mixc::draft_isa::ldiq;
-        using ::mixc::draft_isa::ldub;
-        using ::mixc::draft_isa::lduw;
-        using ::mixc::draft_isa::ldud;
-        using ::mixc::draft_isa::lduq;
-        using ::mixc::draft_isa::ldtib;
-        using ::mixc::draft_isa::ldtiw;
-        using ::mixc::draft_isa::ldtid;
-        using ::mixc::draft_isa::ldtiq;
-        using ::mixc::draft_isa::ldtub;
-        using ::mixc::draft_isa::ldtuw;
-        using ::mixc::draft_isa::ldtud;
-        using ::mixc::draft_isa::ldtuq;
-        using ::mixc::draft_isa::stb;
-        using ::mixc::draft_isa::stw;
-        using ::mixc::draft_isa::std;
-        using ::mixc::draft_isa::stq;
-        using ::mixc::draft_isa::sttb;
-        using ::mixc::draft_isa::sttw;
-        using ::mixc::draft_isa::sttd;
-        using ::mixc::draft_isa::sttq;
-        using ::mixc::draft_isa::ldfs;
-        using ::mixc::draft_isa::ldfd;
-        using ::mixc::draft_isa::ldtfs;
-        using ::mixc::draft_isa::ldtfd;
-        using ::mixc::draft_isa::stfs;
-        using ::mixc::draft_isa::stfd;
-        using ::mixc::draft_isa::sttfs;
-        using ::mixc::draft_isa::sttfd;
-        using ::mixc::draft_isa::pop;
-        using ::mixc::draft_isa::popf;
-        using ::mixc::draft_isa::psh;
-        using ::mixc::draft_isa::pshs;
-        using ::mixc::draft_isa::pshf;
-        using ::mixc::draft_isa::pshfs;
-        using ::mixc::draft_isa::bdc;
-        using ::mixc::draft_isa::movbx;
-        using ::mixc::draft_isa::movwx;
-        using ::mixc::draft_isa::movdx;
-        using ::mixc::draft_isa::movix;
-        using ::mixc::draft_isa::movb;
-        using ::mixc::draft_isa::movw;
-        using ::mixc::draft_isa::movd;
-        using ::mixc::draft_isa::movq;
-        using ::mixc::draft_isa::movfsi;
-        using ::mixc::draft_isa::movfs;
-        using ::mixc::draft_isa::movfdi;
-        using ::mixc::draft_isa::movfd;
-        using ::mixc::draft_isa::uq2fs;
-        using ::mixc::draft_isa::uq2fd;
-        using ::mixc::draft_isa::iq2fs;
-        using ::mixc::draft_isa::iq2fd;
-        using ::mixc::draft_isa::add;
-        using ::mixc::draft_isa::adc;
-        using ::mixc::draft_isa::sbb;
-        using ::mixc::draft_isa::sub;
-        using ::mixc::draft_isa::mul;
-        using ::mixc::draft_isa::mulu;
-        using ::mixc::draft_isa::mulx;
-        using ::mixc::draft_isa::mulxu;
-        using ::mixc::draft_isa::div;
-        using ::mixc::draft_isa::divu;
-        using ::mixc::draft_isa::andi;
-        using ::mixc::draft_isa::ori;
-        using ::mixc::draft_isa::nandi;
-        using ::mixc::draft_isa::xori;
-        using ::mixc::draft_isa::mask;
-        using ::mixc::draft_isa::ldbs;
-        using ::mixc::draft_isa::stbs;
-        using ::mixc::draft_isa::sbc;
-        using ::mixc::draft_isa::ios;
-        using ::mixc::draft_isa::lis;
-        using ::mixc::draft_isa::swp;
-        using ::mixc::draft_isa::swpf;
-        using ::mixc::draft_isa::lock;
-        using ::mixc::draft_isa::ifeq;
-        using ::mixc::draft_isa::ifne;
-        using ::mixc::draft_isa::ifcf;
-        using ::mixc::draft_isa::ifnc;
-        using ::mixc::draft_isa::ifab;
-        using ::mixc::draft_isa::ifae;
-        using ::mixc::draft_isa::ifbt;
-        using ::mixc::draft_isa::ifbe;
-        using ::mixc::draft_isa::ifgt;
-        using ::mixc::draft_isa::ifge;
-        using ::mixc::draft_isa::iflt;
-        using ::mixc::draft_isa::ifle;
-        using ::mixc::draft_isa::ifov;
-        using ::mixc::draft_isa::ifno;
-        using ::mixc::draft_isa::jmp;
-        using ::mixc::draft_isa::ret;
-        using ::mixc::draft_isa::call;
-        using ::mixc::draft_isa::calli;
-        using ::mixc::draft_isa::addf;
-        using ::mixc::draft_isa::mulf;
-        using ::mixc::draft_isa::subf;
-        using ::mixc::draft_isa::divf;
-    }
-
-    using ::mixc::draft_isa::set_t;
-}
-
-/*
-等效指令            |   实际指令
-------------------------------------------
-store   bp          ;   pushs   rx, ...
-mov     bp, sp      ;   
-push    ...         ;   
-
-call    func_name   ;   call    func_name
-mov     sp, bp      ;   
-load    bp          ;   
-*/
+xexport(mixc::draft_isa::isa)

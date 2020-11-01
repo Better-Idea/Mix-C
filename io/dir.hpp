@@ -2,12 +2,13 @@
 #define xpack_io_dir
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_dir
+#define xuser mixc::io_dir::inc
+#include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/iterator.hpp"
 #include"lang/cxx.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_dir::origin{
@@ -47,6 +48,7 @@ namespace mixc::io_dir::origin{
         void    move_to(inc::c08 new_path)              const;
         void    copy_to(inc::c08 new_path)              const;
         bool    is_exist()                              const;
+        void    create()                                const;
 
         auto subfiles() const {
             return subitem(path, true);

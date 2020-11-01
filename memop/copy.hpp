@@ -2,14 +2,14 @@
 #define xpack_memop_copy
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_copy
-#include"define/base_type.hpp"
+#define xuser mixc::memop_copy::inc
 #include"dumb/mirror.hpp"
 #include"memop/addressof.hpp"
 #include"memop/zeros.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::memop_copy{
+namespace mixc::memop_copy::origin{
     template<class a, class b = a>
     inline void copy(a * des, b const & src){
         using mp = inc::mirror<a> *;
@@ -87,12 +87,4 @@ namespace mixc::memop_copy{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_copy::copy;
-    using ::mixc::memop_copy::copy_with_operator;
-}
-
-namespace xuser::adv{
-    using ::mixc::memop_copy::copy_unsafe;
-    using ::mixc::memop_copy::copy_with_operator_unsafe;
-}
+xexport_space(mixc::memop_copy::origin)

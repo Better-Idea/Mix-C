@@ -2,8 +2,10 @@
 #define xpack_dumb_disable_copy
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::dumb_disable_copy
-#include"mixc.hpp"
+#define xuser mixc::dumb_disable_copy::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_disable_copy {
@@ -18,6 +20,4 @@ namespace mixc::dumb_disable_copy {
 
 #endif
 
-namespace xuser::inc {
-    using ::mixc::dumb_disable_copy::disable_copy;
-}
+xexport(mixc::dumb_disable_copy::disable_copy)

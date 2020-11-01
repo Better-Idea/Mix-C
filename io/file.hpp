@@ -2,10 +2,12 @@
 #define xpack_io_file
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_file
+#define xuser mixc::io_file::inc
+#include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/seqptr.hpp"
-#include"mixc.hpp"
+#include"lang/cxx.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_file::origin{
@@ -19,13 +21,13 @@ namespace mixc::io_file::origin{
         xname(file),
         xpubb(inc::disable_copy),
         xprif(fd,   mutable ixx),
-        xprif(path, mutable asciis)
+        xprif(path, mutable inc::c08)
     )
         using final = the_t;
     public:
         file();
-        file(asciis path) : path(path){}
-        file(asciis path, access_mode_t mode, bstate_t * result = nullptr) {
+        file(inc::c08 path) : path(path){}
+        file(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) {
             the.open(path, mode, result);
         }
         ~file(){
@@ -33,7 +35,7 @@ namespace mixc::io_file::origin{
         }
 
         u64     length()                                const;
-        final & open(asciis path, access_mode_t mode, bstate_t * result = nullptr) const;
+        final & open(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) const;
         final & close()                                 const;
         final & forward(u64 offset)                     const;
         final & backward(u64 offset)                    const;
@@ -42,8 +44,8 @@ namespace mixc::io_file::origin{
         uxx     write(void const * buffer, uxx bytes)   const;
 
         void    remove()                                const;
-        void    move_to(asciis new_path)                const;
-        void    copy_to(asciis new_path)                const;
+        void    move_to(inc::c08 new_path)              const;
+        void    copy_to(inc::c08 new_path)              const;
         bool    is_exist()                              const;
 
         template<class item_t>

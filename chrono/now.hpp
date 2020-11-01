@@ -2,7 +2,7 @@
 #define xpack_chrono_now
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::chrono_now
+#define xuser mixc::chrono_now::inc
 #include"chrono/date.hpp"
 #include"chrono/datetime.hpp"
 #include"chrono/time.hpp"

@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_fls
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_fls
+        #define xuser mixc::extern_stm32_fls::inc
         #include"define/bitbind.hpp"
         #include"extern/stm32/define.hpp"
         #include"instruction/index_of_first_set.hpp"
@@ -277,6 +277,4 @@
     }
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::extern_stm32_fls::origin;
-}
+xexport(mixc::extern_stm32_fls::fls)

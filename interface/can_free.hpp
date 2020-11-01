@@ -2,9 +2,9 @@
 #define xpack_interface_can_free
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_can_free
-#include"define/base_type.hpp"
+#define xuser mixc::interface_can_free::inc
 #include"interface/can_callback.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_free{
@@ -14,6 +14,4 @@ namespace mixc::interface_can_free{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::interface_can_free::can_free;
-}
+xexport(mixc::interface_can_free::can_free)

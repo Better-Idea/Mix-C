@@ -2,8 +2,9 @@
 #define xpack_meta_remove_membership
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_remove_membership
+#define xuser mixc::meta_remove_membership::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_remove_membership{
@@ -42,6 +43,4 @@ namespace mixc::meta_remove_membership{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_remove_membership::remove_membership;
-}
+xexport(mixc::meta_remove_membership::remove_membership)

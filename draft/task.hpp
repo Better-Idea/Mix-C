@@ -2,7 +2,7 @@
 #define xpack_draft_task
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::task
+        #define xuser mixc::task::inc
         #include<setjmp.h>
         #include"configure.hpp"
         #include"define/base_type.hpp"
@@ -291,6 +291,4 @@
     }
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::task::origin;
-}
+xexport(mixc::task::task)

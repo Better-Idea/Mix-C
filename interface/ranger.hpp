@@ -2,7 +2,7 @@
 #define xpack_interface_ranger
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_ranger
+#define xuser mixc::interface_ranger::inc
 #include"interface/initializer_list.hpp"
 #include"interface/iterator.hpp"
 #include"macro/xalign.hpp"
@@ -232,8 +232,4 @@ namespace mixc::interface_ranger{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::interface_ranger::ranger;
-}
-
-#include"math/index_system.hpp"
+xexport(mixc::interface_ranger::ranger)

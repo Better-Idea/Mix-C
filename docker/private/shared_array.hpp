@@ -11,7 +11,7 @@
 #define xpack_docker_shared_array
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_shared_array
+#define xuser mixc::docker_shared_array::inc
 #include"docker/private/adapter.array_access.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
@@ -63,15 +63,13 @@ namespace mixc::docker_shared_array{
 
         template<class ... args>
         auto & operator()(::length length, args const & ... list){
-            base_t::operator=(nullptr);
-            new (this) base_t(length, list...);
+            the_t{length, list...}.swap(this);
             return thex;
         }
 
         template<class ... args>
         auto & operator()(item_t const & first, args const & ... rest){
-            base_t::operator=(nullptr);
-            new (this) base_t(first, rest...);
+            the_t{first, rest...}.swap(this);
             return thex;
         }
 

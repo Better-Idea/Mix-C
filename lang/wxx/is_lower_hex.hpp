@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_wxx")
 #undef  xusing_lang_wxx
 #undef  xuser
-#define xuser mixc::lang_wxx_is_lower_hex
+#define xuser mixc::lang_wxx_is_lower_hex::inc
 #include"define/base_type.hpp"
 #include"lang/wxx.hpp"
 #pragma pop_macro("xusing_lang_wxx")

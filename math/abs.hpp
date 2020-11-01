@@ -10,6 +10,6 @@ namespace mixc::math_abs{
 
 #endif
 
-namespace xuser::inc{
+namespace xuser{
     using ::mixc::math_abs::abs;
 }

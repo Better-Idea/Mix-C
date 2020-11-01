@@ -2,11 +2,12 @@
 #define xpack_io_private_tty_color_t
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_private_tty_color_t
+#define xuser mixc::io_private_tty_color_t::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::io_private_tty_color_t{
+namespace mixc::io_private_tty_color_t::origin{
     enum class tty_color_t : u08 {
         black,
         red,
@@ -48,10 +49,4 @@ namespace mixc::io_private_tty_color_t{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::io_private_tty_color_t::tty_color_t;
-}
-
-namespace xuser::inc::tty_color{
-    using namespace ::mixc::io_private_tty_color_t::tty_color;
-}
+xexport_space(mixc::io_private_tty_color_t::origin)

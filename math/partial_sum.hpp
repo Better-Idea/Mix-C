@@ -2,9 +2,10 @@
 #define xpack_math_partial_sum
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_partial_sum
+#define xuser mixc::math_partial_sum::inc
 #include"define/base_type.hpp"
 #include"interface/ranger.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_partial_sum{
@@ -34,6 +35,4 @@ namespace mixc::math_partial_sum{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_partial_sum::partial_sum;
-}
+xexport(mixc::math_partial_sum::partial_sum)

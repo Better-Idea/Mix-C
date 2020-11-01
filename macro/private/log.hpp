@@ -2,7 +2,7 @@
 #define xpack_macro_private_log
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_private_log
+#define xuser mixc::macro_private_log::inc
 #include"define/base_type.hpp"
 #include"macro/private/mix.hpp"
 #pragma pop_macro("xuser")
@@ -35,6 +35,4 @@ namespace mixc::macro_private_log::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::macro_private_log::origin;
-}
+xexport_space(mixc::macro_private_log::origin)

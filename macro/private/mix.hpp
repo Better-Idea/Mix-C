@@ -2,13 +2,18 @@
 #define xpack_macro_private_mix
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_private_mix
+#define xuser mixc::macro_private_mix::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta/more_fit.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx{
     template<class final, class item_t> struct cxx_t;
+}
+
+namespace mixc::macro_private_mix::inc{
+    using mixc::meta_more_fit::more_fit;
 }
 
 namespace mixc::macro_private_mix::origin{
@@ -89,6 +94,4 @@ namespace mixc::macro_private_mix::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::macro_private_mix::origin;
-}
+xexport_space(mixc::macro_private_mix::origin)

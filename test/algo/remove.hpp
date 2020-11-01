@@ -2,15 +2,15 @@
 #define xpack_test_algo_remove
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_algo_insert
+        #define xuser mixc::test_algo_insert::inc
         #include"algo/remove.hpp"
-        #include"define/base_type.hpp"
-        #include"define/nullref.hpp"
+                #include"define/nullref.hpp"
         #include"docker/array.hpp"
         #include"docker/shared_ptr.hpp"
         #include"macro/xassert.hpp"
         #include"memory/allocator.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_algo_insert{
         xtest(remove){

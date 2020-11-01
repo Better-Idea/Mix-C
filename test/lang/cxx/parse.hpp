@@ -2,13 +2,13 @@
 #define xpack_test_lang_cxx_parse
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_lang_cxx_parse
-        #include"define/base_type.hpp"
-        #include"lang/cxx/parse.hpp"
+        #define xuser mixc::test_lang_cxx_parse::inc
+                #include"lang/cxx/parse.hpp"
         #include"lang/cxx.hpp"
         #include"docker/array.hpp"
         #include"macro/xassert.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_lang_cxx_parse{
         xtest(parse){

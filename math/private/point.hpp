@@ -2,7 +2,7 @@
 #define xpack_math_point
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_point
+#define xuser mixc::math_point::inc
 #include"math/sqrt.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")

@@ -2,8 +2,9 @@
 #define xpack_meta_seq_vmerge
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_vmerge
+#define xuser mixc::meta_seq_vmerge::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/vlist.hpp"
 #pragma pop_macro("xuser")
 
@@ -19,6 +20,4 @@ namespace mixc::meta_seq_vmerge{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_vmerge::vmerge;
-}
+xexport(mixc::meta_seq_vmerge::vmerge)

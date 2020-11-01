@@ -2,8 +2,9 @@
 #define xpack_meta_remove_const
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_remove_const
+#define xuser mixc::meta_remove_const::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_remove_const{
@@ -23,6 +24,4 @@ namespace mixc::meta_remove_const{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_remove_const::remove_const;
-}
+xexport(mixc::meta_remove_const::remove_const)

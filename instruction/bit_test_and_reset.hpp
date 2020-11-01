@@ -2,8 +2,8 @@
 #define xpack_instruction_bit_test_and_reset
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_bit_test_and_reset
-#include"define/base_type.hpp"
+#define xuser mixc::instruction_bit_test_and_reset::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_bit_test_and_reset{
@@ -24,6 +24,4 @@ namespace mixc::instruction_bit_test_and_reset{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_bit_test_and_reset::bit_test_and_reset;
-}
+xexport(mixc::instruction_bit_test_and_reset::bit_test_and_reset)

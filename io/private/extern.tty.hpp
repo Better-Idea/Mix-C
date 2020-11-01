@@ -75,7 +75,7 @@ void decode(){
     #undef xuser
 #endif
 
-#define xuser mixc::io_private_tty
+#define xuser mixc::io_private_tty::inc
 #include<stdio.h>
 #include"algo/binary_search.hpp"
 #include"algo/mmu.hpp"
@@ -102,7 +102,7 @@ void decode(){
     #include<wchar.h>
 #endif
 
-namespace xuser::origin{
+namespace mixc::io_private_tty::origin{
     inc::tty_key const  unknown_key{};
     inc::c16            key_str;
     char16_t            buf_key[8];

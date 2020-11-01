@@ -12,7 +12,7 @@
 #define xpack_algo_hash
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_hash
+#define xuser mixc::algo_hash::inc
 #include"memop/addressof.hpp"
 #include"instruction/ring_shift_left.hpp"
 #include"instruction/count_of_set.hpp"

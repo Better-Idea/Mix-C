@@ -2,11 +2,11 @@
 #define xpack_phc_mpc
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::phc_mpc
-#include"define/base_type.hpp"
+#define xuser mixc::phc_mpc::inc
 #include"interface/can_callback.hpp"
 #include"memory/allocator.hpp"
 #include"lock/atom_fetch_or.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::phc_mpc{

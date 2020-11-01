@@ -2,7 +2,7 @@
 #define xpack_talk_about_policy_barrier
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::talk_about_policy_barrier
+#define xuser mixc::talk_about_policy_barrier::inc
 #include<thread>
 #include"lock/mutex.hpp"
 #include"lock/atom_add.hpp"

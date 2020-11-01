@@ -2,9 +2,9 @@
 #define xpack_meta_item_of
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_item_of
+#define xuser mixc::meta_item_of::inc
 #include"meta/is_indexable.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_of{

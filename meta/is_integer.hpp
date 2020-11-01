@@ -2,8 +2,9 @@
 #define xpack_meta_is_integer
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_integer
+#define xuser mixc::meta_is_integer::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_unsigned.hpp"
 #include"meta/is_signed.hpp"
 #pragma pop_macro("xuser")
@@ -20,6 +21,4 @@ namespace mixc::meta_is_integer{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_integer::is_integer;
-}
+xexport(mixc::meta_is_integer::is_integer)

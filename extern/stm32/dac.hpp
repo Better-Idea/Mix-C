@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_dac
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_dac
+        #define xuser mixc::extern_stm32_dac::inc
         #include"define/bitbind.hpp"
         #include"define/mfxx.hpp"
         #include"extern/stm32/define.hpp"

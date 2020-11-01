@@ -2,7 +2,7 @@
 #define xpack_lang_wxx
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lang_wxx
+#define xuser mixc::lang_wxx::inc
 #include"define/base_type.hpp"
 #include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")

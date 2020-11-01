@@ -2,7 +2,7 @@
 #define xpack_multi_barrier
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::multi_barrier
+#define xuser mixc::multi_barrier::inc
 #include"lock/atom_fetch_add.hpp"
 #include"lock/atom_fetch_sub.hpp"
 #include"lock/private/lock_state_t.hpp"
@@ -43,6 +43,4 @@ namespace mixc::multi_barrier::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::multi_barrier::origin;
-}
+xexport_space(mixc::multi_barrier::origin)

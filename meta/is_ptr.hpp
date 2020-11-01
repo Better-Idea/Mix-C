@@ -2,8 +2,9 @@
 #define xpack_meta_is_ptr
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_ptr
+#define xuser mixc::meta_is_ptr::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_ptr{
@@ -33,6 +34,4 @@ namespace mixc::meta_is_ptr{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_ptr::is_ptr;
-}
+xexport(mixc::meta_is_ptr::is_ptr)

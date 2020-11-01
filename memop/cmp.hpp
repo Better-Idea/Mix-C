@@ -2,7 +2,7 @@
 #define xpack_memop_cmp
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_cmp
+#define xuser mixc::memop_cmp::inc
 #include"meta/is_class.hpp"
 #include"meta/is_enum.hpp"
 #include"meta/is_union.hpp"

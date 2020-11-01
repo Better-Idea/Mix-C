@@ -2,8 +2,8 @@
 #define xpack_memop_swap
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_swap
-#include"define/base_type.hpp"
+#define xuser mixc::memop_swap::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_swap{
@@ -21,6 +21,4 @@ namespace mixc::memop_swap{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_swap::swap;
-}
+xexport(mixc::memop_swap::swap)

@@ -2,8 +2,8 @@
 #define xpack_memop_bits
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_bits
-#include"define/base_type.hpp"
+#define xuser mixc::memop_bits::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_bits{
@@ -25,6 +25,4 @@ namespace mixc::memop_bits{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_bits::bit;
-}
+xexport(mixc::memop_bits::bit)

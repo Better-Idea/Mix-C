@@ -3,7 +3,7 @@
 #pragma warning(disable:4390)
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xhint
+#define xuser mixc::macro_xhint::inc
 #include"macro/private/log.hpp"
 #pragma pop_macro("xuser")
 

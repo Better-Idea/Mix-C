@@ -430,6 +430,6 @@ namespace mixc::draft_x64{
 
 #endif
 
-namespace xuser::inc{
+namespace xuser{
     using namespace ::mixc::draft_x64;
 }

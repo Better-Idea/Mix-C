@@ -2,11 +2,11 @@
 #define xpack_math_index_system
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_index_system
+#define xuser mixc::math_index_system::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"macro/xitf.hpp"
-#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc{
@@ -94,6 +94,4 @@ namespace mixc{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::pack;
-}
+xexport_space(mixc::pack)

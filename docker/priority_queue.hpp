@@ -4,7 +4,7 @@
 #endif
 #include"macro/xfinal.hpp"
 
-namespace xuser::inc {
+namespace xuser {
     template<class item_t>
     xfinal_tmpl(xusing_docker_name, priority_queue, item_t);
 }

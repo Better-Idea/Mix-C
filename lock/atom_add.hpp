@@ -2,7 +2,7 @@
 #define xpack_lock_atom_add
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_atom_add
+#define xuser mixc::lock_atom_add::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -21,6 +21,4 @@ namespace mixc::lock_atom_add{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::lock_atom_add::atom_add;
-}
+xexport(mixc::lock_atom_add::atom_add)

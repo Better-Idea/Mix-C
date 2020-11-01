@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tdistinct_merge
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tdistinct_merge
+#define xuser mixc::meta_seq_tdistinct_merge::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
 #pragma pop_macro("xuser")
@@ -43,6 +44,4 @@ namespace mixc::meta_seq_tdistinct_merge{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tdistinct_merge::tdistinct_merge;
-}
+xexport(mixc::meta_seq_tdistinct_merge::tdistinct_marge)

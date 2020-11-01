@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_wxx")
 #undef  xusing_lang_wxx
 #undef  xuser
-#define xuser mixc::lang_wxx_is_punctuation
+#define xuser mixc::lang_wxx_is_punctuation::inc
 #include"algo/binary_search.hpp"
 #include"define/base_type.hpp"
 #include"docker/array.hpp"

@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_gpio
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_gpio
+        #define xuser mixc::extern_stm32_gpio::inc
         #include"extern/stm32/afio.hpp"
         #include"extern/stm32/define.hpp"
         #include"meta/is_based_on.hpp"
@@ -153,6 +153,4 @@
     }
 #endif
 
-namespace xuser::inc{
-    using namespace mixc::extern_stm32_gpio::origin;
-}
+xexport(mixc::extern_stm32_gpio::gpio)

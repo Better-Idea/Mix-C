@@ -2,7 +2,7 @@
 #define xpack_algo_test_binary_search
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_test_binary_search
+#define xuser mixc::algo_test_binary_search::inc
 #include"algo/binary_search.hpp"
 #include"docker/array.hpp"
 #include"macro/xassert.hpp"

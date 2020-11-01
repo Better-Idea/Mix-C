@@ -2,8 +2,9 @@
 #define xpack_math_asin
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_asin
-#include"mixc.hpp"
+#define xuser mixc::math_asin::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_asin{

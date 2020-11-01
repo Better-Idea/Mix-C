@@ -2,8 +2,9 @@
 #define xpack_meta_more_fit
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_more_fit
+#define xuser mixc::meta_more_fit::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"math/const.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/has_operator_cast.hpp"
@@ -86,6 +87,4 @@ namespace mixc::meta_more_fit{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_more_fit::more_fit;
-}
+xexport(mixc::meta_more_fit::more_fit)

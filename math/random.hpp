@@ -2,32 +2,33 @@
 #define xpack_math_random
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_random
+#define xuser mixc::math_random::inc
 #include"define/base_type.hpp"
 #include"define/nan.hpp"
 #include"instruction/ring_shift_left.hpp"
 #include"instruction/time_stamp.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_random{
-    namespace inner{
-        inline static u64 x = inc::time_stamp();
-        inline static u64 y = inc::time_stamp() * magic_number;
+namespace mixc::math_random::inc{
+    inline static u64 x = inc::time_stamp();
+    inline static u64 y = inc::time_stamp() * magic_number;
 
-        inline u64 random() {
-            constexpr u64 change_period = 0x3f;
+    inline u64 random() {
+        constexpr u64 change_period = 0x3f;
 
-            if ((x & change_period) == 0){
-                x += inc::time_stamp();
-            }
-
-            x += inc::ring_shift_left(y, uxx(x));
-            y += inc::ring_shift_left(x, uxx(y));
-            return y;
+        if ((x & change_period) == 0){
+            x += inc::time_stamp();
         }
-    }
 
+        x += inc::ring_shift_left(y, uxx(x));
+        y += inc::ring_shift_left(x, uxx(y));
+        return y;
+    }
+}
+
+namespace mixc::math_random{
     template<class type>
     inline type random(){
         if constexpr (inc::is_same<type, f32>){
@@ -37,7 +38,7 @@ namespace mixc::math_random{
             } v;
 
             while(true){
-                if (v.u = inner::random(); v.candidate[0] != inc::nan){
+                if (v.u = inc::random(); v.candidate[0] != inc::nan){
                     return v.candidate[0];
                 }
                 else if (v.candidate[1] != inc::nan){
@@ -52,22 +53,20 @@ namespace mixc::math_random{
             } v;
 
             while(true){
-                if (v.u = inner::random(); v.candidate != inc::nan){
+                if (v.u = inc::random(); v.candidate != inc::nan){
                     return v.candidate;
                 }
             }
         }
         else if constexpr (inc::is_same<type, bool>){
-            return inner::random() % 2 == 0;
+            return inc::random() % 2 == 0;
         }
         else{
-            return type(inner::random());
+            return type(inc::random());
         }
     }
 }
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_random::random;
-}
+xexport(mixc::math_random::random)

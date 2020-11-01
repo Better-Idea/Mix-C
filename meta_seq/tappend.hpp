@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tappend
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tappend
+#define xuser mixc::meta_seq_tappend::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #pragma pop_macro("xuser")
 
@@ -19,6 +20,4 @@ namespace mixc::meta_seq_tappend{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tappend::tappend;
-}
+xexport(mixc::meta_seq_tappend::tappend)

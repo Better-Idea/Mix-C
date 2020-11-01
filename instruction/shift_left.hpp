@@ -2,8 +2,8 @@
 #define xpack_instruction_shift_left
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_shift_left
-#include"define/base_type.hpp"
+#define xuser mixc::instruction_shift_left::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_shift_left{
@@ -24,6 +24,4 @@ namespace mixc::instruction_shift_left{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_shift_left::shift_left;
-}
+xexport(mixc::instruction_shift_left::shift_left)

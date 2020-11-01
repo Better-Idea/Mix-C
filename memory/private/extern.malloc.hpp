@@ -2,9 +2,10 @@
     #undef xuser
 #endif
 
-#define xuser mixc::memory_private_tiny_allocator
+#define xuser mixc::memory_private_tiny_allocator::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
+
 #include<malloc.h>
 
 namespace mixc::memory_private_tiny_allocator{

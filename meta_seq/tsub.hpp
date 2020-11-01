@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tsub
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tsub
+#define xuser mixc::meta_seq_tsub::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tmerge.hpp"
@@ -38,6 +39,4 @@ namespace mixc::meta_seq_tsub{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tsub::tsub;
-}
+xexport(mixc::meta_seq_tsub::tsub)

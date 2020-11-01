@@ -54,7 +54,7 @@ int main(){
 #define xpack_macro_xitf
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xitf
+#define xuser mixc::macro_xitf::inc
 #include"configure.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/private/word.hpp"
@@ -272,6 +272,4 @@ namespace mixc::macro_xitf{
 
 #endif
 
-namespace xuser::inc {
-    using ::mixc::macro_xitf::hub_itf;
-}
+xexport(mixc::macro_xitf::hub_itf)

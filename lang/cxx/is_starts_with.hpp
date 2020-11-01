@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_is_starts_with
+#define xuser mixc::lang_cxx_is_starts_with::inc
 #include"define/base_type.hpp"
 #include"interface/can_compare.hpp"
 #include"lang/cxx/compare_fastly.hpp"

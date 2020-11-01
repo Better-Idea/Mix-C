@@ -9,7 +9,7 @@
 #define xpack_docker_array
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_array
+#define xuser mixc::docker_array::inc
 #include"docker/private/adapter.array_access.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")

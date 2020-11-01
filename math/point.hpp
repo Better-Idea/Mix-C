@@ -4,7 +4,7 @@
 #endif
 #include"macro/xfinal.hpp"
 
-namespace xuser::inc{
+namespace xuser{
     template<class posx_t, class posy_t = posx_t, class posz_t = void>
     xfinal_tmpl(xusing_math_point, point, posx_t, posx_t, posz_t);
 

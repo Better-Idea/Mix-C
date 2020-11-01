@@ -2,7 +2,7 @@
 #define xpack_meta_ctr_cif
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_ctr_cif
+#define xuser mixc::meta_ctr_cif::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

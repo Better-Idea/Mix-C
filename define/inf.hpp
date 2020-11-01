@@ -49,12 +49,13 @@
 #define xpack_define_inf
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_inf
+#define xuser mixc::define_inf::inc
 #include"define/base_type.hpp"
 #include"define/mfxx.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::define_inf{
+namespace mixc::define_inf::origin{
     // 正无穷
     constexpr inc::mf64 inf_pos { 0ull, 0x7ffull, 0ull };
 
@@ -89,13 +90,6 @@ namespace mixc::define_inf{
     constexpr inf_t inf {};
 }
 
-namespace mixc::define_inf::origin{
-    using ::mixc::define_inf::inf;
-    using ::mixc::define_inf::inf_pos;
-    using ::mixc::define_inf::inf_neg;
-}
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::define_inf::origin;
-}
+xexport_space(mixc::define_inf::origin)

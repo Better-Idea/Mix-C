@@ -13,11 +13,11 @@
 #define xpack_algo_binary_search
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_binary_search
-#include"define/base_type.hpp"
+#define xuser mixc::algo_binary_search::inc
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
@@ -172,6 +172,4 @@ namespace mixc::algo_binary_search::origin::binary_search{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::algo_binary_search::origin;
-}
+xexport_space(mixc::algo_binary_search::origin)

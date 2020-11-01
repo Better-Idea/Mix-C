@@ -2,7 +2,7 @@
 #define xpack_chrono_private_lut
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::chrono_private_lut
+#define xuser mixc::chrono_private_lut::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

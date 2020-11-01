@@ -9,9 +9,8 @@
 #define xpack_gc_self_management
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_self_management
-#include"define/base_type.hpp"
-#include"macro/xstruct.hpp"
+#define xuser mixc::gc_self_management::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_self_management{
@@ -22,6 +21,4 @@ namespace mixc::gc_self_management{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::gc_self_management::self_management;
-}
+xexport(mixc::gc_self_management::self_management)

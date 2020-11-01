@@ -4,7 +4,7 @@
 #endif
 #include"macro/xfinal.hpp"
 
-namespace xuser::inc{
+namespace xuser{
     using xusing_docker_stack::with_stack_lock;
 
     template<class item_t, class lock_t = void>

@@ -16,8 +16,8 @@
 #define xpack_define_nan
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_nan
-#include"define/base_type.hpp"
+#define xuser mixc::define_nan::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_nan{
@@ -61,6 +61,4 @@ namespace mixc::define_nan{
 }
 #endif
 
-namespace xuser::inc{
-    using ::mixc::define_nan::nan;
-}
+xexport(mixc::define_nan::nan)

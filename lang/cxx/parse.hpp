@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_parse
+#define xuser mixc::lang_cxx_parse::inc
 #include"configure.hpp"
 #include"define/base_type.hpp"
 #include"define/nan.hpp"

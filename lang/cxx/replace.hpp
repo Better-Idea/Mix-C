@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_replace
+#define xuser mixc::lang_cxx_replace::inc
 #include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"interface/can_alloc.hpp"

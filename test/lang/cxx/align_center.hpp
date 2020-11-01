@@ -2,13 +2,13 @@
 #define xpack_test_lang_cxx_align_center
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_lang_cxx_align_center
-        #include"define/base_type.hpp"
-        #include"lang/cxx/align_center.hpp"
+        #define xuser mixc::test_lang_cxx_align_center::inc
+                #include"lang/cxx/align_center.hpp"
         #include"lang/cxx/compare.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xassert.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_lang_cxx_align_center{
         xtest(align_center){

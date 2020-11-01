@@ -2,7 +2,7 @@
 #define xpack_macro_xdefer
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xdefer
+#define xuser mixc::macro_xdefer::inc
 #include"mixc.hpp"
 #include"macro/xlink.hpp"
 #pragma pop_macro("xuser")

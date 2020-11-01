@@ -2,8 +2,9 @@
 #define xpack_meta_int_type
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_int_type
+#define xuser mixc::meta_int_type::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_int_type{
@@ -25,6 +26,4 @@ namespace mixc::meta_int_type{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_int_type::int_type;
-}
+xexport(mixc::meta_int_type::int_type)

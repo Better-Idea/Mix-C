@@ -2,14 +2,13 @@
 #define xpack_interface_can_callback
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_can_callback
-#include"define/base_type.hpp"
+#define xuser mixc::interface_can_callback::inc
 #include"macro/private/callable.hpp"
-#include"macro/xstruct.hpp"
 #include"memop/signature.hpp"
 #include"memop/addressof.hpp"
 #include"meta/is_same.hpp"
 #include"meta/remove_membership.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_callback{
@@ -17,9 +16,9 @@ namespace mixc::interface_can_callback{
     template<class ret, class ... args> 
     xstruct(
         xspec(can_callback, ret(args...)),
-        xpubb(inc::callable_t)
+        xpubb(inc::callable)
     )
-        using base_t = inc::callable_t;
+        using base_t = inc::callable;
         using signature = inc::signature<ret(args...)>;
         using base_t::operator=;
         using base_t::operator==;
@@ -58,6 +57,4 @@ namespace mixc::interface_can_callback{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::interface_can_callback::can_callback;
-}
+xexport(mixc::interface_can_callback::can_callback)

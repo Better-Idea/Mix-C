@@ -7,12 +7,12 @@
 #define xpack_gc_private_make_guide
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_private_make_guide
-#include"define/base_type.hpp"
+#define xuser mixc::gc_private_make_guide::inc
 #include"gc/private/routing.hpp"
 #include"gc/private/collect.hpp"
 #include"meta/is_class.hpp"
 #include"meta_seq/tlist.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_make_guide{
@@ -32,6 +32,4 @@ namespace mixc::gc_private_make_guide{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::gc_private_make_guide::make_guide;
-}
+xexport(mixc::gc_private_make_guide::make_guide)

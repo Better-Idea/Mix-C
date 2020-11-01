@@ -1,5 +1,4 @@
+#include"macro/xexport.hpp"
 #include<initializer_list>
 
-namespace xuser::inc{
-    using ::std::initializer_list;
-}
+xexport(std::initializer_list)

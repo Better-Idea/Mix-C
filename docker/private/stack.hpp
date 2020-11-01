@@ -2,7 +2,7 @@
 #define xpack_docker_stack
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_stack
+#define xuser mixc::docker_stack::inc
 #include"docker/transmitter.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"dumb/disable_copy.hpp"

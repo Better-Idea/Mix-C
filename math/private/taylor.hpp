@@ -2,7 +2,7 @@
 #define xpack_math_private_taylor
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_private_taylor
+#define xuser mixc::math_private_taylor::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

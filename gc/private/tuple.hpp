@@ -2,8 +2,7 @@
 #define xpack_gc_private_tuple
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_private_tuple
-#include"define/base_type.hpp"
+#define xuser mixc::gc_private_tuple::inc
 #include"gc/self_management.hpp"
 #include"macro/xdebug.hpp"
 #include"meta/is_based_on.hpp"
@@ -13,6 +12,7 @@
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/vlist.hpp"
 #include"meta_seq/tin.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_tuple{
@@ -100,6 +100,4 @@ namespace mixc::gc_private_tuple{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::gc_private_tuple::tuple;
-}
+xexport(mixc::gc_private_tuple::tuple)

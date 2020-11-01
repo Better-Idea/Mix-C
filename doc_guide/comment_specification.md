@@ -33,7 +33,7 @@
 #define xpack_define_nullref_t
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_nullref_t
+#define xuser mixc::define_nullref_t::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

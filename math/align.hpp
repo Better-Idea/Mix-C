@@ -2,9 +2,9 @@
 #define xpack_math_align
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_align
-#include"define/base_type.hpp"
+#define xuser mixc::math_align::inc
 #include"instruction/index_of_last_set.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_align{
@@ -33,6 +33,4 @@ namespace mixc::math_align{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_align::align;
-}
+xexport(mixc::math_align::align)

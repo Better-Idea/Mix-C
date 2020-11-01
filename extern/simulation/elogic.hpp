@@ -2,12 +2,12 @@
 #define xpack_mixc_extern_simulation_logic
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::elogic
-#include"define/base_type.hpp"
+#define xuser mixc::elogic::inc
 #include"docker/queue.hpp"
 #include"macro/private/xlist.hpp"
 #include"memop/signature.hpp"
 #include"memop/swap.hpp"
+#include"mixc.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -327,6 +327,4 @@ namespace mixc::elogic::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::elogic::origin;
-}
+xexport(mixc::elogic::elogic)

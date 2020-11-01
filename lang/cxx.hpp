@@ -4,7 +4,7 @@
 #include"lang/private/cxx.hpp"
 #endif
 
-namespace xuser::inc{
+namespace xuser{
     template<class item_t> struct cxx;
 
     template<>

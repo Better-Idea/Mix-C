@@ -2,8 +2,9 @@
 #define xpack_meta_is_enum
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_enum
+#define xuser mixc::meta_is_enum::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_enum{
@@ -13,6 +14,4 @@ namespace mixc::meta_is_enum{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_enum::is_enum;
-}
+xexport(mixc::meta_is_enum::is_enum)

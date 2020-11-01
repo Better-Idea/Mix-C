@@ -2,7 +2,7 @@
 #define xpack_draft_bits_indexer
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::draft_bits_indexer
+#define xuser mixc::draft_bits_indexer::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

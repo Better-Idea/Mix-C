@@ -2,13 +2,13 @@
 #define xpack_test_lang_wxx_is_punctuation
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_lang_wxx_is_punctuation
-        #include"define/base_type.hpp"
-        #include"lang/wxx/is_punctuation.hpp"
+        #define xuser mixc::test_lang_wxx_is_punctuation::inc
+                #include"lang/wxx/is_punctuation.hpp"
         #include"lang/wxx.hpp"
         #include"docker/array.hpp"
         #include"macro/xassert.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_lang_wxx_is_punctuation{
         xtest(is_punctuation){

@@ -7,6 +7,6 @@ namespace mixc::lock_private_thread_yield{
 
 #endif
 
-namespace xuser::inc{
+namespace xuser{
     using ::mixc::lock_private_thread_yield::thread_yield;
 }

@@ -2,14 +2,15 @@
 #define xpack_lock_mutex
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_mutex
+#define xuser mixc::lock_mutex::inc
+#include"define/base_type.hpp"
 #include"lock/atom_and.hpp"
 #include"lock/atom_fetch_or.hpp"
 #include"lock/atom_swap.hpp"
 #include"lock/private/lock_state_t.hpp"
 #include"lock/private/thread_yield.hpp"
+#include"macro/xexport.hpp"
 #include"meta/unsigned_type.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::lock_mutex::origin{
@@ -71,6 +72,4 @@ namespace mixc::lock_mutex::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::lock_mutex::origin;
-}
+xexport_space(mixc::lock_mutex::origin)

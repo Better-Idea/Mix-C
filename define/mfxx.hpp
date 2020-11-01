@@ -35,9 +35,9 @@
 #define xpack_define_mfxx
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_mfxx
+#define xuser mixc::define_mfxx::inc
 #include"define/base_type.hpp"
-#include"macro/xstruct.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
@@ -177,6 +177,4 @@ namespace mixc::define_mfxx::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::define_mfxx::origin;
-}
+xexport_space(mixc::define_mfxx::origin)

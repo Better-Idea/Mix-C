@@ -2,8 +2,7 @@
 #define xpack_gc_ref
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_ref
-#include"define/base_type.hpp"
+#define xuser mixc::gc_ref::inc
 #include"define/nullref.hpp"
 #include"docker/hashmap.hpp"
 #include"dumb/dummy_type.hpp"
@@ -16,7 +15,6 @@
 #include"lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xis_nullptr.hpp"
-#include"macro/xstruct.hpp"
 #include"memory/allocator.hpp"
 #include"memop/addressof.hpp"
 #include"memop/cast.hpp"
@@ -27,6 +25,7 @@
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/vlist.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_ref{
@@ -354,6 +353,4 @@ namespace mixc::gc_ref::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::gc_ref::origin;
-}
+xexport_space(mixc::gc_ref::origin)

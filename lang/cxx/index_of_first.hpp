@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_index_of_first
+#define xuser mixc::lang_cxx_index_of_first::inc
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/initializer_list.hpp"
@@ -63,7 +63,7 @@ namespace mixc::lang_cxx_index_of_first{
                 if (index = origin.index_of_first(value[miss], compare); index == not_exist){
                     break;
                 }
-                if (origin = origin.backward(index - miss); origin.length() < value.length()) {
+                if (origin = origin.forward(miss - index); origin.length() < value.length()) {
                     break;
                 }
                 for (index = 0; ; index++){
@@ -71,6 +71,7 @@ namespace mixc::lang_cxx_index_of_first{
                         return uxx(origin - the);
                     }
                     if (compare(origin[index], value[index]) != 0) {
+                        origin = origin.backward(miss);
                         miss = index;
                         break;
                     }

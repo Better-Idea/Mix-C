@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tpop
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tpop
+#define xuser mixc::meta_seq_tpop::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tnull.hpp"
 #pragma pop_macro("xuser")
@@ -67,6 +68,4 @@ namespace mixc::meta_seq_tpop{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tpop::tpop;
-}
+xexport(mixc::meta_seq_tpop::tpop)

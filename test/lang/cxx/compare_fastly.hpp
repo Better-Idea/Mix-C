@@ -2,12 +2,12 @@
 #define xpack_test_lang_cxx_compare_fastly
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_lang_cxx_compare_fastly
-        #include"define/base_type.hpp"
-        #include"lang/cxx/compare_fastly.hpp"
+        #define xuser mixc::test_lang_cxx_compare_fastly::inc
+                #include"lang/cxx/compare_fastly.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xassert.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_lang_cxx_compare_fastly{
         xtest(compare_fastly){

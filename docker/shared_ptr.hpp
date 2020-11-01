@@ -2,7 +2,7 @@
 #define xpack_docker_shared_ptr
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_shared_ptr
+#define xuser mixc::docker_shared_ptr::inc
 #include"gc/ref.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -32,8 +32,7 @@ namespace mixc::docker_shared_ptr{
 
         template<class ... args>
         shared_ptr<type> & operator()(::ini, args const & ... list){
-            base_t::operator=(nullptr);
-            new (this) base_t(::length(0), list...);
+            the_t{ini_now, list...}.swap(this);
             return the;
         }
 

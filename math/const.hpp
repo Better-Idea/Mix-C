@@ -2,8 +2,9 @@
 #define xpack_math_const
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_const
+#define xuser mixc::math_const::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_const::origin{
@@ -47,6 +48,4 @@ namespace mixc::math_const::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::math_const::origin;
-}
+xexport_space(mixc::math_const::origin)

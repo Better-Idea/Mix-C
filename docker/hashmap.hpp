@@ -4,7 +4,7 @@
 #endif
 #include"macro/xfinal.hpp"
 
-namespace xuser::inc{
+namespace xuser{
     template<class key_t, class val_t = void>
     xfinal_tmpl(xusing_docker_hashmap, hashmap, key_t, val_t);
 }

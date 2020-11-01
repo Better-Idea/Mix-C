@@ -2,11 +2,11 @@
 #define xpack_extern_gui_private_addressing
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::extern_gui_private_addressing
+#define xuser mixc::extern_gui_private_addressing::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::extern_gui_private_addressing::origin {
+namespace mixc::extern_gui_private_addressing {
     template<uxx arg_width, uxx arg_height>
     xstruct(
         xtmpl(addressing, arg_width, arg_height)
@@ -32,6 +32,4 @@ namespace mixc::extern_gui_private_addressing::origin {
 
 #endif
 
-namespace xuser::inc {
-    using namespace ::mixc::extern_gui_private_addressing::origin;
-}
+xexport(mixc::extern_gui_private_addressing::addressing)

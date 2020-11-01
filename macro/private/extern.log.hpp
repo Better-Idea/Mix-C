@@ -2,15 +2,17 @@
 #define xpack_macro_private_log_extern
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_private_log_extern
+#define xuser mixc::macro_private_log_extern::inc
 #include"configure.hpp"
 #include"define/base_type.hpp"
 #include"macro/private/log.hpp"
 #include"macro/private/mix.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"macro/xdefer.hpp"
 #include"io/tty.hpp"
 #include"lang/cxx/index_of_last.hpp"
+#include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
 #include"lock/mutex.hpp"
 #pragma pop_macro("xuser")

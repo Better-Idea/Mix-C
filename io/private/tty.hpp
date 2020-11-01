@@ -2,10 +2,11 @@
 #define xpack_io_private_tty
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_private_tty
+#define xuser mixc::io_private_tty::inc
 #include"interface/can_alloc.hpp"
 #include"io/private/tty_key.hpp"
 #include"io/private/tty_color_t.hpp"
+#include"macro/xexport.hpp"
 #include"memory/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -25,6 +26,4 @@ namespace mixc::io_private_tty::origin{
 }
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::io_private_tty::origin;
-}
+xexport_space(mixc::io_private_tty::origin)

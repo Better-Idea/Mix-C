@@ -9,12 +9,13 @@
 #define xpack_docker_adapter_array_access
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_adapter_array_access
+#define xuser mixc::docker_adapter_array_access::inc
 #include"interface/seqptr.hpp"
 #include"interface/iterator.hpp"
+#include"macro/xexport.hpp"
+#include"math/index_system.hpp"
 #include"meta/is_integer.hpp"
 #include"memop/swap.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_adapter_array_access {

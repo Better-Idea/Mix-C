@@ -2,8 +2,9 @@
 #define xpack_meta_is_same
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_same
+#define xuser mixc::meta_is_same::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_same{
@@ -23,6 +24,4 @@ namespace mixc::meta_is_same{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_same::is_same;
-}
+xexport(mixc::meta_is_same::is_same)

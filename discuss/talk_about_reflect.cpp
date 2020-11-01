@@ -2,10 +2,10 @@
 #define xpack_talk_about_reflect
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::talk_about_reflect
+#define xuser mixc::talk_about_reflect::inc
 #include"io/tty.hpp"
-#include"macro/xstruct.hpp"
 #include"macro/xtypeid.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::talk_about_reflect::inc{

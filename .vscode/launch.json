@@ -25,5 +25,11 @@
                 }
             ]
         }
+        // {
+        //     "name": "lldb run",
+        //     "type": "lldb",
+        //     "request": "launch",
+        //     "program": "${workspaceFolder}/../main.exe"
+        // }
     ]
 }

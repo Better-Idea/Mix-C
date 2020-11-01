@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_parse_json
+#define xuser mixc::lang_cxx_parse_json::inc
 #include"define/base_type.hpp"
 #include"docker/shared_array/pushpop.hpp"
 #include"docker/shared_array.hpp"
@@ -391,9 +391,4 @@ namespace mixc::lang_cxx_parse_json::xuser {
     using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
-namespace xuser::inc::json_type{
-    using namespace ::mixc::lang_cxx_parse_json::json_type;
-}
-
-#undef  xusing_lang_cxx
-#define xusing_lang_cxx  ::mixc::lang_cxx_parse_json::xuser
+xexport(mixc::lang_cxx_parse_json::parse_json)

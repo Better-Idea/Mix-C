@@ -2,11 +2,11 @@
 #define xpack_talk_about_multi_barrier
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::talk_about_multi_barrier
+#define xuser mixc::talk_about_multi_barrier::inc
 #include<thread>
-#include"define/base_type.hpp"
 #include"io/tty.hpp"
 #include"lock/multi_barrier.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::talk_about_multi_barrier::inc{

@@ -2,8 +2,8 @@
 #define xpack_memop_zeros
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_zeros
-#include"define/base_type.hpp"
+#define xuser mixc::memop_zeros::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_zeros{
@@ -21,6 +21,4 @@ namespace mixc::memop_zeros{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_zeros::zeros;
-}
+xexport(mixc::memop_zeros::zeros)

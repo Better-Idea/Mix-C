@@ -2,8 +2,9 @@
 #define xpack_meta_fit_bits
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_fit_bits
+#define xuser mixc::meta_fit_bits::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_fit_bits{
@@ -33,6 +34,4 @@ namespace mixc::meta_fit_bits{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_fit_bits::fit_bits;
-}
+xexport(mixc::meta_fit_bits::fit_bits)

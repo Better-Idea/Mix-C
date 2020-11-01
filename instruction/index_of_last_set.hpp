@@ -2,9 +2,9 @@
 #define xpack_instruction_index_of_last_set
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_index_of_last_set
+#define xuser mixc::instruction_index_of_last_set::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_index_of_last_set{
@@ -31,6 +31,4 @@ namespace mixc::instruction_index_of_last_set{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_index_of_last_set::index_of_last_set;
-}
+xexport(mixc::instruction_index_of_last_set::index_of_last_set)

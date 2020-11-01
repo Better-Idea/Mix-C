@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_strlize
+#define xuser mixc::lang_cxx_strlize::inc
 #include"define/base_type.hpp"
 #include"define/inf.hpp"
 #include"define/mfxx.hpp"
@@ -150,17 +150,17 @@ namespace mixc::lang_cxx_strlize{
             auto is_neg_exp     = false;
 
             if (not is_scientific_notation){
-                m              += adv::expr10_unsafe(pce) * 0.5;
+                m              += inc::expr10_unsafe(pce) * 0.5;
             }
 
             // 以乘法代替除法
             if (exp < 0){
                 is_neg_exp      = true;
-                m              *= adv::exp10_unsafe(uxx(-exp));
+                m              *= inc::exp10_unsafe(uxx(-exp));
                 buf_exp[0]      = '-';
             }
             else if (exp > 0){
-                m              *= adv::expr10_unsafe(uxx(exp));
+                m              *= inc::expr10_unsafe(uxx(exp));
             }
 
             if (m < 1.0){
@@ -175,10 +175,10 @@ namespace mixc::lang_cxx_strlize{
 
             if (is_scientific_notation){
                 if (exp > pce){
-                    m          += adv::exp10_unsafe(exp - pce) * 0.5;
+                    m          += inc::exp10_unsafe(exp - pce) * 0.5;
                 }
                 else{
-                    m          += adv::expr10_unsafe(pce - exp) * 0.5;
+                    m          += inc::expr10_unsafe(pce - exp) * 0.5;
                 }
             }
 
@@ -291,7 +291,7 @@ namespace mixc::lang_cxx_strlize{
                     auto mem        = alloc(len);
                     auto ptr        = mem;
 
-                    adv::copy_with_operator_unsafe(mem, real, real.length());
+                    inc::copy_with_operator_unsafe(mem, real, real.length());
                     mem            += real.length();
                     inc::fill_with_operator(mem, '0', expanding_zeros);
                     mem            += expanding_zeros;
@@ -304,7 +304,7 @@ namespace mixc::lang_cxx_strlize{
                     mem            += 1;
                     inc::fill_with_operator(mem, '0', leading_zeros);
                     mem            += leading_zeros;
-                    adv::copy_with_operator_unsafe(mem, decimal, decimal.length());
+                    inc::copy_with_operator_unsafe(mem, decimal, decimal.length());
                     mem            += decimal.length();
                     inc::fill_with_operator(mem, '0', trailing_zeros);
                     return base_t(ptr, len);
@@ -324,7 +324,7 @@ namespace mixc::lang_cxx_strlize{
                 auto mem            = alloc(len);
                 auto ptr            = mem;
 
-                adv::copy_with_operator_unsafe(mem, real, real.length());
+                inc::copy_with_operator_unsafe(mem, real, real.length());
                 mem                += real.length();
 
                 if (e_len == 0){
@@ -335,13 +335,13 @@ namespace mixc::lang_cxx_strlize{
                     mem           += 1;
                 }
 
-                adv::copy_with_operator_unsafe(mem, decimal, decimal.length());
+                inc::copy_with_operator_unsafe(mem, decimal, decimal.length());
                 mem                += decimal.length();
                 inc::fill_with_operator(mem, '0', trailing_zeros);
                 mem                += trailing_zeros;
                 mem[0]              = e;
                 mem                += 1;
-                adv::copy_with_operator_unsafe(mem, exp, exp.length());
+                inc::copy_with_operator_unsafe(mem, exp, exp.length());
                 return base_t(ptr, len);
             });
         }
@@ -462,7 +462,7 @@ namespace mixc::lang_cxx_strlize::xuser{
     using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
-namespace xuser::inc{
+namespace xuser{
     using ::mixc::lang_cxx_strlize::lower;
     using ::mixc::lang_cxx_strlize::upper;
     using ::mixc::lang_cxx_strlize::float_format_t;

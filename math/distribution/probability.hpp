@@ -2,7 +2,7 @@
 概率分布 API —— probability 
 样例：
 
-#define xuser some_pack
+#define xuser some_pack::inc
 #include<stdio.h>
 #include"docker/array.hpp"
 #include"math/distribution/probability.hpp"
@@ -39,13 +39,13 @@ int main(){
 #undef  xuser
 #define xuser mixc::math_distribution_probability
 #include"algo/binary_search.hpp"
-#include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/array.hpp"
 #include"interface/ranger.hpp"
 #include"math/random.hpp"
 #include"meta/is_same.hpp"
 #include"meta/unsigned_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_distribution_probability{
@@ -108,6 +108,4 @@ namespace mixc::math_distribution_probability{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_distribution_probability::probability;
-}
+xexport(some_pack::probability)

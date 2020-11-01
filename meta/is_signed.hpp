@@ -2,8 +2,9 @@
 #define xpack_meta_is_signed
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_signed
+#define xuser mixc::meta_is_signed::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_signed{
@@ -33,7 +34,4 @@ namespace mixc::meta_is_signed{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_signed::is_signed;
-}
-
+xexport(mixc::meta_is_signed::is_signed)

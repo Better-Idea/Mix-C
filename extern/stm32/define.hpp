@@ -1,11 +1,11 @@
 #pragma once
 #pragma push_macro("xuser")
     #undef  xuser
-    #define xuser mixc
-    #include"define/base_type.hpp"
-    #include"macro/xlink.hpp"
+    #define xuser mixc::inc
+        #include"macro/xlink.hpp"
     #include"macro/xvolatile.hpp"
     #include"instruction/index_of_first_set.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 #define xfield(name,bits)               name, xlink(end_, name) = name + bits - 1

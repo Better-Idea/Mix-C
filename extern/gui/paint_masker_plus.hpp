@@ -2,7 +2,7 @@
 #define xpack_extern_gui_paint_masker_plus
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::extern_gui_paint_masker_plus
+#define xuser mixc::extern_gui_paint_masker_plus::inc
 #include"docker/bit_indicator.hpp"
 #include"extern/gui/private/addressing.hpp"
 #include"extern/gui/private/try_paint_result_t.hpp"

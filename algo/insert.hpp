@@ -2,7 +2,7 @@
 #define xpack_algo_insert
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_insert
+#define xuser mixc::algo_insert::inc
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"

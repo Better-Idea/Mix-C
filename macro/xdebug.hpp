@@ -4,7 +4,7 @@
 #pragma warning(disable:4819)
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xdebug
+#define xuser mixc::macro_xdebug::inc
 #include"configure.hpp"
 #include"macro/xlink.hpp"
 #include"macro/private/log.hpp"

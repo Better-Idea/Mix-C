@@ -2,8 +2,9 @@
 #define xpack_meta_function
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_function
+#define xuser mixc::meta_function::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tget.hpp"
 #pragma pop_macro("xuser")
@@ -29,6 +30,4 @@ namespace mixc::meta_function{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_function::function;
-}
+xexport(mixc::meta_function::function)

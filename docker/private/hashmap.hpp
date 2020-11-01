@@ -2,7 +2,7 @@
 #define xpack_docker_hashmap
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_hashmap
+#define xuser mixc::docker_hashmap::inc
 #include"algo/hash.hpp"
 #include"define/nullref.hpp"
 #include"docker/bit_indicator.hpp"

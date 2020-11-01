@@ -12,7 +12,7 @@
 #define xpack_algo_distinct
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_distinct
+#define xuser mixc::algo_distinct::inc
 #include"docker/hashmap.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/unified_seq.hpp"

@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_trim_start
+#define xuser mixc::lang_cxx_trim_start::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/initializer_list.hpp"

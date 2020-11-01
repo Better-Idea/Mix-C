@@ -2,8 +2,9 @@
 #define xpack_math_pow
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_pow
+#define xuser mixc::math_pow::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_pow{
@@ -22,6 +23,4 @@ namespace mixc::math_pow{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::math_pow::pow;
-}
+xexport(mixc::math_pow::pow)

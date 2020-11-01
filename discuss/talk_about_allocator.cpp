@@ -2,7 +2,7 @@
 #define xpack_talk_about_allocator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::talk_about_allocator
+#define xuser mixc::talk_about_allocator::inc
 #include"macro/xhint.hpp"
 #include"docker/array.hpp"
 #include"math/random.hpp"

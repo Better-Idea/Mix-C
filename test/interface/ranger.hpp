@@ -2,12 +2,12 @@
 #define xpack_test_interface_ranger
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::test_interface_ranger
+#define xuser mixc::test_interface_ranger::inc
 #include"algo/insert.hpp"
-#include"define/base_type.hpp"
 #include"docker/array.hpp"
 #include"interface/ranger.hpp"
 #include"macro/xassert.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::test_interface_ranger{

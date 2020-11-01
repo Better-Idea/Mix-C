@@ -8,7 +8,7 @@
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_align_right
+#define xuser mixc::lang_cxx_align_right::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"lang/cxx/clone.hpp"

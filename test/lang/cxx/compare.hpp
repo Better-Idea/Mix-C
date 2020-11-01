@@ -2,12 +2,12 @@
 #define xpack_test_lang_cxx_compare
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::test_lang_cxx_compare
-        #include"define/base_type.hpp"
-        #include"lang/cxx/compare.hpp"
+        #define xuser mixc::test_lang_cxx_compare::inc
+                #include"lang/cxx/compare.hpp"
         #include"lang/cxx.hpp"
         #include"macro/xassert.hpp"
-    #pragma pop_macro("xuser")
+    #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
     namespace mixc::test_lang_cxx_compare{
         xtest(compare){

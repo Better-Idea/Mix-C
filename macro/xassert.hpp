@@ -2,12 +2,12 @@
 #define xpack_macro_xassert
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xassert
-#include"define/base_type.hpp"
+#define xuser mixc::macro_xassert::inc
 #include"io/tty.hpp"
 #include"io/private/tty.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xlink.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xassert{

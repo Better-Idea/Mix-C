@@ -2,7 +2,7 @@
 #define xpack_algo_shuffle
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_shuffle
+#define xuser mixc::algo_shuffle::inc
 #include"interface/unified_seq.hpp"
 #include"math/random.hpp"
 #include"memop/addressof.hpp"

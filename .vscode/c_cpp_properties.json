@@ -7,7 +7,7 @@
                 "${workspaceFolder}"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/cpp",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",
             "cppStandard": "c++20",
             "intelliSenseMode": "clang-x64"
@@ -19,7 +19,7 @@
             ],
             "defines": [],
             "windowsSdkVersion": "10.0.18362.0",
-            "compilerPath": "C:/TDM-GCC-64/bin/g++.exe",
+            "compilerPath": "C:/Program Files/TDM/bin/g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++20",
             "intelliSenseMode": "clang-x64"

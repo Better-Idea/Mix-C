@@ -2,9 +2,9 @@
 #define xpack_instruction_count_of_set
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_count_of_set
+#define xuser mixc::instruction_count_of_set::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_count_of_set{
@@ -25,6 +25,4 @@ namespace mixc::instruction_count_of_set{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_count_of_set::count_of_set;
-}
+xexport(mixc::instruction_count_of_set::count_of_set)

@@ -2,8 +2,9 @@
 #define xpack_meta_is_belong_to
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_belong_to
+#define xuser mixc::meta_is_belong_to::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
@@ -24,6 +25,4 @@ namespace mixc::meta_is_belong_to{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_belong_to::is_belong_to;
-}
+xexport(mixc::meta_is_belong_to::is_belong_to)

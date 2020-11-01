@@ -2,9 +2,10 @@
     #undef xuser
 #endif
 
-#define xuser mixc::math_sqrt
+#define xuser mixc::math_sqrt::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
+
 #include"define/mfxx.hpp"
 #include"math/const.hpp"
 

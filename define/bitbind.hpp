@@ -2,9 +2,8 @@
 #define xpack_define_bitbind
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_bitbind
-#include"define/base_type.hpp"
-#include"macro/xstruct.hpp"
+#define xuser mixc::define_bitbind::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_bitbind{
@@ -44,6 +43,4 @@ namespace mixc::define_bitbind{
 
 #endif
 
-namespace xuser::inc{
-    using mixc::define_bitbind::bitbind;
-}
+xexport(mixc::define_bitbind::bitbind)

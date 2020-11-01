@@ -2,7 +2,7 @@
 #define xpack_ttyctrl_text_line
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::ttyctrl_text_line
+#define xuser mixc::ttyctrl_text_line::inc
 #include"algo/insert.hpp"
 #include"algo/remove.hpp"
 #include"docker/shared_array.hpp"
@@ -140,6 +140,4 @@ namespace mixc::ttyctrl_text_line{
 }
 #endif
 
-namespace xuser::inc{
-    using ::mixc::ttyctrl_text_line::text_line;
-}
+xexport(mixc::ttyctrl_text_line::text_line)

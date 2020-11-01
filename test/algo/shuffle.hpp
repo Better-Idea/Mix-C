@@ -2,7 +2,7 @@
 #define xpack_algo_test_shuffle
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_test_shuffle
+#define xuser mixc::algo_test_shuffle::inc
 #include"algo/shuffle.hpp"
 #include"docker/array.hpp"
 #include"docker/bit_indicator.hpp"

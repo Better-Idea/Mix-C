@@ -2,7 +2,7 @@
 #define xpack_extern_gui_private_try_paint_result_t
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::extern_gui_private_try_paint_result_t
+#define xuser mixc::extern_gui_private_try_paint_result_t::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

@@ -2,13 +2,13 @@
     #undef xuser
 #endif
 
-#define xuser mixc::math_expe
+#define xuser mixc::math_expe::inc
 #include"configure.hpp"
+#include"define/base_type.hpp"
 #include"define/inf.hpp"
 #include"define/mfxx.hpp"
 #include"math/expe.hpp"
 #include"math/div.hpp"
-#include"mixc.hpp"
 
 namespace mixc::math_expe{
     #if xuse_math_expe_lut6x16 
@@ -43,9 +43,9 @@ namespace mixc::math_expe::origin{
             x = -x;
         }
 
-        auto qr         = adv::div_unsafe(x, 1.0);
+        auto qr         = inc::div_unsafe(x, 1.0);
         uxx  q          = uxx(qr.quotient);
-        f64  m          = adv::expe_unsafe(q);
+        f64  m          = inc::expe_unsafe(q);
         mf64 r          = qr.remainder;
         mf64 linear     = r;
         uxx  s          = uxx(-r.real_exp_unsafe());

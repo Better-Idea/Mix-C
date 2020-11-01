@@ -2,11 +2,11 @@
 #define xpack_macro_xsv
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xsv
+#define xuser mixc::macro_xsv::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
 #include"gc/private/token.hpp"
 #include"memory/new.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xsv{
@@ -38,6 +38,4 @@ return *(mixc::macro_xsv::static_string_holder<item> *)(& __tmp__)
 #define xsv(item,padding,str)       ([]() { __xsv__(item, padding, str); }())
 #endif
 
-namespace xuser::inc{
-    using ::mixc::macro_xsv::static_string_holder;
-}
+xexport(mixc::macro_xsv::static_string_holder)

@@ -2,7 +2,7 @@
 #define xpack_algo_test_distinct
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_test_distinct
+#define xuser mixc::algo_test_distinct::inc
 #include"algo/distinct.hpp"
 #include"docker/array.hpp"
 #include"docker/bit_indicator.hpp"

@@ -2,7 +2,7 @@
 #define xpack_docker_priority_queue
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_priority_queue
+#define xuser mixc::docker_priority_queue::inc
 #include"algo/heap_root.hpp"
 #include"docker/shared_array/stacklize.hpp"
 #include"docker/shared_array.hpp"

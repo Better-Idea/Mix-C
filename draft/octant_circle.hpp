@@ -2,9 +2,9 @@
 #define xpack_draft_octant_circle
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::draft_octant_circle
-#include"define/base_type.hpp"
+#define xuser mixc::draft_octant_circle::inc
 #include<math.h>
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::draft_octant_circle{
@@ -58,6 +58,4 @@ namespace mixc::draft_octant_circle{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::draft_octant_circle::octant_circle;
-}
+xexport(mixc::draft_octant_circle::octant_circle)

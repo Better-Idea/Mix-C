@@ -2,11 +2,12 @@
 #define xpack_meta_is_number
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_number
+#define xuser mixc::meta_is_number::inc
 #include"define/base_type.hpp"
 #include"is_integer.hpp"
 #include"is_float.hpp"
 #include"is_enum.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_number{
@@ -20,6 +21,4 @@ namespace mixc::meta_is_number{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_number::is_number;
-}
+xexport(mixc::meta_is_number::is_number)

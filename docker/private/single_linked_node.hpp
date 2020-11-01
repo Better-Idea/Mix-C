@@ -2,7 +2,7 @@
 #define xpack_docker_single_linked_node
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_single_linked_node
+#define xuser mixc::docker_single_linked_node::inc
 #include"dumb/struct_type.hpp"
 #include"interface/iterator.hpp"
 #include"lock/atom_swap.hpp"
@@ -92,6 +92,4 @@ namespace mixc::docker_single_linked_node{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::docker_single_linked_node::origin;
-}
+xexport(mixc::docker_single_linked_node::single_linked_node)

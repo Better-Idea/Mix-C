@@ -2,8 +2,9 @@
 #define xpack_meta_seq_tpush_front
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_seq_tpush_front
+#define xuser mixc::meta_seq_tpush_front::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tlist.hpp"
 #pragma pop_macro("xuser")
 
@@ -19,6 +20,4 @@ namespace mixc::meta_seq_tpush_front{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_seq_tpush_front::tpush_front;
-}
+xexport(mixc::meta_seq_tpush_front::tpush_front)

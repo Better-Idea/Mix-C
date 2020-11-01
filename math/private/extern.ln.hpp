@@ -2,7 +2,7 @@
     #undef xuser
 #endif
 
-#define xuser mixc::math_ln
+#define xuser mixc::math_ln::inc
 #include"configure.hpp"
 #include"define/mfxx.hpp"
 #include"macro/xalign.hpp"

@@ -2,7 +2,7 @@
 #define xpack_lock_atom_fetch_xor
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_atom_fetch_xor
+#define xuser mixc::lock_atom_fetch_xor::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -21,6 +21,4 @@ namespace mixc::lock_atom_fetch_xor{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::lock_atom_fetch_xor::atom_fetch_xor;
-}
+xexport(mixc::lock_atom_fetch_xor::atom_fetch_xor)

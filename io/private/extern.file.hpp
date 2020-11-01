@@ -2,15 +2,19 @@
 #define xpack_io_private_file
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::io_private_file
+#define xuser mixc::io_private_file::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
 #include"io/file.hpp"
+#include"io/dir.hpp"
+#include"io/private/path_buffer.hpp"
+#include"lang/cxx/index_of_last.hpp"
+#include"lang/cxx.hpp"
 #include"lock/atom_swap.hpp"
 #include"macro/xindex_rollback.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::io_file{
+namespace mixc::io_file::cpp{
     using namespace ::mixc::io_private_file::inc;
 }
 
@@ -25,8 +29,15 @@ namespace mixc::io_file::origin{
         return size;
     }
 
-    file & file::open(asciis path, access_mode_t mode, bstate_t * result) const {
-        i32 type = 0;
+    file & file::open(inc::c08 path, access_mode_t mode, bstate_t * result) const {
+        auto type = 0;
+        auto i    = cpp::c08{path}.index_of_last({'/','\\'});
+
+        if (i != not_exist){
+            if (auto folder = cpp::c08{path}.length(i); cpp::dir{folder}.is_exist() == false){
+                cpp::dir{folder}.create();
+            }
+        }
 
         switch(mode){
         case access_mode_t::read_only:  type = GENERIC_READ;                    break;
@@ -48,7 +59,7 @@ namespace mixc::io_file::origin{
     }
 
     file & file::close() const {
-        if (atom_swap<ixx>(& fd, 0) > 0){
+        if (cpp::atom_swap<ixx>(& fd, 0) > 0){
             CloseHandle(HANDLE(fd));
         }
         return thex;
@@ -87,19 +98,35 @@ namespace mixc::io_file::origin{
     }
 
     void file::remove() const{
-        DeleteFileA(the.path);
+        auto && buf     = cpp::path_buffer{};
+        auto    source  = buf.alloc(the.path);
+        DeleteFileA(source);
+        buf.free(source);
     }
 
-    void file::move_to(asciis new_path) const{
-        MoveFileA(the.path, new_path);
+    void file::move_to(inc::c08 new_path) const{
+        auto && buf     = cpp::path_buffer{};
+        auto    source  = buf.alloc(the.path);
+        auto    target  = buf.alloc(new_path);
+        MoveFileA(source, target);
+        buf.free(target);
+        buf.free(source);
     }
 
-    void file::copy_to(asciis new_path) const{
-        CopyFileA(the.path, new_path, true/*override*/);
+    void file::copy_to(inc::c08 new_path) const{
+        auto && buf     = cpp::path_buffer{};
+        auto    source  = buf.alloc(the.path);
+        auto    target  = buf.alloc(new_path);
+        CopyFileA(source, target, true/*override*/);
+        buf.free(target);
+        buf.free(source);
     }
 
     bool file::is_exist() const{
+        auto && buf     = cpp::path_buffer{};
+        auto    source  = buf.alloc(the.path);
         auto word = GetFileAttributesA(the.path);
+        buf.free(source);
         return word != INVALID_FILE_ATTRIBUTES and 0 == (word & FILE_ATTRIBUTE_DIRECTORY);
     }
 }
@@ -117,7 +144,7 @@ namespace mixc::io_file::origin{
         return sta.st_size;
     }
 
-    file & file::open(asciis path, access_mode_t mode, bstate_t * result) const {
+    file & file::open(inc::c08 path, access_mode_t mode, bstate_t * result) const {
         i32 type = 0;
 
         switch(mode){
@@ -137,7 +164,7 @@ namespace mixc::io_file::origin{
     }
 
     file & file::close() const {
-        if (atom_swap<ixx>(& fd, -1) >= 0){
+        if (cpp::atom_swap<ixx>(& fd, -1) >= 0){
             ::close(fd);
         }
         return thex;

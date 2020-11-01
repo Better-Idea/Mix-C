@@ -2,8 +2,8 @@
 #define xpack_instruction_bit_test_and_reverse
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::instruction_bit_test_and_reverse
-#include"define/base_type.hpp"
+#define xuser mixc::instruction_bit_test_and_reverse::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_bit_test_and_reverse{
@@ -24,6 +24,4 @@ namespace mixc::instruction_bit_test_and_reverse{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::instruction_bit_test_and_reverse::bit_test_and_reverse;
-}
+xexport(mixc::instruction_bit_test_and_reverse::bit_test_and_reverse)

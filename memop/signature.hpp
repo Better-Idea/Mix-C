@@ -2,9 +2,9 @@
 #define xpack_memop_signature
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_signature
+#define xuser mixc::memop_signature::inc
 #include"configure.hpp"
-#include"define/base_type.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_signature{
@@ -57,6 +57,4 @@ namespace mixc::memop_signature{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_signature::signature;
-}
+xexport(mixc::memop_signature::signature)

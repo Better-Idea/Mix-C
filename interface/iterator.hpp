@@ -2,10 +2,10 @@
 #define xpack_interface_iterator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_iterator
+#define xuser mixc::interface_iterator::inc
 #include"interface/can_callback.hpp"
+#include"macro/xexport.hpp"
 #include"meta/has_cast.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_iterator{

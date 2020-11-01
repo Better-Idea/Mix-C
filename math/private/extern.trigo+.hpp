@@ -2,7 +2,7 @@
     #undef xuser
 #endif
 
-#define xuser mixc::math_tan
+#define xuser mixc::math_tan::inc
 #include<math.h>
 #include"configure.hpp"
 #include"define/mfxx.hpp"
@@ -159,7 +159,7 @@ namespace mixc::math_tan{
     #undef xuser
 #endif
 
-#define xuser mixc::math_atan
+#define xuser mixc::math_atan::inc
 #include"configure.hpp"
 #include"define/mfxx.hpp"
 #include"math/const.hpp"

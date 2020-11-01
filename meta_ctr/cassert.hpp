@@ -2,8 +2,8 @@
 #define xpack_meta_ctr_cassert
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_ctr_cassert
-#include"define/base_type.hpp"
+#define xuser mixc::meta_ctr_cassert::inc
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_ctr_cassert{
@@ -21,6 +21,4 @@ namespace mixc::meta_ctr_cassert{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_ctr_cassert::cassert;
-}
+xexport(mixc::meta_ctr_cassert::cassert)

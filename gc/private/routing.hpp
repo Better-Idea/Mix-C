@@ -10,8 +10,7 @@
 #define xpack_gc_private_routing
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_private_routing
-#include"define/base_type.hpp"
+#define xuser mixc::gc_private_routing::inc
 #include"meta/is_class.hpp"         
 #include"meta_seq/tappend.hpp"
 #include"meta_seq/tdeque.hpp"
@@ -19,6 +18,7 @@
 #include"meta_seq/tkv.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tmerge.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_routing{
@@ -110,6 +110,4 @@ namespace mixc::gc_private_routing{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::gc_private_routing::routing;
-}
+xexport(mixc::gc_private_routing::routing)

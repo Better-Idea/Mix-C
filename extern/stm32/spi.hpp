@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_spi
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_spi
+        #define xuser mixc::extern_stm32_spi::inc
         #include"extern/stm32/define.hpp"
     #pragma pop_macro("xuser")
 
@@ -182,6 +182,4 @@
     }
 #endif
 
-namespace xuser::inc{
-    using namespace mixc::extern_stm32_spi::origin;
-}
+xexport(mixc::extern_stm32_spi::spi)

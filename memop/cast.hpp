@@ -2,9 +2,9 @@
 #define xpack_memop_cast
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_cast
-#include"define/base_type.hpp"
+#define xuser mixc::memop_cast::inc
 #include"memop/addressof.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_cast{
@@ -16,6 +16,4 @@ namespace mixc::memop_cast{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_cast::cast;
-}
+xexport(mixc::memop_cast::cast)

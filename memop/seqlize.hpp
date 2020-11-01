@@ -2,10 +2,10 @@
 #define xpack_memop_seqlize
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_seqlize
-#include"define/base_type.hpp"
+#define xuser mixc::memop_seqlize::inc
 #include"memop/addressof.hpp"
 #include"interface/seqptr.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_seqlize{
@@ -27,6 +27,4 @@ namespace mixc::memop_seqlize{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_seqlize::seqlize;
-}
+xexport(mixc::memop_seqlize::seqlize)

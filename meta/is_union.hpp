@@ -2,8 +2,9 @@
 #define xpack_meta_is_union
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_union
+#define xuser mixc::meta_is_union::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_union{
@@ -13,6 +14,4 @@ namespace mixc::meta_is_union{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_union::is_union;
-}
+xexport(mixc::meta_is_union::is_union)

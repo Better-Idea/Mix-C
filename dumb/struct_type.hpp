@@ -2,10 +2,11 @@
 #define xpack_dumb_struct_type
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::dumb_struct_type
-#include"define/base_type.hpp"
-#include"macro/xstruct.hpp"
+#define xuser mixc::dumb_struct_type::inc
 #include"meta/is_class.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_struct_type{
@@ -53,6 +54,4 @@ namespace mixc::dumb_struct_type::origin{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::dumb_struct_type::origin::struct_type;
-}
+xexport(mixc::dumb_struct_type::origin::struct_type)

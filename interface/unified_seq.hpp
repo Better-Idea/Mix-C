@@ -9,8 +9,9 @@ unified_seq
 #define xpack_meta_unified_seq
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_unified_seq
+#define xuser mixc::meta_unified_seq::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"interface/ranger.hpp"
 #include"interface/seqptr.hpp"
 #include"meta/has_cast.hpp"
@@ -47,6 +48,4 @@ namespace mixc::meta_unified_seq::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::meta_unified_seq::origin;
-}
+xexport_space(mixc::meta_unified_seq::origin)

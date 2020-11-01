@@ -2,8 +2,9 @@
 #define xpack_meta_is_float
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_float
+#define xuser mixc::meta_is_float::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_float{
@@ -25,6 +26,4 @@ namespace mixc::meta_is_float{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_float::is_float;
-}
+xexport(mixc::meta_is_float::is_float)

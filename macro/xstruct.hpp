@@ -11,7 +11,7 @@
 #define xpack_macro_xstruct
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xstruct
+#define xuser mixc::macro_xstruct::inc
 #include"dumb/place_holder.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/private/word.hpp"

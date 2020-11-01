@@ -2,7 +2,7 @@
 #define xpack_extern_stm32_setup
     #pragma push_macro("xuser")
         #undef  xuser
-        #define xuser mixc::extern_stm32_setup
+        #define xuser mixc::extern_stm32_setup::inc
         #include"extern/stm32/define.hpp"
         #include"extern/stm32/rcc.hpp"
         #include"extern/stm32/fls.hpp"

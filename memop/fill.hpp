@@ -2,8 +2,9 @@
 #define xpack_memop_fill
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memop_fill
+#define xuser mixc::memop_fill::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"memop/copy.hpp"
 #pragma pop_macro("xuser")
 
@@ -19,7 +20,9 @@ namespace mixc::memop_fill{
             }
         }
     }
+}
 
+namespace mixc::memop_fill::origin{
     template<class a, class b>
     inline void fill_with_operator(a & target, b const & source, uxx count) {
         fill_core<true, a, b>(target, source, count);
@@ -43,7 +46,4 @@ namespace mixc::memop_fill{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::memop_fill::fill;
-    using ::mixc::memop_fill::fill_with_operator;
-}
+xexport_space(mixc::memop_fill::origin)

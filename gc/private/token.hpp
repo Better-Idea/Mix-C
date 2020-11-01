@@ -2,7 +2,7 @@
 #define xpack_gc_private_token
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::gc_private_token
+#define xuser mixc::gc_private_token::inc
 #include"dumb/struct_type.hpp"
 #include"lock/atom_add.hpp"
 #include"lock/atom_or.hpp"
@@ -133,6 +133,4 @@ namespace mixc::gc_private_token::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::gc_private_token::origin;
-}
+xexport_space(mixc::gc_private_token::origin)

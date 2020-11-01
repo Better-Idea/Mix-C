@@ -2,7 +2,7 @@
 #define xpack_algo_test_sort
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_test_sort
+#define xuser mixc::algo_test_sort::inc
 #include"algo/sort.hpp"
 #include"docker/array.hpp"
 #include"docker/bit_indicator.hpp"

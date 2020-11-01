@@ -2,7 +2,7 @@
 #define xpack_lock_atom_swap
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_atom_swap
+#define xuser mixc::lock_atom_swap::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -26,6 +26,4 @@ namespace mixc::lock_atom_swap{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::lock_atom_swap::atom_swap;
-}
+xexport(mixc::lock_atom_swap::atom_swap)

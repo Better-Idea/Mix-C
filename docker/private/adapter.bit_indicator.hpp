@@ -9,7 +9,7 @@
 #define xpack_docker_adapter_bit_indicator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_adapter_bit_indicator
+#define xuser mixc::docker_adapter_bit_indicator::inc
 #include"instruction/index_of_first_set.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"interface/unified_seq.hpp"

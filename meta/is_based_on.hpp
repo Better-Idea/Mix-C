@@ -2,8 +2,9 @@
 #define xpack_meta_is_based_on
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_based_on
+#define xuser mixc::meta_is_based_on::inc
 #include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
@@ -14,6 +15,4 @@ namespace mixc::meta_is_based_on{
 
 #endif
 
-namespace xuser::inc{
-    using ::mixc::meta_is_based_on::is_based_on;
-}
+xexport(mixc::meta_is_based_on::is_based_on)

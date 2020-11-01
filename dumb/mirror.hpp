@@ -2,9 +2,11 @@
 #define xpack_dumb_mirror
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::dumb_mirror
+#define xuser mixc::dumb_mirror::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"memory/new.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_mirror::origin{
@@ -68,6 +70,4 @@ namespace mixc::dumb_mirror::origin{
 
 #endif
 
-namespace xuser::inc{
-    using namespace ::mixc::dumb_mirror::origin;
-}
+xexport_space(mixc::dumb_mirror::origin)
