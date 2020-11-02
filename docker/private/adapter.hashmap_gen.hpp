@@ -281,7 +281,13 @@ public:
     void set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr){
         auto   index = addressing(key);
         auto & node = nodes[index];
-        xdebug(im_docker_hashmap_set, index, key xarg_val);
+
+        #ifdef xarg_has_val_t
+        xdebug(im_docker_hashmap_set, index, key, val);
+        #else
+        xdebug(im_docker_hashmap_set, index, key);
+        #endif
+
 
         if (node.is_empty()){
             bmp.set(index);
