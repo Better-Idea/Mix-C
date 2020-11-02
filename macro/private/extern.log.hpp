@@ -44,7 +44,7 @@ namespace mixc::macro_private_log::origin{
         type_list[for_hint ] = "HINT";
         
         file += skip;
-        tty.write(type_list[id], " | ", v{file, ':', line}.l(40), " | ", v{func_name}.l(20), " | ", contents...);
+        tty.write(type_list[id], " | ", v{file, ':', line}.l(60), " | ", v{func_name}.l(20), " | ", contents...);
     }
 
     void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message){
