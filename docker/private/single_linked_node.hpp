@@ -92,4 +92,4 @@ namespace mixc::docker_single_linked_node{
 
 #endif
 
-xexport(mixc::docker_single_linked_node::single_linked_node)
+xexport_space(mixc::docker_single_linked_node::origin)
