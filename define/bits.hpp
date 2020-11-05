@@ -3,8 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::define_bits::inc
+#include"define/base_type.hpp"
 #include"define/bitbind.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_bits::origin{
@@ -37,4 +39,4 @@ namespace mixc::define_bits::origin{
 
 #endif
 
-xexport(mixc::define_bits::bits)
+xexport_space(mixc::define_bits::origin)
