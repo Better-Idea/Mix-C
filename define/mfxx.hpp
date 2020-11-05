@@ -38,6 +38,7 @@
 #define xuser mixc::define_mfxx::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
