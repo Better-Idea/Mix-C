@@ -85,9 +85,9 @@ auto sin(f64 x[4]) {
     auto pone       = _mm256_set1_epi64x(1);            // parallel 1
     auto adj        = _mm256_add_pd(px, php);           // adjust x
     auto pq         = _mm256_mul_pd(adj, prp);          // parallel quotient
-    auto pqi32      = _mm256_cvtpd_epi32(pq);           // parallel quotient f64 -> i32 -> i64
-    auto pqi64      = _mm256_cvtepu32_epi64(pqi32);
-    auto pqf        = _mm256_cvtepi32_pd(pqi32);        // parallel quotient i32 -> f64
+    auto pqf        = _mm256_floor_pd(pq);              // parallel floor
+    auto pqi32      = _mm256_cvtpd_epi32(pqf);          // parallel quotient f64 -> i32
+    auto pqi64      = _mm256_cvtepi32_epi64(pqi32);     // parallel quotient f64 -> i32
     auto prem       = _mm256_sub_pd(                    // parallel remainder
         adj, _mm256_mul_pd(pqf, ppi)
     );
