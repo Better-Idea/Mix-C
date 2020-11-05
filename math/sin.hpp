@@ -7,7 +7,6 @@
 #include"docker/array.hpp"
 #include"macro/xalign.hpp"
 #include"macro/xexport.hpp"
-#include"math/div.hpp"
 #include"math/const.hpp"
 #include"math/private/parallel_lut.hpp"
 #pragma pop_macro("xuser")
@@ -27,7 +26,7 @@ namespace mixc::math_sin{
         type(-8.22063524662432950e-18)
     );
 
-    static inline auto lut_f64x4 = (f64 *)lut<f64, 4>;
+    static inline auto lut_f64x1 = (f64 *)lut<f64, 1>;
 }
 
 namespace mixc::math_sin::origin{
