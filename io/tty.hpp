@@ -14,10 +14,7 @@
 #include"memory/allocator.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::io_tty::origin{
-    using inc::tty_color_t;
-    using inc::tty_key;
-
+namespace mixc::io_tty{
     xstruct(
         xname(tty_t)
     )
@@ -89,9 +86,16 @@ namespace mixc::io_tty::origin{
         }
     $
 
+}
+
+namespace mixc::io_tty::origin{
+    using inc::tty_color_t;
+    using inc::tty_key;
+
     static inline tty_t tty;
 }
 
 #endif
+#include"lang/cxx/ph.hpp"
 
-xexport(mixc::io_tty::origin::tty)
+xexport_space(mixc::io_tty::origin)
