@@ -33,16 +33,15 @@ namespace mixc::docker_array{
     )
         using item_t = typename array_t<final, type, rest...>::the_t;
     public:
-        array_t() : data(){}
+        constexpr array_t() : data(){}
+        constexpr array_t(array_t const &) = default;
 
         template<class ... args>
-        array_t(item_t const & first, args const & ... list) : 
+        constexpr array_t(item_t const & first, args const & ... list) : 
             data { first, ((item_t)list)... } {}
 
-        array_t(array_t const &) = default;
-
         template<class finalx>
-        array_t(array_t<finalx, type, count, rest...> const & self) : 
+        constexpr array_t(array_t<finalx, type, count, rest...> const & self) : 
             array_t((the_t &)(array_t<finalx, type, count, rest...> &)self) {
         }
 
