@@ -58,7 +58,7 @@ auto sin(f64 x0, f64 x1, f64 x2, f64 x3, bool safe) {
 
 auto cos(f64 x0, f64 x1, f64 x2, f64 x3, bool safe) {
     using namespace xuser;
-    return sin(x0 - pi / 2, x1 - pi / 2, x2 - pi / 2, x3 - pi / 2);
+    return sin(x0 - pi / 2, x1 - pi / 2, x2 - pi / 2, x3 - pi / 2, safe);
 }
 
 #include"endc"
