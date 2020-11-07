@@ -7,6 +7,7 @@
 #include"docker/bit_indicator.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
+#include"meta/is_float.hpp"
 #include"math/const.hpp"
 #include"macro/xcmp.hpp"
 #include"memop/swap.hpp"
@@ -15,8 +16,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_sort{
-    constexpr u08 type_unsigned = 0x00;
-    constexpr u08 type_signed   = 0x80;
+    constexpr u08 type_unsigned     = 0x00;
+    constexpr u08 type_signed       = 0x80;
+    constexpr u08 type_float_pos    = type_signed;
+    constexpr u08 type_float_neg    = type_unsigned;
     constexpr u08 mode_asc      = 0x00;
     constexpr u08 mode_des      = 0xff;
 
@@ -24,16 +27,31 @@ namespace mixc::algo_sort{
     inline void radix_sort_core(seq_t & r, uxx offset, uxx length){
         using item_t        = inc::item_origin_of<seq_t>;
 
-        constexpr
-        uxx       top_i     = sizeof(item_t) - 1;
+        enum{ top_i = sizeof(item_t) - 1 };
         counter_t sum0[256];
         counter_t sum1[256];
         inc::bit_indicator<256> idc;
 
+        auto map = [&](uxx index){
+            u08 hex = (u08p(xref r[index + offset])[i]);
+
+            if constexpr (not inc::is_float<item_t>){ // 整数
+                u08 idx = hex ^ type ^ mode;
+                return idx;
+            }
+            else if constexpr (i == top_i){ // 浮点的最高字节
+                u08 idx = hex & 0x80 ? ~hex : hex | 0x80;
+                return idx;
+            }
+            else { // 浮点剩余字节按无符号数排序
+                u08 idx = hex ^ type_unsigned ^ mode;
+                return idx;
+            }
+        };
+
         for(uxx j = 0; j < length; j++){
-            u08 hex         = (u08p(xref r[j + offset])[i]);
-            u08 idx         = (hex + type) ^ mode;
-            // xhint(hex, idx)
+            u08 idx         = map(j);
+            // xhint(i, idx);
 
             if (idc.get(idx) == false){
                 idc.set(idx);
@@ -61,10 +79,9 @@ namespace mixc::algo_sort{
         idct = idc;
 
         for(uxx j = 0, idx, ofs;;){
-            u08 hex     = u08p(xref r[j + offset])[i];
-            idx         = u08((hex + type) ^ mode);
+            idx         = map(j);
             ofs         = sum1[idx];
-            // xhint(hex, idx, ofs)
+            // xhint(idx, ofs)
 
             if (j != ofs){
                 inc::swap(xref r[j + offset], xref r[ofs + offset]);
@@ -76,11 +93,10 @@ namespace mixc::algo_sort{
             if (sum1[idx] += 1; sum1[idx] == sum0[idx]){
                 idc.reset(idx);
                 idx     = idc.index_of_first_set();
-                j       = sum1[idx];
-
                 if (idx == not_exist){
                     break;
                 }
+                j       = sum1[idx];
             }
         }
 
@@ -89,19 +105,27 @@ namespace mixc::algo_sort{
             // 此时 sum0 = sum1
             for(t = 0; not_exist != (j = idct.pop_first()); t = sum0[j]){
                 auto new_length = sum0[j] - t;
-                 //xhint(sum0[j], t);
+                // xhint(sum0[j], t);
 
                 if (new_length == 1){ // 只有一个元素不用排序
                     continue;
                 }
                 if (new_length == 2){ // 两个元素
-                    if ((r[t + offset] > r[t + offset + 1]) ^ (mode == mode_des)){
+                    constexpr auto xor_condition = inc::is_float<item_t> and type == type_float_neg ?
+                        mode == (mode_des ^ 0xff) : mode == mode_des;
+
+                    if ((r[t + offset] > r[t + offset + 1]) ^ (xor_condition)){
                         inc::swap(xref r[t + offset], xref r[t + offset + 1]);
                     }
                 }
                 // TODO：else if (new_length < small_length) ========================================================================
+                else if (inc::is_float<item_t> and i == top_i and j < 0x80){ // 浮点负数部分，低位字节按相反的模式排序
+                    radix_sort_core<counter_t, i - 1, type_float_neg, mode ^ 0xff, seq_t>(r, t + offset, new_length);
+                }
                 else{
-                    radix_sort_core<counter_t, i - 1, type_unsigned, mode, seq_t>(r, t + offset, new_length);
+                    constexpr auto convert_type = inc::is_float<item_t> ? // 如果是浮点元素，则保持 type 不变
+                        type : type_unsigned;
+                    radix_sort_core<counter_t, i - 1,  convert_type, mode, seq_t>(r, t + offset, new_length);
                 }
             }
         }
