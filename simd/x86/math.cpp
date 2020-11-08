@@ -6,6 +6,49 @@
 
 #include"beginc"
 
+void topk(i32 k[8], i32 const * ary, uxx length){
+    using namespace xuser;
+    auto ptopa          = _mm256_set1_epi32(min_value_of<i32>);
+    auto ptopb          = _mm256_set1_epi32(min_value_of<i32>);
+    auto ptopc          = _mm256_set1_epi32(min_value_of<i32>);
+    auto ptopd          = _mm256_set1_epi32(min_value_of<i32>);
+    auto pidx           = _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 7);
+    auto pmsk           = _mm256_setr_epi32(-1, -1, -1, -1, -1, -1, -1,  0);
+
+    // 1.使用 lambda 将无法利用指令级并行，所以这里用宏
+    // 2.clang 对指令并行重排序编译的效果要弱于 gnu 系列编译器，不过 clang 更适合自动优化而不是手动
+    // 3.avx 不支持 ymm >> imm8 * 8 导致冗长的指令，但却支持奇葩的 ymm.xmm[0] >> imm8 * 8 | ymm.xmm[1] >> imm8 * 8
+    // 4.avx _mm256_permutevar8x32_epi32 是第 3 点的替代方案，
+    //   但由于必须要选一个元素参与洗牌操作而导致 pidx 指向的最后一个元素无处安放，而不得不通过 pmsk 屏蔽掉
+    #define xgen(ptop,value)                                                       \
+        auto pcur  ## ptop     = _mm256_set1_epi32(value);                         \
+        auto pcmp  ## ptop     = _mm256_cmpgt_epi32(pcur ## ptop, ptop);           \
+        auto pcmp0 ## ptop     = _mm256_permutevar8x32_epi32(pcmp ## ptop, pidx);  \
+        auto pcmp1 ## ptop     = _mm256_and_si256(pcmp0 ## ptop, pmsk);            \
+        auto pmin0 ## ptop     = _mm256_min_epi32(pcur ## ptop, ptop);             \
+        auto pmin1 ## ptop     = _mm256_permutevar8x32_epi32(pmin0 ## ptop, pidx); \
+        auto pmax  ## ptop     = _mm256_max_epi32(pcur ## ptop, ptop);             \
+        auto pnew  ## ptop     = _mm256_blendv_ps(                                 \
+            _mm256_castsi256_ps(pmax ## ptop),                                     \
+            _mm256_castsi256_ps(pmin1 ## ptop),                                    \
+            _mm256_castsi256_ps(pcmp1 ## ptop)                                     \
+        );                                                                         \
+        ptop                    = _mm256_castps_si256(pnew ## ptop);
+
+    for(uxx i = 0; i < length / 2; i++){
+        xgen(ptopa, ary[i * 2 + 0]); // 通道 a
+        xgen(ptopb, ary[i * 2 + 1]); // 通道 b 这里只实现两个通道，由于 ALU 有限，再增加通道数是不会有性能提升的
+    }
+
+    for(uxx i = 0; i < 8; i++){
+        xgen(ptopa, i32p(& ptopb)[i]);
+    }
+    if (length % 2 != 0){
+        xgen(ptopa, ary[length - 1]);
+    }
+    _mm256_storeu_pd(f64p(k), _mm256_castsi256_pd(ptopa));
+}
+
 auto sin_unsafe(f64 x[4]) {
     using namespace xuser;
     using namespace mixc::math_sin;
