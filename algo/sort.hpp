@@ -187,6 +187,8 @@ namespace mixc::algo_sort{
             xgen(u32, mode_des)
             xgen(u64, mode_des);
         }
+
+        #undef  xgen
     };
 }
 
