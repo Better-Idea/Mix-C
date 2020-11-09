@@ -3,6 +3,47 @@
 #include"intrin.h"
 #include"math/const.hpp"
 #include"math/sin.hpp"
+#include"memop/swap.hpp"
+
+template<class item_t>
+requires(
+    sizeof(item_t) == 8 or
+    sizeof(item_t) == 4 or
+    sizeof(item_t) == 2
+)
+inline void swap_bytes(item_t * buffer,item_t const * source, uxx length){
+    using namespace xuser;
+
+    constexpr
+    auto step           = (32/*sizeof(ymm)*/ / sizeof(item_t));
+    auto i              = (uxx)0;
+    auto pidx           = 
+        sizeof(item_t) == 2 ? _mm256_setr_epi8(
+            1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30
+        ) :
+        sizeof(item_t) == 4 ? _mm256_setr_epi8(
+            3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12, 19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28
+        )                   : _mm256_setr_epi8(
+            7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24
+        );
+
+    for(; i < length / step; i++){
+        auto pbytes     = _mm256_castpd_si256(_mm256_loadu_pd(f64p(source + i * step)));
+        auto pword      = _mm256_shuffle_epi8(pbytes, pidx);
+        _mm256_storeu_pd(f64p(buffer), _mm256_castsi256_pd(pword));
+    }
+
+    for(i *= step; i < length; i++){
+        buffer[i]       = source[i];
+
+        auto begin      = u08p(buffer + i);
+        auto end        = u08p(buffer + i + 1) - 1;
+
+        for(uxx i = 0; i < sizeof(item_t) / 2; i++){
+            swap(xref begin[i], xref end[uxx(0) - i]);
+        }
+    }
+}
 
 #include"beginc"
 
