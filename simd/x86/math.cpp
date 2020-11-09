@@ -30,7 +30,7 @@ inline void swap_bytes(item_t * buffer,item_t const * source, uxx length){
     for(; i < length / step; i++){
         auto pbytes     = _mm256_castpd_si256(_mm256_loadu_pd(f64p(source + i * step)));
         auto pword      = _mm256_shuffle_epi8(pbytes, pidx);
-        _mm256_storeu_pd(f64p(buffer), _mm256_castsi256_pd(pword));
+        _mm256_storeu_pd(f64p(buffer + i * step), _mm256_castsi256_pd(pword));
     }
 
     for(i *= step; i < length; i++){
@@ -44,6 +44,7 @@ inline void swap_bytes(item_t * buffer,item_t const * source, uxx length){
         }
     }
 }
+
 
 #include"beginc"
 
