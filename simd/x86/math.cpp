@@ -27,24 +27,46 @@ inline void swap_bytes(item_t * buffer,item_t const * source, uxx length){
             7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24
         );
 
-    for(; i < length / step; i++){
-        auto pbytes     = _mm256_castpd_si256(_mm256_loadu_pd(f64p(source + i * step)));
-        auto pword      = _mm256_shuffle_epi8(pbytes, pidx);
-        _mm256_storeu_pd(f64p(buffer + i * step), _mm256_castsi256_pd(pword));
+    auto loop_round = [&](uxx i, uxx length){
+        for(; i < length; i++){
+            buffer[i]       = source[i];
+
+            auto begin      = u08p(buffer + i);
+            auto end        = u08p(buffer + i + 1) - 1;
+
+            for(uxx i = 0; i < sizeof(item_t) / 2; i++){
+                swap(xref begin[i], xref end[uxx(0) - i]);
+            }
+        }
+    };
+
+    auto align_a        = uxx(buffer) & 0x1f;
+    auto align_b        = uxx(source) & 0x1f;
+    auto head_length    = uxx(0);
+
+    if (align_a != 0 and align_a % sizeof(item_t) == 0){
+        head_length = (32 - align_a) / sizeof(item_t);
+        loop_round(0, min(length, head_length));
+        length     -= head_length;
+        buffer     += head_length;
+        source     += head_length;
     }
-
-    for(i *= step; i < length; i++){
-        buffer[i]       = source[i];
-
-        auto begin      = u08p(buffer + i);
-        auto end        = u08p(buffer + i + 1) - 1;
-
-        for(uxx i = 0; i < sizeof(item_t) / 2; i++){
-            swap(xref begin[i], xref end[uxx(0) - i]);
+    if (align_a == align_b and align_a % sizeof(item_t) == 0){
+        for(; i < length / step; i++){
+            auto pbytes     = _mm256_stream_load_si256((__m256i *)(source + i * step));
+            auto pword      = _mm256_shuffle_epi8(pbytes, pidx);
+            _mm256_stream_pd(f64p(buffer + i * step), _mm256_castsi256_pd(pword));
         }
     }
+    else{
+        for(; i < length / step; i++){
+            auto pbytes     = _mm256_castpd_si256(_mm256_loadu_pd(f64p(source + i * step)));
+            auto pword      = _mm256_shuffle_epi8(pbytes, pidx);
+            _mm256_storeu_pd(f64p(buffer + i * step), _mm256_castsi256_pd(pword));
+        }
+    }
+    loop_round(i * step, length);
 }
-
 
 #include"beginc"
 
