@@ -5,6 +5,7 @@
 #include"math/sin.hpp"
 #include"memop/swap.hpp"
 
+
 template<class item_t>
 requires(
     sizeof(item_t) == 8 or
@@ -69,6 +70,20 @@ inline void swap_bytes(item_t * buffer,item_t const * source, uxx length){
 }
 
 #include"beginc"
+
+inline void conjugate(f32 * buffer, f32 const * source, uxx length){
+    // 事实证明再强的算力也解决不了只算一下就去访问非对齐内存
+    auto step           = 32 / sizeof(f32);
+    auto psrc           = source + length - step;
+    auto pmsk           = _mm256_castsi256_pd(_mm256_set1_epi64x(1 << 31));
+
+    for(uxx i = 0; i < length / step; i++, source -= step, buffer += step){
+        auto pword      =  _mm256_loadu_pd(f64p(source));
+        auto preverse   = _mm256_permute4x64_pd(pword, 3 | 2 << 2 | 1 << 4 | 0 << 6);
+        auto pconj      = _mm256_xor_pd(preverse, pmsk); // 改变符号位
+        _mm256_storeu_pd(f64p(buffer), pconj);
+    }
+}
 
 void topk(i32 k[8], i32 const * ary, uxx length){
     using namespace xuser;
