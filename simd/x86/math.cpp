@@ -4,6 +4,100 @@
 #include"math/const.hpp"
 #include"math/sin.hpp"
 #include"memop/swap.hpp"
+#include"meta/is_same.hpp"
+
+enum class threshold_mode_t{
+    saturation_lower_bound,
+    saturation_upper_bound,
+};
+
+template<class item_t, threshold_mode_t mode>
+inline void threshold_core(item_t * buffer, item_t const * source, uxx length, item_t level){
+    using namespace xuser;
+
+    auto step               = 32 / sizeof(item_t);
+    auto plevel             = 
+        is_same<item_t, i16> ? _mm256_set1_epi16(i16(level)) :
+        is_same<item_t, f32> ? _mm256_castps_si256(_mm256_set1_ps(f32(level))) : 
+        is_same<item_t, f64> ? _mm256_castpd_si256(_mm256_set1_pd(f64(level))) : _mm256_setzero_si256();
+    auto pmsk               = _mm256_setzero_si256();
+    auto pword              = _mm256_setzero_si256();
+    auto psoruce            = _mm256_setzero_si256();
+    auto i                  = uxx(0);
+    auto loop_round = [&](uxx i, uxx length){
+        for(; i < length; i++){
+            if constexpr (mode == threshold_mode_t::saturation_lower_bound){
+                buffer[i]   = source[i] < level ? level : source[i];
+            }
+            else{
+                buffer[i]   = source[i] > level ? level : source[i];
+            }
+        }
+    };
+    
+    #define xgen(load,store)                                                    \
+    for(; i < length / step; i++){                                              \
+        auto psource        = load;                                             \
+                                                                                \
+        if constexpr (is_same<item_t, i16>){                                    \
+            pmsk            = _mm256_cmpgt_epi16(plevel, psource);              \
+        }                                                                       \
+        else if constexpr (is_same<item_t, f32>){                               \
+            pmsk            = _mm256_castps_si256(                              \
+                _mm256_cmp_ps(                                                  \
+                    _mm256_castsi256_ps(plevel),                                \
+                    _mm256_castsi256_ps(psource), _CMP_GT_OQ                    \
+                )                                                               \
+            );                                                                  \
+        }                                                                       \
+        else if constexpr (is_same<item_t, f64>){                               \
+            pmsk            = _mm256_castpd_si256(                              \
+                _mm256_cmp_ps(                                                  \
+                    _mm256_castsi256_ps(plevel),                                \
+                    _mm256_castsi256_ps(psource), _CMP_GT_OQ                    \
+                )                                                               \
+            );                                                                  \
+        }                                                                       \
+                                                                                \
+        if constexpr (mode == threshold_mode_t::saturation_lower_bound){        \
+            pword           = _mm256_blendv_epi8(psource, plevel, pmsk);        \
+        }                                                                       \
+        else{                                                                   \
+            pword           = _mm256_blendv_epi8(plevel, psource, pmsk);        \
+        }                                                                       \
+                                                                                \
+        store;                                                                  \
+    }
+    
+    // 冗余代码 begin
+    auto align_a        = uxx(buffer) & 0x1f;
+    auto align_b        = uxx(source) & 0x1f;
+    auto head_length    = (32 - align_a) / sizeof(item_t);
+
+    if (align_a != 0 and align_a % sizeof(item_t) == 0){
+        loop_round(0, head_length);
+        length         -= head_length;
+        buffer         += head_length;
+        source         += head_length;
+    }
+
+    // 冗余代码 end
+
+    if (align_a == align_b and align_a % sizeof(item_t) == 0){
+        xgen(
+            _mm256_stream_load_si256((__m256i *)(source + i * step)),
+            _mm256_stream_pd(f64p(buffer + i * step), _mm256_castsi256_pd(pword))
+        )
+    }
+    else{
+        xgen(
+            _mm256_loadu_si256((__m256i_u *)(source + i * step)),
+            _mm256_storeu_pd(f64p(buffer + i * step), _mm256_castsi256_pd(pword))
+        )
+    }
+
+    #undef xgen
+}
 
 
 template<class item_t>
