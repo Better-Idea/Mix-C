@@ -268,4 +268,4 @@ namespace mixc::lock_policy_barrier::origin{
 
 #endif
 
-xexport(mixc::lock_policy_barrier::policy_barrier)
+xexport_space(mixc::lock_policy_barrier::origin)
