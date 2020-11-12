@@ -109,33 +109,9 @@ namespace mixc::io_private_tty::origin{
     uxx                 rest;
 
     union color_t{
-        using the_t = color_t;
-
-        #define xgen(type,name)                                  \
-        union{                                                   \
-            void operator=(type value){                          \
-                the.p ## name          = u08(value);             \
-                the.name ## _changed   = true;                   \
-            }                                                    \
-            template<class t>                                    \
-            operator t (){                                       \
-                return (t)uxx(the.p ## name);                    \
-            }                                                    \
-        } name
-
-        xgen(uxx, fore);
-        xgen(uxx, back);
-        #undef  xgen
-
-    private:
         struct{
-            u08 pfore           : 4;
-            u08 pback           : 4;
-        };
-    public:
-        struct{
-            u08 fore_changed    : 1;
-            u08 back_changed    : 1;
+            u08 fore           : 4;
+            u08 back           : 4;
         };
 
         operator u08(){
@@ -287,14 +263,14 @@ namespace mixc::io_private_tty::origin{
     void forecolor(inc::tty_color_t value) {
         using namespace inc::tty_color;
         static_assert(uxx(black)           == 0x0);
-        static_assert(uxx(red)             == 0x1);
-        static_assert(uxx(green)           == 0x2);
-        static_assert(uxx(yellow)          == 0x3);
-        static_assert(uxx(blue)            == 0x4);
-        static_assert(uxx(magenta)         == 0x5);
-        static_assert(uxx(cyan)            == 0x6);
-        static_assert(uxx(white)           == 0x7);
-        static_assert(uxx(gray)            == 0x8);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED)             == 0x1);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_GREEN)           == 0x2);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN)          == 0x3);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_BLUE)            == 0x4);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE)         == 0x5);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE)            == 0x6);
+        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)           == 0x7);
+        static_assert(uxx(FOREGROUND_INTENSITY)            == 0x8);
         static_assert(uxx(light_red)       == 0x9);
         static_assert(uxx(light_green)     == 0xa);
         static_assert(uxx(light_yellow)    == 0xb);
@@ -456,22 +432,23 @@ namespace mixc::io_private_tty::origin{
     }
 
     constexpr u08 map[]{
-        0 << 3 | 0 << 2 | 0 << 1 | 0 << 0,
-        0 << 3 | 1 << 2 | 0 << 1 | 0 << 0,
-        0 << 3 | 0 << 2 | 1 << 1 | 0 << 0,
-        0 << 3 | 1 << 2 | 1 << 1 | 0 << 0,
-        0 << 3 | 0 << 2 | 0 << 1 | 1 << 0,
-        0 << 3 | 0 << 2 | 1 << 1 | 1 << 0,
-        0 << 3 | 1 << 2 | 0 << 1 | 1 << 0,
-        1 << 3 | 1 << 2 | 1 << 1 | 1 << 0,
-        1 << 3 | 0 << 2 | 0 << 1 | 0 << 0,
-        1 << 3 | 1 << 2 | 0 << 1 | 0 << 0,
-        1 << 3 | 0 << 2 | 1 << 1 | 0 << 0,
-        1 << 3 | 1 << 2 | 1 << 1 | 0 << 0,
-        1 << 3 | 0 << 2 | 0 << 1 | 1 << 0,
-        1 << 3 | 0 << 2 | 1 << 1 | 1 << 0,
-        1 << 3 | 1 << 2 | 0 << 1 | 1 << 0,
-        0 << 3 | 1 << 2 | 1 << 1 | 1 << 0,
+        u08(0),
+        u08(FOREGROUND_RED),
+        u08(FOREGROUND_GREEN),
+        u08(FOREGROUND_RED | FOREGROUND_GREEN),
+        u08(FOREGROUND_BLUE),
+        u08(FOREGROUND_RED | FOREGROUND_BLUE),
+        u08(FOREGROUND_GREEN | FOREGROUND_BLUE),
+        u08(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE),
+        u08(FOREGROUND_INTENSITY),
+
+        u08(FOREGROUND_INTENSITY | FOREGROUND_RED),
+        u08(FOREGROUND_INTENSITY | FOREGROUND_GREEN),
+        u08(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN),
+        u08(FOREGROUND_INTENSITY | FOREGROUND_BLUE),
+        u08(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE),
+        u08(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE),
+        u08(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE),
     };
 
     void forecolor(inc::tty_color_t value) {
