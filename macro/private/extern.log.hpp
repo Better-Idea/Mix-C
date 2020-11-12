@@ -7,11 +7,11 @@
 #include"define/base_type.hpp"
 #include"macro/private/log.hpp"
 #include"macro/private/mix.hpp"
-#include"macro/xexport.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"macro/xdefer.hpp"
 #include"io/tty.hpp"
 #include"lang/cxx/index_of_last.hpp"
+#include"lang/cxx/strlize.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
 #include"lock/mutex.hpp"
@@ -37,18 +37,30 @@ namespace mixc::macro_private_log::origin{
             }
         #endif
 
-        asciis type_list[4];
-        type_list[for_debug] = "DBUG";
-        type_list[for_fail ] = "FAIL";
-        type_list[for_test ] = "TEST";
-        type_list[for_hint ] = "HINT";
-        
+        struct classify{
+            asciis      type;
+            tty_color_t color;
+        };
+
+        classify conf[4];
+        conf[for_debug] = { "DBUG", tty_color_t::light_gray};
+        conf[for_fail ] = { "FAIL", tty_color_t::red};
+        conf[for_test ] = { "TEST", tty_color_t::blue};
+        conf[for_hint ] = { "HINT", tty_color_t::gray};
+
         file += skip;
-        tty.write(type_list[id], " | ", v{file, ':', line}.l(60), " | ", v{func_name}.l(20), " | ", contents...);
+
+        tty.forecolor(conf[uxx(id)].color);
+        tty.write(conf[id].type, " | ", v{file, ':', line}.l(60), " | ", v{func_name}.l(20), " | ", contents...);
     }
 
     void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message){
+        using namespace inc;
+        using namespace inc::ph;
+
+        auto color = tty.forecolor();
         log_core(id, file, line, func_name, message, '\n');
+        tty.forecolor(color);
     }
 
     inc::mutex print_mutex;
@@ -60,18 +72,20 @@ namespace mixc::macro_private_log::origin{
         asciis      func_name, 
         asciis      message, 
         inc::mix *  items, 
-        uxx         length
+        uxx         items_length
     ){
         using namespace inc;
+
 
         xdefer{
             print_mutex.unlock();
         };
         print_mutex.lock();
 
+        char buf[32];
         log_core(type, file, line, func_name);
 
-        for(uxx i = 0; i < length; i++, items++){
+        for(uxx i = 0; i < items_length; i++, items++){
             bool is_origin_text = false;
             uxx  brackets       = 0;
 
@@ -113,10 +127,15 @@ namespace mixc::macro_private_log::origin{
 
             switch(items->fmt){
             case classify_type_t::is_char_t:        tty.write(':', items->c); break;
-            case classify_type_t::is_float_t:       tty.write(':', items->f); break;
             case classify_type_t::is_ptr_t:         tty.write(':', items->v); break;
             case classify_type_t::is_signed_t:      tty.write(':', items->i); break;
             case classify_type_t::is_unsigned_t:    tty.write(':', items->u); break;
+            case classify_type_t::is_float_t:
+                tty.write(':', c08{items->f, float_format_t::fmt_s1p2Es3, 17, [&](uxx length){
+                        return buf;
+                    }
+                });
+                break;
             case classify_type_t::is_str_t:
                 tty.write(':', "\"", items->slen == not_exist ? 
                     inc::c08{items->s} : inc::c08{items->s, items->slen}, 
