@@ -25,6 +25,8 @@
 #include"math/const.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"
+#include"meta/is_float.hpp"
+#include"meta/is_integer.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -129,7 +131,7 @@ namespace mixc::lang_cxx_strlize{
             auto is_neg         = false;
 
             // 默认 precious 是 not_exist (max_value_of<uxx>)
-            if (uxx(pce) > m.precious()){
+            if (precious > m.precious()){
                 pce             = ixx(m.precious());
             }
 
@@ -144,14 +146,9 @@ namespace mixc::lang_cxx_strlize{
                 ptr            += 1;
             }
 
-            auto num_part       = ptr;
             auto e              = inc::log10_2 * m.real_exp();
             auto exp            = ixx(e);
             auto is_neg_exp     = false;
-
-            if (not is_scientific_notation){
-                m              += inc::expr10_unsafe(pce) * 0.5;
-            }
 
             // 以乘法代替除法
             if (exp < 0){
@@ -173,19 +170,16 @@ namespace mixc::lang_cxx_strlize{
                 exp            += 1;
             }
 
+            // 如果是科学计数法则
             if (is_scientific_notation){
-                if (exp > pce){
-                    m          += inc::exp10_unsafe(exp - pce) * 0.5;
-                }
-                else{
-                    m          += inc::expr10_unsafe(pce - exp) * 0.5;
-                }
+                m              += inc::expr10_unsafe(pce - exp) * 0.5;
             }
 
             if (exp < 0){
                 exp = -exp;
             }
 
+            auto num_part       = ptr;
             auto exp_tmp        = exp;
             auto exp_str        = the_t(buf_exp, 4);
             buf_exp[1]          = item('0' + exp_tmp / 100);
@@ -216,16 +210,13 @@ namespace mixc::lang_cxx_strlize{
                 f.full         *= 10;
             } while(f.full != 0 and dec_bits < m.precious());
 
-            if (is_scientific_notation){
-                while(ptr > num_part + 1 and ptr[-1] == '0'){
-                    ptr--;
-                }
-                auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - dec_bits), 0);
-                auto dec_len    = inc::min<uxx>(precious, uxx(ptr - num_part - 1));
-                return invoke(the_t(buf, 1/*sign*/ + 1/*real*/), 0, 0, the_t(num_part + 1, dec_len), ctz, exp_str);
-            }
+            auto num_len        = uxx(ptr - num_part);
 
-            auto num_len        = ptr - num_part;
+            if (is_scientific_notation){
+                auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - dec_bits), ixx(0));
+                auto dec_len    = inc::min<uxx>(precious, num_len);
+                return invoke(the_t(buf, 1/*sign*/ + 1/*real*/), 0/*expanding_zeros*/, 0/*leading zeros*/, the_t(num_part + 1, dec_len), ctz, exp_str);
+            }
 
             if (is_neg_exp and exp != 0){
                 auto real       = the_t(is_neg ? "-0" : "+0");
@@ -347,38 +338,40 @@ namespace mixc::lang_cxx_strlize{
         }
 
         template<class type>
-        auto strlize(type value, int_format_t mode, uxx base, asciis lut, inc::can_alloc<item> alloc) const {
+        auto strlize(type value, int_format_t mode, inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc) const {
             u08  buf[64];
-            u08p ptr = buf;
-            using unsigned_t = inc::unsigned_type<type>;
-            auto u           = unsigned_t(value);
-            auto is_neg      = value < 0;
+            u08p ptr            = buf;
+            uxx  base           = uxx(radix);
+
+            using unsigned_t    = inc::unsigned_type<type>;
+            auto u              = unsigned_t(value);
+            auto is_neg         = value < 0;
 
             if (is_neg){
-                u = unsigned_t(0) - u;
+                u               = unsigned_t(0) - u;
             }
 
             do {
-                ptr[0] = lut[u % base];
-                ptr   += 1;
-                u     /= unsigned_t(base);
+                ptr[0]          = lut[u % base];
+                ptr            += 1;
+                u              /= unsigned_t(base);
             } while(u != 0);
 
-            uxx    len = ptr - buf;
-            item * mem = alloc(len + is_neg);
-            the_t  r   = the_t(mem, len + is_neg);
+            uxx    len          = ptr - buf;
+            item * mem          = alloc(len + is_neg);
+            the_t  r            = the_t(mem, len + is_neg);
 
             if (is_neg){
-                mem[0] = '-';
-                mem   += 1;
+                mem[0]          = '-';
+                mem            += 1;
             }
             else if (mode == int_format_t::fmt_sn){
-                mem[0] = '+';
-                mem   += 1;
+                mem[0]          = '+';
+                mem            += 1;
             }
 
             for(uxx i = 0; i < len; i++){
-                mem[i] = buf[len - i - 1];
+                mem[i]          = buf[len - i - 1];
             }
             return r;
         }
@@ -389,59 +382,47 @@ namespace mixc::lang_cxx_strlize{
         using base::base;
         using the_t = core<item>;
 
-        #define xgen(type)                                                                      \
-        meta(type value, inc::can_alloc<item> alloc) :                                          \
-            meta(value, int_format_t::fmt_n, inc::numeration_t::dec, lower, alloc){             \
-        }                                                                                       \
-                                                                                                \
-        meta(type value, asciis lut, inc::can_alloc<item> alloc) :                              \
-            meta(value, int_format_t::fmt_n, inc::numeration_t::dec, lut, alloc){               \
-        }                                                                                       \
-                                                                                                \
-        meta(type value, inc::numeration_t radix, inc::can_alloc<item> alloc) :                 \
-            meta(value, int_format_t::fmt_n, radix, lower, alloc){                              \
-        }                                                                                       \
-                                                                                                \
-        meta(type value, inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc) :     \
-            meta(value, int_format_t::fmt_n, radix, lower, alloc){                              \
-        }                                                                                       \
-                                                                                                \
-        meta(type value, int_format_t fmt,                                                      \
-            inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc){                   \
-            thex = the.strlize(value, fmt, type(radix), lut, alloc);                            \
+        // TODO:可以转换成数字类型的类
+
+        template<inc::is_integer number_t>
+        meta(number_t value, int_format_t fmt, inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, fmt, radix, lut, alloc);
         }
 
-        xgen(u08);
-        xgen(u16);
-        xgen(u32);
-        xgen(u64);
-        xgen(i08);
-        xgen(i16);
-        xgen(i32);
-        xgen(i64);
-        #undef  xgen
-
-        #define xgen(type)                                                                                      \
-        meta(type value, inc::can_alloc<item> alloc){                                                           \
-            thex = the.template strlize<type>(value, float_format_t::fmt_1p2e3, not_exist, alloc);              \
-        }                                                                                                       \
-                                                                                                                \
-        meta(type value, float_format_t mode, inc::can_alloc<item> alloc){                                      \
-            thex = the.template strlize<type>(value, mode, not_exist, alloc);                                   \
-        }                                                                                                       \
-                                                                                                                \
-        meta(type value, uxx precious, inc::can_alloc<item> alloc){                                  \
-            thex = the.template strlize<type>(value, float_format_t::fmt_1p2e3, precious, alloc);    \
-        }                                                                                                       \
-                                                                                                                \
-        meta(type value, float_format_t mode, uxx precious, inc::can_alloc<item> alloc){             \
-            thex = the.template strlize<type>(value, mode, precious, alloc);                         \
+        template<inc::is_integer number_t>
+        meta(number_t value, inc::numeration_t radix, asciis lut, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, int_format_t::fmt_n, radix, lut, alloc);
         }
 
-        xgen(f32)
-        xgen(f64)
-        xgen(f80)
-        #undef  xgen
+        template<inc::is_integer number_t>
+        meta(number_t value, inc::numeration_t radix, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, int_format_t::fmt_n, radix, lower, alloc);
+        }
+
+        template<inc::is_integer number_t>
+        meta(number_t value, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, int_format_t::fmt_n, inc::numeration_t::dec, lower, alloc);
+        }
+
+        template<inc::is_float float_t>
+        meta(float_t value, float_format_t mode, uxx precious, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, mode, precious, alloc);
+        }
+
+        template<inc::is_float float_t>
+        meta(float_t value, uxx precious, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, float_format_t::fmt_1p2e3, precious, alloc);
+        }
+
+        template<inc::is_float float_t>
+        meta(float_t value, float_format_t mode, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, mode, not_exist, alloc);
+        }
+
+        template<inc::is_float float_t>
+        meta(float_t value, inc::can_alloc<item> alloc){
+            thex = the.strlize(value, float_format_t::fmt_1p2e3, not_exist, alloc);
+        }
 
         meta(final value, inc::can_alloc<item> alloc){
             thex = the_t(value).clone(alloc);
@@ -453,6 +434,14 @@ namespace mixc::lang_cxx_strlize{
             ptr[0] = value;
         }
     };
+
+    namespace origin{
+        using ::mixc::lang_cxx_strlize::lower;
+        using ::mixc::lang_cxx_strlize::upper;
+        using ::mixc::lang_cxx_strlize::float_format_t;
+        using ::mixc::lang_cxx_strlize::int_format_t;
+        using inc::numeration_t;
+    }
 }
 
 #endif
@@ -462,12 +451,7 @@ namespace mixc::lang_cxx_strlize::xuser{
     using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
-namespace xuser{
-    using ::mixc::lang_cxx_strlize::lower;
-    using ::mixc::lang_cxx_strlize::upper;
-    using ::mixc::lang_cxx_strlize::float_format_t;
-    using ::mixc::lang_cxx_strlize::int_format_t;
-}
+xexport_space(mixc::lang_cxx_strlize)
 
 #include"math/numeration_t.hpp"
 #undef  xusing_lang_cxx
