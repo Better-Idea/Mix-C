@@ -60,7 +60,7 @@ namespace mixc::lang_cxx_strlize{
     //               |||||||    ||||
     // +1.23456e8 -> +123456000.0000
     //  | |||||             |||
-    //  nul_len             expanding_zeros
+    //  num_len             expanding_zeros
     template<class item_t>
     using format_invoke = inc::can_callback<
         inc::cxx<item_t>(
