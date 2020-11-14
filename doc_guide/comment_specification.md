@@ -85,12 +85,12 @@ namespace mixc::define_nullref_t{
 ```C++
 /* 函数：去除重复元素
  * 参数：
- * - seq 为满足 inc::unified_seq_t 格式的模板
+ * - seq 为满足 inc::can_unified_seqlize 格式的模板
  * - alloc 为分配回调函数
  * 返回：
  * - 从 alloc 中分配的序列，用于保存着去重后的元素序列
  */ 
- template<inc::unified_seq_t seq_t>
+ template<inc::can_unified_seqlize seq_t>
  inline auto distinct(seq_t const & seq, distinct_alloc_invoke<seq_t> alloc);
 
 ```
