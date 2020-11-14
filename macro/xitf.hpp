@@ -56,11 +56,11 @@ int main(){
 #undef  xuser
 #define xuser mixc::macro_xitf::inc
 #include"configure.hpp"
+#include"macro/xnew.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/private/word.hpp"
 #include"memop/addressof.hpp"
 #include"memop/signature.hpp"
-#include"memory/new.hpp"
 #include"meta/has_cast.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tappend.hpp"
@@ -211,7 +211,7 @@ public:                                                                     \
         __data.object    = xref object;                                     \
         __data.func_list =                                                  \
             ::mixc::macro_xitf::func_list<__object, __invoke_count>;        \
-        new (this) meta(xref __data.func_list, object);                     \
+        xnew (this) meta(xref __data.func_list, object);                    \
         __data.func_list =                                                  \
             ::mixc::macro_xitf::func_list<__object, __invoke_count>;        \
     }                                                                       \

@@ -5,7 +5,7 @@
 #define xuser mixc::macro_xsv::inc
 #include"configure.hpp"
 #include"gc/private/token.hpp"
-#include"memory/new.hpp"
+#include"macro/xnew.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -24,15 +24,15 @@ namespace mixc::macro_xsv{
     };
 }
 
-#define __xsv__(item,padding,str)                                               \
-struct sv{                                                                      \
-    sv() : buf(padding str) {                                                   \
-        new (this) ::mixc::gc_token::token_plus(sizeof(str) / sizeof(item) - 1);\
-    }                                                                           \
-    item buf[sizeof(padding str) / sizeof(item)];                               \
-};                                                                              \
-static sv   __mem__;                                                            \
-static sv * __tmp__ = & __mem__;                                                \
+#define __xsv__(item,padding,str)                                                   \
+struct sv{                                                                          \
+    sv() : buf(padding str) {                                                       \
+        xnew (this) ::mixc::gc_token::token_plus(sizeof(str) / sizeof(item) - 1);   \
+    }                                                                               \
+    item buf[sizeof(padding str) / sizeof(item)];                                   \
+};                                                                                  \
+static sv   __mem__;                                                                \
+static sv * __tmp__ = & __mem__;                                                    \
 return *(mixc::macro_xsv::static_string_holder<item> *)(& __tmp__)
 
 #define xsv(item,padding,str)       ([]() { __xsv__(item, padding, str); }())
