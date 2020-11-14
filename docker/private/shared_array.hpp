@@ -16,7 +16,7 @@
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
 #include"macro/xis_nullptr.hpp"
-#include"memory/new.hpp"
+#include"macro/xnew.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -75,7 +75,7 @@ namespace mixc::docker_shared_array{
 
         the_t & operator=(decltype(nullptr)){
             base_t::operator=(nullptr);
-            new (this) the_t(*(the_t *)& inc::empty_array_ptr);
+            xnew (this) the_t(*(the_t *)& inc::empty_array_ptr);
             return thex;
         }
 
