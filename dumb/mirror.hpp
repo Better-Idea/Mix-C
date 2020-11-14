@@ -6,7 +6,7 @@
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
-#include"memory/new.hpp"
+#include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_mirror::origin{
@@ -29,12 +29,12 @@ namespace mixc::dumb_mirror::origin{
                 this[0] = *(mirror<type> *)(xref value);
             }
             else{
-                new (data) type(value);
+                xnew (data) type(value);
             }
         }
 
         void assign(type const & value){
-            new (this) the_t(value, construction_t::ignore);
+            xnew (this) the_t(value, construction_t::ignore);
         }
 
         void assign_with_operator(type const & value){
