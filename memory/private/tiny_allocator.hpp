@@ -10,7 +10,7 @@
 #include"macro/xexport.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xdebug_fail.hpp"
-#include"memory/new.hpp"
+#include"macro/xnew.hpp"
 #include"instruction/bit_test.hpp"
 #include"instruction/bit_test_and_set.hpp"
 #include"instruction/bit_test_and_reset.hpp"
