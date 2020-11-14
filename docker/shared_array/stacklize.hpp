@@ -11,7 +11,7 @@
 #include"docker/shared_array.hpp"
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
-#include"memory/new.hpp"
+#include"macro/xnew.hpp"
 #include"memop/addressof.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
@@ -62,7 +62,7 @@ namespace mixc::docker_shared_array_stacklize {
             }
 
             item_t * cur = xref the[len];
-            new (cur)item_t(value);
+            xnew (cur)item_t(value);
         }
 
         inc::transmitter<item_t> pop() {
