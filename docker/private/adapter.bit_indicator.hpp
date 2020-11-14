@@ -178,9 +178,9 @@ namespace mixc::docker_adapter_bit_indicator::origin{
 
         /* 函数：根据索引数组依次将指定索引的位置位
          * 参数：
-         * - index_list 为支持 inc::unified_seq_t 接口的对象
+         * - index_list 为支持 inc::can_unified_seqlize 接口的对象
          */
-        template<inc::unified_seq_t seq_t>
+        template<inc::can_unified_seqlize seq_t>
         void set(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
                 set(index_list[i]);
@@ -200,9 +200,9 @@ namespace mixc::docker_adapter_bit_indicator::origin{
 
         /* 函数：根据索引数组依次将指定索引的位复位
          * 参数：
-         * - index_list 为支持 inc::unified_seq_t 接口的对象
+         * - index_list 为支持 inc::can_unified_seqlize 接口的对象
          */
-        template<inc::unified_seq_t seq_t>
+        template<inc::can_unified_seqlize seq_t>
         void reset(seq_t const & index_list){
             for(uxx i = 0; i < index_list.length(); i++){
                 reset(index_list[i]);
