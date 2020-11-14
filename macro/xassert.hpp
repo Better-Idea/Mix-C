@@ -3,69 +3,46 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xassert::inc
-#include"io/tty.hpp"
-#include"io/private/tty.hpp"
+#include"dumb/place_holder.hpp"
 #include"macro/private/log.hpp"
-#include"macro/xlink.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::macro_xassert{
-    struct result{
-        u32 error_threshold;
-        u32 error_count     = 0;
-        u32 case_count      = 0;
+namespace mixc::macro_xassert::origin{
+    struct mixc_test_context{
+        uxx     case_count = 0;
+        uxx     pass_count = 0;
+        uxx     line;
+        asciis  path;
+        asciis  func_name;
 
-        result(asciis name, u32 error_threshold = 128) : 
-            error_threshold(error_threshold){
-            inc::tty.write_line("TEST | ", name);
-        }
+        mixc_test_context(asciis path, uxx line, asciis func_name);
+        ~mixc_test_context();
 
-        ~result(){
-            asciis msg[] = { "fail", "pass" };
-            inc::tty.write_line("     | case:", case_count, " ", msg[error_count == 0]);
+        template<class a0, class ... args>
+        bool test(bool pass, uxx line, asciis message, a0 const & first, args const & ... rest){
+            using namespace inc;
+
+            if (case_count++; pass){
+                pass_count++;
+                return pass;
+            }
+            if (case_count == pass_count + 1){
+                log(log_type_t::for_test, path, line, func_name, "[FAIL]\n", message_type_t::fail);
+            }
+
+            log(log_type_t::for_fail, path, line, func_name, message, message_type_t::fail, first, rest...);
+            return false;
         }
     };
 }
 
-#define xassert(condition,...)                                                                      \
-if (([&](asciis func){                                                                              \
-    if (__test.case_count += 1; condition){                                                         \
-        return false;                                                                               \
-    }                                                                                               \
-    else{                                                                                           \
-        using namespace mixc::macro_private_log::origin;                                            \
-        using namespace mixc::io_tty::origin;                                                       \
-        __test.error_count += 1;                                                                    \
-        log(                                                                                        \
-            for_test,                                                                               \
-            __FILE__,                                                                               \
-            __LINE__,                                                                               \
-            func,                                                                                   \
-            "error, " #__VA_ARGS__ ",", __test.error_count, ## __VA_ARGS__);                        \
-        if (__test.error_count % __test.error_threshold == 0) {                                     \
-            tty.write("pause key to continue...");                                                  \
-            tty.flush();                                                                            \
-            tty.read_key();                                                                         \
-            tty.write("\n");                                                                        \
-        }                                                                                           \
-        return true;                                                                                \
-    }                                                                                               \
-})(__func__))
-
-#define xassert_eq(...)                                                                             \
-if (([&](auto const & wanted, auto const & actually){                                               \
-    xassert(wanted == actually, wanted, actually) return true;                                      \
-    return false;                                                                                   \
-})(__VA_ARGS__))
-
-#define xtest(name,...)                                                                             \
-struct name{                                                                                        \
-    template<class call>                                                                            \
-    name(call && item){                                                                             \
-        ::mixc::macro_xassert::result r(__func__, ## __VA_ARGS__);                                  \
-        item(r);                                                                                    \
-    }                                                                                               \
-} xlink2(__, __COUNTER__) = [](::mixc::macro_xassert::result & __test)
+#define xtest(func_name)                                                                \
+inline void test(                                                                       \
+    mixc::macro_xassert::inc::place_holder<__COUNTER__>,                                \
+    mixc::macro_xassert::origin::mixc_test_context && __test_context =                  \
+    mixc::macro_xassert::origin::mixc_test_context(__FILE__, __LINE__, func_name))      \
 
 #endif
+
+xexport_space(mixc::macro_xassert::origin);
