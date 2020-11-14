@@ -7,9 +7,12 @@
 #include"macro/private/log.hpp"
 #pragma pop_macro("xuser")
 
-#define xhint(...) {                                                        \
-    ::mixc::macro_private_log::origin::log(                                 \
-        ::mixc::macro_private_log::origin::for_hint, __FILE__, __LINE__,    \
-        __func__, #__VA_ARGS__ ",", __VA_ARGS__);                           \
-}
+#define xhint(...)                                                              \
+    ([](auto const & ... args){                                                 \
+        using namespace ::mixc::macro_private_log::origin;                      \
+        log(for_hint, __FILE__, __LINE__, __func__,                             \
+            #__VA_ARGS__ ",", normal, args...                                   \
+        );                                                                      \
+    })(__VA_ARGS__)
+
 #endif
