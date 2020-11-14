@@ -132,7 +132,7 @@ namespace mixc::talk_about_gc::inc{
 
         {
             shared_ptr<N4_t> n4(ini_now);
-            n4->n(length{4}, n4); // 给数组每个都赋值 n4 32 + 16 + 16
+            n4->n(length{4}, n4); // 给数组每个都赋值 n4
             xhint("step:17", used_bytes());
         }
         xhint("step:18", used_bytes());
