@@ -5,8 +5,8 @@
 #define xuser mixc::dumb_mirror::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
-#include"macro/xstruct.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_mirror::origin{
