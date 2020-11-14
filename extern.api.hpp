@@ -6,6 +6,7 @@
 #include"lock/private/extern.atom.hpp"
 #include"lock/private/extern.thread_yield.hpp"
 #include"macro/private/extern.log.hpp"
+#include"macro/private/extern.xassert.hpp"
 #include"math/private/extern.expe.hpp"
 #include"math/private/extern.ln.hpp"
 #include"math/private/extern.sqrt.hpp"
