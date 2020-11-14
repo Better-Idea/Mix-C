@@ -10,7 +10,7 @@
 #undef  xuser
 #define xuser mixc::lang_cxx_parse_json::inc
 #include"define/base_type.hpp"
-#include"docker/shared_array/pushpop.hpp"
+#include"docker/shared_array/stacklize.hpp"
 #include"docker/shared_array.hpp"
 #include"interface/can_alloc.hpp"
 #include"lang/wxx/is_hex.hpp"
@@ -21,7 +21,7 @@
 #include"lang/cxx/parse.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
-#include"memory/new.hpp"
+#include"macro/xnew.hpp"
 #include"meta/is_same.hpp"
 #include"meta/more_fit.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -174,7 +174,7 @@ namespace mixc::lang_cxx_parse_json{
         template<class object>
         operator object * (){
             auto ptr = array<object>(1);
-            return new (ptr) object();
+            return xnew (ptr) object();
         }
     private:
         u08p begin;
