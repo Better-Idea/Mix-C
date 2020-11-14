@@ -3,13 +3,14 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_ranger::inc
+#include"interface/private/check.hpp"
 #include"interface/initializer_list.hpp"
 #include"interface/iterator.hpp"
 #include"macro/xalign.hpp"
+#include"macro/xnew.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
-#include"meta/is_same.hpp"
-#include"meta/item_origin_of.hpp"
+#include"meta/is_initializer_list.hpp"
 #include"meta/is_origin_array.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser") 
@@ -106,12 +107,20 @@ namespace mixc::interface_ranger{
             return len;
         }
     $
+}
 
-    template<class object, class item_t>
-    concept ranger_format = requires(object range, item_t item, uxx length, uxx index){
-        item   = (item_t)range[index];
-        length = range.length();
-    };
+namespace mixc::interface_ranger::origin{
+    template<class seq_t, class item_t>
+    concept can_rangerlizex = 
+        (inc::check_initializer_listx<seq_t, item_t> and inc::is_initializer_list<seq_t>) or
+        (inc::check_arrayx<seq_t, item_t> and inc::is_origin_array<seq_t>) or
+        (inc::check_indexablex<seq_t, item_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
+
+    template<class seq_t>
+    concept can_rangerlize = 
+        (inc::check_initializer_list<seq_t> and inc::is_initializer_list<seq_t>) or
+        (inc::check_array<seq_t> and inc::is_origin_array<seq_t>) or
+        (inc::check_indexable<seq_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
 
     template<class item_t>
     xstruct(
@@ -123,27 +132,22 @@ namespace mixc::interface_ranger{
         ranger(base impl) : 
             base(impl){}
 
-        template<class object>
-        requires(ranger_format<object, item_t &>)
-        ranger(object const & impl) : 
-            base(xref impl, impl.length(), 0){
+        ranger(item_t const * items, uxx length) : 
+            base((item_t *)items, length, 0){
         }
 
-        ranger(item_t * origin_array, uxx len) : 
-            base(xref origin_array, len, 0){
-        }
-
-        template<class type>
-        requires(
-            inc::is_origin_array<type> and
-            inc::is_same<item_t, inc::item_origin_of<type>>
-        )
-        ranger(type const & list) :
-            ranger((item_t *)list, sizeof(type) / sizeof(item_t)){
-        }
-
-        ranger(inc::initializer_list<item_t> impl):
-            base(xref impl, impl.size(), 0){
+        template<class seq_t>
+        requires(can_rangerlizex<seq_t, item_t>)
+        ranger(seq_t const & list){
+            if constexpr (inc::check_initializer_list<seq_t>){
+                xnew(this) ranger(list.begin(), list.size());
+            }
+            else if constexpr (inc::check_length<seq_t>){
+                xnew(this) ranger(list, list.length());
+            }
+            else{
+                xnew(this) ranger(list, sizeof(seq_t) / sizeof(list[0]));
+            }
         }
 
         item_t & operator[](uxx index){
@@ -217,19 +221,19 @@ namespace mixc::interface_ranger{
         xitr_foreachx_const(item_t const &)
     $
 
-    #define xranger(...)                                                               \
-    ::mixc::interface_ranger::ranger<__VA_ARGS__> range(::mixc::iinterval i) const {   \
-        using namespace ::mixc::interface_ranger;                                      \
-        if (i.normalize(this->length());                                               \
-            i.left() <= i.right()){                                                    \
-            return base(this, i.right() - i.left() + 1, i.left());                     \
-        }                                                                              \
-        else{                                                                          \
-            return base(this, i.left() - i.right() + 1, i.left(), true);               \
-        }                                                                              \
+    #define xranger(...)                                                                        \
+    ::mixc::interface_ranger::origin::ranger<__VA_ARGS__> range(::mixc::iinterval i) const {    \
+        using namespace ::mixc::interface_ranger;                                               \
+        if (i.normalize(this->length());                                                        \
+            i.left() <= i.right()){                                                             \
+            return base(this, i.right() - i.left() + 1, i.left());                              \
+        }                                                                                       \
+        else{                                                                                   \
+            return base(this, i.left() - i.right() + 1, i.left(), true);                        \
+        }                                                                                       \
     }
 }
 
 #endif
 
-xexport(mixc::interface_ranger::ranger)
+xexport_space(mixc::interface_ranger::origin)
