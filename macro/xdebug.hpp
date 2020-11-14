@@ -16,7 +16,7 @@
         using namespace ::mixc::macro_private_log::origin;  \
         log(                                                \
             for_debug, __FILE__, __LINE__,                  \
-            func, #__VA_ARGS__ ",", __VA_ARGS__);           \
+            func, #__VA_ARGS__ ",", normal, __VA_ARGS__);   \
         return true;                                        \
     })(__func__))
 
@@ -29,11 +29,11 @@
     enum{
         // docker/private/hashmap.hpp
         xon,
-        xoff,
             im_docker_hashmap_addressing,
             im_docker_hashmap_node_set,
             im_docker_hashmap_set,
             im_docker_hashmap_get,
+        xoff,
 
         // memory/tiny_allocator
         xon,

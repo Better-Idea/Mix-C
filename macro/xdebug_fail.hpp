@@ -10,14 +10,13 @@
 
 #if xuse_xdebug_fail
     #define xdebug_fail(...)                                                    \
-        if (__builtin_expect(([](const char * name, bool error){                \
+        if (__builtin_expect(([](const char * func, bool error){                \
             if (not error){                                                     \
                 return false;                                                   \
             }                                                                   \
             else{                                                               \
                 using namespace ::mixc::macro_private_log::origin;              \
-                log(                                                            \
-                    for_fail, __FILE__, __LINE__, name, # __VA_ARGS__);         \
+                log(for_fail, __FILE__, __LINE__, func, # __VA_ARGS__, fail);   \
                 return error;                                                   \
             }                                                                   \
         })(__func__, __VA_ARGS__), 0))
