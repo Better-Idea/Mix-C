@@ -8,17 +8,19 @@
 #include"docker/bit_indicator.hpp"
 #include"macro/xassert.hpp"
 #include"math/random.hpp"
+#include"memory/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_test_distinct{
-    xtest(distinct) {
+    xtest("distinct") {
         using namespace inc;
         
         static array<u32, 64> r;
+        uxx cost = used_bytes();
 
         for(uxx i = 1; i < r.length(); i++){
             for(uxx j = 0; j < r.length(); j++){
-                auto && bmp = bit_indicator<1024>();
+                auto && bmp = bit_indicator<1024>{};
                 auto    seq = r.subseq(co{0, j});
 
                 for(uxx k = 0; k < seq.length(); k++){
@@ -33,12 +35,14 @@ namespace mixc::algo_test_distinct{
 
                 for(uxx k = 0; k < new_list.length(); k++){
                     auto exist = bmp.get(new_list[k]);
-                    xassert(exist == true, i, j, k, new_list[k]);
+                    xfail_if(not exist, i, j, k, new_list[k]);
                     bmp.reset(new_list[k]);
                 }
             }
         }
 
+        bool memory_leak = used_bytes() - cost != 0;
+        xfail_if(memory_leak);
     };
 }
 
