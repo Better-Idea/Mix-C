@@ -1,8 +1,8 @@
-#ifndef xpack_macro_private_log_extern
-#define xpack_macro_private_log_extern
+#ifndef xpack_macro_private_extern_log
+#define xpack_macro_private_extern_log
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_private_log_extern::inc
+#define xuser mixc::macro_private_log::ext
 #include"configure.hpp"
 #include"define/base_type.hpp"
 #include"macro/private/log.hpp"
@@ -17,15 +17,23 @@
 #include"lock/mutex.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::macro_private_log::inc{
-    using namespace ::mixc::macro_private_log_extern::inc;
-}
-
 namespace mixc::macro_private_log::origin{
-    template<class ... args>
-    void log_core(log_type_t id, asciis file, uxx line, asciis func_name, args const & ... contents){
-        using namespace inc;
-        using namespace inc::ph;
+    ext::mutex print_mutex;
+
+    void log_set_color(message_type_t type){
+        using namespace ext;
+
+        tty_color_t conf[4];
+        conf[uxx(success)] = tty_color_t::green;
+        conf[uxx(normal )] = tty_color_t::light_gray;
+        conf[uxx(warning)] = tty_color_t::yellow;
+        conf[uxx(fail   )] = tty_color_t::red;
+        tty.forecolor(conf[uxx(type)]);
+    }
+
+    void log_header_lock_free(log_type_t log_type, asciis file, uxx line, asciis func_name){
+        using namespace ext;
+        using namespace ext::ph;
         static uxx skip = 0;
 
         #if xuse_xdebug_short_path
@@ -43,47 +51,37 @@ namespace mixc::macro_private_log::origin{
         };
 
         classify conf[4];
-        conf[for_debug] = { "DBUG", tty_color_t::light_gray};
-        conf[for_fail ] = { "FAIL", tty_color_t::red};
-        conf[for_test ] = { "TEST", tty_color_t::blue};
-        conf[for_hint ] = { "HINT", tty_color_t::gray};
+        conf[uxx(for_debug)] = { "DBUG", tty_color_t::light_gray};
+        conf[uxx(for_fail )] = { "FAIL", tty_color_t::red};
+        conf[uxx(for_test )] = { "TEST", tty_color_t::blue};
+        conf[uxx(for_hint )] = { "HINT", tty_color_t::gray};
 
-        file += skip;
-
-        tty.forecolor(conf[uxx(id)].color);
-        tty.write(conf[id].type, " | ", v{file, ':', line}.l(60), " | ", v{func_name}.l(20), " | ", contents...);
+        auto i  = uxx(log_type);
+        file   += skip;
+        tty.forecolor(conf[i].color);
+        tty.write(conf[i].type, " | ", v{file, ':', line}.l(60), " | ", v{func_name}.l(20), " | ");
     }
 
-    void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message){
-        using namespace inc;
-        using namespace inc::ph;
+    void log(log_type_t log_type, asciis file, uxx line, asciis func_name, asciis message, message_type_t message_type){
+        using namespace ext;
 
-        auto color = tty.forecolor();
-        log_core(id, file, line, func_name, message, '\n');
-        tty.forecolor(color);
+        print_mutex.lock([&](){
+            auto color = tty.forecolor();
+            log_header_lock_free(log_type, file, line, func_name);
+            log_set_color(message_type);
+            tty.write(message);
+            tty.forecolor(color);
+        });
     }
 
-    inc::mutex print_mutex;
-
-    void log_core(
-        log_type_t  type, 
-        asciis      file, 
-        uxx         line, 
-        asciis      func_name, 
-        asciis      message, 
-        inc::mix *  items, 
-        uxx         items_length
-    ){
-        using namespace inc;
-
-
-        xdefer{
-            print_mutex.unlock();
-        };
-        print_mutex.lock();
-
+    void log_hint_lock_free(asciis message, message_type_t message_type, ext::mix * items, uxx items_length){
+        using namespace ext;
         char buf[32];
-        log_core(type, file, line, func_name);
+        auto backup = tty.forecolor();
+        xdefer{
+            tty.forecolor(backup);
+        };
+        log_set_color(message_type);
 
         for(uxx i = 0; i < items_length; i++, items++){
             bool is_origin_text = false;
@@ -131,14 +129,14 @@ namespace mixc::macro_private_log::origin{
             case classify_type_t::is_signed_t:      tty.write(':', items->i); break;
             case classify_type_t::is_unsigned_t:    tty.write(':', items->u); break;
             case classify_type_t::is_float_t:
-                tty.write(':', c08{items->f, float_format_t::fmt_s1p2Es3, 17, [&](uxx length){
+                tty.write(':', c08{items->f, float_format_t::fmt_s1p2Es3, 17/*precious*/, [&](uxx length){
                         return buf;
                     }
                 });
                 break;
             case classify_type_t::is_str_t:
                 tty.write(':', "\"", items->slen == not_exist ? 
-                    inc::c08{items->s} : inc::c08{items->s, items->slen}, 
+                    ext::c08{items->s} : ext::c08{items->s, items->slen}, 
                     "\""
                 );
                 break;
@@ -147,7 +145,27 @@ namespace mixc::macro_private_log::origin{
                 break;
             }
         }
-        tty.write_line();
+    }
+
+    void log(
+        log_type_t      log_type, 
+        asciis          file, 
+        uxx             line, 
+        asciis          func_name, 
+        asciis          message, 
+        message_type_t  message_type,
+        ext::mix *      items, 
+        uxx             items_length
+    ){
+        using namespace ext;
+
+        print_mutex.lock([&](){
+            auto color = tty.forecolor();
+            log_header_lock_free(log_type, file, line, func_name);
+            log_hint_lock_free(message, message_type, items, items_length);
+            tty.write_line();
+            tty.forecolor(color);
+        });
     }
 }
 

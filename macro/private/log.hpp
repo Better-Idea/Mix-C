@@ -15,21 +15,39 @@ namespace mixc::macro_private_log::origin{
         for_hint,
     };
 
-    extern void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message);
+    enum message_type_t{
+        success,
+        normal,
+        warning,
+        fail,
+    };
+
+    extern void log(log_type_t log_type, asciis file, uxx line, asciis func_name, asciis message, message_type_t message_type);
 
     template<class a0, class ... args>
-    inline void log(log_type_t id, asciis file, uxx line, asciis func_name, asciis message, a0 const & first, args const & ... list){
-        extern void log_core(
-            log_type_t  type, 
-            asciis      file, 
-            uxx         line, 
-            asciis      func_name, 
-            asciis      message, 
-            inc::mix *  items, 
-            uxx         length
+    inline void log(
+        log_type_t          log_type, 
+        asciis              file, 
+        uxx                 line, 
+        asciis              func_name, 
+        asciis              message, 
+        message_type_t      message_type,
+        a0 const &          first, 
+        args const & ...    list){
+
+        extern void log(
+            log_type_t      log_type, 
+            asciis          file, 
+            uxx             line, 
+            asciis          func_name, 
+            asciis          message, 
+            message_type_t  message_type,
+            inc::mix *      items, 
+            uxx             items_length
         );
-        inc::mix arg[] = { first, list... };
-        log_core(id, file, line, func_name, message, arg, 1 + sizeof...(args));
+
+        inc::mix items[] = { first, list... };
+        log(log_type, file, line, func_name, message, message_type, items, 1 + sizeof...(args));
     }
 }
 
