@@ -14,6 +14,7 @@
 #include"instruction/index_of_last_set.hpp"
 #include"lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
+#include"macro/xnew.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"memory/allocator.hpp"
 #include"memop/addressof.hpp"
@@ -169,7 +170,7 @@ namespace mixc::gc_ref{
 
             if constexpr (not is_same<void, item_t>){
                 for(uxx i = 0; i < length; i++) {
-                    new(mem->item_ptr(i)) item_t(list...);
+                    xnew(mem->item_ptr(i)) item_t(list...);
                 }
             }
         }
@@ -186,7 +187,7 @@ namespace mixc::gc_ref{
 
         template<class ... args>
         void initial(uxx i, the_item_t const & first, args const & ... rest){
-            new(mem->item_ptr(i)) the_item_t(first);
+            xnew(mem->item_ptr(i)) the_item_t(first);
             initial(i + 1, rest...);
         }
     protected:
