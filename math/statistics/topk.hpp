@@ -20,7 +20,7 @@ namespace mixc::math_statistics_topk::origin{
         asc_sort,
     };
 
-    template<inc::unified_seq_t seq_k_t, inc::unified_seq_t seq_src_t>
+    template<inc::can_unified_seqlize seq_k_t, inc::can_unified_seqlize seq_src_t>
     inline seq_k_t & topk(seq_k_t const & k, seq_src_t const & source, topk_with mode = topk_with::des_sort){
         using item_t = inc::item_origin_of<seq_k_t>;
 
@@ -41,13 +41,14 @@ namespace mixc::math_statistics_topk::origin{
             }
         }
 
-        if (mode != topk_with::non_sort){
-            for(uxx i = len; --i > 0; ) {
-                kref[i] = inc::heap_root::pop(kref, i + 1, kref[i]);
-            }
-            if (mode == topk_with::asc_sort) for (uxx i = 0; i < len / 2; i++){
-                inc::swap(xref kref[i], xref kref[len - i - 1]);
-            }
+        if (mode == topk_with::non_sort){
+            return kref;
+        }
+        for(uxx i = len; --i > 0; ) {
+            kref[i] = inc::heap_root::pop(kref, i + 1, kref[i]);
+        }
+        if (mode == topk_with::asc_sort) for (uxx i = 0; i < len / 2; i++){
+            inc::swap(xref kref[i], xref kref[len - i - 1]);
         }
         return kref;
     }
