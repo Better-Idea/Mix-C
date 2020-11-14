@@ -3,31 +3,41 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_seqptr::inc
+#include"interface/private/check.hpp"
 #include"interface/initializer_list.hpp"
 #include"interface/ranger.hpp"
+#include"macro/xnew.hpp"
 #include"math/index_system.hpp"
-#include"memop/signature.hpp"
-#include"meta/is_same.hpp"
-#include"meta/item_origin_of.hpp"
+#include"meta/is_initializer_list.hpp"
 #include"meta/is_origin_array.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-#define xseqptr(...)                                                                \
-::mixc::interface_seqptr::seqptr<__VA_ARGS__> subseq(::mixc::iinterval i) const {   \
-    using ptr_t  = __VA_ARGS__ *;                                                   \
-    using ptrc_t = __VA_ARGS__ const *;                                             \
-    auto  len    = the.length();                                                    \
-    auto  ptr    = (ptr_t)(ptrc_t)this[0];                                          \
-    i.normalize(len);                                                               \
-    return ::mixc::interface_seqptr::seqptr<__VA_ARGS__>(                           \
-        ptr + i.left(),                                                             \
-        i.right() - i.left() + 1                                                    \
-    );                                                                              \
-}                                                                                   \
+#define xseqptr(...)                                                                        \
+::mixc::interface_seqptr::origin::seqptr<__VA_ARGS__> subseq(::mixc::iinterval i) const {   \
+    using ptr_t  = __VA_ARGS__ *;                                                           \
+    using ptrc_t = __VA_ARGS__ const *;                                                     \
+    auto  len    = the.length();                                                            \
+    auto  ptr    = (ptr_t)(ptrc_t)this[0];                                                  \
+    i.normalize(len);                                                                       \
+    return ::mixc::interface_seqptr::origin::seqptr<__VA_ARGS__>(                           \
+        ptr + i.left(),                                                                     \
+        i.right() - i.left() + 1                                                            \
+    );                                                                                      \
+}                                                                                           \
 xranger(__VA_ARGS__)
 
-namespace mixc::interface_seqptr{
+namespace mixc::interface_seqptr::origin{
+    template<class seq_t, class item_t>
+    concept can_seqptrlizex = 
+        (inc::check_initializer_listx<seq_t, item_t> and inc::is_initializer_list<seq_t>) or
+        (inc::check_arrayx<seq_t, item_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
+
+    template<class seq_t>
+    concept can_seqptrlize = 
+        (inc::check_initializer_list<seq_t> and inc::is_initializer_list<seq_t>) or
+        (inc::check_array<seq_t> and bool(inc::check_length<seq_t>));
+
     template<class item_t> struct seqptr;
     template<class item_t>
     xstruct(
@@ -39,33 +49,21 @@ namespace mixc::interface_seqptr{
     public:
         seqptr(){}
 
-        seqptr(item_t * ptr, uxx len) : 
-            ptr(ptr), len(len){}
+        seqptr(item_t const * ptr, uxx len) : 
+            ptr((item_t *)ptr), len(len){}
 
-        template<class type>
-        requires(
-            inc::is_origin_array<type> and
-            inc::is_same<item_t, inc::item_origin_of<type>>
-        )
-        seqptr(type const & list) :
-            seqptr((item_t *)list, sizeof(type) / sizeof(item_t)){
-        }
-
-        template<class object> requires(
-            inc::signature<uxx()>::has(& object::length) and
-            (
-                inc::signature<item_t const *()>::has(& object::operator item_t const *) or
-                inc::signature<item_t *()>::has(& object::operator item_t *)
-            )
-        )
-        seqptr(object const & impl){
-            len = (uxx)impl.length();
-            ptr = (item_t *)(item_t const *)impl;
-        }
-
-        seqptr(inc::initializer_list<item_t> list){
-            len = (uxx)list.size();
-            ptr = (item_t *)list.begin();
+        template<class seq_t>
+        requires(can_seqptrlizex<seq_t, item_t>)
+        seqptr(seq_t const & list){
+            if constexpr (inc::check_initializer_list<seq_t>){
+                xnew(this) seqptr(list.begin(), list.size());
+            }
+            else if constexpr (inc::check_length<seq_t>){
+                xnew(this) seqptr(list, list.length());
+            }
+            else{
+                xnew(this) seqptr(list, sizeof(seq_t) / sizeof(list[0]));
+            }
         }
 
         operator item_t *(){
@@ -110,4 +108,4 @@ namespace mixc::interface_seqptr{
 
 #endif
 
-xexport(mixc::interface_seqptr::seqptr)
+xexport_space(mixc::interface_seqptr::origin)
