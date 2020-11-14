@@ -391,4 +391,5 @@ namespace mixc::lang_cxx_parse_json::xuser {
     using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
 }
 
-xexport(mixc::lang_cxx_parse_json::parse_json)
+#undef  xusing_lang_cxx
+#define xusing_lang_cxx ::mixc::lang_cxx_parse_json::xuser
