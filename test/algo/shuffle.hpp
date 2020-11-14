@@ -1,8 +1,8 @@
-#ifndef xpack_algo_test_shuffle
-#define xpack_algo_test_shuffle
+#ifndef xpack_test_algo_shuffle
+#define xpack_test_algo_shuffle
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_test_shuffle::inc
+#define xuser mixc::test_algo_shuffle::inc
 #include"algo/shuffle.hpp"
 #include"docker/array.hpp"
 #include"docker/bit_indicator.hpp"
@@ -10,8 +10,8 @@
 #include"math/random.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::algo_test_shuffle{
-    xtest(shuffle) {
+namespace mixc::test_algo_shuffle{
+    xtest("shuffle") {
         using namespace inc;
 
         static array<uxx, 32> a, b;
@@ -25,8 +25,9 @@ namespace mixc::algo_test_shuffle{
                     inc::bit_indicator<32> bmp;
 
                     for(uxx k = 0; k < i; k++){
-                        xassert_eq(false, bmp.get(b[k] ^ 0x100000000ull));
-                        bmp.set(b[k] ^ 0x100000000ull);
+                        xfail_if(b[k] >= i);
+                        xfail_if(bmp.get(b[k]));
+                        bmp.set(b[k]);
                     }
                 }
             }
@@ -35,11 +36,7 @@ namespace mixc::algo_test_shuffle{
         a.foreach([](uxx i, uxx & v){
             v = i;
         });
-        test();
 
-        a.foreach([](uxx i, uxx & v){
-            v = i | 0x100000000ull;
-        });
         test();
     };
 }

@@ -1,20 +1,21 @@
-#ifndef xpack_algo_test_sort
-#define xpack_algo_test_sort
+#ifndef xpack_test_algo_sort
+#define xpack_test_algo_sort
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::algo_test_sort::inc
+#define xuser mixc::test_algo_sort::inc
 #include"algo/sort.hpp"
 #include"docker/array.hpp"
 #include"docker/bit_indicator.hpp"
 #include"macro/xassert.hpp"
+#include"macro/xexport.hpp"
 #include"math/random.hpp"
 
 #include<array>
 #include<algorithm>
 #pragma pop_macro("xuser")
 
-namespace mixc::algo_test_sort{
-    xtest(sort) {
+namespace mixc::test_algo_sort::origin{
+    xtest("sort") {
         using namespace inc;
 
         static std::array<u32, 100> a;
@@ -30,7 +31,7 @@ namespace mixc::algo_test_sort{
                 inc::sort::heap(subseq);
 
                 for(uxx k = 0; k < subseq.length(); k++){
-                    xassert_eq(a[k], subseq[k]);
+                    xfail_if(a[k] != subseq[k], k, a[k], subseq[k]);
                 }
             }
         }
@@ -38,3 +39,5 @@ namespace mixc::algo_test_sort{
 }
 
 #endif
+
+xexport_space(mixc::test_algo_sort::origin)
