@@ -20,29 +20,25 @@ unified_seq
 
 namespace mixc::meta_unified_seq{
     template<class seq_t>
-    inline auto invoke(){
-        using item_t     = inc::item_origin_of<seq_t>;
-        using plan_a     = inc::seqptr<item_t>;
-        using plan_b     = inc::ranger<item_t>;
+    inline auto meta(){
+        using item_t = inc::item_origin_of<seq_t>;
 
-        if constexpr (inc::has_cast<plan_a, seq_t>){
-            return plan_a();
+        if constexpr (inc::can_seqptrlize<seq_t>){
+            return inc::seqptr<item_t>{};
         }
         else{
-            return plan_b();
+            return inc::ranger<item_t>{};
         }
     }
 }
 
 namespace mixc::meta_unified_seq::origin{
     template<class seq_t>
-    concept unified_seq_t = 
-        inc::has_cast<inc::seqptr<inc::item_origin_of<seq_t>>, seq_t> or 
-        inc::has_cast<inc::ranger<inc::item_origin_of<seq_t>>, seq_t>;
+    concept can_unified_seqlize = inc::can_seqptrlize<seq_t> or inc::can_rangerlize<seq_t>;
 
-    template<unified_seq_t seq_t>
+    template<can_unified_seqlize seq_t>
     using unified_seq = decltype(
-        invoke<seq_t>()
+        meta<seq_t>()
     );
 }
 
