@@ -19,9 +19,9 @@
 #include"dumb/mirror.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xnew.hpp"
 #include"memop/addressof.hpp"
 #include"memop/copy.hpp"
-#include"memory/new.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -29,11 +29,11 @@
 namespace mixc::algo_heap_root{
     /* 函数：大小根堆压栈操作
      * 参数：
-     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
      * - value 为要压栈的元素
      * - compare 为元素比较回调
      */
-    template<class item_t, inc::unified_seq_t seq_t>
+    template<class item_t, inc::can_unified_seqlize seq_t>
     inline void push_core(
         seq_t                       seq,
         item_t const &              value, 
@@ -60,16 +60,16 @@ namespace mixc::algo_heap_root{
         }
 
         // 这里需要拷贝构造
-        new (xref seq[i]) item_t(similarities);
+        xnew (xref seq[i]) item_t(similarities);
     }
 
     /* 函数：大小根堆弹栈操作
      * 参数：
-     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
      * - insert_value 为要插入的元素
      * - compare 为元素比较回调
      */
-    template<class item_t, inc::unified_seq_t seq_t>
+    template<class item_t, inc::can_unified_seqlize seq_t>
     inline auto pop_core(
         seq_t                       seq, 
         item_t const &              insert_value, 
@@ -104,7 +104,7 @@ namespace mixc::algo_heap_root{
             left_index = (left_index << 1) + 1;
         }
 
-        new (xref seq[i]) item_t(insert_value);
+        xnew (xref seq[i]) item_t(insert_value);
         return wanted;
     }
 }
@@ -112,12 +112,12 @@ namespace mixc::algo_heap_root{
 namespace mixc::algo_heap_root::origin::heap_root{
     /* 函数：大小根堆压栈操作
      * 参数：
-     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
      * - length 为序列长度
      * - value 为要压栈的元素
      * - compare 为元素比较回调
      */
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline void push(
         seq_t                       const & seq,
         uxx                                 length,
@@ -135,12 +135,12 @@ namespace mixc::algo_heap_root::origin::heap_root{
 
     /* 函数：大小根堆弹栈操作
      * 参数：
-     * - seq 为满足 inc::unified_seq_t 约束的序列类型
+     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
      * - length 为序列长度
      * - insert_value 为要插入的元素
      * - compare 为元素比较回调
      */
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline auto pop(
         seq_t                       const & seq, 
         uxx                                 length, 

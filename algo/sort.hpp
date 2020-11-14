@@ -132,7 +132,7 @@ namespace mixc::algo_sort{
     }
 
     struct sort{
-        template<inc::unified_seq_t seq_t>
+        template<inc::can_unified_seqlize seq_t>
         static void heap(
             seq_t                      const & seq,
             inc::can_compare<
@@ -169,7 +169,7 @@ namespace mixc::algo_sort{
             );                                                  \
         } else
 
-        template<inc::unified_seq_t seq_t>
+        template<inc::can_unified_seqlize seq_t>
         static void radix_asc(seq_t const & seq){
             using item_t = inc::item_origin_of<seq_t>;
             xgen(u08, mode_asc)
@@ -178,7 +178,7 @@ namespace mixc::algo_sort{
             xgen(u64, mode_asc);
         }
 
-        template<inc::unified_seq_t seq_t>
+        template<inc::can_unified_seqlize seq_t>
         static void radix_des(seq_t const & seq){
             using item_t = inc::item_origin_of<seq_t>;
 

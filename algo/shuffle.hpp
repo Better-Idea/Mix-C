@@ -11,7 +11,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_shuffle{
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline void shuffle_core(seq_t seq){
         uxx length  = seq.length();
         uxx i       = 0;
@@ -43,7 +43,7 @@ namespace mixc::algo_shuffle{
         }
     }
 
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline void shuffle(seq_t const & seq){
         shuffle_core(
             inc::unified_seq<seq_t>(seq)

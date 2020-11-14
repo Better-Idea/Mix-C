@@ -53,18 +53,18 @@ namespace mixc::algo_remove{
 
     #undef xgen
 
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline void remove(seq_t const & target, iinterval range){
         remove_core(inc::unified_seq<seq_t>(target), range);
     }
 
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline void remove(seq_t const & target, ixx i){
         xindex_rollback(target.length(), i);
         remove_core(inc::unified_seq<seq_t>(target), cc{i, i});
     }
 
-    template<inc::unified_seq_t seq_tar_t, inc::unified_seq_t seq_src_t>
+    template<inc::can_unified_seqlize seq_tar_t, inc::can_unified_seqlize seq_src_t>
     inline void remove(seq_tar_t const & target, seq_src_t const & source, iinterval range){
         remove_core(
             inc::unified_seq<seq_tar_t>(target), 
@@ -73,7 +73,7 @@ namespace mixc::algo_remove{
         );
     }
 
-    template<inc::unified_seq_t seq_tar_t, inc::unified_seq_t seq_src_t>
+    template<inc::can_unified_seqlize seq_tar_t, inc::can_unified_seqlize seq_src_t>
     inline void remove(seq_tar_t const & target, seq_src_t const & source, ixx i){
         xindex_rollback(source.length(), i);
 

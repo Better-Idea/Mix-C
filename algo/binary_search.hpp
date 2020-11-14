@@ -98,7 +98,7 @@ namespace mixc::algo_binary_search{
      * 返回：
      * - result_t 结构
      */
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline auto match_template(
         seq_t                                       const & seq,
         inc::item_origin_of<seq_t>                  const & value,
@@ -115,7 +115,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
     using can_search = inc::can_callback<ixx(uxx)>;
 
     // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline uxx match(
         seq_t                                      const & seq,
         inc::item_origin_of<seq_t>                 const & value,
@@ -126,7 +126,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
     }
 
     // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline uxx greater_equals(
         seq_t                                      const & seq,
         inc::item_origin_of<seq_t>                 const & value,
@@ -138,7 +138,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
     }
 
     // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline uxx less_equals(
         seq_t                                      const & seq,
         inc::item_origin_of<seq_t>                 const & value,
@@ -150,20 +150,20 @@ namespace mixc::algo_binary_search::origin::binary_search{
     }
 
     // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline uxx match(uxx length, can_search const & compare) {
         return match_core(length, compare).match;
     }
 
     // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline uxx greater_equals(uxx length, can_search const & compare) {
         auto result = match_core(length, compare);
         return result.match == not_exist ? result.grater_then_target : result.match;
     }
 
     // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::unified_seq_t seq_t>
+    template<inc::can_unified_seqlize seq_t>
     inline uxx less_equals(uxx length, can_search const & compare) {
         auto result = match_core(length, compare);
         return result.match == not_exist ? result.less_then_target : result.match;
