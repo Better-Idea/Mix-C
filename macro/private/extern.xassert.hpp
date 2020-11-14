@@ -33,13 +33,12 @@ namespace mixc::macro_xassert::origin{
         using namespace ext;
 
         if (case_count == pass_count){
-            log(log_type_t::for_test, path, line, func_name, "[PASS]\n", message_type_t::success);
+            log(log_type_t::for_test, path, line, func_name, "[PASS]", message_type_t::success);
         }
         else{
             log(log_type_t::for_hint, path, line, func_name, "case, pass, fail, pass_rate,", message_type_t::normal, 
                 case_count, pass_count, case_count - pass_count, 1.0 * pass_count / case_count
             );
-            tty.write_line();
         }
     }
 }

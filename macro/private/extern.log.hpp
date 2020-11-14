@@ -69,7 +69,7 @@ namespace mixc::macro_private_log::origin{
             auto color = tty.forecolor();
             log_header_lock_free(log_type, file, line, func_name);
             log_set_color(message_type);
-            tty.write(message);
+            tty.write_line(message);
             tty.forecolor(color);
         });
     }
