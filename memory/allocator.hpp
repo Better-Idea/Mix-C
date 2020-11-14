@@ -7,7 +7,6 @@
 #include"macro/xexport.hpp"
 #include"macro/xtypeid.hpp"
 #include"macro/xnew.hpp"
-#include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memory_alloctor{
@@ -31,7 +30,7 @@ namespace mixc::memory_alloctor::origin{
     inline type * alloc_with_initial(memory_size bytes, args const & ... list){
         auto ptr = (type *)malloc(bytes);
         xdebug(im_alloc_with_initial, xtypeid(type).name, ptr, bytes);
-        return xnew(ptr) type(list...);
+        return new(ptr) type(list...);
     }
 
     template<class type, class ... args>
