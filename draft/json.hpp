@@ -198,7 +198,7 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
     return json_string;
 }
 
-void parse(u08p buffer, u08p buffer_end, asciis json_string){
+json_array parse(voidp buffer, voidp buffer_end, asciis json_string){
     enum closure_t: uxx{
         in_object   = uxx(json_object_type),
         in_array    = uxx(json_array_type),
@@ -217,21 +217,32 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
     auto cur_lv                     = & stack[0];
     auto c                          = '\0';
     auto op                         = fetch_value;
+    auto wait_next                  = false; // 遇到 ',' 逗号，表示还有下一个元素
+    auto miss_terminal              = true;
     auto closure                    = in_array;
-    auto buf_string                 = buffer;
-    auto buf_struct                 = buffer_end;
+    auto buf_string                 = u08p(buffer);
+    auto buf_struct                 = u08p(buffer_end);
     auto type                       = json_unknwon_type;
     auto alloc_object               = [&](){
-        buffer_end                 -= sizeof(json_object);
-        return new(buffer_end) json_object();
+        buf_struct                -= sizeof(json_object);
+        return new(buf_struct) json_object();
     };
     auto alloc_array                = [&](){
-        buffer_end                 -= sizeof(json_array);
-        return new(buffer_end) json_array();
+        buf_struct                -= sizeof(json_array);
+        return new(buf_struct) json_array();
+    };
+    auto create_element             = [&](json_type_t type, voidp item, operation_t opr){
+        cur_lv[0]->type(type);
+        cur_lv[0]->value.u          = uxx(item); // assign to union
+        cur_lv[1]                   = nodep(item);
+        cur_lv                     += 1;
+        closure                     = closure_t(type);
+        op                          = opr;
+        wait_next                   = false;
     };
 
-    terminal[uxx(in_object)]        = '}';
-    terminal[uxx(in_array)]         = ']';
+    terminal[in_object]             = '}';
+    terminal[in_array]              = ']';
     cur_lv[0]                       = alloc_array();
 
     while(json_string[0] != '\0'){
@@ -240,21 +251,11 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
         }
         if (op == fetch_value){
             if (c = json_string[0]; c == '{'){
-                cur_lv[0]->type(json_object_type);
-                cur_lv[0]->value.o  = alloc_object();
-                cur_lv[1]           = nodep(cur_lv[0]->value.o);
-                cur_lv             += 1;
-                closure             = in_object;
-                op                  = fetch_key;
+                create_element(json_object_type, alloc_object(), fetch_key);
                 continue;
             }
-            if (c == '['){
-                cur_lv[0]->type(json_array_type);
-                cur_lv[0]->value.a  = alloc_array();
-                cur_lv[1]           = nodep(cur_lv[0]->value.a);
-                cur_lv             += 1;
-                closure             = in_array;
-                op                  = fetch_value;
+            if (c == '{'){
+                create_element(json_array_type, alloc_array(), fetch_value);
                 continue;
             }
 
@@ -271,19 +272,24 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
                 cur_lv[0]->type(type);
             }
             else if (start_with(json_string, "true")){
+                json_string        += 4;
                 cur_lv[0]->type(json_integer_type);
                 cur_lv[0]->value.u  = 1;
             }
             else if (start_with(json_string, "false") or start_with(json_string, "null")){
+                json_string        += json_string[0] == 'f'/*is "false"*/ ? 5 : 4;
                 cur_lv[0]->type(json_integer_type);
                 cur_lv[0]->value.u  = 0;
+            }
+            else if (wait_next){
+                // error
             }
 
             if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
                 // error
             }
 
-            if (c == '}' or c == ']'){
+            if (miss_terminal = true; c == '}' or c == ']'){
                 if (c != terminal[closure]){ // 终结括号不匹配
                     // error
                 }
@@ -295,6 +301,7 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
                 closure             = closure_t(cur_lv[0]->type());
                 op                  = closure == in_object ? fetch_key : fetch_value;
                 json_string        += 1;
+                miss_terminal       = false; 
 
                 if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
                     break;
@@ -315,7 +322,17 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
 
                 // 新节点作为队列尾部
                 cur_lv[0]           = cur_lv[1];
+
+                json_string        += 1;
+                wait_next           = true;
                 continue;
+            }
+            else{
+                wait_next           = false;
+            }
+
+            if (miss_terminal){
+                // error
             }
         }
         if (op == fetch_key){
@@ -326,8 +343,9 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
                 // error
             }
 
-            json_objectp(cur_lv[0])->key = asciis(buf_string);
-            json_string = parse_string(& buf_string, json_string); 
+            json_objectp(cur_lv[0])->key 
+                                    = asciis(buf_string);
+            json_string             = parse_string(& buf_string, json_string); 
 
             if (json_string[0] != '\"'){
                 // error
@@ -345,4 +363,9 @@ void parse(u08p buffer, u08p buffer_end, asciis json_string){
             continue;
         }
     }
+
+    if (cur_lv != & stack[0]){
+        // error
+    }
+    return *json_arrayp(cur_lv[0]);
 }
