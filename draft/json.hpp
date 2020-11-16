@@ -16,6 +16,19 @@ enum json_type_t : uxx{
     json_unknwon_type,
 };
 
+enum class json_parse_result_t : uxx{
+    success,
+    depth_overflow,
+    terminator_missing,
+    terminator_mismatch,
+    colon_mismatch,
+    unexpected_termination,
+    unexpected_key_format,
+    unexpected_value_format,
+    remainder_comma,
+    remainder_terminator,
+};
+
 union json_value{
     asciis              s;
     f64                 f;
@@ -57,12 +70,30 @@ struct json_object : json_struct<json_object>{
     asciis              key = "";
 };
 
+struct json{
+    json(json_array * ptr) : ptr(ptr){}
+    json(json_parse_result_t state, asciis location_of_error) : 
+        state(state), location_of_error(location_of_error){
+    }
+
+    json_parse_result_t state   = json_parse_result_t::success;
+
+    union{
+        asciis          location_of_error;
+        json_array *    ptr;
+    };
+
+    auto operator->(){
+        return ptr;
+    }
+};
+
 using json_arrayp   = json_array *;
 using json_objectp  = json_object *;
 
 asciis skip_whitespace(asciis json_string){
     char whitespace[] = {
-        char(0x09), char(0x0a), char(0x0b), char(0x0c), char(0x0d), char(0x20), char(0x85), char(0xa0),
+        char(0x09), char(0x0a), char(0x0b), char(0x0c), char(0x0d), char(0x20),
     };
 
     for(; json_string[0] != '\0'; json_string++){
@@ -135,7 +166,7 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
         return false;
     };
 
-    auto fetch_number = [&](uxx * ptr = nullptr){
+    auto fetch_number       = [&](uxx * ptr = nullptr){
         u64 value           = 0;
         uxx idx             = 0;
 
@@ -143,6 +174,7 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
             ptr             = & idx;
         }
 
+        // TODO：超过精度时转为浮点类型
         for(uxx & i = ptr[0]; i < 19; json_string++, i++){
             if (json_string[0] >= '0' and json_string[0] <= '9'){
                 value       = value * 10 + json_string[0] - '0';
@@ -154,7 +186,7 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
                 return value;
             }
         }
-        // error
+
         type[0]             = json_unknwon_type;
         return value;
     };
@@ -199,7 +231,7 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
     return json_string;
 }
 
-json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
+json parse_json(voidp buffer, voidp buffer_end, asciis json_string){
     enum closure_t: uxx{
         in_object   = uxx(json_object_type),
         in_array    = uxx(json_array_type),
@@ -219,18 +251,21 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
 
     constexpr uxx stack_depth       = 256;
     nodep stack[stack_depth];
-    char terminal[2];
+    char terminator[2];
+    auto json_string_begin          = json_string;
     auto root                       = json_array{};
     auto buf                        = buffer;
     auto cur_lv                     = & stack[0];
     auto c                          = '\0';
     auto op                         = fetch_value;
     auto except_next                = false;                // 遇到 ',' 逗号，表示还有下一个元素
-    auto miss_terminal              = true;                 // 缺少终结符
+    auto miss_terminator            = true;                 // 缺少终结符
     auto closure                    = in_array;
     auto buf_string                 = u08p(buffer);
     auto buf_struct                 = u08p(buffer_end);
     auto type                       = json_unknwon_type;
+
+    // 子过程
     auto alloc_object               = [&](){
         buf_struct                 -= sizeof(json_object);
         return new(buf_struct) json_object();               // 初始化分配的内存
@@ -278,8 +313,8 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
         return match;
     };
 
-    terminal[in_object]             = '}';
-    terminal[in_array]              = ']';
+    terminator[in_object]           = '}';
+    terminator[in_array]            = ']';
     cur_lv[0]                       = nodep(& root);
     cur_lv[1]                       = nodep(alloc_array()); // 与上文中的 closure 保持一致
     cur_lv[0]->type(json_array_type);
@@ -287,7 +322,7 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
 
     while(true){
         if (cur_lv == & stack[stack_depth - 1]){
-            // error
+            return { json_parse_result_t::depth_overflow, json_string };
         }
         if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
             break;
@@ -305,36 +340,37 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
 
             // 提取元素值
             if (fetch() == mismatch and except_next){
-                // error
+                return { json_parse_result_t::remainder_comma, json_string };
             }
 
             // 跳过空白字符
             if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
-                // error
+                return { json_parse_result_t::unexpected_termination, json_string };
             }
 
             // 退出子节点
-            for (miss_terminal = true;;){
+            for (miss_terminator = true;;){
                 if (c = json_string[0]; c != '}' and c != ']'){
                     break;
                 }
 
                 // 终结括号不匹配
-                if (c != terminal[closure]){
-                    // error
+                if (c != terminator[closure]){
+                    return { json_parse_result_t::terminator_mismatch, json_string };
                 }
 
                 // 栈底不能再退栈
                 if (cur_lv == & stack[0]){
-                    // error
-                    ;
+                    return { json_parse_result_t::remainder_terminator, json_string };
                 }
 
                 cur_lv             -= 1;
+
+                // 当前节点的父节点存放着自己的类型
                 closure             = closure_t(cur_lv[-1]->type());
                 op                  = closure == in_object ? fetch_key : fetch_value;
                 json_string        += 1;
-                miss_terminal       = false; 
+                miss_terminator     = false; 
 
                 if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
                     break;
@@ -358,7 +394,7 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
                 cur_lv[0]           = cur_lv[1];
 
                 json_string        += 1;
-                miss_terminal       = false;
+                miss_terminator     = false;
                 except_next         = true;
                 continue;
             }
@@ -367,19 +403,19 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
             }
 
             // 当前字符不是终结符('}', ']', ',')
-            if (miss_terminal){
-                // error
+            if (miss_terminator){
+                return { json_parse_result_t::terminator_mismatch, json_string };
             }
             continue;
         }
 
-        // 争对 json_object_type 的 fetch，先获取键，再再 fetch_value 获取值
+        // 针对 json_object_type 的 fetch，先获取键，再在 fetch_value 中获取值
         if (op == fetch_key){
             if (json_string[0] != '\"'){
-                // error
+                return { json_parse_result_t::unexpected_key_format, json_string };
             }
             if (json_string += 1; json_string[0] == '\0'){
-                // error
+                return { json_parse_result_t::unexpected_termination, json_string };
             }
 
             json_objectp(cur_lv[0])->key 
@@ -387,14 +423,14 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
             json_string             = parse_string(& buf_string, json_string); 
 
             if (json_string[0] != '\"'){
-                // error
+                return { json_parse_result_t::unexpected_key_format, json_string };
             }
 
             json_string            += 1; // skip '\"'
             json_string             = skip_whitespace(json_string);
 
             if (json_string[0] != ':'){
-                // error
+                return { json_parse_result_t::colon_mismatch, json_string };
             }
 
             json_string            += 1;
@@ -403,9 +439,9 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
         }
     }
 
-    // 只有括号成对存在才能不会导致退栈失败
-    if (cur_lv != root + 1){
-        // error
+    // 只有括号成对存在并满足正确的嵌套关系才能不会导致退栈失败
+    if (cur_lv != & stack[1]){
+        return { json_parse_result_t::terminator_missing, json_string };
     }
-    return json_arrayp(cur_lv[0]);
+    return { json_arrayp(cur_lv[0]) };
 }
