@@ -172,10 +172,10 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
         return json_string;
     }
     if (json_string[0] == '.'){
+        type[0]             = json_float_type;
         json_string        += 1;
         deci                = fetch_number(& i);
         deci                = expr10_unsafe(i) * deci + real;
-        type[0]             = json_float_type;
     }
     if (json_string[0] == 'e' or json_string[0] == 'E'){
         json_string        += 1;
@@ -198,7 +198,7 @@ asciis parse_number(void * buffer, json_type_t * type, asciis json_string){
     return json_string;
 }
 
-json_array parse(voidp buffer, voidp buffer_end, asciis json_string){
+json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
     enum closure_t: uxx{
         in_object   = uxx(json_object_type),
         in_array    = uxx(json_array_type),
@@ -224,7 +224,7 @@ json_array parse(voidp buffer, voidp buffer_end, asciis json_string){
     auto buf_struct                 = u08p(buffer_end);
     auto type                       = json_unknwon_type;
     auto alloc_object               = [&](){
-        buf_struct                -= sizeof(json_object);
+        buf_struct                 -= sizeof(json_object);
         return new(buf_struct) json_object();
     };
     auto alloc_array                = [&](){
@@ -233,19 +233,19 @@ json_array parse(voidp buffer, voidp buffer_end, asciis json_string){
     };
     auto create_element             = [&](json_type_t type, voidp item, operation_t opr){
         cur_lv[0]->type(type);
-        cur_lv[0]->value.u          = uxx(item); // assign to union
+        cur_lv[0]->value.u          = uxx(item); // 赋值给联合体
         cur_lv[1]                   = nodep(item);
         cur_lv                     += 1;
-        closure                     = closure_t(type);
+        closure                     = closure_t(type); // closure_t 与 json_type_t 保持一致
         op                          = opr;
         wait_next                   = false;
     };
 
     terminal[in_object]             = '}';
     terminal[in_array]              = ']';
-    cur_lv[0]                       = alloc_array();
+    cur_lv[0]                       = nodep(alloc_array()); // 与上文中的 closure 保持一致
 
-    while(json_string[0] != '\0'){
+    while(true){
         if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
             break;
         }
@@ -367,5 +367,5 @@ json_array parse(voidp buffer, voidp buffer_end, asciis json_string){
     if (cur_lv != & stack[0]){
         // error
     }
-    return *json_arrayp(cur_lv[0]);
+    return json_arrayp(cur_lv[0]);
 }
