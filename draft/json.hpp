@@ -44,8 +44,8 @@ struct json_struct{
     void next(next_t * value){
         pnext = (next_t *)(uxx(value) | ptype);
     }
-private:
 
+private:
     union{
         uxx             ptype : 3;
         next_t *        pnext = nullptr;
@@ -211,13 +211,14 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
 
     using nodep = json_struct<void> *;
 
-    nodep stack[256];
+    constexpr uxx stack_depth       = 256;
+    nodep stack[stack_depth];
     char terminal[2];
     auto buf                        = buffer;
     auto cur_lv                     = & stack[0];
     auto c                          = '\0';
     auto op                         = fetch_value;
-    auto wait_next                  = false; // 遇到 ',' 逗号，表示还有下一个元素
+    auto except_next                = false;                // 遇到 ',' 逗号，表示还有下一个元素
     auto miss_terminal              = true;
     auto closure                    = in_array;
     auto buf_string                 = u08p(buffer);
@@ -225,20 +226,20 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
     auto type                       = json_unknwon_type;
     auto alloc_object               = [&](){
         buf_struct                 -= sizeof(json_object);
-        return new(buf_struct) json_object();
+        return new(buf_struct) json_object();               // 初始化分配的内存
     };
     auto alloc_array                = [&](){
         buf_struct                -= sizeof(json_array);
-        return new(buf_struct) json_array();
+        return new(buf_struct) json_array();                // 初始化分配的内存
     };
     auto create_element             = [&](json_type_t type, voidp item, operation_t opr){
         cur_lv[0]->type(type);
-        cur_lv[0]->value.u          = uxx(item); // 赋值给联合体
+        cur_lv[0]->value.u          = uxx(item);            // 赋值给联合体
         cur_lv[1]                   = nodep(item);
         cur_lv                     += 1;
-        closure                     = closure_t(type); // closure_t 与 json_type_t 保持一致
+        closure                     = closure_t(type);      // closure_t 与 json_type_t 保持一致
         op                          = opr;
-        wait_next                   = false;
+        except_next                 = false;
     };
 
     terminal[in_object]             = '}';
@@ -246,6 +247,9 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
     cur_lv[0]                       = nodep(alloc_array()); // 与上文中的 closure 保持一致
 
     while(true){
+        if (cur_lv == & stack[stack_depth - 1]){
+            // error
+        }
         if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
             break;
         }
@@ -281,7 +285,7 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
                 cur_lv[0]->type(json_integer_type);
                 cur_lv[0]->value.u  = 0;
             }
-            else if (wait_next){
+            else if (except_next){
                 // error
             }
 
@@ -290,10 +294,13 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
             }
 
             if (miss_terminal = true; c == '}' or c == ']'){
-                if (c != terminal[closure]){ // 终结括号不匹配
+                // 终结括号不匹配
+                if (c != terminal[closure]){
                     // error
                 }
-                if (cur_lv == & stack[0]){ // 栈底不能再退栈
+
+                // 栈底不能再退栈
+                if (cur_lv == & stack[0]){
                     // error
                 }
 
@@ -324,11 +331,11 @@ json_array * parse(voidp buffer, voidp buffer_end, asciis json_string){
                 cur_lv[0]           = cur_lv[1];
 
                 json_string        += 1;
-                wait_next           = true;
+                except_next         = true;
                 continue;
             }
             else{
-                wait_next           = false;
+                except_next         = false;
             }
 
             if (miss_terminal){
