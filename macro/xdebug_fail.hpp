@@ -10,7 +10,7 @@
 
 #if xuse_xdebug_fail
     #define xdebug_fail(...)                                                    \
-        if (__builtin_expect(([](const char * func, bool error){                \
+        [[unlikely]] if (([](const char * func, bool error){                    \
             if (not error){                                                     \
                 return false;                                                   \
             }                                                                   \
@@ -19,7 +19,7 @@
                 log(for_fail, __FILE__, __LINE__, func, # __VA_ARGS__, fail);   \
                 return error;                                                   \
             }                                                                   \
-        })(__func__, __VA_ARGS__), 0))
+        })(__func__, __VA_ARGS__))
 #else
     #define xdebug_fail(...)  if (false)
 #endif
