@@ -223,7 +223,7 @@ inline carry<big_uint<unit>> operator << (big_uint<unit> const & a, uxx bits){
         else{
             r.has_carry             = u08(a[i] & 1);
 
-            for(; i < unit; i++, k++){
+            for(; i != not_exist; i--, k--){
                 r[k]                = a[i];
             }
         }
