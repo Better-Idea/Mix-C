@@ -131,9 +131,7 @@ struct big_uint{
             using bu                    = big_uint<unit>;
             using bup                   = big_uint<unit> *;
 
-            carry<big_uint<unit>>  r{};
             big_uint<unit> & a          = this[0];
-            r.has_carry                 = b.has_carry;
             u32p ptr_a                  = u32p(& a);
             u32p ptr_b                  = u32p(& b);
             u32  product_l[unit * 4]    = {};
@@ -320,8 +318,8 @@ struct big_uint{
 
     ixx compare(big_uint<unit> const & b){
         for(uxx i = 0; i < unit; i++){
-            if (a[i] != b[i]){
-                return a[i] > b[i] ? 1 : -1;
+            if (items[i] != b[i]){
+                return items[i] > b[i] ? 1 : -1;
             }
         }
         return 0;
