@@ -1,3 +1,5 @@
+// 暂不支持[大端模式]
+
 #include"configure.hpp"
 #include"define/base_type.hpp"
 
@@ -27,6 +29,10 @@ struct big_uint{
     auto & h(){
         using bup = big_uint<unit / 2> *;
         return (bup(this))[1];
+    }
+
+    static constexpr uxx total_bits(){
+        return sizeof(items) * 8;
     }
 private:
     u64 items[unit];
@@ -140,3 +146,204 @@ inline big_uint<unit * 2> operator * (big_uint<unit> const & a, big_uint<unit> c
         #undef xhas_isa
     #endif
 }
+
+template<uxx unit>
+inline carry<big_uint<unit>> operator >> (big_uint<unit> const & a, uxx bits){
+    carry<big_uint<unit>> r{};
+
+    #ifndef xhas_isa
+        if (bits >= a.total_bits()){
+            if (bits == a.total_bits()){
+                r.has_carry         = u08(a[unit - 1] >> 63);
+            }
+            return r;
+        }
+        if (bits == 0){
+            return a;
+        }
+
+        uxx i                       = bits / 64;
+        uxx j                       = bits % 64;
+        uxx k                       = 0;
+
+        if (j != 0){
+            r.has_carry             = u08(1 & (a[i] >> (j - 1)));
+
+            for(; i < unit - 1; i++, k++){
+                u64 l               = a[i + 0] >> (j);
+                u64 h               = a[i + 1] << (64 - j);
+                r[k]                = h | l;
+            }
+
+            r[k]                    = a[i] >> j;
+        }
+        else{
+            r.has_carry             = u08(1 & (a[i - 1] >> 63));
+
+            for(; i < unit; i++, k++){
+                r[k]                = a[i];
+            }
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline carry<big_uint<unit>> operator << (big_uint<unit> const & a, uxx bits){
+    carry<big_uint<unit>> r{};
+
+    #ifndef xhas_isa
+        if (bits >= a.total_bits()){
+            if (bits == a.total_bits()){
+                r.has_carry         = u08(a[0] & 1);
+            }
+            return r;
+        }
+        if (bits == 0){
+            return a;
+        }
+
+        uxx i                       = unit - 1 - bits / 64;
+        uxx j                       = bits % 64;
+        uxx k                       = unit - 1;
+
+        if (j != 0){
+            r.has_carry             = u08(1 & (a[i] >> (64 - j)));
+
+            for(; i > 0; i--, k--){
+                u64 l               = a[i] << (j);
+                u64 h               = a[i - 1] >> (64 - j);
+                r[k]                = h | l;
+            }
+
+            r[k]                    = a[i] << j;
+        }
+        else{
+            r.has_carry             = u08(a[i] & 1);
+
+            for(; i < unit; i++, k++){
+                r[k]                = a[i];
+            }
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline carry<big_uint<unit>> operator | (big_uint<unit> const & a, big_uint<unit> const & b){
+    carry<big_uint<unit>> r{};
+
+    #ifndef xhas_isa
+        for(uxx i = 0; i < unit; i++){
+            r[i]                    = a[i] | b[i];
+            r.has_carry            |= r[i] != 0;
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline carry<big_uint<unit>> operator & (big_uint<unit> const & a, big_uint<unit> const & b){
+    carry<big_uint<unit>> r{};
+
+    #ifndef xhas_isa
+        for(uxx i = 0; i < unit; i++){
+            r[i]                    = a[i] & b[i];
+            r.has_carry            |= r[i] != 0;
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline carry<big_uint<unit>> operator ^ (big_uint<unit> const & a, big_uint<unit> const & b){
+    carry<big_uint<unit>> r{};
+
+    #ifndef xhas_isa
+        for(uxx i = 0; i < unit; i++){
+            r[i]                    = a[i] ^ b[i];
+            r.has_carry            |= r[i] != 0;
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline carry<big_uint<unit>> operator ~ (big_uint<unit> const & a){
+    carry<big_uint<unit>> r{};
+
+    #ifndef xhas_isa
+        for(uxx i = 0; i < unit; i++){
+            r[i]                    = ~a[i];
+            r.has_carry            |= r[i] != 0;
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline bool operator ! (big_uint<unit> const & a){
+    bool r = false;
+
+    #ifndef xhas_isa
+        for(uxx i = 0; i < unit; i++){
+            r                      &= a[i] == 0;
+        }
+        return r;
+    #else
+        #undef xhas_isa
+    #endif
+}
+
+template<uxx unit>
+inline ixx compare (big_uint<unit> const & a, big_uint<unit> const & b){
+    for(uxx i = 0; i < unit; i++){
+        if (a[i] != b[i]){
+            return a[i] > b[i] ? 1 : -1;
+        }
+    }
+    return 0;
+}
+
+template<uxx unit>
+inline bool operator >  (big_uint<unit> const & a, big_uint<unit> const & b){
+    return compare<unit>(a, b) > 0;
+}
+
+template<uxx unit>
+inline bool operator >= (big_uint<unit> const & a, big_uint<unit> const & b){
+    return compare<unit>(a, b) >= 0;
+}
+
+template<uxx unit>
+inline bool operator <  (big_uint<unit> const & a, big_uint<unit> const & b){
+    return compare<unit>(a, b) < 0;
+}
+
+template<uxx unit>
+inline bool operator <= (big_uint<unit> const & a, big_uint<unit> const & b){
+    return compare<unit>(a, b) <= 0;
+}
+
+template<uxx unit>
+inline bool operator == (big_uint<unit> const & a, big_uint<unit> const & b){
+    return compare<unit>(a, b) == 0;
+}
+
+template<uxx unit>
+inline bool operator != (big_uint<unit> const & a, big_uint<unit> const & b){
+    return compare<unit>(a, b) != 0;
+}
+
