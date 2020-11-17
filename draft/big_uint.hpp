@@ -14,7 +14,24 @@ struct carry : big_int_t{
 
 template<uxx unit>
 struct big_uint{
-    big_uint():items{}{}
+    constexpr big_uint(){}
+    constexpr big_uint(asciis value){
+        for(uxx i = 0; value[0] != '\0'; value++){
+            auto v          = u64(value[0] - '0');
+            // "36893488147419103232"
+
+            for(uxx j = 0; j < unit; j++){
+                auto l      = (u64)(u32)(items[j] >>  0) * 10 + (v);
+                auto h      = (u64)(u32)(items[j] >> 32) * 10 + (l >> 32);
+                items[j]    = (h << 32) | u32(l);
+                v           = (u64)(h >> 32);
+
+                if (v == 0){
+                    break;
+                }
+            }
+        }
+    }
 
     u64 & operator[](uxx i) const {
         return items[i];
@@ -71,7 +88,7 @@ struct big_uint{
             for(uxx i = 0; i < unit; i++){
                 auto l                  = (u64)(u32)(a[i]      ) + (u64)(u32)(b[i]      ) + (r.has_carry);
                 auto h                  = (u64)(u32)(a[i] >> 32) + (u64)(u32)(b[i] >> 32) + (l  >> 32);
-                r[i]                    = (h << 32) | l;
+                r[i]                    = (h << 32) | u32(l);
                 r.has_carry             = (h >> 32);
             }
         #else
@@ -117,7 +134,7 @@ struct big_uint{
             for(uxx i = 0; i < unit; i++){
                 auto l                  = (u64)(u32)(a[i]      ) - (u64)(u32)(b[i]      ) - (r.has_carry);
                 auto h                  = (u64)(u32)(a[i] >> 32) - (u64)(u32)(b[i] >> 32) - (1 & (l  >> 32));
-                r[i]                    = (h << 32) | l;
+                r[i]                    = (h << 32) | u32(l);
                 r.has_carry             = (h >> 32) & 1;
             }
         #else
@@ -349,7 +366,7 @@ struct big_uint{
         return compare<unit>(this[0], b) != 0;
     }
 private:
-    mutable u64 items[unit];
+    mutable u64 items[unit] = {};
 };
 
 template<> struct big_uint<0>{};
