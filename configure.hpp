@@ -66,7 +66,7 @@
 #endif
 
 // auto select os
-#if _WIN32 || _WIN64 || __WIN32__ || __WIN64__
+#if _WIN32 || _WIN64 || __WIN32__ || __WIN64__ || __CYGWIN__
     #define xis_windows             1
 #elif   __linux__ || __linux
     #define xis_linux               1
