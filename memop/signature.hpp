@@ -36,7 +36,7 @@ namespace mixc::memop_signature{
         #undef xgen
 
         static ret call(const void * self, voidp this_call, args ... list){
-            typedef struct foo{} * foop;
+            struct foo{};
             union {
                 voidp       mem;
                 ret (     * gnu_call)(const void *, args...);
@@ -47,6 +47,7 @@ namespace mixc::memop_signature{
 
             // 应对不同平台具有差异的 this_call 
             #if xis_msvc
+            using foop = foo *;
             return (foop(self)->*u.msvc_call)(list...);
             #else
             return u.gnu_call(self, list...);
