@@ -1,6 +1,5 @@
 #ifndef xpack_macro_xdebug_fail
 #define xpack_macro_xdebug_fail
-#pragma warning(disable:4390)
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xdebug_fail::inc

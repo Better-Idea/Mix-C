@@ -1,6 +1,5 @@
 #ifndef xpack_macro_xhint
 #define xpack_macro_xhint
-#pragma warning(disable:4390)
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xhint::inc
