@@ -26,5 +26,5 @@ namespace mixc::macro_xdefer {
     };
 }
 
-#define xdefer      [[maybe_unused]] auto && xlink2(__release, __LINE__) = ::mixc::macro_xdefer::sugar() * [&]()
+#define xdefer      [[maybe_unused]] auto && xlink2(__mixc_defer, __LINE__) = ::mixc::macro_xdefer::sugar() * [&]()
 #endif
