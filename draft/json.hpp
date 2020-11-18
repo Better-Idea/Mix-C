@@ -268,11 +268,11 @@ json parse_json(voidp buffer, voidp buffer_end, asciis json_string){
     // 子过程
     auto alloc_object               = [&](){
         buf_struct                 -= sizeof(json_object);
-        return new(buf_struct) json_object();               // 初始化分配的内存
+        return xnew(buf_struct) json_object();              // 初始化分配的内存
     };
     auto alloc_array                = [&](){
         buf_struct                -= sizeof(json_array);
-        return new(buf_struct) json_array();                // 初始化分配的内存
+        return xnew(buf_struct) json_array();               // 初始化分配的内存
     };
     auto create_element             = [&](json_type_t type, voidp item, operation_t opr){
         cur_lv[0]->type(type);

@@ -268,7 +268,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
             }
 
             auto meta   = inner::malloc_aligned(page_bytes, page_bytes);
-            auto page   = new(meta) page_header;
+            auto page   = xnew(meta) page_header;
             auto first  = page->first_block();
 
             if (page_list == nullptr){

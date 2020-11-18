@@ -49,7 +49,7 @@ namespace mixc::docker_shared_array_stacklize {
             if (len == capacity()) {
                 u08 mirror[sizeof(the_t)];
 
-                auto & new_array = * new(mirror) the_t(
+                auto & new_array = xnew(mirror) the_t(
                     ::length(len + 1) // 由于设置了 is_binary_aligned_alloc=true， 所以内部默认为分配容量为 capacity() * 2 的内存
                 );
 

@@ -39,7 +39,7 @@ xstruct(
     hashmap_set_result_t set(key_t const & key xarg_val_t_decl){
         // 约定 next == this 表示的是空节点，首元 next == nullptr 表示只有首元一个节点
         if (is_empty()){
-            new (this) node(key xarg_val, inc::construction_t::execute);
+            xnew (this) node(key xarg_val, inc::construction_t::execute);
             return hashmap_set_result_t::success;
         }
 
@@ -420,7 +420,7 @@ private:
     static node_t * alloc(inc::bit_indicator<> * bmp, uxx node_count){
         node_t * nodes = nullptr;
 
-        new (bmp) inc::bit_indicator<>(node_count,
+        xnew (bmp) inc::bit_indicator<>(node_count,
             [&](uxx length) -> uxx * {
                 auto bytes = inc::memory_size(
                     node_count * sizeof(node_t) + sizeof(uxx) * length
@@ -429,7 +429,7 @@ private:
                 nodes = inc::alloc<node_t>(bytes);
 
                 for (uxx i = 0; i < node_count; i++){
-                    new (xref nodes[i]) node_t();
+                    xnew (xref nodes[i]) node_t();
                 }
                 return uxxp(nodes + node_count);
             }

@@ -80,6 +80,7 @@
 #include"interface/can_alloc.hpp"
 #include"interface/can_free.hpp"
 #include"lock/atom_swap.hpp"
+#include"macro/xnew.hpp"
 #include"memop/copy.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -172,7 +173,7 @@ namespace mixc::algo_mmu {
                 tab[1]                  = (nullptr);
                 ptr                     = (tab[0]);
                 len                     = (1);
-                new (ptr) item_t(value);
+                xnew (ptr) item_t(value);
                 return;
             }
 
@@ -197,11 +198,11 @@ namespace mixc::algo_mmu {
                 }
 
                 len                    += (1);
-                new (ptr) item_t(value);
+                xnew (ptr) item_t(value);
                 return;
             }
             else{
-                new (xref tab[i_page][len & mask]) item_t(value);
+                xnew (xref tab[i_page][len & mask]) item_t(value);
                 len                    += (1);
             }
         }
