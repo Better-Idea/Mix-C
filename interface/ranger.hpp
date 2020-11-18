@@ -12,6 +12,7 @@
 #include"memop/signature.hpp"
 #include"meta/is_initializer_list.hpp"
 #include"meta/is_origin_array.hpp"
+#include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser") 
 
@@ -28,12 +29,12 @@ namespace mixc::interface_ranger{
         enum{ mask = sizeof(uxx) * 2 - 1 };
 
         template<class object, class return_type>
-        return_type pos(uxx index){
+        return_type & pos(uxx index){
             return (*(object *)ptr)[ofs + index];
         }
 
         template<class object, class return_type>
-        return_type neg(uxx index){
+        return_type * neg(uxx index){
             return (*(object *)ptr)[ofs - index];
         }
 
@@ -68,31 +69,36 @@ namespace mixc::interface_ranger{
     public:
         base(){}
 
-        template<class object>
-        base(object const * ptr, uxx len, uxx ofs):
-            ptr((object *)ptr),
-            itr(itrs<object>),
-            len(len),
-            ofs(ofs){
-            using ret_type = decltype((*(object *)ptr)[uxx(0)]);
-            itr[0] = inc::signature<ret_type(uxx)>::check(& base::pos<object, ret_type>);
-            itr[1] = inc::signature<ret_type(uxx)>::check(& base::neg<object, ret_type>);
+        template<class seq_t>
+        base(seq_t const & list) {
+            using item_t = inc::item_origin_of<seq_t>;
+
+            if constexpr (inc::check_initializer_list<seq_t>){
+                xnew(this) base(list.begin(), list.size(), 0);
+            }
+            else if constexpr (inc::check_length<seq_t>){
+                xnew(this) base(& list, list.length(), 0);
+            }
+            else{
+                xnew(this) base(& list, sizeof(seq_t) / sizeof(list[0]), 0);
+            }
+
+            if constexpr (inc::check_length<seq_t>){ // is object
+                itr[0] = inc::signature<item_t &(uxx)>::check(& base::pos<seq_t, item_t>);
+                itr[1] = inc::signature<item_t &(uxx)>::check(& base::neg<seq_t, item_t>);
+            }
+            else{
+                itr[0] = inc::signature<item_t &(uxx)>::check(& base::posx<item_t>);
+                itr[1] = inc::signature<item_t &(uxx)>::check(& base::negx<item_t>);
+            }
         }
 
-        template<class item_t>
-        base(inc::initializer_list<item_t> const * ptr, uxx len, uxx ofs):
-            ptr((item_t *)ptr->begin()),
-            itr(itrs<item_t>),
+        template<class object_t>
+        base(object_t const * ptr, uxx len, uxx ofs): 
+            ptr((object_t *)ptr),
+            itr(itrs<object_t>),
             len(len),
             ofs(ofs){
-            itr[0] = inc::signature<item_t & (uxx)>::check(& base::posx<item_t>);
-            itr[1] = inc::signature<item_t & (uxx)>::check(& base::negx<item_t>);
-        }
-
-        template<class object>
-        base(object const * ptr, uxx len, uxx ofs, bool negtive_order): 
-            base(ptr, len, ofs){
-            turn_negtive_order();
         }
 
         bool is_positive_order() const {
@@ -132,22 +138,10 @@ namespace mixc::interface_ranger::origin{
         ranger(base impl) : 
             base(impl){}
 
-        ranger(item_t const * items, uxx length) : 
-            base((item_t *)items, length, 0){
-        }
-
         template<class seq_t>
         requires(can_rangerlizex<seq_t, item_t>)
-        ranger(seq_t const & list){
-            if constexpr (inc::check_initializer_list<seq_t>){
-                xnew(this) ranger(list.begin(), list.size());
-            }
-            else if constexpr (inc::check_length<seq_t>){
-                xnew(this) ranger(list, list.length());
-            }
-            else{
-                xnew(this) ranger(list, sizeof(seq_t) / sizeof(list[0]));
-            }
+        ranger(seq_t const & list) : 
+            base(list){
         }
 
         item_t & operator[](uxx index){
