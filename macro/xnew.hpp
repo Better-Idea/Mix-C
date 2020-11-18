@@ -1,5 +1,8 @@
 #pragma once
-#include"macro/xunused.hpp"
-#include<new>
+#include"define/base_type.hpp"
 
-#define xnew(...)           xunused_ret new(__VA_ARGS__)
+inline voidp operator new(decltype(sizeof(0)), void * ptr, asciis file, uxx line){
+    return ptr;
+}
+
+#define xnew(...)           new(__VA_ARGS__, __FILE__, __LINE__)
