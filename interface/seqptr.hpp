@@ -36,7 +36,7 @@ namespace mixc::interface_seqptr::origin{
     template<class seq_t>
     concept can_seqptrlize = 
         (inc::check_initializer_list<seq_t> and inc::is_initializer_list<seq_t>) or
-        (inc::check_array<seq_t> and bool(inc::check_length<seq_t>));
+        (inc::check_array<seq_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
 
     template<class item_t> struct seqptr;
     template<class item_t>
