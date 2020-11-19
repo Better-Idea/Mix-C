@@ -138,6 +138,9 @@ namespace mixc::interface_ranger::origin{
         ranger(base impl) : 
             base(impl){}
 
+        ranger(item_t const * ptr, uxx len) : 
+            base(ptr, len, 0){}
+
         template<class seq_t>
         requires(can_rangerlizex<seq_t, item_t>)
         ranger(seq_t const & list) : 
