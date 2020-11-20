@@ -6,7 +6,9 @@
 #include"dumb/struct_type.hpp"
 #include"interface/iterator.hpp"
 #include"lock/atom_swap.hpp"
-#include"lock/mutex.hpp"
+#include"lock/builtin_lock.hpp"
+#include"meta/is_attached_lock.hpp"
+#include"meta/is_same.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -22,72 +24,48 @@ namespace mixc::docker_single_linked_node::origin {
             inc::struct_type<item_t>(list...), next(nullptr){
         }
     $
-}
 
-namespace mixc::docker_single_linked_node{
-    template<class item_t, class barrier_t>
+    template<class item_t, inc::is_attached_lock lock_t = inc::lock_free>
     xstruct(
-        xtmpl(meta   , item_t, barrier_t),
-        xpubf(ptop   , mutable origin::single_linked_node<item_t> *),
-        xprif(barrier, barrier_t)
+        xtmpl(single_linked_node_ptr, item_t, lock_t),
+        xprib(lock_t),
+        xprif(ptop,     mutable single_linked_node<item_t> *)
     )
-        template<auto opr, class callback>
-        void lock(callback const & call) const {
-            barrier.template lock<opr>(call);
+    public:
+        using node_t    = single_linked_node<item_t>;
+        using nodep     = node_t *;
+        using base_t    = lock_t;
+    private:
+        enum{
+            mask        = inc::is_same<lock_t, inc::with_lwmutex> ? uxx(-2) : uxx(-1), // 屏蔽第 0位 : 不屏蔽任何位
+        };
+
+        static nodep origin(nodep single_linked_nodex){
+            return nodep(uxx(single_linked_nodex) & mask); 
         }
 
-        enum : uxx{
-            mask = uxx(-1), // 不屏蔽任何位
-        };
-    $
-
-    // 默认使用 base_t::ptop 的第 0 位作为互斥位
-    template<class item_t>
-    xstruct(
-        xspec(meta, item_t, void),
-        xpubf(ptop, mutable origin::single_linked_node<item_t> *)
-    )
-        template<auto/*dummy*/, class callback>
-        void lock(callback const & call) const {
-            inc::mutex::lock(xref ptop, 0, call);
+        static nodep masked(nodep single_linked_nodex) {
+            return nodep(uxx(single_linked_nodex) | ~mask);
+        }
+    public:
+        single_linked_node_ptr() : 
+            ptop(nullptr){
         }
 
-        enum : uxx{
-            mask = uxx(-2), // 屏蔽第 0 位
-        };
+        template<auto operation, class callback>
+        void lock(callback const & call) const {
+            base_t::template lock<operation>(this, call);
+        }
+
+        nodep top() const {
+            return origin(ptop);
+        }
+
+        nodep swap_top(nodep value) const {
+            nodep masked_top = inc::atom_swap<nodep>(xref ptop, masked(value));
+            return origin(masked_top);
+        }
     $
-
-    namespace origin{
-        template<class item_t, class barrier_t>
-        xstruct(
-            xtmpl(node_field, item_t, barrier_t),
-            xpubb(meta<item_t, barrier_t>)
-        )
-            using nodep  = origin::single_linked_node<item_t> *;
-            using base_t = meta<item_t, barrier_t>;
-
-            node_field(){
-                base_t::ptop = nullptr;
-            }
-
-            static nodep origin(nodep node){
-                return nodep(uxx(node) & base_t::mask); 
-            }
-
-            nodep top() const {
-                return origin(base_t::ptop);
-            }
-
-            nodep swap_top(nodep value) const {
-                nodep masked_top = inc::atom_swap<nodep>(xref base_t::ptop, masked(value));
-                return origin(masked_top);
-            }
-
-            static nodep masked(nodep node) {
-                return nodep(uxx(node) | ~base_t::mask);
-            }
-        $
-    }
 }
 
 #endif
