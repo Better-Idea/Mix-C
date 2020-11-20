@@ -249,8 +249,8 @@ json parse_json(voidp buffer, voidp buffer_end, asciis json_string){
 
     using nodep = json_struct<void> *;
 
-    constexpr uxx stack_depth       = 256;
-    nodep stack[stack_depth];
+    constexpr uxx json_depth        = 256;
+    nodep stack[json_depth];
     char terminator[2];
     auto json_string_begin          = json_string;
     auto root                       = json_array{};
@@ -321,7 +321,7 @@ json parse_json(voidp buffer, voidp buffer_end, asciis json_string){
     cur_lv                         += 1;
 
     while(true){
-        if (cur_lv == & stack[stack_depth - 1]){
+        if (cur_lv == & stack[json_depth - 1]){
             return { json_parse_result_t::depth_overflow, json_string };
         }
         if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
