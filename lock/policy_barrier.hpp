@@ -82,6 +82,7 @@ namespace mixc::lock_policy_barrier{
 
         template<class previous, class first, class ... rest, class ... result>
         static auto make_order(previous, tlist<result...>, tlist<first, rest...>){
+            // 构建按 master 升序排序的规则列表
             if constexpr (previous::master + 1 == first::master){
                 return make_order(first(), tlist<result..., first>(), tlist<rest...>());
             }
@@ -90,11 +91,17 @@ namespace mixc::lock_policy_barrier{
             }
         }
 
-        template<uxx offset, class first, class ... rest, class ... ready>
-        static auto tidy(tlist<ready...>, tlist<first, rest...>){
-            using new_item = raw_data<offset, first::max_concurrency, typename first::share_for>;
-            using new_list = tlist<ready..., new_item>;
-            enum : uxx{ new_offset = offset + first::max_concurrency };
+        template<uxx offset, class first, class ... rest, class ... result>
+        static auto tidy(tlist<result...>, tlist<first, rest...>){
+            // 假如该成员函数的执行与其他成员函数都互斥（不能与其他操作同时执行）
+            // 将同步域第 0 位分配给那些需要全局互斥的成员函数，否则需要分配位域用作同步
+            constexpr auto can_share    = first::share_for::length != 0;
+            constexpr auto current      = can_share ? offset : 0;
+            constexpr auto new_offset   = can_share ? offset + first::max_concurrency : offset;
+
+            using new_item              = raw_data<current, first::max_concurrency, typename first::share_for>;
+            using new_list              = tlist<result..., new_item>;
+
             static_assert(new_offset <= sizeof(uxx) * 8);
 
             if constexpr (sizeof...(rest) == 0){
@@ -107,7 +114,8 @@ namespace mixc::lock_policy_barrier{
     public:
         template<class ... rules>
         static auto/*pair*/ build(){
-            return tidy<0>(
+            /*默认从第 1 位开始分配，第 0 位用作全局成员函数互斥位*/
+            return tidy<1>(
                 tlist<>(),
                 make_order(dummy(), tlist<>(), tlist<rules...>())
             );
@@ -131,7 +139,7 @@ namespace mixc::lock_policy_barrier{
 
     template<auto do_sth, auto ... do_sth_else>
     struct can_also<false, do_sth, do_sth_else...> : 
-        flow<1/*不可以并发*/, do_sth, do_sth_else...> {
+        flow<1/*该函数只能有一个线程进入，但支持其他线程执行其他函数 */, do_sth, do_sth_else...> {
         friend struct utils;
     };
 
@@ -140,6 +148,7 @@ namespace mixc::lock_policy_barrier{
         flow<2/*默认 2 个并发通道，支持再配置*/, do_sth, do_sth_else...> {
         friend struct utils;
 
+        // 再配置并发度
         template<uxx value>
         using concurrency = flow<value, do_sth, do_sth_else...>;
     };
@@ -148,7 +157,8 @@ namespace mixc::lock_policy_barrier{
     struct when{
         template<auto ... do_something_else>
         using can = can_also<
-            // 如果相同的函数可以重入，那么该函数就是可以并发的
+            // 如果 do_something 指示的函数可以被多个线程同时执行
+            // 那么该 can<T> 模板还支持 ::concurrency<T> 子句模板用于配置该函数的最大并发度
             vin<vlist<do_something_else...>, do_something>,
             do_something, 
             do_something_else...
