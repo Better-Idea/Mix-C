@@ -10,6 +10,7 @@
 namespace mixc::dumb_place_holder{
     template<uxx i, bool hidden = false>
     struct place_holder{
+        constexpr place_holder(){}
         enum{ index = i };
     };
 
