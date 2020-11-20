@@ -106,8 +106,8 @@ namespace xuser{
     };
 
     template<class a0, class ... args>
-    inline match_result_t fetch(asciis line, asciis fmt, a0 first, args ... rest){
-        return sscanf_s(line, fmt, first, rest...) == 1 + sizeof...(args) ? match_result_t::ack : match_result_t::nak;
+    inline match_result_t fetch(asciis line, asciis fmt, a0 & first, args & ... rest){
+        return sscanf_s(line, fmt, & first, (& rest)...) == 1 + sizeof...(args) ? match_result_t::ack : match_result_t::nak;
     }
 
     inline uxx truncated_last(char * str, uxx length, char value){
@@ -139,13 +139,23 @@ namespace xuser{
         cmd<__i>(buffer, __fmt, sizeof(fmt), __arg + 1);                \
     }
 
-    #define xat_resp                .match = [&](asciis line, match_result_t & result, bool & loop, bool & without_ok)
+    #define xat_respx               .match = [&](asciis line, match_result_t & result, bool & loop, bool & without_ok)
+    #define xat_resp(...)           xat_respx { result = fetch(line, __VA_ARGS__); }
 
-    void at_sysram(uxx * value){
-        at.push(at_pack{
-            xat_send("AT+SYSRAM?"),
-            xat_resp{ result = fetch(line, "+SYSRAM:%u", value); }
-        });
+    #define xat_cmd(func_name,data_type,token,fmt,...)                  \
+    void func_name(data_type * value_ptr){                              \
+        auto & value = value_ptr[0];                                    \
+                                                                        \
+        at.push(at_pack{                                                \
+            xat_send("AT" token "?"),                                   \
+            xat_resp(token ":" fmt, __VA_ARGS__)                        \
+        });                                                             \
+    }                                                                   \
+                                                                        \
+    void func_name(data_type const & value){                            \
+        at.push(at_pack{                                                \
+            xat_send("AT" token "=" fmt, __VA_ARGS__)                   \
+        });                                                             \
     }
 
     struct sysmsg{
@@ -158,42 +168,12 @@ namespace xuser{
         }
     };
 
-    void at_sysmsg(sysmsg value){
-        at.push(at_pack{
-            xat_send("AT+SYSMSG=%u", value)
-        });
-    }
-    
-    void at_sysmsg(sysmsg * value){
-        at.push(at_pack{
-            xat_send("AT+SYSMSG?"),
-            xat_resp{ result = fetch(line, "+SYSMSG:%u", value); }
-        });
-    }
-
     struct rfpower{
         ixx wifi_power;
         ixx blue_advertising_power  = ignore;
         ixx blue_scan_power         = ignore;
         ixx blue_connect_power      = ignore;
     };
-
-    void at_rfpower(rfpower value){
-        at.push(at_pack{
-            xat_send("AT+RFPOWER=%u,%u,%u,%u", value.wifi_power, value.blue_advertising_power, value.blue_scan_power, value.blue_connect_power)
-        });
-    }
-
-    void at_rfpower(rfpower * value){
-        at.push(at_pack{
-            xat_send("AT+RFPOWER?"),
-            xat_resp{
-                result = fetch(line, "+RFPOWER:%d,%d,%d,%d", 
-                    & value->wifi_power, & value->blue_advertising_power, & value->blue_scan_power, & value->blue_connect_power
-                );
-            }
-        });
-    }
 
     struct cwmode{
         uxx enable_station  : 1;
@@ -204,19 +184,6 @@ namespace xuser{
             return ixxp(this)[0];
         }
     };
-
-    void at_cwmode(cwmode value){
-        at.push(at_pack{
-            xat_send("AT+CWMODE=%u", value)
-        });
-    }
-
-    void at_cwmode(cwmode * value){
-        at.push(at_pack{
-            xat_send("AT+CWMODE?"),
-            xat_resp{ result = fetch(line, "+CWMODE:%u", value); }
-        });
-    }
 
     struct cwjap{
         at_str<64>  ssid;
@@ -235,12 +202,23 @@ namespace xuser{
         other,
     };
 
+    void at_sysram(uxx * value){
+        at.push(at_pack{
+            xat_send("AT+SYSRAM?"),
+            xat_resp("+SYSRAM:%u", value)
+        });
+    }
+
+    xat_cmd(at_sysmsg, sysmsg, "+SYSMSG", "%u", value)
+    xat_cmd(at_rfpower, rfpower, "+RFPOWER", "%d,%d,%d,%d", value.wifi_power, value.blue_advertising_power, value.blue_scan_power, value.blue_connect_power)
+    xat_cmd(at_cwmode, cwmode, "+CWMODE", "%d", value)
+
     error_cwjap_t at_cwjap(cwjap const & value){
         error_cwjap_t error_code = error_cwjap_t::none;
 
         at.push(at_pack{
             xat_send("AT+CWJAP=%s,%s,%s,%d,%d", value.ssid, value.password, value.bssid, value.enable_pci, value.enable_reconnect),
-            xat_resp{ result = fetch(line, "+CWJAP:%u", & error_code); }
+            xat_resp("+CWJAP:%u", error_code)
         });
         return error_code;
     }
