@@ -4,14 +4,14 @@
 #undef  xuser
 #define xuser mixc::docker_queue::inc
 #include"dumb/disable_copy.hpp"
-#include"dumb/struct_type.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"
 #include"interface/iterator.hpp"
-#include"lock/atom_swap.hpp"
+#include"lock/builtin_lock.hpp"
 #include"lock/policy_barrier.hpp"
 #include"memory/allocator.hpp"
+#include"meta/is_attached_lock.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -32,7 +32,7 @@ namespace mixc::docker_queue {
         co_max = (sizeof(uxx) * 8 - 4) / 4,
     };
 
-    using with_queue_lock = policy_barrier<force_machine_word,
+    using with_queue_policy_lock = policy_barrier<force_machine_word,
                         // routing, clear, push, pop, foreach, head_xr, head_xw
         when<routing>::can<                           foreach, head_xr        >,
         when<clear  >::can<>,
@@ -43,17 +43,16 @@ namespace mixc::docker_queue {
         when<head_xw>::can<                push,      foreach, head_xr, head_xw>::concurrency<co_max>
     >;
 
-    template<class final, class item_t, class barrier_t>
+    template<class final, class item_t, is_attached_lock lock_t>
     xstruct(
-        xtmpl(queue, final, item_t, barrier_t),
-        xprib(node_field<item_t, barrier_t>),
+        xtmpl(queue, final, item_t, lock_t),
         xpubb(self_management),
         xpubb(disable_copy),
-        xasso(item_t)
+        xprof(node, single_linked_node_ptr<item_t, lock_t>) // 带锁的节点指针类型
     )
-        using node      = single_linked_node<item_t>;
-        using nodep     = node *;
-        using base_t    = node_field<item_t, barrier_t>;
+    private:
+        using node_t    = single_linked_node<item_t>;       // 纯节点类型
+        using nodep     = node_t *;
     protected:
         ~queue() {
             clear();
@@ -64,8 +63,8 @@ namespace mixc::docker_queue {
             nodep tmp;
             nodep top;
 
-            lock<opr::clear>([&](){
-                top = base_t::swap_top(nullptr);
+            node.template lock<opr::clear>([&](){
+                top = node.swap_top(nullptr);
             });
 
             if (top == nullptr) {
@@ -78,22 +77,22 @@ namespace mixc::docker_queue {
             do {
                 cur = tmp;
                 tmp = tmp->next;
-                free_with_destroy<node>(cur);
+                free_with_destroy<node_t>(cur);
             } while (top != tmp);
         }
 
         void push(item_t const & value) {
-            auto new_top = alloc_with_initial<node>(value);
+            auto new_top = alloc_with_initial<node_t>(value);
 
-            lock<opr::push>([&](){
-                if (auto top = base_t::top(); top != nullptr){
+            node.template lock<opr::push>([&](){
+                if (auto top = node.top(); top != nullptr){
                     new_top->next = top->next;
                     top->next     = new_top;
-                    base_t::swap_top(new_top);
+                    node.swap_top(new_top);
                 }
                 else{
                     new_top->next = new_top;
-                    base_t::swap_top(new_top);
+                    node.swap_top(new_top);
                 }
             });
         }
@@ -102,8 +101,8 @@ namespace mixc::docker_queue {
             transmitter<item_t> r;
             nodep               head = nullptr;
 
-            lock<opr::pop>([&](){
-                auto top = base_t::top(); 
+            node.template lock<opr::pop>([&](){
+                auto top = node.top(); 
                 if (top == nullptr){
                     return;
                 }
@@ -112,7 +111,7 @@ namespace mixc::docker_queue {
                 r       = *head;
 
                 if (head == top){
-                    base_t::swap_top(nullptr);
+                    node.swap_top(nullptr);
                 }
                 else{
                     top->next = head->next;
@@ -120,7 +119,7 @@ namespace mixc::docker_queue {
             });
 
             if (head != nullptr){
-                free_with_destroy<node>(head);
+                free_with_destroy<node_t>(head);
             }
             return r;
         }
@@ -129,8 +128,8 @@ namespace mixc::docker_queue {
     private:
         template<auto mode, class iterator_t>
         void foreach_template(iterator_t const & invoke) const {
-            lock<opr::foreach>([&](){
-                nodep  top   = base_t::top();
+            node.template lock<opr::foreach>([&](){
+                nodep  top   = node.top();
                 nodep  cur   = top;
                 uxx    index = 0;
                 loop_t state = loop_t::go_on;
@@ -152,23 +151,23 @@ namespace mixc::docker_queue {
         xpubget_pubsetx(head, transmitter<item_t>)
             xr{
                 transmitter<item_t> r;
-                lock<opr::head_xr>([&](){
-                    if (nodep cur = base_t::top(); cur != nullptr){
+                node.template lock<opr::head_xr>([&](){
+                    if (nodep cur = node.top(); cur != nullptr){
                         r = cur->next[0];
                     }
                 });
                 return r;
             }
             xw{
-                lock<opr::head_xw>([&](){
-                    if (nodep cur = base_t::top(); cur != nullptr){
+                node.template lock<opr::head_xw>([&](){
+                    if (nodep cur = node.top(); cur != nullptr){
                         cur->next[0] = value;
                     }
                 });
             }
 
         xpubgetx(is_empty, bool){
-            return base_t::top() == nullptr;
+            return node.top() == nullptr;
         }
     $
 }
