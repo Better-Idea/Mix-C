@@ -18,30 +18,36 @@ namespace mixc::lock_mutex::origin{
 
     xstruct(
         xname(mutex),
-        xprif(item, bool)
+        xprif(item, mutable bool)
     )
         mutex() : item(false){}
 
-        lock_state_t try_lock(){
+        lock_state_t try_lock() const {
             return inc::atom_swap(xref item, true) == true ?
                 lock_state_t::blocked : lock_state_t::accept;
         }
 
-        void lock(){
+        void lock() const {
             while(try_lock() == lock_state_t::blocked){
                 inc::thread_yield();
             }
         }
 
-        void unlock(){
+        void unlock() const {
             inc::atom_swap(xref item, false);
         }
 
         template<class callback>
-        void lock(callback const & call){
+        void lock(callback const & call) const {
             lock();
             call();
             unlock();
+        }
+
+        // 兼容 meta/is_builtin_lock 的接口
+        template<auto opr, class this_t, class callback>
+        void lock(this_t, callback const & call) const {
+            lock(call);
         }
 
         template<class type>

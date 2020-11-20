@@ -20,7 +20,7 @@
 // - 如果情况允许，policy_barrier::bits_t 和 uxx 类型（机器字长）保持一致可以获取完整的性能
 // - 如果同步区耗时不足以忽略同步带来的开销，那么即使该同步区可以并发，也请做如下设置：
 //   when<do_sth>::can<do_sth, do_sth_else...>::concurrency<1>
-// - 对于一个耗时较长且可以并发的同步区，可以给一个较大的并发值，推荐给一个大于 cpu 核心数的值
+// - 对于一个耗时较长且可以并发的同步区，可以给一个较大的并发值
 #ifndef xpack_lock_policy_barrier
 #define xpack_lock_policy_barrier
 #pragma push_macro("xuser")
@@ -55,18 +55,18 @@ namespace mixc::lock_policy_barrier{
     template<uxx offset, uxx max_con, class share_list>
     struct raw_data{
         enum : uxx{ 
-            master          = (uxx(1) << (offset)),
+            master          = uxx(1) << (offset),
             mask            = max_con == sizeof(uxx) * 8 ? uxx(-1) : ((uxx(1) << max_con) - 1) << offset,
             boundary        = offset + max_con,
             can_concurrency = max_con > 1,
         };
-        using share_for = share_list;
+        using share_for     = share_list;
     };
 
     template<uxx total_bits, class tlist>
     struct pair{
-        using bits_t    = fit_bits<total_bits>;
-        using new_list  = tlist;
+        using bits_t        = fit_bits<total_bits>;
+        using new_list      = tlist;
     };
 
     struct utils{
@@ -82,7 +82,7 @@ namespace mixc::lock_policy_barrier{
 
         template<class previous, class first, class ... rest, class ... result>
         static auto make_order(previous, tlist<result...>, tlist<first, rest...>){
-            // 构建按 master 升序排序的规则列表
+            // 构建按 master 升序排序
             if constexpr (previous::master + 1 == first::master){
                 return make_order(first(), tlist<result..., first>(), tlist<rest...>());
             }
@@ -236,6 +236,12 @@ namespace mixc::lock_policy_barrier{
                 }
                 thread_yield();
             }
+        }
+
+        // 兼容 meta/is_builtin_lock 的接口
+        template<auto operation, class this_t, class callback>
+        void lock(this_t, callback const & call) const {
+            lock<operation>(call);
         }
 
         template<auto operation, class callback>
