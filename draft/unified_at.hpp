@@ -206,7 +206,7 @@ namespace xuser{
         ixx         rssi;
     };
 
-    enum class error_cwjap_t : uxx{
+    enum class error_cwjap_t : ixx{
         none,
         connection_timeout,
         wrong_password,
@@ -215,7 +215,7 @@ namespace xuser{
         other,
     };
 
-    enum enc_t : ixx{
+    enum class enc_t : ixx{
         open,
         wep,
         wpa_psk,
@@ -248,8 +248,10 @@ namespace xuser{
         });
     }
 
-    xat_cmd(at_sysmsg   , sysmsg    , "+SYSMSG"     , "%u", value)
-    xat_cmd(at_rfpower  , rfpower   , "+RFPOWER"    , "%d,%d,%d,%d", value.wifi_power, value.blue_advertising_power, value.blue_scan_power, value.blue_connect_power)
+    xat_cmd(at_sysmsg   , sysmsg    , "+SYSMSG"     , "%d", value)
+    xat_cmd(at_rfpower  , rfpower   , "+RFPOWER"    , "%d,%d,%d,%d", 
+        value.wifi_power, value.blue_advertising_power, value.blue_scan_power, value.blue_connect_power
+    )
     xat_cmd(at_cwmode   , cwmode    , "+CWMODE"     , "%d", value)
 
     error_cwjap_t at_cwjap(cwjap const & value){
@@ -304,11 +306,11 @@ namespace xuser{
         });
     }
 
-    xat_cmd(at_cwsap, cwsap, "+CWSAP", "%s,%s,%d,%d,%d,%d", value.ssid, value.password, value.channel, value.enc, value.max_connect, value.ssid_hidden)
+    xat_cmd(at_cwsap, cwsap, "+CWSAP", "%s,%s,%d,%d,%d,%d", 
+        value.ssid, value.password, value.channel, value.enc, value.max_connect, value.ssid_hidden
+    )
 
     void at_cwlip(){
         // TODO
     }
-
-    
 }
