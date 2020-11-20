@@ -166,15 +166,15 @@ namespace mixc::lock_policy_barrier{
     template<class bits_t, class ... rules>
     xstruct(
         xtmpl(policy_barrier_t, bits_t, rules...),
-        xprif(state, bits_t)
+        xprif(state, mutable bits_t)
     )
         using rule_list     = tlist<rules...>;
         using raw_data_list = typename pair_t<rules...>::new_list;
 
-        policy_barrier_t() : state(0){}
+        constexpr policy_barrier_t() : state(0){}
 
         template<auto operation>
-        uxx try_lock(){
+        uxx try_lock() const {
             using raw           = tget<raw_data_list, uxx(operation)>;
             constexpr uxx mutex = ~share_mask<raw_data_list, typename raw::share_for>;
 
@@ -219,7 +219,7 @@ namespace mixc::lock_policy_barrier{
         }
 
         template<auto operation>
-        uxx lock(){
+        uxx lock() const {
             while(true){
                 if (uxx channel = try_lock<operation>(); channel != not_exist){
                     return channel;
@@ -229,14 +229,14 @@ namespace mixc::lock_policy_barrier{
         }
 
         template<auto operation, class callback>
-        void lock(callback const & call){
+        void lock(callback const & call) const {
             uxx channel = lock<operation>();
             call();
             unlock<operation>(channel);
         }
 
         template<auto operation>
-        void unlock(uxx channel){
+        void unlock(uxx channel) const {
             atom_and<bits_t>(xref state, bits_t(~channel));
         }
     $
