@@ -79,6 +79,10 @@ namespace xuser{
             pack.barrier.wait();
         }
 
+        void push_asyc(at_pack && pack){
+            // 异步提交
+        }
+
         at_pack & pop(){
             // 后台响应请求并在完成后解锁
         }
@@ -133,7 +137,7 @@ namespace xuser{
 
     #define xat_send(fmt,...)                                           \
     .send = [&](char * buffer) {                                        \
-        char __fmt[] = fmt;                                             \
+        char   __fmt[] = "AT" fmt;                                      \
         at_arg __arg[] = { ""/*ignore*/, __VA_ARGS__ };                 \
         constexpr uxx __i = sizeof(__arg) / sizeof(__arg[0]) - 1;       \
         cmd<__i>(buffer, __fmt, sizeof(fmt), __arg + 1);                \
@@ -147,25 +151,27 @@ namespace xuser{
         auto & value = value_ptr[0];                                    \
                                                                         \
         at.push(at_pack{                                                \
-            xat_send("AT" token "?"),                                   \
+            xat_send(token "?"),                                        \
             xat_resp(token ":" fmt, __VA_ARGS__)                        \
         });                                                             \
     }                                                                   \
                                                                         \
     void func_name(data_type const & value){                            \
         at.push(at_pack{                                                \
-            xat_send("AT" token "=" fmt, __VA_ARGS__)                   \
+            xat_send(token "=" fmt, __VA_ARGS__)                        \
         });                                                             \
     }
 
-    struct sysmsg{
-        uxx quit_with_info  : 1;
-        uxx new_format      : 1;
-        uxx                 : sizeof(uxx) * 8 - 2;
-
+    struct ixx_cast{
         operator ixx &(){
             return ixxp(this)[0];
         }
+    };
+
+    struct sysmsg : ixx_cast{
+        uxx quit_with_info  : 1;
+        uxx new_format      : 1;
+        uxx                 : sizeof(uxx) * 8 - 2;
     };
 
     struct rfpower{
@@ -175,22 +181,29 @@ namespace xuser{
         ixx blue_connect_power      = ignore;
     };
 
-    struct cwmode{
+    struct cwmode : ixx_cast{
         uxx enable_station  : 1;
         uxx enable_softap   : 1;
         uxx                 : sizeof(uxx) * 8 - 2;
-
-        operator ixx & (){
-            return ixxp(this)[0];
-        }
     };
 
+    using str_ssid  = at_str<64>;
+    using str_pwd   = at_str<32>;
+    using str_bssid = at_str<20>;
+
     struct cwjap{
-        at_str<64>  ssid;
-        at_str<32>  password;
-        at_str<64>  bssid               = "";
+        str_ssid    ssid;
+        str_pwd     password;
+        str_bssid   bssid               = "";
         ixx         enable_pci          = ignore;
         ixx         enable_reconnect    = ignore;
+    };
+
+    struct cwjap_resp{
+        str_ssid    ssid;
+        str_bssid   bssid;
+        ixx         channel;
+        ixx         rssi;
     };
 
     enum class error_cwjap_t : uxx{
@@ -202,24 +215,100 @@ namespace xuser{
         other,
     };
 
+    enum enc_t : ixx{
+        open,
+        wep,
+        wpa_psk,
+        wpa2_psk,
+        wpa_wpa2_psk,
+        wpa2_enterprise,
+    };
+
+    struct cwlap_resp{
+        enc_t       enc;
+        str_ssid    ssid;
+        ixx         rssi;
+        str_bssid   bssid;
+        ixx         channel;
+    };
+
+    struct cwsap{
+        str_ssid    ssid;
+        str_pwd     password;
+        ixx         channel;
+        enc_t       enc;
+        ixx         max_connect     = ignore;
+        ixx         ssid_hidden     = ignore;
+    };
+
     void at_sysram(uxx * value){
         at.push(at_pack{
-            xat_send("AT+SYSRAM?"),
+            xat_send("+SYSRAM?"),
             xat_resp("+SYSRAM:%u", value)
         });
     }
 
-    xat_cmd(at_sysmsg, sysmsg, "+SYSMSG", "%u", value)
-    xat_cmd(at_rfpower, rfpower, "+RFPOWER", "%d,%d,%d,%d", value.wifi_power, value.blue_advertising_power, value.blue_scan_power, value.blue_connect_power)
-    xat_cmd(at_cwmode, cwmode, "+CWMODE", "%d", value)
+    xat_cmd(at_sysmsg   , sysmsg    , "+SYSMSG"     , "%u", value)
+    xat_cmd(at_rfpower  , rfpower   , "+RFPOWER"    , "%d,%d,%d,%d", value.wifi_power, value.blue_advertising_power, value.blue_scan_power, value.blue_connect_power)
+    xat_cmd(at_cwmode   , cwmode    , "+CWMODE"     , "%d", value)
 
     error_cwjap_t at_cwjap(cwjap const & value){
         error_cwjap_t error_code = error_cwjap_t::none;
 
         at.push(at_pack{
-            xat_send("AT+CWJAP=%s,%s,%s,%d,%d", value.ssid, value.password, value.bssid, value.enable_pci, value.enable_reconnect),
+            xat_send("+CWJAP=%s,%s,%s,%d,%d", value.ssid, value.password, value.bssid, value.enable_pci, value.enable_reconnect),
             xat_resp("+CWJAP:%u", error_code)
         });
         return error_code;
     }
+
+    void at_cwjap(cwjap_resp * value){
+        at.push(at_pack{
+            xat_send("+CWJAP?"),
+            xat_resp("+CWJAP=%s,%s,%d,%d", value->ssid, value->rssi, value->channel, value->rssi)
+        });
+    }
+
+    void at_cwlapopt(bool sort_by_rssi){
+        at.push(at_pack{
+            xat_send("+CWLAPOPT=%d,31", ixx(sort_by_rssi)) // 这里简化了操作
+        });
+    }
+
+    void at_cwlap_asyc(std::function<void(cwlap_resp &)> const & append){
+        at.push_asyc(at_pack{
+            xat_send("+CWLAP"),
+            xat_respx{
+                cwlap_resp value{};
+                loop = not equals(line, "OK"); // 只要不是终结标识 "OK" 就循环获取 AP 信息
+
+                if (not loop){
+                    return;
+                }
+                if (result = fetch(line, "+CWLAP:%d,%s,%d,%s,%d", 
+                        value.enc, 
+                        value.ssid, 
+                        value.rssi, 
+                        value.bssid, 
+                        value.channel
+                    ); result == match_result_t::ack){
+                    append(value);
+                }
+            }
+        });
+    }
+
+    void at_cwqap(){
+        at.push(at_pack{
+            xat_send("+CWQAP")
+        });
+    }
+
+    xat_cmd(at_cwsap, cwsap, "+CWSAP", "%s,%s,%d,%d,%d,%d", value.ssid, value.password, value.channel, value.enc, value.max_connect, value.ssid_hidden)
+
+    void at_cwlip(){
+        // TODO
+    }
+
+    
 }
