@@ -25,7 +25,7 @@ namespace mixc::talk_about_policy_barrier::inc{
         when<pop>::can<>
     >;
 
-    struct module{
+    struct foo{
         barrier_t barrier;
         uxx       counter = 0;
 
@@ -51,7 +51,7 @@ namespace mixc::talk_about_policy_barrier::inc{
         using namespace std;
         uxx     step = 1000000;
         uxx     sum  = step * 4;
-        module  mod;
+        foo     mod;
 
         auto push_invoke = [&](voidp id){
             xhint("push", id);
