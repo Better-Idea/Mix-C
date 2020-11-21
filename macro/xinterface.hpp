@@ -1,275 +1,217 @@
 /*
 // 注意：===============================================================
-// xitf 内部使用了显式的 this_call 调用，需要留意可能的 ABI 问题
+// xinterface 内部使用了显式的 this_call 调用，需要留意可能的 ABI 问题
 // =====================================================================
 
-// 说明：xitf 组件旨在替换虚函数，简化 GC 结构
+// 说明：xinterface 组件旨在替换虚函数，简化 GC 结构
 // 用法：如下
 
-#include<stdio.h>
-#include"macro/xitf.hpp"
 
-xitf(
-    xname(can_fly),
-    xfunc(fly, 
-        xret(void),
-        xarg(arg, int)
-    )
-)
+#define xuser mixc::powerful_cat
+#include"macro/xinterface.hpp"
+#include"io/tty.hpp"
 
-struct bird{
-    void fly(int a){
-        printf("i'm bird, i can fly %d!\n", a);
+namespace xuser{
+    xinterface(
+        xname(can_say_hello),
+        xfunc(say_hello_to, void(asciis some_one))
+    );
+
+    struct cat{
+        void say_hello_to(asciis some_one){
+            tty.write_line("Hello! ", some_one, ", this is Cat speaking!");
+        }
+    };
+
+    void hello(can_say_hello const & me){
+        me.say_hello_to("leon");
     }
-};
 
-void fly(can_fly ufo){
-    ufo.fly(2020);
+    void test(){
+        {
+            // 正确
+            cat             b;
+            can_say_hello   csh = b;
+            csh.say_hello_to("keyti");
+
+            // 正确
+            hello(b);
+
+            // 正确
+            hello(cat{});
+        }
+
+        {
+            // 错误 ========================================================
+            // can_say_hello 接口需要存活的实例（cat）
+            // 而 cat 在赋值给 can_say_hello 对象 csh 后就析构了
+            // 虽然对于无成员变量的 cat 来说，这样并不会产生错误的输出，
+            // 但我们建议不要这么做
+            can_say_hello csh = cat();
+            csh.say_hello_to("System");
+        }
+    }
 }
 
 int main(){
-    // 正确
-    bird b;
-    can_fly cf = b;
-    cf.fly(2020);
-
-    // 正确
-    fly(b);
-
-    // 正确
-    fly(bird());
-    
-    // 错误 ========================================================
-    // xitf 接口（can_fly）需要存活的实例（bird）
-    // 而 bird 在赋值给 can_fly 对象 cf 后就析构了
-    // 虽然对于无成员变量的 bird 来说，这样并不会产生错误的输出，
-    // 但我们建议不要这么做
-    can_fly cf = bird();
-    cf.fly(2020);
+    xuser::test();
     return 0;
 }
 */
 
-#ifndef xpack_macro_xitf
-#define xpack_macro_xitf
+#ifndef xpack_macro_xinterface
+#define xpack_macro_xinterface
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xitf::inc
-#include"configure.hpp"
-#include"macro/xnew.hpp"
-#include"macro/private/xlist.hpp"
-#include"macro/private/word.hpp"
-#include"memop/addressof.hpp"
+#define xuser mixc::macro_xinterface
 #include"memop/signature.hpp"
-#include"meta/has_cast.hpp"
-#include"meta_seq/tlist.hpp"
-#include"meta_seq/tappend.hpp"
+#include"macro/private/word.hpp"
+#include"macro/private/xlist.hpp"
+#include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
-#define __xitf_ret__
-#define __xitf_ret_ret__(...)               __VA_ARGS__
-#define __xitf_ret_arg__(...)
+namespace mixc::macro_xinterface{
+    template<uxx offset_this, class func_t> struct functor;
 
-#define __xitf_arg0__
-#define __xitf_arg0_ret__(name,...)
-#define __xitf_arg0_arg__(name,...)         __VA_ARGS__
-
-#define __xitf_argx__
-#define __xitf_argx_ret__(name,...)
-#define __xitf_argx_arg__(name,...)         , __VA_ARGS__
-
-#define __xitf_layout_arg0__
-#define __xitf_layout_arg0_ret__(name,...)
-#define __xitf_layout_arg0_arg__(name,...)  __VA_ARGS__ name
-
-#define __xitf_layout_argx__
-#define __xitf_layout_argx_ret__(name,...)
-#define __xitf_layout_argx_arg__(name,...)  , __VA_ARGS__ name
-
-#define __xitf_set_argx__
-#define __xitf_set_argx_ret__(name,...)
-#define __xitf_set_argx_arg__(name,...)     , name
-
-// 结构名
-#define __xitf_name__
-#define __xitf_name_name__(name)            name
-#define __xitf_name_tmpl__(name,...)        name
-#define __xitf_name_spec__(name,...)        name<__VA_ARGS__>
-#define __xitf_name_pubb__(...)
-#define __xitf_name_func__(...)
-
-// 构造函数名
-#define __xitf_cons__
-#define __xitf_cons_name__(name)            name
-#define __xitf_cons_tmpl__(name,...)        name
-#define __xitf_cons_spec__(name,...)        name
-#define __xitf_cons_pubb__(...)
-#define __xitf_cons_func__(...)
-
-#define __xitf_check__
-#define __xitf_check_name__(...)
-#define __xitf_check_tmpl__(...)
-#define __xitf_check_spec__(...)
-#define __xitf_check_func__(name,...)                                   \
-and ::mixc::memop_signature::signature<                                 \
-    __xlista__(__xitf_ret_, __VA_ARGS__)(                               \
-    __xlista3__(__xitf_arg0_, __xitf_arg0_, __xitf_argx_, ##__VA_ARGS__)\
-)>::has(& __object::name)
-
-#define __xitf_registration__
-#define __xitf_registration_name__(...)
-#define __xitf_registration_tmpl__(...)
-#define __xitf_registration_spec__(...)
-#define __xitf_registration_func__(name,...)                            \
-func_list[i++] = ::mixc::memop_signature::signature<                    \
-    __xlista__(__xitf_ret_, __VA_ARGS__)(                               \
-    __xlista3__(__xitf_arg0_, __xitf_arg0_, __xitf_argx_, ##__VA_ARGS__)\
-)>::check(& __object::name);
-
-#define __xitf_invoke__
-#define __xitf_invoke_name__(...)
-#define __xitf_invoke_tmpl__(...)
-#define __xitf_invoke_spec__(...)
-#define __xitf_invoke_func__(name,...)                                  \
-__xlista__(__xitf_ret_, __VA_ARGS__) name(                              \
-__xlista3__(                                                            \
-    __xitf_layout_arg0_,                                                \
-    __xitf_layout_arg0_,                                                \
-    __xitf_layout_argx_, ##__VA_ARGS__)                                 \
-) const {                                                               \
-    auto self = ::mixc::macro_xitf::itf_datap(this);                    \
-    return ::mixc::memop_signature::signature<                          \
-        __xlista__(__xitf_ret_, ## __VA_ARGS__)(                        \
-        __xlista3__(                                                    \
-            __xitf_arg0_,                                               \
-            __xitf_arg0_,                                               \
-            __xitf_argx_, ##__VA_ARGS__                                 \
-        )                                                               \
-    )>::call(                                                           \
-        self->object,                                                   \
-        self->func_list[__COUNTER__ - __index_begin]                    \
-        __xlista__(__xitf_set_argx_, ##__VA_ARGS__)                     \
-    );                                                                  \
-}
-
-#define __xitf_func_cnt__
-#define __xitf_func_cnt_name__(...)
-#define __xitf_func_cnt_tmpl__(...)
-#define __xitf_func_cnt_spec__(...)
-#define __xitf_func_cnt_func__(...)         +1
-
-#define xitf(...)                                                           \
-struct                                                                      \
-__xlist__(__xitf_name_, __VA_ARGS__) {                                      \
-protected:                                                                  \
-    friend struct ::mixc::macro_xitf::helper;                               \
-    template<class __object>                                                \
-    requires(true/*dummy*/ __xlist__(__xitf_check_, ##__VA_ARGS__))         \
-    static constexpr bool __xitf_check() {                                  \
-        return true;                                                        \
-    }                                                                       \
-                                                                            \
-    template<class __object>                                                \
-    static constexpr bool __xitf_check() {                                  \
-        return false;                                                       \
-    }                                                                       \
-                                                                            \
-    enum{                                                                   \
-        __invoke_count = 0 __xlist__(__xitf_func_cnt_, ##__VA_ARGS__),      \
-        __index_begin  = __COUNTER__ + 2 + __invoke_count,                  \
-    };                                                                      \
-public:                                                                     \
-    template<uxx __invoke_offset>                                           \
-    struct core{                                                            \
-    protected:                                                              \
-        friend struct ::mixc::macro_xitf::helper;                           \
-        enum{                                                               \
-            __invoke_count = 0 __xlist__(__xitf_func_cnt_, ##__VA_ARGS__),  \
-            __index_begin  = __COUNTER__ + 1 - __invoke_offset,             \
-        };                                                                  \
-                                                                            \
-    public:                                                                 \
-        core(){}                                                            \
-                                                                            \
-        template<class __object>                                            \
-        core(voidp ** func_listp, __object const &) {                       \
-            voidp * func_list = func_listp[0];                              \
-            uxx     i = 0;                                                  \
-            __xlist__(__xitf_registration_, __VA_ARGS__)                    \
-            func_listp[0] += i;                                             \
-        }                                                                   \
-    public:                                                                 \
-        __xlist__(__xitf_invoke_, ##__VA_ARGS__)                            \
-    };                                                                      \
-                                                                            \
-protected:                                                                  \
-    ::mixc::macro_xitf::itf_data __data;                                    \
-public:                                                                     \
-    template<class __object>                                                \
-    __xlist__(__xitf_cons_, ##__VA_ARGS__)(__object const & object){        \
-        using meta = core<0>;                                               \
-        __data.object    = xref object;                                     \
-        __data.func_list =                                                  \
-            ::mixc::macro_xitf::func_list<__object, __invoke_count>;        \
-        xnew (this) meta(xref __data.func_list, object);                    \
-        __data.func_list =                                                  \
-            ::mixc::macro_xitf::func_list<__object, __invoke_count>;        \
-    }                                                                       \
-    __xlist__(__xitf_invoke_, ##__VA_ARGS__)                                \
-};
-
-namespace mixc::macro_xitf{
-    typedef struct itf_data{
-        voidp   object      = nullptr;
-        voidp * func_list   = nullptr;
-    } * itf_datap;
-
-    template<class object, uxx invoke_count>
-    static inline voidp func_list[invoke_count];
-
-    template<uxx invoke_count, class ... args>
-    struct meta : args...{
-    private:
-        itf_data data;
-    public:
-        meta(){}
-
-        template<class object>
-        meta(object const & obj) : 
-            data{ xref obj, func_list<object, invoke_count> }, args(xref data.func_list, obj)...  {
-            data.func_list = func_list<object, invoke_count>;
+    template<uxx offset_this, class ret_t, class ... args>
+    struct functor<offset_this, ret_t(args...)>{
+        ret_t operator()(args const & ... params) const {
+            return signature<ret_t(args...)>::call(__this_ptr(), __func, params...);
         }
+
+    private:
+        voidp __this_ptr() const {
+            return *(voidp *)(u08p(this) - offset_this); // 偏移字节数
+        }
+
+        voidp __func    = nullptr;
     };
 
-    struct helper {
-        template<class object, uxx invoke_count>
-        static inline voidp func_list[invoke_count];
+    struct this_ptr{ 
+        template<uxx>
+        struct __core{
+            template<class object_t>
+            __core(object_t const & object):
+                self(voidp(& object)){
+            }
+        private:
+            voidp self;
+        };
+    };
 
-        template<uxx offset, class base_list, template<uxx> class first, template<uxx> class ... rest>
-        static auto merge(base_list) {
-            using item                = first<offset>;
-            using new_list            = typename inc::tappend<base_list, item>::new_list;
-            constexpr uxx next_offset = offset + item::__invoke_count;
-            return merge<next_offset, new_list, rest...>(new_list());
-        }
+    template<uxx offset, class ... args> 
+    struct interface_hub_core{
+        template<class object_t>
+        interface_hub_core(object_t const & object) {}
+    };
 
-        template<uxx invoke_count, class tlist>
-        static auto merge(tlist) {
-            return calc<invoke_count>(tlist());
-        }
+    template<uxx offset, class a0, class ... args>
+    struct interface_hub_core<offset, a0, args...> : 
+        a0::__core<offset>, 
+        interface_hub_core<
+            offset + sizeof(typename a0::__core<offset>), 
+            args...
+        >{
 
-        template<uxx invoke_count, class ... args>
-        static auto calc(inc::tlist<args...>) {
-            return meta<invoke_count, args...>();
+        template<class object_t>
+        interface_hub_core(object_t const & object) : 
+            a0::__core<offset>(object), 
+            interface_hub_core<
+                offset + sizeof(typename a0::__core<offset>), 
+                args...
+            >(object){
         }
     };
 
     template<class ... args>
-    using hub_itf = decltype(
-        helper::merge<0, inc::tlist<>, args::template core...>(inc::tlist<>())
-    );
+    using interface_hub = interface_hub_core<0, args...>;
+
+    template<class target_interface, class object_t>
+    concept is_match_interface = requires(target_interface * ptr, object_t const & type){
+        xnew (ptr) target_interface(type);
+    };
+};
+
+#define __xitf_name__
+#define __xitf_name_name__(name)                name
+#define __xitf_name_tmpl__(name,...)            name
+#define __xitf_name_spec__(name,...)            name<__VA_ARGS__>
+#define __xitf_name_pubb__(...)
+#define __xitf_name_func__(...)
+
+#define __xitf_pubb__
+#define __xitf_pubb_name__(...)
+#define __xitf_pubb_tmpl__(...)
+#define __xitf_pubb_spec__(...)
+#define __xitf_pubb_pubb__(...)                 , __VA_ARGS__
+#define __xitf_pubb_func__(...)
+
+#define __xitf_set_func__
+#define __xitf_set_func_name__(...)
+#define __xitf_set_func_tmpl__(...)
+#define __xitf_set_func_spec__(...)
+#define __xitf_set_func_pubb__(...)
+#define __xitf_set_func_func__(name,...)        __func_list(i++) = __sg<__VA_ARGS__>::check(& object_t::name);
+
+#define __xitf_decl_func__
+#define __xitf_decl_func_name__(...)
+#define __xitf_decl_func_tmpl__(...)
+#define __xitf_decl_func_spec__(...)
+#define __xitf_decl_func_pubb__(...)
+#define __xitf_decl_func_func__(name,...)       __fc<__COUNTER__, __VA_ARGS__> name;
+#define __xitf_core__(name,base,...)                                            \
+private:                                                                        \
+    enum : uxx { __cnt_begin = __COUNTER__ + 1 };                               \
+                                                                                \
+    template<uxx __i, class __func>                                             \
+    using __fc = ::mixc::macro_xinterface::                                     \
+        functor<(__i - __cnt_begin) * sizeof(voidp) + __global_offset, __func>; \
+public:                                                                         \
+    template<class object_t>                                                    \
+    constexpr name(object_t const & object) base {                              \
+        uxx i = 0;                                                              \
+        /* 给 functor 赋值（指向指定的成员函数） */                             \
+        __xlist__(__xitf_set_func_, __VA_ARGS__)                                \
+    }                                                                           \
+                                                                                \
+    /* 定义 functor */                                                          \
+    __xlist__(__xitf_decl_func_, __VA_ARGS__)
+
+#define xinterface(...)                                                         \
+struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   \
+    ::mixc::macro_xinterface::interface_hub<                                    \
+        ::mixc::macro_xinterface::this_ptr                                      \
+        __xlist__(__xitf_pubb_, __VA_ARGS__)                                    \
+    > {                                                                         \
+    using __base_hub =                                                          \
+        ::mixc::macro_xinterface::interface_hub<                                \
+            ::mixc::macro_xinterface::this_ptr                                  \
+            __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
+        >;                                                                      \
+                                                                                \
+    template<class __func>                                                      \
+    using __sg = ::mixc::memop_signature::signature<__func>;                    \
+public:                                                                         \
+    template<uxx __global_offset>                                               \
+    struct __core{                                                              \
+        __xitf_core__(__core, , __VA_ARGS__)                                    \
+    private:                                                                    \
+        voidp & __func_list(uxx i) const {                                      \
+            return ((voidp *)this)[i];                                          \
+        }                                                                       \
+    };                                                                          \
+private:                                                                        \
+    enum : uxx { __global_offset = sizeof(__base_hub) };                        \
+                                                                                \
+    voidp & __func_list(uxx i) const {                                          \
+        return ((voidp *)(u08p(this) + __global_offset))[i];                    \
+    }                                                                           \
+                                                                                \
+    __xitf_core__(                                                              \
+        __xlist__(__xitf_name_, __VA_ARGS__), :                                 \
+        __base_hub(object),                                                     \
+        __VA_ARGS__                                                             \
+    )                                                                           \
 }
 
 #endif
-
-xexport(mixc::macro_xitf::hub_itf)
