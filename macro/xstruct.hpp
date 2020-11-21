@@ -88,6 +88,7 @@ using __fak = mixc::macro_xstruct::fake<type>;
 template<class type>
 using __rr  = ::mixc::meta_remove_ref::remove_ref<type>;
 
+[[maybe_unused]]
 static inline uxx __class_id = 0x80000000;
 
 #define __ignore__(...)
@@ -109,22 +110,6 @@ static inline uxx __class_id = 0x80000000;
 #define __xstruct_asso__(...)
 
 // 基类
-#define __xexpand__
-#define __xexpand_name__(...)
-#define __xexpand_tmpl__(...)
-#define __xexpand_spec__(...)
-#define __xexpand_pubb__(...)               , public      __VA_ARGS__
-#define __xexpand_prob__(...)               , protected   __VA_ARGS__
-#define __xexpand_prib__(...)               , private     __VA_ARGS__
-#define __xexpand_pubf__(...)
-#define __xexpand_prof__(...)
-#define __xexpand_prif__(...)
-#define __xexpand_pubc__(...)
-#define __xexpand_proc__(...)
-#define __xexpand_pric__(...)
-#define __xexpand_asso__(...)
-
-// 基类
 #define __xexpand_first__
 #define __xexpand_first_name__(...)
 #define __xexpand_first_tmpl__(...)
@@ -139,6 +124,22 @@ static inline uxx __class_id = 0x80000000;
 #define __xexpand_first_proc__(...)
 #define __xexpand_first_pric__(...)
 #define __xexpand_first_asso__(...)
+
+// 基类
+#define __xexpand__
+#define __xexpand_name__(...)
+#define __xexpand_tmpl__(...)
+#define __xexpand_spec__(...)
+#define __xexpand_pubb__(...)               , public      __VA_ARGS__
+#define __xexpand_prob__(...)               , protected   __VA_ARGS__
+#define __xexpand_prib__(...)               , private     __VA_ARGS__
+#define __xexpand_pubf__(...)
+#define __xexpand_prof__(...)
+#define __xexpand_prif__(...)
+#define __xexpand_pubc__(...)
+#define __xexpand_proc__(...)
+#define __xexpand_pric__(...)
+#define __xexpand_asso__(...)
 
 // the_t 别名
 #define __xthe__
