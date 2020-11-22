@@ -47,3 +47,6 @@
 
 // 参数
 #define xarg(...)                           arg__(__VA_ARGS__)
+
+// operator
+#define xoper(...)                          oper__(__VA_ARGS__)
