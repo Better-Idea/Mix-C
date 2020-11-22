@@ -1,21 +1,16 @@
 /*
-// 注意：===============================================================
-// xinterface 内部使用了显式的 this_call 调用，需要留意可能的 ABI 问题
-// =====================================================================
-
 // 说明：xinterface 组件旨在替换虚函数，简化 GC 结构
 // 用法：如下
-
 
 #define xuser mixc::powerful_cat
 #include"macro/xinterface.hpp"
 #include"io/tty.hpp"
 
-namespace xuser{
+namespace xuser{ // <- xinterface 所在命名空间需要和 xuser 保持一致
     xinterface(
         xname(can_say_hello),
-        xfunc(say_hello_to, void(asciis some_one))
-    );
+        xfunc(say_hello_to, void(asciis some_one)) // <- 没有多余的逗号
+    ); // <- 需要分号
 
     struct cat{
         void say_hello_to(asciis some_one){
@@ -75,16 +70,34 @@ namespace mixc::macro_xinterface{
 
     template<uxx offset_this, class ret_t, class ... args>
     struct functor<offset_this, ret_t(args...)>{
-        ret_t operator()(args const & ... params) const {
-            return signature<ret_t(args...)>::call(__this_ptr(), __func, params...);
-        }
-
     private:
         voidp __this_ptr() const {
             return *(voidp *)(u08p(this) - offset_this); // 偏移字节数
         }
 
+        template<class object_t>
+        static ret_t meta_form(object_t * this_ptr, args ... arg_list) {
+            return this_ptr->operator()(arg_list...);
+        }
+
         voidp __func    = nullptr;
+    public:
+        constexpr functor(){}
+
+        template<class object_t>
+        constexpr functor(object_t const & object):
+            __func(voidp(& meta_form<object_t>)){
+        }
+
+        ret_t operator()(args const & ... params) const {
+            return ((ret_t(*)(voidp, args...))__func)(__this_ptr(), params...);
+        }
+    };
+
+    template<class func_t> 
+    struct functor_closure{
+        template<uxx offset_this>
+        using __core = functor<offset_this, func_t>;
     };
 
     struct this_ptr{ 
@@ -138,6 +151,7 @@ namespace mixc::macro_xinterface{
 #define __xitf_name_spec__(name,...)            name<__VA_ARGS__>
 #define __xitf_name_pubb__(...)
 #define __xitf_name_func__(...)
+#define __xitf_name_oper__(...)
 
 #define __xitf_pubb__
 #define __xitf_pubb_name__(...)
@@ -145,13 +159,18 @@ namespace mixc::macro_xinterface{
 #define __xitf_pubb_spec__(...)
 #define __xitf_pubb_pubb__(...)                 , __VA_ARGS__
 #define __xitf_pubb_func__(...)
+#define __xitf_pubb_oper__(...)                 , mixc::macro_xinterface::functor_closure<__VA_ARGS__>
 
 #define __xitf_set_func__
-#define __xitf_set_func_name__(...)
+#define __xitf_set_func_name__(...)             constexpr auto __xitf_cnt_begin = __COUNTER__ + 1;
 #define __xitf_set_func_tmpl__(...)
 #define __xitf_set_func_spec__(...)
 #define __xitf_set_func_pubb__(...)
-#define __xitf_set_func_func__(name,...)        __func_list(i++) = __sg<__VA_ARGS__>::check(& object_t::name);
+#define __xitf_set_func_func__(name,...)        {                               \
+    constexpr auto i = __COUNTER__ - __xitf_cnt_begin;                          \
+    __func_list(i) = voidp(& __sgc<i, __object, __VA_ARGS__>::meta_form);       \
+}
+#define __xitf_set_func_oper__(...)
 
 #define __xitf_decl_func__
 #define __xitf_decl_func_name__(...)
@@ -159,6 +178,24 @@ namespace mixc::macro_xinterface{
 #define __xitf_decl_func_spec__(...)
 #define __xitf_decl_func_pubb__(...)
 #define __xitf_decl_func_func__(name,...)       __fc<__COUNTER__, __VA_ARGS__> name;
+#define __xitf_decl_func_oper__(...)
+
+#define __xitf_cast_func__
+#define __xitf_cast_func_name__(...)            ; constexpr auto __xitf_cnt_begin = __COUNTER__ + 1
+#define __xitf_cast_func_tmpl__(...)
+#define __xitf_cast_func_spec__(...)
+#define __xitf_cast_func_pubb__(...)
+#define __xitf_cast_func_func__(name,...)                                       \
+;                                                                               \
+template<class __ret, class __object, class ... __args>                         \
+struct __sgc<__COUNTER__ - __xitf_cnt_begin, __object, __ret(__args...)>{       \
+    static __ret meta_form(__object * this_ptr, __args ... arg_list) {          \
+        return this_ptr->name(arg_list...);                                     \
+    }                                                                           \
+}
+
+#define __xitf_cast_func_oper__(...)
+
 #define __xitf_core__(name,base,...)                                            \
 private:                                                                        \
     enum : uxx { __cnt_begin = __COUNTER__ + 1 };                               \
@@ -167,9 +204,8 @@ private:                                                                        
     using __fc = ::mixc::macro_xinterface::                                     \
         functor<(__i - __cnt_begin) * sizeof(voidp) + __global_offset, __func>; \
 public:                                                                         \
-    template<class object_t>                                                    \
-    constexpr name(object_t const & object) base {                              \
-        uxx i = 0;                                                              \
+    template<class __object>                                                    \
+    constexpr name(__object const & object) base {                              \
         /* 给 functor 赋值（指向指定的成员函数） */                             \
         __xlist__(__xitf_set_func_, __VA_ARGS__)                                \
     }                                                                           \
@@ -188,9 +224,6 @@ struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   
             ::mixc::macro_xinterface::this_ptr                                  \
             __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
         >;                                                                      \
-                                                                                \
-    template<class __func>                                                      \
-    using __sg = ::mixc::memop_signature::signature<__func>;                    \
 public:                                                                         \
     template<uxx __global_offset>                                               \
     struct __core{                                                              \
@@ -212,6 +245,11 @@ private:                                                                        
         __base_hub(object),                                                     \
         __VA_ARGS__                                                             \
     )                                                                           \
-}
+}                                                                               \
+__xlist__(__xitf_cast_func_, __VA_ARGS__)
 
 #endif
+
+namespace xuser{
+    template<uxx, class, class> struct __sgc{};
+}
