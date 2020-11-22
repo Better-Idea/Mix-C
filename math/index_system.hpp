@@ -2,26 +2,19 @@
 #define xpack_math_index_system
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_index_system::inc
+#define xuser mixc::math_index_system
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
-#include"macro/xitf.hpp"
+#include"macro/xinterface.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc{
-    xitf(
+namespace mixc::math_index_system{
+    xinterface(
         xname(iinterval),
-        xfunc(normalize, 
-            xret(void), 
-            xarg(length, uxx)
-        ),
-        xfunc(left, 
-            xret(uxx)
-        ),
-        xfunc(right, 
-            xret(uxx)
-        )
+        xfunc(normalize, void(uxx length)),
+        xfunc(left, uxx()),
+        xfunc(right, uxx())
     );
 
     // bend close interval
@@ -83,15 +76,20 @@ namespace mixc{
         }
     };
 
-    namespace pack{
-        using ::mixc::cc;
-        using ::mixc::oc;
-        using ::mixc::co;
-        using ::mixc::cc;
-        using ::mixc::iinterval;
-    }
+}
+
+namespace mixc::math_index_system::origin{
+    using mixc::math_index_system::cc;
+    using mixc::math_index_system::oc;
+    using mixc::math_index_system::co;
+    using mixc::math_index_system::cc;
+    using mixc::math_index_system::iinterval;
+}
+
+namespace mixc{
+    using namespace mixc::math_index_system::origin;
 }
 
 #endif
 
-xexport_space(mixc::pack)
+xexport_space(mixc::math_index_system::origin)

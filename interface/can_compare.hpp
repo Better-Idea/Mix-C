@@ -2,27 +2,31 @@
 #define xpack_interface_can_compare
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_can_compare::inc
-#include"interface/can_callback.hpp"
+#define xuser mixc::interface_can_compare
+#include"define/base_type.hpp"
 #include"macro/xcmp.hpp"
+#include"macro/xinterface.hpp"
 #include"memop/cmp.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_compare::origin{
-    template<class item>
-    using can_compare = inc::can_callback<ixx(item const &, item const &)>;
+    template<class item_t>
+    xinterface(
+        xtmpl(can_compare, item_t),
+        xoper(ixx(item_t const & left, item_t const & right))
+    );
 
     template<class type>
-    inline auto const & default_compare = 
+    inline auto && default_compare = 
         [] xcmp(type){
-            return inc::cmp<type>(left, right);
+            return cmp<type>(left, right);
         };
 
     template<class type>
-    inline auto const & default_compare_neg = 
+    inline auto && default_compare_neg = 
         [] xcmp(type){
-            return inc::cmp<type>(right, left);
+            return cmp<type>(right, left);
         };
 }
 #endif
