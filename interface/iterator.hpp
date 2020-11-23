@@ -17,16 +17,16 @@ namespace mixc::interface_iterator{
     };
 
     template<class a0, class ... args>
-    using iterator_reduced = inc::can_callback<void(a0, args...)>;
+    using iterator_reduced = inc::icallback<void(a0, args...)>;
     
     template<class a0, class ... args>
-    using iterator = inc::can_callback<void(uxx index, a0, args...)>;
+    using iterator = inc::icallback<void(uxx index, a0, args...)>;
 
     template<class a0, class ... args>
-    using iteratorx_reduced = inc::can_callback<loop_t(a0, args...)>;
+    using iteratorx_reduced = inc::icallback<loop_t(a0, args...)>;
 
     template<class a0, class ... args>
-    using iteratorx = inc::can_callback<loop_t(uxx index, a0, args...)>;
+    using iteratorx = inc::icallback<loop_t(uxx index, a0, args...)>;
     
     template<class invoke_t, class a0, class ... args>
     constexpr auto detect_mode = 
