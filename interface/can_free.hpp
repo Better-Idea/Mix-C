@@ -7,11 +7,14 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::interface_can_free{
+namespace mixc::interface_can_free::origin{
     template<class item_t>
-    using can_free = inc::can_callback<void(item_t *, uxx)>;
+    using ifree = inc::icallback<void(item_t *, uxx)>;
+
+    template<class functor_t, class item_t>
+    concept can_free = inc::can_callback<functor_t, void(item_t *, uxx)>;
 }
 
 #endif
 
-xexport(mixc::interface_can_free::can_free)
+xexport_space(mixc::interface_can_free::origin)
