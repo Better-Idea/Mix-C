@@ -56,10 +56,12 @@ namespace mixc::docker_priority_queue {
 
         final & operator= (decltype(nullptr)){
             items = nullptr;
+            return thex;
         }
 
         final & operator= (the_t const & object){
             items = object.items;
+            return thex;
         }
 
         xpubgetx(root, inc::transmitter<item_t>){
