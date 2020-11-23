@@ -66,8 +66,8 @@ namespace mixc::docker_adapter_array_access {
          *   loop_t invoke(uxx index, item_t const & value);
          * - itv 为访问区间
          */
-        template<auto mode, class invoke_t>
-        void foreach_template(invoke_t invoke, inc::iinterval itv = co{0, -1}) const {
+        template<auto mode, class invoke_t, can_interval interval_t = co>
+        void foreach_template(invoke_t invoke, interval_t const & itv = co{0, -1}) const {
             itv.normalize(the.length());
 
             uxx    l     = itv.left();
