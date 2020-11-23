@@ -36,16 +36,16 @@ namespace mixc::lang_cxx_match{
         pair<unsigned_t> point;
     };
 
-    template<class item> struct core;
-    using item = char;
+    template<class item_t> struct core;
+    using item_t = char;
     template<>
-    struct core<item> : inc::cxx<item> {
+    struct core<item_t> : inc::cxx<item_t> {
 
-    // template<class item>
-    // struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    // template<class item_t>
+    // struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
@@ -84,7 +84,7 @@ namespace mixc::lang_cxx_match{
             return false;
         }
 
-        bool base(item special, inc::wxx<item> pattern) {
+        bool base(item_t special, inc::wxx<item_t> pattern) {
             switch(special){
             case 'w': return pattern.is_alpha();
             case 'W': return not pattern.is_alpha();
@@ -102,10 +102,10 @@ namespace mixc::lang_cxx_match{
 #endif
 
 namespace mixc::lang_cxx_match::xuser{
-    template<class final, class item>
-    struct cxx : xusing_lang_cxx::cxx<final, item>{
-        using xusing_lang_cxx::cxx<final, item>::cxx;
-        using the_t = core<item>;
+    template<class final, class item_t>
+    struct cxx : xusing_lang_cxx::cxx<final, item_t>{
+        using xusing_lang_cxx::cxx<final, item_t>::cxx;
+        using the_t = core<item_t>;
 
         auto match(final pattern) const {
             return the.match(pattern);

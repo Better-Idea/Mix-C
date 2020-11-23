@@ -19,20 +19,20 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_index_of_last_miss{
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_last_miss(item const * value, uxx count, cmp_t const & compare) const {
+        uxx index_of_last_miss(item_t const * value, uxx count, cmp_t const & compare) const {
             the_t token = { value, count };
 
             for(uxx i = the.length(); i--; ){
@@ -44,26 +44,26 @@ namespace mixc::lang_cxx_index_of_last_miss{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_last_miss(item value, cmp_t const & compare = inc::default_compare<item>) const {
+        uxx index_of_last_miss(item_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_last_miss(& value, 1, compare);
         }
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
         uxx index_of_last_miss(
-            inc::initializer_list<item> values, 
-            cmp_t const &               compare = inc::default_compare<item>) const {
+            inc::initializer_list<item_t> values, 
+            cmp_t const &               compare = inc::default_compare<item_t>) const {
 
             return the.index_of_last_miss(values.begin(), values.size(), compare);
         }
@@ -73,8 +73,8 @@ namespace mixc::lang_cxx_index_of_last_miss{
 #endif
 
 namespace mixc::lang_cxx_index_of_last_miss::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

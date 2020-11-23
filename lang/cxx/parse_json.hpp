@@ -387,8 +387,8 @@ namespace mixc::lang_cxx_parse_json{
 #endif
 
 namespace mixc::lang_cxx_parse_json::xuser {
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

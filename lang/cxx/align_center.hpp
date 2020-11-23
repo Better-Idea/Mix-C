@@ -18,20 +18,20 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_align_center{
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
-        auto align_center(uxx width, item pad, alloc_t const & alloc) const {
+        auto align_center(uxx width, item_t pad, alloc_t const & alloc) const {
             if (ixx r = ixx(the.length() - width); r >= 0){
                 return the.shorten(uxx(r)).clone(alloc);
             }
@@ -44,14 +44,14 @@ namespace mixc::lang_cxx_align_center{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
         final align_center(uxx width, alloc_t const & alloc) const {
             return the.align_center(width, ' ', alloc);
@@ -59,9 +59,9 @@ namespace mixc::lang_cxx_align_center{
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
-        final align_center(uxx width, item pad, alloc_t const & alloc) const {
+        final align_center(uxx width, item_t pad, alloc_t const & alloc) const {
             return the.align_center(width, pad, alloc);
         }
     };
@@ -70,8 +70,8 @@ namespace mixc::lang_cxx_align_center{
 #endif
 
 namespace mixc::lang_cxx_align_center::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

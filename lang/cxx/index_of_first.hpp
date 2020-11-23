@@ -18,25 +18,25 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_index_of_first{
-    // using item = char;
-    // template<class item> struct core;
+    // using item_t = char;
+    // template<class item_t> struct core;
     // template<>
-    // struct core<item> : inc::cxx<item> {
+    // struct core<item_t> : inc::cxx<item_t> {
 
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_first(item const * value, uxx length, cmp_t const & compare) const {
+        uxx index_of_first(item_t const * value, uxx length, cmp_t const & compare) const {
             for(uxx i = 0; i < the.length(); i++){
                 for(uxx ii = 0; ii < length; ii++){
                     if (compare(the[i], value[ii]) == 0){
@@ -47,11 +47,11 @@ namespace mixc::lang_cxx_index_of_first{
             return not_exist;
         }
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_first(item const & value, cmp_t const & compare) const {
+        uxx index_of_first(item_t const & value, cmp_t const & compare) const {
             return index_of_first(xref value, 1, compare);
         }
 
@@ -106,36 +106,36 @@ namespace mixc::lang_cxx_index_of_first{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base {
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_first(item value, cmp_t const & compare = inc::default_compare<item>) const {
+        uxx index_of_first(item_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(& value, 1, compare);
         }
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
         uxx index_of_first(
-            inc::initializer_list<item> values, 
-            cmp_t const &               compare = inc::default_compare<item>) const {
+            inc::initializer_list<item_t> values, 
+            cmp_t const &               compare = inc::default_compare<item_t>) const {
             return the.index_of_first(values.begin(), values.size(), compare);
         }
 
-        template<class cmp_t>
+        template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
         uxx index_of_first(
             final                  value, 
-            cmp_t const & compare = inc::default_compare<item>) const {
+            cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(value, compare);
         }
 
@@ -147,7 +147,7 @@ namespace mixc::lang_cxx_index_of_first{
         void index_of_first(
             the_t           value, 
             call_t  const & match, 
-            cmp_t   const & compare = inc::default_compare<item>) const {
+            cmp_t   const & compare = inc::default_compare<item_t>) const {
 
             the.index_of_first(value, match, compare);
         }
@@ -157,8 +157,8 @@ namespace mixc::lang_cxx_index_of_first{
 #endif
 
 namespace mixc::lang_cxx_index_of_first::xuser {
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

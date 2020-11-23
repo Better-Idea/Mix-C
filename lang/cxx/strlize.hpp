@@ -102,11 +102,11 @@ namespace mixc::lang_cxx_strlize{
         fmt_sn              ,
     };
 
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
@@ -127,8 +127,8 @@ namespace mixc::lang_cxx_strlize{
 
             #undef  xgen
 
-            item buf[64];
-            item buf_exp[8]     = {'+'};
+            item_t buf[64];
+            item_t buf_exp[8]     = {'+'};
             auto pce            = ixx(precious);
             auto ptr            = buf;
             auto m              = inc::mfxx<type>{value};
@@ -186,11 +186,11 @@ namespace mixc::lang_cxx_strlize{
             auto num_part       = ptr;
             auto exp_tmp        = exp;
             auto exp_str        = the_t(buf_exp, 4);
-            buf_exp[1]          = item('0' + exp_tmp / 100);
+            buf_exp[1]          = item_t('0' + exp_tmp / 100);
             exp_tmp            %= 100;
-            buf_exp[2]          = item('0' + exp_tmp / 10);
+            buf_exp[2]          = item_t('0' + exp_tmp / 10);
             exp_tmp            %= 10;
-            buf_exp[3]          = item('0' + exp_tmp);
+            buf_exp[3]          = item_t('0' + exp_tmp);
 
             union{
                 struct{
@@ -207,7 +207,7 @@ namespace mixc::lang_cxx_strlize{
             f.full              = re > 0 ? rd << re : rd >> -re;
 
             do{
-                ptr[0]          = item(f.digital + '0');
+                ptr[0]          = item_t(f.digital + '0');
                 ptr            += 1;
                 dec_bits       += 1;
                 f.digital       = 0;
@@ -374,7 +374,7 @@ namespace mixc::lang_cxx_strlize{
             } while(u != 0);
 
             uxx    len          = ptr - buf;
-            item * mem          = alloc(len + is_neg);
+            item_t * mem          = alloc(len + is_neg);
             the_t  r            = the_t(mem, len + is_neg);
 
             if (is_neg){
@@ -393,10 +393,10 @@ namespace mixc::lang_cxx_strlize{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         // TODO:可以转换成数字类型的类
 
@@ -476,8 +476,8 @@ namespace mixc::lang_cxx_strlize{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        meta(item value, alloc_t const & alloc){
-            item * ptr = alloc(1);
+        meta(item_t value, alloc_t const & alloc){
+            item_t * ptr = alloc(1);
             thex = the_t{ ptr, 1 };
             ptr[0] = value;
         }
@@ -495,8 +495,8 @@ namespace mixc::lang_cxx_strlize{
 #endif
 
 namespace mixc::lang_cxx_strlize::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 xexport_space(mixc::lang_cxx_strlize)

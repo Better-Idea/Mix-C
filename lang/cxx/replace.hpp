@@ -21,11 +21,11 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_replace{
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
@@ -34,8 +34,8 @@ namespace mixc::lang_cxx_replace{
 
         template<class cmp_t, class alloc_t>
         requires(
-            inc::can_compare<cmp_t, item> and
-            inc::can_alloc<alloc_t, item>
+            inc::can_compare<cmp_t, item_t> and
+            inc::can_alloc<alloc_t, item_t>
         )
         auto replace(
             the_t                   old_value, 
@@ -119,23 +119,23 @@ namespace mixc::lang_cxx_replace{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
         final replace(final old_value, final new_value, alloc_t const & alloc) const {
-            return the.replace(old_value, new_value, inc::default_compare<item>, alloc);
+            return the.replace(old_value, new_value, inc::default_compare<item_t>, alloc);
         }
 
         template<class cmp_t, class alloc_t>
         requires(
-            inc::can_compare<cmp_t, item> and
-            inc::can_alloc<alloc_t, item>
+            inc::can_compare<cmp_t, item_t> and
+            inc::can_alloc<alloc_t, item_t>
         )
         final replace(
             final                   old_value, 
@@ -150,8 +150,8 @@ namespace mixc::lang_cxx_replace{
 #endif
 
 namespace mixc::lang_cxx_replace::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

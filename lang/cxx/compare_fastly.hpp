@@ -16,17 +16,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_compare_fastly{
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
     
-        ixx compare_fastly(the_t value, inc::can_compare<item> compare) const {
+        ixx compare_fastly(the_t value, inc::can_compare<item_t> compare) const {
             if (ixx r = ixx(the.length() - value.length()); r != 0){
                 return r;
             }
@@ -39,14 +39,14 @@ namespace mixc::lang_cxx_compare_fastly{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base {
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         ixx compare_fastly(
             final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+            inc::can_compare<item_t> compare = inc::default_compare<item_t>) const {
             return the.compare_fastly(value, compare);
         }
     };
@@ -55,8 +55,8 @@ namespace mixc::lang_cxx_compare_fastly{
 #endif
 
 namespace mixc::lang_cxx_compare_fastly::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

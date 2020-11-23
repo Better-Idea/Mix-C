@@ -18,18 +18,18 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_strcat{
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
         auto strcat(the_t * list, uxx length, alloc_t const & alloc) const {
             uxx total_length = the.length();
@@ -55,14 +55,14 @@ namespace mixc::lang_cxx_strcat{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
         final strcat(final values, alloc_t const & alloc) const {
             return the.strcat((the_t *)(xref values), 1, alloc);
@@ -70,7 +70,7 @@ namespace mixc::lang_cxx_strcat{
 
         template<class alloc_t>
         requires(
-            inc::can_alloc<alloc_t, item>
+            inc::can_alloc<alloc_t, item_t>
         )
         final strcat(inc::initializer_list<final> values, alloc_t const & alloc) const {
             return the.strcat((the_t *)values.begin(), values.size(), alloc);
@@ -81,8 +81,8 @@ namespace mixc::lang_cxx_strcat{
 #endif
 
 namespace mixc::lang_cxx_strcat::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

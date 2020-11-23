@@ -10,12 +10,12 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_ignore_case{
-    template<class item>
+    template<class item_t>
     inline auto ignore_case = 
-        []xcmp(item) {
+        []xcmp(item_t) {
             return 
-                inc::wxx<item>(left).to_lower() - 
-                inc::wxx<item>(right).to_lower();
+                inc::wxx<item_t>(left).to_lower() - 
+                inc::wxx<item_t>(right).to_lower();
         };
 }
 

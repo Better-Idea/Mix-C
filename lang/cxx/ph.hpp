@@ -23,6 +23,7 @@
 #include"meta/is_origin_array.hpp"
 #include"meta/is_ptr.hpp"
 #include"meta/item_origin_of.hpp"
+#include"meta/remove_ptr.hpp"
 #include"meta/unsigned_type.hpp"
 #include"meta_ctr/cif.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -102,7 +103,7 @@ namespace mixc::lang_cxx_ph{
         }
 
         template<class item_t>
-        item_t * align(uxx length, inc::can_alloc<item_t> alloc){
+        item_t * align(uxx length, inc::ialloc<item_t> alloc){
             if (the_t::align_width == 0 or the_t::align_width <= length){
                 return alloc(length);
             }
@@ -133,16 +134,15 @@ namespace mixc::lang_cxx_ph{
         xprof(value, type)
     )
     public:
-        base_ph(){}
-        base_ph(type const & value) : 
+        constexpr base_ph(type const & value) : 
             value(value){}
     $
 
     #define xopt                                                                            \
-        inc::c08 operator >> (inc::can_alloc<char> alloc) { return output(alloc); }         \
-        inc::c16 operator >> (inc::can_alloc<char16_t>  alloc) { return output(alloc); }    \
+        inc::c08 operator >> (inc::ialloc<char> alloc) { return output(alloc); }            \
+        inc::c16 operator >> (inc::ialloc<char16_t> alloc) { return output(alloc); }        \
         template<class item_t>                                                              \
-        inc::cxx<item_t> output(inc::can_alloc<item_t> alloc)
+        inc::cxx<item_t> output(inc::ialloc<item_t> alloc)
 
     template<
         class             final, 
@@ -203,9 +203,7 @@ namespace mixc::lang_cxx_ph{
     struct v<final, a0, args...> : v<final, args...> {
         using base_t = v<final, args...>;
 
-        v(){}
-
-        v(a0 const & first, args const & ... rest) : 
+        constexpr v(a0 const & first, args const & ... rest) : 
             base_t(rest...), item(first) {
         }
 
@@ -231,14 +229,14 @@ namespace mixc::lang_cxx_ph{
     private:
         static auto invoke(){
             if constexpr (inc::is_origin_array<a0>){
-                return (const inc::item_origin_of<a0> *)nullptr;
+                return (const inc::item_origin_of<a0> **)nullptr;
             }
             else{
-                return a0();
+                return (a0 *)nullptr;
             }
         }
 
-        decltype(invoke()) item;
+        inc::remove_ptr< decltype(invoke()) > item;
     };
 
     template<class final>
@@ -250,13 +248,13 @@ namespace mixc::lang_cxx_ph{
             return { 
                 the.template align<item_t>(
                     length, 
-                    inc::cast<inc::can_alloc<item_t>>(alloc)
+                    inc::cast<inc::ialloc<item_t>>(alloc)
                 ) + length, 
                 0
             };
         }
     protected:
-        inc::can_alloc<void> alloc;
+        inc::ialloc<void> alloc;
     };
 
     constexpr bool with_prefix       = true;
@@ -308,7 +306,7 @@ namespace mixc::lang_cxx_ph::origin::ph{
     template<class a0, class ... args>
     struct v : mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>{
         using base_t = mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>;
-        v(){}
+
         v(a0 const & first, args const & ... rest) : 
             base_t(first, rest...){}
 
@@ -358,7 +356,7 @@ namespace mixc::lang_cxx_ph{
     };
 
     template<> struct phg_core<>{
-        inc::can_alloc<void> alloc;
+        inc::ialloc<void> alloc;
 
         template<class item_t>
         inc::cxx<item_t> output(uxx length){

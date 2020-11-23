@@ -61,23 +61,23 @@ namespace mixc::lang_cxx_parse{
         uxx    error_index;
     };
 
-    // using item = char;
-    // template<class item> struct core;
+    // using item_t = char;
+    // template<class item_t> struct core;
     // template<>
-    // struct core<item> : inc::cxx<item> {
+    // struct core<item_t> : inc::cxx<item_t> {
 
-    template<class item>
-    struct core : inc::cxx<item> {
-        using inc::cxx<item>::cxx;
-        using the_t = core<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using inc::cxx<item_t>::cxx;
+        using the_t = core<item_t>;
 
         template<class target>
         parse_result<target> parse(uxx base) const {
             bool   is_neg = false;
             target value  = 0;
-            item * cur    = the;
-            item * begin  = the;
-            item * end    = cur + the.length();
+            item_t * cur    = the;
+            item_t * begin  = the;
+            item_t * end    = cur + the.length();
 
             if (begin >= end) {
                 return parse_result<target>(value, 0);
@@ -212,10 +212,10 @@ namespace mixc::lang_cxx_parse{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         template<class target>
         parse_result<target> parse() const {
@@ -240,8 +240,8 @@ namespace mixc::lang_cxx_parse{
 #endif
 
 namespace mixc::lang_cxx_parse::xuser{
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #include"math/numeration_t.hpp"

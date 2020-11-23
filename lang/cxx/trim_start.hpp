@@ -19,11 +19,11 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_trim_start{
-    template<class item>
-    struct core : inc::cxx<item> {
-        using base_t = inc::cxx<item>;
+    template<class item_t>
+    struct core : inc::cxx<item_t> {
+        using base_t = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
@@ -32,7 +32,7 @@ namespace mixc::lang_cxx_trim_start{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        auto trim_start(inc::initializer_list<item> values, alloc_t const & alloc) const {
+        auto trim_start(inc::initializer_list<item_t> values, alloc_t const & alloc) const {
             auto token  = the_t(values.begin(), values.size());
             auto r      = the;
 
@@ -46,16 +46,16 @@ namespace mixc::lang_cxx_trim_start{
         }
     };
 
-    template<class final, class base, class item>
+    template<class final, class base, class item_t>
     struct meta : base {
         using base::base;
-        using the_t = core<item>;
+        using the_t = core<item_t>;
 
         template<class alloc_t>
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_start(item value, alloc_t const & alloc = nullptr) const {
+        final trim_start(item_t value, alloc_t const & alloc = nullptr) const {
             return the.trim_start({ value }, alloc);
         }
 
@@ -63,7 +63,7 @@ namespace mixc::lang_cxx_trim_start{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_start(inc::initializer_list<item> values, alloc_t const & alloc = nullptr) const {
+        final trim_start(inc::initializer_list<item_t> values, alloc_t const & alloc = nullptr) const {
             return the.trim_start(values, alloc);
         }
     };
@@ -72,8 +72,8 @@ namespace mixc::lang_cxx_trim_start{
 #endif
 
 namespace mixc::lang_cxx_trim_start::xuser {
-    template<class final, class item>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item>, item>;
+    template<class final, class item_t>
+    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx
