@@ -132,19 +132,20 @@ namespace mixc::algo_sort{
     }
 
     struct sort{
-        template<inc::can_unified_seqlize seq_t>
+        template<
+            inc::can_unified_seqlize    seq_t,
+            class                       cmp_t,
+            class                       item_t = inc::item_origin_of<seq_t>
+        >
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         static void heap(
-            seq_t                      const & seq,
-            inc::can_compare<
-                inc::item_origin_of<seq_t>
-            >                                   compare = 
-            inc::default_compare<
-                inc::item_origin_of<seq_t>
-            >){
+            seq_t   const & seq,
+            cmp_t   const & compare = inc::default_compare<item_t>){
 
-            inc::unified_seq<seq_t> list(seq);
+            inc::unified_seq<seq_t> list{seq};
 
-            using item_t = inc::item_origin_of<seq_t>;
             auto neg = [&]xcmp(item_t){
                 return compare(right, left);
             };
@@ -152,7 +153,6 @@ namespace mixc::algo_sort{
             for(uxx i = 1; i < list.length(); i++) {
                 inc::heap_root::push(list, i, list[i], neg);
             }
-
             for(uxx i = list.length(); --i > 0; ) {
                 list[i] = inc::heap_root::pop(list, i + 1, list[i], neg);
             }
