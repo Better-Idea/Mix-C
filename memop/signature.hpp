@@ -10,18 +10,28 @@
 namespace mixc::memop_signature{
     template<class function> struct signature;
 
-    #define xgen(...)                                                               \
-    template<class ret, class ... args>                                             \
-    struct signature<ret(args...) __VA_ARGS__>{                                     \
-        template<class owner>                                                       \
-        static auto fetch(ret(owner::* member_func)(args...) __VA_ARGS__){          \
-            return member_func;                                                     \
-        }                                                                           \
-    };
+    template<class ret, class ... args>
+    struct signature<ret(args...)>{ 
+        template<class owner>
+        static auto fetch(ret(owner::* member_func)(args...)){ 
+            return member_func;
+        } 
 
-    xgen()
-    xgen(const)
-    #undef xgen
+        template<class owner>
+        static auto fetch(ret(owner::* member_func)(args...) const){ 
+            return member_func;
+        }
+
+        template<class owner>
+        static constexpr bool has(ret(owner::*)(args...)){ 
+            return true;
+        }
+
+        template<class owner>
+        static constexpr bool has(ret(owner::*)(args...) const){ 
+            return true;
+        }
+    };
 }
 
 #endif
