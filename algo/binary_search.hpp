@@ -88,6 +88,20 @@ namespace mixc::algo_binary_search{
         return result;
     }
 
+    #define xheader(ret,name)                                                           \
+        template<                                                                       \
+            inc::can_unified_seqlize seq_t,                                             \
+            class                    item_t  = inc::item_origin_of<seq_t>,              \
+            class                    cmp_t   = decltype(inc::default_compare<item_t>)   \
+        >                                                                               \
+        requires(                                                                       \
+            inc::can_compare<seq_t, item_t>                                             \
+        )                                                                               \
+        inline ret name(                                                                \
+            seq_t   const & seq,                                                        \
+            item_t  const & value,                                                      \
+            cmp_t   const & compare = inc::default_compare<item_t>)
+
     /* 函数：二分匹配模板
      * 参数：
      * - length 为被搜索序列的长度
@@ -98,13 +112,9 @@ namespace mixc::algo_binary_search{
      * 返回：
      * - result_t 结构
      */
-    template<inc::can_unified_seqlize seq_t>
-    inline auto match_template(
-        seq_t                                       const & seq,
-        inc::item_origin_of<seq_t>                  const & value,
-        inc::can_compare< inc::item_origin_of<seq_t> >      compare) {
-
+    xheader(auto, match_template) {
         inc::unified_seq<seq_t> list(seq);
+
         return match_core(list.length(), [&](uxx current){
             return compare(list[current], value);
         });
@@ -112,62 +122,52 @@ namespace mixc::algo_binary_search{
 }
 
 namespace mixc::algo_binary_search::origin::binary_search{
-    using can_search = inc::can_callback<ixx(uxx)>;
+    // using can_search = inc::can_callback<ixx(uxx)>;
 
     // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::can_unified_seqlize seq_t>
-    inline uxx match(
-        seq_t                                      const & seq,
-        inc::item_origin_of<seq_t>                 const & value,
-        inc::can_compare< inc::item_origin_of<seq_t> >     compare = 
-        inc::default_compare< inc::item_origin_of<seq_t> >) {
-
+    xheader(uxx, match) {
         return match_template(seq, value, compare).match;
     }
 
     // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::can_unified_seqlize seq_t>
-    inline uxx greater_equals(
-        seq_t                                      const & seq,
-        inc::item_origin_of<seq_t>                 const & value,
-        inc::can_compare< inc::item_origin_of<seq_t> >     compare = 
-        inc::default_compare< inc::item_origin_of<seq_t> >) {
-
+    xheader(uxx, greater_equals) {
         auto result = match_template(seq, value, compare);
         return result.match == not_exist ? result.grater_then_target : result.match;
     }
 
     // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::can_unified_seqlize seq_t>
-    inline uxx less_equals(
-        seq_t                                      const & seq,
-        inc::item_origin_of<seq_t>                 const & value,
-        inc::can_compare< inc::item_origin_of<seq_t> >     compare = 
-        inc::default_compare< inc::item_origin_of<seq_t> >) {
-
+    xheader(uxx, less_equals){
         auto result = match_template(seq, value, compare);
         return result.match == not_exist ? result.less_then_target : result.match;
     }
 
+    #undef  xheader
+
+    #define xheader(name)                                                       \
+        template<class callback_t>                                              \
+        requires(                                                               \
+            inc::can_callback<callback_t, ixx(uxx)>                             \
+        )                                                                       \
+        inline uxx name(uxx length, callback_t const & compare)
+
     // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::can_unified_seqlize seq_t>
-    inline uxx match(uxx length, can_search const & compare) {
+    xheader(match) {
         return match_core(length, compare).match;
     }
 
     // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::can_unified_seqlize seq_t>
-    inline uxx greater_equals(uxx length, can_search const & compare) {
+    xheader(greater_equals) {
         auto result = match_core(length, compare);
         return result.match == not_exist ? result.grater_then_target : result.match;
     }
 
     // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
-    template<inc::can_unified_seqlize seq_t>
-    inline uxx less_equals(uxx length, can_search const & compare) {
+    xheader(less_equals) {
         auto result = match_core(length, compare);
         return result.match == not_exist ? result.less_then_target : result.match;
     }
+
+    #undef  xheader
 }
 
 #endif
