@@ -6,7 +6,7 @@
 #include"macro/xinterface.hpp"
 #include"io/tty.hpp"
 
-namespace xuser{ // <- xinterface 所在命名空间需要和 xuser 保持一致
+namespace xuser{
     xinterface(
         xname(can_say_hello),
         xfunc(say_hello_to, void(asciis some_one)) // <- 没有多余的逗号
@@ -59,10 +59,11 @@ int main(){
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xinterface
-#include"memop/signature.hpp"
+#include"dumb/place_holder.hpp"
 #include"macro/private/word.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/xnew.hpp"
+#include"memop/signature.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xinterface{
@@ -162,13 +163,14 @@ namespace mixc::macro_xinterface{
 #define __xitf_pubb_oper__(...)                 , mixc::macro_xinterface::functor_closure<__VA_ARGS__>
 
 #define __xitf_set_func__
-#define __xitf_set_func_name__(...)             constexpr auto __xitf_cnt_begin = __COUNTER__ + 1;
+#define __xitf_set_func_name__(...)                                             \
+    enum : uxx { __meta_form_cnt_begin = __COUNTER__ + 1 };
 #define __xitf_set_func_tmpl__(...)
 #define __xitf_set_func_spec__(...)
 #define __xitf_set_func_pubb__(...)
-#define __xitf_set_func_func__(name,...)        {                               \
-    constexpr auto i = __COUNTER__ - __xitf_cnt_begin;                          \
-    __func_list(i) = voidp(& __sgc<i, __object, __VA_ARGS__>::meta_form);       \
+#define __xitf_set_func_func__(name,...)        {                                                           \
+    constexpr auto i = __COUNTER__ - __meta_form_cnt_begin;                                                 \
+    __func_list(i) = __meta_form(__ph<i>{}, object, __sg<__VA_ARGS__>::fetch(& __object::name));            \
 }
 #define __xitf_set_func_oper__(...)
 
@@ -181,18 +183,29 @@ namespace mixc::macro_xinterface{
 #define __xitf_decl_func_oper__(...)
 
 #define __xitf_cast_func__
-#define __xitf_cast_func_name__(...)            ; constexpr auto __xitf_cnt_begin = __COUNTER__ + 1
+#define __xitf_cast_func_name__(...)                                            \
+    enum : uxx { __meta_form_cnt_begin = __COUNTER__ + 1 };
 #define __xitf_cast_func_tmpl__(...)
 #define __xitf_cast_func_spec__(...)
 #define __xitf_cast_func_pubb__(...)
 #define __xitf_cast_func_func__(name,...)                                       \
-;                                                                               \
-template<class __ret, class __object, class ... __args>                         \
-struct __sgc<__COUNTER__ - __xitf_cnt_begin, __object, __ret(__args...)>{       \
-    static __ret meta_form(__object * this_ptr, __args ... arg_list) {          \
-        return this_ptr->name(arg_list...);                                     \
-    }                                                                           \
-}
+    template<                                                                   \
+        class __object,                                                         \
+        class __ret,                                                            \
+        class __owner,                                                          \
+        class ... __args                                                        \
+    >                                                                           \
+    static voidp __meta_form(                                                   \
+        __ph<__COUNTER__ - __meta_form_cnt_begin>,                              \
+        __object const &,                                                       \
+        __ret(__owner::*)(__args...)){                                          \
+        struct __closure{                                                       \
+            static voidp __meta(__object * this_ptr, __args ... list){          \
+                return this_ptr->name(list...);                                 \
+            }                                                                   \
+        };                                                                      \
+        return voidp(& __closure::__meta);                                      \
+    }
 
 #define __xitf_cast_func_oper__(...)
 
@@ -219,11 +232,20 @@ struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   
         ::mixc::macro_xinterface::this_ptr                                      \
         __xlist__(__xitf_pubb_, __VA_ARGS__)                                    \
     > {                                                                         \
+                                                                                \
     using __base_hub =                                                          \
         ::mixc::macro_xinterface::interface_hub<                                \
             ::mixc::macro_xinterface::this_ptr                                  \
             __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
         >;                                                                      \
+                                                                                \
+private:                                                                        \
+    template<uxx __i>                                                           \
+    using __ph = ::mixc::dumb_place_holder::place_holder<__i>;                  \
+                                                                                \
+    template<class __func>                                                      \
+    using __sg = ::mixc::memop_signature::signature<__func>;                    \
+    __xlist__(__xitf_cast_func_, __VA_ARGS__)                                   \
 public:                                                                         \
     template<uxx __global_offset>                                               \
     struct __core{                                                              \
@@ -245,11 +267,6 @@ private:                                                                        
         __base_hub(object),                                                     \
         __VA_ARGS__                                                             \
     )                                                                           \
-}                                                                               \
-__xlist__(__xitf_cast_func_, __VA_ARGS__)
+}
 
 #endif
-
-namespace xuser{
-    template<uxx, class, class> struct __sgc{};
-}
