@@ -239,6 +239,13 @@ struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   
             __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
         >;                                                                      \
                                                                                 \
+    template<uxx __offset>                                                      \
+    using __base_hubx =                                                         \
+        ::mixc::macro_xinterface::interface_hub_core<                           \
+            __offset,/* 这里不需要 this_ptr */                                  \
+            __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
+        >;                                                                      \
+                                                                                \
 private:                                                                        \
     template<uxx __i>                                                           \
     using __ph = ::mixc::dumb_place_holder::place_holder<__i>;                  \
@@ -248,8 +255,12 @@ private:                                                                        
     __xlist__(__xitf_cast_func_, __VA_ARGS__)                                   \
 public:                                                                         \
     template<uxx __global_offset>                                               \
-    struct __core{                                                              \
-        __xitf_core__(__core, , __VA_ARGS__)                                    \
+    struct __core : __base_hubx<__global_offset>{                               \
+        __xitf_core__(                                                          \
+            __core, :                                                           \
+            __base_hubx<__global_offset>(object),                               \
+            __VA_ARGS__                                                         \
+        )                                                                       \
     private:                                                                    \
         voidp & __func_list(uxx i) const {                                      \
             return ((voidp *)this)[i];                                          \
