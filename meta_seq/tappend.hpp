@@ -11,10 +11,10 @@
 namespace mixc::meta_seq_tappend{
     using namespace inc;
 
-    template<class tlist, class item> struct tappend;
-    template<class item, class ... args>
-    struct tappend<tlist<args...>, item>{
-        using new_list = tlist<args..., item>;
+    template<class tlist, class item_t> struct tappend;
+    template<class item_t, class ... args>
+    struct tappend<tlist<args...>, item_t>{
+        using new_list = tlist<args..., item_t>;
     };
 }
 

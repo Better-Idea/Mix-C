@@ -19,7 +19,7 @@ namespace mixc::meta_seq_tpop_by{
         template<class first, class ... args, class ... vals, class ... rest>
         static auto invoke(tlist<first, args...>, tlist<tlist<vals...> , tlist<rest...>>){
             tlist<args...> src;
-            using current_key = typename selector<first>::item;
+            using current_key = typename selector<first>::item_t;
 
             if constexpr (is_same<current_key, key>){
                 return invoke(src, tlist<tlist<vals..., first> , tlist<rest...>> ());

@@ -19,13 +19,13 @@ namespace mixc::meta_seq_tpop{
     // template<class list> struct tpop;
     // template<class last, class ... args>
     // struct tpop<tlist<args..., last>>{
-    //     using item = last;
+    //     using item_t = last;
     //     using new_tlist = tlist<args...>;
     // };
 
     // template<>
     // struct tpop<tlist<>>{
-    //     using item = tnull;
+    //     using item_t = tnull;
     //     using new_tlist = tlist<>;
     // };
 
@@ -43,7 +43,7 @@ namespace mixc::meta_seq_tpop{
         template<class last, class ... result_args>
         static auto invoke(tlist<last>, tlist<result_args...>){
             struct pair{
-                using item = last;
+                using item_t = last;
                 using new_list = tlist<result_args...>;
             };
             return pair();
@@ -52,7 +52,7 @@ namespace mixc::meta_seq_tpop{
         template<class ... result_args>
         static auto invoke(tlist<>, tlist<result_args...>){
             struct pair{
-                using item = tnull;
+                using item_t = tnull;
                 using new_list = tlist<result_args...>;
             };
             return pair();
@@ -61,7 +61,7 @@ namespace mixc::meta_seq_tpop{
             invoke(list(), tlist<>())
         );
     public:
-        using item = typename pair::item;
+        using item_t = typename pair::item_t;
         using new_list = typename pair::new_list;
     };
 }

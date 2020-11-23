@@ -18,7 +18,7 @@ namespace mixc::meta_seq_tsub{
     template<class minus, class first, class ... args>
     struct tsub<tlist<first, args...>, minus>{
     private:
-        using item = cif<
+        using item_t = cif<
             tin<minus, first>,
             tlist<>,
             tlist<first>
@@ -28,7 +28,7 @@ namespace mixc::meta_seq_tsub{
             typename tsub<tlist<args...>, minus>::new_list;
     public:
         using new_list = 
-            typename tmerge<item, next>::new_list;
+            typename tmerge<item_t, next>::new_list;
     };
 
     template<class minus>

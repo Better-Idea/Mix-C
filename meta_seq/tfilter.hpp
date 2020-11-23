@@ -21,10 +21,10 @@ namespace mixc::meta_seq_tfilter{
 
         template<class first, class ... args, class ... result_args>
         static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            using item = typename selector<first>::item;
+            using item_t = typename selector<first>::item_t;
             return invoke(
                 tlist<args...>(), 
-                tlist<result_args..., item>()
+                tlist<result_args..., item_t>()
             );
         }
     public:

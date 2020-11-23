@@ -13,13 +13,13 @@ namespace mixc::meta_seq_vpop_front{
     template<class list> struct vpop_front;
     template<auto first, auto ... args>
     struct vpop_front<inc::vlist<first, args...>>{
-        static constexpr auto item  = first;
+        static constexpr auto item_t  = first;
         using new_list              = inc::vlist<args...>;
     };
 
     template<>
     struct vpop_front<inc::vlist<>>{
-        static constexpr auto item  = inc::vnull;
+        static constexpr auto item_t  = inc::vnull;
         using new_list              = inc::vlist<>;
     };
 }

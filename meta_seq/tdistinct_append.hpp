@@ -13,16 +13,16 @@
 namespace mixc::meta_seq_tdistinct_append{
     using namespace inc;
 
-    template<class tlist, class item> struct tdistinct_append;
-    template<class item, class ... args>
-    struct tdistinct_append<tlist<args...>, item>{
+    template<class tlist, class item_t> struct tdistinct_append;
+    template<class item_t, class ... args>
+    struct tdistinct_append<tlist<args...>, item_t>{
         using new_list = 
             typename cif< 
-                tin< tlist<args...>, item > 
+                tin< tlist<args...>, item_t > 
             >::template select<
                 tlist<args...>
             >::template ces<
-                tlist<args..., item>
+                tlist<args..., item_t>
             >;
     };
 }

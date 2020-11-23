@@ -26,8 +26,8 @@ namespace mixc::meta_seq_vin{
         }
     }
 
-    template<class vlist, auto item>
-    constexpr bool vin = meta<item>(vlist());
+    template<class vlist, auto item_t>
+    constexpr bool vin = meta<item_t>(vlist());
 }
 
 #endif

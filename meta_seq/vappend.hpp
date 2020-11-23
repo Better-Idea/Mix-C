@@ -11,10 +11,10 @@
 namespace mixc::meta_seq_vappend{
     using namespace inc;
 
-    template<class vlist, auto item> struct vappend;
-    template<auto item, auto ... args>
-    struct vappend<vlist<args...>, item>{
-        using new_list = vlist<args..., item>;
+    template<class vlist, auto item_t> struct vappend;
+    template<auto item_t, auto ... args>
+    struct vappend<vlist<args...>, item_t>{
+        using new_list = vlist<args..., item_t>;
     };
 }
 
