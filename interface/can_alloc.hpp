@@ -7,11 +7,14 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::interface_can_alloc{
+namespace mixc::interface_can_alloc::origin{
     template<class item_t>
-    using can_alloc = inc::can_callback<item_t *(uxx)>;
+    using ialloc = inc::icallback<item_t *(uxx)>;
+
+    template<class functor_t, class item_t>
+    concept can_alloc = inc::can_callback<functor_t, item_t *(uxx)>;
 }
 
 #endif
 
-xexport(mixc::interface_can_alloc::can_alloc)
+xexport_space(mixc::interface_can_alloc::origin)
