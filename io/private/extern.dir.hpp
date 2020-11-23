@@ -64,7 +64,7 @@ namespace mixc::io_dir::origin{
         return INVALID_FILE_ATTRIBUTES != attr and 0 != (attr & FILE_ATTRIBUTE_DIRECTORY);
     }
 
-    void dir::foreach_template(bool for_file, inc::c08 path, inc::can_callback< loop_t(asciis path) > invoke){
+    void dir::foreach_template(bool for_file, inc::c08 path, inc::icallback< loop_t(asciis path) > invoke){
         auto info       = WIN32_FIND_DATAA{};
         auto h          = ([](auto path, auto * info){
             char root[256]  = "";

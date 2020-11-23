@@ -379,7 +379,7 @@ namespace mixc::io_private_tty::origin{
     }
 
     template<class item_t>
-    void read_line(inc::can_alloc<item_t> allocx){
+    void read_line(inc::ialloc<item_t> allocx){
         enum { initial_length = 64 };
         using var = inc::var_array<initial_length>;
         item_t      buf[initial_length];
@@ -423,11 +423,11 @@ namespace mixc::io_private_tty::origin{
         var::clear(xref table, xref length, free);
     }
 
-    void read_line(inc::can_alloc<char> alloc){
+    void read_line(inc::ialloc<char> alloc){
         read_line<char>(alloc);
     }
 
-    void read_line(inc::can_alloc<char16_t> alloc){
+    void read_line(inc::ialloc<char16_t> alloc){
         read_line<char16_t>(alloc);
     }
 

@@ -77,11 +77,11 @@ namespace mixc::io_tty{
             write(list..., '\n');
         }
 
-        void read_line(inc::can_alloc<char> alloc) const {
+        void read_line(inc::ialloc<char> alloc) const {
             inc::read_line(alloc);
         }
 
-        void read_line(inc::can_alloc<char16_t> alloc) const {
+        void read_line(inc::ialloc<char16_t> alloc) const {
             inc::read_line(alloc);
         }
     $

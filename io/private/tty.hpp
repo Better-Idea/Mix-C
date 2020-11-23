@@ -13,8 +13,8 @@
 namespace mixc::io_private_tty::origin{
     extern void             print_core(asciis str, uxx length);
     extern inc::tty_key     read_key(bool echo);
-    extern void             read_line(inc::can_alloc<char> alloc);
-    extern void             read_line(inc::can_alloc<char16_t> alloc);
+    extern void             read_line(inc::ialloc<char> alloc);
+    extern void             read_line(inc::ialloc<char16_t> alloc);
     extern inc::tty_color_t backcolor();
     extern inc::tty_color_t forecolor();
     extern bool             cursor_visiable();

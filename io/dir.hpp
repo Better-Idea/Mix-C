@@ -58,7 +58,7 @@ namespace mixc::io_dir::origin{
             return subitem(path, false);
         }
     private:
-        static void foreach_template(bool for_file, inc::c08 path, inc::can_callback< loop_t(asciis path) > invoke);
+        static void foreach_template(bool for_file, inc::c08 path, inc::icallback< loop_t(asciis path) > invoke);
     $
 }
 
