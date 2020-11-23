@@ -200,7 +200,7 @@ namespace mixc::macro_xinterface{
         __object const &,                                                       \
         __ret(__owner::*)(__args...)){                                          \
         struct __closure{                                                       \
-            static voidp __meta(__object * this_ptr, __args ... list){          \
+            static __ret __meta(__object * this_ptr, __args ... list){          \
                 return this_ptr->name(list...);                                 \
             }                                                                   \
         };                                                                      \
@@ -218,7 +218,8 @@ private:                                                                        
         functor<(__i - __cnt_begin) * sizeof(voidp) + __global_offset, __func>; \
 public:                                                                         \
     template<class __object>                                                    \
-    constexpr name(__object const & object) base {                              \
+    requires(__imi<base, __object>)                                             \
+    constexpr name(__object const & object) : base(object) {                    \
         /* 给 functor 赋值（指向指定的成员函数） */                             \
         __xlist__(__xitf_set_func_, __VA_ARGS__)                                \
     }                                                                           \
@@ -242,10 +243,13 @@ struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   
     template<uxx __offset>                                                      \
     using __base_hubx =                                                         \
         ::mixc::macro_xinterface::interface_hub_core<                           \
-            __offset,/* 这里不需要 this_ptr */                                  \
+            __offset /* 这里不需要 this_ptr */                                  \
             __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
         >;                                                                      \
                                                                                 \
+    template<class __target, class __object>                                    \
+    static constexpr bool __imi =                                               \
+        ::mixc::macro_xinterface::is_match_interface<__target, __object>;       \
 private:                                                                        \
     template<uxx __i>                                                           \
     using __ph = ::mixc::dumb_place_holder::place_holder<__i>;                  \
@@ -257,8 +261,8 @@ public:                                                                         
     template<uxx __global_offset>                                               \
     struct __core : __base_hubx<__global_offset>{                               \
         __xitf_core__(                                                          \
-            __core, :                                                           \
-            __base_hubx<__global_offset>(object),                               \
+            __core,                                                             \
+            __base_hubx<__global_offset>,                                       \
             __VA_ARGS__                                                         \
         )                                                                       \
     private:                                                                    \
@@ -274,8 +278,8 @@ private:                                                                        
     }                                                                           \
                                                                                 \
     __xitf_core__(                                                              \
-        __xlist__(__xitf_name_, __VA_ARGS__), :                                 \
-        __base_hub(object),                                                     \
+        __xlist__(__xitf_name_, __VA_ARGS__),                                   \
+        __base_hub,                                                             \
         __VA_ARGS__                                                             \
     )                                                                           \
 }
