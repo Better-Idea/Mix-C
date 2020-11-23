@@ -7,6 +7,7 @@
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xstruct.hpp"
+#include"memop/addressof.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_mirror::origin{
