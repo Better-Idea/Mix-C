@@ -172,7 +172,8 @@ namespace mixc::interface_ranger::origin{
             return backward(uxx(0) - offset);
         }
 
-        ranger<item_t> subseq(iinterval i){
+        template<can_interval interval_t>
+        ranger<item_t> subseq(interval_t const & i){
             ranger<item_t> r = the;
             i.normalize(the.length());
 
@@ -202,8 +203,8 @@ namespace mixc::interface_ranger::origin{
         }
 
     private:
-        template<auto mode, class iterator_t>
-        void foreach_template(iterator_t const & invoke, inc::iinterval itv = co{0, -1}){
+        template<auto mode, class iterator_t, can_interval interval_t = co>
+        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}){
             auto r      = subseq(itv);
             auto state  = loop_t::go_on;
 
@@ -219,7 +220,8 @@ namespace mixc::interface_ranger::origin{
     $
 
     #define xranger(...)                                                                        \
-    ::mixc::interface_ranger::origin::ranger<__VA_ARGS__> range(::mixc::iinterval i) const {    \
+    template<can_interval interval_t>                                                           \
+    ::mixc::interface_ranger::origin::ranger<__VA_ARGS__> range(interval_t const & i) const {            \
         using namespace ::mixc::interface_ranger;                                               \
         if (i.normalize(this->length());                                                        \
             i.left() <= i.right()){                                                             \

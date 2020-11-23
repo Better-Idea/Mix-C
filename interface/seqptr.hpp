@@ -14,7 +14,8 @@
 #pragma pop_macro("xuser")
 
 #define xseqptr(...)                                                                        \
-::mixc::interface_seqptr::origin::seqptr<__VA_ARGS__> subseq(::mixc::iinterval i) const {   \
+template<can_interval interval_t>                                                           \
+::mixc::interface_seqptr::origin::seqptr<__VA_ARGS__> subseq(interval_t const & i) const {  \
     using ptr_t  = __VA_ARGS__ *;                                                           \
     using ptrc_t = __VA_ARGS__ const *;                                                     \
     auto  len    = the.length();                                                            \
@@ -89,8 +90,8 @@ namespace mixc::interface_seqptr::origin{
         xseqptr(item_t); 
 
     private:
-        template<auto mode, class iterator_t>
-        void foreach_template(iterator_t const & invoke, inc::iinterval itv = co{0, -1}){
+        template<auto mode, class iterator_t, can_interval interval_t = co>
+        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}){
             auto r      = subseq(itv);
             auto state  = loop_t::go_on;
 

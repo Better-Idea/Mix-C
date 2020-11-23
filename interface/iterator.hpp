@@ -46,8 +46,8 @@ namespace mixc::interface_iterator{
 
     #define __xitr_foreach__(template_name,modify,...)                                                                 \
     template<                                                                                                          \
-        class iterator_t,                                                                                              \
-        auto  mode = ::mixc::interface_iterator::detect_mode<iterator_t, __VA_ARGS__>                                  \
+        class           iterator_t,                                                                                    \
+        auto            mode = ::mixc::interface_iterator::detect_mode<iterator_t, __VA_ARGS__>                        \
     >                                                                                                                  \
     requires(mode != ::mixc::interface_iterator::itr_miss_match)                                                       \
     void foreach(iterator_t const & invoke) modify {                                                                   \
@@ -56,11 +56,12 @@ namespace mixc::interface_iterator{
 
     #define __xitr_foreachx__(template_name,modify,...)                                                                \
     template<                                                                                                          \
-        class iterator_t,                                                                                              \
-        auto  mode = ::mixc::interface_iterator::detect_mode<iterator_t, __VA_ARGS__>                                  \
+        class           iterator_t,                                                                                    \
+        can_interval    interval_t,                                                                                    \
+        auto            mode = ::mixc::interface_iterator::detect_mode<iterator_t, __VA_ARGS__>                        \
     >                                                                                                                  \
     requires(mode != ::mixc::interface_iterator::itr_miss_match)                                                       \
-    void foreach(inc::iinterval itv, iterator_t const & invoke) modify {                                               \
+    void foreach(interval_t const & itv, iterator_t const & invoke) modify {                                           \
         template_name<mode, iterator_t>(invoke, itv);                                                                  \
     }
 
