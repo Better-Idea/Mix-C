@@ -5,6 +5,7 @@
 #define xuser mixc::interface_can_compare
 #include"define/base_type.hpp"
 #include"macro/xcmp.hpp"
+#include"macro/xnew.hpp"
 #include"macro/xinterface.hpp"
 #include"memop/cmp.hpp"
 #include"mixc.hpp"
@@ -13,18 +14,23 @@
 namespace mixc::interface_can_compare::origin{
     template<class item_t>
     xinterface(
-        xtmpl(can_compare, item_t),
+        xtmpl(icompare, item_t),
         xoper(ixx(item_t const & left, item_t const & right))
     );
 
+    template<class functor_t, class item_t>
+    concept can_compare = requires(functor_t const & call, icompare<item_t> * ptr){
+        xnew(ptr) icompare<item_t>(call);
+    };
+
     template<class type>
-    inline auto && default_compare = 
+    inline auto default_compare = 
         [] xcmp(type){
             return cmp<type>(left, right);
         };
 
     template<class type>
-    inline auto && default_compare_neg = 
+    inline auto default_compare_neg = 
         [] xcmp(type){
             return cmp<type>(right, left);
         };
