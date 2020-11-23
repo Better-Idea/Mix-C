@@ -7,21 +7,27 @@
 #include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"macro/xinterface.hpp"
+#include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_index_system{
+namespace mixc::math_index_system::origin{
     xinterface(
-        xname(iinterval),
+        xname(interval),
         xfunc(normalize, void(uxx length)),
-        xfunc(left, uxx()),
+        xfunc(left,  uxx()),
         xfunc(right, uxx())
     );
+
+    template<class object_t>
+    concept can_interval = requires(object_t object, interval * ptr){
+        xnew(ptr) interval(object);
+    };
 
     // bend close interval
     xstruct(
         xname(cc),
-        xprof(pleft, ixx),
-        xprof(pright, ixx)
+        xprof(pleft,   mutable ixx),
+        xprof(pright,  mutable ixx)
     )
         using final = cc;
 
@@ -29,7 +35,7 @@ namespace mixc::math_index_system{
         cc(left_t left, right_t right = right_t(-1)) : 
             pleft(ixx(left)), pright(ixx(right)){}
 
-        void normalize(uxx length){
+        void normalize(uxx length) const {
             xindex_rollback(length, pleft,  +1);
             xindex_rollback(length, pright, +1);
         }
@@ -47,7 +53,7 @@ namespace mixc::math_index_system{
     struct co : cc{
         using cc::cc;
 
-        void normalize(uxx length){
+        void normalize(uxx length) const {
             cc::normalize(length);
             pright -= pleft <= pright ? 1 : -1;
         }
@@ -57,7 +63,7 @@ namespace mixc::math_index_system{
     struct oc : cc{
         using cc::cc;
 
-        void normalize(uxx length){
+        void normalize(uxx length) const {
             cc::normalize(length);
             pleft += pleft <= pright ? 1 : -1;
         }
@@ -67,7 +73,7 @@ namespace mixc::math_index_system{
     struct oo : cc{
         using cc::cc;
 
-        void normalize(uxx length){
+        void normalize(uxx length) const {
             cc::normalize(length);
             auto asc = pleft <= pright;
 
@@ -75,20 +81,12 @@ namespace mixc::math_index_system{
             pright -= asc ? 1 : -1;
         }
     };
-
-}
-
-namespace mixc::math_index_system::origin{
-    using mixc::math_index_system::cc;
-    using mixc::math_index_system::oc;
-    using mixc::math_index_system::co;
-    using mixc::math_index_system::cc;
-    using mixc::math_index_system::iinterval;
 }
 
 namespace mixc{
     using namespace mixc::math_index_system::origin;
 }
+using namespace mixc::math_index_system::origin;
 
 #endif
 
