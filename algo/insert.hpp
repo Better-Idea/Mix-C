@@ -77,7 +77,11 @@ namespace mixc::algo_insert{
         );
     }
 
-    template<inc::can_unified_seqlize seq_tar_t, inc::can_unified_seqlize seq_src_t, inc::can_unified_seqlize seq_val_t>
+    template<
+        inc::can_unified_seqlize    seq_tar_t, 
+        inc::can_unified_seqlize    seq_src_t, 
+        inc::can_unified_seqlize    seq_val_t
+    >
     inline void insert(
         seq_tar_t                   const & target,
         seq_src_t                   const & source,
@@ -91,7 +95,11 @@ namespace mixc::algo_insert{
         );
     }
 
-    template<inc::can_unified_seqlize seq_tar_t, inc::can_unified_seqlize seq_src_t, class item_t>
+    template<
+        inc::can_unified_seqlize    seq_tar_t, 
+        inc::can_unified_seqlize    seq_src_t, 
+        class                       item_t
+    >
     inline void insert(
         seq_tar_t                   const & target,
         seq_src_t                   const & source,
