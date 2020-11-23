@@ -48,7 +48,7 @@ int main(){
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_distribution_probability{
+namespace mixc::math_distribution_probability::origin{
     template<class type = u32>
     struct probability{
     private:
@@ -100,7 +100,7 @@ namespace mixc::math_distribution_probability{
             return v;
         }
 
-        template<class item> item & random(inc::ranger<item> items) const {
+        template<class item_t> item_t & random(inc::ranger<item_t> items) const {
             return items[random()];
         }
     };
@@ -108,4 +108,4 @@ namespace mixc::math_distribution_probability{
 
 #endif
 
-xexport(some_pack::probability)
+xexport_space(mixc::math_distribution_probability::origin)
