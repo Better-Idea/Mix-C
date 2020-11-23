@@ -5,14 +5,13 @@
 #define xuser mixc::meta_item_origin_of::inc
 #include"configure.hpp"
 #include"macro/xexport.hpp"
-#include"meta/is_indexable.hpp"
 #include"meta/item_of.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta/remove_const.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_origin_of{
-    template<inc::is_indexable seq_t>
+    template<class seq_t>
     using item_origin_of = 
         inc::remove_const<
             inc::remove_ref<

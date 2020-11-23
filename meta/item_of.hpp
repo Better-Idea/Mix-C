@@ -9,8 +9,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_of{
+    template<class> struct meta;
+
     template<inc::is_indexable seq_t>
-    struct meta{
+    struct meta<seq_t>{
         static decltype(auto) invoke(){
             seq_t * list = (seq_t *)magic_number;
             return list[0][0];
