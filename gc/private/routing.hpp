@@ -78,7 +78,7 @@ namespace mixc::gc_private_routing{
         template<class active_list, class result_kvlist, class visited_list>
         static auto invoke(active_list, result_kvlist, visited_list){
             using pair = tdeque<active_list>;
-            using new_root = typename pair::item;
+            using new_root = typename pair::item_t;
             using new_root_without_membership = typename origin<new_root>::type;
             using current_active_list = typename pair::new_list;
             

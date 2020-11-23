@@ -21,7 +21,7 @@ namespace mixc::gc_ref{
 }
 
 namespace mixc::macro_xsv{
-    template<class item> struct static_string_holder;
+    template<class item_t> struct static_string_holder;
 }
 
 namespace mixc::memory_alloctor::origin{
