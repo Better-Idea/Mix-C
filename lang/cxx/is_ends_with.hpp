@@ -26,7 +26,11 @@ namespace mixc::lang_cxx_is_ends_with{
         core(base_t const & self) : 
             base_t(self){}
 
-        bool is_ends_with(the_t value, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        bool is_ends_with(the_t value, cmp_t const & compare) const {
             if (the.length() < value.length() or value.length() == 0){
                 return false;
             }
@@ -41,9 +45,11 @@ namespace mixc::lang_cxx_is_ends_with{
         using base::base;
         using the_t = ::mixc::lang_cxx_is_ends_with::core<item>;
 
-        bool is_ends_with(
-            final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        bool is_ends_with(final value, cmp_t const & compare = inc::default_compare<item>) const {
             return the.is_ends_with(value, compare);
         }
     };

@@ -26,7 +26,11 @@ namespace mixc::lang_cxx_clone{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto clone(inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto clone(alloc_t const & alloc) const {
             the_t  r{ alloc(the.length()), the.length() };
             inc::copy_with_operator(r, the, the.length());
             return r;
@@ -38,7 +42,11 @@ namespace mixc::lang_cxx_clone{
         using base::base;
         using the_t = core<item>;
 
-        final clone(inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final clone(alloc_t const & alloc) const {
             return the.clone(alloc);
         }
     };

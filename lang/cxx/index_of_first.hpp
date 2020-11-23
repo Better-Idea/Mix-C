@@ -32,7 +32,11 @@ namespace mixc::lang_cxx_index_of_first{
         core(base_t const & self) : 
             base_t(self){}
 
-        uxx index_of_first(item const * value, uxx length, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_first(item const * value, uxx length, cmp_t const & compare) const {
             for(uxx i = 0; i < the.length(); i++){
                 for(uxx ii = 0; ii < length; ii++){
                     if (compare(the[i], value[ii]) == 0){
@@ -43,7 +47,11 @@ namespace mixc::lang_cxx_index_of_first{
             return not_exist;
         }
 
-        uxx index_of_first(item const & value, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_first(item const & value, cmp_t const & compare) const {
             return index_of_first(xref value, 1, compare);
         }
 
@@ -80,11 +88,12 @@ namespace mixc::lang_cxx_index_of_first{
             return not_exist;
         }
 
-        void index_of_first(
-            the_t                              value, 
-            inc::can_callback<void(uxx index)> match,
-            inc::can_compare<item>             compare) const {
-
+        template<class call_t, class cmp_t>
+        requires(
+            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_compare<cmp_t, item_t>
+        )
+        void index_of_first(the_t value, call_t const & match, cmp_t const & compare) const {
             for(auto cur = the;;){
                 if (uxx i = cur.index_of_first(value, compare); i == not_exist){
                     return;
@@ -102,30 +111,45 @@ namespace mixc::lang_cxx_index_of_first{
         using base::base;
         using the_t = core<item>;
 
-        uxx index_of_first(
-            item                   value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_first(item value, cmp_t const & compare = inc::default_compare<item>) const {
             return the.index_of_first(& value, 1, compare);
         }
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         uxx index_of_first(
             inc::initializer_list<item> values, 
-            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            cmp_t const &               compare = inc::default_compare<item>) const {
             return the.index_of_first(values.begin(), values.size(), compare);
         }
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         uxx index_of_first(
             final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+            cmp_t const & compare = inc::default_compare<item>) const {
             return the.index_of_first(value, compare);
         }
 
-        final & index_of_first(
-            final                              value, 
-            inc::can_callback<void(uxx index)> match,
-            inc::can_compare<item>             compare = inc::default_compare<item>) const {
+        template<class call_t, class cmp_t>
+        requires(
+            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_compare<cmp_t, item_t>
+        )
+        void index_of_first(
+            the_t           value, 
+            call_t  const & match, 
+            cmp_t   const & compare = inc::default_compare<item>) const {
+
             the.index_of_first(value, match, compare);
-            return thex;
         }
     };
 }

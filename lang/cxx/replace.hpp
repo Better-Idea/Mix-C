@@ -32,11 +32,16 @@ namespace mixc::lang_cxx_replace{
 
         static constexpr uxx buf_size = 64;
 
+        template<class cmp_t, class alloc_t>
+        requires(
+            inc::can_compare<cmp_t, item> and
+            inc::can_alloc<alloc_t, item>
+        )
         auto replace(
             the_t                   old_value, 
             the_t                   new_value, 
-            inc::can_compare<item>  compare, 
-            inc::can_alloc<item>    alloc) const {
+            cmp_t   const &         compare, 
+            alloc_t const &         alloc) const {
 
             struct {
                 uxx              i = 0;
@@ -119,15 +124,24 @@ namespace mixc::lang_cxx_replace{
         using base::base;
         using the_t = core<item>;
 
-        final replace(final old_value, final new_value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final replace(final old_value, final new_value, alloc_t const & alloc) const {
             return the.replace(old_value, new_value, inc::default_compare<item>, alloc);
         }
 
+        template<class cmp_t, class alloc_t>
+        requires(
+            inc::can_compare<cmp_t, item> and
+            inc::can_alloc<alloc_t, item>
+        )
         final replace(
-            final                  old_value, 
-            final                  new_value, 
-            inc::can_compare<item> compare, 
-            inc::can_alloc<item>   alloc) const {
+            final                   old_value, 
+            final                   new_value, 
+            cmp_t   const &         compare, 
+            alloc_t const &         alloc) const {
             return the.replace(old_value, new_value, compare, alloc);
         }
     };

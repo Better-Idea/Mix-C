@@ -35,7 +35,11 @@ namespace mixc::lang_cxx_slice{
             return the.backward(left).length(right - left + 1);
         }
 
-        auto slice(iinterval range, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto slice(iinterval range, alloc_t const & alloc) const {
             range.normalize(the.length());
             ixx left  = ixx(range.left());
             ixx right = ixx(range.right());
@@ -75,7 +79,11 @@ namespace mixc::lang_cxx_slice{
             return the.slice(range);
         }
 
-        final slice(iinterval range, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final slice(iinterval range, alloc_t const & alloc) const {
             return the.slice(range, alloc);
         }
     };

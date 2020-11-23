@@ -27,11 +27,19 @@ namespace mixc::lang_cxx_index_of_last{
         core(base_t const & self) : 
             base_t(self){}
 
-        uxx index_of_last(item pattern, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_last(item pattern, cmp_t const & compare) const {
             return index_of_last(& pattern, 1, compare);
         }
 
-        uxx index_of_last(item const * pattern, uxx length, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_last(item const * pattern, uxx length, cmp_t const & compare) const {
             for(uxx i = the.length(); i--; ){
                 for(uxx ii = 0; ii < length; ii++){
                     if (compare(the[i], pattern[ii]) == 0){
@@ -41,9 +49,11 @@ namespace mixc::lang_cxx_index_of_last{
             }
             return not_exist;
         }
-        
 
-        template<class compare_invoke>
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         uxx index_of_last(
             the_t                  pattern,
             compare_invoke const & compare) const {
@@ -86,11 +96,12 @@ namespace mixc::lang_cxx_index_of_last{
             return not_exist;
         }
 
-        void index_of_last(
-            the_t                              pattern, 
-            inc::can_callback<void(uxx index)> match,
-            inc::can_compare<item>             compare) const {
-
+        template<class call_t, class cmp_t>
+        requires(
+            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_compare<cmp_t, item_t>
+        )
+        void index_of_last(the_t pattern, call_t const & match, cmp_t const & compare) const {
             for(auto cur = the;;){
                 if (uxx i = cur.index_of_last(pattern, compare); i == not_exist){
                     return;
@@ -108,30 +119,44 @@ namespace mixc::lang_cxx_index_of_last{
         using base::base;
         using the_t = core<item>;
 
-        uxx index_of_last(
-            item                   pattern, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_last(item pattern, cmp_t const & compare = inc::default_compare<item>) const {
             return the.index_of_last(pattern, compare);
         }
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         uxx index_of_last(
             inc::initializer_list<item> patterns, 
-            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            cmp_t const &               compare = inc::default_compare<item>) const {
+
             return the.index_of_last(patterns.begin(), patterns.size(), compare);
         }
 
-        uxx index_of_last(
-            final                  pattern, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_last(final pattern, cmp_t const & compare = inc::default_compare<item>) const {
             return the.index_of_last(pattern, compare);
         }
 
-        final & index_of_last(
-            final                              pattern, 
-            inc::can_callback<void(uxx index)> match,
-            inc::can_compare<item>             compare = inc::default_compare<item>) const {
+        template<class call_t, class cmp_t>
+        requires(
+            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_compare<cmp_t, item_t>
+        )
+        void index_of_last(
+            final           pattern, 
+            call_t  const & match,
+            cmp_t   const & compare = inc::default_compare<item>) const {
+
             the.index_of_last(pattern, match, compare);
-            return thex;
         }
     };
 }

@@ -26,7 +26,11 @@ namespace mixc::lang_cxx_compare{
         core(base_t const & self) : 
             base_t(self){}
 
-        ixx compare(the_t value, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        ixx compare(the_t value, cmp_t const & compare) const {
             uxx len = inc::min(the.length(), value.length());
 
             for(uxx i = 0; i < len; i++){
@@ -43,9 +47,13 @@ namespace mixc::lang_cxx_compare{
         using base::base;
         using the_t = core<item>;
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         ixx compare(
             final                  value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+            cmp_t const & compare = inc::default_compare<item>) const {
             return the.compare(value, compare);
         }
     };

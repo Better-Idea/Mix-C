@@ -27,7 +27,11 @@ namespace mixc::lang_cxx_insert{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto insert(ixx index, the_t value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto insert(ixx index, the_t value, alloc_t const & alloc) const {
             xindex_rollback(the.length(), index, + 1);
             uxx                     target_length = the.length() + value.length();
             the_t                   r { alloc(target_length), target_length };
@@ -43,7 +47,11 @@ namespace mixc::lang_cxx_insert{
         using base::base;
         using the_t = core<item>;
 
-        final insert(ixx index, final value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final insert(ixx index, final value, alloc_t const & alloc) const {
             return the.insert(index, value, alloc);
         }
     };

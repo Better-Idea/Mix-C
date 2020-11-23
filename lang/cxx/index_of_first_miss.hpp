@@ -28,7 +28,11 @@ namespace mixc::lang_cxx_index_of_first_miss{
         core(base_t const & self) : 
             base_t(self){}
 
-        uxx index_of_first_miss(item const * values, uxx length, inc::can_compare<item> compare) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        uxx index_of_first_miss(item const * values, uxx length, cmp_t const & compare) const {
             the_t token{ values, length };
 
             for (uxx i = 0; i < the.length(); i++){
@@ -45,15 +49,23 @@ namespace mixc::lang_cxx_index_of_first_miss{
         using base::base;
         using the_t = core<item>;
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         uxx index_of_first_miss(
             item                   value, 
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+            cmp_t const &           compare = inc::default_compare<item>) const {
             return the.index_of_first_miss(& value, 1, compare);
         }
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         uxx index_of_first_miss(
             inc::initializer_list<item> values, 
-            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            cmp_t const &               compare = inc::default_compare<item>) const {
             return the.index_of_first_miss(values.begin(), values.size(), compare);
         }
     };

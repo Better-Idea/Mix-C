@@ -26,7 +26,11 @@ namespace mixc::lang_cxx_reverse{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto reverse(inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto reverse(alloc_t const & alloc) const {
             return the.slice(oc{-1, 0}, alloc);
         }
     };
@@ -36,7 +40,11 @@ namespace mixc::lang_cxx_reverse{
         using base::base;
         using the_t = core<item>;
 
-        final reverse(inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final reverse(alloc_t const & alloc) const {
             return the.reverse(alloc);
         }
     };

@@ -30,7 +30,11 @@ namespace mixc::lang_cxx_trim_bends{
         core(base_t const & self) : 
             base_t(self){}
 
-        the_t trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        the_t trim_bends(inc::initializer_list<item> values, alloc_t const & alloc) const {
             auto token  = the_t(values.begin(), values.size());
             auto r      = the;
 
@@ -52,11 +56,19 @@ namespace mixc::lang_cxx_trim_bends{
         using base::base;
         using the_t = core<item>;
 
-        final trim_bends(item value, inc::can_alloc<item> alloc = nullptr) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        final trim_bends(item value, alloc_t const & alloc = nullptr) const {
             return the.trim_bends({ value }, alloc);
         }
 
-        final trim_bends(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        final trim_bends(inc::initializer_list<item> values, alloc_t const & alloc = nullptr) const {
             return the.trim_bends(values, alloc);
         }
     };

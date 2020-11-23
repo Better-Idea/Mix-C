@@ -11,7 +11,7 @@
 
 namespace mixc::lang_cxx_ignore_case{
     template<class item>
-    inline auto const & ignore_case = 
+    inline auto ignore_case = 
         []xcmp(item) {
             return 
                 inc::wxx<item>(left).to_lower() - 

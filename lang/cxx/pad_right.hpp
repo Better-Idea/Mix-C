@@ -23,7 +23,11 @@ namespace mixc::lang_cxx_pad_right{
         using inc::cxx<item>::cxx;
         using the_t = core<item>;
 
-        auto pad_right(uxx count, item value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto pad_right(uxx count, item value, alloc_t const & alloc) const {
             uxx                     length = the.length() + count;
             the_t                   r{ alloc(length), length };
             inc::copy_with_operator(r, the, the.length());
@@ -37,7 +41,11 @@ namespace mixc::lang_cxx_pad_right{
         using base::base;
         using the_t = core<item>;
 
-        final pad_right(uxx count, item value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final pad_right(uxx count, item value, alloc_t const & alloc) const {
             return the.pad_right(count, value, alloc);
         }
     };

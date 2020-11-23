@@ -27,7 +27,11 @@ namespace mixc::lang_cxx_align_right{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto align_right(uxx width, item pad, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto align_right(uxx width, item pad, alloc_t const & alloc) const {
             if (ixx r = ixx(the.length() - width); r >= 0){
                 return the.shorten(uxx(r)).clone(alloc);
             }
@@ -42,11 +46,19 @@ namespace mixc::lang_cxx_align_right{
         using base::base;
         using the_t = core<item>;
 
-        final align_right(uxx width, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final align_right(uxx width, alloc_t const & alloc) const {
             return the.align_right(width, ' ', alloc);
         }
 
-        final align_right(uxx width, item pad, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final align_right(uxx width, item pad, alloc_t const & alloc) const {
             return the.align_right(width, pad, alloc);
         }
     };

@@ -25,6 +25,7 @@ namespace mixc::lang_cxx_compare_fastly{
         core(base_t const & self) : 
             base_t(self){}
 
+    
         ixx compare_fastly(the_t value, inc::can_compare<item> compare) const {
             if (ixx r = ixx(the.length() - value.length()); r != 0){
                 return r;

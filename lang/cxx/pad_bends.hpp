@@ -27,7 +27,11 @@ namespace mixc::lang_cxx_pad_bends{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto pad_bends(uxx left_count, uxx right_count, item value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto pad_bends(uxx left_count, uxx right_count, item value, alloc_t const & alloc) const {
             uxx                     total_length = left_count + right_count + the.length();
             the_t                   r(alloc(total_length), total_length);
             inc::fill_with_operator(r, value, left_count);
@@ -42,7 +46,11 @@ namespace mixc::lang_cxx_pad_bends{
         using base::base;
         using the_t = core<item>;
 
-        final pad_bends(uxx left_count, uxx right_count, item value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final pad_bends(uxx left_count, uxx right_count, item value, alloc_t const & alloc) const {
             return the.pad_bends(left_count, right_count, value, alloc);
         }
     };

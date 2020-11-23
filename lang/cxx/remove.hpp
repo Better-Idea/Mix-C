@@ -28,7 +28,11 @@ namespace mixc::lang_cxx_remove{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto remove(iinterval range, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto remove(iinterval range, alloc_t const & alloc) const {
             range.normalize(the.length());
 
             auto  left  = range.left();
@@ -46,7 +50,11 @@ namespace mixc::lang_cxx_remove{
         using base::base;
         using the_t = core<item>;
 
-        final remove(iinterval range, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final remove(iinterval range, alloc_t const & alloc) const {
             return the.remove(range, alloc);
         }
     };

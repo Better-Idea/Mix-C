@@ -27,7 +27,11 @@ namespace mixc::lang_cxx_pad_left{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        auto pad_left(uxx count, item value, alloc_t const & alloc) const {
             uxx                     length = the.length() + count;
             the_t                   r(alloc(length), length);
             inc::fill_with_operator(r, value, count);
@@ -41,7 +45,11 @@ namespace mixc::lang_cxx_pad_left{
         using base::base;
         using the_t = core<item>;
 
-        final pad_left(uxx count, item value, inc::can_alloc<item> alloc) const {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item>
+        )
+        final pad_left(uxx count, item value, alloc_t const & alloc) const {
             return the.pad_left(count, value, alloc);
         }
     };

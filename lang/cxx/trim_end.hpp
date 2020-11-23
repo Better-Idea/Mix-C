@@ -28,7 +28,11 @@ namespace mixc::lang_cxx_trim_end{
         core(base_t const & self) : 
             base_t(self){}
 
-        auto trim_end(inc::initializer_list<item> values, inc::can_alloc<item> alloc) {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        auto trim_end(inc::initializer_list<item> values, alloc_t const & alloc) {
             auto token  = the_t(values.begin(), values.size());
             auto r      = the;
 
@@ -47,11 +51,19 @@ namespace mixc::lang_cxx_trim_end{
         using base::base;
         using the_t = core<item>;
 
-        final trim_end(item value, inc::can_alloc<item> alloc = nullptr) {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        final trim_end(item value, alloc_t const & alloc = nullptr) {
             return the.trim_end({ value }, alloc);
         }
 
-        final trim_end(inc::initializer_list<item> values, inc::can_alloc<item> alloc = nullptr) {
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        final trim_end(inc::initializer_list<item> values, alloc_t const & alloc = nullptr) {
             return the.trim_end(values, alloc);
         }
     };

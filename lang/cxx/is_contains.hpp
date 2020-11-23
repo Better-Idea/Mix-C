@@ -23,21 +23,31 @@ namespace mixc::lang_cxx_is_contains{
         using base::base;
         using the_t = inc::cxx<item>;
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         bool is_contains(
-            item                   value,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+            item          value,
+            cmp_t const & compare = inc::default_compare<item>) const {
             return the.index_of_first(value, compare) != not_exist;
         }
 
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
         bool is_contains(
             inc::initializer_list<item> values,
-            inc::can_compare<item>      compare = inc::default_compare<item>) const {
+            cmp_t const &               compare = inc::default_compare<item>) const {
             return the.index_of_first(values.begin(), values.size(), compare) != not_exist;
         }
 
-        bool is_contains(
-            final                  value,
-            inc::can_compare<item> compare = inc::default_compare<item>) const {
+        template<class cmp_t>
+        requires(
+            inc::can_compare<cmp_t, item_t>
+        )
+        bool is_contains(final value, cmp_t const & compare = inc::default_compare<item>) const {
             return the.index_of_first(value, compare) != not_exist;
         }
     };
