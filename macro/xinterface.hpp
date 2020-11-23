@@ -72,27 +72,27 @@ namespace mixc::macro_xinterface{
     template<uxx offset_this, class ret_t, class ... args>
     struct functor<offset_this, ret_t(args...)>{
     private:
-        voidp __this_ptr() const {
-            return *(voidp *)(u08p(this) - offset_this); // 偏移字节数
-        }
+        voidp __this_ptr() const { 
+            return *(voidp *)(u08p(this) - offset_this); /* 偏移字节数 */ 
+        } 
 
         template<class object_t>
-        static ret_t meta_form(object_t * this_ptr, args ... arg_list) {
-            return this_ptr->operator()(arg_list...);
+        static ret_t meta_form(object_t * this_ptr, args ... arg_list) { 
+            return this_ptr->operator()(arg_list...); 
         }
 
-        voidp __func    = nullptr;
+        mutable voidp __func    = nullptr;
     public:
         constexpr functor(){}
 
         template<class object_t>
-        constexpr functor(object_t const & object):
-            __func(voidp(& meta_form<object_t>)){
+        constexpr functor(object_t const & object): 
+            __func(voidp(& meta_form<object_t>)){ 
         }
 
-        ret_t operator()(args const & ... params) const {
-            return ((ret_t(*)(voidp, args...))__func)(__this_ptr(), params...);
-        }
+        ret_t operator()(args const & ... params) const { 
+            return ((ret_t(*)(voidp, args...))__func)(__this_ptr(), params...); 
+        } 
     };
 
     template<class func_t> 
@@ -105,33 +105,39 @@ namespace mixc::macro_xinterface{
         template<uxx>
         struct __core{
             template<class object_t>
-            __core(object_t const & object):
+            constexpr __core(object_t const & object):
                 self(voidp(& object)){
             }
+
+            constexpr __core(){}
         private:
-            voidp self;
+            voidp self = nullptr;
         };
     };
 
     template<uxx offset, class ... args> 
     struct interface_hub_core{
+        constexpr interface_hub_core(){}
+
         template<class object_t>
-        interface_hub_core(object_t const & object) {}
+        constexpr interface_hub_core(object_t const & object) {}
     };
 
     template<uxx offset, class a0, class ... args>
     struct interface_hub_core<offset, a0, args...> : 
-        a0::__core<offset>, 
+        a0::template __core<offset>, 
         interface_hub_core<
-            offset + sizeof(typename a0::__core<offset>), 
+            offset + sizeof(typename a0::template __core<offset>), 
             args...
         >{
 
+        constexpr interface_hub_core(){}
+
         template<class object_t>
-        interface_hub_core(object_t const & object) : 
-            a0::__core<offset>(object), 
+        constexpr interface_hub_core(object_t const & object) : 
+            a0::template __core<offset>(object), 
             interface_hub_core<
-                offset + sizeof(typename a0::__core<offset>), 
+                offset + sizeof(typename a0::template __core<offset>), 
                 args...
             >(object){
         }
@@ -162,20 +168,35 @@ namespace mixc::macro_xinterface{
 #define __xitf_pubb_func__(...)
 #define __xitf_pubb_oper__(...)                 , mixc::macro_xinterface::functor_closure<__VA_ARGS__>
 
+#define __xitf_has_func__
+#define __xitf_has_func_name__(...)
+#define __xitf_has_func_tmpl__(...)
+#define __xitf_has_func_spec__(...)
+#define __xitf_has_func_pubb__(...)
+#define __xitf_has_func_func__(name,...)        and __sg<__VA_ARGS__>::has(& __object::name)
+#define __xitf_has_func_oper__(...)             and __sg<__VA_ARGS__>::has(& __object::operator())
+
 #define __xitf_set_func__
 #define __xitf_set_func_name__(...)                                             \
     enum : uxx { __meta_form_cnt_begin = __COUNTER__ + 1 };
 #define __xitf_set_func_tmpl__(...)
 #define __xitf_set_func_spec__(...)
 #define __xitf_set_func_pubb__(...)
-#define __xitf_set_func_func__(name,...)        {                                                           \
-    constexpr auto i = __COUNTER__ - __meta_form_cnt_begin;                                                 \
-    __func_list(i) = __meta_form(__ph<i>{}, object, __sg<__VA_ARGS__>::fetch(& __object::name));            \
+#define __xitf_set_func_func__(name,...)        {                               \
+    constexpr auto i = __COUNTER__ - __meta_form_cnt_begin;                     \
+    using __f  = __VA_ARGS__;                                                   \
+    using __fp = __f *;                                                         \
+    __func_list(i) = __meta_form(__ph<i>{}, object, __fp(nullptr));             \
 }
 #define __xitf_set_func_oper__(...)
 
 #define __xitf_decl_func__
-#define __xitf_decl_func_name__(...)
+#define __xitf_decl_func_name__(...)                                            \
+private:                                                                        \
+    template<uxx __i, class __func>                                             \
+    using __fc = ::mixc::macro_xinterface::                                     \
+    functor<(__i - __COUNTER__ - 1) * sizeof(voidp) + __global_offset, __func>; \
+public:
 #define __xitf_decl_func_tmpl__(...)
 #define __xitf_decl_func_spec__(...)
 #define __xitf_decl_func_pubb__(...)
@@ -192,13 +213,12 @@ namespace mixc::macro_xinterface{
     template<                                                                   \
         class __object,                                                         \
         class __ret,                                                            \
-        class __owner,                                                          \
         class ... __args                                                        \
     >                                                                           \
     static voidp __meta_form(                                                   \
         __ph<__COUNTER__ - __meta_form_cnt_begin>,                              \
         __object const &,                                                       \
-        __ret(__owner::*)(__args...)){                                          \
+        __ret(*)(__args...)){                                                   \
         struct __closure{                                                       \
             static __ret __meta(__object * this_ptr, __args ... list){          \
                 return this_ptr->name(list...);                                 \
@@ -206,24 +226,19 @@ namespace mixc::macro_xinterface{
         };                                                                      \
         return voidp(& __closure::__meta);                                      \
     }
-
 #define __xitf_cast_func_oper__(...)
 
 #define __xitf_core__(name,base,...)                                            \
-private:                                                                        \
-    enum : uxx { __cnt_begin = __COUNTER__ + 1 };                               \
-                                                                                \
-    template<uxx __i, class __func>                                             \
-    using __fc = ::mixc::macro_xinterface::                                     \
-        functor<(__i - __cnt_begin) * sizeof(voidp) + __global_offset, __func>; \
 public:                                                                         \
+    constexpr name(){}                                                          \
+                                                                                \
     template<class __object>                                                    \
-    requires(__imi<base, __object>)                                             \
+    requires(__imi<base, __object>  __xlist__(__xitf_has_func_, __VA_ARGS__))   \
     constexpr name(__object const & object) : base(object) {                    \
+                                                                                \
         /* 给 functor 赋值（指向指定的成员函数） */                             \
         __xlist__(__xitf_set_func_, __VA_ARGS__)                                \
     }                                                                           \
-                                                                                \
     /* 定义 functor */                                                          \
     __xlist__(__xitf_decl_func_, __VA_ARGS__)
 
@@ -247,6 +262,9 @@ struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   
             __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
         >;                                                                      \
                                                                                 \
+    template<class __func>                                                      \
+    using __sg = ::mixc::memop_signature::signature<__func>;                    \
+                                                                                \
     template<class __target, class __object>                                    \
     static constexpr bool __imi =                                               \
         ::mixc::macro_xinterface::is_match_interface<__target, __object>;       \
@@ -254,8 +272,6 @@ private:                                                                        
     template<uxx __i>                                                           \
     using __ph = ::mixc::dumb_place_holder::place_holder<__i>;                  \
                                                                                 \
-    template<class __func>                                                      \
-    using __sg = ::mixc::memop_signature::signature<__func>;                    \
     __xlist__(__xitf_cast_func_, __VA_ARGS__)                                   \
 public:                                                                         \
     template<uxx __global_offset>                                               \
