@@ -20,12 +20,10 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::algo_distinct{
-    using namespace inc;
-
-    template<inc::can_unified_seqlize seq_t> 
-    using distinct_alloc_invoke = inc::can_callback<
-        unified_seq<seq_t>(uxx/*length*/)
+namespace mixc::algo_distinct::origin{
+    template<class functor_t, class seq_t> 
+    concept can_distinct_alloc = inc::can_callback<
+        functor_t, inc::unified_seq<seq_t>(uxx/*length*/)
     >;
 
     /* 函数：去除重复元素
@@ -35,10 +33,15 @@ namespace mixc::algo_distinct{
      * 返回：
      * - 从 alloc 中分配的序列，用于保存着去重后的元素序列
      */ 
-    template<inc::can_unified_seqlize seq_t>
-    inline auto distinct(
-        seq_t const &                   seq, 
-        distinct_alloc_invoke<seq_t>    alloc){
+    template<
+        inc::can_unified_seqlize        seq_t,
+        class                           alloc_t
+    >
+    requires(
+        can_distinct_alloc<seq_t, alloc_t>
+    )
+    inline auto distinct(seq_t const & seq, alloc_t const & alloc){
+        using namespace inc;
 
         if (seq.length() == 0){
             return alloc(length{0});
@@ -46,9 +49,9 @@ namespace mixc::algo_distinct{
 
         using item_t = inc::item_origin_of<seq_t>;
         hashmap_set_result_t    r;
-        hashmap<item_t, uxx>    map(
+        hashmap<item_t, uxx>    map{
             length{seq.length()}
-        );
+        };
 
         for(uxx i = 0, ii = 0; i < seq.length(); i++){
             // 注意：
@@ -76,11 +79,7 @@ namespace mixc::algo_distinct{
         });
         return buffer;
     }
-}
 
-namespace mixc::algo_distinct::origin{
-    using mixc::algo_distinct::distinct_alloc_invoke;
-    using mixc::algo_distinct::distinct;
     using inc::unified_seq;
     using inc::can_unified_seqlize;
 }
