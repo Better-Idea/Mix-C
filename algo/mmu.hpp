@@ -154,8 +154,8 @@ namespace mixc::algo_mmu {
             item_t ***              page_table_ptr, 
             uxx    *                length, 
             item_t const &          value, 
-            inc::can_alloc<void>    alloc, 
-            inc::can_free<void>     free){
+            inc::ialloc<void>       alloc, 
+            inc::ifree<void>        free){
 
             auto & len                  = (length[0]);
             auto & tab                  = (page_table_ptr[0]);
@@ -220,8 +220,8 @@ namespace mixc::algo_mmu {
             item_t ***              page_table_ptr, 
             uxx    *                length, 
             item_t *                value, 
-            inc::can_alloc<void>    alloc, 
-            inc::can_free<void>     free){
+            inc::ialloc<void>       alloc, 
+            inc::ifree<void>        free){
 
             auto & len                  = (length[0]);
             auto & tab                  = (page_table_ptr[0]);
@@ -289,7 +289,7 @@ namespace mixc::algo_mmu {
          * - free 为回收回调
          */
         template<class item_t>
-        inline static void clear(item_t *** page_table_ptr, uxx * length, inc::can_free<void> free){
+        inline static void clear(item_t *** page_table_ptr, uxx * length, inc::ifree<void> free){
             auto   len                  = inc::atom_swap<uxx>(xref length[0], 0);
             auto & tab                  = (page_table_ptr[0]);
 
