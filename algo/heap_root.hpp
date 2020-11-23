@@ -27,14 +27,14 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_heap_root{
-    #define xheader                                                     \
-    template<                                                           \
-        inc::can_unified_seqlize    seq_t,                              \
-        class                       cmp_t,                              \
-        class                       item_t = inc::item_origin_of<seq_t> \
-    >                                                                   \
-    requires(                                                           \
-        inc::can_compare<cmp_t, item_t>                                 \
+    #define xheader                                                                 \
+    template<                                                                       \
+        inc::can_unified_seqlize seq_t,                                             \
+        class                    item_t  = inc::item_origin_of<seq_t>,              \
+        class                    cmp_t   = decltype(inc::default_compare<item_t>)   \
+    >                                                                               \
+    requires(                                                                       \
+        inc::can_compare<cmp_t, item_t>                                             \
     )
 
     /* 函数：大小根堆压栈操作
@@ -43,11 +43,7 @@ namespace mixc::algo_heap_root{
      * - value 为要压栈的元素
      * - compare 为元素比较回调
      */
-    xheader inline void push_core(
-        seq_t  const &  seq,
-        item_t const &  value, 
-        cmp_t  const &  compare = inc::default_compare<item_t>){
-        
+    xheader inline void push_core(seq_t seq, item_t const & value, cmp_t const & compare){
         // 注意：
         // [value] 可能存在 [seq] 中, 
         // 所以需要一个 [value] 的副本
@@ -78,11 +74,7 @@ namespace mixc::algo_heap_root{
      * - insert_value 为要插入的元素
      * - compare 为元素比较回调
      */
-    xheader inline auto pop_core(
-        seq_t  const &  seq, 
-        item_t const &  insert_value, 
-        cmp_t  const &  compare = inc::default_compare<item_t>){
-
+    xheader inline auto pop_core(seq_t seq, item_t const & insert_value, cmp_t const &  compare){
         // 避免返回值的复制构造
         auto && wanted     = inc::transmitter{ seq[0] };
         uxx     i          = 0;
@@ -148,7 +140,7 @@ namespace mixc::algo_heap_root::origin::heap_root{
     xheader inline auto pop(
         seq_t   const & seq, 
         uxx             length, 
-        cmp_t   const & insert_value, 
+        item_t  const & insert_value, 
         cmp_t   const & compare = inc::default_compare<item_t>){
 
         return pop_core(

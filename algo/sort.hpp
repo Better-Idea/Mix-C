@@ -20,8 +20,8 @@ namespace mixc::algo_sort{
     constexpr u08 type_signed       = 0x80;
     constexpr u08 type_float_pos    = type_signed;
     constexpr u08 type_float_neg    = type_unsigned;
-    constexpr u08 mode_asc      = 0x00;
-    constexpr u08 mode_des      = 0xff;
+    constexpr u08 mode_asc          = 0x00;
+    constexpr u08 mode_des          = 0xff;
 
     template<class counter_t, uxx i, u08 type, u08 mode, class seq_t>
     inline void radix_sort_core(seq_t & r, uxx offset, uxx length){
@@ -134,8 +134,8 @@ namespace mixc::algo_sort{
     struct sort{
         template<
             inc::can_unified_seqlize    seq_t,
-            class                       cmp_t,
-            class                       item_t = inc::item_origin_of<seq_t>
+            class                       item_t  = inc::item_origin_of<seq_t>,
+            class                       cmp_t   = decltype(inc::default_compare<item_t>)
         >
         requires(
             inc::can_compare<cmp_t, item_t>
