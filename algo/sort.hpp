@@ -100,33 +100,31 @@ namespace mixc::algo_sort{
             }
         }
 
-        if constexpr (i > 0){
-            // 对子分区排序，按下一个字节排
-            // 此时 sum0 = sum1
-            for(t = 0; not_exist != (j = idct.pop_first()); t = sum0[j]){
-                auto new_length = sum0[j] - t;
-                // xhint(sum0[j], t);
+        // 对子分区排序，按下一个字节排
+        // 此时 sum0 = sum1
+        if constexpr (i > 0) for(t = 0; not_exist != (j = idct.pop_first()); t = sum0[j]){
+            auto new_length = sum0[j] - t;
+            // xhint(sum0[j], t);
 
-                if (new_length == 1){ // 只有一个元素不用排序
-                    continue;
-                }
-                if (new_length == 2){ // 两个元素
-                    constexpr auto xor_condition = inc::is_float<item_t> and type == type_float_neg ?
-                        mode == (mode_des ^ 0xff) : mode == mode_des;
+            if (new_length == 1){ // 只有一个元素不用排序
+                continue;
+            }
+            if (new_length == 2){ // 两个元素
+                constexpr auto xor_condition = inc::is_float<item_t> and type == type_float_neg ?
+                    mode == (mode_des ^ 0xff) : mode == mode_des;
 
-                    if ((r[t + offset] > r[t + offset + 1]) ^ (xor_condition)){
-                        inc::swap(xref r[t + offset], xref r[t + offset + 1]);
-                    }
+                if ((r[t + offset] > r[t + offset + 1]) ^ (xor_condition)){
+                    inc::swap(xref r[t + offset], xref r[t + offset + 1]);
                 }
-                // TODO：else if (new_length < small_length) ========================================================================
-                else if (inc::is_float<item_t> and i == top_i and j < 0x80){ // 浮点负数部分，低位字节按相反的模式排序
-                    radix_sort_core<counter_t, i - 1, type_float_neg, mode ^ 0xff, seq_t>(r, t + offset, new_length);
-                }
-                else{
-                    constexpr auto convert_type = inc::is_float<item_t> ? // 如果是浮点元素，则保持 type 不变
-                        type : type_unsigned;
-                    radix_sort_core<counter_t, i - 1,  convert_type, mode, seq_t>(r, t + offset, new_length);
-                }
+            }
+            // TODO：else if (new_length < small_length) ========================================================================
+            else if (inc::is_float<item_t> and i == top_i and j < 0x80){ // 浮点负数部分，低位字节按相反的模式排序
+                radix_sort_core<counter_t, i - 1, type_float_neg, mode ^ 0xff, seq_t>(r, t + offset, new_length);
+            }
+            else{
+                // 如果是浮点元素，则保持 type 不变
+                constexpr auto convert_type = inc::is_float<item_t> ? type : type_unsigned;
+                radix_sort_core<counter_t, i - 1, convert_type, mode, seq_t>(r, t + offset, new_length);
             }
         }
     }

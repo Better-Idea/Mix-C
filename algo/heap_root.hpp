@@ -39,9 +39,12 @@ namespace mixc::algo_heap_root{
 
     /* 函数：大小根堆压栈操作
      * 参数：
-     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
      * - value 为要压栈的元素
-     * - compare 为元素比较回调
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline void push_core(seq_t seq, item_t const & value, cmp_t const & compare){
         // 注意：
@@ -70,9 +73,12 @@ namespace mixc::algo_heap_root{
 
     /* 函数：大小根堆弹栈操作
      * 参数：
-     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
-     * - insert_value 为要插入的元素
-     * - compare 为元素比较回调
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - insert_value 为要插入的元素，通常是当前长度 seq 序列中的最后一个元素
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline auto pop_core(seq_t seq, item_t const & insert_value, cmp_t const &  compare){
         // 避免返回值的复制构造
@@ -112,10 +118,12 @@ namespace mixc::algo_heap_root{
 namespace mixc::algo_heap_root::origin::heap_root{
     /* 函数：大小根堆压栈操作
      * 参数：
-     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
-     * - length 为序列长度
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
      * - value 为要压栈的元素
-     * - compare 为元素比较回调
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline void push(
         seq_t   const & seq,
@@ -132,10 +140,12 @@ namespace mixc::algo_heap_root::origin::heap_root{
 
     /* 函数：大小根堆弹栈操作
      * 参数：
-     * - seq 为满足 inc::can_unified_seqlize 约束的序列类型
-     * - length 为序列长度
-     * - insert_value 为要插入的元素
-     * - compare 为元素比较回调
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - insert_value 为要插入的元素，通常是当前长度 seq 序列中的最后一个元素
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline auto pop(
         seq_t   const & seq, 

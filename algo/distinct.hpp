@@ -28,10 +28,10 @@ namespace mixc::algo_distinct::origin{
 
     /* 函数：去除重复元素并保证顺序不改变
      * 参数：
-     * - seq 为待去重的序列
+     * - seq 为待去重的序列，该类型需要满足 can_unified_seqlize 约束
      * - alloc 为分配回调函数，期望签名如下：
      *      unified_seq<seq_t> operator()(uxx length)
-     *   其中 seq_t 和待去重序列的类型保持一致，length 为去重后序列所需的元素个数
+     *   其中 seq_t 和待去重序列的类型保持一致，length 为去重后序列的长度
      * 返回：
      * - 从 alloc 中分配的序列
      */ 
