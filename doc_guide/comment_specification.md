@@ -54,14 +54,14 @@ namespace mixc::define_nullref_t{
     | 变量       |
 
 类型B：
-    | 基础结构   |   -> 提供一个类的雏形，该类只能继承和被继承
-    | 适配器     |   -> 通过继承该结构来对外提供一致的接口，该类只能被继承和被继承
-    | 兼容扩展   |   -> 从基础结构派生的结构，该结构不在原有结构上增加任何字段，只是增加成员函数，
+    | 基础结构   |   -> 提供一个类的雏形，该类只用于继承和被继承
+    | 适配器     |   -> 通过继承该结构来对外提供一致的接口，该类只用于继承和被继承
+    | 兼容扩展   |   -> 从基础结构派生的结构，该结构不在原有结构上增加任何字段，只是增加成员函数，并无函数重写，
                         和原有结构保持兼容性，该类只能继承和被继承
-    | 非兼容扩展 |   -> 在新增了字段，或破坏了和基础结构的兼容性
+    | 非兼容扩展 |   -> 在原有结构上新增了字段，或破坏了和基础结构的兼容性
                         该类只能继承和被继承
-    | 接口结构   |   -> 该结构是扩展结构的终点，在头文件中包含某一类的最后一个扩展时需要再包含此结构，该结构整合该类所有的扩展，
-                        对外提供所需的功能，只有这个这个结构可以实例化
+    | 接口结构   |   -> 该结构是扩展结构的终点。在头文件中包含某一类的最后一个扩展时需要再包含此结构，
+                        该结构整合该类所有的扩展，对外提供所需的功能，只有这个这个结构可以实例化
 
 类型B 关系图：
         +-->[基础结构]           [接口结构]
@@ -83,16 +83,23 @@ namespace mixc::define_nullref_t{
 
 ### 函数注释
 ```C++
-/* 函数：去除重复元素
+/* 函数：去除重复元素并保证顺序不改变
  * 参数：
- * - seq 为满足 inc::can_unified_seqlize 格式的模板
- * - alloc 为分配回调函数
+ * - seq 为待去重的序列，该类型需要满足 can_unified_seqlize 约束
+ * - alloc 为分配回调函数，期望签名如下：
+ *      unified_seq<seq_t> operator()(uxx length)
+ *   其中 seq_t 和待去重序列的类型保持一致，length 为去重后序列的长度
  * 返回：
- * - 从 alloc 中分配的序列，用于保存着去重后的元素序列
+ * - 从 alloc 中分配的序列
  */ 
- template<inc::can_unified_seqlize seq_t>
- inline auto distinct(seq_t const & seq, distinct_alloc_invoke<seq_t> alloc);
-
+template<
+    inc::can_unified_seqlize        seq_t,
+    class                           alloc_t
+>
+requires(
+    can_distinct_alloc<seq_t, alloc_t>
+)
+inline auto distinct(seq_t const & seq, alloc_t const & alloc)
 ```
 
 #### 属性
