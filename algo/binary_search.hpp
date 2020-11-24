@@ -95,7 +95,7 @@ namespace mixc::algo_binary_search{
             class                    cmp_t   = decltype(inc::default_compare<item_t>)   \
         >                                                                               \
         requires(                                                                       \
-            inc::can_compare<seq_t, item_t>                                             \
+            inc::can_compare<cmp_t, item_t>                                             \
         )                                                                               \
         inline ret name(                                                                \
             seq_t   const & seq,                                                        \
