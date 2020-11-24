@@ -36,6 +36,9 @@ namespace mixc::meta_unified_seq::origin{
     template<class seq_t>
     concept can_unified_seqlize = inc::can_seqptrlize<seq_t> or inc::can_rangerlize<seq_t>;
 
+    template<class seq_t, class item_t>
+    concept can_unified_seqlizex = inc::can_seqptrlizex<seq_t, item_t> or inc::can_rangerlizex<seq_t, item_t>;
+
     template<can_unified_seqlize seq_t>
     using unified_seq = decltype(
         meta<seq_t>()
