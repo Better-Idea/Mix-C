@@ -4,8 +4,10 @@
 #undef  xuser
 #define xuser mixc::meta_item_of::inc
 #include"interface/initializer_list.hpp"
-#include"meta/is_indexable.hpp"
 #include"macro/xexport.hpp"
+#include"meta/is_indexable.hpp"
+#include"meta/remove_ref.hpp"
+#include"meta/remove_const.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_of{
@@ -31,7 +33,11 @@ namespace mixc::meta_item_of{
     };
 
     template<class seq_t>
-    using item_of = typename meta<seq_t>::result;
+    using item_of = typename meta<
+        inc::remove_const<
+            inc::remove_ref<seq_t>
+        >
+    >::result;
 }
 
 #endif
