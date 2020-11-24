@@ -113,9 +113,12 @@ namespace xuser{
             auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
 
             // 传入序列的长度和比较回调
+            // 参与比较的可以是任何你期望的元素，binary_search 负责进行二分，你负责编写比较回调
             uxx     index   = binary_search::match(ary.length(), [&/* 这里使用引用捕获外部 ary */](uxx i_current) -> ixx {
                 return ary[i_current] - 50; // 期望值为 50
             });
+
+            xhint(index);
 
             // binary_search::less_equals 和 binary_search::greater_equals 也具有类似的操作
             // 这里就不赘述
