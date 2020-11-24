@@ -15,7 +15,7 @@ namespace xuser{
             auto && buf     = array<i32, 32>{};
             auto && ary     = array_view{ 1, 1, 2, 3, 3, 2, 1 };
 
-            // new_ary 来自回调函数返回的内容
+            // new_ary 来自回调函数，经过 distinct 处理后返回
             auto && new_ary = distinct(ary, [&](uxx length){
                 // unified_seq<decltype(ary)> 会选择合适的序列接口类型
                 return unified_seq<decltype(ary)>{buf, length};
