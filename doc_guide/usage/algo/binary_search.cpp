@@ -6,15 +6,16 @@
 namespace xuser{
     void demo(){
         uxx demo = 0;
+
+        // 演示：在升序数组中寻找指定值对应的索引
         {
-            // 演示：在升序数组中寻找指定值对应的索引
             xhint(demo);
             demo           += 1;
 
             auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
             uxx     index   = binary_search::match(ary, 50);
 
-            // index 期望值为 5，表示期望匹配的值 50 在 ary[5] 这个位置
+            // index 为 5，表示期望匹配的值 50 在 ary[5] 这个位置
             xhint(index);
 
             index           = binary_search::match(ary, 51);
@@ -23,8 +24,8 @@ namespace xuser{
             xhint(index, not_exist);
         }
 
+        // 演示：当目标序列是降序，如何使用二分匹配呢？
         {
-            // 演示：当目标序列是降序，如何使用二分匹配呢？
             xhint(demo);
             demo           += 1;
 
@@ -41,13 +42,13 @@ namespace xuser{
             index           = binary_search::match(ary, 50, default_compare_neg<i32>);
 
             // 由于 ary 是降序的，而参与比较的回调也是反向比较的，所以此时就可以得到正确的值
-            // 期望值为 0
+            // index 为 0
             xhint(index);
 
             // 实际上也可以给手动 diy 一个 lambda
             // 这个 lambda 参数的作用就是参与二分查找的比较
             // 我们约定：
-            // 在升序数组中参与比较的 lambda 返回正数时表示当前值大于期望值，
+            // 在升序数组中参与比较的 lambda 返回正数时表示当前值大于期望值
             // 负数表示当前值小于期望值，零表示匹配期望值
             // 由于这里是降序的数组，所以逻辑是反过来的
             index           = binary_search::match(ary, 50, [](i32 const & current, i32 const & wanted) -> ixx/* 返回值类型为有符号整数类型 */ {
@@ -68,6 +69,56 @@ namespace xuser{
 
             // 实现的效果是一样的
             xhint(index);
+        }
+
+        // 演示：当目标值不存在时，退而求其次
+        {
+            xhint(demo);
+            demo           += 1;
+
+            auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
+            uxx     index   = binary_search::less_equals(ary, 51);
+
+            // index 为 5，因为不存在元素 51，所以只能找最接近但不超过 51 的值
+            // 合适的值为 50，对应的索引为 5
+            xhint(index);
+
+            // 假如目标值存在，那么它的行为和 binary_search::match 是一致的
+            index           = binary_search::less_equals(ary, 50);
+
+            xhint(index);
+
+            // 假如数组中没有比目标值更小的元素且不存在相等的值，那么它将返回 not_exist
+            index           = binary_search::less_equals(ary, -2);
+
+            xhint(index, not_exist);
+
+            // binary_search::greater_equals 是类似的，它是找大于等于期望值的元素
+            index           = binary_search::greater_equals(ary, 11);
+
+            // 目标值 >= 11，匹配的值为 20，index 为 2
+            xhint(index);
+
+            // 类似的，如果数组中没有比目标值更大的元素且不存在相等的值，那么它将返回 not_exist
+            index           = binary_search::greater_equals(ary, 51);
+
+            xhint(index, not_exist);
+        }
+
+        // 演示：binary_search 提供更高级别的抽象
+        {
+            xhint(demo);
+            demo           += 1;
+
+            auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
+
+            // 传入序列的长度和比较回调
+            uxx     index   = binary_search::match(ary.length(), [&/* 这里使用引用捕获外部 ary */](uxx i_current) -> ixx {
+                return ary[i_current] - 50; // 期望值为 50
+            });
+
+            // binary_search::less_equals 和 binary_search::greater_equals 也具有类似的操作
+            // 这里就不赘述
         }
     }
 }
