@@ -35,7 +35,7 @@ namespace mixc::define_nullref_t{
         }
 
         template<class a> friend bool operator == (a const & value, nullref_t const & nullref) {
-            return nullref == value;
+            return nullref.operator==(value);
         }
 
         template<class a> friend bool operator != (a const & value, nullref_t const & nullref) {
