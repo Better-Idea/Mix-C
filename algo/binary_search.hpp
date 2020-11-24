@@ -24,7 +24,7 @@
 namespace mixc::algo_binary_search{
     /* 函数：二分匹配模板
      * 参数：
-     * - length 为被搜索序列的长度
+     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(uxx index)
      *   其中 index 为当前参与比较的元素的索引
@@ -98,13 +98,13 @@ namespace mixc::algo_binary_search{
             inc::can_compare<cmp_t, item_t>                                             \
         )                                                                               \
         inline ret name(                                                                \
-            seq_t   const & seq,                                                        \
-            item_t  const & value,                                                      \
-            cmp_t   const & compare = inc::default_compare<item_t>)
+            seq_t                       const & seq,                                    \
+            inc::item_origin_of<seq_t>  const & value,                                  \
+            cmp_t                       const & compare = inc::default_compare<item_t>)
 
     /* 函数：二分匹配模板
      * 参数：
-     * - seq 为被搜索序列
+     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
      * - value 为期望被搜到的值
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(item_t const & current, item_t const & wanted)
@@ -122,10 +122,14 @@ namespace mixc::algo_binary_search{
     }
 }
 
+namespace mixc::algo_binary_search::origin{
+    using inc::default_compare_neg;
+}
+
 namespace mixc::algo_binary_search::origin::binary_search{
     /* 函数：在升序序列中寻找刚好匹配搜索值的索引
      * 参数：
-     * - seq 为被搜索序列
+     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
      * - value 为期望被搜到的值
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(item_t const & current, item_t const & wanted)
@@ -140,7 +144,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
 
     /* 函数：在升序序列中寻找不小于搜索值的索引
      * 参数：
-     * - seq 为被搜索序列
+     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
      * - value 为期望被搜到的值
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(item_t const & current, item_t const & wanted)
@@ -156,7 +160,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
 
     /* 函数：在升序序列中寻找不大于搜索值的索引
      * 参数：
-     * - seq 为被搜索序列
+     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
      * - value 为期望被搜到的值
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(item_t const & current, item_t const & wanted)
@@ -181,7 +185,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
 
     /* 函数：在升序序列中寻找刚好匹配搜索值的索引
      * 参数：
-     * - length 为被搜索序列的长度
+     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(uxx index)
      *   其中 index 为当前参与比较的元素的索引
@@ -195,7 +199,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
 
     /* 函数：在升序序列中寻找不小于搜索值的索引
      * 参数：
-     * - length 为被搜索序列的长度
+     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(uxx index)
      *   其中 index 为当前参与比较的元素的索引
@@ -210,7 +214,7 @@ namespace mixc::algo_binary_search::origin::binary_search{
 
     /* 函数：在升序序列中寻找不大于搜索值的索引
      * 参数：
-     * - length 为被搜索序列的长度
+     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
      * - compare 为参与匹配的回调函数，期望签名如下：
      *      ixx operator()(uxx index)
      *   其中 index 为当前参与比较的元素的索引
