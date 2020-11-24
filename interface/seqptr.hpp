@@ -42,13 +42,12 @@ namespace mixc::interface_seqptr::origin{
     template<class item_t> struct seqptr;
     template<class item_t>
     xstruct(
-        xtmpl(seqptr, item_t)
+        xtmpl(seqptr, item_t),
+        xprif(ptr,  item_t *),
+        xprif(len,  uxx)
     )
-    private:
-        item_t * ptr = nullptr;
-        uxx      len = 0;
     public:
-        seqptr(){}
+        seqptr() : ptr(nullptr), len(0){}
 
         seqptr(item_t const * ptr, uxx len) : 
             ptr((item_t *)ptr), len(len){}
@@ -91,7 +90,7 @@ namespace mixc::interface_seqptr::origin{
 
     private:
         template<auto mode, class iterator_t, can_interval interval_t = co>
-        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}){
+        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}) const {
             auto r      = subseq(itv);
             auto state  = loop_t::go_on;
 
