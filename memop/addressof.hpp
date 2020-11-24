@@ -1,5 +1,6 @@
 #ifndef xpack_memop_addressof
 #define xpack_memop_addressof
+#include"macro/xexport.hpp"
 
 namespace mixc::memop_addressof{
     template<class type> 
