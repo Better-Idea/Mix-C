@@ -1,3 +1,13 @@
+/* 模块：insert
+ * 类型：函数单体
+ * 功能：在一个序列中插入新的元素
+ * 用法：
+ * TODO ===========================================================
+ * 
+ * 注意：
+ * TODO ===========================================================
+ */
+
 #ifndef xpack_algo_insert
 #define xpack_algo_insert
 #pragma push_macro("xuser")
@@ -7,11 +17,18 @@
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
+#include"meta/has_cast.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_insert{
+    /* 函数：序列插入新元素
+     * 参数：
+     * - target 为待插入新元素的序列，并满足 unified_seq<T> 约束
+     * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
+     * - values 为要插入的元素序列，并满足 unified_seq<T> 约束
+     */
     template<class seq_des_t, class seq_src_t = seq_des_t>
     inline void insert_core(
         seq_des_t                   target, 
@@ -33,6 +50,13 @@ namespace mixc::algo_insert{
         }
     }
 
+    /* 函数：序列插入新元素
+     * 参数：
+     * - target 为结果缓冲区，并满足 unified_seq<T> 约束
+     * - source 为源数据序列，并满足 unified_seq<T> 约束
+     * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
+     * - values 为要插入的元素序列，并满足 unified_seq<T> 约束
+     */
     template<class seq_des_t, class seq_src_t = seq_des_t, class seq_val_t = seq_src_t>
     inline void insert_core(
         seq_des_t                           target,
@@ -51,6 +75,12 @@ namespace mixc::algo_insert{
         );
     }
 
+    /* 函数：序列插入新元素
+     * 参数：
+     * - target 为待插入新元素的序列，并满足 can_unified_seqlize 约束
+     * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
+     * - value 为要插入的元素，类型需要和 target 元素类型保持一致
+     */
     template<inc::can_unified_seqlize seq_t>
     inline void insert(
         seq_t                       const & target,
@@ -65,7 +95,22 @@ namespace mixc::algo_insert{
         );
     }
 
-    template<inc::can_unified_seqlize seq_des_t, inc::can_unified_seqlize seq_val_t>
+    /* 函数：序列插入新元素
+     * 参数：
+     * - target 为待插入新元素的序列，并满足 can_unified_seqlize 约束
+     * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
+     * - values 为要插入的元素序列，并满足 can_unified_seqlize 约束
+     */
+    template<
+        inc::can_unified_seqlize seq_des_t, 
+        inc::can_unified_seqlize seq_val_t
+    >
+    requires(
+        inc::has_cast<
+            inc::item_origin_of<seq_des_t>,
+            inc::item_origin_of<seq_val_t>
+        >
+    )
     inline void insert(
         seq_des_t                   const & target,
         ixx                                 index,
@@ -77,11 +122,32 @@ namespace mixc::algo_insert{
         );
     }
 
+    /* 函数：序列插入新元素
+     * 参数：
+     * - target 为结果缓冲区，并满足 can_unified_seqlize 约束
+     * - source 为源数据序列，并满足 can_unified_seqlize 约束
+     * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
+     * - values 为要插入的元素序列，并满足 can_unified_seqlize 约束
+     */
     template<
         inc::can_unified_seqlize    seq_tar_t, 
         inc::can_unified_seqlize    seq_src_t, 
         inc::can_unified_seqlize    seq_val_t
     >
+    requires(
+        inc::has_cast<
+            inc::item_origin_of<seq_tar_t>,
+            inc::item_origin_of<seq_src_t>
+        > and
+        inc::has_cast<
+            inc::item_origin_of<seq_tar_t>,
+            inc::item_origin_of<seq_val_t>
+        > and
+        inc::has_cast<
+            inc::item_origin_of<seq_src_t>,
+            inc::item_origin_of<seq_val_t>
+        >
+    )
     inline void insert(
         seq_tar_t                   const & target,
         seq_src_t                   const & source,
@@ -95,21 +161,30 @@ namespace mixc::algo_insert{
         );
     }
 
+    /* 函数：序列插入新元素
+     * 参数：
+     * - target 为结果缓冲区，并满足 can_unified_seqlize 约束
+     * - source 为源数据序列，并满足 can_unified_seqlize 约束
+     * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
+     * - value 为要插入的元素，类型和 target 的元素类型保持一致
+     */
     template<
         inc::can_unified_seqlize    seq_tar_t, 
-        inc::can_unified_seqlize    seq_src_t, 
-        class                       item_t
+        inc::can_unified_seqlize    seq_src_t
     >
     inline void insert(
         seq_tar_t                   const & target,
         seq_src_t                   const & source,
         ixx                                 index,
-        item_t                      const & value){
+        inc::item_origin_of<seq_tar_t>
+                                    const & value){
 
         insert_core(
             inc::unified_seq<seq_tar_t>(target), 
             inc::unified_seq<seq_src_t>(source),  index, 
-            inc::seqptr<item_t>{value}
+            inc::seqptr<
+                inc::item_origin_of<seq_tar_t>
+            >{value}
         );
     }
 }
