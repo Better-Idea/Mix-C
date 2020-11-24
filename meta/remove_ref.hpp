@@ -18,6 +18,11 @@ namespace mixc::meta_remove_ref{
         using result = a;
     };
 
+    template<class a>
+    struct meta<a &&> {
+        using result = a;
+    };
+
     template<class type>
     using remove_ref = typename meta<type>::result;
 }
