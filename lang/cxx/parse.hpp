@@ -61,23 +61,17 @@ namespace mixc::lang_cxx_parse{
         uxx    error_index;
     };
 
-    // using item_t = char;
-    // template<class item_t> struct core;
-    // template<>
-    // struct core<item_t> : inc::cxx<item_t> {
-
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using inc::cxx<item_t>::cxx;
-        using the_t = core<item_t>;
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class target>
         parse_result<target> parse(uxx base) const {
-            bool   is_neg = false;
-            target value  = 0;
-            item_t * cur    = the;
-            item_t * begin  = the;
-            item_t * end    = cur + the.length();
+            bool        is_neg = false;
+            target      value  = 0;
+            item_t *    cur    = the;
+            item_t *    begin  = the;
+            item_t *    end    = cur + the.length();
 
             if (begin >= end) {
                 return parse_result<target>(value, 0);
@@ -95,10 +89,10 @@ namespace mixc::lang_cxx_parse{
                 // inf
                 // nan
                 // [+-]{0,1}/d*(/./d+){0,1}([eE][+-]/d+){0,1}
-                if (the_t("nan").compare({ cur, 3 }) == 0){
+                if (the_t{"nan"}.compare({ cur, 3 }) == 0){
                     return is_neg ? -target(inc::nan) : target(inc::nan);
                 }
-                if (the_t("inf").compare({ cur, 3 }) == 0){
+                if (the_t{"inf"}.compare({ cur, 3 }) == 0){
                     return target(is_neg ? inc::inf_neg : inc::inf_pos);
                 }
 

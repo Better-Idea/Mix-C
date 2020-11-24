@@ -15,23 +15,16 @@
 #include"lang/cxx/clone.hpp"
 #include"lang/cxx/index_of_last_miss.hpp"
 #include"lang/cxx.hpp"
+#include"meta/is_same.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_trim_end{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
         auto trim_end(inc::initializer_list<item_t> values, alloc_t const & alloc) {
             auto token  = the_t(values.begin(), values.size());
             auto r      = the;
@@ -39,7 +32,7 @@ namespace mixc::lang_cxx_trim_end{
             if (auto index = r.index_of_last_miss(values); index != not_exist){
                 r       = r.length(index + 1);
             }
-            if (alloc != nullptr){
+            if constexpr (inc::is_same<alloc, decltype(nullptr)>){
                 r       = r.clone(alloc);
             }
             return r;
@@ -51,11 +44,19 @@ namespace mixc::lang_cxx_trim_end{
         using base::base;
         using the_t = core<item_t>;
 
+        final trim_end(item_t value) {
+            return the.trim_end({ value }, nullptr);
+        }
+
+        final trim_end(inc::initializer_list<item_t> values) {
+            return the.trim_end(values, alloc);
+        }
+
         template<class alloc_t>
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_end(item_t value, alloc_t const & alloc = nullptr) {
+        final trim_end(item_t value, alloc_t const & alloc) {
             return the.trim_end({ value }, alloc);
         }
 
@@ -63,7 +64,7 @@ namespace mixc::lang_cxx_trim_end{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_end(inc::initializer_list<item_t> values, alloc_t const & alloc = nullptr) {
+        final trim_end(inc::initializer_list<item_t> values, alloc_t const & alloc) {
             return the.trim_end(values, alloc);
         }
     };

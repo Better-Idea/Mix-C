@@ -27,18 +27,12 @@ namespace mixc::lang_cxx_index_of_last{
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
+        template<class cmp_t>
         uxx index_of_last(item_t pattern, cmp_t const & compare) const {
             return index_of_last(& pattern, 1, compare);
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
+        template<class cmp_t>
         uxx index_of_last(item_t const * pattern, uxx length, cmp_t const & compare) const {
             for(uxx i = the.length(); i--; ){
                 for(uxx ii = 0; ii < length; ii++){
@@ -50,10 +44,7 @@ namespace mixc::lang_cxx_index_of_last{
             return not_exist;
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
+        template<class cmp_t>
         uxx index_of_last(the_t pattern, cmp_t const & compare) const {
             // miss 为未匹配项的索引
             // 每次都去匹配上一次未匹配的字符 str[miss]
@@ -63,10 +54,10 @@ namespace mixc::lang_cxx_index_of_last{
             //         |--+--|
             // origin "123451235"
             // pattern        "34"
-            the_t origin = the;
-            the_t temp   = the;
-            uxx   miss   = 0;
-            uxx   index;
+            the_t   origin = the;
+            the_t   temp   = the;
+            uxx     miss   = 0;
+            uxx     index;
 
             if (origin.length() < pattern.length() or pattern.length() == 0) {
                 return not_exist;
@@ -95,7 +86,7 @@ namespace mixc::lang_cxx_index_of_last{
 
         template<class call_t, class cmp_t>
         requires(
-            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_callback<call_t, void(uxx index)> and  // 此处保留 requires 约束以区分 index_of_last 重载
             inc::can_compare<cmp_t, item_t>
         )
         void index_of_last(the_t pattern, call_t const & match, cmp_t const & compare) const {
@@ -114,9 +105,10 @@ namespace mixc::lang_cxx_index_of_last{
     template<class final, class base, class item_t>
     struct meta : base {
         using base::base;
-        using the_t = core<item_t>;
+        using the_t         = core<item_t>;
+        using default_cmp_t = decltype(inc::default_compare<item_t>);
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
@@ -124,18 +116,15 @@ namespace mixc::lang_cxx_index_of_last{
             return the.index_of_last(pattern, compare);
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_last(
-            inc::initializer_list<item_t>   patterns, 
-            cmp_t const &                   compare = inc::default_compare<item_t>) const {
-
+        uxx index_of_last(inc::initializer_list<item_t> patterns, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_last(patterns.begin(), patterns.size(), compare);
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
@@ -143,7 +132,7 @@ namespace mixc::lang_cxx_index_of_last{
             return the.index_of_last(pattern, compare);
         }
 
-        template<class call_t, class cmp_t>
+        template<class call_t, class cmp_t = default_cmp_t>
         requires(
             inc::can_callback<call_t, void(uxx index)> and
             inc::can_compare<cmp_t, item_t>

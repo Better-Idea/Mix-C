@@ -12,7 +12,7 @@
 #include"define/base_type.hpp"
 #include"dumb/implicit.hpp"
 #include"interface/can_compare.hpp"
-#include"interface/initializer_list.hpp"
+#include"interface/seqptr.hpp"
 #include"lang/cxx/index_of_first.hpp"
 #include"lang/cxx.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -20,18 +20,10 @@
 
 namespace mixc::lang_cxx_index_of_last_miss{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
-        core(base_t const & self) : 
-            base_t(self){}
-
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
+        template<class cmp_t>
         uxx index_of_last_miss(item_t const * value, uxx count, cmp_t const & compare) const {
             the_t token = { value, count };
 
@@ -47,9 +39,10 @@ namespace mixc::lang_cxx_index_of_last_miss{
     template<class final, class base, class item_t>
     struct meta : base{
         using base::base;
-        using the_t = core<item_t>;
+        using the_t         = core<item_t>;
+        using default_cmp_t = decltype(inc::default_compare<item_t>);
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
@@ -57,14 +50,11 @@ namespace mixc::lang_cxx_index_of_last_miss{
             return the.index_of_last_miss(& value, 1, compare);
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_last_miss(
-            inc::initializer_list<item_t> values, 
-            cmp_t const &               compare = inc::default_compare<item_t>) const {
-
+        uxx index_of_last_miss(inc::initializer_list<item_t> values, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_last_miss(values.begin(), values.size(), compare);
         }
     };

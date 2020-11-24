@@ -19,18 +19,10 @@
 
 namespace mixc::lang_cxx_align_right{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
         auto align_right(uxx width, item_t pad, alloc_t const & alloc) const {
             if (ixx r = ixx(the.length() - width); r >= 0){
                 return the.shorten(uxx(r)).clone(alloc);

@@ -19,20 +19,13 @@
 
 namespace mixc::lang_cxx_strcat{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
-        auto strcat(the_t * list, uxx length, alloc_t const & alloc) const {
-            uxx total_length = the.length();
+        auto strcat(void const * list_ptr, uxx length, alloc_t const & alloc) const {
+            the_t *     list            = (the_t *)list_ptr;
+            uxx         total_length    = the.length();
 
             for(uxx i = 0; i < length; i++){
                 total_length += list[i].length();
@@ -65,7 +58,7 @@ namespace mixc::lang_cxx_strcat{
             inc::can_alloc<alloc_t, item_t>
         )
         final strcat(final values, alloc_t const & alloc) const {
-            return the.strcat((the_t *)(xref values), 1, alloc);
+            return the.strcat(& values, 1, alloc);
         }
 
         template<class alloc_t>
@@ -73,7 +66,7 @@ namespace mixc::lang_cxx_strcat{
             inc::can_alloc<alloc_t, item_t>
         )
         final strcat(inc::initializer_list<final> values, alloc_t const & alloc) const {
-            return the.strcat((the_t *)values.begin(), values.size(), alloc);
+            return the.strcat(values.begin(), values.size(), alloc);
         }
     };
 }

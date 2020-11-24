@@ -18,18 +18,10 @@
 
 namespace mixc::lang_cxx_is_ends_with{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
-        core(base_t const & self) : 
-            base_t(self){}
-
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
+        template<class cmp_t>
         bool is_ends_with(the_t value, cmp_t const & compare) const {
             if (the.length() < value.length() or value.length() == 0){
                 return false;
@@ -43,7 +35,7 @@ namespace mixc::lang_cxx_is_ends_with{
     template<class final, class base, class item_t>
     struct meta : base {
         using base::base;
-        using the_t = ::mixc::lang_cxx_is_ends_with::core<item_t>;
+        using the_t = core<item_t>;
 
         template<class cmp_t = decltype(inc::default_compare<item_t>)>
         requires(

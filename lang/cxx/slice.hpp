@@ -19,13 +19,8 @@
 
 namespace mixc::lang_cxx_slice{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<can_interval interval_t>
         auto slice(interval_t const & range) const {
@@ -36,10 +31,7 @@ namespace mixc::lang_cxx_slice{
             return the.backward(left).length(right - left + 1);
         }
 
-        template<class alloc_t, can_interval interval_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        template<can_interval interval_t, class alloc_t>
         auto slice(interval_t const & range, alloc_t const & alloc) const {
             range.normalize(the.length());
             ixx left  = ixx(range.left());
@@ -81,7 +73,7 @@ namespace mixc::lang_cxx_slice{
             return the.slice(range);
         }
 
-        template<class alloc_t, can_interval interval_t>
+        template<can_interval interval_t, class alloc_t>
         requires(
             inc::can_alloc<alloc_t, item_t>
         )

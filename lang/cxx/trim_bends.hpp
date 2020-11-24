@@ -22,18 +22,10 @@
 
 namespace mixc::lang_cxx_trim_bends{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
         the_t trim_bends(inc::initializer_list<item_t> values, alloc_t const & alloc) const {
             auto token  = the_t(values.begin(), values.size());
             auto r      = the;
@@ -44,7 +36,7 @@ namespace mixc::lang_cxx_trim_bends{
             if (auto index = r.index_of_last_miss(values); index != not_exist){
                 r       = r.length(index + 1);
             }
-            if (alloc != nullptr){
+            if constexpr (not inc::is_same<alloc_t, decltype(nullptr)>){
                 r       = r.clone(alloc);
             }
             return r;
@@ -56,11 +48,19 @@ namespace mixc::lang_cxx_trim_bends{
         using base::base;
         using the_t = core<item_t>;
 
+        final trim_bends(item_t value) const {
+            return the.trim_bends({ value }, nullptr);
+        }
+
+        final trim_bends(inc::initializer_list<item_t> values) const {
+            return the.trim_bends(values, nullptr);
+        }
+
         template<class alloc_t>
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_bends(item_t value, alloc_t const & alloc = nullptr) const {
+        final trim_bends(item_t value, alloc_t const & alloc) const {
             return the.trim_bends({ value }, alloc);
         }
 
@@ -68,7 +68,7 @@ namespace mixc::lang_cxx_trim_bends{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_bends(inc::initializer_list<item_t> values, alloc_t const & alloc = nullptr) const {
+        final trim_bends(inc::initializer_list<item_t> values, alloc_t const & alloc) const {
             return the.trim_bends(values, alloc);
         }
     };

@@ -19,19 +19,11 @@
 
 namespace mixc::lang_cxx_align_center{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
-        auto align_center(uxx width, item_t pad, alloc_t const & alloc) const {
+        auto align_center(uxx width, item_t pad_left, item_t pad_right, alloc_t const & alloc) const {
             if (ixx r = ixx(the.length() - width); r >= 0){
                 return the.shorten(uxx(r)).clone(alloc);
             }
@@ -39,7 +31,7 @@ namespace mixc::lang_cxx_align_center{
                 uxx w     = uxx(-r);
                 uxx left  = w / 2;
                 uxx right = w - left;
-                return the.pad_bends(left, right, pad, alloc);
+                return the.pad_bends(left, right, pad_left, pad_right, alloc);
             }
         }
     };
@@ -54,7 +46,7 @@ namespace mixc::lang_cxx_align_center{
             inc::can_alloc<alloc_t, item_t>
         )
         final align_center(uxx width, alloc_t const & alloc) const {
-            return the.align_center(width, ' ', alloc);
+            return the.align_center(width, ' ', ' ', alloc);
         }
 
         template<class alloc_t>
@@ -62,7 +54,15 @@ namespace mixc::lang_cxx_align_center{
             inc::can_alloc<alloc_t, item_t>
         )
         final align_center(uxx width, item_t pad, alloc_t const & alloc) const {
-            return the.align_center(width, pad, alloc);
+            return the.align_center(width, pad, pad, alloc);
+        }
+
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        final align_center(uxx width, item_t pad_left, item_t pad_right, alloc_t const & alloc) const {
+            return the.align_center(width, pad_left, pad_right, alloc);
         }
     };
 }

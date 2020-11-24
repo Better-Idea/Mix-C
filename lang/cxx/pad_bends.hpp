@@ -19,24 +19,16 @@
 
 namespace mixc::lang_cxx_pad_bends{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
-        using base_t::base_t;
-        using the_t = core<item_t>;
-
-        core(base_t const & self) : 
-            base_t(self){}
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
-        auto pad_bends(uxx left_count, uxx right_count, item_t value, alloc_t const & alloc) const {
+        auto pad_bends(uxx left_count, uxx right_count, item_t pad_left, item_t pad_right, alloc_t const & alloc) const {
             uxx                     total_length = left_count + right_count + the.length();
             the_t                   r(alloc(total_length), total_length);
-            inc::fill_with_operator(r, value, left_count);
+            inc::fill_with_operator(r, pad_left, left_count);
             inc::copy_with_operator(r.backward(left_count), the, the.length());
-            inc::fill_with_operator(r.backward(left_count + the.length()), value, right_count);
+            inc::fill_with_operator(r.backward(left_count + the.length()), pad_right, right_count);
             return r;
         }
     };
@@ -52,6 +44,14 @@ namespace mixc::lang_cxx_pad_bends{
         )
         final pad_bends(uxx left_count, uxx right_count, item_t value, alloc_t const & alloc) const {
             return the.pad_bends(left_count, right_count, value, alloc);
+        }
+
+        template<class alloc_t>
+        requires(
+            inc::can_alloc<alloc_t, item_t>
+        )
+        final pad_bends(uxx left_count, uxx right_count, item_t pad_left, item_t pad_right, alloc_t const & alloc) const {
+            return the.pad_bends(left_count, right_count, pad_left, pad_right, alloc);
         }
     };
 }

@@ -22,28 +22,25 @@ namespace mixc::lang_cxx_is_contains{
     struct meta : base{
         using base::base;
         using the_t = inc::cxx<item_t>;
+        using default_cmp_t = decltype(inc::default_compare<item_t>);
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        bool is_contains(
-            item_t          value,
-            cmp_t const & compare = inc::default_compare<item_t>) const {
+        bool is_contains(item_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(value, compare) != not_exist;
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        bool is_contains(
-            inc::initializer_list<item_t> values,
-            cmp_t const &               compare = inc::default_compare<item_t>) const {
-            return the.index_of_first(values.begin(), values.size(), compare) != not_exist;
+        bool is_contains(inc::initializer_list<item_t> values, cmp_t const & compare = inc::default_compare<item_t>) const {
+            return the.index_of_first(values, compare) != not_exist;
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )

@@ -19,14 +19,10 @@
 
 namespace mixc::lang_cxx_pad_right{
     template<class item_t>
-    struct core : inc::cxx<item_t> {
-        using inc::cxx<item_t>::cxx;
-        using the_t = core<item_t>;
+    struct core {
+        using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
         auto pad_right(uxx count, item_t value, alloc_t const & alloc) const {
             uxx                     length = the.length() + count;
             the_t                   r{ alloc(length), length };

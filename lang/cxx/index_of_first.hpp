@@ -18,11 +18,6 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_index_of_first{
-    // using item_t = char;
-    // template<class item_t> struct core;
-    // template<>
-    // struct core<item_t> : inc::cxx<item_t> {
-
     template<class item_t>
     struct core : inc::cxx<item_t> {
         using base_t = inc::cxx<item_t>;
@@ -32,10 +27,7 @@ namespace mixc::lang_cxx_index_of_first{
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
+        template<class cmp_t>
         uxx index_of_first(item_t const * value, uxx length, cmp_t const & compare) const {
             for(uxx i = 0; i < the.length(); i++){
                 for(uxx ii = 0; ii < length; ii++){
@@ -47,19 +39,13 @@ namespace mixc::lang_cxx_index_of_first{
             return not_exist;
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_first(item_t const & value, cmp_t const & compare) const {
+        template<class cmp_t>
+        uxx index_of_first(item_t value, cmp_t const & compare) const {
             return index_of_first(xref value, 1, compare);
         }
 
         template<class compare_invoke>
-        uxx index_of_first(
-            the_t                  value,
-            compare_invoke const & compare) const {
-
+        uxx index_of_first(the_t value, compare_invoke const & compare) const {
             the_t origin = the;
             uxx   miss   = 0;
             uxx   index;
@@ -90,7 +76,7 @@ namespace mixc::lang_cxx_index_of_first{
 
         template<class call_t, class cmp_t>
         requires(
-            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_callback<call_t, void(uxx index)> and  // 此处保留 requires 约束以区分 index_of_first 重载
             inc::can_compare<cmp_t, item_t>
         )
         void index_of_first(the_t value, call_t const & match, cmp_t const & compare) const {
@@ -109,9 +95,10 @@ namespace mixc::lang_cxx_index_of_first{
     template<class final, class base, class item_t>
     struct meta : base {
         using base::base;
-        using the_t = core<item_t>;
+        using the_t         = core<item_t>;
+        using default_cmp_t = decltype(inc::default_compare<item_t>);
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
@@ -119,27 +106,23 @@ namespace mixc::lang_cxx_index_of_first{
             return the.index_of_first(& value, 1, compare);
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_first(
-            inc::initializer_list<item_t> values, 
-            cmp_t const &               compare = inc::default_compare<item_t>) const {
+        uxx index_of_first(inc::initializer_list<item_t> values, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(values.begin(), values.size(), compare);
         }
 
-        template<class cmp_t = decltype(inc::default_compare<item_t>)>
+        template<class cmp_t = default_cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_first(
-            final                  value, 
-            cmp_t const & compare = inc::default_compare<item_t>) const {
+        uxx index_of_first(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(value, compare);
         }
 
-        template<class call_t, class cmp_t>
+        template<class call_t, class cmp_t = default_cmp_t>
         requires(
             inc::can_callback<call_t, void(uxx index)> and
             inc::can_compare<cmp_t, item_t>
