@@ -204,7 +204,7 @@ namespace mixc::interface_ranger::origin{
 
     private:
         template<auto mode, class iterator_t, can_interval interval_t = co>
-        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}){
+        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}) const {
             auto r      = subseq(itv);
             auto state  = loop_t::go_on;
 
