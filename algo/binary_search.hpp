@@ -26,7 +26,7 @@ namespace mixc::algo_binary_search{
      * 参数：
      * - length 为被搜索序列的长度
      * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx compare(uxx index)
+     *      ixx operator()(uxx index)
      *   其中 index 为当前参与比较的元素的索引
      *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
      * 返回：
@@ -39,15 +39,15 @@ namespace mixc::algo_binary_search{
             uxx match;
 
             // 小于期望值的索引
-            uxx less_then_target;
+            uxx less_than_target;
 
             // 大于期望值的索引
-            uxx grater_then_target;
+            uxx grater_than_target;
 
             result_t() {
                 match               = not_exist;
-                less_then_target    = not_exist;
-                grater_then_target  = not_exist;
+                less_than_target    = not_exist;
+                grater_than_target  = not_exist;
             }
         };
 
@@ -72,17 +72,17 @@ namespace mixc::algo_binary_search{
         }
 
         if (cmp > 0) {
-            result.grater_then_target = uxx(backup);
+            result.grater_than_target = uxx(backup);
 
             if (backup > 0) {
-                result.less_then_target = uxx(backup - 1);
+                result.less_than_target = uxx(backup - 1);
             }
         }
         else {
-            result.less_then_target = uxx(backup);
+            result.less_than_target = uxx(backup);
 
             if (u64(backup + 1) < u64(length)) {
-                result.grater_then_target = uxx(backup + 1);
+                result.grater_than_target = uxx(backup + 1);
             }
         }
         return result;
@@ -104,16 +104,17 @@ namespace mixc::algo_binary_search{
 
     /* 函数：二分匹配模板
      * 参数：
-     * - length 为被搜索序列的长度
+     * - seq 为被搜索序列
+     * - value 为期望被搜到的值
      * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx compare(uxx index)
-     *   其中 index 为当前参与比较的元素的索引
+     *      ixx operator()(item_t const & current, item_t const & wanted)
+     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
      *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
      * 返回：
      * - result_t 结构
      */
     xheader(auto, match_template) {
-        inc::unified_seq<seq_t> list(seq);
+        inc::unified_seq<seq_t> list{seq};
 
         return match_core(list.length(), [&](uxx current){
             return compare(list[current], value);
@@ -122,23 +123,51 @@ namespace mixc::algo_binary_search{
 }
 
 namespace mixc::algo_binary_search::origin::binary_search{
-    // using can_search = inc::can_callback<ixx(uxx)>;
-
-    // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
+    /* 函数：在升序序列中寻找刚好匹配搜索值的索引
+     * 参数：
+     * - seq 为被搜索序列
+     * - value 为期望被搜到的值
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx operator()(item_t const & current, item_t const & wanted)
+     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+     */
     xheader(uxx, match) {
         return match_template(seq, value, compare).match;
     }
 
-    // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
+    /* 函数：在升序序列中寻找不小于搜索值的索引
+     * 参数：
+     * - seq 为被搜索序列
+     * - value 为期望被搜到的值
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx operator()(item_t const & current, item_t const & wanted)
+     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+     */
     xheader(uxx, greater_equals) {
         auto result = match_template(seq, value, compare);
-        return result.match == not_exist ? result.grater_then_target : result.match;
+        return result.match == not_exist ? result.grater_than_target : result.match;
     }
 
-    // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
+    /* 函数：在升序序列中寻找不大于搜索值的索引
+     * 参数：
+     * - seq 为被搜索序列
+     * - value 为期望被搜到的值
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx operator()(item_t const & current, item_t const & wanted)
+     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+     */
     xheader(uxx, less_equals){
         auto result = match_template(seq, value, compare);
-        return result.match == not_exist ? result.less_then_target : result.match;
+        return result.match == not_exist ? result.less_than_target : result.match;
     }
 
     #undef  xheader
@@ -150,21 +179,48 @@ namespace mixc::algo_binary_search::origin::binary_search{
         )                                                                       \
         inline uxx name(uxx length, callback_t const & compare)
 
-    // 说明：在升序序列中寻找刚好匹配搜索值的索引，如果不匹配则返回 not_exist
+    /* 函数：在升序序列中寻找刚好匹配搜索值的索引
+     * 参数：
+     * - length 为被搜索序列的长度
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx operator()(uxx index)
+     *   其中 index 为当前参与比较的元素的索引
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+     */
     xheader(match) {
         return match_core(length, compare).match;
     }
 
-    // 说明：在升序序列中寻找不小于搜索值的索引，如果不匹配则返回 not_exist
+    /* 函数：在升序序列中寻找不小于搜索值的索引
+     * 参数：
+     * - length 为被搜索序列的长度
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx operator()(uxx index)
+     *   其中 index 为当前参与比较的元素的索引
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+     */
     xheader(greater_equals) {
         auto result = match_core(length, compare);
-        return result.match == not_exist ? result.grater_then_target : result.match;
+        return result.match == not_exist ? result.grater_than_target : result.match;
     }
 
-    // 说明：在升序序列中寻找不大于搜索值的索引，如果不匹配则返回 not_exist
+    /* 函数：在升序序列中寻找不大于搜索值的索引
+     * 参数：
+     * - length 为被搜索序列的长度
+     * - compare 为参与匹配的回调函数，期望签名如下：
+     *      ixx operator()(uxx index)
+     *   其中 index 为当前参与比较的元素的索引
+     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * 返回：
+     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+     */
     xheader(less_equals) {
         auto result = match_core(length, compare);
-        return result.match == not_exist ? result.less_then_target : result.match;
+        return result.match == not_exist ? result.less_than_target : result.match;
     }
 
     #undef  xheader
