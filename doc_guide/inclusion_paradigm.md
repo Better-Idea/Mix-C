@@ -136,16 +136,16 @@ xexport(mixc::foo_function::function)
 ```
 
 ## 特殊情况
-- 相互包含
+- 循环包含
 - 彻底隐藏
 
 ### 循环包含
 在 .h/.cpp 模式下由于 .cpp 可以单独作为一个编译空间，所以 a.cpp 可以同时包含 a.h 和 b.h 而
 b.cpp 也可以同时包含 a.h 和 b.h。  
-对于只有头文件的情况怎么解决相互包含的情况的呢？方法如下：
+对于只有头文件的情况怎么解决循环包含的情况的呢？方法如下：
 
+#### **file:func/private/a.hpp**
 ```C++
-// file:func/private/a.hpp ====================================================
 #ifndef xpack_func_private_a    // 这里 xpack_xxx 包含 private
 #define xpack_func_private_a
 #pragma push_macro("xuser")
@@ -170,9 +170,10 @@ namespace mixc::func_a::origin{ // 这里不是 mixc::func_private_a
 #endif
 
 xexport_space(mixc::func_a::origin)
+```
 
-
-// file:func/private/b.hpp ====================================================
+#### **file:func/private/b.hpp**
+```C++
 #ifndef xpack_func_private_b    // 声明
 #define xpack_func_private_b
 #pragma push_macro("xuser")
@@ -187,9 +188,10 @@ namespace mixc::func_b::origin{
 #endif
 
 xexport_space(mixc::func_b::origin)
+```
 
-
-// file:func/a.hpp ============================================================
+#### **file:func/a.hpp**
+```C++
 #ifndef xpack_func_a            // 主体
 #define xpack_func_a
 #pragma push_macro("xuser")
@@ -221,9 +223,10 @@ namespace mixc::func_a::origin{ // 命名空间与 func/private/a.hpp 保持一�
 #endif
 
 xexport_space(mixc::func_a::origin)
+```
 
-
-// file:func/b.hpp ============================================================
+#### **file:func/b.hpp**
+```C++
 #ifndef xpack_func_b            // 主体 pack
 #define xpack_func_b
 #pragma push_macro("xuser")
@@ -247,10 +250,9 @@ namespace mixc::func_b::origin{
 xexport_space(mixc::func_b::origin)
 ```
 
-该布局方式让每个头文件只会被包含一次，即使存在相互包含
+该布局方式让每个头文件只会被包含一次，即使存在循环包含
 
 ### 彻底隐藏
 对于类似 windows.h 这样的文件，它既庞大又与平台相关。直接包含它会拖慢编译速度同时也会在全局命名空间布满各种符号。
-包含范式有两个包含分支，一个是主分支，它结束于 main 函数所在的顶层包含文件。另一个是从分支，该分支就用用于隔离 windows.h 这样
-的头文件，将它预先编译成 .o 文件后重复使用，主分支的变更不不影响该分支。  
+包含范式有两个包含分支，一个是主分支，它结束于 main 函数所在的顶层包含文件。另一个是从分支，该分支就用于隔离 windows.h 这样的头文件，将它预先编译成 .o 文件后重复使用，主分支的变更不不影响该分支。  
 经常变动、需要 inline 的文件放到主分支，而稳定的、需要隔离的文件放到从分支。
