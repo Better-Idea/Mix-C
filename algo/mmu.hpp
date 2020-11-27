@@ -85,7 +85,7 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::algo_mmu {
+namespace mixc::algo_mmu::origin {
     struct pagoff{ uxx page, offset; };
 
     /* 结构：寻址器
@@ -129,14 +129,18 @@ namespace mixc::algo_mmu {
         }
     };
 
+    constexpr bool with_fixed_page_table = true;
+
     /* 结构：可变大小数组模板
      * 参数：
      * - initial_alloc_length 为数组的起始分配长度，需要二进制对齐且大于 0
      *   只有第一次和第二次分配时，initial_alloc_length 的值不变，此后每次变为之前的两倍
+     * - with_fixed_page_table 指示是否使用固定大小的页表
      * 注意：
      * - 创建数组的在未添加元素时是没有分配内存的，只有在添加元素后才会分配内存
+     * - 使用 with_fixed_page_table 选项后，将不再单独为 page_table_ptr 分配和释放内存，内部假定页表是已分配好的
      */
-    template<uxx initial_alloc_length = 1>
+    template<uxx initial_alloc_length = 1, bool with_fixed_page_table = not origin::with_fixed_page_table>
     requires(
         (initial_alloc_length & (initial_alloc_length - 1)) == 0 and initial_alloc_length > 0
     )
@@ -168,7 +172,9 @@ namespace mixc::algo_mmu {
             auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1)); // index_of_last_set(0) -> uxx(-1)
 
             if (len == 0) {
-                tab                     = (item_t **)alloc(sizeof(voidp) * 2);
+                if constexpr (not with_fixed_page_table){
+                    tab                 = (item_t **)alloc(sizeof(voidp) * 2);
+                }
                 tab[0]                  = (item_t *)alloc(sizeof(item_t) * initial_alloc_length);
                 tab[1]                  = (nullptr);
                 ptr                     = (tab[0]);
@@ -182,7 +188,7 @@ namespace mixc::algo_mmu {
             mask                       |= (uxx(1) << i) - 1;
 
             if (need_new_page and len >= initial_alloc_length) {
-                if (i_page  % 2 == 0) { // i_page 是偶数页就需要分配新页表
+                if (i_page % 2 == 0 and not with_fixed_page_table) { // i_page 是偶数页就需要分配新页表
                     new_tab             = (item_t **)alloc(sizeof(voidp) * (i_page + 2));
                     inc::copy(new_tab, tab, i_page);
                     free(tab, sizeof(voidp) * i_page);
@@ -248,18 +254,25 @@ namespace mixc::algo_mmu {
                 if (tab[i_page + 1]){
                     free(tab[i_page + 1], sizeof(item_t) * len * 2);
                 }
-                free(tab[i_page]    , sizeof(item_t) * len);
-                new_tab = (item_t **)alloc(sizeof(voidp) * i_page);
-                inc::copy(new_tab, tab, i_page);
-                free(tab            , sizeof(voidp) * (i_page + 2));
-                tab                     = new_tab;
+
+                free(tab[i_page], sizeof(item_t) * len);
+
+                if constexpr (not with_fixed_page_table){
+                    new_tab             = (item_t **)alloc(sizeof(voidp) * i_page);
+                    inc::copy(new_tab, tab, i_page);
+                    free(tab, sizeof(voidp) * (i_page + 2));
+                    tab                 = new_tab;
+                }
                 return;
             }
             if (len == 0){
-                free(tab[0]    , sizeof(item_t) * initial_alloc_length);
-                free(tab[1]    , sizeof(item_t) * initial_alloc_length);
-                free(tab       , sizeof(voidp)  * 2);
-                tab                     = nullptr;
+                free(tab[0], sizeof(item_t) * initial_alloc_length);
+                free(tab[1], sizeof(item_t) * initial_alloc_length);
+
+                if constexpr (not with_fixed_page_table){
+                    free(tab, sizeof(voidp)  * 2);
+                    tab                 = nullptr;
+                }
             }
         }
 
@@ -322,6 +335,7 @@ namespace mixc::algo_mmu {
             for(uxx i = 0; i <= (len & mask); i++){
                 tab[i_page][i].~item_t();
             }
+
             free(tab[i_page], sizeof(item_t) * current_length);
 
             if (i_page % 2 == 0 and tab[i_page += 1] != nullptr){
@@ -330,13 +344,14 @@ namespace mixc::algo_mmu {
                 }
                 free(tab[i_page], sizeof(item_t) * current_length);
             }
-            free(tab, sizeof(voidp) * (i_page + 1));
+
+            if constexpr (with_fixed_page_table){
+                free(tab, sizeof(voidp) * (i_page + 1));
+            }
         }
     };
 }
 
 #endif
 
-xexport(mixc::algo_mmu::pagoff)
-xexport(mixc::algo_mmu::addressing)
-xexport(mixc::algo_mmu::var_array)
+xexport_space(mixc::algo_mmu::origin)
