@@ -115,6 +115,10 @@ namespace mixc::algo_heap_root{
     }
 }
 
+namespace mixc::algo_heap_root::origin{
+    using inc::default_compare_neg;
+}
+
 namespace mixc::algo_heap_root::origin::heap_root{
     /* 函数：大小根堆压栈操作
      * 参数：
