@@ -23,11 +23,14 @@ namespace mixc::meta_unified_seq{
     inline auto meta(){
         using item_t = inc::item_origin_of<seq_t>;
 
+        item_t *    ptr     = nullptr;
+        uxx         length  = 0;
+
         if constexpr (inc::can_seqptrlize<seq_t>){
-            return inc::seqptr<item_t>{};
+            return inc::seqptr<item_t>{ptr, length};
         }
         else{
-            return inc::ranger<item_t>{};
+            return inc::ranger<item_t>{ptr, length};
         }
     }
 }
