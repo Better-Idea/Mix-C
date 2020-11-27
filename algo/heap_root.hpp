@@ -46,7 +46,7 @@ namespace mixc::algo_heap_root{
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
-    xheader inline void push_core(seq_t seq, item_t const & value, cmp_t const & compare){
+    xheader inline void push_core(seq_t seq, inc::item_origin_of<seq_t> const & value, cmp_t const & compare){
         // 注意：
         // [value] 可能存在 [seq] 中, 
         // 所以需要一个 [value] 的副本
@@ -80,7 +80,7 @@ namespace mixc::algo_heap_root{
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
-    xheader inline auto pop_core(seq_t seq, item_t const & insert_value, cmp_t const &  compare){
+    xheader inline auto pop_core(seq_t seq, inc::item_origin_of<seq_t> const & insert_value, cmp_t const &  compare){
         // 避免返回值的复制构造
         auto && wanted     = inc::transmitter{ seq[0] };
         uxx     i          = 0;
@@ -131,10 +131,10 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline void push(
-        seq_t   const & seq,
-        uxx             length,
-        item_t  const & value, 
-        cmp_t   const & compare = inc::default_compare<item_t>){
+        seq_t                       const & seq,
+        uxx                                 length,
+        inc::item_origin_of<seq_t>  const & value, 
+        cmp_t                       const & compare = inc::default_compare<item_t>){
 
         push_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
@@ -153,10 +153,10 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline auto pop(
-        seq_t   const & seq, 
-        uxx             length, 
-        item_t  const & insert_value, 
-        cmp_t   const & compare = inc::default_compare<item_t>){
+        seq_t                       const & seq, 
+        uxx                                 length, 
+        inc::item_origin_of<seq_t>  const & insert_value, 
+        cmp_t                       const & compare = inc::default_compare<item_t>){
 
         return pop_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
@@ -174,9 +174,9 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
     xheader inline auto pop(
-        seq_t   const & seq, 
-        uxx             length, 
-        cmp_t   const & compare = inc::default_compare<item_t>){
+        seq_t                       const & seq, 
+        uxx                                 length, 
+        cmp_t                       const & compare = inc::default_compare<item_t>){
 
         inc::unified_seq<seq_t> v{seq};
         return pop_core(
