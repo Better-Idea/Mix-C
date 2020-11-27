@@ -123,6 +123,7 @@ namespace mixc::algo_heap_root::origin::heap_root{
     /* 函数：大小根堆压栈操作
      * 参数：
      * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - length 为当前 seq 元素个数
      * - value 为要压栈的元素
      * - compare 为元素比较回调，期望签名如下：
      *      ixx operator()(item_t const & left, item_t const & right)
@@ -160,6 +161,27 @@ namespace mixc::algo_heap_root::origin::heap_root{
         return pop_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
             insert_value, 
+            compare
+        );
+    }
+
+    /* 函数：大小根堆弹栈操作
+     * 参数：
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     */
+    xheader inline auto pop(
+        seq_t   const & seq, 
+        uxx             length, 
+        cmp_t   const & compare = inc::default_compare<item_t>){
+
+        inc::unified_seq<seq_t> v{seq};
+        return pop_core(
+            v.subseq(co{0, length}), 
+            v[length - 1], 
             compare
         );
     }
