@@ -44,7 +44,7 @@ xstruct(
         }
 
         for(auto cur = this; ; cur = cur->next){
-            if ((key_t &)cur->key == (key_t &)key){
+            if (inc::cmp((key_t &)cur->key, (key_t &)key) == 0){
                 cur->xarg_item.assign_with_operator(xarg_item);
                 return hashmap_set_result_t::override;
             }
@@ -58,7 +58,7 @@ xstruct(
     xarg_item_t & get(key_t const & key){
         if (not is_empty()){
             for(auto cur = this; cur != nullptr; cur = cur->next){
-                if ((key_t &)cur->key == (key_t &)key){
+                if (inc::cmp((key_t &)cur->key, (key_t &)key) == 0){
                     return cur->xarg_item;
                 }
             }
@@ -78,7 +78,7 @@ xstruct(
             if (cur == nullptr){
                 return inc::nullref;
             }
-            if ((key_t &)cur->key == (key_t &)key){
+            if (inc::cmp((key_t &)cur->key, (key_t &)key) == 0){
                 break;
             }
             pre = cur;
@@ -241,7 +241,7 @@ public:
         }
         else{
             tmp_state     = hashmap_take_out_result_t::success;
-            count        -= 1; // 需要计数========================================
+            count        -= 1; // 需要计数
         }
 
         inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item;
@@ -309,7 +309,7 @@ public:
     void take_out(key_t const & key, xarg_item_t * value, hashmap_take_out_result_t * state = nullptr) {
         auto sta = hashmap_take_out_result_t::item_not_exist;
 
-        // count -= 1; 注意计数问题========================================
+        // count -= 1; 注意计数问题
         // 这里间接调用了 count -= 1 的 take_out 则无需考虑此问题
         if (auto && r = take_out(key); r.has_hold_value()){
             value[0]  = r;
