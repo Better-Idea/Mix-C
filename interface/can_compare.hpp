@@ -26,13 +26,13 @@ namespace mixc::interface_can_compare::origin{
     template<class type>
     constexpr auto default_compare = 
         [] xcmp(type){
-            return cmp<type>(left, right);
+            return cmp_with_operator<type>(left, right);
         };
 
     template<class type>
     constexpr auto default_compare_neg = 
         [] xcmp(type){
-            return cmp<type>(right, left);
+            return cmp_with_operator<type>(right, left);
         };
 }
 #endif

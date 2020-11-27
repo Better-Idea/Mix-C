@@ -44,7 +44,7 @@ xstruct(
         }
 
         for(auto cur = this; ; cur = cur->next){
-            if (inc::cmp((key_t &)cur->key, (key_t &)key) == 0){
+            if (inc::cmp_with_operator((key_t &)cur->key, (key_t &)key) == 0){
                 cur->xarg_item.assign_with_operator(xarg_item);
                 return hashmap_set_result_t::override;
             }
@@ -58,7 +58,7 @@ xstruct(
     xarg_item_t & get(key_t const & key){
         if (not is_empty()){
             for(auto cur = this; cur != nullptr; cur = cur->next){
-                if (inc::cmp((key_t &)cur->key, (key_t &)key) == 0){
+                if (inc::cmp_with_operator((key_t &)cur->key, (key_t &)key) == 0){
                     return cur->xarg_item;
                 }
             }
@@ -78,7 +78,7 @@ xstruct(
             if (cur == nullptr){
                 return inc::nullref;
             }
-            if (inc::cmp((key_t &)cur->key, (key_t &)key) == 0){
+            if (inc::cmp_with_operator((key_t &)cur->key, (key_t &)key) == 0){
                 break;
             }
             pre = cur;
