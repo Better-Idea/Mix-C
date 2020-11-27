@@ -67,8 +67,6 @@ namespace mixc::interface_ranger{
             return inc::signature<item_t(uxx)>::call(this, itr[0], index);
         }
     public:
-        base(){}
-
         template<class seq_t>
         base(seq_t const & list) {
             using item_t = inc::item_origin_of<seq_t>;
@@ -134,7 +132,6 @@ namespace mixc::interface_ranger::origin{
         xpubb(base)
     )
     public:
-        ranger(){}
         ranger(base impl) : 
             base(impl){}
 

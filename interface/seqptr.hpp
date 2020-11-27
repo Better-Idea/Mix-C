@@ -42,13 +42,13 @@ namespace mixc::interface_seqptr::origin{
     template<class item_t> struct seqptr;
     template<class item_t>
     xstruct(
-        xtmpl(seqptr, item_t),
-        xprif(ptr,  item_t *),
-        xprif(len,  uxx)
+        xtmpl(seqptr, item_t)
     )
+    private:
+        mutable item_t *    ptr = nullptr;
+        mutable uxx         len = 0;
     public:
-        seqptr() : ptr(nullptr), len(0){}
-
+        seqptr(the_t const &) = default;
         seqptr(item_t const * ptr, uxx len) : 
             ptr((item_t *)ptr), len(len){}
 

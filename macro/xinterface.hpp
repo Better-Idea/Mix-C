@@ -230,8 +230,6 @@ public:
 
 #define __xitf_core__(name,base,...)                                            \
 public:                                                                         \
-    constexpr name(){}                                                          \
-                                                                                \
     template<class __object>                                                    \
     requires(__imi<base, __object>  __xlist__(__xitf_has_func_, __VA_ARGS__))   \
     constexpr name(__object const & object) : base(object) {                    \
