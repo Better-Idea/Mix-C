@@ -13,13 +13,16 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_hash::inc
-#include"memop/addressof.hpp"
 #include"instruction/ring_shift_left.hpp"
 #include"instruction/count_of_set.hpp"
+#include"interface/seqptr.hpp"
+#include"memop/addressof.hpp"
+#include"meta/is_origin_array.hpp"
+#include"meta/is_same.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::algo_hash{
+namespace mixc::algo_hash::origin{
     /* 函数：底层哈希函数
      * 参数：
      * - mem 为要 hash 的对象首地址
@@ -37,10 +40,10 @@ namespace mixc::algo_hash{
         uxx  y    = (magic_number * (u32(-1) >> 1));
 
         for(uxx i = 0; i <= blocks; i++){
-            y        += i == blocks ? ptr[i] & mask : ptr[i];
-            x        += inc::count_of_set(y);
-            y        += inc::ring_shift_left(x, y);
-            x        += inc::ring_shift_left(y, x);
+            y    += i == blocks ? ptr[i] & mask : ptr[i];
+            x    += inc::count_of_set(y);
+            y    += inc::ring_shift_left(x, y);
+            x    += inc::ring_shift_left(y, x);
         }
         return x;
     }
@@ -54,9 +57,22 @@ namespace mixc::algo_hash{
      */
     template<class type>
     inline uxx hash(type const & value, uxx seed = 0){
-        return hash(inc::addressof(value), sizeof(type) / sizeof(uxx), sizeof(type) % sizeof(uxx), seed);
+        if constexpr (
+            inc::is_same<type, asciis> or 
+            inc::is_same<type, words> or 
+            inc::is_origin_array<type>){
+
+            uxx i = 0;
+            while(value[i] != '\0'){
+                i++;
+            }
+            return hash(voidp(value), i / sizeof(uxx), i % sizeof(uxx), seed);
+        }
+        else{
+            return hash(inc::addressof(value), sizeof(type) / sizeof(uxx), sizeof(type) % sizeof(uxx), seed);
+        }
     }
 }
 #endif
 
-xexport(mixc::algo_hash::hash)
+xexport_space(mixc::algo_hash::origin)
