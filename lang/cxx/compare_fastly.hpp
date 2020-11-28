@@ -46,6 +46,8 @@ namespace mixc::lang_cxx_compare_fastly{
         ixx compare_fastly(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.compare_fastly(value, compare);
         }
+
+        xcmpopx_friend(compare_fastly, final)
     };
 }
 
