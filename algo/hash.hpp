@@ -5,7 +5,8 @@
  * TODO ===========================================================
  * 
  * 注意：
- * - 打算后期再支持序列的 hash
+ * - 不同字节数的类型即使值相同也会具有不同的 hash 值
+ * - hash(u08('a')) != hash(u16('a'))
  */
 
 #ifndef xpack_algo_hash
@@ -36,7 +37,7 @@ namespace mixc::algo_hash::origin{
         uxxp ptr  = (uxxp)mem;
         uxx  mask = (uxx(1) << (rest * 8)) - 1;
         uxx  val  = (ptr[blocks] & mask);
-        uxx  x    = (val + seed);
+        uxx  x    = (val + seed + rest);
         uxx  y    = (magic_number * (u32(-1) >> 1));
 
         for(uxx i = 0; i <= blocks; i++){
