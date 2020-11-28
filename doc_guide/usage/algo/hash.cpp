@@ -58,6 +58,18 @@ namespace xuser{
             // 带随机数的弱口令
             xhint(hash("123456", r));
         }
+
+        // 演示：即使值相同，不同字节数的整数也会有不同的 hash 值
+        {
+            xhint(demo);
+            demo       += 1;
+
+            u08 a       = 'a';
+            u16 b       = 'a';
+
+            xhint(hash(a));
+            xhint(hash(b));
+        }
     }
 }
 
