@@ -17,20 +17,31 @@
 #include"lock/atom_swap.hpp"
 #include"memory/allocator.hpp"
 #include"meta/has_constructor.hpp"
+#include"meta/remove_ptr.hpp"
 #include"meta/remove_ref.hpp"
-#include"meta_ctr/cif.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_array{
+    template<class item_t, uxx count>
+    using pack = item_t[count];
+
     template<class final, class type, uxx count = 0, uxx ... rest>
     struct array_t;
 
-    template<class final, class item_t, uxx count, uxx ... rest>
-    using base = inc::cif<sizeof...(rest) != 0>::template select<
-        array_t<final, item_t, rest...>[count]
-    >::template ces<
-        item_t[count]
+    template<class final, class type, uxx count, uxx ... rest>
+    inline auto configure(){
+        if constexpr (sizeof...(rest) == 0){
+            return (pack<type, count> *)nullptr;
+        }
+        else{
+            return (pack<array_t<final, type, rest...>, count> *)nullptr;
+        }
+    }
+
+    template<class final, class type, uxx count, uxx ... rest>
+    using items = inc::remove_ptr<
+        decltype(configure<final, type, count, rest...>())
     >;
 
     /* 结构：静态数组
@@ -43,7 +54,7 @@ namespace mixc::docker_array{
     template<class final, class type, uxx count, uxx ... rest>
     xstruct(
         xtmpl(array_t, final, type, count, rest...),
-        xprif(data, mutable base<final, type, count, rest...>)
+        xprif(data, mutable items<final, type, count, rest...>)
     )
         using item_t = inc::remove_ref<decltype(data[0])>;
     public:
