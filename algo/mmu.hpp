@@ -345,7 +345,7 @@ namespace mixc::algo_mmu::origin {
                 free(tab[i_page], sizeof(item_t) * current_length);
             }
 
-            if constexpr (with_fixed_page_table){
+            if constexpr (not with_fixed_page_table){
                 free(tab, sizeof(voidp) * (i_page + 1));
             }
         }
