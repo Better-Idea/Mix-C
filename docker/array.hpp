@@ -5,7 +5,7 @@
 #include"macro/xfinal.hpp"
 
 namespace xuser{
-    template<class item_t, uxx count, uxx ... rest>
+    template<class item_t, uxx count = 0, uxx ... rest>
     xfinal_tmpl(xusing_docker_array, array, item_t, count, rest...);
 
     template<class type, class ... args>

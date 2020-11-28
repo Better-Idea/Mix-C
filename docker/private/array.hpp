@@ -11,13 +11,27 @@
 #undef  xuser
 #define xuser mixc::docker_array::inc
 #include"docker/private/adapter.array_access.hpp"
+#include"dumb/disable_copy.hpp"
+#include"interface/can_alloc.hpp"
+#include"interface/can_callback.hpp"
+#include"lock/atom_swap.hpp"
+#include"memory/allocator.hpp"
+#include"meta/has_constructor.hpp"
+#include"meta/remove_ref.hpp"
+#include"meta_ctr/cif.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_array{
-    /* 静态数组类型 */
-    template<class type, uxx count>
-    using items_t = type[count];
+    template<class final, class type, uxx count = 0, uxx ... rest>
+    struct array_t;
+
+    template<class final, class item_t, uxx count, uxx ... rest>
+    using base = inc::cif<sizeof...(rest) != 0>::template select<
+        array_t<final, item_t, rest...>[count]
+    >::template ces<
+        item_t[count]
+    >;
 
     /* 结构：静态数组
      * 参数：
@@ -26,12 +40,12 @@ namespace mixc::docker_array{
      * - count 为第一维度元素个数
      * - rest 为更高维度元素个数
      */
-    template<class final, class type, uxx count = 0, uxx ... rest>
+    template<class final, class type, uxx count, uxx ... rest>
     xstruct(
         xtmpl(array_t, final, type, count, rest...),
-        xprif(data, mutable items_t<typename array_t<final, type, rest...>::the_t, count>)
+        xprif(data, mutable base<final, type, count, rest...>)
     )
-        using item_t = typename array_t<final, type, rest...>::the_t;
+        using item_t = inc::remove_ref<decltype(data[0])>;
     public:
         constexpr array_t() : data(){}
         constexpr array_t(array_t const &) = default;
@@ -81,10 +95,134 @@ namespace mixc::docker_array{
         }
     $
 
+    static inline uxx   empty_array     = 0;
+
     template<class final, class type>
-    struct array_t<final, type>{
-        using the_t = type;
-    };
+    xstruct(
+        xspec(array_t, final, type),
+        xpubb(inc::disable_copy),
+        xprif(data, mutable type *)
+    )
+        using item_t                = type;
+        using item_initial_invoke   = inc::icallback<void(item_t *)>;
+
+        constexpr array_t() : 
+            data(empty_array_ptr()){
+        }
+
+        array_t(length capacity, inc::ialloc<void> alloc, item_initial_invoke initial){
+            using itemp = item_t *;
+            auto    mem = alloc(sizeof(uxx) + capacity * sizeof(item_t));
+            auto &  len = uxxp(mem)[0];
+            len         = capacity;
+            data        = itemp(uxxp(mem) + 1);
+
+            for(uxx i = 0; i < len; i++){
+                initial(data + i);
+            }
+        }
+
+        array_t(length capacity, item_initial_invoke initial):
+            array_t(capacity, [](uxx bytes) -> voidp {
+                return inc::alloc<void>(inc::memory_size{bytes});
+            }, initial){
+            the.need_free(true);
+        }
+
+        template<class ... args>
+        requires(inc::has_constructor<item_t, args const & ...>)
+        array_t(length capacity, inc::ialloc<void> alloc, args const & ... item_initial_args):
+            array_t(capacity, alloc, [&](item_t * item){
+                xnew(item) item_t(item_initial_args...);
+            }){
+        }
+
+        template<class ... args>
+        requires(inc::has_constructor<item_t, args const & ...>)
+        array_t(length capacity, args const & ... item_initial_args):
+            array_t(capacity, [&](item_t * item){
+                xnew(item) item_t(item_initial_args...);
+            }){
+        }
+    protected:
+        ~array_t(){
+            if (not need_free()){
+                return;
+            }
+
+            item_t * ptr    = empty_array_ptr(); 
+            uxx len         = 0;
+            ptr             = inc::atom_swap(& data, ptr);
+
+            if (ptr == empty_array_ptr()){
+                return;
+            }
+
+            ptr             = origin(ptr);
+            len             = uxxp(ptr)[-1];
+            inc::free(
+                uxxp(ptr) - 1, 
+                inc::memory_size{
+                    sizeof(uxx) + len * sizeof(item_t)
+                }
+            );
+        }
+
+        static item_t * empty_array_ptr(){
+            return (item_t *)(& empty_array + 1);
+        }
+
+        static item_t * origin(voidp ptr){
+            return (item_t *)(uxx(ptr) & ~uxx(1));
+        }
+
+        item_t * origin() const {
+            return origin(data);
+        }
+    public:
+        
+        /* 函数：下标随机访问
+         * 参数：
+         * - index 要访问元素的下标
+         * 返回：
+         * - 指定索引的元素的引用
+         */
+        item_t & operator[] (uxx index) {
+            return origin()[index];
+        }
+
+        /* 函数：下标随机访问（const 修饰）
+         * 参数：
+         * - index 要访问元素的下标
+         * 返回：
+         * - 指定索引的元素的引用
+         */
+        item_t const & operator[] (uxx index) const {
+            return origin()[index];
+        }
+
+        /* 函数：获取数组元素的首地址 */
+        operator item_t *() {
+            return origin();
+        }
+
+        /* 函数：获取数组元素的首地址（const 修饰） */
+        operator item_t const *() const {
+            return origin();
+        }
+
+        xpriget_prisetx(need_free, bool)
+            xr{ 
+                return (uxx(data) & 1) != 0;
+            }
+            xw{ 
+                data = (item_t *)(uxx(origin()) | uxx(value));
+            }
+        
+        xpubgetx(length, uxx){
+            return uxxp(uxx(data) & ~uxx(1))[-1];
+        }
+    $
 
     template<class final, class type, uxx count, uxx ... rest>
     using array = inc::adapter_array_access<
