@@ -15,6 +15,8 @@
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
 #include"lock/atom_swap.hpp"
+#include"macro/xis_nullptr.hpp"
+#include"memop/cast.hpp"
 #include"memory/allocator.hpp"
 #include"meta/has_constructor.hpp"
 #include"meta/remove_ptr.hpp"
@@ -117,7 +119,7 @@ namespace mixc::docker_array{
         using item_t                = type;
         using item_initial_invoke   = inc::icallback<void(item_t *)>;
 
-        constexpr array_t() : 
+        constexpr array_t(decltype(nullptr) = nullptr) : 
             data(empty_array_ptr()){
         }
 
@@ -159,24 +161,21 @@ namespace mixc::docker_array{
         }
     protected:
         ~array_t(){
-            if (not need_free()){
+            if (the == nullptr){
                 return;
             }
 
-            item_t * ptr    = empty_array_ptr(); 
-            uxx len         = 0;
-            ptr             = inc::atom_swap(& data, ptr);
+            auto   old_ptr  = empty_array_ptr();
+            auto & old      = inc::cast<the_t>(old_ptr);
+            old.data        = inc::atom_swap(& data, old.data);
 
-            if (ptr == empty_array_ptr()){
+            if (not old.need_free()){
                 return;
             }
 
-            ptr             = origin(ptr);
-            len             = uxxp(ptr)[-1];
             inc::free(
-                uxxp(ptr) - 1, 
-                inc::memory_size{
-                    sizeof(uxx) + len * sizeof(item_t)
+                old.header(), inc::memory_size{
+                    sizeof(uxx) + old.length() * sizeof(item_t)
                 }
             );
         }
@@ -192,8 +191,11 @@ namespace mixc::docker_array{
         item_t * origin() const {
             return origin(data);
         }
+
+        uxxp header() const {
+            return uxxp(uxx(data) & ~uxx(1)) - 1;
+        }
     public:
-        
         /* 函数：下标随机访问
          * 参数：
          * - index 要访问元素的下标
@@ -224,6 +226,10 @@ namespace mixc::docker_array{
             return origin();
         }
 
+        xis_nullptr(
+            origin() == empty_array_ptr()
+        )
+
         xpriget_prisetx(need_free, bool)
             xr{ 
                 return (uxx(data) & 1) != 0;
@@ -231,9 +237,9 @@ namespace mixc::docker_array{
             xw{ 
                 data = (item_t *)(uxx(origin()) | uxx(value));
             }
-        
+
         xpubgetx(length, uxx){
-            return uxxp(uxx(data) & ~uxx(1))[-1];
+            return header()[0];
         }
     $
 
