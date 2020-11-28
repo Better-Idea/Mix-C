@@ -9,14 +9,15 @@
 #undef  xusing_lang_cxx
 #undef  xuser
 #define xuser mixc::lang_cxx_replace::inc
+#include"algo/mmu.hpp"
 #include"define/base_type.hpp"
-#include"docker/shared_array.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
 #include"lang/cxx/index_of_first.hpp"
 #include"lang/cxx.hpp"
 #include"memop/copy.hpp"
+#include"memory/allocator.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -25,92 +26,70 @@ namespace mixc::lang_cxx_replace{
     struct core {
         using the_t = inc::cxx<item_t>;
 
-        static constexpr uxx buf_size = 64;
 
         template<class cmp_t, class alloc_t>
-        requires(
-            inc::can_compare<cmp_t, item_t> and
-            inc::can_alloc<alloc_t, item_t>
-        )
-        auto replace(
-            the_t                   old_value, 
-            the_t                   new_value, 
-            cmp_t   const &         compare, 
-            alloc_t const &         alloc) const {
+        auto replace(the_t old_value, the_t new_value, cmp_t const & compare, alloc_t const & alloc) const {
+            constexpr uxx buf_size = 128;
+            using va            = inc::var_array<buf_size, inc::with_fixed_page_table>;
 
-            struct {
-                uxx              i = 0;
-                uxx              buf[buf_size];
-                uxx              total_length;
-                uxx              dis;
-                inc::shared_array<uxx> heap;
+            uxx     buffer[buf_size];
+            uxx *   table[40];
+            uxx **  page_table  = table;
+            uxx     count       = 0;
+            uxx     last_index  = 0;
+            bool    once        = true;
 
-                void push(uxx value){
-                    uxx index = i++;
-                    
-                    if (total_length += dis; index < buf_size){
-                        buf[index] = value;
-                        return;
-                    }
-                    if (index - buf_size - heap.length() == 0){
-                        inc::shared_array<uxx> new_heap { ::length(index) };
-                        inc::copy_with_operator(new_heap, heap, heap.length());
-                        heap = new_heap;
-                    }
-                    heap[index - buf_size] = value;
+            // 融合栈内存和堆内存
+            auto allocx = [&](uxx bytes) -> voidp {
+                if (once){
+                    once = false;
+                    return buffer;
                 }
-            } pack;
+                else{
+                    return inc::alloc<void>(inc::memory_size{bytes});
+                }
+            };
 
-            pack.dis          = new_value.length() - old_value.length();
-            pack.total_length = the.length();
+            auto freex = [&](voidp ptr, uxx bytes){
+                if (ptr == voidp(buffer)){
+                    return;
+                }
+                inc::free(ptr, inc::memory_size{bytes});
+            };
 
             the.index_of_first(old_value, [&](uxx index){
-                pack.push(index);
+                va::push(& page_table, & count, index - last_index, allocx, freex);
+                last_index      = index + old_value.length();
             }, compare);
 
-            the_t r { alloc(pack.total_length), pack.total_length };
-            the_t target     = r;
-            the_t source     = the;
-            bool  only_stack = pack.i < buf_size;
-            uxx   top        = only_stack ? pack.i : buf_size;
-            uxx   last_index = 0;
+            auto    dis         = new_value.length() - old_value.length();
+            auto    len_this    = the.length();
+            auto    len_old     = old_value.length();
+            auto    len_new     = new_value.length();
+            auto    len         = len_this + dis * count;
+            auto    buf         = alloc(len);
+            auto    ptr         = buf;
+            auto    ptr_origin  = (item_t *)the;
+            auto    ptr_new     = (item_t *)new_value;
+            auto    offset      = (uxx)0;
+            auto    copy_size   = (uxx)offset;
 
+            for(uxx i = 0; i < count; i++){
+                offset          = va::access(page_table, i);
+                copy_size       = offset;
+                inc::copy_with_operator(ptr, ptr_origin, copy_size);
+                ptr            += offset;
+                ptr_origin     += offset + len_old;
 
-            auto && replace = [&](uxx index/*要移除字符串的索引*/){
-                // 将 source 要移除字符串之前的保留字符串拷贝到 target
-                auto 
-                head_length = index - last_index;
-                inc::copy_with_operator(target, source, head_length);
-                target      = target.backward(head_length);
-                head_length = head_length + old_value.length();
-                source      = source.backward(head_length);
-                inc::copy_with_operator(target, new_value, new_value.length());
-                target      = target.backward(new_value.length());
-                last_index  = index + old_value.length();
-            };
-
-            auto && remove = [&](uxx index){
-                auto 
-                head_length = index - last_index;
-                inc::copy_with_operator(target, source, head_length);
-                target      = target.backward(head_length);
-                source      = source.backward(head_length + old_value.length());
-                last_index  = index + old_value.length();
-            };
-
-            using change_t = inc::can_callback<void(uxx)>;
-
-            auto && change = 
-                new_value.is_empty() ? change_t(remove) : change_t(replace);
-
-            for(uxx i = 0; i < top; i++){
-                change(pack.buf[i]);
+                if (len_new != 0){
+                    inc::copy_with_operator(ptr, ptr_new, len_new);
+                    ptr        += len_new;
+                }
             }
-            for(uxx i = 0; ixx(i) < ixx(pack.i - buf_size); i++){
-                change(pack.heap[i]);
-            }
-            inc::copy_with_operator(target, source, source.length());
-            return r;
+
+            inc::copy_with_operator(ptr, ptr_origin, len_this - last_index);
+            va::clear(& page_table, & count, freex);
+            return the_t{ buf, len };
         }
     };
 
