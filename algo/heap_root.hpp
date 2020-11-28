@@ -34,7 +34,7 @@ namespace mixc::algo_heap_root{
         class                    cmp_t   = decltype(inc::default_compare<item_t>)   \
     >                                                                               \
     requires(                                                                       \
-        inc::can_compare<cmp_t, item_t>                                             \
+        inc::can_compare<cmp_t, item_t> == true                                     \
     )
 
     /* 函数：大小根堆压栈操作

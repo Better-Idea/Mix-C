@@ -40,7 +40,7 @@ namespace mixc::algo_distinct::origin{
         class                           alloc_t
     >
     requires(
-        can_distinct_alloc<alloc_t, seq_t>
+        can_distinct_alloc<alloc_t, seq_t> == true
     )
     inline auto distinct(seq_t const & seq, alloc_t const & alloc){
         using namespace inc;

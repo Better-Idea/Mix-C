@@ -109,7 +109,7 @@ namespace mixc::algo_insert{
         inc::has_cast<
             inc::item_origin_of<seq_des_t>,
             inc::item_origin_of<seq_val_t>
-        >
+        > == true
     )
     inline void insert(
         seq_des_t                   const & target,
@@ -138,15 +138,15 @@ namespace mixc::algo_insert{
         inc::has_cast<
             inc::item_origin_of<seq_tar_t>,
             inc::item_origin_of<seq_src_t>
-        > and
+        > == true and
         inc::has_cast<
             inc::item_origin_of<seq_tar_t>,
             inc::item_origin_of<seq_val_t>
-        > and
+        > == true and
         inc::has_cast<
             inc::item_origin_of<seq_src_t>,
             inc::item_origin_of<seq_val_t>
-        >
+        > == true 
     )
     inline void insert(
         seq_tar_t                   const & target,
