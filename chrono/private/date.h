@@ -134,7 +134,7 @@ namespace mixc::chrono_private_date::origin{
 
         uxx day_of_year() const {
             auto days = is_leap() ? inc::sum_leap : inc::sum_normal;
-            return days[month() - 1] + day_t();
+            return days[month() - 1] + the.day();
         }
 
         uxx day_index_of_year() const {
