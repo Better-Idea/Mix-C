@@ -709,17 +709,27 @@ namespace mixc::extern_isa_cpu::origin{
         #undef  xgen
 
         template<class reg, class mod, class opr>
-        void f8(res_t mode, reg & a, reg b, reg c, reg d, opr && invoke){
+        void f8(res_t mode, reg & a, reg b, reg c, opr && invoke){
             switch(mode){
-            case is_f32: invoke(a.rf32, b.rf32, c.rf32, d.rf32); break;
-            case is_f64: invoke(a.rf64, b.rf64, c.rf64, d.rf64); break;
-            case is_u64: invoke(a.ru64, b.ru64, c.ru64, d.ru64); break;
-            case is_i64: invoke(a.ri64, b.ri64, c.ri64, d.ri64); break;
+            case is_f32: invoke(a.rf32, b.rf32, c.rf32); break;
+            case is_f64: invoke(a.rf64, b.rf64, c.rf64); break;
+            case is_u64: invoke(a.ru64, b.ru64, c.ru64); break;
+            case is_i64: invoke(a.ri64, b.ri64, c.ri64); break;
             }
         }
 
-        template<class opr>
-        void f8(opr const & invoke){
+        template<class reg, class mod, class opr>
+        void f8x(res_t mode, reg & a, reg b, reg c, opr && invoke){
+            if (mode == is_i64){
+                invoke(a.ru64, b.ru64, c.ru64, d.ru64);
+            }
+            else{
+                invoke(a.ri64, b.ri64, c.ri64, d.ri64);
+            }
+        }
+
+        template<class opr, class sub>
+        void f8(opr && invoke, sub && sub_f8){
             auto &  a           = regs[ins.opa];
             auto &  b           = regs[ins.opb];
             auto    role_type   = is_f32;
@@ -746,35 +756,30 @@ namespace mixc::extern_isa_cpu::origin{
             auto &  t           = *t_ptr;
 
             switch(m){
-            case f8abt: mode[ins.opa] = role_type; f8(role_type, a, b, t，invoke); break;
-            case f8atb: mode[ins.opa] = role_type; f8(role_type, a, t, b，invoke); break;
-            case f8aab: mode[ins.opa] = role_type; f8(role_type, a, a, b，invoke); break;
-            case f8tab: mode[ins.opt] = role_type; f8(role_type, t, a, b，invoke); break;
-            case f8aai: mode[ins.opa] = role_type; f8(role_type, a, a, i，invoke); break;
-            case f8aia: mode[ins.opa] = role_type; f8(role_type, a, i, a，invoke); break;
-            case f8tai: mode[ins.opt] = role_type; f8(role_type, t, a, i，invoke); break;
+            case f8abt: mode[ins.opa] = role_type; sub_f8(role_type, a, b, t，invoke); break;
+            case f8atb: mode[ins.opa] = role_type; sub_f8(role_type, a, t, b，invoke); break;
+            case f8aab: mode[ins.opa] = role_type; sub_f8(role_type, a, a, b，invoke); break;
+            case f8tab: mode[ins.opt] = role_type; sub_f8(role_type, t, a, b，invoke); break;
+            case f8aai: mode[ins.opa] = role_type; sub_f8(role_type, a, a, i，invoke); break;
+            case f8aia: mode[ins.opa] = role_type; sub_f8(role_type, a, i, a，invoke); break;
+            case f8tai: mode[ins.opt] = role_type; sub_f8(role_type, t, a, i，invoke); break;
             // case f8tia: 
-            default:    mode[ins.opt] = role_type; f8(role_type, t, i, a，invoke); break;
+            default:    mode[ins.opt] = role_type; sub_f8(role_type, t, i, a，invoke); break;
             }
         }
 
         template<class opr>
-        void f8x(opr const & invoke){
-            auto & a  = regs[ins.opa];
-            auto & b  = regs[ins.opb];
-            auto   m  = f8_t(ins.opc & 0x7);
+        void f8(opr const & invoke){
+            f8(invoke, [this](auto mode, auto & a, auto b, auto c, auto && invoke){
+                f8(mode, a, b, c, invoke);
+            });
+        }
 
-            switch(f8_t(ins.opc)){
-            case f8abt: mode[ins.opa] = role_type; f8(role_type, a, b, t，invoke); break;
-            case f8atb: mode[ins.opa] = role_type; f8(role_type, a, t, b，invoke); break;
-            case f8aab: mode[ins.opa] = role_type; f8(role_type, a, a, b，invoke); break;
-            case f8tab: mode[ins.opt] = role_type; f8(role_type, t, a, b，invoke); break;
-            case f8aai: mode[ins.opa] = role_type; f8(role_type, a, a, i，invoke); break;
-            case f8aia: mode[ins.opa] = role_type; f8(role_type, a, i, a，invoke); break;
-            case f8tai: mode[ins.opt] = role_type; f8(role_type, t, a, i，invoke); break;
-            // case f8tia: 
-            default:    mode[ins.opt] = role_type; f8(role_type, t, i, a，invoke); break;
-            }
+        template<class opr>
+        void f8x(opr const & invoke){
+            f8(invoke, [this](auto mode, auto & a, auto b, auto c, auto && invoke){
+                f8x(mode, a, b, c, invoke);
+            });
         }
 
         template<class type>
