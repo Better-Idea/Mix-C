@@ -122,10 +122,10 @@ namespace mixc::extern_isa_cpu::origin{
         ldf             = lds    + 2,
 
         // 写入内存
-        // u08/i08 -> mu08
-        // u16/i16 -> mu16
-        // u32/i32 -> mu32
-        // u64/i64 -> mu64
+        // u08/i08      -> mu08
+        // u16/i16      -> mu16
+        // u32/i32/f32  -> mu32
+        // u64/i64/f64  -> mu64
         stb             = ldf    + 2 + 2 * 2, // 保留 2x2 空位
         stw             = stb    + 2,
         std             = stw    + 2,
@@ -421,7 +421,8 @@ namespace mixc::extern_isa_cpu::origin{
         seg_t   pc;                                     // 程序计数器
         seg_t   cs;                                     // 调用栈寄存器
         seg_t   ss;                                     // 堆栈寄存器
-        rtg_t & mode    = sta.reg_type;
+        rtg_t & mode    = sta.reg_type;                 // 寄存器类型
+        u08p    ram;                                    // 内存起始地址
 
         static i64 sign_extern(reg_t val, uxx scale){
             auto idx  = 1ull << ((1ull << scale) * 8);
@@ -534,7 +535,7 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void jalx(seg_t address){
-            
+
         }
 
         void asm_imm(){
@@ -611,20 +612,29 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
+        void rdmem(reg_t * mem, u64 address, uxx bytes){
+            // 平坦模式
+            while(bytes-- > 0){
+                mem->ru64         <<= 8;
+                mem->ru64          |= ram[address + bytes];
+            }
+        }
+
+        void wrmem(reg_t * mem, u64 address, uxx bytes){
+            // 平坦模式
+            u64 v = mem->ru64;
+
+            for(uxx i = address; i < address + bytes; i++, v >>= 8){
+                ram[i]              = u08(v);
+            }
+        }
+
         struct ldx_t{
             u08                : 4;
             u08    scale       : 2;
             u08    sign_extern : 1;
             u08    with_rt     : 1;
         };
-
-        void rdmem(reg_t * mem, u64 address, uxx bytes){
-
-        }
-
-        void wrmem(reg_t * mem, u64 address, uxx bytes){
-
-        }
 
         void asm_ldxx(){
             auto i                  = inc::cast<ldx_t>(ins);
