@@ -751,7 +751,7 @@ namespace mixc::extern_isa_cpu::origin{
             auto address            = the.ins.opc == jali ? 
                 rim.load(ins.im4_opa, 4/*bit*/).read_with_clear<u64>() :
                 regs[ins.im4_opa].ru64;
-            jalx(address);
+            jalx(address & ~over_area); // 对齐
         }
 
         void asm_imm(){
