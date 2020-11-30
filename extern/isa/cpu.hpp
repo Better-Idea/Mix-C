@@ -330,6 +330,16 @@ namespace mixc::extern_isa_cpu::origin{
             #undef  xgen
         }
 
+        void run(){
+            for(;; pc.address += sizeof(ins)){
+                // 取指令
+                rdmem(& ins, pc.address, sizeof(ins));
+
+                // 执行
+                exec();
+            }
+        }
+
     private:
         using the_t     = cpu_t;
 
@@ -527,7 +537,7 @@ namespace mixc::extern_isa_cpu::origin{
 
         voidp   cmd[256];
 
-        void call(){
+        void exec(){
             union {
                 voidp           mem;
                 void (       *  gnu_call)(const void *);
