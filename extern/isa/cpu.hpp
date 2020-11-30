@@ -291,11 +291,41 @@ namespace mixc::extern_isa_cpu::origin{
 
     struct cpu_t{
     public:
-        cpu_t(){
-            #define xgen(start,end,func) for(uxx i = uxx(start); i <= uxx(end); i++) cmd[i] = the.cast(& func);
+        cpu_t(voidp ram, uxx bytes) : ram(u08p(ram)){
+            #define xgen(start,end,func) for(uxx i = uxx(cmd_t::start); i <= uxx(cmd_t::end); i++) cmd[i] = the.cast(& func);
 
             xgen(cifeq, ciflt,  asm_cifxx)
-            xgen(ifeq,  jmp,    asm_cifxx)
+            xgen(ifeq,  jmp,    asm_ifxx)
+            xgen(ret,   ret,    asm_ret)
+            xgen(jali,  jalr,   asm_jalx)
+            xgen(bdcss, bdcqix, asm_bdc)
+            xgen(movqb, movfix, asm_mov)
+
+            // xgen(rduxr, rduxr + 1, )
+            // xgen(rdpri, rdpri + 1, )
+            // xgen(wruxr, wruxr + 1, )
+            // xgen(wrpri, wrpri + 1, )
+
+            xgen(ldb,   ldqx,   asm_ldxx)
+            xgen(ldkq,  ldkf,   asm_ldkxx)
+            xgen(lds,   ldf,    asm_ldxx)
+            xgen(stb,   stq,    asm_stxx)
+            xgen(stkq,  stkq+2, asm_stxx)
+            xgen(band,  band+4, asm_band)
+            xgen(bor,   bor+4,  asm_bor)
+            xgen(bxor,  bxor+4, asm_bxor)
+            xgen(bnand, bnand+4,asm_bnand)
+            xgen(add,   add+8,  asm_add)
+            xgen(sub,   sub+8,  asm_sub)
+            xgen(mul,   mul+8,  asm_mul)
+            xgen(div,   div+8,  asm_div)
+            xgen(shr,   shr+8,  asm_shr)
+            xgen(shl,   shl+8,  asm_shl)
+            xgen(cmp,   cmp+8,  asm_cmp)
+
+            // MORE TODO:===================================
+
+            xgen(imm,   imm+16, asm_imm)
 
             #undef  xgen
         }
@@ -946,7 +976,7 @@ namespace mixc::extern_isa_cpu::origin{
             });
         }
 
-        void sub(){
+        void asm_sub(){
             f8([&](auto & a, auto b, auto c){
                 if (inc::is_float<decltype(a)>){
                     a = b - c;
