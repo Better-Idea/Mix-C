@@ -525,20 +525,47 @@ namespace mixc::extern_isa_cpu::origin{
             }
         };
 
+        struct regs_t{
+            using the_t = regs_t;
+
+            reg_t & operator[](uxx index){
+                if (index != ins_t::opt or 
+                    the->mode[index] == is_u64 or 
+                    the->mode[index] == is_i64){
+                    return regs[index];
+                }
+                if (the->mode[ins_t::opt] == is_f32){
+                    return regs[index + 1];
+                }
+                else{
+                    return regs[index + 2];
+                }
+            }
+
+            reg_t & rt(){
+                return regs[ins_t::opt];
+            }
+        private:
+            cpu_t * operator->(){
+                auto offset_ptr = & cpu_t::regs;
+                auto offset     = * uxxp(& offset_ptr);
+                return (cpu_t *)((voidp)this - offset);
+            }
+
+            reg_t   regs[general_purpose_register_count + 2];
+        };
+
+        u08p    ram;                                    // 内存起始地址
         imm_t   rim;                                    // 立即数寄存器
         ins_t   ins;                                    // 指令寄存器
-        reg_t   regs[general_purpose_register_count + 2];
-        reg_t & rt      = regs[ins_t::opt + 0];         // 临时 r64 寄存器
-        reg_t & rs      = regs[ins_t::opt + 1];         // 临时 f32 寄存器
-        reg_t & rf      = regs[ins_t::opt + 2];         // 临时 f64 寄存器
+        regs_t  regs;                                   // 通用寄存器组
         sta_t   sta;                                    // 状态寄存器
         seg_t   pc;                                     // 程序计数器
         seg_t   cs;                                     // 调用栈寄存器
         seg_t   ss;                                     // 堆栈寄存器
+        reg_t & rt      = regs.rt();                    // 绑定整数临时寄存器
         rtg_t & mode    = sta.reg_type;                 // 寄存器类型
-        u08p    ram;                                    // 内存起始地址
-
-        voidp   cmd[256];
+        voidp   cmd[256];                               // 指令集清单
 
         void exec(){
             union {
@@ -766,19 +793,20 @@ namespace mixc::extern_isa_cpu::origin{
         void asm_bdc(){
             auto i      = inc::cast<bdc_t>(ins);
             auto assign = [&](res_t m, auto v){
-                auto p_v = & regs[i.bank << 2];
-
                 for(uxx mask = i.bmp, idx = 0; mask != 0; mask >>= 1, idx++){
                     if (0 == (mask & 1)){
                         continue;
                     }
 
-                    p_v [idx]               = v;
+                    // 先设置模式，当设置的临时寄存器的情况，内部会根据当前寄存器的类型进行选择
                     mode[i.bank << 2 | idx] = m;
+                    regs[i.bank << 2 | idx] = v;
 
-                    if (m == res_t::is_f32){
-                        p_v[idx].rh32 = 0;
+                    if (m != res_t::is_f32){
+                        continue;
                     }
+
+                    regs[i.bank << 2 | idx].rh32 = 0;
                 }
             };
 
@@ -902,12 +930,8 @@ namespace mixc::extern_isa_cpu::origin{
 
         template<class opr, class subop>
         void f8(opr && invoke, subop && sub_f8){
-            auto &  a           = regs[ins.opa];
-            auto &  b           = regs[ins.opb];
             auto    role_type   = is_f32;
-            auto *  t_ptr       = (reg_t *)nullptr;
             auto    i           = reg_t{};
-            auto    z           = reg_t{}; // zero
             auto    m           = f8_t(ins.opc & 0x7);
 
             switch(m){
@@ -918,14 +942,18 @@ namespace mixc::extern_isa_cpu::origin{
             }
 
             switch(role_type){
-            case is_f32: t_ptr = & the.rs; i.rf32 = rim.read_with_clear<f32>(); break;
-            case is_f64: t_ptr = & the.rf; i.rf64 = rim.read_with_clear<f64>(); break;
-            case is_u64: t_ptr = & the.rt; i.ru64 = rim.read_with_clear<u64>(); break;
+            case is_f32: i.rf32 = rim.read_with_clear<f32>(); break;
+            case is_f64: i.rf64 = rim.read_with_clear<f64>(); break;
+            case is_u64: i.ru64 = rim.read_with_clear<u64>(); break;
             // case is_i64: 
-            default:     t_ptr = & the.rt; i.ri64 = rim.read_with_clear<i64>(); break;
+            default:     i.ri64 = rim.read_with_clear<i64>(); break;
             }
 
-            auto &  t           = *t_ptr;
+            // 在进行 mode[ins.opa] = role_type; 设置前
+            // 如果 a 是临时寄存器，则 regs[ins.opa] 代表的寄存器依赖于 mode[ins.opa] 的类型
+            #define a       regs[ins.opa];
+            #define b       regs[ins.opb];
+            #define t       regs[ins.opt]
 
             switch(m){
             case f8abt: mode[ins.opa] = role_type; sub_f8(role_type, a, b, t, invoke); break;
@@ -938,6 +966,10 @@ namespace mixc::extern_isa_cpu::origin{
             // case f8tia: 
             default:    mode[ins.opt] = role_type; sub_f8(role_type, t, i, a, invoke); break;
             }
+
+            #undef  a
+            #undef  b
+            #undef  t
         }
 
         template<class opr>
@@ -1043,16 +1075,19 @@ namespace mixc::extern_isa_cpu::origin{
         void asm_div(){
             f8([&](auto & a, auto b, auto c){
                 using ut = decltype(b);
-                if (sta.of = c == 0; sta.of){
+                if (c == 0){
                     if (b > 0){
                         a           = inc::max_value_of<ut>;
+                        sta.cf      = 1;
                     }
                     else if (b < 0){
                         a           = inc::min_value_of<ut>;
+                        sta.of      = 1;
                     }
                     else{
                         a           = 1;
                     }
+
                     sta.pmod        = no_predetermined;
                     return;
                 }
