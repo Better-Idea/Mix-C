@@ -9,6 +9,7 @@
 #include"memop/cast.hpp"
 #include"memop/signature.hpp"
 #include"memop/swap.hpp"
+#include"memory/allocator.hpp"
 #include"meta/is_float.hpp"
 #include"meta/is_integer.hpp"
 #include"meta/is_signed.hpp"
@@ -291,7 +292,9 @@ namespace mixc::extern_isa_cpu::origin{
 
     struct cpu_t{
     public:
-        cpu_t(voidp ram, uxx bytes) : ram(u08p(ram)){
+        cpu_t(uxx bytes) : 
+            ram(inc::alloc<u08>(inc::memory_size{bytes})){
+
             #define xgen(start,end,func) for(uxx i = uxx(cmd_t::start); i <= uxx(cmd_t::end); i++) cmd[i] = the.cast(& func);
 
             xgen(cifeq, ciflt,  asm_cifxx)
@@ -855,16 +858,16 @@ namespace mixc::extern_isa_cpu::origin{
         template<class opr>
         void f4(opr const & invoke){
             switch(f4_t(ins.opc & 0x3)){
-            case f4_t::f4aab: invoke(mode[ins.opa], regs[ins.opa], regs[ins.opa], regs[ins.opb]);                                       break;
-            case f4_t::f4abt: invoke(mode[ins.opb], regs[ins.opa], regs[ins.opb], regs[ins.opt]);                                       break;
-            case f4_t::f4tab: invoke(mode[ins.opa], regs[ins.opt], regs[ins.opa], regs[ins.opb]);                                       break;
-            case f4_t::f4tai: invoke(mode[ins.opa], regs[ins.opt], regs[ins.opa], rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>()); break;
+            case f4_t::f4aab: mode[ins.opa] = mode[ins.opa]; invoke(regs[ins.opa], regs[ins.opa], regs[ins.opb]);                                       break;
+            case f4_t::f4abt: mode[ins.opa] = mode[ins.opb]; invoke(regs[ins.opa], regs[ins.opb], regs[ins.opt]);                                       break;
+            case f4_t::f4tab: mode[ins.opt] = mode[ins.opa]; invoke(regs[ins.opt], regs[ins.opa], regs[ins.opb]);                                       break;
+            case f4_t::f4tai: mode[ins.opt] = mode[ins.opa]; invoke(regs[ins.opt], regs[ins.opa], rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>()); break;
             }
         }
 
         #define xgen(name,...)                                                                      \
         void asm_ ## name(){                                                                        \
-            f4([&](res_t m, reg_t & a, reg_t b, reg_t c){                                           \
+            f4([&](reg_t & a, reg_t b, reg_t c){                                                    \
                 a.ru64 = __VA_ARGS__;                                                               \
                 sta.zf = a.ru64 == 0;                                                               \
             });                                                                                     \
@@ -1159,3 +1162,5 @@ namespace mixc::extern_isa_cpu::origin{
  */
 
 #endif
+
+xexport_space(mixc::extern_isa_cpu::origin)
