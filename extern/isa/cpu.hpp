@@ -3,9 +3,11 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_isa_cpu::origin::inc
+#include"configure.hpp"
 #include"macro/xdefer.hpp"
 #include"math/const.hpp"
 #include"memop/cast.hpp"
+#include"memop/signature.hpp"
 #include"memop/swap.hpp"
 #include"meta/is_float.hpp"
 #include"meta/is_integer.hpp"
@@ -223,6 +225,20 @@ namespace mixc::extern_isa_cpu::origin{
         f8tia,
     };
 
+    typedef enum register_state_t{
+        is_f32,
+        is_f64,
+        is_u64,
+        is_i64,
+    } res_t;
+
+    enum{
+        general_purpose_register_count  = 0x10,
+        no_predetermined                = 0x10,
+
+        over_area                       = 0x1,  // 跨区域跳转
+    };
+
     struct cifxx_t{
         u08 opc     : 4;
         u08 mode    : 2;
@@ -232,21 +248,13 @@ namespace mixc::extern_isa_cpu::origin{
         u08 im4     : 4;
     };
 
-    struct jali_t{
-        u08         : 8;
-        u08   opt   : 4;
-        u08   im4   : 4;
+    struct jalx_t{
+        u08             : 8;
+        u08   opt       : 4;
+        u08   im4_opa   : 4;
     };
 
-    struct jalr_t{
-        u08         : 8;
-        u08   opt   : 4;
-        u08   opa   : 4;
-    };
-
-    enum context_t : uxx{ 
-        over_area       = 0x1,  // 跨区域跳转
-
+    enum opt_t : uxx{ 
         save_lreg_type  = 0x1,  // 保存类型寄存器低 8 组
         save_hreg_type  = 0x2,  // 保存类型寄存器高 8 组
         save_op_state   = 0x4,  // 保存运算状态寄存器
@@ -282,7 +290,13 @@ namespace mixc::extern_isa_cpu::origin{
     };
 
     struct cpu_t{
-        using the_t = cpu_t;
+    public:
+        cpu_t(){
+            
+        }
+
+    private:
+        using the_t     = cpu_t;
 
         struct imm_t{
             auto & load(uxx value, uxx bits){
@@ -371,13 +385,6 @@ namespace mixc::extern_isa_cpu::origin{
             enum{ opt = 15 };
         };
 
-        typedef enum register_state_t{
-            is_f32,
-            is_f64,
-            is_u64,
-            is_i64,
-        } res_t;
-
         typedef struct reg_type_group{
             struct bits_delegate{
                 bits_delegate(u32p bits, uxx offset) : 
@@ -406,11 +413,6 @@ namespace mixc::extern_isa_cpu::origin{
         private:
             u32 type_group;
         } rtg_t;
-
-        enum{
-            general_purpose_register_count  = 0x10,
-            no_predetermined                = 0x10,
-        };
 
         struct sta_t{
             // 寄存器类型 2bit * 16
@@ -487,6 +489,34 @@ namespace mixc::extern_isa_cpu::origin{
         seg_t   ss;                                     // 堆栈寄存器
         rtg_t & mode    = sta.reg_type;                 // 寄存器类型
         u08p    ram;                                    // 内存起始地址
+
+        voidp   cmd[256];
+
+        void call(){
+            union {
+                voidp           mem;
+                void (       *  gnu_call)(const void *);
+                void (the_t::*  msvc_call)();
+            } u;
+
+            u.mem = cmd[ins.opc];
+
+            #if xis_msvc
+            return (this->*u.msvc_call)();
+            #else
+            return u.gnu_call(this);
+            #endif
+        }
+
+        static voidp cast(void(cpu_t::* func)()){
+            union {
+                voidp          mem;
+                void (cpu_t::* call)();
+            } u;
+
+            u.call = func;
+            return u.mem;
+        }
 
         static i64 sign_extern(reg_t val, uxx scale){
             auto idx  = 1ull << ((1ull << scale) * 8);
@@ -585,7 +615,7 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
         void jalx(seg_t address){
-            auto ins                = inc::cast<jali_t>(the.ins);
+            auto ins                = inc::cast<jalx_t>(the.ins);
 
             // 跨程序段跳转
             if (address.segment){
@@ -629,7 +659,7 @@ namespace mixc::extern_isa_cpu::origin{
             }
 
             // 读取 jal 指令信息
-            auto ins                = jali_t{};
+            auto ins                = jalx_t{};
             rdmem(& ins, pc.address, sizeof(ins_t));
 
             // 恢复调用时保存的信息
@@ -641,11 +671,12 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        void asm_jali(){
-            auto ins                = inc::cast<jali_t>(the.ins);
-            auto address            = rim.load(ins.im4, 4/*bit*/).read_with_clear<u64>();
-
-            
+        void asm_jalx(){
+            auto ins                = inc::cast<jalx_t>(the.ins);
+            auto address            = the.ins.opc == jali ? 
+                rim.load(ins.im4_opa, 4/*bit*/).read_with_clear<u64>() :
+                regs[ins.im4_opa].ru64;
+            jalx(address);
         }
 
         void asm_imm(){
@@ -1079,39 +1110,8 @@ namespace mixc::extern_isa_cpu::origin{
     };
 }
 
-/*
- * 
- * bp + 16  arg2
- * bp + 08  arg1
- * bp + 00  arg0
- * 
- * 0x00 <- 0xff10
- * 0x04 <- 0xff0c
- * 
- * 
- * 调用框架：
- * 
- *      # 保留 n 个单位的内存用于保存返回参数
- *      keep n
- *
- *      ...
- *      push mem_arg8
- *      push mem_arg7
- *      push mem_arg6
- *      rf   reg_arg5
- *      re   reg_arg4
- *      rd   reg_arg3
- *      rc   reg_arg2
- *      rb   reg_arg1
- *      ra   reg_arg0
- *      r9   reg_ret1
- *      r8   reg_ret0
- * 
- *      jal  foo -> r0, r1
- * 
- *      jal  8
- *      ret  8
- * 
+/* 笔记：
+ * 当进行跨段调用时，需要进行冗余的寄存器类型设置以避免计算错误，因为外来的参数需要默认当作不可信的（防卫式编程）。
  */
 
 #endif
