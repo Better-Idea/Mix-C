@@ -377,6 +377,12 @@ namespace mixc::extern_isa_cpu::origin{
             // 下溢
             u32     of                  : 1;
 
+            // 保留
+            u32                         : 11;
+
+            // 保留
+            u32                         : 1;
+
             // 预设(predetermined)
             // 指定余数存放的寄存器
             // 在指定寄存器获取到余数后该位域被复位为 no_predetermined
@@ -530,12 +536,89 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        void asm_ret(){
+        struct jali_t{
+            u08         : 8;
+            u08   opt   : 4;
+            u08   im4   : 4;
+        };
 
-        }
+        struct jalr_t{
+            u08         : 8;
+            u08   opt   : 4;
+            u08   opa   : 4;
+        };
+
+        enum : uxx{ 
+            over_area       = 0x1,  // 跨区域跳转
+
+            save_lreg_type  = 0x1,  // 保存类型寄存器低 8 组
+            save_hreg_type  = 0x2,  // 保存类型寄存器高 8 组
+            save_op_state   = 0x4,  // 保存运算状态寄存器
+            save_pstate     = 0x8,  // 保存预设寄存器
+        };
 
         void jalx(seg_t address){
+            auto ins                = inc::cast<jali_t>(the.ins);
 
+            // 跨程序段跳转
+            if (address.segment){
+                // TODO====================================================================================
+            }
+
+            // 按需保存状态寄存器
+            for(uxx i = 0; i < 4; i++){
+                if (u16 v = u16p(& sta)[i]; ins.opt & (1 << i)){
+                    wrmem(& v, cs.address, 2/*bytes*/);
+                    cs.address     += 2;
+                }
+            }
+
+            // 段内跨区域跳转
+            // 让 position 排后边，作为第一个读到的 u16，在根据 over_area 位判断是否存在 area
+            if (address.area){
+                address.position   |= over_area;
+                wrmem(& address.area,     cs.address + 0, 2/*bytes*/);
+                wrmem(& address.position, cs.address + 2, 2/*bytes*/);
+                cs.address         += 4;
+            }
+            // 为了看上去整齐
+            else{
+                wrmem(& address.position, cs.address + 0, 2/*bytes*/);
+                cs.address         += 2;
+            }
+        }
+
+        void asm_ret(){
+            // 跨程序段跳转
+            // TODO====================================================================================
+
+            cs.address             -= 2;
+            rdmem(& pc.position, cs.address, 2/*bytes*/);
+
+            if (pc.position & over_area){
+                pc.position        &= ~over_area;
+                cs.address         -= 2;
+                rdmem(& pc.area, cs.address, 2/*bytes*/);
+            }
+
+            // 读取 jal 指令信息
+            auto ins                = jali_t{};
+            rdmem(& ins, pc.address, sizeof(ins_t));
+
+            // 恢复调用时保存的信息
+            for(uxx i = 4; i-- > 0;){
+                if (u16 & v = u16p(& sta)[i]; ins.opt & (1 << i)){
+                    cs.address     -= 2;
+                    wrmem(& v, cs.address, 2/*bytes*/);
+                }
+            }
+        }
+
+        void asm_jali(){
+            auto ins                = inc::cast<jali_t>(the.ins);
+            auto address            = rim.load(ins.im4, 4/*bit*/).read_with_clear<u64>();
+
+            
         }
 
         void asm_imm(){
@@ -612,20 +695,17 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        void rdmem(reg_t * mem, u64 address, uxx bytes){
+        void rdmem(voidp mem, u64 address, uxx bytes){
             // 平坦模式
-            while(bytes-- > 0){
-                mem->ru64         <<= 8;
-                mem->ru64          |= ram[address + bytes];
+            for(auto ptr = u08p(mem); bytes-- > 0;){
+                ptr[bytes]         |= ram[address + bytes];
             }
         }
 
-        void wrmem(reg_t * mem, u64 address, uxx bytes){
+        void wrmem(voidp mem, u64 address, uxx bytes){
             // 平坦模式
-            u64 v = mem->ru64;
-
-            for(uxx i = address; i < address + bytes; i++, v >>= 8){
-                ram[i]              = u08(v);
+            for(uxx i = 0; i < bytes; i++){
+                ram[i + address]    = u08p(mem)[i];
             }
         }
 
