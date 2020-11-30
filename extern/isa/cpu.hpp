@@ -223,6 +223,64 @@ namespace mixc::extern_isa_cpu::origin{
         f8tia,
     };
 
+    struct cifxx_t{
+        u08 opc     : 4;
+        u08 mode    : 2;
+        u08 bank    : 2;
+        u08 opa     : 2;
+        u08 opb     : 2;
+        u08 im4     : 4;
+    };
+
+    struct jali_t{
+        u08         : 8;
+        u08   opt   : 4;
+        u08   im4   : 4;
+    };
+
+    struct jalr_t{
+        u08         : 8;
+        u08   opt   : 4;
+        u08   opa   : 4;
+    };
+
+    enum context_t : uxx{ 
+        over_area       = 0x1,  // 跨区域跳转
+
+        save_lreg_type  = 0x1,  // 保存类型寄存器低 8 组
+        save_hreg_type  = 0x2,  // 保存类型寄存器高 8 组
+        save_op_state   = 0x4,  // 保存运算状态寄存器
+        save_pstate     = 0x8,  // 保存预设寄存器
+    };
+
+    struct bdc_t{
+        u08         : 6;
+        u08   bank  : 2;
+        u08   bmp   : 4;
+        u08   opb   : 4;
+    };
+
+    struct ldx_t{
+        u08                : 4;
+        u08    scale       : 2;
+        u08    sign_extern : 1;
+        u08    with_rt     : 1;
+    };
+
+    struct rwss_t{
+        u08                 : 5;
+        u08     type        : 2;
+        u08     side_effect : 1;
+        u08     opa         : 4;
+        u08     im4         : 4;
+    };
+
+    struct stxx_t{
+        u08                 : 5;
+        u08     scale       : 2;
+        u08     with_rt     : 1;
+    };
+
     struct cpu_t{
         using the_t = cpu_t;
 
@@ -485,15 +543,6 @@ namespace mixc::extern_isa_cpu::origin{
             sta.gt  = cmode == c4ia ? a < b : a > b;
         }
 
-        struct cifxx_t{
-            u08 opc     : 4;
-            u08 mode    : 2;
-            u08 bank    : 2;
-            u08 opa     : 2;
-            u08 opb     : 2;
-            u08 im4     : 4;
-        };
-
         void asm_cifxx(){
             auto ins = inc::cast<cifxx_t>(the.ins);
             rim.load(ins.im4, 4/*bits*/);
@@ -535,28 +584,6 @@ namespace mixc::extern_isa_cpu::origin{
             case cmd_t::jmp : ifxx(false/*force*/);           break;
             }
         }
-
-        struct jali_t{
-            u08         : 8;
-            u08   opt   : 4;
-            u08   im4   : 4;
-        };
-
-        struct jalr_t{
-            u08         : 8;
-            u08   opt   : 4;
-            u08   opa   : 4;
-        };
-
-        enum : uxx{ 
-            over_area       = 0x1,  // 跨区域跳转
-
-            save_lreg_type  = 0x1,  // 保存类型寄存器低 8 组
-            save_hreg_type  = 0x2,  // 保存类型寄存器高 8 组
-            save_op_state   = 0x4,  // 保存运算状态寄存器
-            save_pstate     = 0x8,  // 保存预设寄存器
-        };
-
         void jalx(seg_t address){
             auto ins                = inc::cast<jali_t>(the.ins);
 
@@ -657,13 +684,6 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        struct bdc_t{
-            u08         : 6;
-            u08   bank  : 2;
-            u08   bmp   : 4;
-            u08   opb   : 4;
-        };
-
         void asm_bdc(){
             auto i      = inc::cast<bdc_t>(ins);
             auto assign = [&](res_t m, auto v){
@@ -709,13 +729,6 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        struct ldx_t{
-            u08                : 4;
-            u08    scale       : 2;
-            u08    sign_extern : 1;
-            u08    with_rt     : 1;
-        };
-
         void asm_ldxx(){
             auto i                  = inc::cast<ldx_t>(ins);
             auto bytes              = ins.opc <= cmd_t::ldqx ? 1 << i.scale/*m08/m16/m32/m64*/ : 4 << i.scale/*mf32/mf64*/;
@@ -733,14 +746,6 @@ namespace mixc::extern_isa_cpu::origin{
                 mode[ins.opa]       = res_t::is_u64;
             }
         }
-
-        struct rwss_t{
-            u08                 : 5;
-            u08     type        : 2;
-            u08     side_effect : 1;
-            u08     opa         : 4;
-            u08     im4         : 4;
-        };
 
         void asm_stkxx(){
             auto ins           = inc::cast<rwss_t>(the.ins);
@@ -764,12 +769,6 @@ namespace mixc::extern_isa_cpu::origin{
                 ss.address     = addr;
             }
         }
-
-        struct stxx_t{
-            u08                 : 5;
-            u08     scale       : 2;
-            u08     with_rt     : 1;
-        };
 
         void asm_stxx(){
             auto i                  = inc::cast<stxx_t>(ins);
