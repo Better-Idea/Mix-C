@@ -303,7 +303,11 @@ namespace mixc::extern_isa_cpu::origin{
                     u08 opa : 4;
                     u08 opb : 4;
                 };
-                u08 im;
+                struct{
+                    u08     : 4;
+                    u08 im4 : 4;
+                };
+                u08 im8;
             };
 
             enum{ opt = 15 };
@@ -508,7 +512,7 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void asm_ifxx(){
-            switch(rim.load(ins.im, 8/*bits*/); cmd_t(ins.opc)){
+            switch(rim.load(ins.im8, 8/*bits*/); cmd_t(ins.opc)){
             case cmd_t::ifeq: ifxx(    sta.eq);               break;
             case cmd_t::ifne: ifxx(not sta.eq);               break;
             case cmd_t::ifle: ifxx(    sta.eq or not sta.gt); break;
@@ -596,14 +600,14 @@ namespace mixc::extern_isa_cpu::origin{
             };
 
             switch(cmd_t(ins.opc)){
-            case cmd_t::bdcss : assign(res_t::is_f32, regs[i.opb]);                                       break;
-            case cmd_t::bdcsi : assign(res_t::is_f32, rim.load(i.im4, 4/*bits*/).read_with_clear<f32>()); break;
-            case cmd_t::bdcff : assign(res_t::is_f64, regs[ins.opb]);                                     break;
-            case cmd_t::bdcfi : assign(res_t::is_f64, rim.load(i.im4, 4/*bits*/).read_with_clear<f64>()); break;
-            case cmd_t::bdcqq : assign(res_t::is_u64, regs[ins.opb]);                                     break;
-            case cmd_t::bdcqi : assign(res_t::is_u64, rim.load(i.im4, 4/*bits*/).read_with_clear<u64>()); break;
-            case cmd_t::bdcqqx: assign(res_t::is_i64, regs[ins.opb]);                                     break;
-            case cmd_t::bdcqix: assign(res_t::is_i64, rim.load(i.im4, 4/*bits*/).read_with_clear<i64>()); break;
+            case cmd_t::bdcss : assign(res_t::is_f32, regs[i.opb]);                                         break;
+            case cmd_t::bdcsi : assign(res_t::is_f32, rim.load(ins.im4, 4/*bits*/).read_with_clear<f32>()); break;
+            case cmd_t::bdcff : assign(res_t::is_f64, regs[ins.opb]);                                       break;
+            case cmd_t::bdcfi : assign(res_t::is_f64, rim.load(ins.im4, 4/*bits*/).read_with_clear<f64>()); break;
+            case cmd_t::bdcqq : assign(res_t::is_u64, regs[ins.opb]);                                       break;
+            case cmd_t::bdcqi : assign(res_t::is_u64, rim.load(ins.im4, 4/*bits*/).read_with_clear<u64>()); break;
+            case cmd_t::bdcqqx: assign(res_t::is_i64, regs[ins.opb]);                                       break;
+            case cmd_t::bdcqix: assign(res_t::is_i64, rim.load(ins.im4, 4/*bits*/).read_with_clear<i64>()); break;
             }
         }
 
@@ -873,24 +877,29 @@ namespace mixc::extern_isa_cpu::origin{
                 using ut = decltype(b);
                 if (sta.of = c == 0; sta.of){
                     if (b > 0){
-                        a   = inc::max_value_of<ut>;
+                        a           = inc::max_value_of<ut>;
                     }
                     else if (b < 0){
-                        a   = inc::min_value_of<ut>;
+                        a           = inc::min_value_of<ut>;
                     }
                     else{
-                        a   = 1;
+                        a           = 1;
                     }
+                    sta.pmod        = no_predetermined;
                     return;
                 }
 
-                if constexpr (inc::is_integer<ut>){
-                    if (sta.pmod != no_predetermined){
-                        regs[sta.pmod]  = b % c;
-                        sta.pmod        = no_predetermined;
-                    }
+                a                   = b / c;
+
+                if (not inc::is_integer<ut>){
+                    sta.pmod        = no_predetermined;
+                    return;
                 }
-                a = b / c;
+
+                if (sta.pmod != no_predetermined){
+                    regs[sta.pmod]  = b % c;
+                    sta.pmod        = no_predetermined;
+                }
             });
         }
 
@@ -934,19 +943,19 @@ namespace mixc::extern_isa_cpu::origin{
         void asm_cmp(){
             reg_t  ra;
             reg_t  rb;
-            res_t  sa;
-            res_t  sb;
+            res_t  ma;
+            res_t  mb;
 
             if (c4_t(ins.opc) == c4ab){
                 ra = regs[ins.opa];
-                sa = mode[ins.opa];
+                ma = mode[ins.opa];
                 rb = regs[ins.opb];
-                sb = mode[ins.opb];
+                mb = mode[ins.opb];
             }
             else{
                 ra = regs[ins.opa];
-                sb = 
-                sa = mode[ins.opa];
+                mb = 
+                ma = mode[ins.opa];
                 rim.load(ins.im4, 4/*bits*/);
 
                 switch(c4_t(ins.opc)){
@@ -961,15 +970,15 @@ namespace mixc::extern_isa_cpu::origin{
                 }
             }
 
-            #define xgen(type)                                                                              \
-            switch(sb){                                                                                     \
-            case is_f32: sta.eq = f80(type) == f80(rb.rf32); sta.gt = f80(type) > f80(rb.rf32); break;      \
-            case is_f64: sta.eq = f80(type) == f80(rb.rf64); sta.gt = f80(type) > f80(rb.rf64); break;      \
-            case is_u64: sta.eq = f80(type) == f80(rb.ru64); sta.gt = f80(type) > f80(rb.ru64); break;      \
-            case is_i64: sta.eq = f80(type) == f80(rb.ri64); sta.gt = f80(type) > f80(rb.ri64); break;      \
+            #define xgen(value)                                                                                 \
+            switch(mb){                                                                                         \
+            case is_f32: sta.eq = f80(value) == f80(rb.rf32); sta.gt = f80(value) > f80(rb.rf32); break;        \
+            case is_f64: sta.eq = f80(value) == f80(rb.rf64); sta.gt = f80(value) > f80(rb.rf64); break;        \
+            case is_u64: sta.eq = f80(value) == f80(rb.ru64); sta.gt = f80(value) > f80(rb.ru64); break;        \
+            case is_i64: sta.eq = f80(value) == f80(rb.ri64); sta.gt = f80(value) > f80(rb.ri64); break;        \
             }
 
-            switch(sa){
+            switch(ma){
             case is_f32: xgen(ra.rf32) break;
             case is_f64: xgen(ra.rf64) break;
             case is_u64: xgen(ra.ru64) break;
