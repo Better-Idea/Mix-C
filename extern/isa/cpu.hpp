@@ -416,21 +416,21 @@ namespace mixc::extern_isa_cpu::origin{
         };
 
         struct ins_t{
-            u08     opc;
+            u08     opc;                // op-code
 
             union{
                 struct{
-                    u08 opa : 4;
-                    u08 opb : 4;
+                    u08 opa : 4;        // 操作数 a
+                    u08 opb : 4;        // 操作数 b
                 };
                 struct{
                     u08     : 4;
-                    u08 im4 : 4;
+                    u08 im4 : 4;        // 4bit 立即数，与 opb 共用位域
                 };
-                u08 im8;
+                u08 im8;                // 8bit 立即数
             };
 
-            enum{ opt = 15 };
+            enum{ opt = 15 };           // 临时寄存器的编号
         };
 
         typedef struct reg_type_group{
