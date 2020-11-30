@@ -292,7 +292,12 @@ namespace mixc::extern_isa_cpu::origin{
     struct cpu_t{
     public:
         cpu_t(){
-            
+            #define xgen(start,end,func) for(uxx i = uxx(start); i <= uxx(end); i++) cmd[i] = the.cast(& func);
+
+            xgen(cifeq, ciflt,  asm_cifxx)
+            xgen(ifeq,  jmp,    asm_cifxx)
+
+            #undef  xgen
         }
 
     private:
@@ -825,14 +830,14 @@ namespace mixc::extern_isa_cpu::origin{
             });                                                                                     \
         }
 
-        xgen(band,  (b.ru64 & c.ru64))
-        xgen(band,  (b.ru64 | c.ru64))
-        xgen(band,  (b.ru64 ^ c.ru64))
-        xgen(band, ~(b.ru64 & c.ru64))
+        xgen(band ,  (b.ru64 & c.ru64))
+        xgen(bor  ,  (b.ru64 | c.ru64))
+        xgen(bxor ,  (b.ru64 ^ c.ru64))
+        xgen(bnand, ~(b.ru64 & c.ru64))
 
         #undef  xgen
 
-        template<class reg, class mod, class opr>
+        template<class reg, class opr>
         void f8(res_t mode, reg & a, reg b, reg c, opr && invoke){
             switch(mode){
             case is_f32: invoke(a.rf32, b.rf32, c.rf32); break;
@@ -842,18 +847,18 @@ namespace mixc::extern_isa_cpu::origin{
             }
         }
 
-        template<class reg, class mod, class opr>
+        template<class reg, class opr>
         void f8x(res_t mode, reg & a, reg b, reg c, opr && invoke){
             if (mode == is_i64){
-                invoke(a.ru64, b.ru64, c.ru64, d.ru64);
+                invoke(a.ru64, b.ru64, c.ru64);
             }
             else{
-                invoke(a.ri64, b.ri64, c.ri64, d.ri64);
+                invoke(a.ri64, b.ri64, c.ri64);
             }
         }
 
-        template<class opr, class sub>
-        void f8(opr && invoke, sub && sub_f8){
+        template<class opr, class subop>
+        void f8(opr && invoke, subop && sub_f8){
             auto &  a           = regs[ins.opa];
             auto &  b           = regs[ins.opb];
             auto    role_type   = is_f32;
@@ -866,7 +871,7 @@ namespace mixc::extern_isa_cpu::origin{
             case f8abt:  role_type = mode[ins.opb]; break;
             case f8atb:  role_type = mode[ins.opt]; break;
             // case f8aab:  case f8tab:  case f8aai : case f8aia : case f8tai : case f8tia : 
-            default:     role_type = mode[ins.opa]; rim.load(ins.im4, 4/*bit*/) break;
+            default:     role_type = mode[ins.opa]; rim.load(ins.im4, 4/*bit*/); break;
             }
 
             switch(role_type){
@@ -880,15 +885,15 @@ namespace mixc::extern_isa_cpu::origin{
             auto &  t           = *t_ptr;
 
             switch(m){
-            case f8abt: mode[ins.opa] = role_type; sub_f8(role_type, a, b, t，invoke); break;
-            case f8atb: mode[ins.opa] = role_type; sub_f8(role_type, a, t, b，invoke); break;
-            case f8aab: mode[ins.opa] = role_type; sub_f8(role_type, a, a, b，invoke); break;
-            case f8tab: mode[ins.opt] = role_type; sub_f8(role_type, t, a, b，invoke); break;
-            case f8aai: mode[ins.opa] = role_type; sub_f8(role_type, a, a, i，invoke); break;
-            case f8aia: mode[ins.opa] = role_type; sub_f8(role_type, a, i, a，invoke); break;
-            case f8tai: mode[ins.opt] = role_type; sub_f8(role_type, t, a, i，invoke); break;
+            case f8abt: mode[ins.opa] = role_type; sub_f8(role_type, a, b, t, invoke); break;
+            case f8atb: mode[ins.opa] = role_type; sub_f8(role_type, a, t, b, invoke); break;
+            case f8aab: mode[ins.opa] = role_type; sub_f8(role_type, a, a, b, invoke); break;
+            case f8tab: mode[ins.opt] = role_type; sub_f8(role_type, t, a, b, invoke); break;
+            case f8aai: mode[ins.opa] = role_type; sub_f8(role_type, a, a, i, invoke); break;
+            case f8aia: mode[ins.opa] = role_type; sub_f8(role_type, a, i, a, invoke); break;
+            case f8tai: mode[ins.opt] = role_type; sub_f8(role_type, t, a, i, invoke); break;
             // case f8tia: 
-            default:    mode[ins.opt] = role_type; sub_f8(role_type, t, i, a，invoke); break;
+            default:    mode[ins.opt] = role_type; sub_f8(role_type, t, i, a, invoke); break;
             }
         }
 
@@ -1011,15 +1016,14 @@ namespace mixc::extern_isa_cpu::origin{
 
                 a                   = b / c;
 
-                if (not inc::is_integer<ut>){
-                    sta.pmod        = no_predetermined;
-                    return;
+                if constexpr (inc::is_integer<ut>){
+                    if (sta.pmod != no_predetermined){
+                        regs[sta.pmod]
+                                    = b % c;
+                    }
                 }
 
-                if (sta.pmod != no_predetermined){
-                    regs[sta.pmod]  = b % c;
-                    sta.pmod        = no_predetermined;
-                }
+                sta.pmod        = no_predetermined;
             });
         }
 
