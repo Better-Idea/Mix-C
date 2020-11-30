@@ -233,7 +233,7 @@ namespace mixc::extern_isa_cpu::origin{
         is_i64,
     } res_t;
 
-    enum{
+    enum : uxx{
         general_purpose_register_count  = 0x10,
         no_predetermined                = 0x10,
 
@@ -549,7 +549,7 @@ namespace mixc::extern_isa_cpu::origin{
             cpu_t * operator->(){
                 auto offset_ptr = & cpu_t::regs;
                 auto offset     = * uxxp(& offset_ptr);
-                return (cpu_t *)((voidp)this - offset);
+                return (cpu_t *)((u08p)this - offset);
             }
 
             reg_t   regs[general_purpose_register_count + 2];
@@ -798,7 +798,7 @@ namespace mixc::extern_isa_cpu::origin{
                         continue;
                     }
 
-                    // 先设置模式，当设置的临时寄存器的情况，内部会根据当前寄存器的类型进行选择
+                    // 先设置模式，当设置的是临时寄存器的情况，内部会根据当前寄存器的类型进行选择
                     mode[i.bank << 2 | idx] = m;
                     regs[i.bank << 2 | idx] = v;
 
@@ -949,10 +949,9 @@ namespace mixc::extern_isa_cpu::origin{
             default:     i.ri64 = rim.read_with_clear<i64>(); break;
             }
 
-            // 在进行 mode[ins.opa] = role_type; 设置前
-            // 如果 a 是临时寄存器，则 regs[ins.opa] 代表的寄存器依赖于 mode[ins.opa] 的类型
-            #define a       regs[ins.opa];
-            #define b       regs[ins.opb];
+            // 如果 a 是临时寄存器，则 regs[ins.opa] 代表的寄存器依赖于 mode[ins.opa] 的值
+            #define a       regs[ins.opa]
+            #define b       regs[ins.opb]
             #define t       regs[ins.opt]
 
             switch(m){
@@ -1101,7 +1100,7 @@ namespace mixc::extern_isa_cpu::origin{
                     }
                 }
 
-                sta.pmod        = no_predetermined;
+                sta.pmod            = no_predetermined;
             });
         }
 
