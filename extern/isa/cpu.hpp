@@ -718,6 +718,12 @@ namespace mixc::extern_isa_cpu::origin{
                 wrmem(& address.position, cs.address + 0, 2/*bytes*/);
                 cs.address         += 2;
             }
+
+            // 当执行 jalx 指令后，此时 pc 会指向子函数第一条指令
+            // 接着在 the.run() 函数中完成一轮循环，需要将 pc += sizeof(ins_t)
+            // 这里让 pc -= sizeof(ins_t); 保证下一条指令指向子函数第一条指令
+            // 在 jalx() 中不直接执行子函数第一条指令，避免恶意的递归调用（第一条指令是 jalx 指令）导致爆栈
+            pc.address             -= sizeof(ins_t);
         }
 
         void asm_ret(){
