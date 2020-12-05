@@ -85,7 +85,7 @@ namespace xuser{
             // 新的长度为 7
             xhint(new_length);
 
-            // 依次打印 10,15,20,30,40,50,60,70
+            // 依次打印 10,20,30,40,50,60,70
             for(uxx i = 0; i < new_length; i++){
                 xhint(i, ary[i]);
             }
@@ -102,7 +102,7 @@ namespace xuser{
             // 新的长度为 10
             xhint(new_length);
 
-            // 依次打印 1,2,3,10,15,20,30,40,50,60,70
+            // 依次打印 1,2,3,10,20,30,40,50,60,70
             for(uxx i = 0; i < new_length; i++){
                 xhint(i, buf[i]);
             }
