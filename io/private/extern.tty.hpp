@@ -263,14 +263,14 @@ namespace mixc::io_private_tty::origin{
     void forecolor(inc::tty_color_t value) {
         using namespace inc::tty_color;
         static_assert(uxx(black)           == 0x0);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED)             == 0x1);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_GREEN)           == 0x2);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN)          == 0x3);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_BLUE)            == 0x4);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE)         == 0x5);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE)            == 0x6);
-        static_assert(uxx(FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)           == 0x7);
-        static_assert(uxx(FOREGROUND_INTENSITY)            == 0x8);
+        static_assert(uxx(red)             == 0x1);
+        static_assert(uxx(green)           == 0x2);
+        static_assert(uxx(yellow)          == 0x3);
+        static_assert(uxx(blue)            == 0x4);
+        static_assert(uxx(magenta)         == 0x5);
+        static_assert(uxx(cyan)            == 0x6);
+        static_assert(uxx(white)           == 0x7);
+        static_assert(uxx(gray)            == 0x8);
         static_assert(uxx(light_red)       == 0x9);
         static_assert(uxx(light_green)     == 0xa);
         static_assert(uxx(light_yellow)    == 0xb);
@@ -295,7 +295,7 @@ namespace mixc::io_private_tty::origin{
     void clear(){
         print_core("\e[0m\e[0;0H\e[2J", 14);
         // backcolor(back);
-        forecolor(color.fore);
+        forecolor((inc::tty_color_t)color.fore);
         print_flush();
     }
 
