@@ -98,8 +98,8 @@ namespace mixc::interface_seqptr::origin{
             auto r      = subseq(itv);
             auto state  = loop_t::go_on;
 
-            for(uxx i = 0; i < r.length() and state != loop_t::finish; i++){
-                xitr_switch(mode,i,state,invoke, r[i]);
+            for(uxx i = 0, index = 0; i < r.length() and state != loop_t::finish; i++){
+                xitr_switch(mode,index,state,invoke, r[i]);
             }
         }
     public:
