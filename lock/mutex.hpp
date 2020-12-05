@@ -18,7 +18,7 @@ namespace mixc::lock_mutex::origin{
 
     xstruct(
         xname(mutex),
-        xprif(item, mutable bool)
+        xprif(item,  bool)
     )
         mutex() : item(false){}
 

@@ -56,7 +56,7 @@ namespace mixc::docker_array{
     template<class final, class type, uxx count, uxx ... rest>
     xstruct(
         xtmpl(array_t, final, type, count, rest...),
-        xprif(data, mutable items<final, type, count, rest...>)
+        xprif(data, items<final, type, count, rest...>)
     )
         using item_t = inc::remove_ref<decltype(data[0])>;
     public:
@@ -114,7 +114,7 @@ namespace mixc::docker_array{
     xstruct(
         xspec(array_t, final, type),
         xpubb(inc::disable_copy),
-        xprif(data, mutable type *)
+        xprif(data, type *)
     )
         using item_t                = type;
         using item_initial_invoke   = inc::icallback<void(item_t *)>;

@@ -26,8 +26,8 @@ namespace mixc::math_index_system::origin{
     // bend close interval
     xstruct(
         xname(cc),
-        xprof(pleft,   mutable ixx),
-        xprof(pright,  mutable ixx)
+        xprof(pleft,    ixx),
+        xprof(pright,   ixx)
     )
         using final = cc;
 

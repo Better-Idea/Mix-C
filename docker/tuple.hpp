@@ -36,7 +36,7 @@ namespace mixc::docker_tuple::origin{
     xstruct(
         xtmpl(tuple, a0, args...),
         xprob(tuple<args...>),
-        xprif(value, mutable item_t<a0>)
+        xprif(value, item_t<a0>)
     )
         using base = tuple<args...>;
 

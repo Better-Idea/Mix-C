@@ -33,7 +33,8 @@ namespace mixc::gc_private_token::origin{
     constexpr uxx step = uxx(1);
 
     xstruct(
-        xname(token)
+        xname(token),
+        xprof(record, uxx)
     )
         token(uxx) : record(step) { }
     protected:
@@ -42,8 +43,6 @@ namespace mixc::gc_private_token::origin{
 
         constexpr uxx  this_length() const { return uxx(0); }
         constexpr void this_length(uxx) const { }
-
-        mutable uxx record;
 
         uxx owners() const {
             return record;
@@ -62,7 +61,7 @@ namespace mixc::gc_private_token::origin{
         xname(token_plus),
         xpubb(token)
     )
-        mutable uxx length;
+         uxx length;
 
         token_plus(uxx length) : 
             token(0), length(length) { }

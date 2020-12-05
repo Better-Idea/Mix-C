@@ -20,8 +20,8 @@ namespace mixc::io_file::origin{
     xstruct(
         xname(file),
         xpubb(inc::disable_copy),
-        xprif(fd,   mutable ixx),
-        xprif(path, mutable inc::c08)
+        xprif(fd,    ixx),
+        xprif(path,  inc::c08)
     )
         using final = the_t;
     public:

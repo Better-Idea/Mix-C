@@ -176,7 +176,7 @@ namespace mixc::lock_policy_barrier{
     template<class bits_t, class ... rules>
     xstruct(
         xtmpl(policy_barrier_t, bits_t, rules...),
-        xprif(state, mutable bits_t)
+        xprif(state,  bits_t)
     )
         using rule_list     = tlist<rules...>;
         using raw_data_list = typename pair_t<rules...>::new_list;

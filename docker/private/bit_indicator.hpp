@@ -75,7 +75,7 @@ namespace mixc::docker_bit_indicator{
             return data;
         }
 
-        mutable uxx data[size()] = {0};
+         uxx data[size()] = {0};
 
         /* 位图可访问的总位数 */
         xpubgetx(total_bits, uxx){
@@ -91,10 +91,10 @@ namespace mixc::docker_bit_indicator{
     xstruct(
         xspec(bit_indicator_t, final),
         xpubb(inc::disable_copy),
-        xprif(pbmp          , mutable uxx *),
-        xprif(pheight       , mutable uxx),
-        xprif(psize         , mutable uxx),
-        xprif(ptotal_bits   , mutable uxx)
+        xprif(pbmp          , uxx *),
+        xprif(pheight       , uxx),
+        xprif(psize         , uxx),
+        xprif(ptotal_bits   , uxx)
     )
         bit_indicator_t() : 
             pbmp(nullptr), pheight(0), psize(0) {}

@@ -29,7 +29,7 @@ namespace mixc::docker_single_linked_node::origin {
     xstruct(
         xtmpl(single_linked_node_ptr, item_t, lock_t),
         xprib(lock_t),
-        xprif(ptop,     mutable single_linked_node<item_t> *)
+        xprif(ptop,       single_linked_node<item_t> *)
     )
     public:
         using node_t    = single_linked_node<item_t>;

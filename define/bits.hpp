@@ -13,7 +13,7 @@ namespace mixc::define_bits::origin{
     template<class type, class bit_type = bool>
     xstruct(
         xtmpl(bits, type),
-        xprif(data, mutable type)
+        xprif(data, type)
     )
         bits() : bits(0){}
         bits(type const & value) : data(value){}

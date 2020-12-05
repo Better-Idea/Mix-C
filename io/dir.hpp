@@ -15,7 +15,7 @@ namespace mixc::io_dir::origin{
     xstruct(
         xname(dir),
         xpubb(inc::disable_copy),
-        xprif(path, mutable inc::c08)
+        xprif(path,  inc::c08)
     )
         using final = the_t;
     public:
