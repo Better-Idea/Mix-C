@@ -68,6 +68,16 @@ namespace mixc::macro_xstruct{
 
     template<class type>
     struct fake{ type * item = nullptr; };
+
+    template<class t>
+    struct repeat{
+        using type = t;
+    };
+
+    template<class ret, class ... args>
+    struct repeat<ret(args...)>{
+        using type = ret(*)(args...);
+    };
 }
 
 template<uxx index>
@@ -87,6 +97,9 @@ using __fak = mixc::macro_xstruct::fake<type>;
 
 template<class type>
 using __rr  = ::mixc::meta_remove_ref::remove_ref<type>;
+
+template<class type>
+using __rp  = typename ::mixc::macro_xstruct::repeat<type>::type;
 
 [[maybe_unused]]
 static inline uxx __class_id = 0x80000000;
@@ -197,12 +210,12 @@ static inline uxx __class_id = 0x80000000;
 #define __xfield_pubb__(...)
 #define __xfield_prob__(...)
 #define __xfield_prib__(...)
-#define __xfield_pubf__(name,...)           public:     __VA_ARGS__ name;
-#define __xfield_prof__(name,...)           protected:  __VA_ARGS__ name;
-#define __xfield_prif__(name,...)           private:    __VA_ARGS__ name;
-#define __xfield_pubc__(name,bits,...)      public:     __VA_ARGS__ name    : bits;
-#define __xfield_proc__(name,bits,...)      protected:  __VA_ARGS__ name    : bits;
-#define __xfield_pric__(name,bits,...)      private:    __VA_ARGS__ name    : bits;
+#define __xfield_pubf__(name,...)           public:     mutable __rp<__VA_ARGS__> name;
+#define __xfield_prof__(name,...)           protected:  mutable __rp<__VA_ARGS__> name;
+#define __xfield_prif__(name,...)           private:    mutable __rp<__VA_ARGS__> name;
+#define __xfield_pubc__(name,bits,...)      public:     mutable __rp<__VA_ARGS__> name    : bits;
+#define __xfield_proc__(name,bits,...)      protected:  mutable __rp<__VA_ARGS__> name    : bits;
+#define __xfield_pric__(name,bits,...)      private:    mutable __rp<__VA_ARGS__> name    : bits;
 #define __xfield_asso__(...)
 
 // 非基类成员字段指针
@@ -257,22 +270,29 @@ struct __xlist__(__xstruct_, __VA_ARGS__)                                       
        __xlist3__(__xexpand_first_, __xexpand_first_, __xexpand_, __VA_ARGS__) {\
     using the_t = __xlist__(__xthe_, __VA_ARGS__);                              \
         __xlist__(__xfield_, __VA_ARGS__)                                       \
-    private:                                                                    \
-        enum{ __start = __COUNTER__ + 1 };                                      \
-        static constexpr auto __my_name =                                       \
-            __xlist__(__xtype_, __VA_ARGS__);                                   \
-        static inline uxx __my_class_id = __class_id++;                         \
-        static constexpr asciis __my_field_name[] =                             \
-            { __xlist__(__xitem_, __VA_ARGS__)  ""/*dummy*/ };                  \
-        template<class, class>                                                  \
-        friend struct ::mixc::macro_xtypeid::__typeid;                          \
-        template<class>                                                         \
-        friend struct ::mixc::gc_private_tuple::tuple;                          \
-        template<uxx __end>                                                     \
-        void operator()(__dph<__end>);                                          \
-        template<uxx __foo>                                                     \
-        static decltype(nullptr) __field_name(__dph<__foo>);                    \
-    public:                                                                     \
+private:                                                                        \
+    enum{ __start = __COUNTER__ + 1 };                                          \
+                                                                                \
+    static constexpr auto __my_name =                                           \
+        __xlist__(__xtype_, __VA_ARGS__);                                       \
+                                                                                \
+    static inline uxx __my_class_id = __class_id++;                             \
+                                                                                \
+    static constexpr asciis __my_field_name[] =                                 \
+        { __xlist__(__xitem_, __VA_ARGS__)  ""/*dummy*/ };                      \
+                                                                                \
+    template<class, class>                                                      \
+    friend struct ::mixc::macro_xtypeid::__typeid;                              \
+                                                                                \
+    template<class>                                                             \
+    friend struct ::mixc::gc_private_tuple::tuple;                              \
+                                                                                \
+    template<uxx __end>                                                         \
+    void operator()(__dph<__end>);                                              \
+                                                                                \
+    template<uxx __foo>                                                         \
+    static decltype(nullptr) __field_name(__dph<__foo>);                        \
+public:                                                                         \
     using base_list = __bl<                                                     \
         void/*ignore*/ __xlist__(__xbase_, __VA_ARGS__)                         \
     >;                                                                          \
