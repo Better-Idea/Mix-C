@@ -35,8 +35,8 @@ namespace mixc::memop_copy::origin{
                 uxx begin; uxx end; uxx step;
             };
 
-            itr i = xref target[0] > xref source[0] ? 
-                itr{ count - 1, uxx(-1), uxx(-1) } : 
+            itr i = uxx(xref target[0]) > uxx(xref source[0]) ? 
+                itr{ count - 1, uxx(-1), uxx(-1) } :
                 itr{ 0, count, 1 };
 
             for(; i.begin != i.end; i.begin += i.step){
