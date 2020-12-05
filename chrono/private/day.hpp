@@ -24,6 +24,17 @@ namespace mixc::chrono_private_day::origin{
         day(uxx value = 0) : 
             pvalue(value){}
 
+        template<class finalx, class fieldx>
+        day(inc::date<finalx, fieldx> value){
+            auto y = value.year() - 1;
+            auto m = value.month() - 1;
+            auto d = value.day();
+            auto a = y % 400;
+            auto b = a % 100;
+            auto c = value.is_leap() ? inc::sum_leap[m] : inc::sum_normal[m];
+            pvalue = y * 365 + y / 400 * 97 + a / 100 * 24 + b / 4 + c + d - 1;
+        }
+
         operator uxx & (){
             return pvalue;
         }
@@ -37,19 +48,8 @@ namespace mixc::chrono_private_day::origin{
             return the;
         }
 
-        template<class finalx, class fieldx>
-        day(inc::date<finalx, fieldx> value){
-            auto y = value.year() - 1;
-            auto m = value.month() - 1;
-            auto d = value.day();
-            auto a = y % 400;
-            auto b = a % 100;
-            auto c = value.is_leap() ? inc::sum_leap[m] : inc::sum_normal[m];
-            pvalue = y * 365 + y / 400 * 97 + a / 100 * 24 + b / 4 + c + d - 1;
-        }
-
         template<class final_date>
-        requires(inc::has_constructor<final_date, uxx, uxx, uxx>)
+        requires(inc::has_constructor<final_date, u32, u32, u32>)
         operator final_date() const {
             constexpr u32 a = 400 * 365 + 97; // 完整的 400 年共有的天数
             constexpr u32 b = 100 * 365 + 24; // 完整的 100 年共有的天数
