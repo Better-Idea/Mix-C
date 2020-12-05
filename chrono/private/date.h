@@ -127,7 +127,7 @@ namespace mixc::chrono_private_date::origin{
 
         day_of_week_t day_of_week() const {
             return day_of_week_t(
-                day_t(this[0]) % 7
+                (day_t(this[0]) + 1) % 7
             );
         }
 
