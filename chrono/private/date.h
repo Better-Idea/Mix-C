@@ -37,9 +37,9 @@ namespace mixc::chrono_private_date::origin{
     template<class final, class field_t>
     xstruct(
         xtmpl(date  , final, field_t),
-        xproc(pyear , 23, field_t),
+        xproc(pday  , 5 , field_t),
         xproc(pmonth, 4 , field_t),
-        xproc(pday  , 5 , field_t)
+        xproc(pyear , 23, field_t)  // 按照字节序用于比较
     )
 
         date(date const &) = default;
@@ -52,11 +52,11 @@ namespace mixc::chrono_private_date::origin{
 
         template<class finalx, class fieldx>
         date(date<finalx, fieldx> const & object):
-            date(object.year, object.month, object.day){
+            date(object.year(), object.month(), object.day()){
         }
 
         date(field_t year = 0, field_t month = 0, field_t day = 0) :
-            pyear(year), pmonth(month), pday(day){
+            pday(day), pmonth(month), pyear(year){
         }
 
         bool is_valid() const {
