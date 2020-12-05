@@ -17,7 +17,7 @@ namespace mixc::chrono_private_date{
     constexpr u08 month_normal[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
     inline uxx days_of_month(bool is_leap, uxx month) {
-        return (is_leap ? month_leap : month_normal)[month];
+        return (is_leap ? month_leap : month_normal)[month - 1];
     }
 }
 
@@ -91,9 +91,8 @@ namespace mixc::chrono_private_date::origin{
                 return final{}.year(year()).month(month()).day(day() - 1);
             }
             if (month() > 1){
-                auto m       = month() - 1;
-                auto max_day = days_of_month(is_leap(), m);
-                return final{}.year(year()).month(m).day(field_t(max_day));
+                auto max_day = days_of_month(is_leap(), month());
+                return final{}.year(year()).month(month() - 1).day(field_t(max_day));
             }
             else{
                 return final{}.year(year() - 1).month(12).day(31);
