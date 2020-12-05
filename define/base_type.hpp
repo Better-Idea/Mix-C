@@ -116,6 +116,7 @@
 
     constexpr uxx       not_exist    = uxx(-1);
     constexpr uxx       magic_number = 19961212;
+    constexpr uxx       zero         = 0;
 
     enum class ini {};
     constexpr ini ini_now = ini(0);
