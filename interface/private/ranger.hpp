@@ -1,8 +1,8 @@
-#ifndef xpack_interface_ranger
-#define xpack_interface_ranger
+#ifndef xpack_interface_private_ranger
+#define xpack_interface_private_ranger
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::interface_ranger::inc
+#define xuser mixc::interface_private_ranger::inc
 #include"interface/private/check.hpp"
 #include"interface/initializer_list.hpp"
 #include"interface/iterator.hpp"
@@ -16,7 +16,11 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser") 
 
-namespace mixc::interface_ranger{
+namespace mixc::docker_adapter_array_access {
+    template<class base_t> struct adapter_array_access;
+}
+
+namespace mixc::interface_private_ranger{
     using namespace inc;
 
     template<class object>
@@ -92,11 +96,15 @@ namespace mixc::interface_ranger{
         }
 
         template<class object_t>
-        base(object_t const * ptr, uxx len, uxx ofs): 
+        base(object_t const * ptr, uxx len, uxx ofs, bool use_negtive_order = false): 
             ptr((object_t *)ptr),
             itr(itrs<object_t>),
             len(len),
             ofs(ofs){
+
+            if (use_negtive_order){
+                turn_negtive_order();
+            }
         }
 
         bool is_positive_order() const {
@@ -111,9 +119,7 @@ namespace mixc::interface_ranger{
             return len;
         }
     $
-}
 
-namespace mixc::interface_ranger::origin{
     template<class seq_t, class item_t>
     concept can_rangerlizex = 
         (inc::check_initializer_listx<seq_t, item_t> and inc::is_initializer_list<seq_t>) or
@@ -202,38 +208,34 @@ namespace mixc::interface_ranger::origin{
             }
             return r;
         }
-
-    private:
-        template<auto mode, class iterator_t, can_interval interval_t = co>
-        void foreach_template(iterator_t const & invoke, interval_t const & itv = co{0, -1}) const {
-            auto r      = subseq(itv);
-            auto state  = loop_t::go_on;
-
-            for(uxx i = 0; i < r.length() and state != loop_t::finish; i++){
-                xitr_switch(mode,i,state,invoke, r[i]);
-            }
-        }
-    public:
-        xitr_foreach (item_t &)
-        xitr_foreachx(item_t &)
-        xitr_foreach_const (item_t const &)
-        xitr_foreachx_const(item_t const &)
     $
 
-    #define xranger(...)                                                                        \
-    template<can_interval interval_t>                                                           \
-    ::mixc::interface_ranger::origin::ranger<__VA_ARGS__> range(interval_t const & i) const {            \
-        using namespace ::mixc::interface_ranger;                                               \
-        if (i.normalize(this->length());                                                        \
-            i.left() <= i.right()){                                                             \
-            return base(this, i.right() - i.left() + 1, i.left());                              \
-        }                                                                                       \
-        else{                                                                                   \
-            return base(this, i.left() - i.right() + 1, i.left(), true);                        \
-        }                                                                                       \
-    }
+}
+
+namespace mixc::interface_private_ranger::origin{
+    using mixc::interface_private_ranger::can_rangerlize;
+    using mixc::interface_private_ranger::can_rangerlizex;
+
+    template<class item_t>
+    using ranger = mixc::docker_adapter_array_access::adapter_array_access<
+        mixc::interface_private_ranger::ranger<item_t>
+    >;
+}
+
+#define xranger(...)                                                                        \
+template<can_interval interval_t>                                                           \
+::mixc::interface_private_ranger::origin                                                    \
+::ranger<__VA_ARGS__> range(interval_t const & i) const {                                   \
+    using namespace ::mixc::interface_private_ranger;                                       \
+    if (i.normalize(this->length());                                                        \
+        i.left() <= i.right()){                                                             \
+        return base(this, i.right() - i.left() + 1, i.left());                              \
+    }                                                                                       \
+    else{                                                                                   \
+        return base(this, i.left() - i.right() + 1, i.left(), true/*negtive order*/);       \
+    }                                                                                       \
 }
 
 #endif
 
-xexport_space(mixc::interface_ranger::origin)
+xexport_space(mixc::interface_private_ranger::origin)
