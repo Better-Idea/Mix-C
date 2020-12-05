@@ -5,7 +5,7 @@
 #define xuser mixc::meta_is_initializer_list::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
-#include<initializer_list>
+#include"interface/initializer_list.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_initializer_list{
