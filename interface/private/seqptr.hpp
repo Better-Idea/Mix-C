@@ -4,6 +4,7 @@
 #undef  xuser
 #define xuser mixc::interface_private_seqptr::inc
 #include"interface/private/check.hpp"
+#include"interface/private/ranger.hpp"
 #include"interface/initializer_list.hpp"
 #include"macro/xnew.hpp"
 #include"math/index_system.hpp"
@@ -100,18 +101,20 @@ namespace mixc::interface_private_seqptr::origin{
     >;
 }
 
-#define xseqptr(space,...)                                                                  \
-template<can_interval interval_t> space::seqptr<__VA_ARGS__>                                \
-subseq(interval_t const & i) const {                                                        \
+#define xseqptr(...)                                                                        \
+template<can_interval interval_t>                                                           \
+::mixc::interface_private_seqptr::origin                                                    \
+::seqptr<__VA_ARGS__> subseq(interval_t const & i) const {                                  \
     using ptr_t  = __VA_ARGS__ *;                                                           \
     using ptrc_t = __VA_ARGS__ const *;                                                     \
     auto  len    = the.length();                                                            \
     auto  ptr    = (ptr_t)(ptrc_t)this[0];                                                  \
     i.normalize(len);                                                                       \
-    return space::seqptr<__VA_ARGS__>(                                                      \
+    return ::mixc::interface_private_seqptr::origin::seqptr<__VA_ARGS__>(                   \
         ptr + i.left(), i.right() - i.left() + 1                                            \
     );                                                                                      \
 }                                                                                           \
+xranger(__VA_ARGS__)
 
 #endif
 
