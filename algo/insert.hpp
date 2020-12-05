@@ -14,6 +14,7 @@
 #undef  xuser
 #define xuser mixc::algo_insert::inc
 #include"interface/seqptr.hpp"
+#include"interface/initializer_list.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
@@ -28,9 +29,11 @@ namespace mixc::algo_insert{
      * - target 为待插入新元素的序列，并满足 unified_seq<T> 约束
      * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
      * - values 为要插入的元素序列，并满足 unified_seq<T> 约束
+     * 返回：
+     * 插入元素后序列的长度
      */
     template<class seq_des_t, class seq_src_t = seq_des_t>
-    inline void insert_core(
+    inline uxx insert_core(
         seq_des_t                   target, 
         ixx                         index, 
         seq_src_t                   values){
@@ -48,6 +51,7 @@ namespace mixc::algo_insert{
         for(i = 0; i < j; i++){
             target[i + index] = (item_t)values[i];
         }
+        return target.length() + values.length();
     }
 
     /* 函数：序列插入新元素
@@ -56,15 +60,17 @@ namespace mixc::algo_insert{
      * - source 为源数据序列，并满足 unified_seq<T> 约束
      * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
      * - values 为要插入的元素序列，并满足 unified_seq<T> 约束
+     * 返回：
+     * 插入元素后序列的长度
      */
     template<class seq_des_t, class seq_src_t = seq_des_t, class seq_val_t = seq_src_t>
-    inline void insert_core(
+    inline uxx insert_core(
         seq_des_t                           target,
         seq_src_t                           source,
         ixx                                 index,
         seq_val_t                           values){
 
-        xindex_rollback(target.length(), index, +1);
+        xindex_rollback(source.length(), index, +1);
         auto tar   = target.subseq(co{index});
         inc::copy_with_operator(target, source, index);
         inc::copy_with_operator(tar, values, values.length());
@@ -73,6 +79,7 @@ namespace mixc::algo_insert{
             source.subseq(co{index}), 
             source.length() - index
         );
+        return source.length() + values.length();
     }
 
     /* 函数：序列插入新元素
@@ -80,18 +87,20 @@ namespace mixc::algo_insert{
      * - target 为待插入新元素的序列，并满足 can_unified_seqlize 约束
      * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
      * - value 为要插入的元素，类型需要和 target 元素类型保持一致
+     * 返回：
+     * 插入元素后序列的长度
      */
     template<inc::can_unified_seqlize seq_t>
-    inline void insert(
+    inline uxx insert(
         seq_t                       const & target,
         ixx                                 index,
         inc::item_origin_of<seq_t>  const & value){
 
         using item_t = inc::item_origin_of<seq_t>;
 
-        insert_core(
+        return insert_core(
             inc::unified_seq<seq_t>(target), index, 
-            inc::seqptr<item_t>{value}
+            inc::seqptr<item_t>({ value })
         );
     }
 
@@ -100,6 +109,8 @@ namespace mixc::algo_insert{
      * - target 为待插入新元素的序列，并满足 can_unified_seqlize 约束
      * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
      * - values 为要插入的元素序列，并满足 can_unified_seqlize 约束
+     * 返回：
+     * 插入元素后序列的长度
      */
     template<
         inc::can_unified_seqlize seq_des_t, 
@@ -111,12 +122,12 @@ namespace mixc::algo_insert{
             inc::item_origin_of<seq_val_t>
         > == true
     )
-    inline void insert(
+    inline uxx insert(
         seq_des_t                   const & target,
         ixx                                 index,
         seq_val_t                   const & values){
 
-        insert_core(
+        return insert_core(
             inc::unified_seq<seq_des_t>(target), index, 
             inc::unified_seq<seq_val_t>(values)
         );
@@ -128,6 +139,8 @@ namespace mixc::algo_insert{
      * - source 为源数据序列，并满足 can_unified_seqlize 约束
      * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
      * - values 为要插入的元素序列，并满足 can_unified_seqlize 约束
+     * 返回：
+     * 插入元素后序列的长度
      */
     template<
         inc::can_unified_seqlize    seq_tar_t, 
@@ -148,13 +161,13 @@ namespace mixc::algo_insert{
             inc::item_origin_of<seq_val_t>
         > == true 
     )
-    inline void insert(
+    inline uxx insert(
         seq_tar_t                   const & target,
         seq_src_t                   const & source,
         ixx                                 index,
         seq_val_t                   const & values){
 
-        insert_core(
+        return insert_core(
             inc::unified_seq<seq_tar_t>(target), 
             inc::unified_seq<seq_src_t>(source),  index, 
             inc::unified_seq<seq_val_t>(values)
@@ -167,24 +180,26 @@ namespace mixc::algo_insert{
      * - source 为源数据序列，并满足 can_unified_seqlize 约束
      * - index 为新元素要插入的索引，支持负数索引（-1 表示插入到末尾，-2 表示倒数第一个元素的位置，依此类推）
      * - value 为要插入的元素，类型和 target 的元素类型保持一致
+     * 返回：
+     * 插入元素后序列的长度
      */
     template<
         inc::can_unified_seqlize    seq_tar_t, 
         inc::can_unified_seqlize    seq_src_t
     >
-    inline void insert(
+    inline uxx insert(
         seq_tar_t                   const & target,
         seq_src_t                   const & source,
         ixx                                 index,
         inc::item_origin_of<seq_tar_t>
                                     const & value){
 
-        insert_core(
+        return insert_core(
             inc::unified_seq<seq_tar_t>(target), 
             inc::unified_seq<seq_src_t>(source),  index, 
             inc::seqptr<
                 inc::item_origin_of<seq_tar_t>
-            >{value}
+            >({value})
         );
     }
 }
