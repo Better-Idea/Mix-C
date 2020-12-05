@@ -75,7 +75,7 @@ namespace mixc::docker_bit_indicator{
             return data;
         }
 
-         uxx data[size()] = {0};
+        mutable uxx data[size()] = {0};
 
         /* 位图可访问的总位数 */
         xpubgetx(total_bits, uxx){

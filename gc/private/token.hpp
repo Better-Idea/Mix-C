@@ -61,7 +61,7 @@ namespace mixc::gc_private_token::origin{
         xname(token_plus),
         xpubb(token)
     )
-         uxx length;
+        mutable uxx length;
 
         token_plus(uxx length) : 
             token(0), length(length) { }

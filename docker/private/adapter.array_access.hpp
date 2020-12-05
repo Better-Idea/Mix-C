@@ -33,7 +33,7 @@ namespace mixc::docker_adapter_array_access {
         using base_t::operator[];
         using base_t::length;
 
-        xseqptr(inc, item_t);
+        xseqptr(item_t);
     private:
         /* 函数：随机访问接口
          * 参数：
