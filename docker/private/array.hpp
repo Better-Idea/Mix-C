@@ -123,7 +123,7 @@ namespace mixc::docker_array{
             data(empty_array_ptr()){
         }
 
-        array_t(length capacity, inc::ialloc<void> alloc, item_initial_invoke initial){
+        array_t(::length capacity, inc::ialloc<void> alloc, item_initial_invoke initial){
             using itemp = item_t *;
             auto    mem = alloc(sizeof(uxx) + capacity * sizeof(item_t));
             auto &  len = uxxp(mem)[0];
@@ -135,7 +135,7 @@ namespace mixc::docker_array{
             }
         }
 
-        array_t(length capacity, item_initial_invoke initial):
+        array_t(::length capacity, item_initial_invoke initial):
             array_t(capacity, [](uxx bytes) -> voidp {
                 return inc::alloc<void>(inc::memory_size{bytes});
             }, initial){
@@ -144,7 +144,7 @@ namespace mixc::docker_array{
 
         template<class ... args>
         requires(inc::has_constructor<item_t, args const & ...> == true)
-        array_t(length capacity, inc::ialloc<void> alloc, args const & ... item_initial_args):
+        array_t(::length capacity, inc::ialloc<void> alloc, args const & ... item_initial_args):
             // 编译器差异导致必须让 concept 和 bool true 比较才可以被 requires 接受
             array_t(capacity, alloc, [&](item_t * item){
                 xnew(item) item_t(item_initial_args...);
@@ -153,7 +153,7 @@ namespace mixc::docker_array{
 
         template<class ... args>
         requires(inc::has_constructor<item_t, args const & ...> == true)
-        array_t(length capacity, args const & ... item_initial_args):
+        array_t(::length capacity, args const & ... item_initial_args):
             // 编译器差异导致必须让 concept 和 bool true 比较才可以被 requires 接受
             array_t(capacity, [&](item_t * item){
                 xnew(item) item_t(item_initial_args...);
