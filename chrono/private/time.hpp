@@ -47,6 +47,10 @@ namespace mixc::chrono_private_time::origin{
             return pminute <= 59 and psecond <= 59 and pmilisecond <= 999;
         }
 
+        xpubgetx(is_valid_allow_leap_second, bool){
+            return pminute <= 60 and psecond <= 59 and pmilisecond <= 999;
+        }
+
         xpubget_pubsetx(total_milisecond, u64)
             xr{
                 auto ms = 
