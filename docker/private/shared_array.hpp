@@ -35,14 +35,11 @@ namespace mixc::docker_shared_array{
         using item_t = typename shared_array_t<final, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t;
         using base_t = inc::ref_array<final, item_t, attribute, is_binary_aligned_alloc>;
     public:
-        xseqptr(item_t);
-
+        shared_array_t(shared_array_t const &) = default;
         shared_array_t() : 
             shared_array_t(*(the_t *)& inc::empty_array_ptr) {
             static_assert(sizeof(inc::empty_array) >= sizeof(inc::struct_type<attribute>));
         }
-
-        shared_array_t(shared_array_t const &) = default;
 
         template<class finalx>
         shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
