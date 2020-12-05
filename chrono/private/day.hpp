@@ -4,6 +4,7 @@
 #undef  xuser
 #define xuser mixc::chrono_private_day::inc
 #include"chrono/private/lut.hpp"
+#include"meta/has_constructor.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -47,8 +48,9 @@ namespace mixc::chrono_private_day::origin{
             pvalue = y * 365 + y / 400 * 97 + a / 100 * 24 + b / 4 + c + d - 1;
         }
 
-        template<class finalx, class fieldx>
-        operator inc::date<finalx, fieldx>() const {
+        template<class final_date>
+        requires(inc::has_constructor<final_date, uxx, uxx, uxx>)
+        operator final_date() const {
             constexpr u32 a = 400 * 365 + 97; // 完整的 400 年共有的天数
             constexpr u32 b = 100 * 365 + 24; // 完整的 100 年共有的天数
             constexpr u32 c = 4 * 365 + 1;    // 完整的 4   年共有的天数
@@ -62,17 +64,17 @@ namespace mixc::chrono_private_day::origin{
             auto p5 = p3 % c;
 
             if (p5 == 0){
-                return inc::date<finalx, fieldx>(p0 + p2 + p4, 12, 30 + (p2 != 400));
+                return final_date(p0 + p2 + p4, 12, 30 + (p2 != 400));
             }
 
             auto p6 = p5 / 365;
             auto p7 = p5 % 365;
 
             if (p7 == 0){
-                return inc::date<finalx, fieldx>(p0 + p2 + p4 + p6, 12, 30 + (p6 != 4));
+                return final_date(p0 + p2 + p4 + p6, 12, 30 + (p6 != 4));
             }
 
-            auto da = inc::date<finalx, fieldx>(); da.year(p0 + p2 + p4 + p6 + 1);
+            auto da = final_date(); da.year(p0 + p2 + p4 + p6 + 1);
             auto lu = da.is_leap() ? inc::sum_leap : inc::sum_normal;
             auto p8 = p7 / 31;
             auto p9 = 
