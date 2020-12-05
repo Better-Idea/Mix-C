@@ -38,18 +38,18 @@ namespace mixc::chrono_private_time::origin{
             ){
         }
 
+        bool is_valid(uxx max_second = 59){
+            return pminute <= 59 and psecond <= max_second and pmilisecond <= 999;
+        }
+
+        bool is_valid_24h_clock(uxx max_second = 59){
+            return phour <= 23 and is_valid(max_second);
+        }
+
         xpubget_pubset(milisecond)
         xpubget_pubset(second)
         xpubget_pubset(minute)
         xpubget_pubset(hour)
-
-        xpubgetx(is_valid, bool){
-            return pminute <= 59 and psecond <= 59 and pmilisecond <= 999;
-        }
-
-        xpubgetx(is_valid_allow_leap_second, bool){
-            return pminute <= 60 and psecond <= 59 and pmilisecond <= 999;
-        }
 
         xpubget_pubsetx(total_milisecond, u64)
             xr{
