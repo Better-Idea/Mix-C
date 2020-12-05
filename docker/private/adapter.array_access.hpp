@@ -10,7 +10,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_adapter_array_access::inc
-#include"interface/seqptr.hpp"
+#include"interface/private/seqptr.hpp"
 #include"interface/iterator.hpp"
 #include"macro/xexport.hpp"
 #include"math/index_system.hpp"
@@ -33,7 +33,7 @@ namespace mixc::docker_adapter_array_access {
         using base_t::operator[];
         using base_t::length;
 
-        xseqptr(item_t);
+        xseqptr(inc, item_t);
     private:
         /* 函数：随机访问接口
          * 参数：
