@@ -66,6 +66,10 @@ namespace mixc::interface_seqptr::origin{
             }
         }
 
+        seqptr(inc::initializer_list<item_t> const & list){ // 使用显式的 initializer_list
+            xnew(this) seqptr(list.begin(), list.size());
+        }
+
         operator item_t *(){
             return ptr;
         }

@@ -144,6 +144,10 @@ namespace mixc::interface_ranger::origin{
             base(list){
         }
 
+        ranger(inc::initializer_list<item_t> const & list){ // 使用显式的 initializer_list
+            xnew(this) ranger(list.begin(), list.size());
+        }
+
         item_t & operator[](uxx index){
             return access<item_t &>(index);
         }
