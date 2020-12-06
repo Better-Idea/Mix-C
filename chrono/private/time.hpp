@@ -1,15 +1,23 @@
 #ifndef xpack_chrono_private_time
 #define xpack_chrono_private_time
+#pragma push_macro("xuser")
+#undef  xuser
+#define xuser mixc::chrono_private_time::inc
+#include"memop/seqlize.hpp"
+#include"memop/cmp.hpp"
 #include"mixc.hpp"
+#pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_time::origin{
+    constexpr uxx allow_leap_second = 60;
+
     template<class final, class field_t = u32>
     xstruct(
         xtmpl(time, final, field_t),
-        xproc(pmilisecond, 10                      , field_t),
+        xproc(pmilisecond, 10                      , field_t),  // 低位
         xproc(psecond    , 6                       , field_t),
         xproc(pminute    , 6                       , field_t),
-        xproc(phour      , sizeof(field_t) * 8 - 22, field_t)
+        xproc(phour      , sizeof(field_t) * 8 - 22, field_t)   // 高位，按比较的顺序
     )
         template<class, class> friend struct time;
 
@@ -38,14 +46,23 @@ namespace mixc::chrono_private_time::origin{
             ){
         }
 
-        bool is_valid(uxx max_second = 59){
+        bool is_valid(uxx max_second = 59) const {
             return pminute <= 59 and psecond <= max_second and pmilisecond <= 999;
         }
 
-        bool is_valid_24h_clock(uxx max_second = 59){
+        bool is_valid_24h_clock(uxx max_second = 59) const {
             return phour <= 23 and is_valid(max_second);
         }
 
+        ixx compare(the_t const & value) const {
+            return inc::cmp_des(the, value); // 将结构转换成机器字长的序列，从高字往低字比较
+        }
+
+        friend ixx operator- (the_t const & left, the_t const & right){
+            return (ixx)(left.total_milisecond() - right.total_milisecond());
+        }
+
+        xcmpopx_friend(compare, the_t)
         xpubget_pubset(milisecond)
         xpubget_pubset(second)
         xpubget_pubset(minute)
