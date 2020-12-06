@@ -15,12 +15,15 @@
 
 namespace mixc::memop_cmp::origin{
     template<class a>
+    inline ixx cmp_with_operator(a const & left, a const & right);
+
+    template<class a>
     inline ixx cmp(a const & left, a const & right){
         auto l = inc::seqlize(left);
         auto r = inc::seqlize(right);
 
-        for (uxx i = 0; i < l.length(); i++){
-            if (ixx s = cmp(l[i], r[i]); s != 0){
+        for(uxx i = 0; i < l.length(); i++){
+            if (ixx s = cmp_with_operator(l[i], r[i]); s != 0){
                 return s;
             }
         }
@@ -32,8 +35,8 @@ namespace mixc::memop_cmp::origin{
         auto l = inc::seqlize(left);
         auto r = inc::seqlize(right);
 
-        for (uxx i = l.length(); i-- > 0; ){
-            if (ixx s = cmp(l[i], r[i]); s != 0){
+        for(uxx i = l.length(); i-- > 0; ){
+            if (ixx s = cmp_with_operator(l[i], r[i]); s != 0){
                 return s;
             }
         }
