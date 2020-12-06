@@ -65,6 +65,7 @@ namespace xuser{
             xhint(the_date.year(), the_date.month(), the_date.day(), the_date.is_valid());
 
             // day 必须小于等于当月最大的天数
+            // day 溢出
             // 该日期不合法
             the_date.year(2020).month(12).day(32);
             xhint(the_date.year(), the_date.month(), the_date.day(), the_date.is_valid());
