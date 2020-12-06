@@ -6,6 +6,7 @@
 #include"chrono/private/date.hpp"
 #include"chrono/private/time.hpp"
 #include"chrono/private/day.hpp"
+#include"memop/cmp.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -19,10 +20,18 @@ namespace mixc::chrono_private_datetime::origin{
     template<class final, class field_date = u32, class field_time = field_date>
     xstruct(
         xtmpl(datetime, final, field_date, field_time),
-        xpubb(inc::date<final, field_date>),
-        xpubb(inc::time<final, field_time>)
+        xpubb(inc::time<final, field_time>),    // 低位
+        xpubb(inc::date<final, field_date>)     // 高位 先比较
     )
-        datetime(datetime const &) = default;
+    private:
+        using the_time  = inc::time<final, field_time>;
+        using the_date  = inc::date<final, field_date>;
+        using the_time::is_valid_24h_clock;
+        using the_time::total_milisecond;
+        using the_time::compare;
+        using the_date::compare;
+    public:
+        datetime(the_t const &) = default;
 
         template<class now_t>
         requires(now_t::im_now_t == true)
@@ -51,23 +60,64 @@ namespace mixc::chrono_private_datetime::origin{
             field_time minute      = 0, 
             field_time second      = 0, 
             field_time milisecond  = 0
-        ) : inc::date<final, field_date>(year, month, day), 
-            inc::time<final, field_time>(hour, minute, second, milisecond){
+        ) : the_time(hour, minute, second, milisecond),
+            the_date(year, month, day){
         }
 
         template<class finala, class field_datex, class finalb, class field_timex>
-        datetime(inc::date<finala, field_datex> date, inc::time<finalb, field_timex> time): 
-            inc::date<final, field_date>(date), 
-            inc::time<final, field_time>(time){
+        datetime(
+            inc::date<finala, field_datex> const & date, 
+            inc::time<finalb, field_timex> const & time): 
+            the_time(time), the_date(date){
         }
 
-        bool is_valid() const {
+        template<class finala, class field_datex>
+        datetime(inc::date<finala, field_datex> date): 
+            the_time(), the_date(date){
+        }
+
+        template<class finala, class field_timex>
+        datetime(inc::time<finala, field_timex> const & time): 
+            the_time(time), the_date(){
+        }
+
+        bool is_valid(uxx max_second = 59) const {
             return 
                 inc::date<final, field_date>::is_valid() and 
-                inc::time<final, field_time>::is_valid() and 
-                inc::time<final, field_time>::hour() <= 23;
+                inc::time<final, field_time>::is_valid_24h_clock(max_second);
         }
 
+        ixx compare(the_t const & value) const {
+            return inc::cmp_des(the, value); // 将结构转换成机器字长的序列，从高字往低字比较
+        }
+
+        friend ixx operator- (the_t const & left, the_t const & right) {
+            return (ixx)(left.total_milisecond() - right.total_milisecond());
+        }
+
+        friend final operator- (the_t const & left, inc::day right) {
+            final r         = (final &)(the_t &)left;
+            (the_date &)r  -= right;
+            return r;
+        }
+
+        friend final operator-= (the_t & left, inc::day right) {
+            left = left - right;
+            return left;
+        }
+
+        friend final operator+ (the_t const & left, inc::day right) {
+            final r         = (final &)(the_t &)left;
+            (the_date &)r  += right;
+            return r;
+        }
+
+        friend final operator+= (the_t & left, inc::day right) {
+            left = left + right;
+            return left;
+        }
+
+        xcmpopx_friend(compare, the_t)
         xpubget_pubsetx(total_milisecond, u64)
             xr{
                 constexpr u64 one_day = 24 * 3600 * 1000;
