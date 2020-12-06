@@ -115,7 +115,7 @@ namespace mixc::chrono_private_date::origin{
         }
 
         ixx compare(the_t const & value) const {
-            return inc::cmp_des(the, value); // 将结构转换成机器字长的序列，从高字往低字比较
+            return inc::cmp_des(the, value); // 将结构转换成无符号整数序列，从高字往低字比较
         }
 
         friend day_t operator - (the_t const & self, the_t const & value) {
