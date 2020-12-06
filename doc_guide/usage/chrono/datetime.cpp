@@ -341,6 +341,19 @@ namespace xuser{
             total_ms        = d.total_milisecond();
             xhint(total_ms);
         }
+
+        // 演示：比较两个日期
+        {
+            xhint(demo);
+            demo           += 1;
+
+            datetime<>  a;
+            datetime<>  b;
+            a.year(2020).month(1).day(2).hour(3).minute(4).second(5).milisecond(6);
+            b.year(2020).month(1).day(3).hour(3).minute(4).second(5).milisecond(6);
+
+            xhint(a == a, a == b, a > b, a >= b, a < b, a <= b);
+        }
     }
 }
 
