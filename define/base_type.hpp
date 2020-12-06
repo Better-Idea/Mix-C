@@ -114,12 +114,20 @@
         go_on,
     };
 
+    enum class ini {};
+
+    struct zero_t{
+        constexpr zero_t(){}
+
+        operator uxx() const {
+            return 0;
+        }
+    };
+
     constexpr uxx       not_exist    = uxx(-1);
     constexpr uxx       magic_number = 19961212;
-    constexpr uxx       zero         = 0;
-
-    enum class ini {};
-    constexpr ini ini_now = ini(0);
+    constexpr zero_t    zero{};
+    constexpr ini       ini_now{};
 
     struct length {
         explicit length(uxx value) : value(value) { }
