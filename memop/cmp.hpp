@@ -28,6 +28,19 @@ namespace mixc::memop_cmp::origin{
     }
 
     template<class a>
+    inline ixx cmp_des(a const & left, a const & right){
+        auto l = inc::seqlize(left);
+        auto r = inc::seqlize(right);
+
+        for (uxx i = l.length(); i-- > 0; ){
+            if (ixx s = cmp(l[i], r[i]); s != 0){
+                return s;
+            }
+        }
+        return 0;
+    }
+
+    template<class a>
     inline ixx cmp_with_operator(a const & left, a const & right){
         if constexpr (inc::is_same<asciis, a> or inc::is_same<words, a>){
             auto * l        = left;
