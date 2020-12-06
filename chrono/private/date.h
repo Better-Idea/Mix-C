@@ -91,38 +91,12 @@ namespace mixc::chrono_private_date::origin{
                 return final{}.year(year()).month(month()).day(day() - 1);
             }
             if (month() > 1){
-                auto max_day = days_of_month(is_leap(), month());
+                auto max_day = days_of_month(is_leap(), month() - 1);
                 return final{}.year(year()).month(month() - 1).day(field_t(max_day));
             }
             else{
                 return final{}.year(year() - 1).month(12).day(31);
             }
-        }
-
-        day_t operator - (the_t value) const {
-            return day_t(this[0]) - day_t(value);
-        }
-
-        final operator - (day_t value) const {
-            day_t a = this[0];
-            day_t b = a - value;
-            return b;
-        }
-
-        final operator + (day_t value) const {
-            day_t a = this[0];
-            day_t b = a + value;
-            return b;
-        }
-
-        final operator -= (day_t value){
-            this[0] = this[0] - value;
-            return this[0];
-        }
-
-        final operator += (day_t value){
-            this[0] = this[0] + value;
-            return this[0];
         }
 
         day_of_week_t day_of_week() const {
@@ -140,7 +114,37 @@ namespace mixc::chrono_private_date::origin{
             return day_of_year() - 1;
         }
 
-        xcmpop_friend (the_t)
+        ixx compare(the_t const & value) const {
+            return inc::cmp_des(the, value); // 将结构转换成机器字长的序列，从高字往低字比较
+        }
+
+        friend day_t operator - (the_t const & self, the_t const & value) {
+            return day_t(self) - day_t(value);
+        }
+
+        friend final operator - (the_t const & self, day_t value) {
+            day_t a = self;
+            day_t b = a - value;
+            return b;
+        }
+
+        friend final operator + (the_t const & self, day_t value) {
+            day_t a = self;
+            day_t b = a + value;
+            return b;
+        }
+
+        friend final operator -= (the_t & self, day_t value){
+            self = self - value;
+            return self;
+        }
+
+        friend final operator += (the_t & self, day_t value){
+            self = self + value;
+            return self;
+        }
+
+        xcmpopx_friend(compare, the_t)
         xpubget_pubset(day)
         xpubget_pubset(month)
         xpubget_pubset(year)
