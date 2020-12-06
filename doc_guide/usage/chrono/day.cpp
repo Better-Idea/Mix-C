@@ -19,7 +19,7 @@ namespace xuser{
             day d           = the_date;
 
             // 转换成数值
-            uxx total_days  = d;
+            ixx total_days  = d;
 
             xhint(total_days);
 

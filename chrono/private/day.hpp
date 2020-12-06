@@ -19,9 +19,9 @@ namespace mixc::chrono_private_day::inc{
 namespace mixc::chrono_private_day::origin{
     xstruct(
         xname(day),
-        xprif(pvalue, uxx)
+        xprif(pvalue, ixx)
     )
-        day(uxx value = 0) : 
+        day(ixx value = 0) : 
             pvalue(value){}
 
         template<class finalx, class fieldx>
@@ -35,15 +35,15 @@ namespace mixc::chrono_private_day::origin{
             pvalue = y * 365 + y / 400 * 97 + a / 100 * 24 + b / 4 + c + d - 1;
         }
 
-        operator uxx & (){
+        operator ixx & (){
             return pvalue;
         }
 
-        operator uxx const & () const {
+        operator ixx const & () const {
             return pvalue;
         }
 
-        day operator = (uxx value){
+        day operator = (ixx value){
             pvalue = value;
             return the;
         }
