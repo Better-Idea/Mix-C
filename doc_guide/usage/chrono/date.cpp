@@ -305,6 +305,11 @@ namespace xuser{
             b.year(2020).month(1).day(21);
 
             xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.year(2020).month(2).day(21);
+            b.year(2021).month(1).day(21);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
         }
     }
 }
