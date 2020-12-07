@@ -278,6 +278,34 @@ namespace xuser{
             the_date.year(2019).month(3).day(1);
             xhint(the_date.year(), the_date.month(), the_date.day(), the_date.day_of_year(), the_date.day_index_of_year());
         }
+
+        // 演示：日期的比较
+        {
+            xhint(demo);
+            demo               += 1;
+
+            date<> a;
+            date<> b;
+            a.year(2020);
+            b.year(2021);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.year(2020).month(2);
+            b.year(2020).month(1);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.year(2020).month(1).day(20);
+            b.year(2020).month(1).day(21);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.year(2020).month(1).day(21);
+            b.year(2020).month(1).day(21);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+        }
     }
 }
 
