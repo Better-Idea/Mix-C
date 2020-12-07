@@ -78,6 +78,45 @@ namespace xuser{
             total_ms        = the_time.total_milisecond();
             xhint(total_ms);
         }
+
+        // 演示：时间的比较
+        {
+            xhint(demo);
+            demo               += 1;
+
+            time<> a;
+            time<> b;
+            a.hour(20);
+            b.hour(21);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.hour(20).minute(2);
+            b.hour(20).minute(1);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.hour(20).minute(1).second(20);
+            b.hour(20).minute(1).second(21);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.hour(20).minute(1).second(21);
+            b.hour(20).minute(1).second(21);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.hour(20).minute(1).second(21).milisecond(998);
+            b.hour(20).minute(1).second(21).milisecond(999);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+
+            a.hour(21).minute(1).second(21).milisecond(998);
+            b.hour(20).minute(2).second(21).milisecond(999);
+
+            xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
+        }
+
     }
 }
 
