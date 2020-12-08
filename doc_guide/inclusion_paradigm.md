@@ -107,7 +107,7 @@ xexport_space(mixc::foo_bar::origin)
 // 项目名::目录名_模块名
 // 作用：
 // 告诉下面包含的模块，将可见模块导出到 xuser::inc 空间
-#define xuser mixc::foo_function
+#define xuser mixc::foo_function::inc
 #include"foo/bar.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -149,7 +149,7 @@ b.cpp 也可以同时包含 a.h 和 b.h。
 #ifndef xpack_func_private_a    // 这里 xpack_xxx 包含 private
 #define xpack_func_private_a
 #pragma push_macro("xuser")
-#define xuser mixc::func_a      // 这里不是 mixc::func_private_a
+#define xuser mixc::func_a::inc // 这里不是 mixc::func_private_a
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -195,7 +195,7 @@ xexport_space(mixc::func_b::origin)
 #ifndef xpack_func_a            // 主体
 #define xpack_func_a
 #pragma push_macro("xuser")
-#define xuser mixc::func_a
+#define xuser mixc::func_a::inc
 #include"func/private/a.hpp"    // private 包放到前面
 #include"func/private/b.hpp"
 #include"func/b.hpp"            // func/a.hpp 和 func/b.hpp
@@ -230,7 +230,7 @@ xexport_space(mixc::func_a::origin)
 #ifndef xpack_func_b            // 主体 pack
 #define xpack_func_b
 #pragma push_macro("xuser")
-#define xuser mixc::func_b
+#define xuser mixc::func_b::inc
 #include"func/private/a.hpp"    // private 包放到前面
 #include"func/private/b.hpp"
 #include"func/a.hpp"            // 包含 a
