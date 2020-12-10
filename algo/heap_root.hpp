@@ -10,6 +10,7 @@
 #define xuser mixc::algo_heap_root::inc
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xindex_rollback.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -65,10 +66,10 @@ namespace mixc::algo_heap_root{
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
      */
-    xheader inline item_t pop_core(seq_t seq, inc::item_origin_of<seq_t> const & insert_value, cmp_t const &  compare){
-        item_t  wanted      = seq[0];
-        uxx     i           = 0;
-        uxx     left_index  = 1;
+    xheader inline item_t pop_core(seq_t seq, uxx index, inc::item_origin_of<seq_t> const & insert_value, cmp_t const &  compare){
+        item_t  wanted      = (seq[index]);
+        uxx     i           = (index);
+        uxx     left_index  = (index << 1) + 1;
 
         while(left_index + 1 < seq.length()) {
             item_t & left   = seq[left_index];
@@ -130,6 +131,7 @@ namespace mixc::algo_heap_root::origin::heap_root{
     /* 函数：大小根堆弹栈操作
      * 参数：
      * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - length 为 seq 序列的长度
      * - insert_value 为要插入的元素，通常是当前长度 seq 序列中的最后一个元素
      * - compare 为元素比较回调，期望签名如下：
      *      ixx operator()(item_t const & left, item_t const & right)
@@ -144,6 +146,34 @@ namespace mixc::algo_heap_root::origin::heap_root{
 
         return pop_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
+            0,
+            insert_value, 
+            compare
+        );
+    }
+
+    /* 函数：大小根堆弹栈操作，取出指定索引的元素
+     * 参数：
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - length 为 seq 序列的长度
+     * - index 为要取出元素对应的索引
+     * - insert_value 为要插入的元素，通常是当前长度 seq 序列中的最后一个元素
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     */
+    xheader inline auto pop_by_index(
+        seq_t                       const & seq, 
+        uxx                                 length, 
+        ixx                                 index,
+        inc::item_origin_of<seq_t>  const & insert_value, 
+        cmp_t                       const & compare = inc::default_compare<item_t>){
+
+        xindex_rollback(length, index);
+        return pop_core(
+            inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
+            index,
             insert_value, 
             compare
         );
@@ -152,6 +182,7 @@ namespace mixc::algo_heap_root::origin::heap_root{
     /* 函数：大小根堆弹栈操作
      * 参数：
      * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - length 为 seq 序列的长度
      * - compare 为元素比较回调，期望签名如下：
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
@@ -164,7 +195,32 @@ namespace mixc::algo_heap_root::origin::heap_root{
 
         inc::unified_seq<seq_t> v{seq};
         return pop_core(
-            v.subseq(co{0, length}), 
+            v.subseq(co{0, length}), 0,
+            v[length - 1], 
+            compare
+        );
+    }
+
+    /* 函数：大小根堆弹栈操作，取出指定索引的元素
+     * 参数：
+     * - seq 为满足 can_unified_seqlize 约束的序列类型
+     * - length 为 seq 序列的长度
+     * - index 为要取出元素对应的索引
+     * - compare 为元素比较回调，期望签名如下：
+     *      ixx operator()(item_t const & left, item_t const & right)
+     *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
+     *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     */
+    xheader inline auto pop_by_index(
+        seq_t                       const & seq, 
+        uxx                                 length, 
+        ixx                                 index,
+        cmp_t                       const & compare = inc::default_compare<item_t>){
+
+        xindex_rollback(length, index);
+        inc::unified_seq<seq_t> v{seq};
+        return pop_core(
+            v.subseq(co{0, length}), index,
             v[length - 1], 
             compare
         );
