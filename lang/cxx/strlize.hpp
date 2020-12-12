@@ -203,23 +203,22 @@ namespace mixc::lang_cxx_strlize{
             // 这里用 auto 就好了，m 可能是 mf32 或 mf64，所以返回值类型不是固定的
             auto rd             = m.real_dec();
             auto re             = m.real_exp();
-            auto dec_bits       = uxx(0);
+            auto num_len        = uxx(0);
             f.full              = re > 0 ? rd << re : rd >> -re;
 
             do{
                 ptr[0]          = item_t(f.digital + '0');
                 ptr            += 1;
-                dec_bits       += 1;
+                num_len        += 1;
                 f.digital       = 0;
                 f.full         *= 10;
-            } while(f.full != 0 and dec_bits < m.precious());
-
-            auto num_len        = uxx(ptr - num_part);
+            } while(f.full != 0 and num_len < m.precious());
 
             if (is_scientific_notation){
-                auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - dec_bits), ixx(0));
-                auto dec_len    = inc::min<uxx>(precious, num_len);
-                return invoke(the_t(buf, 1/*sign*/ + 1/*real*/), 0/*expanding_zeros*/, 0/*leading zeros*/, the_t(num_part + 1, dec_len), ctz, exp_str);
+                auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - num_len), ixx(0));
+                auto dec_len    = inc::min<uxx>(precious, num_len - 1/*except real*/);
+                auto decimal    = the_t(num_part + 1/*skip real*/, dec_len);
+                return invoke(the_t(buf, 1/*sign*/ + 1/*real*/), 0/*expanding_zeros*/, 0/*leading zeros*/, decimal, ctz, exp_str);
             }
 
             if (is_neg_exp and exp != 0){
@@ -274,7 +273,7 @@ namespace mixc::lang_cxx_strlize{
 
                 // 不强制使用实数部分正负号
                 if (not (mode & force_real_part_sign) and real[0] == '+'){
-                    real = real.backward(1);
+                    real            = real.backward(1);
                 }
 
                 // 一般记数法
@@ -313,22 +312,18 @@ namespace mixc::lang_cxx_strlize{
                     exp             = exp.backward(1);
                 }
 
-                auto dec_len        = decimal.length() == 0 ?
-                    0 : 1/*dot*/ +  decimal.length();
+                auto with_dot       = decimal.length() == 0 and trailing_zeros == 0 ? 0 : 1/*dot*/;
                 auto e_len          = exp.length() == 0 ?
                     0 : 1/*e*/ + exp.length();
                 auto e              = mode & force_upper_e ? 'E' : 'e';
-                auto len            = real.length() + dec_len + trailing_zeros + e_len;
+                auto len            = real.length() + with_dot + decimal.length() + trailing_zeros + e_len;
                 auto mem            = alloc(len);
                 auto ptr            = mem;
 
                 inc::copy_with_operator_unsafe(mem, real, real.length());
                 mem                += real.length();
 
-                if (e_len == 0){
-                    return base_t(ptr, len);
-                }
-                if (dec_len != 0){
+                if (with_dot){
                     mem[0]         = '.';
                     mem           += 1;
                 }
