@@ -18,12 +18,16 @@ namespace mixc::math_random::inc{
     inline u64 random() {
         constexpr u64 change_period = 0x3f;
 
+        // 这里维持了随机的不确定性
         if ((x & change_period) == 0){
             x += inc::time_stamp();
         }
 
+        // 这里维持了随机的稳定性
         x += inc::ring_shift_left(y, uxx(x));
         y += inc::ring_shift_left(x, uxx(y));
+
+        // 只要没人知道它下一步会变成什么，那么它就是随机的。
         return y;
     }
 }
