@@ -264,11 +264,11 @@ struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   
                                                                                 \
     template<class __func>                                                      \
     using __sg = ::mixc::memop_signature::signature<__func>;                    \
-                                                                                \
+private:                                                                        \
     template<class __target, class __object>                                    \
     static constexpr bool __imi =                                               \
         ::mixc::macro_xinterface::is_match_interface<__target, __object>;       \
-private:                                                                        \
+                                                                                \
     template<uxx __i>                                                           \
     using __ph = ::mixc::dumb_place_holder::place_holder<__i>;                  \
                                                                                 \
