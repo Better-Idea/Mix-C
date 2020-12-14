@@ -216,9 +216,10 @@ namespace mixc::lang_cxx_strlize{
 
             if (is_scientific_notation){
                 auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - num_len), ixx(0));
+                auto real       = the_t(buf, 1/*sign*/ + 1/*real*/);
                 auto dec_len    = inc::min<uxx>(precious, num_len - 1/*except real*/);
                 auto decimal    = the_t(num_part + 1/*skip real*/, dec_len);
-                return invoke(the_t(buf, 1/*sign*/ + 1/*real*/), 0/*expanding_zeros*/, 0/*leading zeros*/, decimal, ctz, exp_str);
+                return invoke(real, 0/*expanding_zeros*/, 0/*leading zeros*/, decimal, ctz, exp_str);
             }
 
             if (is_neg_exp and exp != 0){
