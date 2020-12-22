@@ -82,25 +82,25 @@ guide 存在的意义非凡，它在编译期为 gc 路由一个具有环形引�
 // 其中 spg<int> 被排除在外，因为它并不在环上
 
 struct ax{
-    spg<ax> a;          // 自环
+    spg<ax> a;              // 自环
 };
 
 struct bar;
 struct foo{
-    spg<bar> b;         // 互环
+    spg<bar> b;             // 互环
     spg<int> i;
 };
 
 struct bar{
-    spg<foo> f;         // 互环
+    spg<foo> f;             // 互环
 };
 
 ...
 {
-    spg<foo> f(ini_now); // 分配内存
-    spg<bar> b(ini_now); // 分配内存
+    spg<foo> f{init_now};   // 分配内存
+    spg<bar> b{init_now};   // 分配内存
     f.b = b;
-    b.f = f;             // 互相指向，构成环
+    b.f = f;                // 互相指向，构成环
 }
 
 ...
@@ -159,7 +159,7 @@ https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_gc.cpp
 ```C++
 ...
 {
-    shared_ptr<ax> a0(ini_now, ... /* push some args for initialize*/);
+    shared_ptr<ax> a0(init_now, ... /* push some args for initialize*/);
     {
         shared_ptr<ax> a1 = a0;
         a1->self = a0;

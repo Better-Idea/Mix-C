@@ -106,20 +106,20 @@ namespace mixc::gc_ref{
             // 而计数汇总的工作则是交给此节点来完成
             if (info_t & info = gc_map.get(mem); info == nullref){
                 info_t        this_node;
-                this_node.can_arrive_root   = mem == root;
-                this_node.visited           = mem != root; // 除了根节点，其他节点都有直接的入边（表示从前一个节点到此节点）
+                this_node.can_arrive_root       = mem == root;
+                this_node.visited               = mem != root; // 除了根节点，其他节点都有直接的入边（表示从前一个节点到此节点）
                 gc_map.set(mem, this_node);
                 xdebug(im_gc_meta_routing, mem, "set to gc_map");
 
                 // 如果数组元素 item_t 属于 guide 类型集合，那么就遍历数组元素
                 if constexpr (tin<guide, item_t>){
-                    can_arrive_root |= tuple<void>::template routing<guide>(the, the.length());
+                    can_arrive_root            |= tuple<void>::template routing<guide>(the, the.length());
                 }
                 
                 // 如果 attribute_t 属于 guide 类型集合，就遍历该对象的字段
                 if constexpr (tin<guide, attribute_t>){
-                    attribute_t * ptr       = mem; // 李氏转换
-                    can_arrive_root |= tuplep(ptr)->template routing<guide>();
+                    attribute_t * ptr           = mem; // 李氏转换
+                    can_arrive_root            |= tuplep(ptr)->template routing<guide>();
                 }
 
                 if (can_arrive_root){
@@ -130,11 +130,11 @@ namespace mixc::gc_ref{
             }
             else if (info.can_arrive_root){
                 xdebug(im_gc_meta_routing, "can_arrive_root");
-                degree_dvalue  -= 1;
-                can_arrive_root = true;
+                degree_dvalue                  -= 1;
+                can_arrive_root                 = true;
             }
             else{
-                info.visited   += 1;
+                info.visited                   += 1;
                 xdebug(im_gc_meta_routing, info.visited);
             }
             return can_arrive_root;
@@ -193,7 +193,7 @@ namespace mixc::gc_ref{
     protected:
 
         template<class ... args>
-        meta(::ini, args const & ... list) {
+        meta(::init_t, args const & ... list) {
             mem = alloc(::length(0), list...);
         }
 

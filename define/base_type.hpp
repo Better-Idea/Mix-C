@@ -114,7 +114,7 @@
         go_on,
     };
 
-    enum class ini {};
+    enum class init_t {};
 
     struct zero_t{
         constexpr zero_t(){}
@@ -127,7 +127,7 @@
     constexpr uxx       not_exist    = uxx(-1);
     constexpr uxx       magic_number = 19961212;
     constexpr zero_t    zero{};
-    constexpr ini       ini_now{};
+    constexpr init_t    init_now{};
 
     struct length {
         explicit length(uxx value) : value(value) { }
