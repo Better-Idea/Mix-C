@@ -51,8 +51,8 @@ namespace mixc::gc_ref{
     extern uxx                               degree_dvalue;
     extern visited_ptr_t                     root;
     extern bool                              can_free_whole_ring;
-    static inline uxx                        empty_array[32];
-    static inline voidp                      empty_array_ptr   = empty_array;
+    static inline uxx                        empty_mem[32];
+    static inline voidp                      empty_mem_ptr   = empty_mem;
 
     template<class final, class item_t, class attribute_t, bool is_array, bool is_binary_aligned_alloc>
     xstruct(
@@ -82,6 +82,10 @@ namespace mixc::gc_ref{
 
         using token_mix_t = token_mix<item_t, attribute_t, the_length>;
 
+        static token_mix_t * null(){
+            return (token_mix_t *)empty_mem_ptr;
+        }
+
         template<class guide>
         bool routing() {
             using tuplep = tuple<attribute_t> *;
@@ -89,7 +93,7 @@ namespace mixc::gc_ref{
             bool can_arrive_root = false;
 
             // 无法通向 root 的死路
-            if (mem == nullptr){
+            if (mem == null()){
                 return false;
             }
 
@@ -154,14 +158,17 @@ namespace mixc::gc_ref{
             degree_dvalue   = 0;
             return state;
         }
-
     public:
-        meta() : mem(nullptr) { }
+        meta() : mem(null()) { }
 
         meta(the_t const & value){
-            if (mem = value.mem; mem != nullptr) {
+            if (mem = value.mem; mem != null()) {
                 mem->owners_inc();
             }
+        }
+
+        meta(the_t && object){
+            the.mem = atom_swap(& object.mem, null());
         }
     protected:
         template<class ... args>
@@ -191,7 +198,6 @@ namespace mixc::gc_ref{
             initial(i + 1, rest...);
         }
     protected:
-
         template<class ... args>
         meta(::init_t, args const & ... list) {
             mem = alloc(::length(0), list...);
@@ -202,26 +208,49 @@ namespace mixc::gc_ref{
         }
     public:
         final & operator = (the_t const & object){
-            if (object.mem != nullptr){ 
-                object.mem->owners_inc();
-            }
+            /* 当 object == nullptr 时，实际上指向的是 the_t::null()
+             * 对外而言依旧与 nullptr 比较判断是否是空对象
+             * the_t::null() 是一块不为 nullptr 可用的内存，只是它不能当作对象实例使用
+             * 具体情况：
+             * 对于该函数 operator=(the_t const & object)
+             * 假如 object.mem 为空时指向的是 nullptr
+             * 那么在增加计数器时我们需要额外判断它是否为 nullptr
+             * 此外下列步骤在多线程环境并不安全：
+             * if (object.mem != nullptr){      // 前一刻不为 nullptr
+             *     object.mem->owners_inc();    // 后一刻为 nullptr
+             * }
+             * 
+             * 所以我们用静态的空对象 null() 代替 nullptr
+             * 这样我们我们可以放心的直接增加计数器并且消除了线程不一致问题
+             */
+            object.mem->owners_inc();
 
             // 当有多个线程对该对象赋值时，该原子操作可以保证正确性
-            token_mix_t * m   = atom_swap(& mem, object.mem);
             the_t         old;
-            old.mem = m;
+            token_mix_t * m     = atom_swap(& the.mem, object.mem);
+            old.mem             = m;
             return thex;
         }
 
-        xis_nullptr(mem == nullptr);
+        final & operator = (the_t && object){
+            the_t         old;
+            token_mix_t * m     = atom_swap(& the.mem, object.mem);
+            old.mem             = m;
+
+            // 移除 object 对当前内存的所有权(右值移动)
+            atom_swap(& object.mem, null());
+            return thex;
+        }
+
+        xis_nullptr(mem == null());
 
         final & operator=(decltype(nullptr)){
             using guide = decltype(make_guide<final>());
             constexpr bool need_gc = guide::length != 0;
-            token_mix_t *  ptr = nullptr;
+            token_mix_t *  ptr = null();
             uxx            cnt;
 
-            if (ptr = atom_swap(& mem, ptr); ptr == nullptr) { // enter only once
+            if (ptr = atom_swap(& mem, ptr); ptr == null()) { // enter only once
                 return thex;
             }
 
@@ -312,7 +341,7 @@ namespace mixc::gc_ref{
 
         static uxx real(uxx length) {
             if constexpr (is_binary_aligned_alloc){
-                length = uxx(1) << (inc::index_of_last_set(length - 1) + 1);
+                length = uxx(1) << (index_of_last_set(length - 1) + 1);
             }
             return length;
         }
@@ -343,8 +372,8 @@ namespace mixc::gc_ref{
 }
 
 namespace mixc::gc_ref::origin{
-    using mixc::gc_ref::empty_array;
-    using mixc::gc_ref::empty_array_ptr;
+    using mixc::gc_ref::empty_mem;
+    using mixc::gc_ref::empty_mem_ptr;
 
     template<class final, class type>
     using ref_ptr = meta<final, void, type, false, false>;
