@@ -255,12 +255,6 @@ namespace mixc::gc_ref{
             }
 
             // 后面的代码可以推送给后台 gc 线程
-            if constexpr (is_array) {
-                if (voidp(ptr) == empty_array_ptr) {
-                    return thex;
-                }
-            }
-
             auto old = (the_t *)& ptr;
 
             if (can_free_whole_ring){
