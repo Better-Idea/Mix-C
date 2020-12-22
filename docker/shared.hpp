@@ -53,14 +53,7 @@ namespace mixc::docker_shared{
         }
 
         type const & operator= (type const & value){
-            if (the != nullptr){
-                operator type & () = value;
-            }
-            else{
-                // xnew (this) the_t(value);
-                // 避免以上并发赋值时多次初始化
-                the_t{value}.swap(this);
-            }
+            operator type & () = value;
             return value;
         }
     };
