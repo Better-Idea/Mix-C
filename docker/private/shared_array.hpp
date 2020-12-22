@@ -37,8 +37,8 @@ namespace mixc::docker_shared_array{
     public:
         shared_array_t(shared_array_t const &) = default;
         shared_array_t() : 
-            shared_array_t(*(the_t *)& inc::empty_array_ptr) {
-            static_assert(sizeof(inc::empty_array) >= sizeof(inc::struct_type<attribute>));
+            shared_array_t(*(the_t *)& inc::empty_mem_ptr) {
+            static_assert(sizeof(inc::empty_mem) >= sizeof(inc::struct_type<attribute>));
         }
 
         template<class finalx>
