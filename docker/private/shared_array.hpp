@@ -72,7 +72,7 @@ namespace mixc::docker_shared_array{
 
         the_t & operator=(decltype(nullptr)){
             base_t::operator=(nullptr);
-            xnew (this) the_t(*(the_t *)& inc::empty_array_ptr);
+            xnew (this) the_t(*(the_t *)& inc::empty_mem_ptr);
             return thex;
         }
 
@@ -97,7 +97,7 @@ namespace mixc::docker_shared_array{
         }
 
         xis_nullptr(
-            the == *(the_t *)& inc::empty_array_ptr
+            the == *(the_t *)& inc::empty_mem_ptr
         )
 
         xpubgetx(is_empty, bool) {
