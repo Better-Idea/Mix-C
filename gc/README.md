@@ -57,7 +57,7 @@
 
 ### 引用计数器 + 图论
 原始的引用计数器解 shared_ptr（sp）决不了环形引用问题，但结合图论的引用计数器就与众不同，这里暂且叫它 shared_ptr with guide (spg)。  
-思路：如果一个对象不存在环形引用结构（这种结构是一般在编译期可以得出），那么 spg 的行为和普通 sp 大同小异（没有额外的行为），否则我们需要通过元编程计算出能从 spg 出发并能再次抵达 spg 的**类型集合** guide。  
+思路：如果一个对象不存在环形引用**结构**（这种结构是一般在编译期可以得出），那么 spg 的行为和普通 sp 大同小异（没有额外的行为），否则我们需要通过元编程计算出能从 spg 出发并能再次抵达 spg 的**类型集合** guide。  
 guide 存在的意义非凡，它在编译期为 gc 路由一个具有环形引用的对象（下文称 环对象）提供启发，减少经过无用的节点的次数，降低了路由的规模。  
   
 **概念一：我们判断能否(不是是否)构成环形引用的标准是：从一个类型出发，路由成员类型，能再次回到该类型本身**  
@@ -68,10 +68,10 @@ guide 存在的意义非凡，它在编译期为 gc 路由一个具有环形引�
 - [**docker/private/queue**](https://github.com/Better-Idea/Mix-C/tree/master/docker/private/queue.hpp)  
 - [**docker/private/hashmap**](https://github.com/Better-Idea/Mix-C/tree/master/docker/private/hashmap.hpp)  
   
-其实上述结构也完全可以用 mixc::shared_ptr 构成，但我们为了节省内存，降低不必要的开销而选择自己管理这些类型。  
+其实上述结构也完全可以用 `mixc::shared<T>` 构成，但我们为了节省内存，降低不必要的开销而选择自己管理这些类型。  
 如果把上述结构中递归定义当作结构嵌套看的话，那这些节点是不能直接暴露给外部的，因为所有外部引用该节点的指针皆为弱指针，随着指向的节点在内部被释放而无效。  
   
-但如果使用 shared_ptr 就可以共享这些节点了，比如你可以把一个链表节点共享给另一个链表。所以我们没有限制死一定要用 gc 的那一套，也可以自定义 routing 函数来提供显式的 gc 路由策略。  
+但如果使用 `shared<T>` 就可以共享这些节点了，比如你可以把一个链表节点共享给另一个链表。所以我们没有限制死一定要用 gc 的那一套，也可以自定义 routing 函数来提供显式的 gc 路由策略。  
   
 回归正题：  
 我们这里以简单的例子示意环形引用。  
@@ -159,9 +159,9 @@ https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_gc.cpp
 ```C++
 ...
 {
-    shared_ptr<ax> a0(init_now, ... /* push some args for initialize*/);
+    shared<ax> a0(init_now, ... /* push some args for initialize*/);
     {
-        shared_ptr<ax> a1 = a0;
+        shared<ax> a1 = a0;
         a1->self = a0;
     }
 } /* a0 和 a1 共享内存理论上的释放点
