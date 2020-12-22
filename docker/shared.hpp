@@ -1,38 +1,38 @@
-#ifndef xpack_docker_shared_ptr
-#define xpack_docker_shared_ptr
+#ifndef xpack_docker_shared
+#define xpack_docker_shared
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_shared_ptr::inc
+#define xuser mixc::docker_shared::inc
 #include"gc/ref.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_shared_ptr{
-    template<class type> struct shared_ptr;
+namespace mixc::docker_shared{
+    template<class type> struct shared;
     template<class type>
-    struct shared_ptr : inc::ref_ptr<shared_ptr<type>, type>{
-        using the_t  = shared_ptr<type>;
-        using base_t = inc::ref_ptr<shared_ptr<type>, type>;
+    struct shared : inc::ref_ptr<shared<type>, type>{
+        using the_t  = shared<type>;
+        using base_t = inc::ref_ptr<shared<type>, type>;
         using base_t::operator=;
         using base_t::operator==;
         using base_t::operator!=;
     public:
-        shared_ptr() = default;
+        shared() = default;
 
-        shared_ptr(type const & value) : 
-            base_t(::ini_now, value){
+        shared(type const & value) : 
+            base_t(::init_now, value){
         }
 
-        explicit shared_ptr(::ini) : 
-            base_t(::ini_now) {}
+        explicit shared(::init_t) : 
+            base_t(::init_now) {}
 
         template<class ... args>
-        explicit shared_ptr(::ini, args const & ... list) : 
-            base_t(::ini_now, list...) {}
+        explicit shared(::init_t, args const & ... list) : 
+            base_t(::init_now, list...) {}
 
         template<class ... args>
-        shared_ptr<type> & operator()(::ini, args const & ... list){
-            the_t{ini_now, list...}.swap(this);
+        shared<type> & operator()(::init_t, args const & ... list){
+            the_t{init_now, list...}.swap(this);
             return the;
         }
 
@@ -68,4 +68,4 @@ namespace mixc::docker_shared_ptr{
 
 #endif
 
-xexport(mixc::docker_shared_ptr::shared_ptr)
+xexport(mixc::docker_shared::shared)
