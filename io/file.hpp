@@ -8,6 +8,7 @@
 #include"interface/seqptr.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_file::origin{
@@ -26,12 +27,22 @@ namespace mixc::io_file::origin{
         using final = the_t;
     public:
         file();
+        file(file &&);
         file(inc::c08 path) : path(path){}
         file(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) {
             the.open(path, mode, result);
         }
         ~file(){
             the.close();
+        }
+
+        final & operator=(file && value){
+            if (this == & value){
+                return;
+            }
+            the.close();
+            xnew(this) file(value);
+            return thex;
         }
 
         u64     length()                                const;

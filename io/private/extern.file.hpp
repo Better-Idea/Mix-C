@@ -18,6 +18,13 @@ namespace mixc::io_file::cpp{
     using namespace ::mixc::io_private_file::inc;
 }
 
+namespace mixc::io_file::origin{
+    file::file(file && value){
+        the.path    = value.path;
+        the.fd      = cpp::atom_swap<ixx>(& value.fd, -1);
+    }
+}
+
 #if xis_windows
 #include<Windows.h>
 namespace mixc::io_file::origin{
