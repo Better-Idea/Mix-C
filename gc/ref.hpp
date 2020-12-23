@@ -366,9 +366,6 @@ namespace mixc::gc_ref{
 }
 
 namespace mixc::gc_ref::origin{
-    using mixc::gc_ref::empty_mem;
-    using mixc::gc_ref::empty_mem_ptr;
-
     template<class final, class type>
     using ref_ptr = meta<final, void, type, false, false>;
 
