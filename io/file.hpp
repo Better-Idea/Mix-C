@@ -5,6 +5,7 @@
 #define xuser mixc::io_file::inc
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
+#include"dumb/move.hpp"
 #include"interface/seqptr.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
@@ -38,10 +39,10 @@ namespace mixc::io_file::origin{
 
         final & operator=(file && value){
             if (this == & value){
-                return;
+                return thex;
             }
             the.close();
-            xnew(this) file(value);
+            xnew(this) file(inc::move(value));
             return thex;
         }
 
