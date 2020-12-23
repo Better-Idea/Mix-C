@@ -17,6 +17,8 @@
 #include"gc/ref.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"macro/xnew.hpp"
+#include"meta/has_cast.hpp"
+#include"meta/has_constructor.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -34,49 +36,61 @@ namespace mixc::docker_shared_array{
     )
         using item_t = typename shared_array_t<final, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t;
         using base_t = inc::ref_array<final, item_t, attribute, is_binary_aligned_alloc>;
+        using typename base_t::item_initial_invoke;
+        using typename base_t::item_initial_invokex;
+        using base_t::operator=;
+        using base_t::operator==;
+        using base_t::operator!=;
     public:
-        shared_array_t(shared_array_t const &) = default;
-        shared_array_t() : 
-            shared_array_t(*(the_t *)& inc::empty_mem_ptr) {
-            static_assert(sizeof(inc::empty_mem) >= sizeof(inc::struct_type<attribute>));
-        }
+        shared_array_t()                       = default;
+
+        shared_array_t(::length length) :
+            base_t(length) {}
 
         template<class finalx>
         shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
             shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> &)self){
         }
 
-        shared_array_t(::length length) :
-            base_t(length) {}
-
         template<class ... args>
+        requires(true && ... && inc::has_cast<item_t, args>)
         shared_array_t(item_t const & first, args const & ... rest) : 
             base_t(first, rest...){
         }
 
         template<class ... args>
+        requires(inc::has_constructor<item_t, void(args const &...)>)
         shared_array_t(::length length, args const & ... list) : 
             base_t(length, list...) {}
 
+        template<class initial_invoke>
+        requires(
+            inc::has_cast<item_initial_invoke , initial_invoke> or 
+            inc::has_cast<item_initial_invokex, initial_invoke>
+        )
+        shared_array_t(::length length, initial_invoke const & initial) :
+            base_t(length, initial){
+        }
+
         template<class ... args>
+        requires(inc::has_constructor<item_t, void(args const &...)>)
         auto & operator()(::length length, args const & ... list){
             the_t{length, list...}.swap(this);
             return thex;
         }
 
         template<class ... args>
+        requires(true && ... && inc::has_cast<item_t, args>)
         auto & operator()(item_t const & first, args const & ... rest){
             the_t{first, rest...}.swap(this);
             return thex;
         }
 
-        the_t & operator=(decltype(nullptr)){
-            base_t::operator=(nullptr);
-            xnew (this) the_t(*(the_t *)& inc::empty_mem_ptr);
-            return thex;
+        operator item_t *() {
+            return base_t::operator item_t * ();
         }
 
-        operator item_t *() const {
+        operator item_t const *() const {
             return base_t::operator item_t * ();
         }
 
@@ -95,10 +109,6 @@ namespace mixc::docker_shared_array{
         attribute const * operator->() const {
             return base_t::operator->();
         }
-
-        xis_nullptr(
-            the == *(the_t *)& inc::empty_mem_ptr
-        )
 
         xpubgetx(is_empty, bool) {
             return length() == 0;
