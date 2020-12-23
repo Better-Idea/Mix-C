@@ -4,9 +4,9 @@
 
 #define xuser mixc::math_ln::inc
 #include"configure.hpp"
-#include"define/mfxx.hpp"
 #include"macro/xalign.hpp"
 #include"math/const.hpp"
+#include"utils/mfxx.hpp"
 
 namespace mixc::math_ln{
     #if xuse_math_ln_lut6x16

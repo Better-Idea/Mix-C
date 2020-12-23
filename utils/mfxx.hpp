@@ -31,18 +31,18 @@
  * - 浮点数的陷阱
  */
 
-#ifndef xpack_define_mfxx
-#define xpack_define_mfxx
+#ifndef xpack_utils_mfxx
+#define xpack_utils_mfxx
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_mfxx::inc
+#define xuser mixc::utils_mfxx::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::define_mfxx{
+namespace mixc::utils_mfxx{
     template<
         class   float_type, 
         class   equivalent_type, 
@@ -148,9 +148,9 @@ namespace mixc::define_mfxx{
         }
     $
 
-    using mf32 = mixc::define_mfxx::mfxx<f32, u32, 23, 8 , (1 <<  8) - 1, 7 >;
-    using mf64 = mixc::define_mfxx::mfxx<f64, u64, 52, 11, (1 << 10) - 1, 17>;
-    using mf80 = mixc::define_mfxx::mfxx<f80, u64, 64, 15, (1 << 14) - 1, 19>;
+    using mf32 = mixc::utils_mfxx::mfxx<f32, u32, 23, 8 , (1 <<  8) - 1, 7 >;
+    using mf64 = mixc::utils_mfxx::mfxx<f64, u64, 52, 11, (1 << 10) - 1, 17>;
+    using mf80 = mixc::utils_mfxx::mfxx<f80, u64, 64, 15, (1 << 14) - 1, 19>;
 
     template<class> struct base;
     template<>      struct base<f32> : mf32{ using mf32::mfxx; };
@@ -158,10 +158,10 @@ namespace mixc::define_mfxx{
     template<>      struct base<f80> : mf80{ using mf80::mfxx; };
 }
 
-namespace mixc::define_mfxx::origin{
-    using mixc::define_mfxx::mf32;
-    using mixc::define_mfxx::mf64;
-    using mixc::define_mfxx::mf80;
+namespace mixc::utils_mfxx::origin{
+    using mixc::utils_mfxx::mf32;
+    using mixc::utils_mfxx::mf64;
+    using mixc::utils_mfxx::mf80;
 
     template<class float_t> 
     xstruct(
@@ -178,4 +178,4 @@ namespace mixc::define_mfxx::origin{
 
 #endif
 
-xexport_space(mixc::define_mfxx::origin)
+xexport_space(mixc::utils_mfxx::origin)

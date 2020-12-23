@@ -5,9 +5,9 @@
 #define xuser mixc::math_expe::inc
 #include"define/base_type.hpp"
 #include"define/inf.hpp"
-#include"define/mfxx.hpp"
 #include"macro/xexport.hpp"
 #include"math/div.hpp"
+#include"utils/mfxx.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_expe{

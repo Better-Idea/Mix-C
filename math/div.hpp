@@ -4,9 +4,9 @@
 #undef  xuser
 #define xuser mixc::math_div::inc
 #include"define/base_type.hpp"
-#include"define/mfxx.hpp"
 #include"instruction/mod.hpp"
 #include"macro/xexport.hpp"
+#include"utils/mfxx.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_div{

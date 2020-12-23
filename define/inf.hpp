@@ -51,8 +51,8 @@
 #undef  xuser
 #define xuser mixc::define_inf::inc
 #include"define/base_type.hpp"
-#include"define/mfxx.hpp"
 #include"macro/xexport.hpp"
+#include"utils/mfxx.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_inf::origin{

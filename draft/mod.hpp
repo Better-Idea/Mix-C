@@ -3,10 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser   
 #define xuser mixc::draft_mod::inc
-#include"define/mfxx.hpp"
 #include"instruction/mod.hpp"
 #include"instruction/mul.hpp"
 #include"mixc.hpp"
+#include"utils/mfxx.hpp"
 #pragma pop_macro("xuser")
 
 // 小猫的杂货屋

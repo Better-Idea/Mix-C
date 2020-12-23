@@ -5,8 +5,8 @@
 #define xuser mixc::math_sqrt::inc
 #include"configure.hpp"
 #include"mixc.hpp"
-#include"define/mfxx.hpp"
 #include"math/const.hpp"
+#include"utils/mfxx.hpp"
 
 namespace mixc::math_sqrt::origin{
     #if xuse_math_sqrt_lut6x16

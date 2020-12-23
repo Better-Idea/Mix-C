@@ -6,9 +6,9 @@
 #include"configure.hpp"
 #include"define/base_type.hpp"
 #include"define/inf.hpp"
-#include"define/mfxx.hpp"
 #include"math/expe.hpp"
 #include"math/div.hpp"
+#include"utils/mfxx.hpp"
 
 namespace mixc::math_expe{
     #if xuse_math_expe_lut6x16 

@@ -5,9 +5,9 @@
 #define xuser mixc::math_tan::inc
 #include<math.h>
 #include"configure.hpp"
-#include"define/mfxx.hpp"
 #include"macro/xalign.hpp"
 #include"math/tan.hpp"
+#include"utils/mfxx.hpp"
 
 namespace mixc::math_tan{
     #if xuse_math_tan_lut4x256
@@ -161,7 +161,7 @@ namespace mixc::math_tan{
 
 #define xuser mixc::math_atan::inc
 #include"configure.hpp"
-#include"define/mfxx.hpp"
+#include"utils/mfxx.hpp"
 #include"math/const.hpp"
 
 namespace mixc::math_atan{

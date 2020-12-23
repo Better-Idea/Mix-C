@@ -11,7 +11,6 @@
 #define xuser mixc::lang_cxx_strlize::inc
 #include"define/base_type.hpp"
 #include"define/inf.hpp"
-#include"define/mfxx.hpp"
 #include"define/nan.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
@@ -28,6 +27,7 @@
 #include"meta/is_float.hpp"
 #include"meta/is_integer.hpp"
 #include"meta/unsigned_type.hpp"
+#include"utils/mfxx.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
