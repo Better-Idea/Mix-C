@@ -1,6 +1,4 @@
 #include"define/base_type.hpp"
-#include"define/bitbind.hpp"
 #include"define/inf.hpp"
-#include"define/mfxx.hpp"
 #include"define/nan.hpp"
 #include"define/nullref.hpp"
