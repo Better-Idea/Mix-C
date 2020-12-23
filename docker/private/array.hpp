@@ -126,28 +126,30 @@ namespace mixc::docker_array{
             data(empty_array_ptr()){
         }
 
-        array_t(::length capacity, inc::ialloc<void> alloc, item_initial_invokex initial) : 
+        template<class initial_invoke>
+        requires(
+            inc::has_cast<item_initial_invoke , initial_invoke> or 
+            inc::has_cast<item_initial_invokex, initial_invoke>
+        )
+        array_t(::length capacity, inc::ialloc<void> alloc, initial_invoke const & initial) : 
             data(create(capacity, alloc)){
 
             for(uxx i = 0, len = the.length(); i < len; i++){
-                initial(i, data + i);
+                if constexpr (inc::has_cast<item_initial_invoke, initial_invoke>){
+                    initial(data + i);
+                }
+                else{
+                    initial(i, data + i);
+                }
             }
         }
 
-        array_t(::length capacity, inc::ialloc<void> alloc, item_initial_invoke initial):
-            data(create(capacity, alloc)){
-            
-            for(uxx i = 0, len = the.length(); i < len; i++){
-                initial(data + i);
-            }
-        }
-
-        array_t(::length capacity, item_initial_invokex initial):
-            array_t(capacity, inc::default_alloc<void>, initial){
-            the.need_free(true);
-        }
-
-        array_t(::length capacity, item_initial_invoke initial):
+        template<class initial_invoke>
+        requires(
+            inc::has_cast<item_initial_invoke , initial_invoke> or 
+            inc::has_cast<item_initial_invokex, initial_invoke>
+        )
+        array_t(::length capacity, initial_invoke const & initial):
             array_t(capacity, inc::default_alloc<void>, initial){
             the.need_free(true);
         }
@@ -184,9 +186,7 @@ namespace mixc::docker_array{
             struct item_ref{
                 item_t const & value;
                 item_ref(item_t const & value) : value(value){}
-            };
-
-            item_ref items[] = {first, rest...};
+            } items[] = {first, rest...};
 
             for(uxx i = 0, len = the.length(); i < len; i++){
                 xnew(the.data + i) item_t(items[i].value);
