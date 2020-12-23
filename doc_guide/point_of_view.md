@@ -13,6 +13,7 @@
 **如果你用的是 vscode，那么这个问题应该会很好解决：**
 - 使用 ctrl+shift+b 快捷键弹出编译提示
 - 根据你现有的编译器选择 `g++` 或者 `clang` 编译 `extern.api.o`
+- 默认情况 `extern.api.o` 只需要编译一次就好，可以重复使用。在拉取 Mix-C 新的版本时，重新编译一下是常规操作
 - 添加 `main.cpp` 并引用 `Mix-C` 项目的组建书写代码
 - 使用 ctrl+shift+b 快捷键弹出编译提示
 - 选择 `... build active file` 选项
