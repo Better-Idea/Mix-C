@@ -8,11 +8,21 @@
 #include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::meta_has_constructor::origin{
+namespace mixc::meta_has_constructor{
     template<class object_t, class ... args>
-    concept has_constructor = requires(object_t * ptr, args ... list){
+    concept meta = requires(object_t * ptr, args ... list){
         xnew(ptr) object_t(list...);
     };
+
+    template<class object_t, class ... args>
+    inline constexpr bool invoke(object_t * ptr, void(*)(args...)){
+        return meta<object_t, args...>;
+    }
+}
+
+namespace mixc::meta_has_constructor::origin{
+    template<class object_t, class constructor>
+    concept has_constructor = invoke((object_t *)nullptr, (constructor *)nullptr);
 }
 
 #endif
