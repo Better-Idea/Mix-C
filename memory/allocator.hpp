@@ -72,6 +72,16 @@ namespace mixc::memory_alloctor::origin{
         free_with_destroy(ptr, memory_size(sizeof(type)));
     }
 
+    template<class type>
+    constexpr auto default_alloc = [](uxx bytes) -> type * {
+        return alloc<type>(memory_size{bytes});
+    };
+
+    template<class type>
+    constexpr auto default_free = [](type * ptr, uxx bytes){
+        free(ptr, memory_size{bytes});
+    };
+
     uxx used_bytes();
     uxx need_free_count();
     uxx alive_pages();
