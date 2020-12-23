@@ -38,11 +38,14 @@ namespace mixc::docker_shared_array{
         using base_t = inc::ref_array<final, item_t, attribute, is_binary_aligned_alloc>;
         using typename base_t::item_initial_invoke;
         using typename base_t::item_initial_invokex;
-        using base_t::operator=;
         using base_t::operator==;
         using base_t::operator!=;
     public:
-        shared_array_t()                       = default;
+        shared_array_t()                        = default;
+        shared_array_t(the_t const &)           = default;
+        shared_array_t(the_t &&)                = default;
+        the_t & operator=(the_t const &)        = default;
+        the_t & operator=(the_t &&)             = default;
 
         shared_array_t(::length length) :
             base_t(length) {}
