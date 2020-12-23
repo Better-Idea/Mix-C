@@ -12,6 +12,7 @@
 #include"gc/private/token.hpp"
 #include"gc/private/tuple.hpp"
 #include"instruction/index_of_last_set.hpp"
+#include"interface/can_callback.hpp"
 #include"lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xnew.hpp"
@@ -22,6 +23,8 @@
 #include"meta/is_based_on.hpp"
 #include"meta/is_class.hpp"
 #include"meta/is_same.hpp"
+#include"meta/has_cast.hpp"
+#include"meta/has_constructor.hpp"
 #include"meta_ctr/cif.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
@@ -171,33 +174,51 @@ namespace mixc::gc_ref{
             the.mem = atom_swap(& object.mem, null());
         }
     protected:
-        template<class ... args>
-        meta(::length length, args const & ... list) {
+        using item_initial_invoke   = inc::icallback<void(the_item_t * item_ptr)>;
+        using item_initial_invokex  = inc::icallback<void(uxx i, the_item_t * item_ptr)>;
+
+        template<class initial_invoke>
+        requires(
+            inc::has_cast<item_initial_invoke , initial_invoke> or 
+            inc::has_cast<item_initial_invokex, initial_invoke>
+        )
+        meta(::length length, initial_invoke const & initial) {
             mem = alloc(length);
 
-            if constexpr (not is_same<void, item_t>){
-                for(uxx i = 0; i < length; i++) {
-                    xnew(mem->item_ptr(i)) item_t(list...);
+            for(uxx i = 0; i < length; i++) {
+                if constexpr (inc::has_cast<item_initial_invoke, initial_invoke>){
+                    initial(mem->item_ptr(i));
+                }
+                else{
+                    initial(i, mem->item_ptr(i));
                 }
             }
         }
 
         template<class ... args>
-        meta(the_item_t const & first, args const & ... rest) {
-            uxx count                            = 1 + sizeof...(args);
-            mem                                  = alloc(count);
-            initial(0, first, rest...);
+        requires(inc::has_constructor<item_t, void(args const & ...)>)
+        meta(::length length, args const & ... list):
+            meta(length, [&](the_item_t * item_ptr){
+                xnew(item_ptr) the_item_t(list...);
+            }) {
         }
-
-    private:
-        void initial(uxx i){ }
 
         template<class ... args>
-        void initial(uxx i, the_item_t const & first, args const & ... rest){
-            xnew(mem->item_ptr(i)) the_item_t(first);
-            initial(i + 1, rest...);
+        requires(true && ... && inc::has_cast<the_item_t, args>)
+        meta(the_item_t const & first, args const & ... rest) {
+            struct item_ref{
+                the_item_t const & value;
+                item_ref(the_item_t const & value) : value(value){}
+            } items[] = {first, rest...};
+
+            uxx count                            = 1 + sizeof...(args);
+            mem                                  = alloc(count);
+
+            for(uxx i = 0; i < count; i++) {
+                xnew(mem->item_ptr(i)) the_item_t(items[i].value);
+            }
         }
-    protected:
+
         template<class ... args>
         meta(::init_t, args const & ... list) {
             mem = alloc(::length(0), list...);
