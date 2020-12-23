@@ -10,14 +10,16 @@
 #include"memop/addressof.hpp"
 #pragma pop_macro("xuser")
 
+namespace mixc::dumb_mirror{
+    template<class type>
+    using item_t = u08 [sizeof(type)];
+}
+
 namespace mixc::dumb_mirror::origin{
     enum class construction_t{
         ignore,
         execute,
     };
-
-    template<class type>
-    using item_t = u08 [sizeof(type)];
 
     template<class type>
     xstruct(
