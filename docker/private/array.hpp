@@ -16,8 +16,10 @@
 #include"interface/can_callback.hpp"
 #include"lock/atom_swap.hpp"
 #include"macro/xis_nullptr.hpp"
+#include"macro/xnew.hpp"
 #include"memop/cast.hpp"
 #include"memory/allocator.hpp"
+#include"meta/has_cast.hpp"
 #include"meta/has_constructor.hpp"
 #include"meta/remove_ptr.hpp"
 #include"meta/remove_ref.hpp"
@@ -117,47 +119,78 @@ namespace mixc::docker_array{
         xprif(data, type *)
     )
         using item_t                = type;
-        using item_initial_invoke   = inc::icallback<void(item_t *)>;
+        using item_initial_invoke   = inc::icallback<void(item_t * item_ptr)>;
+        using item_initial_invokex  = inc::icallback<void(uxx i, item_t * item_ptr)>;
 
         constexpr array_t(decltype(nullptr) = nullptr) : 
             data(empty_array_ptr()){
         }
 
-        array_t(::length capacity, inc::ialloc<void> alloc, item_initial_invoke initial){
-            using itemp = item_t *;
-            auto    mem = alloc(sizeof(uxx) + capacity * sizeof(item_t));
-            auto &  len = uxxp(mem)[0];
-            len         = capacity;
-            data        = itemp(uxxp(mem) + 1);
+        array_t(::length capacity, inc::ialloc<void> alloc, item_initial_invokex initial) : 
+            data(create(capacity, alloc)){
 
-            for(uxx i = 0; i < len; i++){
+            for(uxx i = 0, len = the.length(); i < len; i++){
+                initial(i, data + i);
+            }
+        }
+
+        array_t(::length capacity, inc::ialloc<void> alloc, item_initial_invoke initial):
+            data(create(capacity, alloc)){
+            
+            for(uxx i = 0, len = the.length(); i < len; i++){
                 initial(data + i);
             }
         }
 
+        array_t(::length capacity, item_initial_invokex initial):
+            array_t(capacity, inc::default_alloc<void>, initial){
+            the.need_free(true);
+        }
+
         array_t(::length capacity, item_initial_invoke initial):
-            array_t(capacity, [](uxx bytes) -> voidp {
-                return inc::alloc<void>(inc::memory_size{bytes});
-            }, initial){
+            array_t(capacity, inc::default_alloc<void>, initial){
             the.need_free(true);
         }
 
         template<class ... args>
-        requires(inc::has_constructor<item_t, args const & ...> == true)
+        requires(inc::has_constructor<item_t, void(args const & ...)> == true)
         array_t(::length capacity, inc::ialloc<void> alloc, args const & ... item_initial_args):
             // 编译器差异导致必须让 concept 和 bool true 比较才可以被 requires 接受
-            array_t(capacity, alloc, [&](item_t * item){
-                xnew(item) item_t(item_initial_args...);
+            array_t(capacity, alloc, [&](item_t * item_ptr){
+                xnew(item_ptr) item_t(item_initial_args...);
             }){
         }
 
         template<class ... args>
-        requires(inc::has_constructor<item_t, args const & ...> == true)
-        array_t(::length capacity, args const & ... item_initial_args):
-            // 编译器差异导致必须让 concept 和 bool true 比较才可以被 requires 接受
-            array_t(capacity, [&](item_t * item){
-                xnew(item) item_t(item_initial_args...);
-            }){
+        requires(inc::has_constructor<item_t, void(args const & ...)> == true)
+        array_t(::length capacity, args const & ... item_initial_args){
+            array_t(capacity, [&](item_t * item_ptr){
+                xnew(item_ptr) item_t(item_initial_args...);
+            });
+        }
+
+        array_t(::length capacity):
+            array_t(capacity, [](item_t * item_ptr){
+                xnew(item_ptr) item_t();
+            }){}
+        
+        template<class ... args>
+        requires(true && ... && inc::has_cast<item_t, args>)
+        array_t(item_t const & first, args const & ... rest) : 
+            data(
+                create(::length{1 + sizeof...(args)}, inc::default_alloc<void>)
+            ){
+
+            struct item_ref{
+                item_t const & value;
+                item_ref(item_t const & value) : value(value){}
+            };
+
+            item_ref items[] = {first, rest...};
+
+            for(uxx i = 0, len = the.length(); i < len; i++){
+                xnew(the.data + i) item_t(items[i].value);
+            }
         }
     protected:
         ~array_t(){
@@ -178,6 +211,15 @@ namespace mixc::docker_array{
                     sizeof(uxx) + old.length() * sizeof(item_t)
                 }
             );
+        }
+
+        static item_t * create(uxx capacity, inc::ialloc<void> alloc){
+            using itemp     = item_t *;
+            auto    mem     = alloc(sizeof(uxx) + capacity * sizeof(item_t));
+            auto &  len     = uxxp(mem)[0];
+            auto    data    = itemp(uxxp(mem) + 1);
+            len             = capacity;
+            return data;
         }
 
         static item_t * empty_array_ptr(){
