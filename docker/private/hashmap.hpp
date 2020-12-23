@@ -5,7 +5,6 @@
 #define xuser mixc::docker_hashmap::inc
 #include"algo/hash.hpp"
 #include"define/nullref.hpp"
-#include"docker/bit_indicator.hpp"
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/disable_copy.hpp"
@@ -20,6 +19,7 @@
 #include"memop/swap.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/bit_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_hashmap{

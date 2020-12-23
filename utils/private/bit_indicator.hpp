@@ -5,21 +5,21 @@
  * TODO======================================================================================
  */
 
-#ifndef xpack_docker_bit_indicator
-#define xpack_docker_bit_indicator
+#ifndef xpack_utils_bit_indicator
+#define xpack_utils_bit_indicator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_bit_indicator::inc
-#include"docker/private/adapter.bit_indicator.hpp"
+#define xuser mixc::utils_bit_indicator::inc
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
 #include"lock/atom_swap.hpp"
 #include"memop/zeros.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/private/adapter.bit_indicator.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_bit_indicator{
+namespace mixc::utils_bit_indicator{
     /* 结构：静态位图
      * 参数：
      * - final 为接口结构类型
@@ -215,4 +215,4 @@ namespace mixc::docker_bit_indicator{
 }
 #endif
 
-#define xusing_docker_bit_indicator     ::mixc::docker_bit_indicator
+#define xusing_utils_bit_indicator     ::mixc::utils_bit_indicator

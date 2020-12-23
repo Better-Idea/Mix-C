@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::memory_private_tiny_allocator::inc
 #include"define/base_type.hpp"
-#include"docker/bit_indicator.hpp"
+#include"utils/bit_indicator.hpp"
 #include"interface/ranger.hpp"
 #include"lang/cxx/index_of_last.hpp"
 #include"macro/xexport.hpp"

@@ -5,11 +5,11 @@
  * TODO======================================================================================
  */
 
-#ifndef xpack_docker_adapter_bit_indicator
-#define xpack_docker_adapter_bit_indicator
+#ifndef xpack_utils_adapter_bit_indicator
+#define xpack_utils_adapter_bit_indicator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::docker_adapter_bit_indicator::inc
+#define xuser mixc::utils_adapter_bit_indicator::inc
 #include"instruction/index_of_first_set.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"interface/unified_seq.hpp"
@@ -17,7 +17,7 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::docker_adapter_bit_indicator::origin{
+namespace mixc::utils_adapter_bit_indicator::origin{
     // 64bit 字长 -> 2^6
     // 32bit 字长 -> 2^5
     // more todo ...
@@ -291,4 +291,4 @@ namespace mixc::docker_adapter_bit_indicator::origin{
 
 #endif
 
-xexport_space(mixc::docker_adapter_bit_indicator::origin)
+xexport_space(mixc::utils_adapter_bit_indicator::origin)

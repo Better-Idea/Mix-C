@@ -4,7 +4,6 @@
 #undef  xuser
 #define xuser mixc::algo_sort::inc
 #include"algo/heap_root.hpp"
-#include"docker/bit_indicator.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
 #include"meta/is_float.hpp"
@@ -13,6 +12,7 @@
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
+#include"utils/bit_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_sort{
