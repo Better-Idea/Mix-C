@@ -1,5 +1,5 @@
-#ifndef xpack_dumb_mirror
-#define xpack_dumb_mirror
+#ifndef xpack_dumb_move
+#define xpack_dumb_move
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::dumb_move::inc
