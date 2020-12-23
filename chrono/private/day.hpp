@@ -49,11 +49,11 @@ namespace mixc::chrono_private_day::origin{
         }
 
         template<class final_date>
-        requires(inc::has_constructor<final_date, u32, u32, u32>)
+        requires(inc::has_constructor<final_date, void(u32, u32, u32)>)
         operator final_date() const {
             constexpr u32 a = 400 * 365 + 97; // 完整的 400 年共有的天数
             constexpr u32 b = 100 * 365 + 24; // 完整的 100 年共有的天数
-            constexpr u32 c = 4 * 365 + 1;    // 完整的 4   年共有的天数
+            constexpr u32 c = 4   * 365 + 1;  // 完整的 4   年共有的天数
 
             auto v0 = pvalue + 1;
             auto p0 = v0 / a * 400;
