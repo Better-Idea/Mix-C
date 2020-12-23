@@ -204,7 +204,7 @@ namespace mixc::gc_ref{
         }
 
         template<class ... args>
-        requires(true && ... && inc::has_cast<the_item_t, args>)
+        requires(... && inc::has_cast<the_item_t, args>)
         meta(the_item_t const & first, args const & ... rest) {
             struct item_ref{
                 the_item_t const & value;

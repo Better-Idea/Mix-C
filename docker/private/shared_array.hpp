@@ -56,7 +56,7 @@ namespace mixc::docker_shared_array{
         }
 
         template<class ... args>
-        requires(true && ... && inc::has_cast<item_t, args>)
+        requires(... && inc::has_cast<item_t, args>)
         shared_array_t(item_t const & first, args const & ... rest) : 
             base_t(first, rest...){
         }
@@ -83,7 +83,7 @@ namespace mixc::docker_shared_array{
         }
 
         template<class ... args>
-        requires(true && ... && inc::has_cast<item_t, args>)
+        requires(... && inc::has_cast<item_t, args>)
         auto & operator()(item_t const & first, args const & ... rest){
             the_t{first, rest...}.swap(this);
             return thex;
