@@ -2,14 +2,14 @@
 #define xpack_define_bits
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::define_bits::inc
+#define xuser mixc::utils_bits::inc
 #include"define/base_type.hpp"
-#include"define/bitbind.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
+#include"utils/bitbind.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::define_bits::origin{
+namespace mixc::utils_bits::origin{
     template<class type, class bit_type = bool>
     xstruct(
         xtmpl(bits, type),
@@ -39,4 +39,4 @@ namespace mixc::define_bits::origin{
 
 #endif
 
-xexport_space(mixc::define_bits::origin)
+xexport_space(mixc::utils_bits::origin)
