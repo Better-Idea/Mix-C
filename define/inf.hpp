@@ -84,6 +84,14 @@ namespace mixc::define_inf::origin{
         friend bool operator != (inf_t, type const & value){
             return value != inf_pos and value != inf_neg;
         }
+
+        constexpr auto operator +() const {
+            return inf_pos;
+        }
+
+        constexpr auto operator -() const {
+            return inf_neg;
+        }
     };
 
     // 正无穷或负无穷
