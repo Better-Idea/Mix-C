@@ -71,19 +71,19 @@ namespace mixc::macro_private_mix::origin{
                 fmt     = is_unsigned_t;
             }
             else if constexpr (result::index < 11){
-                f       = value;
+                f       = (type &)value;
                 fmt     = is_float_t;
             }
             else if constexpr (result::index < 12){
-                s       = value;
+                s       = (type &)value;
                 fmt     = is_str_t;
             }
             else if constexpr (result::index < 13){
-                v       = value;
+                v       = (type &)value;
                 fmt     = is_ptr_t;
             }
             else if constexpr (result::index < 14){
-                c       = value;
+                c       = (type &)value;
                 fmt     = is_char_t;
             }
 
