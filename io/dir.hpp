@@ -34,8 +34,8 @@ namespace mixc::io_dir::origin{
                 uxx    index = 0;
                 loop_t state = loop_t::go_on;
 
-                dir::foreach_template(for_file, path, [&](asciis path){
-                    xitr_switch(mode, index, state, invoke, path);
+                dir::foreach_template(for_file, path, [&](asciis name){
+                    xitr_switch(mode, index, state, invoke, name);
                     return state;
                 });
             }
@@ -49,6 +49,7 @@ namespace mixc::io_dir::origin{
         void    copy_to(inc::c08 new_path)              const;
         bool    is_exist()                              const;
         void    create()                                const;
+        void    as_cwd()                                const;
 
         auto subfiles() const {
             return subitem(path, true);
@@ -57,8 +58,9 @@ namespace mixc::io_dir::origin{
         auto subdirs() const {
             return subitem(path, false);
         }
+
     private:
-        static void foreach_template(bool for_file, inc::c08 path, inc::icallback< loop_t(asciis path) > invoke);
+        static void foreach_template(bool for_file, inc::c08 path, inc::icallback< loop_t(asciis name) > invoke);
     $
 }
 

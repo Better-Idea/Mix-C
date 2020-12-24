@@ -209,12 +209,25 @@ namespace mixc::io_dir::origin{
         #elif xis_linux
 
         auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
-        dir_operator("/bin/mkdir", "mkdir", "-p", source);
-        buf.free(source, path);
+        auto    target  = buf.alloc(the.path);
+        dir_operator("/bin/mkdir", "mkdir", "-p", target);
+        buf.free(target, path);
 
         #else
         #error "os miss match"
+        #endif
+    }
+
+    void dir::as_cwd() const {
+        #if xis_windows
+        #error "TODO"
+        #elif xis_linux
+
+        auto && buf     = cpp::path_buffer{};
+        auto    target  = buf.alloc(the.path);
+        chdir(target);
+        buf.free(target, path);
+
         #endif
     }
 }
