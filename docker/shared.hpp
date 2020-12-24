@@ -17,15 +17,11 @@ namespace mixc::docker_shared{
         using base_t::operator==;
         using base_t::operator!=;
     public:
-        shared()                            = default;
+        shared(decltype(nullptr) = nullptr) : base_t(){}
         shared(the_t const &)               = default;
         shared(the_t &&)                    = default;
         the_t & operator=(the_t const &)    = default;
         the_t & operator=(the_t &&)         = default;
-
-        explicit shared(type const & value) : 
-            base_t(::init_now, value){
-        }
 
         template<class ... args>
         requires(inc::has_constructor<type, void(args const & ...)>)

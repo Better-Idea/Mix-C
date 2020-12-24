@@ -41,29 +41,29 @@ namespace mixc::docker_shared_array{
         using base_t::operator==;
         using base_t::operator!=;
     public:
-        shared_array_t()                        = default;
-        shared_array_t(the_t const &)           = default;
-        shared_array_t(the_t &&)                = default;
-        the_t & operator=(the_t const &)        = default;
-        the_t & operator=(the_t &&)             = default;
-
-        shared_array_t(::length length) :
-            base_t(length) {}
+        shared_array_t(decltype(nullptr) = nullptr) : base_t(){}
+        shared_array_t(the_t const &)               = default;
+        shared_array_t(the_t &&)                    = default;
+        the_t & operator=(the_t const &)            = default;
+        the_t & operator=(the_t &&)                 = default;
 
         template<class finalx>
         shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
             shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> &)self){
         }
 
+        explicit shared_array_t(::length length) :
+            base_t(length) {}
+
         template<class ... args>
         requires(... && inc::has_cast<item_t, args>)
-        shared_array_t(item_t const & first, args const & ... rest) : 
+        explicit shared_array_t(item_t const & first, args const & ... rest) : 
             base_t(first, rest...){
         }
 
         template<class ... args>
         requires(inc::has_constructor<item_t, void(args const &...)>)
-        shared_array_t(::length length, args const & ... list) : 
+        explicit shared_array_t(::length length, args const & ... list) : 
             base_t(length, list...) {}
 
         template<class initial_invoke>
@@ -71,7 +71,7 @@ namespace mixc::docker_shared_array{
             inc::has_cast<item_initial_invoke , initial_invoke> or 
             inc::has_cast<item_initial_invokex, initial_invoke>
         )
-        shared_array_t(::length length, initial_invoke const & initial) :
+        explicit shared_array_t(::length length, initial_invoke const & initial) :
             base_t(length, initial){
         }
 
