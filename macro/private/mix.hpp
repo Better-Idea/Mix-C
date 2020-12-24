@@ -46,7 +46,7 @@ namespace mixc::macro_private_mix::origin{
         classify_type_t  fmt;
 
         template<class type>
-        mix(type value){
+        mix(type const & value){
             using result = inc::more_fit<
                 type,
                 i08,    i16,    i32,    i64,
