@@ -38,9 +38,12 @@ namespace mixc::io_private_path_buffer::origin{
             }
         }
 
-        void free(inc::c08 path){
+        void free(inc::c08 path, inc::c08 maybe_ref){
             asciis p = path;
 
+            if (p == (asciis)maybe_ref){
+                return;
+            }
             if (buf <= p and p < end){
                 return;
             }
