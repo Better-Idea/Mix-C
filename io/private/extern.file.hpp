@@ -203,7 +203,7 @@ namespace mixc::io_file::origin{
         #error "os miss match"
         #endif
 
-        buf.free(source);
+        buf.free(source, the.path);
     }
 
     void file::move_to(inc::c08 new_path) const{
@@ -217,8 +217,8 @@ namespace mixc::io_file::origin{
         #else
         #error "os miss match"
         #endif
-        buf.free(target);
-        buf.free(source);
+        buf.free(target, new_path);
+        buf.free(source, the.path);
     }
 
     void file::copy_to(inc::c08 new_path) const{
@@ -239,8 +239,8 @@ namespace mixc::io_file::origin{
         #error "os miss match"
         #endif
 
-        buf.free(target);
-        buf.free(source);
+        buf.free(target, new_path);
+        buf.free(source, the.path);
     }
 
     bool file::is_exist() const{
@@ -262,7 +262,8 @@ namespace mixc::io_file::origin{
         #else
         #error "os miss match"
         #endif
-        buf.free(source);
+
+        buf.free(source, the.path);
     }
 }
 
