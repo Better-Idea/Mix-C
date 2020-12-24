@@ -2,15 +2,15 @@
 #include"chrono/day.hpp"
 #include"chrono/time.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：创建时间
         {
             xhint(demo);
-            demo           += 1;
             
             // 创建时间
             time<> the_time;
@@ -25,7 +25,6 @@ namespace xuser{
         // 演示：时间校验
         {
             xhint(demo);
-            demo           += 1;
 
             // 创建时间
             time<> the_time;
@@ -68,7 +67,6 @@ namespace xuser{
         // 演示：计算总毫秒数
         {
             xhint(demo);
-            demo           += 1;
 
             // 创建时间
             time<>  the_time;
@@ -82,7 +80,6 @@ namespace xuser{
         // 演示：时间的比较
         {
             xhint(demo);
-            demo               += 1;
 
             time<> a;
             time<> b;

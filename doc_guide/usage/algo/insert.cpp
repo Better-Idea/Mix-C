@@ -2,15 +2,15 @@
 #include"algo/insert.hpp"
 #include"docker/array.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：序列中插入一个元素
         {
             xhint(demo);
-            demo               += 1;
 
             // 不设置初始元素的数组
             array<uxx, 10>  buf;
@@ -59,7 +59,6 @@ namespace xuser{
         // 演示：序列插入多个元素
         {
             xhint(demo);
-            demo       += 1;
 
             // 不设置初始元素的数组
             array<uxx, 10>  buf;

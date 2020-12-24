@@ -4,15 +4,15 @@
 #include"chrono/now.hpp"
 #include"chrono/time.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：获取时间
         {
             xhint(demo);
-            demo           += 1;
 
             // 得到当前时间
             time<> the_time = now;
@@ -23,7 +23,6 @@ namespace xuser{
         // 演示：获取日期
         {
             xhint(demo);
-            demo           += 1;
 
             // 得到当前日期
             date<> the_date = now;
@@ -34,7 +33,6 @@ namespace xuser{
         // 演示：获取日期时间
         {
             xhint(demo);
-            demo           += 1;
 
             // 得到当前日期时间
             datetime<> d    = now;
@@ -45,7 +43,6 @@ namespace xuser{
         // 演示：错误用法
         {
             xhint(demo);
-            demo           += 1;
 
             // 直接使用 now.date() / now.time() / now.datetime() 的方式是不正确的
             // 因为存在如下情况：

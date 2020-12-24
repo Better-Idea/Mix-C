@@ -3,15 +3,15 @@
 #include"docker/array.hpp"
 #include"math/random.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：heap_root 默认生成小根堆
         {
             xhint(demo);
-            demo               += 1;
 
             array<uxx, 6> ary;
 
@@ -36,7 +36,6 @@ namespace xuser{
         // 演示：heap_root 生成大根堆
         {
             xhint(demo);
-            demo               += 1;
 
             array<uxx, 6> ary;
 
@@ -65,7 +64,6 @@ namespace xuser{
         // 演示：heap_root 默认生成小根堆 pop 指定索引的元素
         {
             xhint(demo);
-            demo               += 1;
 
             array<uxx, 6> ary;
 

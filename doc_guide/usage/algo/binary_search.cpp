@@ -2,15 +2,15 @@
 #include"algo/binary_search.hpp"
 #include"docker/array.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：在升序数组中寻找指定值对应的索引
         {
             xhint(demo);
-            demo           += 1;
 
             auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
             uxx     index   = binary_search::match(ary, 50);
@@ -27,7 +27,6 @@ namespace xuser{
         // 演示：当目标序列是降序，如何使用二分匹配呢？
         {
             xhint(demo);
-            demo           += 1;
 
             auto && ary     = array_view{ 50, 40, 30, 20, 10, 0 };
 
@@ -74,7 +73,6 @@ namespace xuser{
         // 演示：当目标值不存在时，退而求其次
         {
             xhint(demo);
-            demo           += 1;
 
             auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
             uxx     index   = binary_search::less_equals(ary, 51);
@@ -108,7 +106,6 @@ namespace xuser{
         // 演示：binary_search 提供更高级别的抽象
         {
             xhint(demo);
-            demo           += 1;
 
             auto && ary     = array_view{ 0, 10, 20, 30, 40, 50, };
 

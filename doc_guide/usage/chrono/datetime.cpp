@@ -4,10 +4,11 @@
 #include"chrono/time.hpp"
 #include"chrono/now.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         auto show = [](auto d){
             xhint(
@@ -24,7 +25,6 @@ namespace xuser{
         // 演示：获取当前日期时间
         {
             xhint(demo);
-            demo               += 1;
 
             // 获取当前日期时间
             datetime<> date_now = now;
@@ -35,7 +35,6 @@ namespace xuser{
         // 演示：推荐的初始化日期方法
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
 
@@ -49,7 +48,6 @@ namespace xuser{
         // 演示：判断日期是否合法
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
 
@@ -131,7 +129,6 @@ namespace xuser{
         // 演示：判断当前年份是否是闰年
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
 
@@ -151,7 +148,6 @@ namespace xuser{
         // 演示：计算明天对应的日期
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
             d.year(2020).month(2).day(28);
@@ -181,7 +177,6 @@ namespace xuser{
         {
 
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
             d.year(2020).month(3).day(2);
@@ -211,7 +206,6 @@ namespace xuser{
         {
 
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
             datetime<> old_date;
@@ -238,7 +232,6 @@ namespace xuser{
         // 演示：日期加法
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> d;
             datetime<> old_date;
@@ -269,7 +262,6 @@ namespace xuser{
         // 演示：今天是星期几
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> today    = now;
             asciis day_of_week;
@@ -300,7 +292,6 @@ namespace xuser{
         // 演示：今天是今年第几天
         {
             xhint(demo);
-            demo               += 1;
 
             datetime<> today    = now;
             datetime<> d;
@@ -331,7 +322,6 @@ namespace xuser{
         // 演示：计算总毫秒数
         {
             xhint(demo);
-            demo           += 1;
 
             // 创建时间
             datetime<>  d;
@@ -345,7 +335,6 @@ namespace xuser{
         // 演示：比较两个日期
         {
             xhint(demo);
-            demo           += 1;
 
             datetime<>  a;
             datetime<>  b;

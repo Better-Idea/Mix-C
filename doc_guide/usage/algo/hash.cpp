@@ -2,15 +2,15 @@
 #include"algo/hash.hpp"
 #include"math/random.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：hash 普通数值类型
         {
             xhint(demo);
-            demo       += 1;
 
             uxx v       = hash(1024);
             xhint(v);
@@ -26,7 +26,6 @@ namespace xuser{
         // 演示：hash 原始字符串类型
         {
             xhint(demo);
-            demo       += 1;
 
             asciis s    = "hello world";
             uxx    a    = hash("hello world");  // 实际上这两个传入的参数类型是不一样的
@@ -38,7 +37,6 @@ namespace xuser{
         // 演示：hash 未知类型
         {
             xhint(demo);
-            demo       += 1;
 
             struct { u08 bytes[10]; }unknown;
 
@@ -48,7 +46,6 @@ namespace xuser{
         // 演示：使用 hash 函数第二个参数避免 hash 攻击
         {
             xhint(demo);
-            demo       += 1;
 
             // 弱口令
             xhint(hash("123456"));
@@ -62,7 +59,6 @@ namespace xuser{
         // 演示：即使值相同，不同字节数的整数也会有不同的 hash 值
         {
             xhint(demo);
-            demo       += 1;
 
             u08 a       = 'a';
             u16 b       = 'a';

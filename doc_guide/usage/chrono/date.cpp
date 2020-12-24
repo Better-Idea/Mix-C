@@ -2,15 +2,15 @@
 #include"chrono/date.hpp"
 #include"chrono/now.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：获取当前日期
         {
             xhint(demo);
-            demo               += 1;
 
             // 获取当前日期
             date<> date_now     = now;
@@ -21,7 +21,6 @@ namespace xuser{
         // 演示：推荐的初始化日期方法
         {
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
 
@@ -35,7 +34,6 @@ namespace xuser{
         // 演示：判断日期是否合法
         {
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
 
@@ -84,7 +82,6 @@ namespace xuser{
         // 演示：判断当前年份是否是闰年
         {
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
 
@@ -104,7 +101,6 @@ namespace xuser{
         // 演示：计算明天对应的日期
         {
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
             the_date.year(2020).month(2).day(28);
@@ -134,7 +130,6 @@ namespace xuser{
         {
 
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
             the_date.year(2020).month(3).day(2);
@@ -164,7 +159,6 @@ namespace xuser{
         {
 
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
             date<> old_date;
@@ -189,7 +183,6 @@ namespace xuser{
         // 演示：日期加法
         {
             xhint(demo);
-            demo               += 1;
 
             date<> the_date;
             date<> old_date;
@@ -220,7 +213,6 @@ namespace xuser{
         // 演示：今天是星期几
         {
             xhint(demo);
-            demo               += 1;
 
             date<> today        = now;
             asciis day_of_week;
@@ -251,7 +243,6 @@ namespace xuser{
         // 演示：今天是今年第几天
         {
             xhint(demo);
-            demo               += 1;
 
             date<> today        = now;
             date<> the_date;
@@ -282,7 +273,6 @@ namespace xuser{
         // 演示：日期的比较
         {
             xhint(demo);
-            demo               += 1;
 
             date<> a;
             date<> b;

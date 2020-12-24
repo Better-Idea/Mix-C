@@ -2,15 +2,15 @@
 #include"chrono/day.hpp"
 #include"chrono/date.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：
         {
             xhint(demo);
-            demo           += 1;
             
             // 创建日期
             date<> the_date{ 2020/*year*/, 12/*month*/, 5/*day*/ };

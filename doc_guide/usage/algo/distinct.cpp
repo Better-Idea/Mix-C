@@ -2,15 +2,15 @@
 #include"algo/distinct.hpp"
 #include"docker/array.hpp"
 #include"mixc.hpp"
+#include"utils/counter.hpp"
 
 namespace xuser{
     void demo(){
-        uxx demo = 0;
+        counter demo = 0;
 
         // 演示：去除重复元素，每种元素只保留一个
         {
             xhint(demo);
-            demo           += 1;
 
             auto && buf     = array<i32, 32>{};
             auto && ary     = array_view{ 1, 1, 2, 3, 3, 2, 1 };
