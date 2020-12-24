@@ -9,6 +9,7 @@
 #include"lang/cxx/compare_fastly.hpp"
 #include"lang/cxx/strcat.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xdefer.hpp"
 #include"memop/copy.hpp"
 #include"memory/allocator.hpp"
 #pragma pop_macro("xuser")
@@ -144,6 +145,10 @@ namespace mixc::io_dir::origin{
             return;
         }
 
+        xdefer{
+            ::CloseHandle(fd);
+        };
+
         #define xentry_name     (entry.cFileName)
         #define xis_dir         (0 != (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
         #define xhas_next       (FindNextFileA(h, xref entry) != 0)
@@ -161,6 +166,10 @@ namespace mixc::io_dir::origin{
         else{
             entry           = readdir(fd);
         }
+
+        xdefer{
+            ::closedir(fd);
+        };
 
         #define xentry_name     (entry->d_name)
         #define xis_dir         ((entry->d_type & DT_DIR) != 0)
