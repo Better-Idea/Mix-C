@@ -134,6 +134,19 @@ namespace mixc::lang_cxx_index_of_first{
 
             the.index_of_first(value, match, compare);
         }
+
+        template<class call_t, class cmp_t = default_cmp_t>
+        requires(
+            inc::can_callback<call_t, void(uxx index)> and
+            inc::can_compare<cmp_t, item_t>
+        )
+        void index_of_first(
+            item_t          value, 
+            call_t  const & match, 
+            cmp_t   const & compare = inc::default_compare<item_t>) const {
+
+            the.index_of_first(final{& value, 1}, match, compare);
+        }
     };
 }
 
