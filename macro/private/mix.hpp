@@ -63,19 +63,19 @@ namespace mixc::macro_private_mix::origin{
                 fmt     = is_str_t;
             }
             else if constexpr (result::index < 4){
-                i       = i64(value); // maybe is enum class
+                i       = (i64)(type &)value; // maybe is enum class
                 fmt     = is_signed_t;
             }
             else if constexpr (result::index < 9){
-                u       = u64(value);
+                u       = (u64)(type &)value;
                 fmt     = is_unsigned_t;
             }
             else if constexpr (result::index < 11){
-                f       = (type &)value;
+                f       = (f64)(type &)value;
                 fmt     = is_float_t;
             }
             else if constexpr (result::index < 12){
-                s       = (type &)value;
+                s       = (asciis)(type &)value;
                 fmt     = is_str_t;
             }
             else if constexpr (result::index < 13){
