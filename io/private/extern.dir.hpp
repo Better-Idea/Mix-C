@@ -133,10 +133,9 @@ namespace mixc::io_dir::origin{
 
         auto entry          = WIN32_FIND_DATAA{};
         auto fd             = ([](auto path, auto * entry){
-            char root[256]  = "";
+            char root[256];
             cpp::copy(root, path, path.length());
             cpp::copy(root + path.length(), "\\*", 3);
-
             auto fd         = FindFirstFileA(root, entry);
             return fd;
         })(path, xref entry);
@@ -154,6 +153,7 @@ namespace mixc::io_dir::origin{
         #define xhas_next       (FindNextFileA(fd, xref entry) != 0)
 
         #elif xis_linux
+
         struct
         dirent  * entry;
         DIR     * fd;
@@ -234,7 +234,7 @@ namespace mixc::io_dir::origin{
         #if xis_windows
         ::SetCurrentDirectory(target);
         #elif xis_linux
-        chdir(target);
+        ::chdir(target);
         #endif
         buf.free(target, path);
     }
