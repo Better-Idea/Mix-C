@@ -34,8 +34,16 @@ namespace mixc::algo_heap_root{
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     * 注意：
+     * 我们假定 seq [0, length) 区间的元素已经完成了初始化
+     * 或者 seq 的元素类似与 int 这样不初始化也可以直接赋值的类型
+     * 如果 seq[i] 带有 operator=，并且它没有初始化，那么调用该函数将导致不正确的行为
      */
-    xheader inline void push_core(seq_t seq, inc::item_origin_of<seq_t> const & value, cmp_t const & compare){
+    xheader inline void push_core(
+        seq_t                               seq, 
+        inc::item_origin_of<seq_t> const &  value, 
+        cmp_t const &                       compare){
+
         // 注意：
         // [value] 可能存在 [seq] 中, 
         // 所以需要一个 [value] 的副本
@@ -65,13 +73,25 @@ namespace mixc::algo_heap_root{
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     * 注意：
+     * 我们假定 seq [0, length) 区间的元素已经完成了初始化
+     * 或者 seq 的元素类似与 int 这样不初始化也可以直接赋值的类型
+     * 如果 seq[i] 带有 operator=，并且它没有初始化，那么调用该函数将导致不正确的行为
      */
-    xheader inline item_t pop_core(seq_t seq, uxx index, inc::item_origin_of<seq_t> const & insert_value, cmp_t const &  compare){
+    xheader inline item_t pop_core(
+        seq_t                               seq, 
+        uxx                                 index, 
+        inc::item_origin_of<seq_t> const &  insert_value, 
+        cmp_t                      const &  compare){
+
+        // 注意：
+        // 提前保存要取出元素的副本，避免后续的元素覆盖它
         item_t  wanted      = (seq[index]);
         uxx     i           = (index);
         uxx     left_index  = (index << 1) + 1;
+        uxx     len         = seq.length();
 
-        while(left_index + 1 < seq.length()) {
+        while(left_index + 1 < len) {
             item_t & left   = seq[left_index];
             item_t & right  = seq[left_index + 1];
             item_t * select;
@@ -95,6 +115,11 @@ namespace mixc::algo_heap_root{
             left_index      = (left_index << 1) + 1;
         }
 
+        if (left_index < len and compare(seq[left_index], insert_value) < 0){
+            seq[i]          = (seq[left_index]);
+            i               = (left_index);
+        }
+
         seq[i]              = insert_value;
         return wanted;
     }
@@ -114,6 +139,10 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     * 注意：
+     * 我们假定 seq [0, length) 区间的元素已经完成了初始化
+     * 或者 seq 的元素类似与 int 这样不初始化也可以直接赋值的类型
+     * 如果 seq[i] 带有 operator=，并且它没有初始化，那么调用该函数将导致不正确的行为
      */
     xheader inline void push(
         seq_t                       const & seq,
@@ -137,6 +166,10 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     * 注意：
+     * 我们假定 seq [0, length) 区间的元素已经完成了初始化
+     * 或者 seq 的元素类似与 int 这样不初始化也可以直接赋值的类型
+     * 如果 seq[i] 带有 operator=，并且它没有初始化，那么调用该函数将导致不正确的行为
      */
     xheader inline auto pop(
         seq_t                       const & seq, 
@@ -162,6 +195,10 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     * 注意：
+     * 我们假定 seq [0, length) 区间的元素已经完成了初始化
+     * 或者 seq 的元素类似与 int 这样不初始化也可以直接赋值的类型
+     * 如果 seq[i] 带有 operator=，并且它没有初始化，那么调用该函数将导致不正确的行为
      */
     xheader inline auto pop_by_index(
         seq_t                       const & seq, 
@@ -187,6 +224,10 @@ namespace mixc::algo_heap_root::origin::heap_root{
      *      ixx operator()(item_t const & left, item_t const & right)
      *   其中 item_t 是 seq 序列元素的类型，left 和 right 作为 seq 序列中两两比较的元素
      *   当 left 大于 right 返回正数，若小于则返回负数，相等则返回零
+     * 注意：
+     * 我们假定 seq [0, length) 区间的元素已经完成了初始化
+     * 或者 seq 的元素类似与 int 这样不初始化也可以直接赋值的类型
+     * 如果 seq[i] 带有 operator=，并且它没有初始化，那么调用该函数将导致不正确的行为
      */
     xheader inline auto pop(
         seq_t                       const & seq, 
