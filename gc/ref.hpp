@@ -164,10 +164,9 @@ namespace mixc::gc_ref{
     public:
         meta() : mem(null()) { }
 
-        meta(the_t const & value){
-            if (mem = value.mem; mem != null()) {
-                mem->owners_inc();
-            }
+        meta(the_t const & object){
+            object.mem->owners_inc();
+            mem     = object.mem;
         }
 
         meta(the_t && object){
