@@ -115,6 +115,7 @@ namespace mixc::algo_heap_root{
             left_index      = (left_index << 1) + 1;
         }
 
+        // left_index 可能会等于 len，所以这里需要判断一下才能确认是否存在左节点
         if (left_index < len and compare(seq[left_index], insert_value) < 0){
             seq[i]          = (seq[left_index]);
             i               = (left_index);
