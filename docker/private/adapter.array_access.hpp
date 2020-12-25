@@ -11,8 +11,8 @@
 #undef  xuser
 #define xuser mixc::docker_adapter_array_access::inc
 #include"interface/private/seqptr.hpp"
-#include"interface/iterator.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xitr_foreach.hpp"
 #include"math/index_system.hpp"
 #include"meta/is_integer.hpp"
 #include"memop/swap.hpp"
@@ -67,7 +67,7 @@ namespace mixc::docker_adapter_array_access {
          * - itv 为访问区间
          */
         template<auto mode, class invoke_t, can_interval interval_t = co>
-        void foreach_template(invoke_t invoke, interval_t const & itv = co{0, -1}) const {
+        void foreach_template(invoke_t const & invoke, interval_t const & itv = co{0, -1}) const {
             itv.normalize(the.length());
 
             uxx    l     = itv.left();
@@ -112,10 +112,8 @@ namespace mixc::docker_adapter_array_access {
             return random_access(index);
         }
 
-        xitr_foreach (item_t &)
-        xitr_foreachx(item_t &)
-        xitr_foreach_const (item_t const &)
-        xitr_foreachx_const(item_t const &)
+        xitr_foreach (item_t)
+        xitr_foreachx(item_t)
     };
 }
 

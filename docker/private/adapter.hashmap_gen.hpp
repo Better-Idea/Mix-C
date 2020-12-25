@@ -210,11 +210,9 @@ protected:
     // 接口区
 public:
     #ifdef xarg_has_val_t
-        xitr_foreach(key_t &, val_t &)
-        xitr_foreach_const(key_t const &, val_t const &)
+        xitr_foreach(key_t, val_t)
     #else
-        xitr_foreach(key_t &)
-        xitr_foreach_const(key_t const &)
+        xitr_foreach(key_t)
     #endif
 
     xarg_item_t & get(key_t const & key) const {

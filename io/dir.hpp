@@ -6,7 +6,7 @@
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_callback.hpp"
-#include"interface/iterator.hpp"
+#include"macro/xitr_foreach.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
@@ -24,7 +24,6 @@ namespace mixc::io_dir::origin{
                 path(path), for_file(for_file){}
 
             xitr_foreach(asciis)
-            xitr_foreach_const(asciis)
         private:
             inc::c08 path;
             bool     for_file;

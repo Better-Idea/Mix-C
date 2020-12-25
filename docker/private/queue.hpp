@@ -7,9 +7,9 @@
 #include"docker/transmitter.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"
-#include"interface/iterator.hpp"
 #include"lock/builtin_lock.hpp"
 #include"lock/policy_barrier.hpp"
+#include"macro/xitr_foreach.hpp"
 #include"memory/allocator.hpp"
 #include"meta/is_attached_lock.hpp"
 #include"mixc.hpp"
@@ -145,8 +145,7 @@ namespace mixc::docker_queue {
             });
         }
     public:
-        xitr_foreach(item_t &)
-        xitr_foreach_const(item_t const &)
+        xitr_foreach(item_t)
 
         xpubget_pubsetx(head, transmitter<item_t>)
             xr{

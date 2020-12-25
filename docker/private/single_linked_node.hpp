@@ -4,7 +4,6 @@
 #undef  xuser
 #define xuser mixc::docker_single_linked_node::inc
 #include"dumb/struct_type.hpp"
-#include"interface/iterator.hpp"
 #include"lock/atom_swap.hpp"
 #include"lock/builtin_lock.hpp"
 #include"meta/is_attached_lock.hpp"

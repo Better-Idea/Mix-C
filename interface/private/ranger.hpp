@@ -5,8 +5,8 @@
 #define xuser mixc::interface_private_ranger::inc
 #include"interface/private/check.hpp"
 #include"interface/initializer_list.hpp"
-#include"interface/iterator.hpp"
 #include"macro/xalign.hpp"
+#include"macro/xitr_foreach.hpp"
 #include"macro/xnew.hpp"
 #include"math/index_system.hpp"
 #include"memop/signature.hpp"
