@@ -267,6 +267,8 @@ namespace mixc::algo_heap_root::origin::heap_root{
             compare
         );
     }
+
+    #undef  xheader
 }
 
 #endif
