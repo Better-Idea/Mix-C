@@ -151,7 +151,7 @@ namespace mixc::io_dir::origin{
 
         #define xentry_name     (entry.cFileName)
         #define xis_dir         (0 != (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-        #define xhas_next       (FindNextFileA(h, xref entry) != 0)
+        #define xhas_next       (FindNextFileA(fd, xref entry) != 0)
 
         #elif xis_linux
         struct
@@ -228,16 +228,15 @@ namespace mixc::io_dir::origin{
     }
 
     void dir::as_cwd() const {
-        #if xis_windows
-        #error "TODO"
-        #elif xis_linux
-
         auto && buf     = cpp::path_buffer{};
         auto    target  = buf.alloc(the.path);
-        chdir(target);
-        buf.free(target, path);
 
+        #if xis_windows
+        ::SetCurrentDirectory(target);
+        #elif xis_linux
+        chdir(target);
         #endif
+        buf.free(target, path);
     }
 }
 
