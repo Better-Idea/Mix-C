@@ -43,7 +43,7 @@ namespace mixc::math_statistics_topk::origin{
             inc::heap_root::push(kref, i, source[i], compare); // 构建小根堆
         }
         for(uxx i = len; i < source.length(); i++){
-            if (auto cur = source[i]; cur <= kref[0]){ // kref[0] 是 topk 数组中最小的元素
+            if (auto cur = source[i]; compare(cur, kref[0]) <= 0){ // kref[0] 是 topk 数组中最小的元素
                 continue;
             }
             else{
