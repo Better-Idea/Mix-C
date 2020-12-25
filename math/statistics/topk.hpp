@@ -21,9 +21,12 @@ namespace mixc::math_statistics_topk::origin{
     };
 
     template<inc::can_unified_seqlize seq_k_t, inc::can_unified_seqlize seq_src_t>
-    inline seq_k_t & topk(seq_k_t const & k, seq_src_t const & source, topk_with mode = topk_with::des_sort){
-        using item_t = inc::item_origin_of<seq_k_t>;
+    inline seq_k_t & topk(
+        seq_k_t     const & k, 
+        seq_src_t   const & source, 
+        topk_with           mode = topk_with::des_sort){
 
+        using item_t = inc::item_origin_of<seq_k_t>;
         auto    n       = (uxx)0;
         auto    len     = (uxx)inc::min(k.length(), source.length());
         auto &  kref    = (seq_k_t &)k;
@@ -36,8 +39,7 @@ namespace mixc::math_statistics_topk::origin{
                 continue;
             }
             else{
-                inc::heap_root::pop(kref, kref.length(), kref[len - 1]);
-                inc::heap_root::push(kref, kref.length(), cur);
+                inc::heap_root::pop(kref, len, cur/*insert*/);
             }
         }
 
