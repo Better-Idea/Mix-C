@@ -11,6 +11,7 @@
 #define xuser mixc::lang_cxx_ph::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
+#include"lang/cxx/index_of_first.hpp"
 #include"lang/cxx/strlize.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
@@ -22,6 +23,7 @@
 #include"meta/is_based_on.hpp"
 #include"meta/is_origin_array.hpp"
 #include"meta/is_ptr.hpp"
+#include"meta/is_same.hpp"
 #include"meta/item_origin_of.hpp"
 #include"meta/remove_ptr.hpp"
 #include"meta/unsigned_type.hpp"
@@ -39,6 +41,8 @@ namespace mixc::lang_cxx_ph{
      * X{}  upper hex with 0x prefix
      * zx{} hex with 0x prefix and leading zero
      * zX{} upper hex with 0x prefix and leading zero
+     * o{}  oct
+     * zo{} oct with 0x prefix and leading zero
      * 
      * v{}  normal multi-value
      * f{}  decimal(pending)
@@ -52,6 +56,22 @@ namespace mixc::lang_cxx_ph{
      * 
      * more... to be continue
      */
+
+    constexpr auto place_holder_char = '\e';
+
+    #define xfmt_specialize()                                                                   \
+    inc::cxx<char> format(inc::cxx<char> fmt, inc::ialloc<char> const & alloc){                 \
+        return format<char>(fmt, alloc);                                                        \
+    }                                                                                           \
+    inc::cxx<char16_t> format(inc::cxx<char16_t> fmt, inc::ialloc<char16_t> const & alloc){     \
+        return format<char16_t>(fmt, alloc);                                                    \
+    }                                                                                           \
+    inc::cxx<char> format(inc::ialloc<char> const & alloc){                                     \
+        return format<char>(alloc);                                                             \
+    }                                                                                           \
+    inc::cxx<char16_t> format(inc::ialloc<char16_t> const & alloc){                             \
+        return format<char16_t>(alloc);                                                         \
+    }
 
     xstruct(
         xname(place_holder_group)
@@ -138,12 +158,6 @@ namespace mixc::lang_cxx_ph{
             value(value){}
     $
 
-    #define xopt                                                                            \
-        inc::c08 operator >> (inc::ialloc<char> alloc) { return output(alloc); }            \
-        inc::c16 operator >> (inc::ialloc<char16_t> alloc) { return output(alloc); }        \
-        template<class item_t>                                                              \
-        inc::cxx<item_t> output(inc::ialloc<item_t> alloc)
-
     template<
         class             final, 
         class             type, 
@@ -156,7 +170,9 @@ namespace mixc::lang_cxx_ph{
         using the_t::the_t;
         num(){}
 
-        xopt{
+        template<class item_t>
+        item_t * format(inc::ialloc<item_t> const & alloc){
+            auto buf         = (item_t *)nullptr;
             auto deformation = [this](){
                 if constexpr (inc::is_ptr<type>){
                     return uxx(the_t::value);
@@ -165,7 +181,8 @@ namespace mixc::lang_cxx_ph{
                     return the_t::value;
                 }
             };
-            return inc::cxx<item_t>(deformation(), n, lut, [this, alloc](uxx length){
+
+            inc::cxx<item_t>(deformation(), n, lut, [&](uxx length){
                 auto klz_length = sizeof(type) * 8; // keep leading zero length
 
                 if constexpr (n == inc::numeration_t::hex){
@@ -179,82 +196,24 @@ namespace mixc::lang_cxx_ph{
                 }
 
                 auto new_length = (keep_leading_zero ? klz_length : length);
-                auto zero_count = new_length - length;
+                auto zero_count = (new_length - length);
                 auto mem        = the.template align<item_t>(
-                    new_length += (with_prefix ? 2 : 0), 
-                    alloc
+                    new_length += (with_prefix ? 2 : 0), alloc
                 );
+                buf             = mem;
 
                 if constexpr (with_prefix){ // only in hex
-                    inc::copy_with_operator(mem, "0x", 2);
-                    mem += 2;
+                    inc::copy_with_operator_unsafe(mem, "0x", 2);
+                    mem        += 2;
                 }
                 if (zero_count){
                     inc::fill_with_operator(mem, '0', zero_count);
-                    mem += zero_count;
+                    mem        += zero_count;
                 }
                 return mem;
             });
-        }
-    };
-
-    template<class final, class ... args> struct v;
-    template<class final, class a0, class ... args>
-    struct v<final, a0, args...> : v<final, args...> {
-        using base_t = v<final, args...>;
-
-        constexpr v(a0 const & first, args const & ... rest) : 
-            base_t(rest...), item(first) {
-        }
-
-        template<class item_t>
-        inc::cxx<item_t> output(uxx old_length){
-            inc::cxx<item_t> buf;
-
-            auto link = [&](uxx this_length){
-                base_t * base = this;
-                buf = base->template output<item_t>(old_length + this_length);
-                buf = buf.forward(this_length);
-                return (item_t *)buf;
-            };
-
-            if constexpr (inc::is_based_on<place_holder_group, a0>){
-                item.template output<item_t>(link);
-            }
-            else{
-                inc::cxx<item_t>(item, link);
-            }
             return buf;
         }
-    private:
-        static auto invoke(){
-            if constexpr (inc::is_origin_array<a0>){
-                return (const inc::item_origin_of<a0> **)nullptr;
-            }
-            else{
-                return (a0 *)nullptr;
-            }
-        }
-
-        inc::remove_ptr< decltype(invoke()) > item;
-    };
-
-    template<class final>
-    struct v<final> : base_ph<final> {
-        using the_t = base_ph<final>;
-
-        template<class item_t>
-        inc::cxx<item_t> output(uxx length){
-            return { 
-                the.template align<item_t>(
-                    length, 
-                    inc::cast<inc::ialloc<item_t>>(alloc)
-                ) + length, 
-                0
-            };
-        }
-    protected:
-        inc::ialloc<void> alloc;
     };
 
     constexpr bool with_prefix       = true;
@@ -269,8 +228,9 @@ namespace mixc::lang_cxx_ph{
             name(type const & value) :                                                                  \
                 base_t(equivalent_type_t(value)){                                                       \
             }                                                                                           \
-            xopt{                                                                                       \
-                return thex.template output<item_t>(alloc);                                             \
+            template<class item_t>                                                                      \
+            item_t * format(inc::ialloc<item_t> const & alloc){                                         \
+                return thex.template format<item_t>(alloc);                                             \
             }                                                                                           \
         }
     
@@ -302,7 +262,122 @@ namespace mixc::lang_cxx_ph::origin::ph{
 
     xbin(b , not with_prefix, not keep_leading_zero, inc::lower);
     xbin(zb, not with_prefix,     keep_leading_zero, inc::lower);
+}
 
+namespace mixc::lang_cxx_ph{
+    template<class final, class ... args> struct v;
+    template<class final, class a0, class ... args>
+    struct v<final, a0, args...> : v<final, args...> {
+    private:
+        static auto configure(){
+            if constexpr (inc::is_based_on<place_holder_group, a0>){
+                return (a0 *)nullptr;
+            }
+            else if constexpr (inc::is_origin_array<a0>){
+                return (const inc::item_origin_of<a0> **)nullptr;
+            }
+            else if constexpr (inc::has_cast<inc::c08, a0>){
+                return (inc::c08 *)nullptr;
+            }
+            else if constexpr (inc::is_ptr<a0>){
+                return (origin::ph::zX<const void *> *)nullptr;
+            }
+            else{
+                return (a0 *)nullptr;
+            }
+        }
+
+        using val_t  = inc::remove_ptr<decltype(configure())>;
+        using base_t = v<final, args...>;
+
+        val_t item;
+    public:
+        constexpr v(a0 const & first, args const & ... rest) : 
+            base_t(rest...), item((val_t)(a0 &)first) {
+        }
+
+        template<class item_t, class fmt_t = decltype(nullptr)>
+        item_t * combine(uxx cum_length, fmt_t const & fmt = nullptr){
+            item_t * ptr;
+            uxx      i_e        = not_exist;
+
+            auto link           = [&](uxx this_length){
+                item_t * buf;
+                fmt_t    next   = {};
+                uxx      total  = cum_length + this_length;
+
+                if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
+                    if (fmt.length() != 0){
+                        i_e     = fmt.index_of_first(place_holder_char);
+                    }
+                    if (i_e == not_exist){
+                        i_e     = fmt.length();
+                    }
+                    else{
+                        next    = fmt.backward(i_e + 1);
+                    }
+                }
+
+                if (i_e == not_exist){
+                    buf         = base_t::template combine<item_t>(total);
+                }
+                else{
+                    buf         = base_t::template combine<item_t>(total + i_e, next);
+                }
+
+                buf             = buf - this_length;
+                return (item_t *)buf;
+            };
+
+            if constexpr (inc::is_based_on<place_holder_group, val_t>){
+                ptr             = item.template format<item_t>(link);
+            }
+            else{
+                ptr             = inc::cxx<item_t>(item, link);
+            }
+
+            if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
+                if (i_e != not_exist){
+                    ptr        -= i_e;
+                    inc::copy_with_operator_unsafe(ptr, inc::cxx<item_t>{fmt}.length(i_e), i_e/*length*/);
+                }
+            }
+            return ptr;
+        }
+    };
+
+    template<class final>
+    struct v<final> : base_ph<final> {
+        using base_t = base_ph<final>;
+        using the_t  = v<final>;
+
+        template<class item_t, class fmt_t = decltype(nullptr)>
+        item_t * combine(uxx length, fmt_t const & fmt = nullptr){
+            item_t * buf;
+            if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
+                length     += fmt.length();
+                buf         = base_t::template align<item_t>(
+                    length, inc::cast<inc::ialloc<item_t>>(alloc)
+                ) + length;
+
+                inc::copy_with_operator_unsafe(buf, fmt, fmt.length());
+                buf        -= fmt.length();
+            }
+            else{
+                buf         = base_t::template align<item_t>(
+                    length, inc::cast<inc::ialloc<item_t>>(alloc)
+                ) + length;
+            }
+            the.length      = length;
+            return buf;
+        }
+    protected:
+        inc::ialloc<void> alloc;
+        uxx               length;
+    };
+}
+
+namespace mixc::lang_cxx_ph::origin::ph{
     template<class a0, class ... args>
     struct v : mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>{
         using base_t = mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>;
@@ -310,82 +385,31 @@ namespace mixc::lang_cxx_ph::origin::ph{
         v(a0 const & first, args const & ... rest) : 
             base_t(first, rest...){}
 
-        xopt {
+        template<class item_t>
+        inc::cxx<item_t> format(inc::cxx<item_t> fmt, inc::ialloc<item_t> const & alloc){
             inc::copy(xref base_t::alloc, alloc);
-            return base_t::template output<item_t>(0);
-        }
-    };
-}
-
-namespace mixc::lang_cxx_ph{
-    using namespace origin;
-
-    template<class ... args> struct phg_core;
-    template<class a0, class ... args>
-    struct phg_core<a0, args...> : phg_core<args...>{
-    private:
-        typename inc::cif<
-            inc::is_based_on<place_holder_group, a0>
-        >::template select<
-            a0
-        >::template cei<
-            inc::has_cast<asciis, a0> or not inc::is_ptr<a0>
-        >::template select<
-            ph::v<a0>
-        >::template ces<
-            ph::zX<a0>
-        > item;
-
-        using base_t = phg_core<args...>;
-    public:
-        phg_core(a0 const & first, args const & ... list) : 
-            base_t(list...), item(first) {
+            item_t * ptr    = fmt.length() == 0 ? 
+                base_t::template combine<item_t>(0) :
+                base_t::template combine<item_t>(0, fmt);
+            return { ptr, base_t::length };
         }
 
         template<class item_t>
-        inc::cxx<item_t> output(uxx old_length){
-            inc::cxx<item_t> ret;
-            item.template output<item_t>([&](uxx length) -> item_t * {
-                base_t * base = this;
-                ret = base->template output<item_t>(old_length + length);
-                ret = ret.forward(length);
-                return ret;
-            });
-            return ret;
+        inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){
+            inc::copy(xref base_t::alloc, alloc);
+            item_t * ptr    = base_t::template combine<item_t>(0);
+            return { ptr, base_t::length };
         }
-    };
 
-    template<> struct phg_core<>{
-        inc::ialloc<void> alloc;
-
-        template<class item_t>
-        inc::cxx<item_t> output(uxx length){
-            return { (item_t *)alloc(length) + length, 0 };
-        }
+        xfmt_specialize()
     };
 }
 
-namespace mixc::lang_cxx_ph::origin::ph{ // place_holder
-    template<class a0, class ... args>
-    struct phg{ // place_holder group
-        phg(a0 const & first, args const & ... list)
-            : items(first, list...){
-        }
-
-        xopt {
-            inc::copy(xref items.alloc, alloc);
-            return items.template output<item_t>(0);
-        }
-    private:
-        phg_core<a0, args...> items;
-    };
-}
-
+#undef  xfmt_specialize
 #undef  xbin
 #undef  xoct
 #undef  xhex
 #undef  xnum
-#undef  xopt 
 #undef  xmate
 #endif
 
