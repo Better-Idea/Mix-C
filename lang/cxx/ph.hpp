@@ -42,7 +42,7 @@ namespace mixc::lang_cxx_ph{
      * zx{} hex with 0x prefix and leading zero
      * zX{} upper hex with 0x prefix and leading zero
      * o{}  oct
-     * zo{} oct with 0x prefix and leading zero
+     * zo{} oct with leading zero
      * 
      * v{}  normal multi-value
      * f{}  decimal(pending)
