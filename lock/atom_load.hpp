@@ -10,7 +10,7 @@
 namespace mixc::lock_atom_load{
     template<class a>
     inline a atom_load(a * left){
-        return inc::atom_fetch_or(left, 0);
+        return inc::atom_fetch_or<a>(left, 0);
     }
 }
 
