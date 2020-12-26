@@ -1,11 +1,13 @@
 #pragma once
 #define xmixc                       "Mix-C"
 
+#define xendline                    "\n"
+
 /* mixc::xdebug ====================================================
  * 
  * =================================================================*/
-#define xuse_xdebug                 0
-#define xuse_xdebug_fail            0
+#define xuse_xdebug                 1
+#define xuse_xdebug_fail            1
 #define xuse_xdebug_short_path      1
 
 /* mixc::math =======================================================
@@ -50,7 +52,7 @@
  * =================================================================*/
 
 // select memory allocator
-#define xuse_libc_malloc            1
+#define xuse_libc_malloc            0
 
 /* mixc::auto =======================================================
  * 
