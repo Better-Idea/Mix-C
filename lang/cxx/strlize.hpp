@@ -369,9 +369,9 @@ namespace mixc::lang_cxx_strlize{
                 u              /= unsigned_t(base);
             } while(u != 0);
 
-            uxx    len          = ptr - buf;
-            item_t * mem          = alloc(len + is_neg);
-            the_t  r            = the_t(mem, len + is_neg);
+            uxx      len        = ptr - buf;
+            item_t * mem        = alloc(len + is_neg);
+            the_t    r          = the_t(mem, len + is_neg);
 
             if (is_neg){
                 mem[0]          = '-';
