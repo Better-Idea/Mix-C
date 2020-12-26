@@ -5,29 +5,11 @@
 #define xuser mixc::gc_private_token::inc
 #include"dumb/struct_type.hpp"
 #include"lock/atom_add.hpp"
-#include"lock/atom_or.hpp"
 #include"lock/atom_sub.hpp"
-#include"macro/xtypeid.hpp"
+#include"lock/atom_load.hpp"
 #include"meta/is_same.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
-
-namespace mixc::gc_private_tuple{
-    template<class root_t> struct tuple;
-}
-
-namespace mixc::gc_ref{
-    template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> struct meta;
-}
-
-namespace mixc::macro_xsv{
-    template<class item_t> struct static_string_holder;
-}
-
-namespace mixc::memory_alloctor::origin{
-    struct memory_size;
-    template<class t> void free_with_destroy(t *, memory_size);
-}
 
 namespace mixc::gc_private_token::origin{
     constexpr uxx step = uxx(1);
@@ -37,15 +19,12 @@ namespace mixc::gc_private_token::origin{
         xprof(record, uxx)
     )
         token(uxx) : record(step) { }
-    protected:
-        template<class, class, class, bool, bool> friend struct mixc::gc_ref::meta;
-        template<class> friend struct mixc::gc_private_tuple::tuple;
 
         constexpr uxx  this_length() const { return uxx(0); }
         constexpr void this_length(uxx) const { }
 
         uxx owners() const {
-            return record;
+            return inc::atom_load(& record);
         }
 
         uxx owners_inc() const {
@@ -81,13 +60,14 @@ namespace mixc::gc_private_token::origin{
     template<class type, class addition>
     xstruct(
         xspec(token_mix, type, void, addition),
-        xprob(addition)
+        xpubb(addition)
     )
-        using addition::addition;
+        using base_t = addition;
+        using base_t::base_t;
 
         token_mix(token_mix const &)        = delete;
         void operator=(token_mix const &)   = delete;
-    protected:
+
         type * item_ptr(uxx index){
             if constexpr (inc::is_same<void, type>){
                 return nullptr;
@@ -104,9 +84,6 @@ namespace mixc::gc_private_token::origin{
                 }
             }
         }
-
-        template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> friend struct mixc::gc_ref::meta;
-        template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
     $
 
     template<class type, class attribute, class addition>
@@ -124,9 +101,6 @@ namespace mixc::gc_private_token::origin{
         attribute * attribute_ptr() const {
             return (attribute *)(inc::struct_type<attribute> *)this;
         }
-
-        template<class impl, class a, class b, bool is_array, bool is_binary_aligned_alloc> friend struct mixc::gc_ref::meta;
-        template<class t> friend void mixc::memory_alloctor::origin::free_with_destroy(t *, mixc::memory_alloctor::origin::memory_size);
     $
 }
 

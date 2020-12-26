@@ -6,6 +6,7 @@
 #include"define/nullref.hpp"
 #include"docker/hashmap.hpp"
 #include"dumb/dummy_type.hpp"
+#include"dumb/init_by.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/self_management.hpp"
 #include"gc/private/make_guide.hpp"
@@ -21,7 +22,6 @@
 #include"memop/addressof.hpp"
 #include"memop/cast.hpp"
 #include"meta/is_based_on.hpp"
-#include"meta/is_class.hpp"
 #include"meta/is_same.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/has_constructor.hpp"
@@ -84,6 +84,9 @@ namespace mixc::gc_ref{
             >;
 
         using token_mix_t = token_mix<item_t, attribute_t, the_length>;
+
+        static constexpr bool has_attribute = not inc::is_same<void, attribute_t>;
+        static constexpr bool has_array     = not inc::is_same<void, item_t>;
 
         static token_mix_t * null(){
             return (token_mix_t *)empty_mem_ptr;
@@ -173,54 +176,41 @@ namespace mixc::gc_ref{
             the.mem = atom_swap(& object.mem, null());
         }
     protected:
-        using item_initial_invoke   = inc::icallback<void(the_item_t * item_ptr)>;
-        using item_initial_invokex  = inc::icallback<void(uxx i, the_item_t * item_ptr)>;
+        using item_initial_invoke   = icallback<void(the_item_t * item_ptr)>;
+        using item_initial_invokex  = icallback<void(uxx i, the_item_t * item_ptr)>;
 
-        template<class initial_invoke>
-        requires(
-            inc::has_cast<item_initial_invoke , initial_invoke> or 
-            inc::has_cast<item_initial_invokex, initial_invoke>
-        )
-        meta(::length length, initial_invoke const & initial) {
-            mem = alloc(length);
+        template<class initial_invoke, class ... args>
+        void init(::length length, init_by<args...> const & init_attr, initial_invoke const & init_ary) {
+            mem     = alloc(length, init_attr);
 
             for(uxx i = 0; i < length; i++) {
                 if constexpr (inc::has_cast<item_initial_invoke, initial_invoke>){
-                    initial(mem->item_ptr(i));
+                    init_ary(mem->item_ptr(i));
                 }
                 else{
-                    initial(i, mem->item_ptr(i));
+                    init_ary(i, mem->item_ptr(i));
                 }
             }
         }
 
-        template<class ... args>
-        requires(inc::has_constructor<item_t, void(args const & ...)>)
-        meta(::length length, args const & ... list):
-            meta(length, [&](the_item_t * item_ptr){
-                xnew(item_ptr) the_item_t(list...);
-            }) {
-        }
-
-        template<class ... args>
-        requires(... && inc::has_cast<the_item_t, args>)
-        meta(the_item_t const & first, args const & ... rest) {
+        template<class ... args, class ... argsx>
+        void init_one_by_one(init_by<args...> const & init_attr, the_item_t const & first, argsx const & ... rest){
             struct item_ref{
                 the_item_t const & value;
                 item_ref(the_item_t const & value) : value(value){}
             } items[] = {first, rest...};
 
-            uxx count                            = 1 + sizeof...(args);
-            mem                                  = alloc(count);
+            mem     = alloc(1 + sizeof...(rest), init_attr);
 
-            for(uxx i = 0; i < count; i++) {
+            for(uxx i = 0, count = 1 + sizeof...(rest); i < count; i++) {
                 xnew(mem->item_ptr(i)) the_item_t(items[i].value);
             }
         }
 
         template<class ... args>
-        meta(::init_t, args const & ... list) {
-            mem = alloc(::length(0), list...);
+        requires(can_init<attribute_t, init_by<args...>> == true)
+        void init_ptr(init_by<args...> const & init) {
+            mem     = alloc(::length(0), init);
         }
 
         ~meta(){
@@ -327,11 +317,11 @@ namespace mixc::gc_ref{
         }
 
         attribute_t * operator->() const {
-            if constexpr (is_same<void, attribute_t>){
-                return nullptr;
+            if constexpr (has_attribute){
+                return mem->attribute_ptr();
             }
             else{
-                return mem->attribute_ptr();
+                return nullptr;
             }
         }
 
@@ -360,37 +350,144 @@ namespace mixc::gc_ref{
             return length;
         }
 
-        template<class ... args> auto alloc(uxx length, args const & ... list) const {
-            uxx real_length = real(length);
-            return alloc_with_initial<token_mix_t>(size(real_length), length, list...);
-        }
-
-        void free() const {
-            uxx length = capacity();
-            free_with_destroy(mem, size(length));
-        }
-
-        memory_size size(uxx length) const {
-            if constexpr (is_same<void, item_t>){
-                return memory_size(
-                    sizeof(token_mix_t)
-                );
-            }
-            else{
+        static memory_size size(uxx length) {
+            if constexpr (has_array){
                 return memory_size(
                     sizeof(token_mix_t) + length * sizeof(item_t)
                 );
             }
+            else{
+                return memory_size(
+                    sizeof(token_mix_t)
+                );
+            }
+        }
+
+        template<class ... args>
+        static auto alloc(uxx length, init_by<args...> const & init) {
+            // 这里只初始化不带属性的部分（引用计数器（*必选）、数组长度（*可选））
+            auto real_length    = real(length);
+            auto mem            = (token_mix_t *)alloc_with_initial<typename token_mix_t::base_t>(size(real_length), length);
+
+            // 再根据实际情况初始化属性部分
+            if constexpr (has_attribute){
+                init.make(mem->attribute_ptr());
+            }
+            return mem;
+        }
+
+        void free() const {
+            uxx length = capacity();
+
+            // 先析构
+            mem->~token_mix_t();
+
+            // 再根据实际内存大小释放
+            inc::free(mem, size(length));
         }
     $
+
+    #define xgen(name)                                          \
+        name()                              = default;          \
+        name(the_t const &)                 = default;          \
+        name(the_t &&)                      = default;          \
+        the_t & operator=(the_t const &)    = default;          \
+        the_t & operator=(the_t &&)         = default;          \
+
+    template<class final, class attribute_t>
+    xstruct(
+        xtmpl(ref_ptr, final, attribute_t),
+        xpubb(meta<final, void, attribute_t, false, false>)
+    )
+        using base_t = meta<final, void, attribute_t, false, false>;
+
+        xgen(ref_ptr)
+
+        template<class ... args>
+        requires(can_init<attribute_t, init_by<args...>> == true)
+        ref_ptr(init_by<args...> const & init){
+            base_t::init_ptr(init);
+        }
+    $
+
+    template<
+        class   final, 
+        class   item_t, 
+        class   attribute_t, 
+        bool    is_binary_aligned_alloc
+    >
+    xstruct(
+        xtmpl(ref_array, final, item_t, attribute_t, is_binary_aligned_alloc),
+        xpubb(meta<final, item_t, attribute_t, true, is_binary_aligned_alloc>)
+    )
+        using base_t = meta<final, item_t, attribute_t, true, is_binary_aligned_alloc>;
+        using typename base_t::item_initial_invoke;
+        using typename base_t::item_initial_invokex;
+
+        xgen(ref_array)
+
+        template<class initial_invoke, class ... args>
+        requires(
+            (
+                has_cast<item_initial_invoke , initial_invoke> or 
+                has_cast<item_initial_invokex, initial_invoke>
+            )   and
+            (
+                can_init<attribute_t, init_by<args...>>
+            )
+        )
+        ref_array(::length length, init_by<args...> const & init_attr, initial_invoke const & init_ary){
+            base_t::init(length, init_attr, init_ary);
+        }
+
+        template<class ... args, class ... argsx>
+        requires(
+            can_init<attribute_t, init_by<args...>> and ... and 
+            has_cast<item_t, argsx>
+        )
+        ref_array(init_by<args...> const & init_attr, item_t const & first, argsx const & ... rest){
+            base_t::init_one_by_one(init_attr, first, rest...);
+        }
+    $
+
+    template<
+        class   final, 
+        class   item_t, 
+        bool    is_binary_aligned_alloc
+    >
+    xstruct(
+        xspec(ref_array, final, item_t, void, is_binary_aligned_alloc),
+        xpubb(meta<final, item_t, void, true, is_binary_aligned_alloc>)
+    )
+        using base_t = meta<final, item_t, void, true, is_binary_aligned_alloc>;
+        using typename base_t::item_initial_invoke;
+        using typename base_t::item_initial_invokex;
+
+        xgen(ref_array)
+
+        template<class initial_invoke, class ... args>
+        requires(
+            has_cast<item_initial_invoke , initial_invoke> or 
+            has_cast<item_initial_invokex, initial_invoke>
+        )
+        ref_array(::length length, initial_invoke const & init_ary){
+            base_t::init(length, init_by_default, init_ary);
+        }
+
+        template<class ... args>
+        requires(... and has_cast<item_t, args>)
+        ref_array(item_t const & first, args const & ... rest){
+            base_t::init_one_by_one(init_by_default, first, rest...);
+        }
+    $
+
+    #undef  xgen
 }
 
 namespace mixc::gc_ref::origin{
-    template<class final, class type>
-    using ref_ptr = meta<final, void, type, false, false>;
-
-    template<class final, class item_t, class attribute_t = void, bool is_binary_aligned_alloc = false>
-    using ref_array = meta<final, item_t, attribute_t, true, is_binary_aligned_alloc>;
+    using inc::init_by;
+    using mixc::gc_ref::ref_ptr;
+    using mixc::gc_ref::ref_array;
 }
 
 #endif
