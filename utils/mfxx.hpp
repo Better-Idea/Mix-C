@@ -148,7 +148,7 @@ namespace mixc::utils_mfxx{
         }
     $
 
-    using mf32 = mixc::utils_mfxx::mfxx<f32, u32, 23, 8 , (1 <<  8) - 1, 7 >;
+    using mf32 = mixc::utils_mfxx::mfxx<f32, u32, 23, 8 , (1 <<  7) - 1, 7 >;
     using mf64 = mixc::utils_mfxx::mfxx<f64, u64, 52, 11, (1 << 10) - 1, 17>;
     using mf80 = mixc::utils_mfxx::mfxx<f80, u64, 64, 15, (1 << 14) - 1, 19>;
 
