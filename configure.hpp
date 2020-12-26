@@ -6,7 +6,7 @@
 /* mixc::xdebug ====================================================
  * 
  * =================================================================*/
-#define xuse_xdebug                 1
+#define xuse_xdebug                 0
 #define xuse_xdebug_fail            1
 #define xuse_xdebug_short_path      1
 
