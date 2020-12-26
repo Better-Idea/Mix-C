@@ -197,11 +197,10 @@ namespace mixc::lang_cxx_strlize{
                     u64 decimal : 52;
                     u64 digital : 4;
                 };
-                u64 full;
+                u64     full;
             }f;
 
-            // 这里用 auto 就好了，m 可能是 mf32 或 mf64，所以返回值类型不是固定的
-            auto rd             = m.real_dec();
+            auto rd             = m.real_dec() << (52 - m.decimal_bits());
             auto re             = m.real_exp();
             auto num_len        = uxx(0);
             f.full              = re > 0 ? rd << re : rd >> -re;
@@ -213,6 +212,13 @@ namespace mixc::lang_cxx_strlize{
                 f.digital       = 0;
                 f.full         *= 10;
             } while(f.full != 0 and num_len < m.precious());
+
+            // 如果没有限定精度，就去除末尾多余的零
+            if (precious == not_exist) for(uxx i = num_len; num_len > 1/*最少一位数字*/; num_len--, ptr--){
+                if (ptr[-1] != '0'){
+                    break;
+                }
+            }
 
             if (is_scientific_notation){
                 auto ctz        = precious == not_exist ? ixx(0) : inc::max<ixx>(ixx(precious - num_len), ixx(0));
@@ -457,7 +463,7 @@ namespace mixc::lang_cxx_strlize{
             inc::can_alloc<alloc_t, item_t>
         )
         meta(float_t value, alloc_t const & alloc){
-            thex = the.strlize(value, float_format_t::fmt_1p2e3, not_exist, alloc);
+            thex = the.strlize(value, float_format_t::fmt_n, not_exist, alloc);
         }
 
         template<class alloc_t>
@@ -473,9 +479,9 @@ namespace mixc::lang_cxx_strlize{
             inc::can_alloc<alloc_t, item_t>
         )
         meta(item_t value, alloc_t const & alloc){
-            item_t * ptr = alloc(1);
-            thex = the_t{ ptr, 1 };
-            ptr[0] = value;
+            item_t * ptr    = alloc(1);
+            thex            = the_t{ ptr, 1 };
+            ptr[0]          = value;
         }
     };
 
