@@ -13,6 +13,7 @@
 #undef  xuser
 #define xuser mixc::docker_shared_array::inc
 #include"docker/private/adapter.array_access.hpp"
+#include"dumb/init_by.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
 #include"macro/xis_nullptr.hpp"
@@ -22,7 +23,15 @@
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
+namespace mixc::docker_shared_array::origin{
+    using inc::can_init;
+    using inc::init_by;
+    using inc::init_by_default;
+}
+
 namespace mixc::docker_shared_array{
+    using namespace origin;
+
     template<class final, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
     xstruct(
         xtmpl(shared_array_t, final, type, rank, attribute, is_binary_aligned_alloc),
@@ -40,53 +49,16 @@ namespace mixc::docker_shared_array{
         using typename base_t::item_initial_invokex;
         using base_t::operator==;
         using base_t::operator!=;
+        using base_t::base_t;
     public:
         shared_array_t(decltype(nullptr) = nullptr) : base_t(){}
-        shared_array_t(the_t const &)               = default;
-        shared_array_t(the_t &&)                    = default;
+
         the_t & operator=(the_t const &)            = default;
         the_t & operator=(the_t &&)                 = default;
 
         template<class finalx>
         shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
             shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> &)self){
-        }
-
-        explicit shared_array_t(::length length) :
-            base_t(length) {}
-
-        template<class ... args>
-        requires(... && inc::has_cast<item_t, args>)
-        explicit shared_array_t(item_t const & first, args const & ... rest) : 
-            base_t(first, rest...){
-        }
-
-        template<class ... args>
-        requires(inc::has_constructor<item_t, void(args const &...)>)
-        explicit shared_array_t(::length length, args const & ... list) : 
-            base_t(length, list...) {}
-
-        template<class initial_invoke>
-        requires(
-            inc::has_cast<item_initial_invoke , initial_invoke> or 
-            inc::has_cast<item_initial_invokex, initial_invoke>
-        )
-        explicit shared_array_t(::length length, initial_invoke const & initial) :
-            base_t(length, initial){
-        }
-
-        template<class ... args>
-        requires(inc::has_constructor<item_t, void(args const &...)>)
-        auto & operator()(::length length, args const & ... list){
-            the_t{length, list...}.swap(this);
-            return thex;
-        }
-
-        template<class ... args>
-        requires(... && inc::has_cast<item_t, args>)
-        auto & operator()(item_t const & first, args const & ... rest){
-            the_t{first, rest...}.swap(this);
-            return thex;
         }
 
         operator item_t *() {

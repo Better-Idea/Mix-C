@@ -5,6 +5,8 @@
 #include"macro/xfinal.hpp"
 
 namespace xuser{
+    using namespace xusing_docker_shared_array::origin;
+
     #ifndef xdocker_shared_array_disable_is_binary_aligned_alloc
         template<class item_t, uxx rank = 1, class attribute = void, bool is_binary_aligned_alloc = false>
         xfinal_tmpl(xusing_docker_shared_array, shared_array, item_t, rank, attribute, is_binary_aligned_alloc);
