@@ -43,12 +43,11 @@ namespace mixc::lang_cxx_ph{
      * zX{} upper hex with 0x prefix and leading zero
      * o{}  oct
      * zo{} oct with leading zero
-     * 
-     * v{}  normal multi-value
-     * f{}  decimal(pending)
-     * 
      * b{}  bin
      * zb{} bin with leading zero
+     * 
+     * v{}  generic multi-value
+     * f{}  decimal(pending)
      * 
      * .l() align left
      * .r() align right
@@ -122,6 +121,7 @@ namespace mixc::lang_cxx_ph{
             return thex;
         }
 
+    protected:
         template<class item_t>
         item_t * align(uxx length, inc::ialloc<item_t> alloc){
             if (the_t::align_width == 0 or the_t::align_width <= length){
@@ -166,8 +166,8 @@ namespace mixc::lang_cxx_ph{
         bool              keep_leading_zero, 
         auto              lut>
     struct num : base_ph<final, type>{
-        using the_t = base_ph<final, type>;
-        using the_t::the_t;
+        using base_t = base_ph<final, type>;
+        using base_t::base_t;
         num(){}
 
         template<class item_t>
@@ -175,10 +175,10 @@ namespace mixc::lang_cxx_ph{
             auto buf         = (item_t *)nullptr;
             auto deformation = [this](){
                 if constexpr (inc::is_ptr<type>){
-                    return uxx(the_t::value);
+                    return uxx(base_t::value);
                 }
                 else{
-                    return the_t::value;
+                    return base_t::value;
                 }
             };
 
@@ -197,7 +197,7 @@ namespace mixc::lang_cxx_ph{
 
                 auto new_length = (keep_leading_zero ? klz_length : length);
                 auto zero_count = (new_length - length);
-                auto mem        = the.template align<item_t>(
+                auto mem        = base_t::template align<item_t>(
                     new_length += (with_prefix ? 2 : 0), alloc
                 );
                 buf             = mem;
@@ -232,6 +232,7 @@ namespace mixc::lang_cxx_ph{
             item_t * format(inc::ialloc<item_t> const & alloc){                                         \
                 return thex.template format<item_t>(alloc);                                             \
             }                                                                                           \
+            xfmt_specialize()                                                                           \
         }
     
     #define xhex(name,prefix,leading_zero,lut)      \
