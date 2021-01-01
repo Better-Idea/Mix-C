@@ -16,9 +16,10 @@ namespace mixc::math_align{
     // align(v) = 1 if v > 2 exp (sizeof(uxx) * 8 - 1)
     template<class type>
     inline type align(type size){
-        return size & (size - 1) ?
-            type(1) << (inc::index_of_last_set(size) + 1) :
-            size;
+        uxx i                           = inc::index_of_last_set(size);
+        uxx mask                        = (uxx(1) << i) - 1;
+        uxx value                       = (size + mask) & ~mask;
+        return value;
     }
 
     // 让 size 的低 bits 位以 2 的指数次方 向上圆整
