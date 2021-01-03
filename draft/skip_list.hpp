@@ -1,6 +1,8 @@
 #define xuser mixc::powerful_cat
 #include"define/base_type.hpp"
 #include"memop/swap.hpp"
+#include"memory/allocator.hpp"
+#include"macro/xnew.hpp"
 
 namespace xuser{
     struct skip_node;
@@ -57,10 +59,11 @@ namespace xuser{
         static constexpr bool path_record = true;
 
         template<auto path_record = false>
-        auto find(uxx * index_ptr, skip_node ** path_ptr = nullptr){
-            skip_node * cur_skip_node = root;
-            item_node * item_ptr;
-            uxx       & i             = index_ptr[0];
+        auto find(uxx * index_ptr, skip_node *** path_ptrx = nullptr){
+            item_node *   item_ptr;
+            skip_node *   cur_skip_node         = root;
+            skip_node **& path_ptr              = path_ptrx[0];
+            uxx       & i                       = index_ptr[0];
 
             while(true){
                /*
@@ -122,7 +125,7 @@ namespace xuser{
             }
 
             // 说明是插入到末尾(相当于追加，那么 i 一定等于 1)
-            auto pair                           = find<path_record>(xref i, path_ptr);
+            auto pair                           = find<path_record>(xref i, xref path_ptr);
             insert_point                        = pair.item_ptr;
             cur_skip_node                       = pair.cur_skip_node;
 
@@ -403,11 +406,15 @@ namespace xuser{
         }
 
         skip_node * alloc_skip_node(){
-            return new skip_node();
+            return alloc_with_initial<skip_node>(
+                memory_size{sizeof(skip_node)}
+            );
         }
 
         item_node * alloc_item_node(item_t const & value){
-            return new item_node(value);
+            return alloc_with_initial<item_node>(
+                memory_size{sizeof(item_node)}, value
+            );
         }
     };
 }
