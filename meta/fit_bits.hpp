@@ -22,7 +22,7 @@ namespace mixc::meta_fit_bits{
             else if constexpr (bits <= 32){
                 return u32();
             }
-            else{
+            else if constexpr (bits <= 64){
                 return u64();
             }
         }
