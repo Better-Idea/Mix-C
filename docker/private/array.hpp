@@ -177,7 +177,7 @@ namespace mixc::docker_array{
             }){}
         
         template<class ... args>
-        requires(... && inc::has_cast<item_t, args>)
+        requires(... and inc::has_cast<item_t, args>)
         array_t(item_t const & first, args const & ... rest) : 
             data(
                 create(::length{1 + sizeof...(args)}, inc::default_alloc<void>)

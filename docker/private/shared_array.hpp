@@ -53,13 +53,13 @@ namespace mixc::docker_shared_array{
     public:
         shared_array_t(decltype(nullptr) = nullptr) : base_t(){}
 
-        the_t & operator=(the_t const &)            = default;
-        the_t & operator=(the_t &&)                 = default;
-
         template<class finalx>
         shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
             shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> &)self){
         }
+
+        the_t & operator=(the_t const &)            = default;
+        the_t & operator=(the_t &&)                 = default;
 
         operator item_t *() {
             return base_t::operator item_t * ();
