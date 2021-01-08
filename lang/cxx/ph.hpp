@@ -88,6 +88,7 @@ namespace mixc::lang_cxx_ph{
         char        left_padding_char        = ' ';
         char        right_padding_char       = ' ';
         u32         align_width              = 0;
+        u32         offset_to_head           = 0;
 
         enum{
             align_center,
@@ -123,27 +124,43 @@ namespace mixc::lang_cxx_ph{
 
     protected:
         template<class item_t>
-        item_t * align(uxx length, inc::ialloc<item_t> alloc){
+        item_t * align(uxx length, uxx * cum_length_ptr, inc::ialloc<item_t> const & alloc){
+            uxx     dummy               = 0;
+            uxx &   cum_length          = cum_length_ptr ? cum_length_ptr[0] : dummy;
+
             if (the_t::align_width == 0 or the_t::align_width <= length){
+                cum_length              = length;
                 return alloc(length);
             }
+            else{
+                cum_length              = the_t::align_width;
+            }
 
-            auto mem       = alloc(the_t::align_width);
-            auto pad_width = the_t::align_width - length;
-            auto half      = pad_width / 2;
+            auto mem                    = alloc(the_t::align_width);
+            auto pad_width              = the_t::align_width - length;
+            auto half                   = pad_width / 2;
 
             switch(the_t::align_mode){
             case the_t::align_center:
                 inc::fill_with_operator(mem, left_padding_char, half);
                 inc::fill_with_operator(length + (mem += half), right_padding_char, pad_width - half);
+                offset_to_head          = half;
                 return mem;
             case the_t::align_left:
                 inc::fill_with_operator(mem + length, right_padding_char, pad_width);
                 return mem;
             default: // align_right
                 inc::fill_with_operator(mem, left_padding_char, pad_width);
+                offset_to_head          = pad_width;
                 return mem + pad_width;
             }
+        }
+
+        
+        template<class item_t>
+        item_t * align(uxx length, inc::ialloc<item_t> const & alloc){
+            uxx dummy                   = 0;
+            return align(length, xref dummy, alloc);
         }
     $
 
@@ -355,21 +372,25 @@ namespace mixc::lang_cxx_ph{
         template<class item_t, class fmt_t = decltype(nullptr)>
         item_t * combine(uxx length, fmt_t const & fmt = nullptr){
             item_t * buf;
+
             if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
                 length     += fmt.length();
                 buf         = base_t::template align<item_t>(
-                    length, inc::cast<inc::ialloc<item_t>>(alloc)
-                ) + length;
+                    length, xref the.length/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
+                );
 
-                inc::copy_with_operator_unsafe(buf, fmt, fmt.length());
+                buf        += length;
+
+                // fmt 剩下的内容排在最后
                 buf        -= fmt.length();
+                inc::copy_with_operator_unsafe(buf, fmt, fmt.length());
             }
             else{
                 buf         = base_t::template align<item_t>(
-                    length, inc::cast<inc::ialloc<item_t>>(alloc)
-                ) + length;
+                    length, xref the.length/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
+                );
+                buf        += length;
             }
-            the.length      = length;
             return buf;
         }
     protected:
@@ -392,6 +413,7 @@ namespace mixc::lang_cxx_ph::origin::ph{
             item_t * ptr    = fmt.length() == 0 ? 
                 base_t::template combine<item_t>(0) :
                 base_t::template combine<item_t>(0, fmt);
+            ptr            -= base_t::offset_to_head;
             return { ptr, base_t::length };
         }
 
@@ -399,6 +421,7 @@ namespace mixc::lang_cxx_ph::origin::ph{
         inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){
             inc::copy(xref base_t::alloc, alloc);
             item_t * ptr    = base_t::template combine<item_t>(0);
+            ptr            -= base_t::offset_to_head;
             return { ptr, base_t::length };
         }
 
