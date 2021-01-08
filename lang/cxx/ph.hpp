@@ -144,23 +144,22 @@ namespace mixc::lang_cxx_ph{
             case the_t::align_center:
                 inc::fill_with_operator(mem, left_padding_char, half);
                 inc::fill_with_operator(length + (mem += half), right_padding_char, pad_width - half);
+
+                // 两端填充字符用于对齐，实际返回的是居中内容缓冲区的地址
+                // 要得到这个对齐块的首地址，实际上还需要减去 offset_to_head
                 offset_to_head          = half;
                 return mem;
             case the_t::align_left:
                 inc::fill_with_operator(mem + length, right_padding_char, pad_width);
+
+                // 返回的地址就是当前对齐块的首地址
+                offset_to_head          = 0;
                 return mem;
             default: // align_right
                 inc::fill_with_operator(mem, left_padding_char, pad_width);
                 offset_to_head          = pad_width;
                 return mem + pad_width;
             }
-        }
-
-        
-        template<class item_t>
-        item_t * align(uxx length, inc::ialloc<item_t> const & alloc){
-            uxx dummy                   = 0;
-            return align(length, xref dummy, alloc);
         }
     $
 
@@ -188,7 +187,7 @@ namespace mixc::lang_cxx_ph{
         num(){}
 
         template<class item_t>
-        item_t * format(inc::ialloc<item_t> const & alloc){
+        inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){
             auto buf         = (item_t *)nullptr;
             auto deformation = [this](){
                 if constexpr (inc::is_ptr<type>){
@@ -198,6 +197,8 @@ namespace mixc::lang_cxx_ph{
                     return base_t::value;
                 }
             };
+
+            uxx total = 0;
 
             inc::cxx<item_t>(deformation(), n, lut, [&](uxx length){
                 auto klz_length = sizeof(type) * 8; // keep leading zero length
@@ -215,7 +216,7 @@ namespace mixc::lang_cxx_ph{
                 auto new_length = (keep_leading_zero ? klz_length : length);
                 auto zero_count = (new_length - length);
                 auto mem        = base_t::template align<item_t>(
-                    new_length += (with_prefix ? 2 : 0), alloc
+                    new_length += (with_prefix ? 2 : 0), xref total, alloc
                 );
                 buf             = mem;
 
@@ -229,7 +230,7 @@ namespace mixc::lang_cxx_ph{
                 }
                 return mem;
             });
-            return buf;
+            return { buf - base_t::offset_to_head, total };
         }
     };
 
@@ -246,7 +247,7 @@ namespace mixc::lang_cxx_ph{
                 base_t(equivalent_type_t(value)){                                                       \
             }                                                                                           \
             template<class item_t>                                                                      \
-            item_t * format(inc::ialloc<item_t> const & alloc){                                         \
+            inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){                                 \
                 return thex.template format<item_t>(alloc);                                             \
             }                                                                                           \
             xfmt_specialize()                                                                           \
@@ -391,6 +392,8 @@ namespace mixc::lang_cxx_ph{
                 );
                 buf        += length;
             }
+
+            // 缓冲区尾部地址，从后往前填充
             return buf;
         }
     protected:
