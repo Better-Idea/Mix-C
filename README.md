@@ -12,7 +12,8 @@ https://github.com/Better-Idea/Mix-C/blob/master/lock/policy_barrier.hpp
 https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_policy_barrier.cpp
 
 - 半伪随机数生成算法：一款高质量的伪随机数生成算法，速度比线性同余更快，周期比 mt19937更长（理论上没有周期）  
-https://github.com/Better-Idea/Mix-C/blob/master/math/random.hpp
+https://github.com/Better-Idea/Mix-C/blob/master/math/random.hpp  
+https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_random.cpp
 
 - 包含范式：给你一个干净的命名空间，一言难尽，看代码吧 。  
 https://github.com/Better-Idea/Mix-C/tree/master/lang
@@ -60,7 +61,7 @@ https://github.com/Better-Idea/Mix-C/blob/master/math
 | ttyctrl               | 为控制台打造的控件库                                                   |
 
 ## 框架指引
-- [编译配置 pending](https://github.com/Better-Idea/Mix-C/tree/master/doc_guide/)
+- [运作观](https://github.com/Better-Idea/Mix-C/tree/master/doc_guide/point_of_view.md)
 - [包含范式](https://github.com/Better-Idea/Mix-C/tree/master/doc_guide/inclusion_paradigm.md)
 
 TO BE CONTINUE
