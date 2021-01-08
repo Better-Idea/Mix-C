@@ -1,5 +1,4 @@
 #define xuser mixc::powerful_cat
-#include"io/tty.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
 #include"mixc.hpp"
@@ -178,6 +177,124 @@ namespace xuser{
             content             = zX{ptr}.format(alloc);
 
             xhint(ptr, content);
+        }
+
+        // 演示：8 进制占位符 'o'
+        {
+            xhint(demo, "placeholder 'o'");
+
+            u32 value           = 01234; // 以 0 开头表示该数值是 8 进制
+            c08 content         = o{value}.format(alloc);
+
+            xhint(value, content);
+        }
+
+        // 演示：带前导零的 8 进制占位符 'zo'
+        {
+            xhint(demo, "placeholder 'zo'");
+
+            u32 value           = 01234; // 以 0 开头表示该数值是 8 进制
+            c08 content         = zo{value}.format(alloc);
+
+            // value 有 32bit，实际上可以分成 1 个 2bit + 10 个 3bit 的 8 进制数
+            // value = 01234(oct)，只占用 4 位八进制数，所以有 7 个前导零
+            xhint(value, content);
+        }
+
+        // 演示：2 进制占位符 'b'
+        {
+            xhint(demo, "placeholder 'b'");
+
+            u32 value           = 0b10010;  // 以 0b 开头的常量为 2 进制数字
+            c08 content         = b{value}.format(alloc);
+
+            xhint(value, content);
+        }
+
+        // 演示：带前导零的 8 进制占位符 'zo'
+        {
+            xhint(demo, "placeholder 'zb'");
+
+            // 以 0b 开头的常量为 2 进制数字，这里避免前导零太多所以选择 u08 示意
+            u08 value           = 0b10010;
+            c08 content         = zb{value}.format(alloc);
+
+            // value 有 8bit
+            // 实际显式的是 '00010010'，会有 3 个前导零
+            xhint(value, content);
+        }
+
+        // 演示：通用占位符 'v'
+        {
+            xhint(demo, "placeholder 'v'");
+
+            c08 content         = v{996}.format(alloc);
+            xhint(content);
+
+            // \e 为占位符标识
+            // 那么后续元素的内容都会填充到 \e 对应的位置
+            content             = v{2021,1,1}.format("\e-\e-\e", alloc);
+
+            // 显示 "2021-1-1"
+            xhint(content);
+
+            // 'v' 还支持占位符的嵌套
+            content             = v{ h(123), o(123), b(123) }.format("0x\e=0\e=0b\e", alloc);
+            xhint(content);
+        }
+
+        // 演示：左对齐
+        {
+            // ph 命名空间下的所有占位符都支持对齐
+            xhint(demo, "align left 'placeholder::l()'");
+
+            // 左对齐 10 个字符单位
+            c08 content         = v{ v{996}.l(10), "is horrible" }.format(alloc);
+
+            // 显示 "996       is horrible"
+            xhint(content);
+
+            // 左对齐 10 个字符单位，空出的部分用 '?' 填充
+            content             = v{ v{996}.l(10, '?'), "is horrible" }.format(alloc);
+
+            // 显示 "996???????is horrible"
+            xhint(content);
+        }
+
+        // 演示：右对齐
+        {
+            // ph 命名空间下的所有占位符都支持对齐
+            xhint(demo, "align right 'placeholder::r()'");
+
+            // 右对齐 10 个字符单位，空出的部分用 ' ' 填充
+            c08 content         = v{ "the shit working mode", v{996}.r(10)  }.format(alloc);
+
+            // 显示 "the shit working mode       996"
+            xhint(content);
+
+            // 右对齐 10 个字符单位，空出的部分用 '?' 填充
+            content             = v{ "the shit working mode", v{996}.r(10, '-')  }.format(alloc);
+
+            // 显示 "the shit working mode-------996"
+            xhint(content);
+        }
+
+        // 演示：居中
+        {
+            // ph 命名空间下的所有占位符都支持对齐
+            xhint(demo, "align center 'placeholder::c()'");
+
+            // 居中 16 个字符单位，空出的部分用 ' ' 填充
+            c08 content         = v{996}.c(16).format(alloc);
+
+            // 显示 "      996       "
+            xhint(content);
+
+            // 右对齐 16 个字符单位，空出的部分用 '?' 填充
+            content             = v{996}.c(16, '?').format(alloc);
+
+            // 显示 "??????996???????"
+            xhint(content);
         }
     }
 }
