@@ -1,12 +1,13 @@
-#ifndef xpack_draft_bits_indexer
-#define xpack_draft_bits_indexer
+#ifndef xpack_utils_bits_indexer
+#define xpack_utils_bits_indexer
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::draft_bits_indexer::inc
-#include"mixc.hpp"
+#define xuser mixc::utils_bits_indexer::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::draft_bits_indexer{
+namespace mixc::utils_bits_indexer::origin{
     template<uxx bits_per_item>
     xstruct(
         xtmpl(bits_indexer, bits_per_item),
@@ -61,3 +62,6 @@ namespace mixc::draft_bits_indexer{
     $
 }
 
+#endif
+
+xexport_space(mixc::utils_bits_indexer::origin)
