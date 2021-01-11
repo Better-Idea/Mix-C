@@ -1,3 +1,4 @@
+// TODO：用于平衡的部分还需要重新设置父节点的跳跃数
 #define xuser mixc::powerful_cat
 #include"define/base_type.hpp"
 #include"memop/swap.hpp"
@@ -10,8 +11,7 @@ namespace xuser{
     using item_t = uxx;
 
     enum skip_node_state{
-        need_delete,
-        is_narrow_space,    // 与下一个跳跃的节点相隔 0 个节点
+        is_narrow_space = 1,// 与下一个跳跃的节点相隔 0 个节点
         is_normal_space,    // 与下一个跳跃的节点相隔 1 个节点
         is_wide_space,      // 与下一个跳跃的节点相隔 2 个节点
         need_split,
@@ -40,7 +40,7 @@ namespace xuser{
         skip_node():
             next(nullptr),
             skip_step(0),
-            state(need_delete),
+            state(is_narrow_space),
             is_item(false),
             item(nullptr){
         }
@@ -54,7 +54,7 @@ namespace xuser{
     struct skip_list{
         skip_node * root     = nullptr;
         uxx         count    = 0;
-        uxx         top_step = 1;
+        uxx         state    = is_narrow_space;
 
         static constexpr bool path_record = true;
 
@@ -63,7 +63,8 @@ namespace xuser{
             item_node *   item_ptr;
             skip_node *   cur_skip_node         = root;
             skip_node **& path_ptr              = path_ptrx[0];
-            uxx       & i                       = index_ptr[0];
+            uxx         & i                     = index_ptr[0];
+            uxx           index                 = i;
 
             while(true){
                /*
@@ -81,17 +82,16 @@ namespace xuser{
                 }
 
                 // 底层节点是元素节点
-                if (cur_skip_node->skip_step += 1; cur_skip_node->is_item){
+                if constexpr (path_record){
+                    path_ptr[0]                 = cur_skip_node;
+                    path_ptr                   += 1;
+                    cur_skip_node->skip_step   += 1;
+                }
+                if (cur_skip_node->is_item){
                     break;
                 }
                 // 如果越不过，那么该跳跃点至下一个跳跃点之间多了一个节点，而插入点也在此范围内
-                else{
-                    if constexpr (path_record){
-                        path_ptr[0]             = cur_skip_node;
-                        path_ptr               += 1;
-                    }
-                    cur_skip_node               = cur_skip_node->bottom;
-                }
+                cur_skip_node                   = cur_skip_node->bottom;
             }
 
             for(item_ptr = cur_skip_node->item;
@@ -111,7 +111,7 @@ namespace xuser{
             skip_node *  new_skip_node;
             skip_node *  nex_skip_node;
             skip_node *  path[sizeof(uxx) * 8];
-            skip_node ** path_ptr               = path + 1/*skip top*/;
+            skip_node ** path_ptr               = path;
             uxx          i                      = index;
 
             if (count += 1; root == nullptr){
@@ -171,9 +171,9 @@ namespace xuser{
                     return;
                 }
                 else if (cur_skip_node->state == is_normal_space){
-                   if (when_normal_space(cur_skip_node, nex_skip_node) == loop_t::finish){
-                       return;
-                   }
+                    if (when_normal_space(cur_skip_node, nex_skip_node) == loop_t::finish){
+                        return;
+                    }
                 }
                 else {
                    /* 插入前状态：
@@ -194,8 +194,13 @@ namespace xuser{
                     *  ||          ||          ||   
                     * [N0]==[N1]==[N2]==[N3]==[N4]==
                     */
-                    new_skip_node                   = alloc_skip_node(cur_skip_node);
+                    new_skip_node                   = alloc_skip_node();
+                    new_skip_node->next             = nex_skip_node;
+                    cur_skip_node->next             = new_skip_node;
+                    new_skip_node->state            = is_normal_space;
                     cur_skip_node->state            = is_normal_space;
+                    new_skip_node->is_item          = cur_skip_node->is_item;
+                    new_skip_node->bottom           = cur_skip_node->bottom->next->next;
 
                     if (not cur_skip_node->is_item){
                         uxx s0                      = cur_skip_node->skip_step;
@@ -213,41 +218,32 @@ namespace xuser{
                     }
                 }
 
-                if (cur_skip_node == root){
-                    break;
-                }
-
                 // 若为 true 说明已经在 root 层插入了新节点
-                if (path_ptr == xref path[1]){
-                    if (top_step += 1; top_step != is_wide_space){
+                if (path_ptr -= 1; path_ptr < xref path[0]){
+                    return;
+                }
+                if (path_ptr == xref path[0]){
+                    if (state != is_normal_space){
+                        state                      += 1;
                         return;
-                    }
-                    else{
-                        top_step                    = is_narrow_space;
                     }
 
                     new_skip_node                   = alloc_skip_node();
-                    new_skip_node->next             = nullptr;
-
-                    // 平衡跳表的 if 判定要求 state 为未插入元素时的状态
-                    new_skip_node->state            = 0;
-
-                    // 顶层的 skip_step 不可以直接赋值为 count
-                    // 因为每一层都可能存在不足一个跳跃点的末尾部分
-                    new_skip_node->skip_step        = 0;
+                    nex_skip_node                   = alloc_skip_node();
+                    new_skip_node->next             = nex_skip_node;
+                    nex_skip_node->next             = nullptr;
+                    new_skip_node->skip_step        = root->skip_step + root->next->skip_step;
+                    nex_skip_node->skip_step        = root->next->next->skip_step;
+                    new_skip_node->state            = is_normal_space;
+                    nex_skip_node->state            = is_narrow_space;
                     new_skip_node->is_item          = false;
+                    nex_skip_node->is_item          = false;
                     new_skip_node->bottom           = root;
-
-                    while(root->next != nullptr){
-                        new_skip_node->state       += 1;
-                        root                        = root->next;
-                    }
-
+                    nex_skip_node->bottom           = root->next->next;
                     root                            = new_skip_node;
-                    cur_skip_node                   = new_skip_node;
+                    return;
                 }
                 else{
-                    path_ptr                       -= 1;
                     cur_skip_node                   = path_ptr[0];
                 }
             }
@@ -259,40 +255,31 @@ namespace xuser{
         }
 
         loop_t when_normal_space(skip_node * cur_skip_node, skip_node * nex_skip_node){
-           /* 下一个跳跃点为 NULL 直接跳过：
-            * 插入前状态：
-            * [S1]========NULL
+           /* 插入前状态：
+            * [S2]========NULL
             *  || 
             * [N0]==[N1]==NULL
             * 
-            * 或者：
-            * [S1]========[S?]==···
-            *  ||          ||
-            * [N0]==[N1]==[N1]==···
-            * 
             * 插入后状态：
-            * [S3]==============NULL
-            *  || 
+            * [S2]========[S1]==NULL
+            *  ||          ||
             * [N0]==[N1]==[N2]==NULL
-            * 
-            * 或者：
-            * [S3]==============[S?]==···
-            *  ||                ||
-            * [N0]==[N1]==[N2]==[N3]==···
             */
 
-            skip_node * new_skip_node;
-
             if (nex_skip_node == nullptr){
-                new_skip_node                   = alloc_skip_node(cur_skip_node);
-                new_skip_node->state            = is_narrow_space;
+                nex_skip_node                   = alloc_skip_node();
+                nex_skip_node->next             = nullptr;
+                nex_skip_node->state            = is_narrow_space;
+                nex_skip_node->is_item          = cur_skip_node->is_item;
+                nex_skip_node->bottom           = cur_skip_node->bottom->next->next;
+                cur_skip_node->next             = nex_skip_node;
 
                 if (not cur_skip_node->is_item){
-                    new_skip_node->skip_step    = cur_skip_node->bottom->next->next->skip_step;
-                    cur_skip_node->skip_step   -= new_skip_node->skip_step; // 分给 new_skip_node
+                    nex_skip_node->skip_step    = cur_skip_node->bottom->next->next->skip_step;
+                    cur_skip_node->skip_step   -= nex_skip_node->skip_step; // 分给 nex_skip_node
                 }
                 else{
-                    new_skip_node->skip_step    = is_narrow_space;
+                    nex_skip_node->skip_step    = is_narrow_space;
                     cur_skip_node->skip_step    = is_normal_space;
                 }
                 return loop_t::go_on;
@@ -303,7 +290,7 @@ namespace xuser{
             * 看两个跳跃点之间是否可以合并或者分裂
             * 
             * 此外：
-            * 一宽一窄，可以平衡一下：
+            * 插入后，一宽一窄，可以平衡一下：
             * [S3]==============[S1]==[S?]==···
             *  ||                ||    ||
             * [N0]==[N1]==[N2]==[N3]==[N4]==···
@@ -323,9 +310,13 @@ namespace xuser{
             * [S2]========[S2]========[S?]==···
             *  ||          ||          ||
             * [N0]==[N1]==[N2]==[N3]==[N4]==···
+            * 
+            * 或者：
+            * [S2]========[S2]==NULL
+            *  ||          ||
+            * [N0]==[N1]==[N2]==[N3]==NULL
             */
             if (nex_skip_node->state == is_narrow_space){
-                cur_skip_node->state            = is_normal_space;
                 nex_skip_node->state            = is_normal_space;
 
                 if (not cur_skip_node->is_item){
@@ -359,22 +350,25 @@ namespace xuser{
             *  ||          ||          ||          || 
             * [N0]==[N1]==[N2]==[N3]==[N4]==[N5]==[N6]==···
             */
-            if (nex_skip_node->state != is_wide_space){
-                // next->state == is_normal_space
+            if (nex_skip_node->state < is_wide_space){
+                cur_skip_node->state           += 1;
                 return loop_t::finish;
             }
 
-            new_skip_node                       = alloc_skip_node(cur_skip_node);
+            skip_node * new_skip_node           = alloc_skip_node();
+            new_skip_node->next                 = nex_skip_node;
+            cur_skip_node->next                 = new_skip_node;
+            new_skip_node->state                = is_normal_space;
             cur_skip_node->state                = is_normal_space;
-            nex_skip_node->state                = is_normal_space;
+            new_skip_node->is_item              = cur_skip_node->is_item;
 
             if (not cur_skip_node->is_item){
                 uxx s0                          = cur_skip_node->skip_step;
                 uxx s1                          = nex_skip_node->bottom->skip_step;
-                uxx s2                          = 
+                uxx s2                          =
                     cur_skip_node->bottom->skip_step + 
                     cur_skip_node->bottom->next->skip_step;
-                uxx s3                          = s0 + s1 - s2;
+                uxx s3                          = s0 + s1 - s2; // 后两个子节点 skip_count 总和
 
                 cur_skip_node->skip_step        = s2;
                 new_skip_node->skip_step        = s3;
@@ -386,23 +380,9 @@ namespace xuser{
                 nex_skip_node->skip_step        = is_normal_space;
             }
 
-            cur_skip_node->next                 = new_skip_node;
+            new_skip_node->bottom               = cur_skip_node->bottom->next->next;
             nex_skip_node->bottom               = nex_skip_node->bottom->next;
             return loop_t::go_on;
-        }
-
-        skip_node * alloc_skip_node(skip_node * cur_skip_node){
-            skip_node * 
-            nex_skip_node                   = cur_skip_node->next;
-            skip_node *
-            new_skip_node                   = alloc_skip_node();
-            new_skip_node->next             = nex_skip_node;
-            new_skip_node->state            = is_normal_space;
-            new_skip_node->state            = is_normal_space;
-            new_skip_node->is_item          = cur_skip_node->is_item;
-            new_skip_node->bottom           = cur_skip_node->bottom->next->next;
-            cur_skip_node->next             = new_skip_node;
-            return new_skip_node;
         }
 
         skip_node * alloc_skip_node(){
