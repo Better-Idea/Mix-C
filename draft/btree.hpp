@@ -136,10 +136,10 @@ namespace mixc::draft_btree::origin{
                 if (h -= 1; h != 0){
                     auto pi                 = _mm256_set1_epi32(i);
                     auto pcum               = _mm256_load_si256((__m256i *)cur->offset);
-                    auto pcmplt             = _mm256_cmpgt_epi32(pcum, pi);
+                    auto pcmpgt             = _mm256_cmpgt_epi32(pcum, pi);
                     auto pcmpeq             = _mm256_cmpeq_epi32(pcum, pi);
-                    auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmplt));
-                    auto padd               = _mm256_sub_epi32(pcum, pcmplt); // 减去 -1 -> +1
+                    auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpgt));
+                    auto padd               = _mm256_sub_epi32(pcum, pcmpgt); // 减去 -1 -> +1
 
                     if (pmsk){
                         iofs                = inc::index_of_first_set(pmsk);
@@ -266,8 +266,8 @@ namespace mixc::draft_btree::origin{
                 if (h -= 1; h != 0){
                     auto pi                 = _mm256_set1_epi32(i);
                     auto pcum               = _mm256_load_si256((__m256i *)cur->offset);
-                    auto pcmplt             = _mm256_cmpgt_epi32(pcum, pi);
-                    auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmplt));
+                    auto pcmpgt             = _mm256_cmpgt_epi32(pcum, pi);
+                    auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpgt));
                     auto iofs               = inc::index_of_first_set(pmsk);
 
                     if (iofs > 0){
