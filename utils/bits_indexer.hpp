@@ -43,8 +43,8 @@ namespace mixc::utils_bits_indexer::origin{
 
         void set(uxx index, uxx value){
             index  *=  (bits_per_item);
-            bits   &= ~(0xf << index);
-            bits   |=  (value << index);
+            bits   &= ~(u64(0xf) << index);
+            bits   |=  (u64(value) << index);
         }
 
         void clear(){
