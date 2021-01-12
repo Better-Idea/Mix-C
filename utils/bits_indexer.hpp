@@ -13,7 +13,7 @@ namespace mixc::utils_bits_indexer::origin{
         xtmpl(bits_indexer, bits_per_item),
         xprif(bits, u64)
     )
-        bits_indexer(u64 value = 0):
+        bits_indexer(u64 value = 0x0123456789abcdefULL):
             bits(value){
         }
 
