@@ -14,16 +14,19 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::draft_btree::origin{
-    using item_t = uxx;
+    using item_t            = uxx;
 
-    constexpr bool is_full   = true;
+    constexpr bool is_full  = true;
+    constexpr bool is_empty = true;
 
     template<class item_t>
     struct item_group{
         enum{ 
-            length = 16, 
-            group_max = 4
+            length          = 16, 
+            group_max       = 4
         };
+
+        using m_t           = inc::mirror<item_t>;
 
         struct xalign(16) item_node{
             inc::bits_indexer<4>        cum_offset;
@@ -34,8 +37,6 @@ namespace mixc::draft_btree::origin{
         uxx         count                   = 0;
 
         bool insert(uxx i, item_t const & value){
-            using m_t = inc::mirror<item_t>;
-
             // 带构造的初始化一次，但 m 析构时不析构 item_t
             m_t         m                   = { value, inc::construction_t::execute };
             uxx         i_group             = i >> 4;
@@ -43,7 +44,6 @@ namespace mixc::draft_btree::origin{
             uxx         i_offset            = i & 0xf;
             uxx         i_free;
             item_node * group;
-
 
             for(uxx i = i_group; i <= i_group_max; i++){
                 if (groups[i] == nullptr){
@@ -66,6 +66,39 @@ namespace mixc::draft_btree::origin{
             // full
             count                          += 1;
             return count == group_max * length;
+        }
+
+        bool talk_out(uxx i, item_t * value){
+            // 先减计数
+            count                          -= 1;
+
+            bool        free_last           = (count & 0xf) == 0;
+            m_t         m;
+            uxx         i_group             = i >> 4;
+            uxx         i_group_max         = count >> 4;
+            uxx         i_offset            = i & 0xf;
+            uxx         i_move;
+            uxx         i_free;
+            item_node * group;
+
+            for(uxx i = i_group_max; ixx(i) >= ixx(i_group); i--){
+                i_move                      = i != i_group ? 0 : i_offset;
+                group                       = groups[i];
+                i_free                      = group->cum_offset.get(i_move);
+                group->cum_offset.remove(i_move);
+                group->cum_offset.set(15, i_free);
+                inc::swap(xref m, (m_t *)(xref group->item[i_free]));
+            }
+
+            if (free_last){
+                inc::free(groups[i_group_max], inc::memory_size{
+                    sizeof(item_node)
+                });
+                groups[i_group_max]         = nullptr;
+            }
+
+            value[0]                        = m;
+            return count == 0;
         }
 
         item_group * split(){
@@ -120,17 +153,17 @@ namespace mixc::draft_btree::origin{
 
             path_node * path[32];
             uxx  iofsg[32];
-            auto path_ptr                   = path;
-            auto iofsg_ptr                  = iofsg;
-            auto h                          = height;
+            auto path_ptr                   = (path);
+            auto iofsg_ptr                  = (iofsg);
+            auto h                          = (height);
             auto i                          = (i32)index;
-            auto cur                        = root;
-            auto iofs                       = uxx(0);
+            auto cur                        = (root);
+            auto iofs                       = (uxx)0;
             auto new_node                   = (path_node *)nullptr;
             auto new_item                   = (item_node *)nullptr;
             auto parent                     = (path_node *)nullptr;
-            auto offset                     = 0;
-            count                          += 1;
+            auto offset                     = (0);
+            count                          += (1);
 
             while(true){
                 if (h -= 1; h != 0){
@@ -257,15 +290,89 @@ namespace mixc::draft_btree::origin{
             root                            = new_root;
         }
 
+        void talk_out(uxx index, item_t * value){
+            path_node * path[32];
+            uxx  iofsg[32];
+            auto path_ptr                   = (path);
+            auto iofsg_ptr                  = (iofsg);
+            auto h                          = (height);
+            auto cur                        = (root);
+            auto parent                     = (root);
+            auto i                          = (i32)index;
+            auto iofs                       = (0);
+            count                          -= (1);
+
+            while(true){
+                if (h -= 1; h != 0){
+                    auto pi                 = _mm256_set1_epi32(i);
+                    auto pcum               = _mm256_loadu_si256((__m256i_u *)cur->offset);
+                    auto pcmpgt             = _mm256_cmpgt_epi32(pcum, pi);
+                    auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpgt));
+                    auto psub               = _mm256_add_epi32(pcum, pcmpgt); // + -1 -> -1
+                    iofs                    = inc::index_of_first_set(pmsk);
+
+                    if (iofs > 0){
+                        i                  -= cur->offset[iofs - 1];
+                    }
+
+                    _mm256_storeu_si256((__m256i_u *)cur->offset, psub);
+                    iofsg_ptr[0]            = iofs;
+                    path_ptr[0]             = cur;
+                    parent                  = cur;
+                    iofsg_ptr              += 1;
+                    path_ptr               += 1;
+                    cur                     = cur->bottom[iofs];
+                }
+                else {
+                    break;
+                }
+            }
+
+            if (auto vals = (item_node *)cur; vals->talk_out(i, value) != is_empty){
+                return;
+            }
+
+            for(bool once = true; path_ptr != xref path[0]; ){
+                iofsg_ptr                  -= 1;
+                path_ptr                   -= 1;
+                iofs                        = iofsg_ptr[0];
+                parent                      = path_ptr[0];
+
+                if (once){
+                    once                    = false;
+                    free(parent->items[iofs]);
+                }
+                else{
+                    free(parent->bottom[iofs]);
+                }
+                parent->bottom[iofs]        = nullptr;
+
+                while(iofs < 7 and parent->bottom[iofs + 1] != nullptr){
+                    inc::swap(xref parent->offset[iofs], xref parent->offset[iofs + 1]); 
+                    inc::swap(xref parent->bottom[iofs], xref parent->bottom[iofs + 1]);
+                    iofs                   += 1;
+                }
+
+                if (parent->bottom[0] != nullptr){
+                    return;
+                }
+            }
+
+            if (count == 0){
+                free(root);
+                root                        = nullptr;
+            }
+        }
+
         item_t & operator[](uxx index){
-            auto h                          = height;
-            auto cur                        = root;
+            auto h                          = (height);
+            auto cur                        = (root);
             auto i                          = (i32)index;
 
             while(true){
                 if (h -= 1; h != 0){
                     auto pi                 = _mm256_set1_epi32(i);
-                    auto pcum               = _mm256_loadu_si256((__m256i *)cur->offset);
+                    auto pcum               = _mm256_loadu_si256((__m256i_u *)cur->offset);
                     auto pcmpgt             = _mm256_cmpgt_epi32(pcum, pi);
                     auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpgt));
                     auto iofs               = inc::index_of_first_set(pmsk);
@@ -298,6 +405,11 @@ namespace mixc::draft_btree::origin{
                 inc::memory_size{sizeof(path_node)}
             );
             // return new path_node;
+        }
+
+        template<class node_t>
+        void free(node_t * ptr){
+            inc::free(ptr, inc::memory_size{sizeof(node_t)});
         }
     };
 }
