@@ -135,7 +135,7 @@ namespace mixc::draft_btree::origin{
             while(true){
                 if (h -= 1; h != 0){
                     auto pi                 = _mm256_set1_epi32(i);
-                    auto pcum               = _mm256_load_si256((__m256i *)cur->offset);
+                    auto pcum               = _mm256_loadu_si256((__m256i_u *)cur->offset);
                     auto pcmpgt             = _mm256_cmpgt_epi32(pcum, pi);
                     auto pcmpeq             = _mm256_cmpeq_epi32(pcum, pi);
                     auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpgt));
@@ -155,7 +155,7 @@ namespace mixc::draft_btree::origin{
                         i                  -= cur->offset[iofs - 1];
                     }
 
-                    _mm256_store_si256((__m256i *)cur->offset, padd);
+                    _mm256_storeu_si256((__m256i_u *)cur->offset, padd);
                     iofsg_ptr[0]            = iofs;
                     path_ptr[0]             = cur;
                     parent                  = cur;
@@ -265,7 +265,7 @@ namespace mixc::draft_btree::origin{
             while(true){
                 if (h -= 1; h != 0){
                     auto pi                 = _mm256_set1_epi32(i);
-                    auto pcum               = _mm256_load_si256((__m256i *)cur->offset);
+                    auto pcum               = _mm256_loadu_si256((__m256i *)cur->offset);
                     auto pcmpgt             = _mm256_cmpgt_epi32(pcum, pi);
                     auto pmsk               = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpgt));
                     auto iofs               = inc::index_of_first_set(pmsk);
@@ -283,7 +283,6 @@ namespace mixc::draft_btree::origin{
         }
 
         item_node * alloc_item_node(){
-
             // TODO: inc::alloc_with_initial暂时还不支持超过 16 字节的对齐内存分配
             // 目前该接口使用 AVX 在 5M 数据随机插入性能 大约有 7% 的性能差距
             // 测试       ：5M 数据随机插入 | 读取
