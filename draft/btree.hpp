@@ -4,6 +4,7 @@
 #undef  xuser
 #define xuser mixc::draft_btree::inc
 #include"dumb/mirror.hpp"
+#include"dumb/move.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"macro/xalign.hpp"
 #include"macro/xexport.hpp"
@@ -14,8 +15,6 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::draft_btree::origin{
-    using item_t            = uxx;
-
     constexpr bool is_full  = true;
     constexpr bool is_empty = true;
 
@@ -29,7 +28,14 @@ namespace mixc::draft_btree::origin{
         using m_t           = inc::mirror<item_t>;
 
         struct xalign(16) item_node{
-            inc::bits_indexer<4>        cum_offset;
+            // 逻辑地址，由于该字段为 64bit，可以构成 16 个 4bit 的位组
+            // 我们可以用这些位组来存下标编号，在不使用该字段前
+            // 我们要插入一个元素需要将该插入点后边的所有元素都往后挪
+            // 现在我们只要挪 indexer 中表示索引的位组就好了
+            // 假设 indexer 初始值 为 0x0123456789abcdef
+            // 那么往下标 1 插入到元素时，我们把最后一个元素占用的空间挪出去
+            // 用于存放插入元素，那么此时 index 为 0x123456789abcde0f
+            inc::bits_indexer<4>        indexer;
             item_t                      item[length];
         };
 
@@ -39,10 +45,11 @@ namespace mixc::draft_btree::origin{
         bool insert(uxx i, item_t const & value){
             // 带构造的初始化一次，但 m 析构时不析构 item_t
             m_t         m                   = { value, inc::construction_t::execute };
-            uxx         i_group             = i >> 4;
-            uxx         i_group_max         = count >> 4;
-            uxx         i_offset            = i & 0xf;
-            uxx         i_free;
+            uxx         i_group             = i >> 4;       // 插入的索引 i 在 groups 的第几组
+            uxx         i_offset            = i & 0xf;      // 插入的索引 i 在对应组中的偏移
+            uxx         i_group_max         = count >> 4;   // 当前元素个数最大组号
+            uxx         i_free;                             // 插入一个元素到一个组时，如果改组存满（已经存了 16 个元素）
+                                                            // 那么需要该组最后一个元素挪到下一组第一个元素
             item_node * group;
 
             for(uxx i = i_group; i <= i_group_max; i++){
@@ -51,19 +58,22 @@ namespace mixc::draft_btree::origin{
                         inc::memory_size{sizeof(item_node)}
                     );
                     group                   = groups[i];
-                    i                       = group_max;
+                    i                       = group_max;    // 当前组为空时，那么就无需再往后挪元素了
                 }
                 else{
                     group                   = groups[i];
                 }
 
-                i_free                      = group->cum_offset.get(15/*最后一个*/);
+                // 该组最后一个元素挪出去后，就空出一个空间，该空间可以用来存插入的元素
+                i_free                      = group->indexer.get(15/*最后一个*/);
                 inc::swap(xref m, (m_t *)(xref group->item[i_free]));
-                group->cum_offset.insert(i_offset, i_free);
+                group->indexer.insert(i_offset, i_free);
+
+                // 之后每次都是把上次挪出去的最后一个元素插入到下一组的第一个位置
                 i_offset                    = 0;
             }
 
-            // full
+            // 存满返回 true
             count                          += 1;
             return count == group_max * length;
         }
@@ -72,6 +82,8 @@ namespace mixc::draft_btree::origin{
             // 先减计数
             count                          -= 1;
 
+            // 当 count 值为 16, 32, 48 时需要释放最后一个组，因为通过该函数带出一个元素后
+            // 最后一个组已经空了
             bool        free_last           = (count & 0xf) == 0;
             m_t         m;
             uxx         i_group             = i >> 4;
@@ -81,12 +93,15 @@ namespace mixc::draft_btree::origin{
             uxx         i_free;
             item_node * group;
 
+            // 从后往前挪动
             for(uxx i = i_group_max; ixx(i) >= ixx(i_group); i--){
+                // 当 i 到达取出元素对应的组时，i_move 变成取出点对应的索引
+                // 否则每次取出当前组第一个元素放到前一组的最后一个位置
                 i_move                      = i != i_group ? 0 : i_offset;
                 group                       = groups[i];
-                i_free                      = group->cum_offset.get(i_move);
-                group->cum_offset.remove(i_move);
-                group->cum_offset.set(15, i_free);
+                i_free                      = group->indexer.get(i_move);
+                group->indexer.remove(i_move);
+                group->indexer.set(15, i_free);
                 inc::swap(xref m, (m_t *)(xref group->item[i_free]));
             }
 
@@ -97,15 +112,22 @@ namespace mixc::draft_btree::origin{
                 groups[i_group_max]         = nullptr;
             }
 
-            value[0]                        = m;
+            // 移动语义
+            value[0]                        =  inc::move((item_t &)m);
+
+            // 析构
+            m->~item_t();
             return count == 0;
         }
 
         item_group * split(){
+            // brother 节点用于插入到当前节点的前面
             item_group<item_t> * brother    = inc::alloc_with_initial<item_group>(
                 inc::memory_size{sizeof(item_group<item_t>)}
             );
 
+            // group_max * length 为存满时的元素个数
+            // 执行 split 操作时进行分半
             brother->count                  = group_max * length / 2;
             brother->groups[0]              = this->groups[0];
             brother->groups[1]              = this->groups[1];
@@ -121,11 +143,12 @@ namespace mixc::draft_btree::origin{
             uxx         i_group             = i >> 4;
             uxx         i_offset            = i & 0xf;
             item_node * group               = groups[i_group];
-            uxx         i_real_offset       = group->cum_offset.get(i_offset);
+            uxx         i_real_offset       = group->indexer.get(i_offset);
             return group->item[i_real_offset];
         }
     };
 
+    template<class item_t>
     struct btree{
     private:
         using item_node         = item_group<item_t>;
@@ -139,7 +162,6 @@ namespace mixc::draft_btree::origin{
         };
 
     public:
-        uxx             count               = 0;
         uxx             height              = 0;
         path_node   *   root                = nullptr;
 
@@ -151,8 +173,9 @@ namespace mixc::draft_btree::origin{
                 height                      = 2;
             }
 
+            // index of first set group
+            uxx         iofsg[32];
             path_node * path[32];
-            uxx  iofsg[32];
             auto path_ptr                   = (path);
             auto iofsg_ptr                  = (iofsg);
             auto h                          = (height);
@@ -163,7 +186,6 @@ namespace mixc::draft_btree::origin{
             auto new_item                   = (item_node *)nullptr;
             auto parent                     = (path_node *)nullptr;
             auto offset                     = (0);
-            count                          += (1);
 
             while(true){
                 if (h -= 1; h != 0){
@@ -178,8 +200,6 @@ namespace mixc::draft_btree::origin{
                         iofs                = inc::index_of_first_set(pmsk);
                     }
                     else{
-                        // 找到 对应的子节点
-                        // count:12 index:12
                         iofs                = _mm256_movemask_ps(_mm256_castsi256_ps(pcmpeq));
                         iofs                = inc::index_of_first_set(iofs);
                         padd                = _mm256_sub_epi32(pcum, pcmpeq);
@@ -300,7 +320,6 @@ namespace mixc::draft_btree::origin{
             auto parent                     = (root);
             auto i                          = (i32)index;
             auto iofs                       = (0);
-            count                          -= (1);
 
             while(true){
                 if (h -= 1; h != 0){
@@ -358,10 +377,14 @@ namespace mixc::draft_btree::origin{
                 }
             }
 
-            if (count == 0){
+            if (length() == 0){
                 free(root);
                 root                        = nullptr;
             }
+        }
+
+        uxx length() const {
+            return root->offset[7];
         }
 
         item_t & operator[](uxx index){
@@ -390,7 +413,7 @@ namespace mixc::draft_btree::origin{
         }
 
         item_node * alloc_item_node(){
-            // TODO: inc::alloc_with_initial暂时还不支持超过 16 字节的对齐内存分配
+            // TODO: inc::alloc_with_initial 暂时还不支持超过 16 字节的对齐内存分配
             // 目前该接口使用 AVX 在 5M 数据随机插入性能 大约有 7% 的性能差距
             // 测试       ：5M 数据随机插入 | 读取
             // 32Byte 对齐：提升约 7%       | 提升约 7%
