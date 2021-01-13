@@ -148,6 +148,8 @@ namespace mixc::draft_btree::origin{
         }
     };
 
+    static inline const i32 null_node = 0;
+
     template<class item_t>
     struct btree{
     private:
@@ -161,12 +163,18 @@ namespace mixc::draft_btree::origin{
             i32                         offset[8]   = {};
         };
 
+        static path_node * null(){
+            // 用 null() 代替 nullptr，让 btree::length() 可以在只有 0 个元素的时候可访问
+            uxx     offset                  = uxx(& ((path_node *)nullptr)->offset[7]);
+            u08p    ptr                     = u08p(& null_node) - offset;
+            return (path_node *)ptr;
+        }
     public:
         uxx             height              = 0;
-        path_node   *   root                = nullptr;
+        path_node   *   root                = null();
 
         void insert(uxx index, item_t const & value){
-            if (item_node * item_ptr; root == nullptr){
+            if (item_node * item_ptr; root == null()){
                 root                        = alloc_path_node();
                 item_ptr                    = alloc_item_node();
                 root->items[0]              = item_ptr;
@@ -379,7 +387,7 @@ namespace mixc::draft_btree::origin{
 
             if (length() == 0){
                 free(root);
-                root                        = nullptr;
+                root                        = null();
             }
         }
 
