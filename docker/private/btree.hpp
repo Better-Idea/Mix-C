@@ -113,8 +113,9 @@ namespace mixc::docker_btree{
                 groups[i_group_max]         = nullptr;
             }
 
-            // 移动语义
-            value[0]                        =  inc::move((item_t &)m);
+            if (value != nullptr){
+                value[0]                    = inc::move((item_t &)m); // 移动语义
+            }
 
             // 析构
             m->~item_t();
@@ -239,7 +240,6 @@ namespace mixc::docker_btree{
         ~btree(){
             clear();
         }
-
     public:
         void clear(){
             auto cur                        = null();
@@ -287,6 +287,10 @@ namespace mixc::docker_btree{
                     free(vals);
                 }
             }
+        }
+
+        void remove(uxx index){
+            talk_out(index, nullptr);
         }
 
         void insert(uxx index, item_t const & value){
