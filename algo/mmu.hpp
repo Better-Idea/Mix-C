@@ -75,6 +75,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::algo_mmu::inc
+#include"dumb/move.hpp"
 #include"instruction/bit_test_and_reset.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_alloc.hpp"
@@ -139,6 +140,7 @@ namespace mixc::algo_mmu::origin {
      * 注意：
      * - 创建数组的在未添加元素时是没有分配内存的，只有在添加元素后才会分配内存
      * - 使用 with_fixed_page_table 选项后，将不再单独为 page_table_ptr 分配和释放内存，内部假定页表是已分配好的
+     * - 并且要求传入的 page_table_ptr 指向的是一个空指针数组（一个数组，里面的值都是 nullptr）
      */
     template<uxx initial_alloc_length = 1, bool with_fixed_page_table = not origin::with_fixed_page_table>
     requires(
@@ -152,6 +154,8 @@ namespace mixc::algo_mmu::origin {
          * - value 为要压栈的元素
          * - alloc 为分配回调
          * - free 为回收回调
+         * 注意：
+         * 要求传入的 page_table_ptr 指向的是一个空指针数组（一个数组，里面的值都是 nullptr）
          */
         template<class item_t>
         inline static void push(
@@ -244,7 +248,7 @@ namespace mixc::algo_mmu::origin {
             i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
             mask                       |= (uxx(1) << i) - 1;
-            val                         = (tab[i_page][len & mask]);
+            val                         = inc::move(tab[i_page][len & mask]); // 移动语义
             tab[i_page][len & mask].~item_t();
 
             if (not need_free_page) {
