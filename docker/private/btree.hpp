@@ -1,13 +1,12 @@
-#ifndef xpack_draft_btree
-#define xpack_draft_btree
+#ifndef xpack_docker_btree
+#define xpack_docker_btree
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::draft_btree::inc
+#define xuser mixc::docker_btree::inc
+#include"dumb/disable_copy.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/move.hpp"
-#include"dumb/disable_copy.hpp"
 #include"instruction/index_of_first_set.hpp"
-#include"macro/xalign.hpp"
 #include"memop/swap.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
@@ -15,7 +14,7 @@
 #include<intrin.h>
 #pragma pop_macro("xuser")
 
-namespace mixc::draft_btree::origin{
+namespace mixc::docker_btree{
     constexpr bool is_full  = true;
     constexpr bool is_empty = true;
 
@@ -28,7 +27,7 @@ namespace mixc::draft_btree::origin{
 
         using m_t           = inc::mirror<item_t>;
 
-        struct xalign(16) item_node{
+        struct item_node{
             // 逻辑地址，由于该字段为 64bit，可以构成 16 个 4bit 的位组
             // 我们可以用这些位组来存下标编号，在不使用该字段前
             // 我们要插入一个元素需要将该插入点后边的所有元素都往后挪
@@ -150,7 +149,7 @@ namespace mixc::draft_btree::origin{
     };
 
     template<class item_t>
-    struct xalign(32) path_group{
+    struct path_group{
         using item_node                         = item_group<item_t>;
         union{
             item_node             * items [8]   = {}; 
@@ -161,9 +160,9 @@ namespace mixc::draft_btree::origin{
 
     static inline const i32 null_node = 0;
 
-    template<class item_t>
+    template<class final, class item_t>
     xstruct(
-        xtmpl(btree, item_t),
+        xtmpl(btree, final, item_t),
         xpubb(inc::disable_copy),
         xasso(item_t)
     )
@@ -180,19 +179,43 @@ namespace mixc::draft_btree::origin{
             return (path_node *)ptr;
         }
 
-        item_node * mark_is_item_level(voidp origin){
+        static item_node * mark_is_item_level(voidp origin){
             uxx marked                      = uxx(origin) | 1;
             return (item_node *)marked;
         }
 
-        item_node * unmark(voidp marked){
+        static item_node * unmark(voidp marked){
             uxx origin                      = uxx(marked) & uxx(-2);
             return (item_node *)origin;
         }
 
-        bool is_item_level(voidp may_marked){
+        static bool is_item_level(voidp may_marked){
             return (uxx(may_marked) & 1) != 0;
         }
+
+        static item_node * alloc_item_node(){
+            // TODO: inc::alloc_with_initial 暂时还不支持超过 16 字节的对齐内存分配
+            // 目前该接口使用 AVX 在 5M 数据随机插入性能 大约有 7% 的性能差距
+            // 测试       ：5M 数据随机插入 | 读取
+            // 32Byte 对齐：提升约 7%       | 提升约 7%
+            return inc::alloc_with_initial<item_node>(
+                inc::memory_size{sizeof(item_node)}
+            );
+            // return new item_node;
+        }
+
+        static path_node * alloc_path_node(){
+            return inc::alloc_with_initial<path_node>(
+                inc::memory_size{sizeof(path_node)}
+            );
+            // return new path_node;
+        }
+
+        template<class node_t>
+        static void free(node_t * ptr){
+            inc::free(ptr, inc::memory_size{sizeof(node_t)});
+        }
+
     public:
         void insert(uxx index, item_t const & value){
             if (item_node * item_ptr; root == null()){
@@ -386,11 +409,12 @@ namespace mixc::draft_btree::origin{
                     once                    = false;
                     vals                    = unmark(parent->items[iofs]);
                     free(vals);
+                    parent->items[iofs]     = nullptr;
                 }
                 else{
                     free(parent->bottom[iofs]);
+                    parent->bottom[iofs]    = nullptr;
                 }
-                parent->bottom[iofs]        = nullptr;
 
                 while(iofs < 7 and parent->bottom[iofs + 1] != nullptr){
                     inc::swap(xref parent->offset[iofs], xref parent->offset[iofs + 1]); 
@@ -407,10 +431,6 @@ namespace mixc::draft_btree::origin{
                 free(root);
                 root                        = null();
             }
-        }
-
-        uxx length() const {
-            return root->offset[7];
         }
 
         item_t & operator[](uxx index){
@@ -437,31 +457,12 @@ namespace mixc::draft_btree::origin{
             }
         }
 
-        item_node * alloc_item_node(){
-            // TODO: inc::alloc_with_initial 暂时还不支持超过 16 字节的对齐内存分配
-            // 目前该接口使用 AVX 在 5M 数据随机插入性能 大约有 7% 的性能差距
-            // 测试       ：5M 数据随机插入 | 读取
-            // 32Byte 对齐：提升约 7%       | 提升约 7%
-            return inc::alloc_with_initial<item_node>(
-                inc::memory_size{sizeof(item_node)}
-            );
-            // return new item_node;
-        }
-
-        path_node * alloc_path_node(){
-            return inc::alloc_with_initial<path_node>(
-                inc::memory_size{sizeof(path_node)}
-            );
-            // return new path_node;
-        }
-
-        template<class node_t>
-        void free(node_t * ptr){
-            inc::free(ptr, inc::memory_size{sizeof(node_t)});
+        xpubgetx(length, uxx) {
+            return root->offset[7];
         }
     $
 }
 
 #endif
 
-xexport_space(mixc::draft_btree::origin)
+#define xusing_docker_btree     ::mixc::docker_btree
