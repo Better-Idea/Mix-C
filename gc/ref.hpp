@@ -345,7 +345,16 @@ namespace mixc::gc_ref{
 
         static uxx real(uxx length) {
             if constexpr (is_binary_aligned_alloc){
-                length = uxx(1) << (index_of_last_set(length - 1) + 1);
+                // length       capacity
+                // 0        ->  1 
+                // 1        ->  2
+                // 2        ->  4
+                // 3        ->  4
+                // 4        ->  8
+                // 5        ->  8
+                // 6        ->  8
+                // ...
+                length    = uxx(1) << (index_of_last_set(length) + 1);
             }
             return length;
         }
