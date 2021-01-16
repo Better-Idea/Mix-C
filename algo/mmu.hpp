@@ -328,6 +328,7 @@ namespace mixc::algo_mmu::origin {
                 }
 
                 free(tab[i], sizeof(item_t) * current_length);
+                tab[i]                  = nullptr;
                 current_length          = initial_alloc_length * multi;
                 multi                  *= 2;
             }
@@ -337,16 +338,19 @@ namespace mixc::algo_mmu::origin {
             }
 
             free(tab[i_page], sizeof(item_t) * current_length);
+            tab[i_page]                 = nullptr;
 
             if (i_page % 2 == 0 and tab[i_page += 1] != nullptr){
                 if (i_page > 1){
                     current_length     *= 2;
                 }
                 free(tab[i_page], sizeof(item_t) * current_length);
+                tab[i_page]             = nullptr;
             }
 
             if constexpr (not with_fixed_page_table){
                 free(tab, sizeof(voidp) * (i_page + 1));
+                tab                     = nullptr;
             }
         }
     };
