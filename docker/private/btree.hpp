@@ -7,6 +7,7 @@
 #include"dumb/mirror.hpp"
 #include"dumb/move.hpp"
 #include"instruction/index_of_first_set.hpp"
+#include"lock/atom_swap.hpp"
 #include"memop/swap.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
@@ -146,11 +147,29 @@ namespace mixc::docker_btree{
             uxx         i_real_offset       = group->indexer.get(i_offset);
             return group->item[i_real_offset];
         }
+
+        void clear(){
+            auto page = count / 16 + (count % 16 != 0);
+
+            for(uxx i = 0; i < count; i++){
+                get(i).~item_t();
+            }
+
+            for(uxx i = 0; i < page; i++){
+                inc::free(groups[i], inc::memory_size{
+                    sizeof(item_node)
+                });
+                groups[i]                   = nullptr;
+            }
+            count                           = 0;
+        }
     };
 
     template<class item_t>
     struct path_group{
         using item_node                         = item_group<item_t>;
+
+        // 注意：btree::clear 中要求该字段排在首位以便和 path_group<T> 可以进行强制转换
         union{
             item_node             * items [8]   = {}; 
             path_group<item_t>    * bottom[8];
@@ -216,7 +235,60 @@ namespace mixc::docker_btree{
             inc::free(ptr, inc::memory_size{sizeof(node_t)});
         }
 
+    protected:
+        ~btree(){
+            clear();
+        }
+
     public:
+        void clear(){
+            auto cur                        = null();
+
+            if (cur = inc::atom_swap(xref root, cur); cur == null()){
+                return;
+            }
+
+            path_node **   path[32];
+            uxx            i_path[32];
+            path_node ***  path_ptr         = path;
+            uxx       *    i_path_ptr       = i_path;
+            i_path_ptr[0]                   = 0;
+            path_ptr[0]                     = cur->bottom;
+
+            while(path_ptr >= xref path[0]){
+                auto i                      = (i_path_ptr[0]);
+                auto arrive_end             = (i == 8);
+                auto arrive_item_level      = (false);
+
+                if (not arrive_end){
+                    cur                     = (path_ptr[0][i]);
+                    arrive_item_level       = (is_item_level(cur));
+                    arrive_end              = (cur == nullptr);
+                }
+                if (arrive_end){
+                    free((path_node *)path_ptr[0]);
+                    i_path_ptr             -= 1;
+                    path_ptr               -= 1;
+                    continue;
+                }
+                else{
+                    i_path_ptr[0]          += 1;
+                }
+
+                if (not arrive_item_level){
+                    i_path_ptr             += 1;
+                    i_path_ptr[0]           = 0;
+                    path_ptr               += 1;
+                    path_ptr[0]             = cur->bottom;
+                }
+                else{
+                    auto vals               = unmark(cur);
+                    vals->clear();
+                    free(vals);
+                }
+            }
+        }
+
         void insert(uxx index, item_t const & value){
             if (item_node * item_ptr; root == null()){
                 root                        = alloc_path_node();
