@@ -15,9 +15,13 @@
 #include"memop/addressof.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
-#pragma pop_macro("xusing_docker_shared_array")
 #include"mixc.hpp"
+#pragma pop_macro("xusing_docker_shared_array")
 #pragma pop_macro("xuser")
+
+namespace mixc::docker_shared_array_stacklize::origin {
+    using namespace xusing_docker_shared_array::origin;
+}
 
 namespace mixc::docker_shared_array_stacklize {
     template<class final, class type, uxx rank, class attribute>
@@ -46,19 +50,29 @@ namespace mixc::docker_shared_array_stacklize {
         void push(item_t const & value) {
             uxx len = the.length();
 
-            if (len == capacity()) {
+            if (len == 0 or (len & (len + 1))) {
+                the.length(len + 1);
+            }
+            // 到达容量边界
+            // length       capacity
+            // 0        ->  1 
+            // 1        ->  2
+            // 2        ->  4
+            // 3        ->  4
+            // 4        ->  8
+            // 5        ->  8
+            // 6        ->  8
+            // ...
+            else{
                 u08 mirror[sizeof(the_t)];
 
-                auto & new_array = xnew(mirror) the_t(
-                    ::length(len + 1) // 由于设置了 is_binary_aligned_alloc=true， 所以内部默认为分配容量为 capacity() * 2 的内存
+                the_t & new_array = * xnew(mirror) the_t(
+                    ::length{len + 1} // 由于设置了 is_binary_aligned_alloc=true， 所以内部默认为分配容量为 capacity() * 2 的内存
                 );
 
                 inc::copy(new_array, the, len);
                 the.swap(xref new_array);
                 inc::cast<mirror_without_destroy>(new_array).~mirror_without_destroy();
-            }
-            else{
-                the.length(len + 1);
             }
 
             item_t * cur = xref the[len];
