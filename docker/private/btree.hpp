@@ -1,8 +1,11 @@
+// TODO：使用更宽的树 + 分级 path_node
+// TODO: 特化 foreach
 #ifndef xpack_docker_btree
 #define xpack_docker_btree
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_btree::inc
+#include"docker/private/adapter.array_access.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/move.hpp"
@@ -180,12 +183,14 @@ namespace mixc::docker_btree{
 
     static inline const i32 null_node = 0;
 
-    template<class final, class item_t>
+    template<class final, class item_type>
     xstruct(
-        xtmpl(btree, final, item_t),
+        xtmpl(btree, final, item_type),
         xpubb(inc::disable_copy),
-        xasso(item_t)
+        xasso(item_type)
     )
+    public:
+        using item_t                        = item_type;
     private:
         using path_node                     = path_group<item_t>;
         using item_node                     = typename path_node::item_node;
@@ -231,11 +236,7 @@ namespace mixc::docker_btree{
             // return new path_node;
         }
 
-        template<class node_t>
-        static void free(node_t * ptr){
-            inc::free(ptr, inc::memory_size{sizeof(node_t)});
-        }
-
+        
     protected:
         ~btree(){
             clear();
@@ -266,7 +267,7 @@ namespace mixc::docker_btree{
                     arrive_end              = (cur == nullptr);
                 }
                 if (arrive_end){
-                    free((path_node *)path_ptr[0]);
+                    inc::free((path_node *)path_ptr[0]); // 要释放的大小为 sizeof(path_node)
                     i_path_ptr             -= 1;
                     path_ptr               -= 1;
                     continue;
@@ -284,7 +285,7 @@ namespace mixc::docker_btree{
                 else{
                     auto vals               = unmark(cur);
                     vals->clear();
-                    free(vals);
+                    inc::free(vals);
                 }
             }
         }
@@ -484,11 +485,11 @@ namespace mixc::docker_btree{
                 if (once){
                     once                    = false;
                     vals                    = unmark(parent->items[iofs]);
-                    free(vals);
+                    inc::free(vals);
                     parent->items[iofs]     = nullptr;
                 }
                 else{
-                    free(parent->bottom[iofs]);
+                    inc::free(parent->bottom[iofs]);
                     parent->bottom[iofs]    = nullptr;
                 }
 
@@ -504,7 +505,7 @@ namespace mixc::docker_btree{
             }
 
             if (length() == 0){
-                free(root);
+                inc::free(root);
                 root                        = null();
             }
         }
@@ -536,9 +537,16 @@ namespace mixc::docker_btree{
         xpubgetx(length, uxx) {
             return root->offset[7];
         }
-    $
+    $    
+}
+
+namespace mixc::docker_btree::origin{
+    template<class final, class item_t>
+    using btree = inc::adapter_array_access<
+        mixc::docker_btree::btree<final, item_t>
+    >;
 }
 
 #endif
 
-#define xusing_docker_btree     ::mixc::docker_btree
+#define xusing_docker_btree     ::mixc::docker_btree::origin
