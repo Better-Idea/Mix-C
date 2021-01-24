@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "shell",
+            "type" : "shell",
             "label": "g++ build active file",
             "command": "g++",
             "args": [
@@ -11,9 +11,9 @@
                 "-fconcepts",
                 "-mavx",
                 "-mavx2",
-                // "-fopenmp",
                 "-Wno-empty-body",
-                "-g",
+                "-O2",
+                // "-g",
                 "${workspaceFolder}/extern.api_g++.o",
                 "${file}",
                 "-o",
@@ -36,7 +36,7 @@
                 "-mavx2",
                 "-g",
                 "${workspaceFolder}/extern.api_g++.cpp",
-                "-c",
+                "-c"
             ],
             "problemMatcher": [
                 "$gcc"
@@ -58,25 +58,6 @@
                 "${file}",
                 "-o",
                 "${workspaceFolder}/../main.exe"
-            ],
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build"
-        },
-        {
-            "type": "shell",
-            "label": "clang++ build extern.api.o",
-            "command": "clang++",
-            "args": [
-                "-I${workspaceFolder}",
-                "-std=c++2a",
-                "-mavx",
-                "-mavx2",
-                "-Wno-empty-body",
-                "-g",
-                "${workspaceFolder}/extern.api_clang++.cpp",
-                "-c"
             ],
             "problemMatcher": [
                 "$gcc"

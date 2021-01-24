@@ -1,4 +1,4 @@
-﻿#ifndef xpack_docker_queue
+#ifndef xpack_docker_queue
 #define xpack_docker_queue
 #pragma push_macro("xuser")
 #undef  xuser

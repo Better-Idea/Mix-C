@@ -1,4 +1,4 @@
-﻿#ifndef xusing_lang_cxx
+#ifndef xusing_lang_cxx
 #include"lang/private/cxx.hpp"
 #endif
 

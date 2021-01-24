@@ -4,18 +4,21 @@
 #undef  xuser
 #define xuser mixc::extern_rtos_task::inc
 #include"define/base_type.hpp"
-#include"docker/bit_indicator.hpp"
 #include"macro/xstruct.hpp"
+#include"utils/bit_indicator.hpp"
 #pragma pop_macro("xuser")
 
-#define xtask_max_priority      32
-#define xtask                   ::mixc::extern_rtos_task::origin::task_sugar{} * [](voidp arg_ptr)
+#define xtask_max_priority          32
+#define xtask_time_slice            10'000 /*us*/
+#define xtask_stack_guard_bytes     8
+#define xtask                       ::mixc::extern_rtos_task::origin::task_sugar{} * [](voidp arg_ptr)
 
 namespace mixc::extern_rtos_task::origin{
     struct task_context{
         task_context *  prev;
         task_context *  next;
-        uxx             sp;                 // 栈指针
+        uxx             sp_mem;             // 栈指针内存起始地址
+        uxx             sp_cur;             // 栈指针
         u16             stack_scale;        // 栈空间大小 32bytes pcs
         u08             priority;           // 优先级
         u08             priority_current;   // 当前优先级
@@ -23,7 +26,7 @@ namespace mixc::extern_rtos_task::origin{
 
     struct task_list{
         using idc_t = inc::bit_indicator<xtask_max_priority>;
-        using itm_t = task_context * [xtask_max_priority + 1];
+        using itm_t = task_context * [xtask_max_priority + 1/*one for defer*/];
 
         void push(task_context * task){
             uxx priority            = task->priority;
@@ -106,16 +109,18 @@ namespace mixc::extern_rtos_task::origin{
 
     xstruct(
         xname(task_config),
-        xprif(pstack_size,  uxx),
-        xprif(ppriority,    u08),
-        xprif(pinvoke,      invoke_t),
-        xprif(parg_ptr,     voidp)
+        xprif(pstack_size,          uxx),
+        xprif(ppriority,            u08),
+        xprif(puse_stack_guard,     u08),
+        xprif(pinvoke,              invoke_t),
+        xprif(parg_ptr,             voidp)
     )
         using final = task_config;
 
         task_config():
             pstack_size(4096),
-            ppriority(32),
+            ppriority(0),
+            puse_stack_guard(false),
             pinvoke(& do_nothing),
             parg_ptr(nullptr){
         }
@@ -124,23 +129,20 @@ namespace mixc::extern_rtos_task::origin{
         xpubget_pubset(priority)
         xpubget_pubset(invoke)
         xpubget_pubset(arg_ptr)
+        xpubget_pubset(use_stack_guard)
     private:
         static void do_nothing(voidp){
             ;
         }
     $
 
-    struct ax{
-        
-    };
+    using task_handler = uxx;
 
-    extern void task_create(task_config const & tc);
-    extern void task_run();
+    extern void task_create(task_handler * handler, task_config const & tc);
+    extern void task_run(task_handler handler);
     extern void task_exit(uxx exit_code = 0);
     extern void task_yield();
     extern void task_sleep(uxx ms);
-
-    extern void task_set_candidate();
 }
 
 #endif

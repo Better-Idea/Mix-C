@@ -1,4 +1,4 @@
-﻿#ifndef xpack_docker_hashmap
+#ifndef xpack_docker_hashmap
 #define xpack_docker_hashmap
 #pragma push_macro("xuser")
 #undef  xuser

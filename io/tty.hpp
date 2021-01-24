@@ -22,12 +22,6 @@ namespace mixc::io_tty{
     )
         using final = tty_t;
 
-        tty_t(){
-            // backcolor(inc::tty_color::black);
-            forecolor(inc::tty_color::light_gray);
-            cursor_visiable(true);
-        }
-
         xpubget_pubsetx(backcolor, inc::tty_color_t)
             xr { return inc::backcolor(); }
             xw { inc::backcolor(value); }
