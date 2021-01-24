@@ -1,4 +1,3 @@
-// TODO：使用更宽的树 + 分级 path_node
 // TODO: 特化 foreach
 #ifndef xpack_docker_btree
 #define xpack_docker_btree
@@ -15,7 +14,7 @@
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
 #include"utils/bits_indexer.hpp"
-#include<intrin.h>
+#include<x86intrin.h>
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_btree{
@@ -86,7 +85,7 @@ namespace mixc::docker_btree{
             // 先减计数
             count                          -= 1;
 
-            // 当 count 值为 16, 32, 48 时需要释放最后一个组，因为通过该函数带出一个元素后
+            // 当 count 值为 0, 16, 32, 48 时需要释放最后一个组，因为通过该函数带出一个元素后
             // 最后一个组已经空了
             bool        free_last           = (count & 0xf) == 0;
             m_t         m;
@@ -235,7 +234,6 @@ namespace mixc::docker_btree{
             );
             // return new path_node;
         }
-
         
     protected:
         ~btree(){
@@ -301,7 +299,6 @@ namespace mixc::docker_btree{
                 root->items[0]              = mark_is_item_level(item_ptr);
             }
 
-            // index of first set group
             uxx         iofsg[32];
             path_node * path[32];
             auto path_ptr                   = (path);
