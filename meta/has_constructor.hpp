@@ -10,19 +10,21 @@
 
 namespace mixc::meta_has_constructor{
     template<class object_t, class ... args>
-    concept meta = requires(object_t * ptr, args ... list){
-        xnew(ptr) object_t(list...);
+    concept check = requires(object_t, args ... list){
+        object_t{list...};
     };
 
-    template<class object_t, class ... args>
-    inline constexpr bool invoke(object_t * ptr, void(*)(args...)){
-        return meta<object_t, args...>;
-    }
+    template<class, class> struct meta;
+
+    template<class object, class ret, class ... args> 
+    struct meta<object, ret(args...)>{
+        enum{ result = check<object, args...> };
+    };
 }
 
 namespace mixc::meta_has_constructor::origin{
     template<class object_t, class constructor>
-    concept has_constructor = invoke((object_t *)nullptr, (constructor *)nullptr);
+    concept has_constructor = meta<object_t, constructor>::result != 0;
 }
 
 #endif
