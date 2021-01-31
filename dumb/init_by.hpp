@@ -3,20 +3,17 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::dumb_init_by::inc
-#include"define/base_type.hpp"
-#include"macro/xexport.hpp"
-#include"macro/xnew.hpp"
+#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_init_by{
     template<class object_t, class ... args>
-    concept can_new = requires(object_t * ptr, args const  & ... list){
-        xnew(ptr) object_t(list...);
+    concept can_new = requires(args const  & ... list){
+        object_t{list...};
     };
 }
 
 namespace mixc::dumb_init_by::origin{
-
     template<class a0 = void, class ... args> struct init_by;
 
     template<class a0, class ... args>
@@ -42,7 +39,7 @@ namespace mixc::dumb_init_by::origin{
         constexpr init_by(){}
 
         template<class object_t, class ... argsx>
-        void make(object_t *  this_ptr, argsx const & ... list) const {
+        void make(object_t * this_ptr, argsx const & ... list) const {
             xnew(this_ptr) object_t(list...);
         }
 
@@ -52,7 +49,7 @@ namespace mixc::dumb_init_by::origin{
         }
     };
 
-    constexpr init_by<> init_by_default{};
+    constexpr init_by<> default_init_by{};
 
     template<class object_t, class init_by_t>
     concept can_init = init_by_t::template test<object_t>();

@@ -62,15 +62,15 @@ namespace xuser{
         counter step = 0;
         {
             xhint(step, used_bytes());
-            shared<uxx> c { init_by_default };
+            shared<uxx> c { default_init_by };
             {
                 xhint(step, used_bytes());
-                shared<ax> x { init_by_default };
+                shared<ax> x { default_init_by };
                 {
                     xhint(step, used_bytes());
-                    shared<ax> a{ init_by_default };
+                    shared<ax> a{ default_init_by };
                     xhint(step, used_bytes());
-                    shared<bx> b{ init_by_default };
+                    shared<bx> b{ default_init_by };
                     xhint(step, used_bytes());
                     x->a = a;
                     x->b = b;
@@ -89,23 +89,23 @@ namespace xuser{
         xhint(step, used_bytes());
 
         {
-            shared<N1_t> n1{ init_by_default };{ 
+            shared<N1_t> n1{ default_init_by };{ 
                 n1->name = "n1"; 
                 xhint(step, used_bytes());
-                shared<N2_t> n2_1{ init_by_default };{ 
+                shared<N2_t> n2_1{ default_init_by };{ 
                     n2_1->name = "n2_1";
                     xhint(step, used_bytes());
-                    shared<N2_t> n2_2{ init_by_default };{ 
+                    shared<N2_t> n2_2{ default_init_by };{ 
                         n2_2->name = "n2_2";
                         xhint(step, used_bytes());
-                        shared<N2_t> n2_3{ init_by_default };{
+                        shared<N2_t> n2_3{ default_init_by };{
                             n2_3->name = "n2_3";
                             xhint(step, used_bytes());
-                            shared<N2_t> n2_4{ init_by_default };{
+                            shared<N2_t> n2_4{ default_init_by };{
                                 n2_3->name = "n2_4";
                                 xhint(step, used_bytes());
 
-                                shared<N3_t> n3{ init_by_default }; 
+                                shared<N3_t> n3{ default_init_by }; 
                                 n3->name = "n3";
                                 xhint(step, used_bytes());
 
@@ -132,12 +132,12 @@ namespace xuser{
         {
             // 其实我们更推荐这么写
             // 这样可以减少栈上环对象的个数，避免无用的析构操作
-            shared<N3_t> n3{ init_by_default };
-            shared<N1_t> n1{ init_by_default };
-            auto & n2_1 = n1->na    = { init_by_default };
-            auto & n2_2 = n2_1      = { init_by_default };
-            auto & n2_3 = n2_2      = { init_by_default };
-            auto & n2_4 = n2_3      = { init_by_default };
+            shared<N3_t> n3{ default_init_by };
+            shared<N1_t> n1{ default_init_by };
+            auto & n2_1 = n1->na    = { default_init_by };
+            auto & n2_2 = n2_1      = { default_init_by };
+            auto & n2_3 = n2_2      = { default_init_by };
+            auto & n2_4 = n2_3      = { default_init_by };
             n2_1->nb                = n2_3;
             n2_3->nc                = n3;
             n2_4->na                = n2_2;
@@ -146,7 +146,7 @@ namespace xuser{
         xhint(step, used_bytes());
 
         {
-            shared<N4_t> n4         = { init_by_default };
+            shared<N4_t> n4         = { default_init_by };
             n4->n                   = { n4, n4, n4, n4 }; // 创建长度为 4 的数组，并将每个元素赋值为 n4
             xhint(step, used_bytes());
         }

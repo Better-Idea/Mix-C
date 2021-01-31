@@ -11,7 +11,7 @@
 
 namespace mixc::docker_shared::origin{
     using inc::init_by;
-    using inc::init_by_default;
+    using inc::default_init_by;
 
     template<class type> struct shared;
     template<class type>

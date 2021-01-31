@@ -26,7 +26,7 @@
 namespace mixc::docker_shared_array::origin{
     using inc::can_init;
     using inc::init_by;
-    using inc::init_by_default;
+    using inc::default_init_by;
 }
 
 namespace mixc::docker_shared_array{

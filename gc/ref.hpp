@@ -480,13 +480,13 @@ namespace mixc::gc_ref{
             has_cast<item_initial_invokex, initial_invoke>
         )
         ref_array(::length length, initial_invoke const & init_ary){
-            base_t::init(length, init_by_default, init_ary);
+            base_t::init(length, default_init_by, init_ary);
         }
 
         template<class ... args>
         requires(... and has_cast<item_t, args>)
         ref_array(item_t const & first, args const & ... rest){
-            base_t::init_one_by_one(init_by_default, first, rest...);
+            base_t::init_one_by_one(default_init_by, first, rest...);
         }
     $
 
