@@ -214,7 +214,7 @@ namespace mixc::lang_cxx_strlize{
             } while(f.full != 0 and num_len < m.precious());
 
             // 如果没有限定精度，就去除末尾多余的零
-            if (precious == not_exist) for(uxx i = num_len; num_len > 1/*最少一位数字*/; num_len--, ptr--){
+            if (precious == not_exist) for(; num_len > 1/*最少一位数字*/; num_len--, ptr--){
                 if (ptr[-1] != '0'){
                     break;
                 }
