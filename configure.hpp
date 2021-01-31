@@ -81,12 +81,16 @@
     #define xis_arm                 1
 #endif
 
-#if _MSVC_LANG
-    #define xis_msvc                1
-#endif
-
 #if __clang__
     #define xis_clang               1
+#endif
+
+#if _MSVC_LANG
+    #define xis_msvc                1
+
+    #ifndef xis_clang
+        #define xis_msvc_pure       1
+    #endif
 #endif
 
 // check
