@@ -29,7 +29,7 @@ namespace mixc::io_file::origin{
     public:
         file();
         file(file &&);
-        file(inc::c08 path) : path(path), fd(-1){}
+        file(inc::c08 path) : fd(-1), path(path) {}
         file(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) {
             the.open(path, mode, result);
         }
