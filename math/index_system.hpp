@@ -7,23 +7,22 @@
 #include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"macro/xinterface.hpp"
-#include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_index_system::origin{
     xinterface(
-        xname(interval),
+        xname(iinterval),
         xfunc(normalize, void(uxx length)),
         xfunc(left,  uxx()),
         xfunc(right, uxx())
     );
 
     template<class object_t>
-    concept can_interval = requires(object_t object, interval * ptr){
-        xnew(ptr) interval(object);
+    concept can_interval = requires(object_t object){
+        iinterval(object);
     };
 
-    // bend close interval
+    // bend close iinterval
     xstruct(
         xname(cc),
         xprof(pleft,    ixx),
@@ -49,7 +48,7 @@ namespace mixc::math_index_system::origin{
             xw{ pright = ixx(value); }
     $
 
-    // left close right open interval
+    // left close right open iinterval
     struct co : cc{
         using cc::cc;
 
@@ -59,7 +58,7 @@ namespace mixc::math_index_system::origin{
         }
     };
 
-    // left open right close interval
+    // left open right close iinterval
     struct oc : cc{
         using cc::cc;
 
@@ -69,7 +68,7 @@ namespace mixc::math_index_system::origin{
         }
     };
 
-    // bend open interval
+    // bend open iinterval
     struct oo : cc{
         using cc::cc;
 
