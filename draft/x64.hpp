@@ -3,7 +3,7 @@
 #include"configure.hpp"
 #include"define/base_type.hpp"
 
-#if xis_msvc
+#if xis_msvc_compatible
     #include<intrin.h>
 #else
     #include<x86intrin.h>
