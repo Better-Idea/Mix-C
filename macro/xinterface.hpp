@@ -97,7 +97,7 @@ namespace mixc::macro_xinterface{
         class ...                       old_overloadx,
         class ...                       new_overloadx
     >
-    static auto make_flat(inc::tlist<new_overloadx...> result, ret(*)(args...), old_overloadx...){
+    inline auto make_flat(inc::tlist<new_overloadx...> result, ret(*)(args...), old_overloadx...){
         using new_list = inc::tlist<
             new_overloadx...,
             docker<i, ret, args...>
@@ -115,7 +115,7 @@ namespace mixc::macro_xinterface{
         template<class ...> class       docker,
         class ...                       overload
     >
-    static auto docker_specialize(inc::tlist<overload...>){
+    inline auto docker_specialize(inc::tlist<overload...>){
         return docker<overload...>{};
     }
 
@@ -158,7 +158,7 @@ namespace mixc::macro_xinterface{
         template<uxx> class ...         func_next,
         class ...                       fax
     >
-    static auto make_assembly(
+    inline auto make_assembly(
         functional_assembly<0, funcx...>, 
         functional_assembly<0, func_next...>, 
         fax ... list){
@@ -308,10 +308,10 @@ using __itf_voidp       = voidp;
     struct __lv1_ ## name : __overload...{                                          \
         template<class __object>                                                    \
         requires(... and __itf_hc<__overload, void(__object)>)                      \
-        constexpr __lv1_ ## name(__object const & this_ref) :                       \
+        __lv1_ ## name(__object const & this_ref) :                                 \
             __overload(this_ref)...{                                                \
         }                                                                           \
-        constexpr __lv1_ ## name(){}                                                \
+        __lv1_ ## name(){}                                                          \
                                                                                     \
         using __overload::name...;                                                  \
         using __overload_list = __itf_tl<__overload...>;                            \
