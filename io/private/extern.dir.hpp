@@ -232,7 +232,7 @@ namespace mixc::io_dir::origin{
         auto    target  = buf.alloc(the.path);
 
         #if xis_windows
-        ::SetCurrentDirectory(target);
+        ::SetCurrentDirectoryA(target);
         #elif xis_linux
         ::chdir(target);
         #endif
