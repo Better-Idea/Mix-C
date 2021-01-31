@@ -7,14 +7,10 @@
             "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++2a",
-                "-fconcepts",
-                "-mavx",
-                "-mavx2",
-                "-Wno-empty-body",
-                "-O2",
-                // "-g",
-                "${workspaceFolder}/extern.api_g++.o",
+                "-std=c++2a", "-fconcepts", "-mavx", "-mavx2", "-Wno-empty-body",
+                // "-O2",
+                "-g",
+                "${workspaceFolder}/extern.api_g++.o", 
                 "${file}",
                 "-o",
                 "${workspaceFolder}/../main.exe"
@@ -30,11 +26,7 @@
             "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++2a",
-                "-fconcepts",
-                "-mavx",
-                "-mavx2",
-                "-g",
+                "-std=c++2a", "-fconcepts", "-mavx", "-mavx2", "-g",
                 "${workspaceFolder}/extern.api_g++.cpp",
                 "-c"
             ],
@@ -44,24 +36,29 @@
             "group": "build"
         },
         {
-            "type": "shell",
+            "type" : "shell",
             "label": "clang++ build active file",
             "command": "clang++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++2a",
-                "-mavx",
-                "-mavx2",
-                "-Wno-empty-body",
-                "-g",
+                "-std=c++20", "-mavx", "-mavx2", "-Wno-empty-body",
+                "-g", 
                 "${workspaceFolder}/extern.api_clang++.o",
-                "${file}",
-                "-o",
-                "${workspaceFolder}/../main.exe"
+                "${file}", "-o", "${workspaceFolder}/../main.exe"
             ],
-            "problemMatcher": [
-                "$gcc"
+            "problemMatcher": [ "$gcc" ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "clang++ build extern.api.o",
+            "command": "clang++",
+            "args": [
+                "-I${workspaceFolder}",
+                "-std=c++20", "-mavx", "-mavx2", "-g", "-Wno-empty-body",
+                "${workspaceFolder}/extern.api_clang++.cpp", "-c"
             ],
+            "problemMatcher": [ "$gcc" ],
             "group": "build"
         }
     ]
