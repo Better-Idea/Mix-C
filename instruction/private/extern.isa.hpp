@@ -14,10 +14,20 @@ namespace mixc::instruction_time_stamp{
 #endif
 
 namespace mixc::instruction_mod{
+    #if xis_msvc_pure
+    extern u64 mod_core(u128 a, u64 b){
+        #if xis_os64
+            unsigned __int64 r = 0;
+            _udiv128(a.high, a.low, b, & r);
+            return r;
+        #endif
+    }
+    #endif
+
     extern f64 mod(f64 a, f64 b){
         #if xis_x86
             f64 r = 0;
-            #if xis_msvc_compatible
+            #if xis_msvc_pure
             r = fmod(a, b);
             #else
             asm("fldl %0"::"m"(b));

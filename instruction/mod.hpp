@@ -13,8 +13,8 @@ namespace mixc::instruction_mod{
         #if xis_x86
             #if xis_os64
                 #if xis_msvc_pure
-                #pragma message("note here")
-                return 0;
+                extern u64 mod_core(u128 a, u64 b);
+                return mod_core(a, b);
                 #else
                 u64 r = 0;
                 asm(""::"a"(a.low),"d"(a.high),"c"(b));
