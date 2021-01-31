@@ -1,0 +1,8 @@
+#include"dumb/disable_copy.hpp"
+#include"dumb/dummy_type.hpp"
+#include"dumb/implicit.hpp"
+#include"dumb/init_by.hpp"
+#include"dumb/mirror.hpp"
+#include"dumb/move.hpp"
+#include"dumb/place_holder.hpp"
+#include"dumb/struct_type.hpp"
