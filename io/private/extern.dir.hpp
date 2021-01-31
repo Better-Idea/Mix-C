@@ -106,8 +106,6 @@ namespace mixc::io_dir::origin{
         auto    source  = buf.alloc(the.path);
 
         #if xis_windows
-
-        auto && opr     = SHFILEOPSTRUCTA{};
         auto    attr    = GetFileAttributesA((asciis)source);
         auto    exist   = INVALID_FILE_ATTRIBUTES != attr and 0 != (attr & FILE_ATTRIBUTE_DIRECTORY);
 
