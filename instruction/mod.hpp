@@ -12,7 +12,7 @@ namespace mixc::instruction_mod{
     inline u64 mod(u128 a, u64 b){
         #if xis_x86
             #if xis_os64
-                #if xis_msvc
+                #if xis_msvc_pure
                 #pragma message("note here")
                 return 0;
                 #else

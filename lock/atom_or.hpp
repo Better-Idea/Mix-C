@@ -11,7 +11,7 @@ namespace mixc::lock_atom_or{
 
     template<class a>
     inline a atom_or(a * left, a right){
-        #if xis_msvc
+        #if xis_msvc_compatible
             return (a)atom_or(left, u64(right), sizeof(a));
         #else
             return __atomic_or_fetch(left, right, 5);

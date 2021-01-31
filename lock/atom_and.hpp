@@ -11,7 +11,7 @@ namespace mixc::lock_atom_and{
 
     template<class a>
     inline a atom_and(a * left, a right){
-        #if xis_msvc
+        #if xis_msvc_compatible
             return (a)atom_and(left, u64(right), sizeof(a));
         #else
             return __atomic_and_fetch(left, right, 5);

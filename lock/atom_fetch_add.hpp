@@ -11,7 +11,7 @@ namespace mixc::lock_atom_fetch_add{
 
     template<class a>
     inline a atom_fetch_add(a * left, a right){
-        #if xis_msvc
+        #if xis_msvc_compatible
             return (a)atom_fetch_add(left, u64(right), sizeof(a));
         #else
             return __atomic_fetch_add(left, right, 5);

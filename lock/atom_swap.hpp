@@ -14,7 +14,7 @@ namespace mixc::lock_atom_swap{
         // function equals to 
         // r = left[0]
         // left[0] = right
-        #if xis_msvc
+        #if xis_msvc_compatible
             return (a)atom_swap(left, u64(right), sizeof(a));
         #else
             a r;
