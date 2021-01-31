@@ -86,7 +86,7 @@
 #endif
 
 #if _MSVC_LANG
-    #define xis_msvc_compatible                1
+    #define xis_msvc_compatible     1
 
     #ifndef xis_clang
         #define xis_msvc_pure       1
