@@ -3,13 +3,13 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xdebug_fail::inc
-#include"configure.hpp"
+#include"macro/xunlikely.hpp"
 #include"macro/private/log.hpp"
 #pragma pop_macro("xuser")
 
 #if xuse_xdebug_fail
     #define xdebug_fail(...)                                                    \
-        [[unlikely]] if (([](const char * func, bool error){                    \
+        xunlikely(([](const char * func, bool error){                           \
             if (not error){                                                     \
                 return false;                                                   \
             }                                                                   \
