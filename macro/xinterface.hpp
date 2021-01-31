@@ -173,11 +173,12 @@ namespace mixc::macro_xinterface{
         }
     }
 
-    template<class ... fa>
+    template<class fa, class ... fax>
     using functional_assemblyx      = decltype(
         make_assembly(
             functional_assembly<0>{}, 
-            fa{}...
+            fax{}...,
+            fa{}
         )
     );
 
@@ -241,13 +242,14 @@ template<
 >
 using __itf_fa          = mixc::macro_xinterface::functional_assembly<i, func...>;
 
-template<class ... fa>
-using __itf_fax         = mixc::macro_xinterface::functional_assemblyx<fa...>;
+template<class fa, class ... fax>
+using __itf_fax         = mixc::macro_xinterface::functional_assemblyx<
+    // fa::__func_list 会在 functional_assemblyx 中调整到末尾位置以符合继承结构的内存布局
+    typename fa::__func_list,
+    typename fax::__func_listx...
+>;
 
 using __itf_voidp       = voidp;
-
-template<class interfacce>
-using __itf_fl          = typename interfacce::__func_listx;
 
 #define __xitf_name__
 #define __xitf_name_name__(name)                name
@@ -269,14 +271,14 @@ using __itf_fl          = typename interfacce::__func_listx;
 #define __xitf_pubb_name__(...)
 #define __xitf_pubb_tmpl__(...)
 #define __xitf_pubb_spec__(...)
-#define __xitf_pubb_pubb__(...)                 __itf_fl<__VA_ARGS__>, 
+#define __xitf_pubb_pubb__(...)                 , __VA_ARGS__
 #define __xitf_pubb_func__(...)
 #define __xitf_pubb_oper__(...)
 
 #define __xitf_decl_func__
-#define __xitf_decl_func_name__(...)
-#define __xitf_decl_func_tmpl__(...)
-#define __xitf_decl_func_spec__(...)
+#define __xitf_decl_func_name__(name,...)       using the_t = name;
+#define __xitf_decl_func_tmpl__(name,...)       using the_t = name<__VA_ARGS__>;
+#define __xitf_decl_func_spec__(name,...)       using the_t = name<__VA_ARGS__>;
 #define __xitf_decl_func_pubb__(...)
 #define __xitf_decl_func_func__(name,...)                                           \
     template<uxx __i, class __ret, class ... __args>                                \
@@ -284,11 +286,11 @@ using __itf_fl          = typename interfacce::__func_listx;
         constexpr __lv0_ ## name(){}                                                \
                                                                                     \
         template<class __object>                                                    \
-        requires(__itf_sg<__ret(__args...)>::has(__object::hello))                  \
+        requires(__itf_sg<__ret(__args...)>::has(__object::name))                   \
         constexpr __lv0_ ## name(__object const &){                                 \
             struct __closure{                                                       \
                 static __ret __shell(__object * __this_ptr, __args ... __list){     \
-                    return __this_ptr->hello(__list...);                            \
+                    return __this_ptr->name(__list...);                             \
                 }                                                                   \
             };                                                                      \
                                                                                     \
@@ -335,7 +337,7 @@ using __itf_fl          = typename interfacce::__func_listx;
 struct __xlist__(__xitf_namex_, __VA_ARGS__) {                                      \
     __xlist__(__xitf_decl_func_, __VA_ARGS__)                                       \
     using __func_list  = __itf_fa<0 __xlist__(__xitf_layout_func_, __VA_ARGS__)>;   \
-    using __func_listx = __itf_fax<__xlist__(__xitf_pubb_,__VA_ARGS__) __func_list>;\
+    using __func_listx = __itf_fax<the_t __xlist__(__xitf_pubb_,__VA_ARGS__)>;      \
                                                                                     \
     template<class __object>                                                        \
     requires(__itf_hc<__func_listx, void(__object)>)                                \
