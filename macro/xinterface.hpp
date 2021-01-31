@@ -8,7 +8,7 @@
 
 namespace xuser{
     xinterface(
-        xname(can_say_hello),
+        xname(isay_hello),
         xfunc(say_hello_to, void(asciis some_one)) // <- 没有多余的逗号
     ); // <- 需要分号
 
@@ -18,16 +18,16 @@ namespace xuser{
         }
     };
 
-    void hello(can_say_hello const & me){
-        me.say_hello_to("leon");
+    void hello(isay_hello const & me){
+        me->say_hello_to("leon");
     }
 
     void test(){
         {
             // 正确
-            cat             b;
-            can_say_hello   csh = b;
-            csh.say_hello_to("keyti");
+            cat          b;
+            isay_hello   ish = b;
+            ish.say_hello_to("keyti");
 
             // 正确
             hello(b);
@@ -38,12 +38,12 @@ namespace xuser{
 
         {
             // 错误 ========================================================
-            // can_say_hello 接口需要存活的实例（cat）
-            // 而 cat 在赋值给 can_say_hello 对象 csh 后就析构了
+            // isay_hello 接口需要存活的实例（cat）
+            // 而 cat 在赋值给 isay_hello 对象 ish 后就析构了
             // 虽然对于无成员变量的 cat 来说，这样并不会产生错误的输出，
             // 但我们建议不要这么做
-            can_say_hello csh = cat();
-            csh.say_hello_to("System");
+            isay_hello ish = cat();
+            ish.say_hello_to("System");
         }
     }
 }
@@ -58,246 +58,302 @@ int main(){
 #define xpack_macro_xinterface
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_xinterface
-#include"dumb/place_holder.hpp"
+#define xuser mixc::macro_xinterface::inc
 #include"macro/private/word.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/xnew.hpp"
 #include"memop/signature.hpp"
+#include"meta/has_constructor.hpp"
+#include"meta_seq/tlist.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xinterface{
-    template<uxx offset_this, class func_t> struct functor;
+    template<class object, uxx length>
+    static inline voidp s_func_table[length];
 
-    template<uxx offset_this, class ret_t, class ... args>
-    struct functor<offset_this, ret_t(args...)>{
+    struct dummy{ enum { __func_length }; };
+
+    template<class __func_list>
+    struct this_call_pair{
+        voidp   this_ptr    = nullptr;
+        voidp * func_table  = nullptr;
+
+        template<class object>
+        constexpr this_call_pair(object const & this_ref) : 
+            this_ptr(xref this_ref), 
+            func_table(s_func_table<object, __func_list::__func_length>){
+        }
+
+        constexpr this_call_pair(){};
+    };
+
+    using this_call_pairp =  this_call_pair<dummy> *;
+
+    template<
+        template<uxx, class ...> class  docker, 
+        uxx                             i, 
+        class                           ret,
+        class ...                       args,
+        class ...                       old_overloadx,
+        class ...                       new_overloadx
+    >
+    static auto make_flat(inc::tlist<new_overloadx...> result, ret(*)(args...), old_overloadx...){
+        using new_list = inc::tlist<
+            new_overloadx...,
+            docker<i, ret, args...>
+        >;
+
+        if constexpr (sizeof...(old_overloadx) == 0){
+            return new_list{};
+        }
+        else{
+            return make_flat<docker, i + 1>(new_list{}, (old_overloadx)nullptr...);
+        }
+    }
+
+    template<
+        template<class ...> class       docker,
+        class ...                       overload
+    >
+    static auto docker_specialize(inc::tlist<overload...>){
+        return docker<overload...>{};
+    }
+
+    template<
+        uxx                             i, 
+        template<uxx> class         ... func
+    >
+    struct functional_assembly{
+        template<class object>
+        constexpr functional_assembly(object const & this_ref){}
+        constexpr functional_assembly(){}
     private:
-        voidp __this_ptr() const { 
-            return *(voidp *)(u08p(this) - offset_this); /* 偏移字节数 */ 
-        } 
+        template<class> friend struct this_call_pair;
+        enum { __func_length = i };
+    };
 
-        template<class object_t>
-        static ret_t meta_form(object_t * this_ptr, args ... arg_list) { 
-            return this_ptr->operator()(arg_list...); 
+    template<
+        uxx                             i,
+        template<uxx> class             func, 
+        template<uxx> class         ... funcx
+    >
+    struct functional_assembly<i, func, funcx...> : 
+        func<i>, 
+        functional_assembly<i + func<i>::__overload_list::length, funcx...>{
+
+        using base_t = functional_assembly<i + func<i>::__overload_list::length, funcx...>;
+
+        template<class object>
+        requires(
+            inc::has_constructor<func<i>, void(object)>
+        )
+        constexpr functional_assembly(object const & this_ref) :
+            func<i>(this_ref), base_t(this_ref){
         }
+        constexpr functional_assembly(){}
+    };
 
-        mutable voidp __func    = nullptr;
-    public:
-        constexpr functor(){}
+    template<
+        template<uxx> class ...         funcx,
+        template<uxx> class ...         func_next,
+        class ...                       fax
+    >
+    static auto make_assembly(
+        functional_assembly<0, funcx...>, 
+        functional_assembly<0, func_next...>, 
+        fax ... list){
 
-        template<class object_t>
-        constexpr functor(object_t const & object): 
-            __func(voidp(& meta_form<object_t>)){ 
+        using new_fa = functional_assembly<0, funcx..., func_next...>;
+
+        if constexpr (sizeof...(fax) == 0){
+            return new_fa{};
         }
-
-        ret_t operator()(args const & ... params) const { 
-            return ((ret_t(*)(voidp, args...))__func)(__this_ptr(), params...); 
-        } 
-    };
-
-    template<class func_t> 
-    struct functor_closure{
-        template<uxx offset_this>
-        using __core = functor<offset_this, func_t>;
-    };
-
-    struct this_ptr{ 
-        template<uxx>
-        struct __core{
-            template<class object_t>
-            constexpr __core(object_t const & object):
-                self(voidp(& object)){
-            }
-
-            constexpr __core(){}
-        private:
-            voidp self = nullptr;
-        };
-    };
-
-    template<uxx offset, class ... args> 
-    struct interface_hub_core{
-        constexpr interface_hub_core(){}
-
-        template<class object_t>
-        constexpr interface_hub_core(object_t const & object) {}
-    };
-
-    template<uxx offset, class a0, class ... args>
-    struct interface_hub_core<offset, a0, args...> : 
-        a0::template __core<offset>, 
-        interface_hub_core<
-            offset + sizeof(typename a0::template __core<offset>), 
-            args...
-        >{
-
-        constexpr interface_hub_core(){}
-
-        template<class object_t>
-        constexpr interface_hub_core(object_t const & object) : 
-            a0::template __core<offset>(object), 
-            interface_hub_core<
-                offset + sizeof(typename a0::template __core<offset>), 
-                args...
-            >(object){
+        else{
+            return make_assembly(new_fa{}, list...);
         }
-    };
+    }
 
-    template<class ... args>
-    using interface_hub = interface_hub_core<0, args...>;
+    template<class ... fa>
+    using functional_assemblyx      = decltype(
+        make_assembly(
+            functional_assembly<0>{}, 
+            fa{}...
+        )
+    );
 
-    template<class target_interface, class object_t>
-    concept is_match_interface = requires(target_interface * ptr, object_t const & type){
-        xnew (ptr) target_interface(type);
-    };
+    template<
+        template<uxx, class ...> class  func_docker,
+        uxx                             i,
+        class                       ... overload
+    >
+    using overload_list = decltype(
+        make_flat<func_docker, i>(inc::tlist<>{}, (overload *)nullptr...)
+    );
+
+    template<
+        template<class ...> class       docker,
+        class                           overload_list
+    >
+    using specialized_docker = decltype(
+        docker_specialize<docker>(overload_list{})
+    );
+
+    template<class target, class constructor>
+    concept __itf_hc    = inc::has_constructor<target, constructor>;
+
+    template<class ... type>
+    using __itf_tl      = inc::tlist<type...>;
+
+    template<class func>
+    using __itf_sg      = inc::signature<func>;
 };
+
+template<class __func_list>
+using __itf_tcp         = mixc::macro_xinterface::this_call_pair<__func_list>;
+
+using __itf_tcpp        = mixc::macro_xinterface::this_call_pairp;
+
+template<class target, class constructor>
+concept __itf_hc        = mixc::macro_xinterface::__itf_hc<target, constructor>;
+
+template<class ... type>
+using __itf_tl          = mixc::macro_xinterface::__itf_tl<type...>;
+
+template<class func>
+using __itf_sg          = mixc::macro_xinterface::__itf_sg<func>;
+
+template<
+    template<uxx, class ...> class  func_docker,
+    uxx                             i,
+    class                       ... overload
+>
+using __itf_ol          = mixc::macro_xinterface::overload_list<func_docker, i, overload...>;
+
+template<
+    template<class ...> class       docker,
+    class                           overload_list
+>
+using __itf_sd          = mixc::macro_xinterface::specialized_docker<docker, overload_list>;
+
+template<
+    uxx                             i, 
+    template<uxx> class         ... func
+>
+using __itf_fa          = mixc::macro_xinterface::functional_assembly<i, func...>;
+
+template<class ... fa>
+using __itf_fax         = mixc::macro_xinterface::functional_assemblyx<fa...>;
+
+using __itf_voidp       = voidp;
+
+template<class interfacce>
+using __itf_fl          = typename interfacce::__func_listx;
 
 #define __xitf_name__
 #define __xitf_name_name__(name)                name
 #define __xitf_name_tmpl__(name,...)            name
-#define __xitf_name_spec__(name,...)            name<__VA_ARGS__>
+#define __xitf_name_spec__(name,...)            name
 #define __xitf_name_pubb__(...)
 #define __xitf_name_func__(...)
 #define __xitf_name_oper__(...)
+
+#define __xitf_namex__
+#define __xitf_namex_name__(name)               name
+#define __xitf_namex_tmpl__(name,...)           name
+#define __xitf_namex_spec__(name,...)           name<__VA_ARGS__>
+#define __xitf_namex_pubb__(...)
+#define __xitf_namex_func__(...)
+#define __xitf_namex_oper__(...)
 
 #define __xitf_pubb__
 #define __xitf_pubb_name__(...)
 #define __xitf_pubb_tmpl__(...)
 #define __xitf_pubb_spec__(...)
-#define __xitf_pubb_pubb__(...)                 , __VA_ARGS__
+#define __xitf_pubb_pubb__(...)                 __itf_fl<__VA_ARGS__>, 
 #define __xitf_pubb_func__(...)
-#define __xitf_pubb_oper__(...)                 , mixc::macro_xinterface::functor_closure<__VA_ARGS__>
-
-#define __xitf_has_func__
-#define __xitf_has_func_name__(...)
-#define __xitf_has_func_tmpl__(...)
-#define __xitf_has_func_spec__(...)
-#define __xitf_has_func_pubb__(...)
-#define __xitf_has_func_func__(name,...)        and __sg<__VA_ARGS__>::has(& __object::name)
-#define __xitf_has_func_oper__(...)             and __sg<__VA_ARGS__>::has(& __object::operator())
-
-#define __xitf_set_func__
-#define __xitf_set_func_name__(...)                                             \
-    enum : uxx { __meta_form_cnt_begin = __COUNTER__ + 1 };
-#define __xitf_set_func_tmpl__(...)
-#define __xitf_set_func_spec__(...)
-#define __xitf_set_func_pubb__(...)
-#define __xitf_set_func_func__(name,...)        {                               \
-    constexpr auto i = __COUNTER__ - __meta_form_cnt_begin;                     \
-    using __f  = __VA_ARGS__;                                                   \
-    using __fp = __f *;                                                         \
-    __func_list(i) = __meta_form(__ph<i>{}, object, __fp(nullptr));             \
-}
-#define __xitf_set_func_oper__(...)
+#define __xitf_pubb_oper__(...)
 
 #define __xitf_decl_func__
-#define __xitf_decl_func_name__(...)                                            \
-private:                                                                        \
-    template<uxx __i, class __func>                                             \
-    using __fc = ::mixc::macro_xinterface::                                     \
-    functor<(__i - __COUNTER__ - 1) * sizeof(voidp) + __global_offset, __func>; \
-public:
+#define __xitf_decl_func_name__(...)
 #define __xitf_decl_func_tmpl__(...)
 #define __xitf_decl_func_spec__(...)
 #define __xitf_decl_func_pubb__(...)
-#define __xitf_decl_func_func__(name,...)       __fc<__COUNTER__, __VA_ARGS__> name;
+#define __xitf_decl_func_func__(name,...)                                           \
+    template<uxx __i, class __ret, class ... __args>                                \
+    struct __lv0_ ## name{                                                          \
+        constexpr __lv0_ ## name(){}                                                \
+                                                                                    \
+        template<class __object>                                                    \
+        requires(__itf_sg<__ret(__args...)>::has(__object::hello))                  \
+        constexpr __lv0_ ## name(__object const &){                                 \
+            struct __closure{                                                       \
+                static __ret __shell(__object * __this_ptr, __args ... __list){     \
+                    return __this_ptr->hello(__list...);                            \
+                }                                                                   \
+            };                                                                      \
+                                                                                    \
+            __itf_tcpp(this)->func_table[__i] = __itf_voidp(& __closure::__shell);  \
+        }                                                                           \
+                                                                                    \
+        __ret  name(__args ... __list) const {                                      \
+            __itf_tcpp __p  = __itf_tcpp(this);                                     \
+            using __f       = __ret(*)(__itf_voidp, __args...);                     \
+            return __f(__p->func_table[__i])(__p->this_ptr, __list...);             \
+        }                                                                           \
+    };                                                                              \
+                                                                                    \
+    template<class ... __overload>                                                  \
+    struct __lv1_ ## name : __overload...{                                          \
+        template<class __object>                                                    \
+        requires(... and __itf_hc<__overload, void(__object)>)                      \
+        constexpr __lv1_ ## name(__object const & this_ref) :                       \
+            __overload(this_ref)...{                                                \
+        }                                                                           \
+        constexpr __lv1_ ## name(){}                                                \
+                                                                                    \
+        using __overload::name...;                                                  \
+        using __overload_list = __itf_tl<__overload...>;                            \
+    };                                                                              \
+                                                                                    \
+    template<uxx __i> using __ ## name = __itf_sd<                                  \
+        __lv1_ ## name, __itf_ol<                                                   \
+            __lv0_ ## name, __i, __VA_ARGS__                                        \
+        >                                                                           \
+    >;
+
 #define __xitf_decl_func_oper__(...)
 
-#define __xitf_cast_func__
-#define __xitf_cast_func_name__(...)                                            \
-    enum : uxx { __meta_form_cnt_begin = __COUNTER__ + 1 };
-#define __xitf_cast_func_tmpl__(...)
-#define __xitf_cast_func_spec__(...)
-#define __xitf_cast_func_pubb__(...)
-#define __xitf_cast_func_func__(name,...)                                       \
-    template<                                                                   \
-        class __object,                                                         \
-        class __ret,                                                            \
-        class ... __args                                                        \
-    >                                                                           \
-    static voidp __meta_form(                                                   \
-        __ph<__COUNTER__ - __meta_form_cnt_begin>,                              \
-        __object const &,                                                       \
-        __ret(*)(__args...)){                                                   \
-        struct __closure{                                                       \
-            static __ret __meta(__object * this_ptr, __args ... list){          \
-                return this_ptr->name(list...);                                 \
-            }                                                                   \
-        };                                                                      \
-        return voidp(& __closure::__meta);                                      \
-    }
-#define __xitf_cast_func_oper__(...)
+#define __xitf_layout_func__
+#define __xitf_layout_func_name__(...)
+#define __xitf_layout_func_tmpl__(...)
+#define __xitf_layout_func_spec__(...)
+#define __xitf_layout_func_pubb__(...)
+#define __xitf_layout_func_func__(name,...)  , __ ## name
+#define __xitf_layout_func_oper__(...)
 
-#define __xitf_core__(name,base,...)                                            \
-public:                                                                         \
-    constexpr name(){}                                                          \
-                                                                                \
-    template<class __object>                                                    \
-    requires(__imi<base, __object>  __xlist__(__xitf_has_func_, __VA_ARGS__))   \
-    constexpr name(__object const & object) : base(object) {                    \
-                                                                                \
-        /* 给 functor 赋值（指向指定的成员函数） */                             \
-        __xlist__(__xitf_set_func_, __VA_ARGS__)                                \
-    }                                                                           \
-    /* 定义 functor */                                                          \
-    __xlist__(__xitf_decl_func_, __VA_ARGS__)
-
-#define xinterface(...)                                                         \
-struct __xlist__(__xitf_name_, __VA_ARGS__) :                                   \
-    ::mixc::macro_xinterface::interface_hub<                                    \
-        ::mixc::macro_xinterface::this_ptr                                      \
-        __xlist__(__xitf_pubb_, __VA_ARGS__)                                    \
-    > {                                                                         \
-                                                                                \
-    using __base_hub =                                                          \
-        ::mixc::macro_xinterface::interface_hub<                                \
-            ::mixc::macro_xinterface::this_ptr                                  \
-            __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
-        >;                                                                      \
-                                                                                \
-    template<uxx __offset>                                                      \
-    using __base_hubx =                                                         \
-        ::mixc::macro_xinterface::interface_hub_core<                           \
-            __offset /* 这里不需要 this_ptr */                                  \
-            __xlist__(__xitf_pubb_, __VA_ARGS__)                                \
-        >;                                                                      \
-                                                                                \
-    template<class __func>                                                      \
-    using __sg = ::mixc::memop_signature::signature<__func>;                    \
-private:                                                                        \
-    template<class __target, class __object>                                    \
-    static constexpr bool __imi =                                               \
-        ::mixc::macro_xinterface::is_match_interface<__target, __object>;       \
-                                                                                \
-    template<uxx __i>                                                           \
-    using __ph = ::mixc::dumb_place_holder::place_holder<__i>;                  \
-                                                                                \
-    __xlist__(__xitf_cast_func_, __VA_ARGS__)                                   \
-public:                                                                         \
-    template<uxx __global_offset>                                               \
-    struct __core : __base_hubx<__global_offset>{                               \
-        __xitf_core__(                                                          \
-            __core,                                                             \
-            __base_hubx<__global_offset>,                                       \
-            __VA_ARGS__                                                         \
-        )                                                                       \
-    private:                                                                    \
-        voidp & __func_list(uxx i) const {                                      \
-            return ((voidp *)this)[i];                                          \
-        }                                                                       \
-    };                                                                          \
-private:                                                                        \
-    enum : uxx { __global_offset = sizeof(__base_hub) };                        \
-                                                                                \
-    voidp & __func_list(uxx i) const {                                          \
-        return ((voidp *)(u08p(this) + __global_offset))[i];                    \
-    }                                                                           \
-                                                                                \
-    __xitf_core__(                                                              \
-        __xlist__(__xitf_name_, __VA_ARGS__),                                   \
-        __base_hub,                                                             \
-        __VA_ARGS__                                                             \
-    )                                                                           \
+#define xinterface(...)                                                             \
+struct __xlist__(__xitf_namex_, __VA_ARGS__) {                                      \
+    __xlist__(__xitf_decl_func_, __VA_ARGS__)                                       \
+    using __func_list  = __itf_fa<0 __xlist__(__xitf_layout_func_, __VA_ARGS__)>;   \
+    using __func_listx = __itf_fax<__xlist__(__xitf_pubb_,__VA_ARGS__) __func_list>;\
+                                                                                    \
+    template<class __object>                                                        \
+    requires(__itf_hc<__func_listx, void(__object)>)                                \
+    constexpr __xlist__(__xitf_name_, __VA_ARGS__)(__object const & __this_ref) :   \
+        __pair(__this_ref){                                                         \
+                                                                                    \
+        if (__pair.func_table[0] == nullptr){                                       \
+            xnew (this) __func_listx(__this_ref);                                   \
+        }                                                                           \
+    }                                                                               \
+                                                                                    \
+    constexpr __xlist__(__xitf_name_, __VA_ARGS__)(){}                              \
+                                                                                    \
+    __func_listx const * operator-> () const {                                      \
+        return (__func_listx *)this;                                                \
+    }                                                                               \
+private:                                                                            \
+    __itf_tcp<__func_listx> __pair;                                                 \
 }
 
 #endif
