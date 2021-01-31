@@ -27,12 +27,12 @@ namespace mixc::interface_can_callback::origin{
 
         constexpr icallback(){}
 
-        ret operator()(args ... list){
+        ret operator()(args ... list) const {
             return this_func(this_ptr, list...);
         }
 
     private:
-        using func_t = ret(*)(args...);
+        using func_t = ret(*)(voidp, args...);
         voidp   this_ptr  = nullptr;
         func_t  this_func = nullptr;
     };
