@@ -6,34 +6,33 @@
 #define xuser mixc::meta_seq_tget::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
+#include"meta/remove_ptr.hpp"
 #include"meta_seq/tnull.hpp"
 #include"meta_seq/tlist.hpp"
-#include"meta_ctr/cif.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tget{
-    using namespace inc;
-
-    template<class tlist, ixx index> struct meta;
     template<ixx index, class first, class ... args>
-    struct meta<tlist<first, args...>, index>{
-        using item_t = 
-            cif<
-                index == 0 or -index == 1 + sizeof...(args)
-            >::template select<
-                first
-            >::template ces<
-                typename meta<tlist<args...>, (index < 0 ? index : index - 1)>::item_t
-            >;
-    };
+    inline auto invoke(inc::tlist<first, args...>){
+        if constexpr (index == 0 or -index == 1 + sizeof...(args)){
+            return (first *)nullptr;
+        }
+        else{
+            return invoke<
+                (index < 0 ? index : index - 1)
+            >(inc::tlist<args...>{});
+        }
+    }
 
     template<ixx index>
-    struct meta<tlist<>, index>{
-        using item_t = tnull;
-    };
+    inline auto invoke(inc::tlist<>){
+        return (inc::tnull *)nullptr;
+    }
 
     template<class tlist, ixx index>
-    using tget = typename meta<tlist, index>::item_t;
+    using tget = inc::remove_ptr<
+        decltype(invoke<index>(tlist{}))
+    >;
 }
 
 #endif
