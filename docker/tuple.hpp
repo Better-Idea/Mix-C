@@ -11,7 +11,6 @@
 #include"meta/item_origin_of.hpp"
 #include"meta/remove_ptr.hpp"
 #pragma pop_macro("xuser")
-#undef  xuser
 
 namespace mixc::docker_tuple{
     template<class a0>
