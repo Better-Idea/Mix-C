@@ -286,7 +286,7 @@ using __itf_voidp       = voidp;
         constexpr __lv0_ ## name(){}                                                \
                                                                                     \
         template<class __object>                                                    \
-        requires(__itf_sg<__ret(__args...)>::has(__object::name))                   \
+        requires(__itf_sg<__ret(__args...)>::has(& __object::name))                 \
         constexpr __lv0_ ## name(__object const &){                                 \
             struct __closure{                                                       \
                 static __ret __shell(__object * __this_ptr, __args ... __list){     \
@@ -297,7 +297,7 @@ using __itf_voidp       = voidp;
             __itf_tcpp(this)->func_table[__i] = __itf_voidp(& __closure::__shell);  \
         }                                                                           \
                                                                                     \
-        __ret  name(__args ... __list) const {                                      \
+        __ret name(__args ... __list) const {                                       \
             __itf_tcpp __p  = __itf_tcpp(this);                                     \
             using __f       = __ret(*)(__itf_voidp, __args...);                     \
             return __f(__p->func_table[__i])(__p->this_ptr, __list...);             \
