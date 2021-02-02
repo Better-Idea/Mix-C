@@ -12,6 +12,7 @@
 #include"define/base_type.hpp"
 #include"dumb/implicit.hpp"
 #include"interface/can_compare.hpp"
+#include"interface/initializer_list.hpp"
 #include"interface/seqptr.hpp"
 #include"lang/cxx/index_of_first.hpp"
 #include"lang/cxx.hpp"
