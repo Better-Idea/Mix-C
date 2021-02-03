@@ -49,7 +49,7 @@ namespace mixc::lang_cxx_trim_end{
         }
 
         final trim_end(inc::initializer_list<item_t> values) {
-            return the.trim_end(values, alloc);
+            return the.trim_end(values, nullptr);
         }
 
         template<class alloc_t>
