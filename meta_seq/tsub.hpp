@@ -8,7 +8,6 @@
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tmerge.hpp"
-#include"meta_ctr/cif.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tsub{
@@ -18,17 +17,19 @@ namespace mixc::meta_seq_tsub{
     template<class minus, class first, class ... args>
     struct tsub<tlist<first, args...>, minus>{
     private:
-        using item_t = cif<
-            tin<minus, first>,
-            tlist<>,
-            tlist<first>
-        >;
+        static auto invoke(){
+            if constexpr (inc::tin<minus, first>){
+                return tlist<>{};
+            }
+            else{
+                return tlist<first>{};    
+            }
+        }
 
-        using next = 
-            typename tsub<tlist<args...>, minus>::new_list;
+        using item_t    = decltype(invoke());
+        using next      = typename tsub<tlist<args...>, minus>::new_list;
     public:
-        using new_list = 
-            typename tmerge<item_t, next>::new_list;
+        using new_list  = typename tmerge<item_t, next>::new_list;
     };
 
     template<class minus>
