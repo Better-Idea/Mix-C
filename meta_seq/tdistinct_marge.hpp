@@ -44,4 +44,4 @@ namespace mixc::meta_seq_tdistinct_merge{
 
 #endif
 
-xexport(mixc::meta_seq_tdistinct_merge::tdistinct_marge)
+xexport(mixc::meta_seq_tdistinct_merge::tdistinct_merge)
