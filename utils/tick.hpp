@@ -13,7 +13,7 @@ namespace mixc::utils_tick::origin{
         xname(tick),
         xprif(value, u64)
     )
-        constexpr tick() : value(0){
+        tick() : value(0ULL){
             restart();
         }
 
