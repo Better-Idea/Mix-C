@@ -23,6 +23,7 @@
 #include"meta/has_constructor.hpp"
 #include"meta/remove_ptr.hpp"
 #include"meta/remove_ref.hpp"
+#include"meta_seq/vlist.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -34,7 +35,7 @@ namespace mixc::docker_array{
     struct array_t;
 
     template<class final, class type, uxx count, uxx ... rest>
-    inline auto configure(){
+    inline auto configure(final *, type *, inc::vlist<count, rest...>){
         if constexpr (sizeof...(rest) == 0){
             return (pack<type, count> *)nullptr;
         }
@@ -45,7 +46,13 @@ namespace mixc::docker_array{
 
     template<class final, class type, uxx count, uxx ... rest>
     using items = inc::remove_ptr<
-        decltype(configure<final, type, count, rest...>())
+        decltype(
+            configure(
+                (final *)nullptr, 
+                (type  *)nullptr, 
+                (inc::vlist<count, rest...>{})
+            )
+        )
     >;
 
     /* 结构：静态数组

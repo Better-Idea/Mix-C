@@ -231,15 +231,15 @@ namespace xuser{
             c08 content         = v{996}.format(alloc);
             xhint(content);
 
-            // \e 为占位符标识
-            // 那么后续元素的内容都会填充到 \e 对应的位置
-            content             = v{2021,1,1}.format("\e-\e-\e", alloc);
+            // \v 为占位符标识
+            // 那么后续元素的内容都会填充到 \v 对应的位置
+            content             = v{2021,1,1}.format("\v-\v-\v", alloc);
 
             // 显示 "2021-1-1"
             xhint(content);
 
             // 'v' 还支持占位符的嵌套
-            content             = v{ h(123), o(123), b(123) }.format("0x\e=0\e=0b\e", alloc);
+            content             = v{ h(123), o(123), b(123) }.format("0x\v=0\v=0b\v", alloc);
             xhint(content);
         }
 

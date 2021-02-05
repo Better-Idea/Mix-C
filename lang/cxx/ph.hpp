@@ -56,7 +56,7 @@ namespace mixc::lang_cxx_ph{
      * more... to be continue
      */
 
-    constexpr auto place_holder_char = '\e';
+    constexpr auto place_holder_char = '\v';
 
     #define xfmt_specialize()                                                                   \
     inc::cxx<char> format(inc::cxx<char> fmt, inc::ialloc<char> const & alloc){                 \
@@ -147,7 +147,7 @@ namespace mixc::lang_cxx_ph{
 
                 // 两端填充字符用于对齐，实际返回的是居中内容缓冲区的地址
                 // 要得到这个对齐块的首地址，实际上还需要减去 offset_to_head
-                offset_to_head          = half;
+                offset_to_head          = u32(half);
                 return mem;
             case the_t::align_left:
                 inc::fill_with_operator(mem + length, right_padding_char, pad_width);
@@ -157,7 +157,7 @@ namespace mixc::lang_cxx_ph{
                 return mem;
             default: // align_right
                 inc::fill_with_operator(mem, left_padding_char, pad_width);
-                offset_to_head          = pad_width;
+                offset_to_head          = u32(pad_width);
                 return mem + pad_width;
             }
         }
@@ -188,50 +188,53 @@ namespace mixc::lang_cxx_ph{
 
         template<class item_t>
         inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){
-            auto buf         = (item_t *)nullptr;
-            auto deformation = [this](){
-                if constexpr (inc::is_ptr<type>){
-                    return uxx(base_t::value);
-                }
-                else{
-                    return base_t::value;
-                }
-            };
+            auto buf        = (item_t *)nullptr;
+            auto total      = (uxx)0;
 
-            uxx total = 0;
-
-            inc::cxx<item_t>(deformation(), n, lut, [&](uxx length){
-                auto klz_length = sizeof(type) * 8; // keep leading zero length
-
-                if constexpr (n == inc::numeration_t::hex){
-                    klz_length /= 4;
-                }
-                else if constexpr (n == inc::numeration_t::oct){
-                    klz_length = klz_length / 3 + (klz_length % 3 != 0);
-                }
-                else if constexpr (n == inc::numeration_t::bin){
-                    ; // klz_length = klz_length;
-                }
-
-                auto new_length = (keep_leading_zero ? klz_length : length);
-                auto zero_count = (new_length - length);
-                auto mem        = base_t::template align<item_t>(
-                    new_length += (with_prefix ? 2 : 0), xref total, alloc
-                );
-                buf             = mem;
-
-                if constexpr (with_prefix){ // only in hex
-                    inc::copy_with_operator_unsafe(mem, "0x", 2);
-                    mem        += 2;
-                }
-                if (zero_count){
-                    inc::fill_with_operator(mem, '0', zero_count);
-                    mem        += zero_count;
-                }
-                return mem;
+            inc::cxx<item_t>(deformation(), n, lut, [&](uxx length) {
+                buf = operation<item_t>(length, xref total, alloc);
+                return buf;
             });
             return { buf - base_t::offset_to_head, total };
         }
+    private:
+        template<class item_t>
+        item_t * operation(uxx length, uxx * total, inc::ialloc<item_t> const & alloc){
+            auto klz_length = sizeof(type) * 8; // keep leading zero length
+
+            if constexpr (n == inc::numeration_t::hex){
+                klz_length /= 4;
+            }
+            else if constexpr (n == inc::numeration_t::oct){
+                klz_length = klz_length / 3 + (klz_length % 3 != 0);
+            }
+            else if constexpr (n == inc::numeration_t::bin){
+                ; // klz_length = klz_length;
+            }
+
+            auto new_length = (keep_leading_zero ? klz_length : length) + (with_prefix ? 2 : 0);
+            auto zero_count = (new_length - length);
+            auto mem        = (base_t::template align<item_t>(new_length, total, alloc));
+
+            if constexpr (with_prefix){ // only in hex
+                inc::copy_with_operator_unsafe(mem, "0x", 2);
+                mem        += 2;
+            }
+            if (zero_count){
+                inc::fill_with_operator(mem, '0', zero_count);
+                mem        += zero_count;
+            }
+            return mem;
+        }
+
+        auto deformation() {
+            if constexpr (inc::is_ptr<type>) {
+                return uxx(base_t::value);
+            }
+            else {
+                return base_t::value;
+            }
+        };
     };
 
     constexpr bool with_prefix       = true;
@@ -337,11 +340,11 @@ namespace mixc::lang_cxx_ph{
                     }
                 }
 
-                if (i_e == not_exist){
-                    buf         = base_t::template combine<item_t>(total);
+                if (base_t * base = this; i_e == not_exist) {
+                    buf         = base->template combine<item_t>(total);
                 }
                 else{
-                    buf         = base_t::template combine<item_t>(total + i_e, next);
+                    buf         = base->template combine<item_t>(total + i_e, next);
                 }
 
                 buf             = buf - this_length;

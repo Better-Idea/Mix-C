@@ -53,7 +53,7 @@ namespace xuser{
         tty.write_line();
 
         // 平均值和期望值
-        tty.write_line("\e times random<>() call", max);
+        tty.write_line("\v times random<>() call", max);
         tty.write_line("average:", sum / max);
         tty.write_line("expect :", max_value_of<ixx>);
         tty.write_line();
@@ -62,7 +62,7 @@ namespace xuser{
         tty.write_line("set bit count distribution, bits:count");
 
         for(uxx i = 0; i < popcnt.length(); i++){
-            tty.write("\e:\e, ", ph::v{i}.l(2), ph::v{popcnt[i]}.l(6), (i + 1) % 8 == 0 ? "\n" : "");
+            tty.write("\v:\v, ", ph::v{i}.l(2), ph::v{popcnt[i]}.l(6), (i + 1) % 8 == 0 ? "\n" : "");
         }
 
         tty.write_line();
@@ -71,7 +71,7 @@ namespace xuser{
         tty.write_line("contiguous zero distribution");
 
         for(uxx i = 0; i < contiguous_zero.length(); i++){
-            tty.write("\e:\e, ", ph::v{i}.l(2), ph::v{contiguous_zero[i]}.l(6), (i + 1) % 8 == 0 ? "\n" : "");
+            tty.write("\v:\v, ", ph::v{i}.l(2), ph::v{contiguous_zero[i]}.l(6), (i + 1) % 8 == 0 ? "\n" : "");
         }
 
         tty.write_line();
@@ -80,7 +80,7 @@ namespace xuser{
         tty.write_line("contiguous one distribution");
 
         for(uxx i = 0; i < contiguous_one.length(); i++){
-            tty.write("\e:\e, ", ph::v{i}.l(2), ph::v{contiguous_one[i]}.l(6), (i + 1) % 8 == 0 ? "\n" : "");
+            tty.write("\v:\v, ", ph::v{i}.l(2), ph::v{contiguous_one[i]}.l(6), (i + 1) % 8 == 0 ? "\n" : "");
         }
 
         tty.write_line();
