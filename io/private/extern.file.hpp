@@ -157,7 +157,8 @@ namespace mixc::io_file::origin{
         u64 size = 0;
 
         #if xis_windows
-        ::ReadFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
+
+        (void)::ReadFile(HANDLE(the.fd), buffer, DWORD(bytes), LPDWORD(& size), NULL);
         #elif xis_linux
         size = (uxx)::read(the.fd, buffer, bytes);
         #else
