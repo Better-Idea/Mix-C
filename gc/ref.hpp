@@ -50,12 +50,12 @@ namespace mixc::gc_ref{
         }
     $
 
-    extern hashmap<visited_ptr_t, info_t>    gc_map;
-    extern uxx                               degree_dvalue;
-    extern visited_ptr_t                     root;
-    extern bool                              can_free_whole_ring;
-    static inline uxx                        empty_mem[32];
-    static inline voidp                      empty_mem_ptr   = empty_mem;
+    static inline hashmap<visited_ptr_t, info_t>    gc_map;
+    static inline uxx                               degree_dvalue;
+    static inline visited_ptr_t                     root;
+    static inline bool                              can_free_whole_ring;
+    static inline uxx                               empty_mem[32];
+    static inline voidp                             empty_mem_ptr   = empty_mem;
 
     template<class final, class item_t, class attribute_t, bool is_array, bool is_binary_aligned_alloc>
     xstruct(
@@ -451,8 +451,8 @@ namespace mixc::gc_ref{
 
         template<class ... args, class ... argsx>
         requires(
-            can_init<attribute_t, init_by<args...>> and ... and 
-            has_cast<item_t, argsx>
+            (... and has_cast<item_t, argsx>) and
+            (can_init<attribute_t, init_by<args...>>)
         )
         ref_array(init_by<args...> const & init_attr, item_t const & first, argsx const & ... rest){
             base_t::init_one_by_one(init_attr, first, rest...);
