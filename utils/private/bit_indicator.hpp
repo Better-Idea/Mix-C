@@ -97,7 +97,7 @@ namespace mixc::utils_bit_indicator{
         xprif(ptotal_bits   , uxx)
     )
         bit_indicator_t() : 
-            pbmp(nullptr), pheight(0), psize(0) {}
+            pbmp(nullptr), pheight(0), psize(0), ptotal_bits(0){}
 
         /* 函数：构造函数（外部分配内存）
          * 参数：
