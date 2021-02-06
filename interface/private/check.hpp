@@ -32,13 +32,13 @@ namespace mixc::interface_private_check::origin{
     };
 
     template<class seq_t>
-    concept check_indexable = requires(seq_t list, inc::item_origin_of<seq_t> & (seq_t::*indexer)(uxx)){
-        indexer = & seq_t::operator[];
+    concept check_indexable = requires(seq_t list, inc::item_origin_of<seq_t> * ptr, uxx index){
+        ptr     = & list[index];
     };
 
     template<class seq_t, class item_t>
-    concept check_indexablex = requires(seq_t list, item_t & (seq_t::*indexer)(uxx)){
-        indexer = & seq_t::operator[];
+    concept check_indexablex = requires(seq_t list, item_t * ptr, uxx index){
+        ptr = &list[index];
     };
 
     template<class seq_t>
