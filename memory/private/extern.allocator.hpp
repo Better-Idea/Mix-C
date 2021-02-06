@@ -3,11 +3,8 @@
 #endif
 
 #define xuser mixc::memory_alloctor::inc
-#include"docker/hashmap.hpp"
-#include"gc/ref.hpp"
+#include"configure.hpp"
 #include"memory/private/tiny_allocator.hpp"
-#include"mixc.hpp"
-#include"macro/xhint.hpp"
 
 #if xuse_libc_malloc
 #include<malloc.h>
@@ -43,6 +40,7 @@ namespace mixc::memory_alloctor::origin{
     }
 }
 #else
+
 namespace mixc::memory_alloctor{
     // 单线程
     inline static inc::tiny_allocator mem;
@@ -70,12 +68,3 @@ namespace mixc::memory_alloctor::origin{
     }
 }
 #endif
-
-namespace mixc::gc_ref{
-    using namespace mixc::memory_alloctor::inc;
-
-    hashmap<visited_ptr_t, info_t>    gc_map;
-    uxx                               degree_dvalue;
-    visited_ptr_t                     root;
-    bool                              can_free_whole_ring;
-}
