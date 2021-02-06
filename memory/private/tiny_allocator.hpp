@@ -5,8 +5,6 @@
 #define xuser mixc::memory_private_tiny_allocator::inc
 #include"define/base_type.hpp"
 #include"utils/bit_indicator.hpp"
-#include"interface/ranger.hpp"
-#include"lang/cxx/index_of_last.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xdebug+.hpp"
 #include"macro/xnew.hpp"
@@ -202,8 +200,8 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 return;
             }
 
-            pused_bytes           -= bytes;
-            pneed_free_count      -= 1;
+            pused_bytes            -= bytes;
+            pneed_free_count       -= 1;
 
             auto return_size_index = (bytes - 1) / scale_one;
 
@@ -213,21 +211,21 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 return;
             }
 
-            auto   cur        = nodep(ptr);
-            auto & bmp        = get_page_header_by(cur);
-            auto   free_block = cur;
-            auto   free_size  = return_size_index + 1;
-            auto   left       = bmp.left_free_block_of(cur);
-            auto   right      = bmp.right_free_block_of(cur, free_size);
+            auto   cur              = nodep(ptr);
+            auto & bmp              = get_page_header_by(cur);
+            auto   free_block       = cur;
+            auto   free_size        = return_size_index + 1;
+            auto   left             = bmp.left_free_block_of(cur);
+            auto   right            = bmp.right_free_block_of(cur, free_size);
 
             if (bmp.mark_free(cur, return_size_index + 1); left.begin != nullptr){
                 bmp.mark_free(left.begin, left.length);
-                free_block  = left.begin;
-                free_size  += left.length;
+                free_block          = left.begin;
+                free_size          += left.length;
                 remove(left.begin, left.length);
             }
             if (right.begin != nullptr){
-                free_size  += right.length;
+                free_size          += right.length;
                 bmp.mark_free(right.begin, right.length);
                 remove(right.begin, right.length);
             }
@@ -247,14 +245,14 @@ namespace mixc::memory_private_tiny_allocator::origin{
             auto next      = ptr->next;
             auto prev      = ptr->previous;
             inner::free_aligned(ptr);
-            palive_pages   -= 1;
+            palive_pages  -= 1;
 
             if (next == ptr){
                 page_list  = nullptr;
                 return;
             }
             if (ptr == page_list){
-                page_list = next;
+                page_list  = next;
             }
 
             next->previous = prev;
@@ -383,7 +381,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
         indicator_t     slot;
         indicator_t     slot_plus;
-        uxx             palive_pages         = 0;
+        uxx             palive_pages        = 0;
         uxx             pused_bytes         = 0;
         uxx             pneed_free_count    = 0;
         page_header *   page_list           = nullptr;
