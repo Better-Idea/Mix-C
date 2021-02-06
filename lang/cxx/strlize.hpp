@@ -112,9 +112,7 @@ namespace mixc::lang_cxx_strlize{
             base_t(self){}
 
         template<class type, class call_t>
-        requires(
-            can_cxx_format<call_t, item_t>
-        )
+        requires(can_cxx_format<call_t, item_t>)
         static auto strlize(type value, bool is_scientific_notation, uxx precious, call_t const & invoke){
             #define xgen(v,str)                                         \
             if (value == v){                                            \
@@ -403,81 +401,61 @@ namespace mixc::lang_cxx_strlize{
         // TODO:可以转换成数字类型的类
 
         template<inc::is_integer number_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(number_t value, int_format_t fmt, inc::numeration_t radix, asciis lut, alloc_t const & alloc){
             thex = the.strlize(value, fmt, radix, lut, alloc);
         }
 
         template<inc::is_integer number_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(number_t value, inc::numeration_t radix, asciis lut, alloc_t const & alloc){
             thex = the.strlize(value, int_format_t::fmt_n, radix, lut, alloc);
         }
 
         template<inc::is_integer number_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(number_t value, inc::numeration_t radix, alloc_t const & alloc){
             thex = the.strlize(value, int_format_t::fmt_n, radix, lower, alloc);
         }
 
         template<inc::is_integer number_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(number_t value, alloc_t const & alloc){
             thex = the.strlize(value, int_format_t::fmt_n, inc::numeration_t::dec, lower, alloc);
         }
 
         template<inc::is_float float_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(float_t value, float_format_t mode, uxx precious, alloc_t const & alloc){
             thex = the.strlize(value, mode, precious, alloc);
         }
 
         template<inc::is_float float_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(float_t value, uxx precious, alloc_t const & alloc){
             thex = the.strlize(value, float_format_t::fmt_1p2e3, precious, alloc);
         }
 
         template<inc::is_float float_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(float_t value, float_format_t mode, alloc_t const & alloc){
             thex = the.strlize(value, mode, not_exist, alloc);
         }
 
         template<inc::is_float float_t, class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(float_t value, alloc_t const & alloc){
             thex = the.strlize(value, float_format_t::fmt_n, not_exist, alloc);
         }
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(final value, alloc_t const & alloc){
             thex = the_t(value).clone(alloc);
         }
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(item_t value, alloc_t const & alloc){
             item_t * ptr    = alloc(1);
             thex            = the_t{ ptr, 1 };
