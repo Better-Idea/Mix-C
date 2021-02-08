@@ -14,6 +14,7 @@
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
+#include"interface/ranger.hpp"
 #include"lock/atom_swap.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"macro/xnew.hpp"
@@ -69,12 +70,12 @@ namespace mixc::docker_array{
     )
         using item_t = inc::remove_ref<decltype(data[0])>;
     public:
-        constexpr array_t() : data(){}
         constexpr array_t(array_t const &) = default;
 
         template<class ... args>
-        constexpr array_t(item_t const & first, args const & ... list) : 
-            data { first, ((item_t)list)... } {}
+        requires(... and inc::has_cast<item_t, args>)
+        constexpr array_t(args const & ... list) : 
+            data { ((item_t &)(args &)list)... } {}
 
         template<class finalx>
         constexpr array_t(array_t<finalx, type, count, rest...> const & self) : 
@@ -115,6 +116,9 @@ namespace mixc::docker_array{
         xpubgetx(length, uxx){
             return count;
         }
+
+    public:
+        xranger(item_t)
     $
 
     static inline uxx   empty_array     = 0;
@@ -182,18 +186,18 @@ namespace mixc::docker_array{
             array_t(capacity, [](item_t * item_ptr){
                 xnew(item_ptr) item_t();
             }){}
-        
+
         template<class ... args>
         requires(... and inc::has_cast<item_t, args>)
-        array_t(item_t const & first, args const & ... rest) : 
+        array_t(args const & ... list) : 
             data(
-                create(::length{1 + sizeof...(args)}, inc::default_alloc<void>)
+                create(::length{ sizeof...(args) }, inc::default_alloc<void>)
             ){
 
             struct item_ref{
                 item_t const & value;
                 item_ref(item_t const & value) : value(value){}
-            } items[] = {first, rest...};
+            } items[] = { list... };
 
             for(uxx i = 0, len = the.length(); i < len; i++){
                 xnew(the.data + i) item_t(items[i].value);
@@ -290,6 +294,9 @@ namespace mixc::docker_array{
         xpubgetx(length, uxx){
             return header()[0];
         }
+
+    public:
+        xranger(item_t)
     $
 
     template<class final, class type, uxx count, uxx ... rest>
