@@ -14,7 +14,6 @@
 #undef  xuser
 #define xuser mixc::algo_insert::inc
 #include"interface/seqptr.hpp"
-#include"interface/initializer_list.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
@@ -32,13 +31,13 @@ namespace mixc::algo_insert{
      * 返回：
      * 插入元素后序列的长度
      */
-    template<class seq_des_t, class seq_src_t = seq_des_t>
+    template<class seq_tar_t, class seq_src_t>
     inline uxx insert_core(
-        seq_des_t                   target, 
+        seq_tar_t                   target, 
         ixx                         index, 
         seq_src_t                   values){
         
-        using item_t = inc::item_origin_of<seq_des_t>;
+        using item_t = inc::item_origin_of<seq_tar_t>;
         xindex_rollback(target.length(), index, +1);
 
         ixx i   = ixx(target.length());
@@ -63,9 +62,9 @@ namespace mixc::algo_insert{
      * 返回：
      * 插入元素后序列的长度
      */
-    template<class seq_des_t, class seq_src_t = seq_des_t, class seq_val_t = seq_src_t>
+    template<class seq_tar_t, class seq_src_t, class seq_val_t>
     inline uxx insert_core(
-        seq_des_t                           target,
+        seq_tar_t                           target,
         seq_src_t                           source,
         ixx                                 index,
         seq_val_t                           values){
@@ -113,22 +112,19 @@ namespace mixc::algo_insert{
      * 插入元素后序列的长度
      */
     template<
-        inc::can_unified_seqlize seq_des_t, 
-        inc::can_unified_seqlize seq_val_t
+        inc::can_unified_seqlize seq_tar_t,
+        class                    seq_val_t = inc::seqptr<
+            inc::item_origin_of<seq_tar_t>
+        >
     >
-    requires(
-        inc::has_cast<
-            inc::item_origin_of<seq_des_t>,
-            inc::item_origin_of<seq_val_t>
-        > == true
-    )
+    requires(inc::can_seqptrlize<seq_val_t>)
     inline uxx insert(
-        seq_des_t                   const & target,
+        seq_tar_t                   const & target,
         ixx                                 index,
         seq_val_t                   const & values){
 
         return insert_core(
-            inc::unified_seq<seq_des_t>(target), index, 
+            inc::unified_seq<seq_tar_t>(target), index, 
             inc::unified_seq<seq_val_t>(values)
         );
     }
@@ -144,8 +140,10 @@ namespace mixc::algo_insert{
      */
     template<
         inc::can_unified_seqlize    seq_tar_t, 
-        inc::can_unified_seqlize    seq_src_t, 
-        inc::can_unified_seqlize    seq_val_t
+        class                       seq_src_t = inc::seqptr<
+            inc::item_origin_of<seq_tar_t>
+        >,
+        class                       seq_val_t = seq_src_t
     >
     requires(
         inc::has_cast<
@@ -185,7 +183,8 @@ namespace mixc::algo_insert{
      */
     template<
         inc::can_unified_seqlize    seq_tar_t, 
-        inc::can_unified_seqlize    seq_src_t
+        class                       item_t    = inc::item_origin_of<seq_tar_t>,
+        class                       seq_src_t = inc::seqptr<item_t>
     >
     inline uxx insert(
         seq_tar_t                   const & target,
@@ -197,9 +196,7 @@ namespace mixc::algo_insert{
         return insert_core(
             inc::unified_seq<seq_tar_t>(target), 
             inc::unified_seq<seq_src_t>(source),  index, 
-            inc::seqptr<
-                inc::item_origin_of<seq_tar_t>
-            >({value})
+            inc::seqptr<item_t>({value})
         );
     }
 }
