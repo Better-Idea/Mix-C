@@ -1,4 +1,4 @@
-/* 模块：bit_indicator
+/* 模块：bits_indicator
  * 类型：基础结构
  * 功能：提供静态/动态的位图结构
  * 用法：
@@ -16,7 +16,7 @@
 #include"memop/zeros.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
-#include"utils/private/adapter.bit_indicator.hpp"
+#include"utils/private/adapter.bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_bit_indicator{
@@ -209,7 +209,7 @@ namespace mixc::utils_bit_indicator{
     $
 
     template<class final, uxx total_bits>
-    using bit_indicator = inc::adapter_bit_indicator<
+    using bits_indicator = inc::adapter_bit_indicator<
         bit_indicator_t<final, total_bits>
     >;
 }
