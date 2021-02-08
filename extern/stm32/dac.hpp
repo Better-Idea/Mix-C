@@ -3,7 +3,7 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::extern_stm32_dac::inc
-        #include"define/bitbind.hpp"
+        #include"define/bits_bind.hpp"
         #include"define/mfxx.hpp"
         #include"extern/stm32/define.hpp"
     #pragma pop_macro("xuser")

@@ -8,7 +8,7 @@
 #include"math/index_system.hpp"
 #include"memop/swap.hpp"
 #include"mixc.hpp"
-#include"utils/bit_indicator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_gui_paint_masker_plus::origin {
@@ -20,7 +20,7 @@ namespace mixc::extern_gui_paint_masker_plus::origin {
         xpubb(inc::addressing<width, height>)
     )
     private:
-        using masker = inc::bit_indicator<width * height>;
+        using masker = inc::bits_indicator<width * height>;
         masker   idc[2];
         masker * idc_a;
         masker * idc_b;

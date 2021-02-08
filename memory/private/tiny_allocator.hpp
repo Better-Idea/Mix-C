@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::memory_private_tiny_allocator::inc
 #include"define/base_type.hpp"
-#include"utils/bit_indicator.hpp"
+#include"utils/bits_indicator.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xdebug+.hpp"
 #include"macro/xnew.hpp"
@@ -160,7 +160,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
     struct tiny_allocator{
     private:
-        using indicator_t = inc::bit_indicator<scale>;
+        using indicator_t = inc::bits_indicator<scale>;
     public:
         uxx used_bytes() {
             return pused_bytes;

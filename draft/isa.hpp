@@ -3,7 +3,7 @@
     #pragma push_macro("xuser")
         #undef  xuser
         #define xuser mixc::draft_isa::inc
-                #include"define/bitbind.hpp"
+                #include"define/bits_bind.hpp"
         #include"instruction/index_of_first_set.hpp"
         #include"instruction/index_of_last_set.hpp"
         #include"macro/xprop.hpp"
@@ -244,7 +244,7 @@
 
             struct state_t{
                 struct {
-                    inc::bitbind<u16> operator[](uxx index){
+                    inc::bits_bind<u16> operator[](uxx index){
                         return { & mask, index };
                     }
                 private:

@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_mmu_x3240::inc
-#include"docker/bit_indicator.hpp"
+#include"docker/bits_indicator.hpp"
 #include"instruction/count_of_set.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -151,8 +151,8 @@ namespace mixc::extern_mmu_x3240::origin{
     };
 
     struct sysreg{
-        inc::bit_indicator<128> is_used;
-        inc::bit_indicator<128> is_objs;
+        inc::bits_indicator<128> is_used;
+        inc::bits_indicator<128> is_objs;
 
         union{
             u08p m08;

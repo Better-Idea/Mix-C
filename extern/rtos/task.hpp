@@ -5,7 +5,7 @@
 #define xuser mixc::extern_rtos_task::inc
 #include"define/base_type.hpp"
 #include"macro/xstruct.hpp"
-#include"utils/bit_indicator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 #define xtask_max_priority          32
@@ -25,7 +25,7 @@ namespace mixc::extern_rtos_task::origin{
     };
 
     struct task_list{
-        using idc_t = inc::bit_indicator<xtask_max_priority>;
+        using idc_t = inc::bits_indicator<xtask_max_priority>;
         using itm_t = task_context * [xtask_max_priority + 1/*one for defer*/];
 
         void push(task_context * task){

@@ -7,7 +7,7 @@
 #include"extern/gui/private/try_paint_result_t.hpp"
 #include"math/index_system.hpp"
 #include"mixc.hpp"
-#include"utils/bit_indicator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_gui_paint_masker_mini::origin {
@@ -28,7 +28,7 @@ namespace mixc::extern_gui_paint_masker_mini::origin {
         };
 
         using final                         = the_t;
-        using idc_t                         = inc::bit_indicator<pixel_per_row * pixel_per_column>;
+        using idc_t                         = inc::bits_indicator<pixel_per_row * pixel_per_column>;
         idc_t   idc;
         u16     pixel_count[rows * columns] = {};
         u16     i                           = rows * columns - 1;

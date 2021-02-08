@@ -6,7 +6,7 @@
         #include<setjmp.h>
         #include"configure.hpp"
         #include"define/base_type.hpp"
-        #include"docker/bit_indicator.hpp"
+        #include"docker/bits_indicator.hpp"
         #include"instruction/count_of_set.hpp"
         #include"memory/allocator.hpp"
     #pragma pop_macro("xuser")
@@ -140,7 +140,7 @@
 
         inline static task_control_block                      info_main;
         inline static task_control_block *                    task_cur;
-        inline static inc::bit_indicator<xmax_task_priority>  bmp_prio;
+        inline static inc::bits_indicator<xmax_task_priority>  bmp_prio;
 
         task_control_block * task_current(){
             // TODO:

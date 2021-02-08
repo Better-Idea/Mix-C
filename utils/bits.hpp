@@ -6,7 +6,7 @@
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
-#include"utils/bitbind.hpp"
+#include"utils/bits_bind.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_bits::origin{
@@ -18,8 +18,8 @@ namespace mixc::utils_bits::origin{
         bits() : bits(0){}
         bits(type const & value) : data(value){}
 
-        inc::bitbind<type, bit_type> operator [](uxx index) const {
-            return inc::bitbind<type, bit_type>(xref data, index);
+        inc::bits_bind<type, bit_type> operator [](uxx index) const {
+            return inc::bits_bind<type, bit_type>(xref data, index);
         }
 
         uxx length() const {

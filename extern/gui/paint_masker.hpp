@@ -7,7 +7,7 @@
 #include"extern/gui/private/try_paint_result_t.hpp"
 #include"math/index_system.hpp"
 #include"mixc.hpp"
-#include"utils/bit_indicator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_gui_paint_masker::origin {
@@ -19,7 +19,7 @@ namespace mixc::extern_gui_paint_masker::origin {
         xpubb(inc::addressing<width, height>)
     )
     private:
-        inc::bit_indicator<width * height> idc;
+        inc::bits_indicator<width * height> idc;
     public:
         try_paint_result_t try_paint(uxx x, uxx y){
             auto index = the(x, y);

@@ -12,7 +12,7 @@
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
-#include"utils/bit_indicator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_sort{
@@ -30,7 +30,7 @@ namespace mixc::algo_sort{
         enum{ top_i = sizeof(item_t) - 1 };
         counter_t sum0[256];
         counter_t sum1[256];
-        inc::bit_indicator<256> idc;
+        inc::bits_indicator<256> idc;
 
         auto map = [&](uxx index){
             u08 hex = (u08p(xref r[index + offset])[i]);
