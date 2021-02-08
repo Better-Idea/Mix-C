@@ -10,7 +10,6 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_adapter_array_access::inc
-#include"interface/private/seqptr.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"math/index_system.hpp"
@@ -22,6 +21,7 @@ namespace mixc::docker_adapter_array_access {
     /* - base_t 为被此结构继承的结构类型，要求 base_t 具有以下函数
      *   item_t & base_t::operator[](uxx) const;
      *   uxx      base_t::length() const;
+     *   ANY      base_t::subseq(ANY) const;
      * requires：
      * - base_t::item_t
      */
@@ -32,8 +32,10 @@ namespace mixc::docker_adapter_array_access {
         using base_t::base_t;
         using base_t::operator[];
         using base_t::length;
+        using base_t::subseq;
 
-        xseqptr(item_t);
+        constexpr adapter_array_access(base_t const & self): 
+            base_t(self){}
     private:
         /* 函数：随机访问接口
          * 参数：
