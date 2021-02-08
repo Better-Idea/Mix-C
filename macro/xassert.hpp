@@ -44,11 +44,18 @@ namespace mixc::macro_xassert::origin{
         }
     };
 }
+
 #define xtest(func_name)    ::mixc::macro_xassert::origin::closure xlink2(__test, __COUNTER__) =    \
     [](::mixc::macro_xassert::origin::mixc_test_context && __test_context =                         \
        ::mixc::macro_xassert::origin::mixc_test_context(__FILE__, __LINE__, func_name))
 
 #define xfail_if(condition,...)     if (__test_context.fail_if((condition), __LINE__, #__VA_ARGS__ ",", ## __VA_ARGS__))
+#define xfail_ifeq(left,right,...)  xfail_if((left) == (right), left, right, ## __VA_ARGS__)
+#define xfail_ifne(left,right,...)  xfail_if((left) != (right), left, right, ## __VA_ARGS__)
+#define xfail_ifge(left,right,...)  xfail_if((left) >= (right), left, right, ## __VA_ARGS__)
+#define xfail_ifgt(left,right,...)  xfail_if((left) >  (right), left, right, ## __VA_ARGS__)
+#define xfail_iflt(left,right,...)  xfail_if((left) <  (right), left, right, ## __VA_ARGS__)
+#define xfail_ifle(left,right,...)  xfail_if((left) <= (right), left, right, ## __VA_ARGS__)
 
 #endif
 
