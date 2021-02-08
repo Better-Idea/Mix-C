@@ -21,16 +21,16 @@ for(uxx i = 0; i < xinitial_length * 32; i++){
     for(uxx j = 0; j <= i; j++){
         meta.value = j;
         var_array<xinitial_length>::push(xref table, xref length, meta, alloc, free);
-        xassert_eq(j + 1, length);
+        xfail_ifne(j + 1, length);
     }
     for(uxx j = 0; j <= i; j++){
         auto & current = var_array<xinitial_length>::access(table, j);
-        xassert_eq(j, current.value);
+        xfail_ifne(j, current.value);
     }
 
     var_array<xinitial_length>::clear(xref table, xref length, free);
-    xassert_eq(i + 1, meta.counter);
-    xassert_eq(cost, used_bytes());
+    xfail_ifne(i + 1, meta.counter);
+    xfail_ifne(cost, used_bytes());
     meta.counter = 0;
 }
 
@@ -41,22 +41,22 @@ for(uxx i = 0; i < xinitial_length * 32; i++){
     }
     for(uxx j = 0; j <= i; j++){
         auto & current = var_array<xinitial_length>::access(table, j);
-        xassert_eq(j, current.value);
+        xfail_ifne(j, current.value);
     }
 
     auto destroy_count = i + 1;
 
     for(uxx j = 0, k = length / 2; j < k; j++){
         var_array<xinitial_length>::pop(xref table, xref length, xref meta, alloc, free);
-        xassert_eq(1, meta.counter);
-        xassert_eq(length, meta.value);
+        xfail_ifne(1, meta.counter);
+        xfail_ifne(length, meta.value);
         meta.counter    = 0;
         destroy_count  -= 1;
     }
 
     inc::var_array<xinitial_length>::clear(xref table, xref length, free);
-    xassert_eq(destroy_count, meta.counter);
-    xassert_eq(cost, used_bytes());
+    xfail_ifne(destroy_count, meta.counter);
+    xfail_ifne(cost, used_bytes());
     meta.counter = 0;
 }
 
@@ -67,11 +67,11 @@ for(uxx i = 0; i < xinitial_length * 32; i++){
 
 while(length != 0){
     var_array<xinitial_length>::pop(xref table, xref length, xref meta, alloc, free);
-    xassert_eq(length, meta.value);
-    xassert_eq(1, meta.counter);
+    xfail_ifne(length, meta.value);
+    xfail_ifne(1, meta.counter);
     meta.counter = 0;
 }
-xassert_eq(cost, used_bytes());
+xfail_ifne(cost, used_bytes());
 
 #undef xinitial_length
 #endif

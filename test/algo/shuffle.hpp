@@ -5,9 +5,9 @@
 #define xuser mixc::test_algo_shuffle::inc
 #include"algo/shuffle.hpp"
 #include"docker/array.hpp"
-#include"docker/bit_indicator.hpp"
 #include"macro/xassert.hpp"
 #include"math/random.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::test_algo_shuffle{
@@ -22,7 +22,7 @@ namespace mixc::test_algo_shuffle{
                 for(uxx j = 0; j < 1000; j++){
                     b = a;
                     inc::shuffle(b.subseq(co{0, i}));
-                    inc::bit_indicator<32> bmp;
+                    inc::bits_indicator<32> bmp;
 
                     for(uxx k = 0; k < i; k++){
                         xfail_if(b[k] >= i);

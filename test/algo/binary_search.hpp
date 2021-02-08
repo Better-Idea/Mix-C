@@ -45,7 +45,7 @@ namespace mixc::test_algo_binary_search{
 
         // 对比测试
         for (uxx length = 1; length <= c.length(); length++){
-            auto r = c.range(co{0, length});
+            auto r = c.subseq(co{0, length});
 
             for (uxx find = 0; find < length * 2 + 2; find++){
                 actual = inc::binary_search::match(r, find);

@@ -5,10 +5,10 @@
 #define xuser mixc::algo_test_distinct::inc
 #include"algo/distinct.hpp"
 #include"docker/array.hpp"
-#include"docker/bit_indicator.hpp"
 #include"macro/xassert.hpp"
 #include"math/random.hpp"
 #include"memory/allocator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_test_distinct{
@@ -20,7 +20,7 @@ namespace mixc::algo_test_distinct{
 
         for(uxx i = 1; i < r.length(); i++){
             for(uxx j = 0; j < r.length(); j++){
-                auto && bmp = bit_indicator<1024>{};
+                auto && bmp = bits_indicator<1024>{};
                 auto    seq = r.subseq(co{0, j});
 
                 for(uxx k = 0; k < seq.length(); k++){
@@ -28,9 +28,9 @@ namespace mixc::algo_test_distinct{
                     bmp.set(seq[k]);
                 }
 
-                auto new_list = inc::distinct(seq, [](uxx len) -> inc::unified_seq<decltype(r)>{
+                auto new_list = inc::distinct(seq, [](uxx len) -> decltype(seq){
                     static u32 buffer[1024];
-                    return { buffer, len, };
+                    return { buffer, len };
                 });
 
                 for(uxx k = 0; k < new_list.length(); k++){

@@ -5,10 +5,10 @@
 #define xuser mixc::test_algo_sort::inc
 #include"algo/sort.hpp"
 #include"docker/array.hpp"
-#include"docker/bit_indicator.hpp"
 #include"macro/xassert.hpp"
 #include"macro/xexport.hpp"
 #include"math/random.hpp"
+#include"utils/bits_indicator.hpp"
 
 #include<array>
 #include<algorithm>
