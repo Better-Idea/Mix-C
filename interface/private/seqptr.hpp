@@ -121,7 +121,7 @@ namespace mixc::interface_private_seqptr::origin{
 template<can_interval interval_t>                                                           \
 ::mixc::interface_private_seqptr::origin                                                    \
 ::seqptr<__VA_ARGS__> subseq(interval_t const & i) const {                                  \
-    return *this;                                                                           \
+    return ::mixc::interface_private_seqptr::origin::seqptr<__VA_ARGS__>(*this).subseq(i);  \
 }
 
 #endif
