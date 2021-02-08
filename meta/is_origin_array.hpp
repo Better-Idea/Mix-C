@@ -8,7 +8,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_origin_array{
-    template<class a>
+    template<class>
     struct meta{ enum { result = false }; };
 
     template<class a, uxx length>
