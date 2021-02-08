@@ -96,6 +96,10 @@ namespace mixc::interface_private_seqptr{
             return len;
         }
 
+        xpubgetx(is_support_logic_inverse, bool){
+            return false;
+        }
+
     public:
         template<can_interval interval_t>
         final subseq(interval_t const & i) const {

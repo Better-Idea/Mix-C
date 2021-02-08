@@ -136,6 +136,10 @@ namespace mixc::interface_private_ranger{
         xpubgetx(length, uxx) {
             return len;
         }
+
+        xpubgetx(is_support_logic_inverse, bool){
+            return true;
+        }
     $
 
     template<class item_type>
