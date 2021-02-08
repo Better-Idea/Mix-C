@@ -3,61 +3,84 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_private_ranger::inc
-#include"interface/private/check.hpp"
 #include"interface/initializer_list.hpp"
+#include"interface/private/seqptr.hpp"
 #include"macro/xalign.hpp"
-#include"macro/xitr_foreach.hpp"
-#include"macro/xnew.hpp"
 #include"math/index_system.hpp"
-#include"memop/signature.hpp"
-#include"meta/is_initializer_list.hpp"
 #include"meta/is_origin_array.hpp"
+#include"meta/is_origin_arrayx.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser") 
 
 namespace mixc::docker_adapter_array_access {
-    template<class base_t> struct adapter_array_access;
+    template<class ranger_base_t> struct adapter_array_access;
+}
+
+namespace mixc::interface_private_ranger::inc{
+    using namespace mixc::docker_adapter_array_access;
 }
 
 namespace mixc::interface_private_ranger{
     using namespace inc;
 
-    template<class object>
-    static inline xalign(sizeof(voidp) * 2) voidp itrs[2];
+    template<class seq_t, class item_t>
+    concept has_indexer_length_pairx = requires(seq_t seq, item_t * ptr, uxx length){
+        // 为了兼容 msvc 16.8 以下版本：使用 seq.operator item_t & []() 会出现编译器内部错误
+        ptr     = xref seq[uxx(0)];
+        length  = seq.length();
+    };
+
+    template<class seq_t>
+    concept has_indexer_length_pair = 
+        has_indexer_length_pairx<seq_t, inc::item_origin_of<seq_t>>;
+
+    template<class seq_t, class item_t>
+    concept can_rangerlizex = 
+        inc::is_origin_arrayx<seq_t, item_t> or has_indexer_length_pairx<seq_t, item_t>;
+
+    template<class seq_t>
+    concept can_rangerlize = 
+        can_rangerlizex<seq_t, inc::item_origin_of<seq_t>>;
+
+    template<class object_t>
+    struct helper{
+        // 为了兼容 msvc 16.8 以下版本：全局静态内联模板变量对齐无效的 bug，只能套个结构体曲线救国
+        static inline xalign(sizeof(voidp) * 2) voidp itrs[2];
+    };
 
     xstruct(
-        xname(base)
+        xname(ranger_base),
+        xprof(ptr, voidp  ),
+        xprof(itr, voidp *),
+        xprof(len, uxx    ),
+        xprof(ofs, uxx    )
     )
     private:
-        enum{ mask = sizeof(uxx) * 2 - 1 };
+        using final = the_t;
+        enum{ mask  = sizeof(voidp) * 2 - 1 };
 
         template<class object, class return_type>
-        return_type & pos(uxx index){
-            return (*(object *)ptr)[ofs + index];
+        static return_type & pos(ranger_base * this_ptr, uxx index){
+            return (*(object *)this_ptr->ptr)[this_ptr->ofs + index];
         }
 
         template<class object, class return_type>
-        return_type * neg(uxx index){
-            return (*(object *)ptr)[ofs - index];
+        static return_type & neg(ranger_base * this_ptr, uxx index){
+            return (*(object *)this_ptr->ptr)[this_ptr->ofs - index];
         }
 
         template<class return_type>
-        return_type & posx(uxx index){
-            return ((return_type *)ptr)[ofs + index];
+        static return_type & posx(ranger_base * this_ptr, uxx index){
+            return ((return_type *)this_ptr->ptr)[this_ptr->ofs + index];
         }
 
         template<class return_type>
-        return_type & negx(uxx index){
-            return ((return_type *)ptr)[ofs - index];
+        static return_type & negx(ranger_base * this_ptr, uxx index){
+            return ((return_type *)this_ptr->ptr)[this_ptr->ofs - index];
         }
 
     protected:
-        mutable voidp    ptr = nullptr;
-        mutable voidp *  itr = nullptr;
-        mutable uxx      len = 0;
-        mutable uxx      ofs = 0;
-
         void turn_positive_order() {
             itr = (voidp *)(uxx(itr) & ~mask);
         }
@@ -67,102 +90,91 @@ namespace mixc::interface_private_ranger{
         }
 
         template<class item_t>
-        item_t access(uxx index) const {
-            return inc::signature<item_t(uxx)>::call(this, itr[0], index);
-        }
-    public:
-        template<class seq_t>
-        base(seq_t const & list) {
-            using item_t = inc::item_origin_of<seq_t>;
-
-            if constexpr (inc::check_initializer_list<seq_t>){
-                xnew(this) base(list.begin(), list.size(), 0);
-            }
-            else if constexpr (inc::check_length<seq_t>){
-                xnew(this) base(& list, list.length(), 0);
-            }
-            else{
-                xnew(this) base(& list, sizeof(seq_t) / sizeof(list[0]), 0);
-            }
-
-            if constexpr (inc::check_length<seq_t>){ // is object
-                itr[0] = inc::signature<item_t &(uxx)>::check(& base::pos<seq_t, item_t>);
-                itr[1] = inc::signature<item_t &(uxx)>::check(& base::neg<seq_t, item_t>);
-            }
-            else{
-                itr[0] = inc::signature<item_t &(uxx)>::check(& base::posx<item_t>);
-                itr[1] = inc::signature<item_t &(uxx)>::check(& base::negx<item_t>);
-            }
+        item_t & access(uxx index) const {
+            using invoke_t = item_t &(*)(ranger_base const *, uxx);
+            return invoke_t(*itr)(this, index);
         }
 
+    private:
         template<class object_t>
-        base(object_t const * ptr, uxx len, uxx ofs, bool use_negtive_order = false): 
-            ptr((object_t *)ptr),
-            itr(itrs<object_t>),
-            len(len),
-            ofs(ofs){
-
-            if (use_negtive_order){
-                turn_negtive_order();
-            }
+        void init(object_t const * ptr, uxx len){
+            this->ptr       = (object_t *)ptr;
+            this->itr       = (voidp *)helper<object_t>::itrs;
+            this->len       = (uxx)len;
+            this->ofs       = (0);
         }
 
-        bool is_positive_order() const {
+    public:
+        template<class item_t>
+        ranger_base(item_t * seq, uxx len){
+            init(seq, len);
+            itr[0]          = voidp(& posx<item_t>);
+            itr[1]          = voidp(& negx<item_t>);
+        }
+
+        template<has_indexer_length_pair seq_t>
+        ranger_base(seq_t const & seq){
+            init(xref seq, seq.length());
+            using item_t    = inc::item_origin_of<seq_t>;
+            itr[0]          = voidp(& pos<seq_t, item_t>);
+            itr[1]          = voidp(& neg<seq_t, item_t>);
+        }
+
+        template<inc::is_origin_array seq_t>
+        ranger_base(seq_t const & seq):
+            ranger_base(& seq, sizeof(seq) / sizeof(inc::item_origin_of<seq_t>)){
+        }
+
+        xpubgetx(is_positive_order, bool) {
             return (uxx(itr) & mask) == 0;
         }
 
-        bool is_negtive_order() const {
+        xpubgetx(is_negtive_order, bool) {
             return (uxx(itr) & mask) != 0;
         }
 
-        uxx length() const {
+        xpubgetx(length, uxx) {
             return len;
         }
     $
 
-    template<class seq_t, class item_t>
-    concept can_rangerlizex = 
-        (inc::check_initializer_listx<seq_t, item_t> and inc::is_initializer_list<seq_t>) or
-        (inc::check_arrayx<seq_t, item_t> and inc::is_origin_array<seq_t>) or
-        (inc::check_indexablex<seq_t, item_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
-
-    template<class seq_t>
-    concept can_rangerlize = 
-        (inc::check_initializer_list<seq_t> and inc::is_initializer_list<seq_t>) or
-        (inc::check_array<seq_t> and inc::is_origin_array<seq_t>) or
-        (inc::check_indexable<seq_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
-
-    template<class item_t>
+    template<class item_type>
     xstruct(
-        xtmpl(ranger, item_t),
-        xpubb(base)
+        xtmpl(ranger, item_type),
+        xpubb(ranger_base)
     )
     public:
-        ranger(base impl) : 
-            base(impl){}
+        using item_t = item_type;
+        using final  = inc::adapter_array_access<the_t>;
 
-        ranger(item_t const * ptr, uxx len) : 
-            base(ptr, len, 0){}
+        constexpr ranger(the_t const &) = default;
+
+        constexpr ranger(item_t const * ptr, uxx len) :
+            ranger_base((item_t *)ptr, len){}
+
+        constexpr ranger(inc::initializer_list<item_t> const & seq) :
+            ranger(seq.begin(), seq.size()){
+        }
+
+        constexpr ranger(inc::seqptr<item_t> const & seq) :
+            ranger(seq, seq.length()){
+        }
 
         template<class seq_t>
         requires(can_rangerlizex<seq_t, item_t>)
-        ranger(seq_t const & list) : 
-            base(list){
-        }
-
-        ranger(inc::initializer_list<item_t> const & list){ // 使用显式的 initializer_list
-            xnew(this) ranger(list.begin(), list.size());
+        constexpr ranger(seq_t const & list) : 
+            ranger_base(list){
         }
 
         item_t & operator[](uxx index){
-            return access<item_t &>(index);
+            return access<item_t>(index);
         }
 
         item_t & operator[](uxx index) const {
-            return access<item_t &>(index);
+            return access<item_t>(index);
         }
 
-        the_t backward(uxx offset) const {
+        final backward(uxx offset) const {
             if (the_t r = the; is_positive_order()){
                 r.ofs += offset;
                 r.len -= offset;
@@ -175,13 +187,13 @@ namespace mixc::interface_private_ranger{
             }
         }
 
-        the_t forward(uxx offset) const {
+        final forward(uxx offset) const {
             return backward(uxx(0) - offset);
         }
 
         template<can_interval interval_t>
-        ranger<item_t> subseq(interval_t const & i){
-            ranger<item_t> r = the;
+        final subseq(interval_t const & i) const {
+            the_t r = the;
             i.normalize(the.length());
 
             if (is_positive_order()){ // 正序
@@ -209,7 +221,6 @@ namespace mixc::interface_private_ranger{
             return r;
         }
     $
-
 }
 
 namespace mixc::interface_private_ranger::origin{
@@ -217,7 +228,7 @@ namespace mixc::interface_private_ranger::origin{
     using mixc::interface_private_ranger::can_rangerlizex;
 
     template<class item_t>
-    using ranger = mixc::docker_adapter_array_access::adapter_array_access<
+    using ranger = inc::adapter_array_access<
         mixc::interface_private_ranger::ranger<item_t>
     >;
 }
@@ -225,15 +236,8 @@ namespace mixc::interface_private_ranger::origin{
 #define xranger(...)                                                                        \
 template<can_interval interval_t>                                                           \
 ::mixc::interface_private_ranger::origin                                                    \
-::ranger<__VA_ARGS__> range(interval_t const & i) const {                                   \
-    using namespace ::mixc::interface_private_ranger;                                       \
-    if (i.normalize(this->length());                                                        \
-        i.left() <= i.right()){                                                             \
-        return base(this, i.right() - i.left() + 1, i.left());                              \
-    }                                                                                       \
-    else{                                                                                   \
-        return base(this, i.left() - i.right() + 1, i.left(), true/*negtive order*/);       \
-    }                                                                                       \
+::ranger<__VA_ARGS__> subseq(interval_t const & i) const {                                  \
+    return ::mixc::interface_private_ranger::origin::ranger<__VA_ARGS__>(*this).subseq(i);  \
 }
 
 #endif
