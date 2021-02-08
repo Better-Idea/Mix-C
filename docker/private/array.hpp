@@ -75,7 +75,9 @@ namespace mixc::docker_array{
         template<class ... args>
         requires(... and inc::has_cast<item_t, args>)
         constexpr array_t(args const & ... list) : 
-            data { ((item_t &)(args &)list)... } {}
+            // (item_t &)(args &) 和指针的转换类似，会导致不正确的行为
+            // data { ((item_t &)(args &)list)... } {}
+            data { ((args &)list)... } {}
 
         template<class finalx>
         constexpr array_t(array_t<finalx, type, count, rest...> const & self) : 
