@@ -1,20 +1,20 @@
-#ifndef xpack_define_bitbind
-#define xpack_define_bitbind
+#ifndef xpack_define_bits_bind
+#define xpack_define_bits_bind
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::utils_bitbind::inc
+#define xuser mixc::utils_bits_bind::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::utils_bitbind{
+namespace mixc::utils_bits_bind{
     template<class type, class bit_type = bool>
     xstruct(
-        xtmpl(bitbind, type, bit_type),
+        xtmpl(bits_bind, type, bit_type),
         xprif(ptr,  type *),
         xprif(mask, type)
     )
-        bitbind() : bitbind(nullptr, 0) {}
-        bitbind(type * bits, uxx index){
+        bits_bind() : bits_bind(nullptr, 0) {}
+        bits_bind(type * bits, uxx index){
             the.bind(bits, index);
         }
 
@@ -28,7 +28,7 @@ namespace mixc::utils_bitbind{
             mask        = type(1) << index;
         }
 
-        void swap_value(bitbind value){
+        void swap_value(bits_bind value){
             bit_type a  = the;
             bit_type b  = value;
             the         = b;
@@ -43,4 +43,4 @@ namespace mixc::utils_bitbind{
 
 #endif
 
-xexport(mixc::utils_bitbind::bitbind)
+xexport(mixc::utils_bits_bind::bits_bind)
