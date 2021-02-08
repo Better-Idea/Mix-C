@@ -3,13 +3,11 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_private_seqptr::inc
-#include"interface/private/check.hpp"
-#include"interface/private/ranger.hpp"
 #include"interface/initializer_list.hpp"
-#include"macro/xnew.hpp"
 #include"math/index_system.hpp"
-#include"meta/is_initializer_list.hpp"
-#include"meta/is_origin_array.hpp"
+#include"meta/is_initializer_listx.hpp"
+#include"meta/is_origin_arrayx.hpp"
+#include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -17,48 +15,57 @@ namespace mixc::docker_adapter_array_access {
     template<class base_t> struct adapter_array_access;
 }
 
+namespace mixc::interface_private_seqptr::inc{
+    using namespace mixc::docker_adapter_array_access;
+}
+
 namespace mixc::interface_private_seqptr{
     template<class seq_t, class item_t>
+    concept has_ptr_length_pairx = requires(seq_t seq, item_t * ptr, uxx length){
+        ptr     = seq;
+        length  = seq.length();
+    };
+
+    template<class seq_t, class item_t>
     concept can_seqptrlizex = 
-        (inc::check_initializer_listx<seq_t, item_t> and inc::is_initializer_list<seq_t>) or
-        (inc::check_arrayx<seq_t, item_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
+        inc::is_initializer_listx<seq_t, item_t> or
+        inc::is_origin_arrayx<seq_t, item_t> or 
+        has_ptr_length_pairx<seq_t, item_t>;
 
     template<class seq_t>
     concept can_seqptrlize = 
-        (inc::check_initializer_list<seq_t> and inc::is_initializer_list<seq_t>) or
-        (inc::check_array<seq_t> and bool(inc::is_origin_array<seq_t> ^ inc::check_length<seq_t>));
+        can_seqptrlizex<seq_t, inc::item_origin_of<seq_t>> == true;
 
     template<class item_type>
     xstruct(
-        xtmpl(seqptr, item_type)
+        xtmpl(seqptr, item_type),
+        xprif(ptr,  item_type *),
+        xprif(len,  uxx)
     )
     public:
         using item_t            = item_type;
-        using final             = the_t;
-    private:
-        mutable item_t *    ptr = nullptr;
-        mutable uxx         len = 0;
+        using final             = inc::adapter_array_access<the_t>;
     public:
-        seqptr(the_t const &) = default;
-        seqptr(item_t const * ptr, uxx len) : 
+        constexpr seqptr(the_t const &) : 
+            ptr(nullptr), len(0){}
+
+        constexpr seqptr(item_t const * ptr, uxx len) : 
             ptr((item_t *)ptr), len(len){}
 
-        template<class seq_t>
-        requires(can_seqptrlizex<seq_t, item_t>)
-        seqptr(seq_t const & list){
-            if constexpr (inc::check_initializer_list<seq_t>){
-                xnew(this) seqptr(list.begin(), list.size());
-            }
-            else if constexpr (inc::check_length<seq_t>){
-                xnew(this) seqptr(list, list.length());
-            }
-            else{
-                xnew(this) seqptr(list, sizeof(seq_t) / sizeof(list[0]));
-            }
+        constexpr seqptr(inc::initializer_list<item_t> const & seq) :
+            seqptr(seq.begin(), seq.size()){
         }
 
-        seqptr(inc::initializer_list<item_t> const & list){ // 使用显式的 initializer_list
-            xnew(this) seqptr(list.begin(), list.size());
+        template<class seq_t>
+        requires(inc::is_origin_arrayx<seq_t, item_t>)
+        constexpr seqptr(seq_t const & list) : 
+            seqptr(list, sizeof(seq_t) / sizeof(list[0])){
+        }
+
+        template<class seq_t>
+        requires(has_ptr_length_pairx<seq_t, item_t>)
+        constexpr seqptr(seq_t const & list) : 
+            seqptr(list, list.length()){
         }
 
         operator item_t *(){
@@ -88,6 +95,15 @@ namespace mixc::interface_private_seqptr{
         xpubgetx(length, uxx){
             return len;
         }
+
+    public:
+        template<can_interval interval_t>
+        final subseq(interval_t const & i) const {
+            the_t r = the;
+            i.normalize(the.length());
+
+            return the_t(ptr + i.left(), i.right() - i.left() + 1);
+        }
     $
 }
 
@@ -96,7 +112,7 @@ namespace mixc::interface_private_seqptr::origin{
     using mixc::interface_private_seqptr::can_seqptrlizex;
 
     template<class item_t>
-    using seqptr = mixc::docker_adapter_array_access::adapter_array_access<
+    using seqptr = inc::adapter_array_access<
         mixc::interface_private_seqptr::seqptr<item_t>
     >;
 }
@@ -105,16 +121,8 @@ namespace mixc::interface_private_seqptr::origin{
 template<can_interval interval_t>                                                           \
 ::mixc::interface_private_seqptr::origin                                                    \
 ::seqptr<__VA_ARGS__> subseq(interval_t const & i) const {                                  \
-    using ptr_t  = __VA_ARGS__ *;                                                           \
-    using ptrc_t = __VA_ARGS__ const *;                                                     \
-    auto  len    = the.length();                                                            \
-    auto  ptr    = (ptr_t)(ptrc_t)this[0];                                                  \
-    i.normalize(len);                                                                       \
-    return ::mixc::interface_private_seqptr::origin::seqptr<__VA_ARGS__>(                   \
-        ptr + i.left(), i.right() - i.left() + 1                                            \
-    );                                                                                      \
-}                                                                                           \
-xranger(__VA_ARGS__)
+    return *this;                                                                           \
+}
 
 #endif
 
