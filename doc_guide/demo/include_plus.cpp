@@ -5,6 +5,7 @@
 #include"io/file.hpp"
 #include"io/tty.hpp"
 #include"lang/cxx/compare_fastly.hpp"
+#include"lang/cxx/index_of_prefix.hpp"
 #include"lang/cxx/index_of_suffix.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
@@ -28,6 +29,7 @@ namespace xuser{
                 c08 header_file = name;
 
                 if (header_file == "+.hpp" or
+                    header_file.index_of_prefix({"xgen."}) != not_exist or
                     header_file.index_of_suffix({".hpp"}) == not_exist){
                     return;
                 }
@@ -58,6 +60,7 @@ int main(int argc, asciis * argv){
         "docker/",
         "dumb/",
         "instruction/",
+        "interface/",
         "io/",
         "lang/",
         "lang/cxx/",
