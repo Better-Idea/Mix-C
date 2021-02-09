@@ -68,7 +68,6 @@ int main(int argc, asciis * argv){
         "memop/",
         "meta/",
         "meta_seq/",
-        "meta_seq/",
         "utils/",
         "test/algo/",
     });
