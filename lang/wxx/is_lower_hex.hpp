@@ -20,21 +20,17 @@ namespace mixc::lang_wxx_is_lower_hex{
         using inc::wxx<type>::wxx;
         using the_t = core<type>;
 
-        auto is_lower_hex() const {
+        bool is_lower_hex() const {
             return ('0' <= the.data and the.data <= '9' ) or ('a' <= the.data and the.data <= 'f');
         }
     };
-}
 
-#endif
-
-namespace mixc::lang_wxx_is_lower_hex::xuser {
-    template<class final, class type>
-    struct wxx : xusing_lang_wxx::wxx<final, type> {
-        using xusing_lang_wxx::wxx<final, type>::wxx;
+    template<class final, class base, class type>
+    struct meta: base {
+        using base::base;
         using the_t = core<type>;
 
-        auto is_lower_hex() const {
+        bool is_lower_hex() const {
             return the.is_lower_hex();
         }
 
@@ -43,6 +39,13 @@ namespace mixc::lang_wxx_is_lower_hex::xuser {
             return thex;
         }
     };
+}
+
+#endif
+
+namespace mixc::lang_wxx_is_lower_hex::xuser {
+    template<class final, class item_t>
+    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

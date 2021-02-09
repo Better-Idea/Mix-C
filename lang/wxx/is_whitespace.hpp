@@ -20,7 +20,7 @@ namespace mixc::lang_wxx_is_whitespace{
         using inc::wxx<type>::wxx;
         using the_t = core<type>;
 
-        auto is_whitespace() const {
+        bool is_whitespace() const {
             return
                 the.data == 0x09 or
                 the.data == 0x0a or
@@ -32,17 +32,13 @@ namespace mixc::lang_wxx_is_whitespace{
                 the.data == 0xa0;
         }
     };
-}
 
-#endif
-
-namespace mixc::lang_wxx_is_whitespace::xuser{
-    template<class final, class type>
-    struct wxx : xusing_lang_wxx::wxx<final, type> {
-        using xusing_lang_wxx::wxx<final, type>::wxx;
+    template<class final, class base, class type>
+    struct meta: base {
+        using base::base;
         using the_t = core<type>;
 
-        auto is_whitespace() const {
+        bool is_whitespace() const {
             return the.is_whitespace();
         }
 
@@ -51,6 +47,13 @@ namespace mixc::lang_wxx_is_whitespace::xuser{
             return thex;
         }
     };
+}
+
+#endif
+
+namespace mixc::lang_wxx_is_whitespace::xuser{
+    template<class final, class item_t>
+    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

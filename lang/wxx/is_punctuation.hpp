@@ -34,14 +34,10 @@ namespace mixc::lang_wxx_is_punctuation{
             return inc::binary_search::match(seq, u16(uns)) != not_exist;
         }
     };
-}
 
-#endif
-
-namespace mixc::lang_wxx_is_punctuation::xuser{
-    template<class final, class type>
-    struct wxx : xusing_lang_wxx::wxx<final, type> {
-        using xusing_lang_wxx::wxx<final, type>::wxx;
+    template<class final, class base, class type>
+    struct meta: base {
+        using base::base;
         using the_t = core<type>;
 
         bool is_punctuation() const {
@@ -53,6 +49,13 @@ namespace mixc::lang_wxx_is_punctuation::xuser{
             return thex;
         }
     };
+}
+
+#endif
+
+namespace mixc::lang_wxx_is_punctuation::xuser{
+    template<class final, class item_t>
+    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

@@ -21,19 +21,15 @@ namespace mixc::lang_wxx_to_lower{
         using inc::wxx<type>::wxx;
         using the_t = core<type>;
 
-        auto to_lower() const {
+        type to_lower() const {
             auto dvalue = 'A' - 'a';
             return the.is_upper() ? the.data - dvalue : the.data;
         }
     };
-}
 
-#endif
-
-namespace mixc::lang_wxx_to_lower::xuser{
-    template<class final, class type>
-    struct wxx : xusing_lang_wxx::wxx<final, type> {
-        using xusing_lang_wxx::wxx<final, type>::wxx;
+    template<class final, class base, class type>
+    struct meta: base {
+        using base::base;
         using the_t = core<type>;
 
         final to_lower() const {
@@ -45,6 +41,13 @@ namespace mixc::lang_wxx_to_lower::xuser{
             return thex;
         }
     };
+}
+
+#endif
+
+namespace mixc::lang_wxx_to_lower::xuser{
+    template<class final, class item_t>
+    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

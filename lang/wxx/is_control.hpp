@@ -11,8 +11,6 @@
 #define xuser mixc::lang_wxx_is_control::inc
 #include"define/base_type.hpp"
 #include"lang/wxx.hpp"
-#include"lang/cxx/index_of_first.hpp"
-#include"lang/cxx.hpp"
 #pragma pop_macro("xusing_lang_wxx")
 #pragma pop_macro("xuser")
 
@@ -22,24 +20,20 @@ namespace mixc::lang_wxx_is_control{
         using inc::wxx<type>::wxx;
         using the_t = core<type>;
 
-        auto is_control() const {
+        bool is_control() const {
             // 9f 1001 1111
             // 7f 0111 1111
             // 1f 0001 1111
             return the.data <= 0x1f or (0x7f <= the.data and the.data <= 0x9f);
         }
     };
-}
 
-#endif
-
-namespace mixc::lang_wxx_is_control::xuser{
-    template<class final, class type>
-    struct wxx : xusing_lang_wxx::wxx<final, type> {
-        using xusing_lang_wxx::wxx<final, type>::wxx;
+    template<class final, class base, class type>
+    struct meta : base {
+        using base::base;
         using the_t = core<type>;
 
-        auto is_control() const {
+        bool is_control() const {
             return the.is_control();
         }
 
@@ -48,6 +42,13 @@ namespace mixc::lang_wxx_is_control::xuser{
             return thex;
         }
     };
+}
+
+#endif
+
+namespace mixc::lang_wxx_is_control::xuser{
+    template<class final, class item_t>
+    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

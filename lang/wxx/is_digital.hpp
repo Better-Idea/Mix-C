@@ -20,20 +20,17 @@ namespace mixc::lang_wxx_is_digital{
         using inc::wxx<type>::wxx;
         using the_t = core<type>;
 
-        auto is_digital() const {
+        bool is_digital() const {
             return '0' <= the.data and the.data <= '9';
         }
     };
-}
-#endif
 
-namespace mixc::lang_wxx_is_digital::xuser{
-    template<class final, class type>
-    struct wxx : xusing_lang_wxx::wxx<final, type> {
-        using xusing_lang_wxx::wxx<final, type>::wxx;
+    template<class final, class base, class type>
+    struct meta : base {
+        using base::base;
         using the_t = core<type>;
 
-        auto is_digital() const {
+        bool is_digital() const {
             return the.is_digital();
         }
 
@@ -42,6 +39,12 @@ namespace mixc::lang_wxx_is_digital::xuser{
             return thex;
         }
     };
+}
+#endif
+
+namespace mixc::lang_wxx_is_digital::xuser{
+    template<class final, class item_t>
+    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx
