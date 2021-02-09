@@ -108,7 +108,7 @@ namespace mixc::utils_bit_indicator{
          * - 该方式需要外部释放内存
          */
         bit_indicator_t(uxx total_bits, inc::ialloc<uxx> alloc){
-            uxx buf[sizeof(uxx) * 8 / inc::bwidth + 1];
+            uxx buf[sizeof(uxx) * 8];
 
             // 先设置，之后 total_bits 会被修改
             the.total_bits(total_bits);
