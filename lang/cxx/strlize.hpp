@@ -246,7 +246,7 @@ namespace mixc::lang_cxx_strlize{
                 auto rest       = inc::max<ixx>(0, -expand);
                 auto dec_len    = inc::min<uxx>(precious, uxx(rest));
                 auto real       = the_t(buf, exp + 1/*sign*/ + 1/*real*/ - cez);
-                auto decimal    = the_t(real + real.length(), dec_len);
+                auto decimal    = the_t((item_t *)real + real.length(), dec_len);
                 auto clz        = 0;
                 auto ctz        = precious == not_exist ? 0 : inc::max<ixx>(0, ixx(precious) - rest);
                 return invoke(real, cez/*expanding_zeros*/, clz/*leading zeros*/, decimal, ctz/*trailing zeros*/, exp_str);

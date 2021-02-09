@@ -352,10 +352,10 @@ namespace mixc::lang_cxx_ph{
             };
 
             if constexpr (inc::is_based_on<place_holder_group, val_t>){
-                ptr             = item.template format<item_t>(link);
+                ptr             = (item_t *)item.template format<item_t>(link);
             }
             else{
-                ptr             = inc::cxx<item_t>(item, link);
+                ptr             = (item_t *)inc::cxx<item_t>(item, link);
             }
 
             if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
