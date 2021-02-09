@@ -12,6 +12,8 @@
 
 namespace xuser{
     void foreach(c08 const & root, seqptr<c08> folders){
+        xhint(root);
+
         folders.foreach([&](c08 folder){
             tty.write_line(folder);
             dir{root}.as_cwd();
