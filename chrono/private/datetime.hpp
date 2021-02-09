@@ -117,7 +117,11 @@ namespace mixc::chrono_private_datetime::origin{
             return left;
         }
 
-        xcmpopx_friend(compare, the_t)
+        #define xa_args_list       the_t const & left, the_t const & right
+        #define xa_invoke          left.compare(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
         xpubget_pubsetx(total_milisecond, u64)
             xr{
                 constexpr u64 one_day = 24 * 3600 * 1000;

@@ -62,7 +62,11 @@ namespace mixc::chrono_private_time::origin{
             return (ixx)(left.total_milisecond() - right.total_milisecond());
         }
 
-        xcmpopx_friend(compare, the_t)
+        #define xa_args_list       the_t const & left, the_t const & right
+        #define xa_invoke          compare(left, right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
         xpubget_pubset(milisecond)
         xpubget_pubset(second)
         xpubget_pubset(minute)

@@ -47,7 +47,20 @@ namespace mixc::lang_cxx_compare_fastly{
             return the.compare_fastly(value, compare);
         }
 
-        xcmpopx_friend(compare_fastly, final)
+        #define xa_args_list       final const & left, final const & right
+        #define xa_invoke          left.compare_fastly(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
+        #define xa_args_list       item_t const * left, final const & right
+        #define xa_invoke          final{left}.compare_fastly(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
+        #define xa_args_list       final const & left, item_t const * right
+        #define xa_invoke          left.compare_fastly(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
     };
 }
 

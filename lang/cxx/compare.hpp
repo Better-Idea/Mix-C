@@ -46,6 +46,21 @@ namespace mixc::lang_cxx_compare{
         ixx compare(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.compare(value, compare);
         }
+
+        #define xa_args_list       final const & left, final const & right
+        #define xa_invoke          left.compare_fastly(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
+        #define xa_args_list       item_t const * left, final const & right
+        #define xa_invoke          final{left}.compare_fastly(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
+        #define xa_args_list       final const & left, item_t const * right
+        #define xa_invoke          left.compare_fastly(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
     };
 }
 

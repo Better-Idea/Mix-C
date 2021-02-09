@@ -144,7 +144,11 @@ namespace mixc::chrono_private_date::origin{
             return self;
         }
 
-        xcmpopx_friend(compare, the_t)
+        #define xa_args_list       the_t const & left, the_t const & right
+        #define xa_invoke          left.compare(right)
+        #define xa_is_friend
+        #include"memop/cmp.gen.hpp"
+
         xpubget_pubset(day)
         xpubget_pubset(month)
         xpubget_pubset(year)
