@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::instruction_index_of_last_reset::inc
-#include"instruction/index_of_first_set.hpp"
+#include"instruction/index_of_last_set.hpp"
 #include"meta/is_number.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
