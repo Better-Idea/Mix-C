@@ -92,14 +92,14 @@ void decode(){
 #include"memory/allocator.hpp"
 
 #if xis_windows
-    #include<windows.h>
+#include<windows.h>
 #endif
 
 #if xis_linux
-    #include<fcntl.h>
-    #include<termios.h>
-    #include<unistd.h>
-    #include<wchar.h>
+#include<fcntl.h>
+#include<termios.h>
+#include<unistd.h>
+#include<wchar.h>
 #endif
 
 namespace mixc::io_private_tty::origin{
