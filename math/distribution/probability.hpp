@@ -37,29 +37,45 @@ int main(){
 #define xpack_math_distribution_probability
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::math_distribution_probability
+#define xuser mixc::math_distribution_probability::inc
 #include"algo/binary_search.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/array.hpp"
-#include"interface/ranger.hpp"
+#include"dumb/dummy_type.hpp"
+#include"interface/unified_seq.hpp"
 #include"math/random.hpp"
 #include"meta/is_same.hpp"
+#include"meta/item_origin_of.hpp"
 #include"meta/unsigned_type.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_distribution_probability::origin{
     template<class type = u32>
-    struct probability{
+    xstruct(
+        xtmpl(probability, type),
+        xprif(guide, inc::shared_array<
+                inc::unsigned_type<type>
+            >
+        )
+    )
     private:
-        using item_t = typename inc::unsigned_type<type>;
-        inc::shared_array<item_t> guide;
+        using item_t = inc::unsigned_type<type>;
     public:
         probability() = default;
-        probability(inc::ranger<type> proportion) : 
-            guide(
-                ::length(proportion.length())
+
+        template<inc::can_unified_seqlize seq_t>
+        probability(seq_t const & proportion) : 
+            probability(
+                inc::unified_seq<seq_t>{proportion}, 
+                inc::dummy_type{}
             ){
+        }
+
+    private:
+        template<class seq_t>
+        probability(seq_t const & proportion, inc::dummy_type) : 
+            guide(::length{proportion.length()}){
 
             item_t multi;
 
@@ -96,14 +112,17 @@ namespace mixc::math_distribution_probability::origin{
         uxx random() const {
             auto l = guide.length();
             auto r = inc::random<item_t>() % (guide[l - 1] + 1);
-            auto v = inc::binary_search<item_t>::less_equals(guide, r);
+            auto v = inc::binary_search::less_equals(guide, r);
             return v;
         }
 
-        template<class item_t> item_t & random(inc::ranger<item_t> items) const {
-            return items[random()];
+        template<
+            inc::can_unified_seqlize    seq_t, 
+            class                       itemx_t = inc::item_origin_of<seq_t>>
+        itemx_t & random(seq_t const & items) const {
+            return (itemx_t &)items[random()];
         }
-    };
+    $
 }
 
 #endif
