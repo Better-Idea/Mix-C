@@ -1,6 +1,7 @@
 #include"memop/addressof.hpp"
 #include"memop/bit.hpp"
 #include"memop/cast.hpp"
+#include"memop/cmp.gen.hpp"
 #include"memop/cmp.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"

@@ -1,0 +1,7 @@
+#include"test/algo/binary_search.hpp"
+#include"test/algo/distinct.hpp"
+#include"test/algo/insert.hpp"
+#include"test/algo/mmu.hpp"
+#include"test/algo/remove.hpp"
+#include"test/algo/shuffle.hpp"
+#include"test/algo/sort.hpp"
