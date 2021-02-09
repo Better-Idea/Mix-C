@@ -18,9 +18,9 @@ namespace mixc::macro_private_mix::inc{
 
 namespace mixc::macro_private_mix::origin{
     template<class seq_type>
-    concept is_asciis_seq = requires(seq_type val, asciis tmp){
-        tmp = val;
-        val.length();
+    concept is_asciis_seq = requires(seq_type val, asciis tmp, uxx length){
+        tmp     = (asciis)val;
+        length  = val.length();
     };
 
     enum classify_type_t{
@@ -58,7 +58,7 @@ namespace mixc::macro_private_mix::origin{
             >;
 
             if constexpr (is_asciis_seq<type>){
-                s       = value;
+                s       = asciis(value);
                 slen    = value.length();
                 fmt     = is_str_t;
             }
@@ -87,7 +87,7 @@ namespace mixc::macro_private_mix::origin{
                 fmt     = is_char_t;
             }
 
-            static_assert(result::index != not_exist);
+            static_assert(is_asciis_seq<type> or result::index != not_exist);
         }
     };
 }
