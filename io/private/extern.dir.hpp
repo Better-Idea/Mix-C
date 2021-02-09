@@ -26,27 +26,17 @@ namespace mixc::io_dir::cpp{
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<unistd.h>
+#include"cmd.hpp"
 #endif
 
 namespace mixc::io_dir::origin{
-    #if xis_linux
-
-    template<class ... args>
-    void dir_operator(asciis exe_path, asciis exe, args ... list){
-        if (vfork() == 0){ // this thread will wait child finished
-            execl(exe_path, exe, (asciis)list..., NULL);
-            _exit(-1);
-        }
-    }
-    #endif
-
     void dir::remove() const{
         auto && buf     = cpp::path_buffer{};
         auto    source  = buf.alloc(the.path);
         #if xis_windows
-        ::RemoveDirectoryA(source);
+        ::RemoveDirectoryA(asciis(source));
         #elif xis_linux
-        dir_operator("/bin/rm", "rm", "-rf", source, NULL);
+        cmd("/bin/rm", "rm", "-rf", source);
         #else
         #error "os miss match"
         #endif
@@ -92,7 +82,7 @@ namespace mixc::io_dir::origin{
         SHFileOperationA(& opr);
 
         #elif xis_linux
-        dir_operator("/bin/cp", "cp", "-r", source, target);
+        cmd("/bin/cp", "cp", "-r", source, target);
         #else
         #error "os miss match"
         #endif
@@ -210,14 +200,14 @@ namespace mixc::io_dir::origin{
         system((asciis)mkdir);
 
         if (mkdir.operator char *() != buf){
-            cpp::free<char>(mkdir, cpp::memory_size{mkdir.length() + 1});
+            cpp::free<char>((char *)mkdir, cpp::memory_size{mkdir.length() + 1});
         }
 
         #elif xis_linux
 
         auto && buf     = cpp::path_buffer{};
         auto    target  = buf.alloc(the.path);
-        dir_operator("/bin/mkdir", "mkdir", "-p", target);
+        cmd("/bin/mkdir", "mkdir", "-p", target);
         buf.free(target, path);
 
         #else
@@ -230,7 +220,7 @@ namespace mixc::io_dir::origin{
         auto    target  = buf.alloc(the.path);
 
         #if xis_windows
-        ::SetCurrentDirectoryA(target);
+        ::SetCurrentDirectoryA((asciis)target);
         #elif xis_linux
         ::chdir(target);
         #endif
