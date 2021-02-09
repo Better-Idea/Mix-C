@@ -22,8 +22,8 @@ namespace mixc::interface_private_seqptr::inc{
 namespace mixc::interface_private_seqptr{
     template<class seq_t, class item_t>
     concept has_ptr_length_pairx = requires(seq_t seq, item_t * ptr, uxx length){
-        ptr     = seq;
-        length  = seq.length();
+        ptr     = (item_t *)seq; // 适应一些使用 explict operator 的类
+        length  = (seq.length());
     };
 
     template<class seq_t, class item_t>
@@ -65,7 +65,7 @@ namespace mixc::interface_private_seqptr{
         template<class seq_t>
         requires(has_ptr_length_pairx<seq_t, item_t>)
         constexpr seqptr(seq_t const & list) : 
-            seqptr(list, list.length()){
+            seqptr((item_t const *)list, list.length()){
         }
 
         operator item_t *(){
