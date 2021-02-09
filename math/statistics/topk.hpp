@@ -6,6 +6,7 @@
 #include"algo/heap_root.hpp"
 #include"define/base_type.hpp"
 #include"interface/can_compare.hpp"
+#include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xexport.hpp"
 #include"math/min.hpp"
@@ -21,12 +22,13 @@ namespace mixc::math_statistics_topk::origin{
         asc_sort,
     };
 
-    #define xheader                                                                 \
-    template<                                                                       \
-        inc::can_unified_seqlize seq_k_t,                                           \
-        inc::can_unified_seqlize seq_src_t,                                         \
-        class                    item_t  = inc::item_origin_of<seq_src_t>,          \
-        class                    cmp_t   = decltype(inc::default_compare<item_t>)   \
+    #define xheader                                                                     \
+    template<                                                                           \
+        inc::can_unified_seqlize seq_k_t,                                               \
+        class                    item_k_t   = inc::item_origin_of<seq_k_t>,             \
+        inc::can_unified_seqlize seq_src_t  = inc::seqptr<item_k_t>,                    \
+        class                    item_t     = inc::item_origin_of<seq_src_t>,           \
+        class                    cmp_t      = decltype(inc::default_compare<item_t>)    \
     >
 
     xheader inline seq_k_t & topk(
