@@ -68,50 +68,6 @@ namespace mixc::memop_cmp::origin{
     }
 }
 
-#define __xcmpop__(friend_token,...)                                                            \
-friend_token inline bool operator >  (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return ::mixc::memop_cmp::origin::cmp(left, right) > 0;                                     \
-}                                                                                               \
-friend_token inline bool operator >= (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return ::mixc::memop_cmp::origin::cmp(left, right) >= 0;                                    \
-}                                                                                               \
-friend_token inline bool operator <  (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return ::mixc::memop_cmp::origin::cmp(left, right) <  0;                                    \
-}                                                                                               \
-friend_token inline bool operator <= (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return ::mixc::memop_cmp::origin::cmp(left, right) <= 0;                                    \
-}                                                                                               \
-friend_token inline bool operator == (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return ::mixc::memop_cmp::origin::cmp(left, right) == 0;                                    \
-}                                                                                               \
-friend_token inline bool operator != (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return ::mixc::memop_cmp::origin::cmp(left, right) != 0;                                    \
-}
-
-#define __xcmpopx__(friend_token,func,...)                                                      \
-friend_token inline bool operator >  (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return left.func(right) > 0;                                                                \
-}                                                                                               \
-friend_token inline bool operator >= (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return left.func(right) >= 0;                                                               \
-}                                                                                               \
-friend_token inline bool operator <  (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return left.func(right) <  0;                                                               \
-}                                                                                               \
-friend_token inline bool operator <= (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return left.func(right) <= 0;                                                               \
-}                                                                                               \
-friend_token inline bool operator == (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return left.func(right) == 0;                                                               \
-}                                                                                               \
-friend_token inline bool operator != (__VA_ARGS__ const & left, __VA_ARGS__ const & right){     \
-    return left.func(right) != 0;                                                               \
-}
 #endif
-
-#define xcmpop(...)                     __xcmpop__(,__VA_ARGS__)
-#define xcmpop_friend(...)              __xcmpop__(friend,__VA_ARGS__)
-#define xcmpopx(func,...)               __xcmpopx__(,func, __VA_ARGS__)
-#define xcmpopx_friend(func,...)        __xcmpopx__(friend, func, __VA_ARGS__)
 
 xexport_space(mixc::memop_cmp::origin)
