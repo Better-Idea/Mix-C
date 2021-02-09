@@ -1,14 +1,14 @@
-#ifndef xpack_meta_is_initializer_list
-#define xpack_meta_is_initializer_list
+#ifndef xpack_meta_is_initializer_listx
+#define xpack_meta_is_initializer_listx
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::meta_is_initializer_list::inc
+#define xuser mixc::meta_is_initializer_listx::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"interface/initializer_list.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::meta_is_initializer_list{
+namespace mixc::meta_is_initializer_listx{
     template<class, class>
     struct meta{
         enum{ result = false };
@@ -25,4 +25,4 @@ namespace mixc::meta_is_initializer_list{
 
 #endif
 
-xexport(mixc::meta_is_initializer_list::is_initializer_listx)
+xexport(mixc::meta_is_initializer_listx::is_initializer_listx)
