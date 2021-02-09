@@ -6,7 +6,7 @@
 #pragma warning(disable:4291)
 #endif
 
-inline voidp operator new(decltype(sizeof(0)), void * ptr, asciis file, uxx line){
+inline voidp operator new(decltype(sizeof(0)), void * ptr, asciis file, uxx line) noexcept {
     return ptr;
 }
 
