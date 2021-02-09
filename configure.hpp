@@ -1,8 +1,6 @@
 #pragma once
 #define xmixc                       "Mix-C"
 
-#define xendline                    "\n"
-
 /* mixc::xdebug ====================================================
  * 
  * =================================================================*/
@@ -89,8 +87,16 @@
     #define xis_msvc_compatible     1
 
     #ifndef xis_clang
-        #define xis_msvc_native       1
+        #define xis_msvc_native     1
     #endif
+#endif
+
+#if xis_windows
+    #define xlocal_endl             "\r\n"
+    #define xlocal_endl_length      2
+#elif xis_linux
+    #define xlocal_endl             "\n"
+    #define xlocal_endl_length      1
 #endif
 
 // check
