@@ -54,7 +54,8 @@ namespace mixc::lang_cxx{
             return the.ptr[(uxx)(number_t &)index];
         }
 
-        operator item_t *() const {
+        explicit operator item_t *() const {
+            // 使用 explicit 避免出现在未包含 "lang/cxx/compare_xxx.hpp" 时直接变成指针比较 
             return the.ptr;
         }
 
