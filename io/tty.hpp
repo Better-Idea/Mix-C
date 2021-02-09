@@ -83,12 +83,12 @@ namespace mixc::io_tty{
         }
 
         void write_line(){
-            inc::print_core(xendline, 1);
+            inc::print_core(xlocal_endl, xlocal_endl_length);
         }
         
         template<class a0, class ... args>
         void write_line(a0 const & first, args const & ... list) const {
-            write(first, list..., xendline);
+            write(first, list..., xlocal_endl);
         }
 
         void read_line(inc::ialloc<char> alloc) const {
