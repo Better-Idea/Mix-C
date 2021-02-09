@@ -62,7 +62,7 @@ namespace mixc::lang_cxx_index_of_first{
                 }
                 for (index = 0; ; index++){
                     if (index == value.length()) {
-                        return uxx(origin - the);
+                        return uxx(asciis(origin) - asciis(the));
                     }
                     if (compare(origin[index], value[index]) != 0) {
                         origin = origin.backward(miss);
@@ -85,7 +85,7 @@ namespace mixc::lang_cxx_index_of_first{
                     return;
                 }
                 else{
-                    match(cur - the + i);
+                    match(asciis(cur) - asciis(the) + i);
                     cur = cur.backward(i + value.length());
                 }
             }
