@@ -34,6 +34,7 @@
         xa_is_friend inline bool operator op (xa_args_list) xa_is_const;
 #endif
 
+#ifdef xa_args_list
 xa_is_outside(>)
 xa_is_outside(>=)
 xa_is_outside(<)
@@ -46,3 +47,4 @@ xa_is_outside(!=)
 #undef  xa_is_friend
 #undef  xa_is_const
 #undef  xa_is_outside
+#endif
