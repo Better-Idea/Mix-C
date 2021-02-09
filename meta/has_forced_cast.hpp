@@ -11,7 +11,7 @@
 namespace mixc::meta_has_forced_cast{
     template<class target, class source>
     concept has_forced_cast = requires(target tar, source src){
-        tar = (target)src;
+        tar = static_cast<target>(src);
     };
 }
 
