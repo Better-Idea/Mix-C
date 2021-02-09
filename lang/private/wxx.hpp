@@ -13,9 +13,9 @@ namespace mixc::lang_wxx{
         xtmpl(wxx, final, type),
         xprof(data, type)
     )
-        wxx() = default;
-        wxx(wxx const &) = default;
-        wxx(type value) : data(value){}
+        constexpr wxx() : data('\0'){};
+        constexpr wxx(wxx const &) = default;
+        constexpr wxx(type value) : data(value){}
 
         template<class final_t>
         wxx(wxx<final_t, type> const & self) :
