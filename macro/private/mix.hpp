@@ -19,7 +19,7 @@ namespace mixc::macro_private_mix::inc{
 namespace mixc::macro_private_mix::origin{
     template<class seq_type>
     concept is_asciis_seq = requires(seq_type val, asciis tmp, uxx length){
-        tmp     = (asciis)val;
+        tmp     = static_cast<asciis>(val); // C style 转换会有警告
         length  = val.length();
     };
 
