@@ -8,7 +8,7 @@
 #include"define/nan.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::math_ln{
+namespace mixc::math_ln::origin{
     extern f64 ln_unsafe(f64 x);
 
     inline f64 ln(f64 x){
@@ -21,4 +21,4 @@ namespace mixc::math_ln{
 
 #endif
 
-xexport(mixc::math_ln::ln)
+xexport_space(mixc::math_ln::origin)
