@@ -2,6 +2,7 @@
 #include"define/base_type.hpp"
 #include<atomic>
 
+#ifdef xis_msvc_native
 #define xatomop(name,op)                                                    \
 namespace mixc::lock_ ## name{                                              \
     u64 name(voidp a, u64 b, uxx bytes){                                    \
@@ -28,3 +29,4 @@ xatomop(atom_fetch_xor , fetch_xor )
 xatomop(atom_swap      , exchange  )
 
 #undef  xatomop
+#endif
