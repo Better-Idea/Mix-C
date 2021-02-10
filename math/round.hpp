@@ -10,7 +10,7 @@
 
 namespace mixc::math_round::origin{
     inline f32 round_unsafe(f32 a){
-        return inc::div_unsafe(a + 0.5, 1).quotient;
+        return inc::div_unsafe(a + 0.5f, 1).quotient;
     }
 
     inline f64 round_unsafe(f64 a){
@@ -22,7 +22,7 @@ namespace mixc::math_round::origin{
     }
 
     inline f32 round(f32 a){
-        return inc::div(a + 0.5, 1).quotient;
+        return inc::div(a + 0.5f, 1).quotient;
     }
 
     inline f64 round(f64 a){
