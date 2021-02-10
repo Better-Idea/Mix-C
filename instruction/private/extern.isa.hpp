@@ -1,7 +1,7 @@
 #include"configure.hpp"
 #include"define/base_type.hpp"
 
-#if xis_msvc_compatible
+#if xis_msvc_native
 #include<intrin.h>
 #include<math.h>
 

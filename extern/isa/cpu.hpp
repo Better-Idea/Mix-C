@@ -576,7 +576,7 @@ namespace mixc::extern_isa_cpu::origin{
 
             u.mem = cmd[ins.opc];
 
-            #if xis_msvc_compatible
+            #if xis_msvc_native
             return (this->*u.msvc_call)();
             #else
             return u.gnu_call(this);
