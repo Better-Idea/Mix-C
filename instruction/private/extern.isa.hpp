@@ -11,19 +11,27 @@ namespace mixc::instruction_time_stamp{
     }
 }
 
+namespace mixc::instruction_mul{
+    extern u128 mul(u64 a, u64 b){
+        unsigned __int64 high;
+        unsigned __int64 low = _umul128((unsigned __int64)a, (unsigned __int64)b, & high);
+        return u128{}.l(low).h(high);
+    }
+}
+
+namespace mixc::instruction_mod{
+    extern u64 mod(u128 a, u64 b){
+        #if xis_os64
+            unsigned __int64 remainder = 0;
+            _udiv128(a.high, a.low, b, & remainder);
+            return remainder;
+        #endif
+    }
+}
+
 #endif
 
 namespace mixc::instruction_mod{
-    #if xis_msvc_native
-    extern u64 mod_core(u128 a, u64 b){
-        #if xis_os64
-            unsigned __int64 r = 0;
-            _udiv128(a.high, a.low, b, & r);
-            return r;
-        #endif
-    }
-    #endif
-
     extern f64 mod(f64 a, f64 b){
         #if xis_x86
             f64 r = 0;
