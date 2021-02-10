@@ -4,30 +4,37 @@
 #undef  xuser
 #define xuser mixc::lang_cxx::inc
 #include"define/base_type.hpp"
-#include"interface/seqptr.hpp"
+#include"interface/ranger.hpp"
 #include"macro/xstruct.hpp"
 #include"macro/xsv.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx{
+    template<class item_t>
+    static inline item_t empty = item_t(0);
+
     template<class final, class item_t>
     xstruct(
         xtmpl(cxx_t, final, item_t),
         xprif(ptr, item_t *),
         xprif(plength, uxx)
     )
-    private:
-        inline static item_t empty = item_t(0);
     public:
-        xseqptr(item_t)
+        xranger(item_t)
 
-        cxx_t() : cxx_t(& empty, 0) {}
+        cxx_t() : cxx_t(& empty<item_t>, 0) {}
         cxx_t(cxx_t const &)        = default;
-        cxx_t(decltype(nullptr))    = delete;
 
-        constexpr cxx_t(const item_t * str) : 
+        cxx_t(item_t const * str) : 
             ptr((item_t *)str), plength(0) {
-            for(uxx i = 0; str[i++]; plength = i);
+
+            if (ptr == nullptr){
+                ptr                 = & empty<item_t>;
+            }
+
+            while(ptr[plength] != '\0'){
+                plength            += 1;
+            }
         }
 
         template<class final_t>
