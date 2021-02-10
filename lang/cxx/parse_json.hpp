@@ -14,6 +14,9 @@
 #include"macro/xnew.hpp"
 #include"math/expr10.hpp"
 #include"math/exp10.hpp"
+#include"meta/is_number.hpp"
+#include"meta/more_fit.hpp"
+#include"lang/cxx/compare_fastly.hpp"
 #include"lang/cxx.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -86,45 +89,121 @@ namespace mixc::lang_cxx_parse_json{
 
     template<class item_t>
     struct json_object : json_struct<item_t, json_object<item_t>>{
-        item_t const *      key = & mixc::lang_cxx::empty<item_t>;
-    };
+        item_t const *      key;
 
-    template<class item_t>
-    xstruct(
-        xtmpl(json, item_t)
-    )
-        using jarray_t = json_array<item_t>;
-        using final    = the_t;
-
-        json(jarray_t * ptr) : pptr(ptr){}
-        json(json_parse_result_t parse_result, item_t const * location_of_error) : 
-            pparse_result(parse_result), plocation_of_error(location_of_error){
+        json_object() :
+            key((item_t *)inc::cxx<item_t>{}){
         }
-    public:
-        // final operator[](inc::cxx<item_t> name){
-        // }
-    private:
-        json_parse_result_t pparse_result   = json_parse_result_t::success;
-
-        union{
-            item_t const  * plocation_of_error;
-            jarray_t      * pptr;
-        };
-
-    public:
-        // xpubgetx(length, uxx){
-        //     return 0;
-        // }
-
-        xpubget(parse_result)
-        xpubget(location_of_error)
-    $
+    };
 
     template<class item_t>
     using json_arrayp   = json_array<item_t> *;
 
     template<class item_t>
     using json_objectp  = json_object<item_t> *;
+
+    template<class item_t>
+    using json_valuep   = json_value<item_t> *;
+
+    template<class item_t>
+    xstruct(
+        xtmpl(json, item_t),
+        xprif(ptr, voidp),
+        xprif(len, uxx)
+    )
+    private:
+        using jap   = json_arrayp<item_t>;
+        using jop   = json_objectp<item_t>;
+        using jvp   = json_valuep<item_t>;
+        using final = the_t;
+    public:
+        json(voidp ptr = nullptr) : ptr(ptr), len(not_exist){}
+
+        json<item_t> operator[](item_t const * name) const {
+            return the[inc::cxx<item_t>{name}];
+        }
+
+        json<item_t> operator[](inc::cxx<item_t> name) const {
+            for(jop object = jop(ptr)->value.o;;){
+                if (name == object->key){
+                    return object;
+                }
+                if (object = object->next(); object == nullptr){
+                    return nullptr;
+                }
+            }
+        }
+
+        template<inc::is_number number_t>
+        json<item_t> operator[](number_t index) const {
+            jap object  = jop(ptr)->value.a;
+            uxx i       = 0;
+
+            while(true){
+                if (i == index){
+                    return object;
+                }
+                if (i += 1, object = object->next(); object == nullptr){
+                    return nullptr;
+                }
+            }
+        }
+
+        operator f64 () const {
+            return jop(ptr)->value.f;
+        }
+
+        operator i64 () const {
+            return jop(ptr)->value.i;
+        }
+
+        operator u64 () const {
+            return jop(ptr)->value.u;
+        }
+
+        operator inc::cxx<item_t> () const {
+            return jop(ptr)->value.s;
+        }
+
+        template<class type_t>
+        operator type_t () const {
+            using result_t  = inc::more_fit<type_t, f64, i64, u64, inc::cxx<item_t>>;
+            using fit_t     = typename result_t::type;
+            //return (type_t)(fit_t)(the); // msvc 不支持
+            return (type_t)(operator fit_t());
+        }
+
+        xpubgetx(length, uxx){
+            if (len == not_exist){
+                len         = 0;
+
+                for(jop object = jop(ptr)->value.o; object != nullptr;){
+                    object  = object->next();
+                    len    += 1;
+                }
+            }
+            return len;
+        }
+    $
+
+    template<class item_t>
+    xstruct(
+        xtmpl(jsonx, item_t),
+        xpubb(json<item_t>),
+        xprif(pparse_result, json_parse_result_t),
+        xprif(plocation_of_error, item_t const *)
+    )
+        using jarray_t = json_array<item_t>;
+        using final    = the_t;
+        using json<item_t>::json;
+
+        jsonx(json_parse_result_t parse_result, item_t const * location_of_error) : 
+            pparse_result(parse_result), plocation_of_error(location_of_error){
+        }
+    public:
+        xpubget(parse_result)
+        xpubget(location_of_error)
+    $
 
     template<class item_t>
     inline item_t const * skip_whitespace(item_t const * json_string){
@@ -148,20 +227,20 @@ namespace mixc::lang_cxx_parse_json{
     template<class item_t>
     inline bool start_with(item_t const * json_string, asciis value){
         while(json_string[0] == (item_t)value[0]){
-            json_string    += 1;
-            value          += 1;
+            json_string        += 1;
+            value              += 1;
         }
         return value[0] == '\0';
     }
 
     template<class item_t>
     inline item_t const * parse_string(item_t ** buffer, item_t const * json_string){
-        item_t * buf = (item_t *)(* buffer);
+        item_t * buf            = (item_t *)(* buffer);
 
         for(; json_string[0] != '\0' and json_string[0] != '\"'; json_string++){
             if (json_string[0] != '\\'){
-                buf[0] = json_string[0];
-                buf   += 1;
+                buf[0]          = json_string[0];
+                buf            += 1;
                 continue;
             }
 
@@ -186,9 +265,9 @@ namespace mixc::lang_cxx_parse_json{
                 break;
             }
         }
-        buf[0]      = '\0';
-        buf        += 1;
-        buffer[0]   = static_cast<item_t *>(buf);
+        buf[0]                  = '\0';
+        buf                    += 1;
+        buffer[0]               = static_cast<item_t *>(buf);
         return json_string;
     }
 
@@ -246,7 +325,7 @@ namespace mixc::lang_cxx_parse_json{
         if (json_string[0] == '.'){
             type[0]             = json_type_t::jfloat;
             json_string        += 1;
-            deci                = fetch_number(& i);
+            deci                = static_cast<f64>(fetch_number(& i));
             deci                = inc::expr10_unsafe(i) * deci + real;
         }
         if (json_string[0] == 'e' or json_string[0] == 'E'){
@@ -274,15 +353,15 @@ namespace mixc::lang_cxx_parse_json{
     struct core{
         using the_t = inc::cxx<item_t>;
 
-        json<item_t> parse_json(inc::ialloc<void> const & alloc){
+        jsonx<item_t> parse_json(inc::ialloc<void> const & alloc){
             enum closure_t : uxx{
-                in_object   = uxx(json_type_t::jobject),
-                in_array    = uxx(json_type_t::jarray),
+                in_object                   = uxx(json_type_t::jobject),
+                in_array                    = uxx(json_type_t::jarray),
             };
 
             enum operation_t: uxx{
-                fetch_key   = in_object,
-                fetch_value = in_array,
+                fetch_key                   = in_object,
+                fetch_value                 = in_array,
             };
 
             enum : uxx{
@@ -316,7 +395,7 @@ namespace mixc::lang_cxx_parse_json{
                 return xnew(buf_struct) json_object<item_t>();      // 初始化分配的内存
             };
             auto alloc_array                = [&](){
-                buf_struct                -= sizeof(json_array<item_t>);
+                buf_struct                 -= sizeof(json_array<item_t>);
                 return xnew(buf_struct) json_array<item_t>();       // 初始化分配的内存
             };
             auto create_element             = [&](json_type_t type, voidp item, operation_t opr){
@@ -332,8 +411,8 @@ namespace mixc::lang_cxx_parse_json{
             auto fetch                      = [&](){
                 if (c == '\"'){
                     cur_lv[0]->type(json_type_t::jstring);
-                    cur_lv[0]->value.s  = buf_string;
-                    json_string         = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
+                    cur_lv[0]->value.s      = buf_string;
+                    json_string             = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
 
                     if (json_string++; json_string[-1] != '\"'){
                         // error
@@ -343,9 +422,9 @@ namespace mixc::lang_cxx_parse_json{
                     cur_lv[0]->type(type);
                 }
                 else if (start_with(json_string, "true")){
-                    json_string        += 4;
+                    json_string            += 4;
                     cur_lv[0]->type(json_type_t::jinteger);
-                    cur_lv[0]->value.u  = 1;
+                    cur_lv[0]->value.u      = 1;
                 }
                 else if (start_with(json_string, "false") or start_with(json_string, "null")){
                     json_string        += json_string[0] == 'f'/*is "false"*/ ? 5 : 4;
@@ -497,7 +576,7 @@ namespace mixc::lang_cxx_parse_json{
         using base::base;
         using the_t = core<item_t>;
 
-        json<item_t> parse_json(inc::ialloc<void> const & alloc){
+        jsonx<item_t> parse_json(inc::ialloc<void> const & alloc){
             return the.parse_json(alloc);
         }
     };
@@ -509,6 +588,7 @@ namespace mixc::lang_cxx_parse_json::xuser{
     using ::mixc::lang_cxx_parse_json::json_type_t;
     using ::mixc::lang_cxx_parse_json::json_parse_result_t;
     using ::mixc::lang_cxx_parse_json::json;
+    using ::mixc::lang_cxx_parse_json::jsonx;
 
     template<class final, class item_t>
     using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
