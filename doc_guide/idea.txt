@@ -30,7 +30,35 @@ xtypeid(some_struct).props<is_pubget, is_pubget_pubset>;
 
 ## 原则
 ### 关于范式
-- 除非函数调用有连带关系，否则只有属性需要返回 final &
-- 支持包含方式的类需要将 class final 作为第一个模板参数, 该参数表示接口结构
+- 除非函数调用有连带关系，否则只有属性需要返回 final_t &
+- 支持包含方式的类需要将 class final_t 作为第一个模板参数, 该参数表示接口结构
 - 如果希望可以访问被 const 修饰的变量的属性，那么需要提供 const 版本的重载
+- 避免隐式操作，尤其在隐藏细节时需要留意副作用的情况
+
+```
+以旧版 docker/hashmap<key_t, val_t> 为例子，无论 key_t 参数是否具可以比较，
+我们在该结构内部使用 cmp_with_operator 函数一刀切碎所有比较情况，
+假如 key_t 有自带的比较接口就使用自带的，否则按无符号数组比较。
+虽然这种方式方便，但对于包含范式类系统会出现不期望的行为。
+对于字符串类 cxx<item_t> 默认是不带比较接口的，字段布局如下
+struct cxx<item_t>{
+    item_t * ptr; // 字符指针
+    uxx      len; // 长度
+};
+假如我们使用 hashmap<cxx<item_t>, val_t> 的组合，内部元素比较方式类似 memcmp
+在未包含 "lang/cxx/compare.hpp" 之类的扩展之前
+
+hashmap<cxx<item_t>, val_t> map;
+c08 a0 = "foo";
+c08 a1 = "foo";
+map.set(a0);
+
+// Q: false!?, what's the fuck?
+// A: the fuck is you forget include the `lang/cxx/compare_fastly.hpp`
+map.is_contains(a1);
+
+总结：如果你比较粗心，忘了包含比较扩展，旧版的 hashmap 可能会让你痛苦。
+所以我们引以为戒，减少使用者出错的可能
+```
+
 ...
