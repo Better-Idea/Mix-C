@@ -3,22 +3,39 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::lang_cxx::inc
+#include"algo/hash.hpp"
 #include"define/base_type.hpp"
 #include"interface/ranger.hpp"
 #include"macro/xstruct.hpp"
 #include"macro/xsv.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
+
+namespace mixc::algo_hash::origin{
+    template<class cxx_t>
+    requires(sizeof(typename cxx_t::im_cxx) != 0)
+    inline uxx hash(cxx_t const & value, uxx seed = 0){
+        return hash(
+            static_cast<typename cxx_t::item_t *>(value), 
+            value.length() / sizeof(uxx), 
+            value.length() % sizeof(uxx),
+            seed
+        );
+    }
+}
 
 namespace mixc::lang_cxx{
     template<class item_t>
     static inline item_t empty = item_t(0);
 
-    template<class final, class item_t>
+    template<class final_t, class item_type>
     xstruct(
-        xtmpl(cxx_t, final, item_t),
-        xprif(ptr, item_t *),
+        xtmpl(cxx_t, final_t, item_type),
+        xprif(ptr, item_type *),
         xprif(plength, uxx)
     )
+        using im_cxx = final_t;
+        using item_t = item_type;
     public:
         xranger(item_t)
 
@@ -37,8 +54,8 @@ namespace mixc::lang_cxx{
             }
         }
 
-        template<class final_t>
-        cxx_t(cxx_t<final_t, item_t> const & self) : 
+        template<class finalx_t>
+        cxx_t(cxx_t<finalx_t, item_t> const & self) : 
             cxx_t((the_t &)self){
         }
 
@@ -66,26 +83,26 @@ namespace mixc::lang_cxx{
             return the.ptr;
         }
 
-        final backward(uxx value) const {
+        final_t backward(uxx value) const {
             auto tmp     = thex;
             tmp.ptr     += value;
             tmp.plength -= uxx(value);
             return tmp;
         }
 
-        final forward(uxx value) const {
+        final_t forward(uxx value) const {
             return backward(
                 uxx(-ixx(value))
             );
         }
 
-        final shorten(uxx length) const {
+        final_t shorten(uxx length) const {
             auto tmp     = thex;
             tmp.plength -= length;
             return tmp;
         }
 
-        final elongate(uxx length) const {
+        final_t elongate(uxx length) const {
             return shorten(
                 uxx(-ixx(length))
             );
@@ -99,13 +116,13 @@ namespace mixc::lang_cxx{
         }
     $
 
-    template<class final, class item_t> struct cxx;
-    template<class final>
+    template<class final_t, class item_t> struct cxx;
+    template<class final_t>
     xstruct(
-        xspec(cxx, final, char),
-        xpubb(cxx_t<final, char>)
+        xspec(cxx, final_t, char),
+        xpubb(cxx_t<final_t, char>)
     )
-        using base_t = cxx_t<final, char>;
+        using base_t = cxx_t<final_t, char>;
         using base_t::base_t;
 
         xpubgetx(length_for_char16, uxx){
@@ -122,12 +139,12 @@ namespace mixc::lang_cxx{
         }
     };
 
-    template<class final>
+    template<class final_t>
     xstruct(
-        xspec(cxx, final, char16_t),
-        xpubb(cxx_t<final, char16_t>)
+        xspec(cxx, final_t, char16_t),
+        xpubb(cxx_t<final_t, char16_t>)
     )
-        using base_t = cxx_t<final, char16_t>;
+        using base_t = cxx_t<final_t, char16_t>;
         using base_t::base_t;
 
         xpubgetx(length_for_char, uxx){
