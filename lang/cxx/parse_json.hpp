@@ -374,7 +374,7 @@ namespace mixc::lang_cxx_parse_json{
             constexpr uxx json_depth        = 256;
             node stack[json_depth];
             char terminator[2];
-            auto bytes                      = the.length() * sizeof(voidp) * 2;
+            auto bytes                      = the.length() * sizeof(json_object<item_t>);
             auto buffer                     = alloc(bytes);
             auto buffer_end                 = u08p(buffer) + bytes;
             auto root                       = node{};
@@ -414,8 +414,8 @@ namespace mixc::lang_cxx_parse_json{
                     cur_lv[0]->value.s      = buf_string;
                     json_string             = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
 
-                    if (json_string++; json_string[-1] != '\"'){
-                        // error
+                    if (json_string++; json_string[-1] == '\0'){
+                        return { json_parse_result_t::unexpected_termination, json_string };
                     }
                 }
                 else if (json_string = parse_number(& cur_lv[0]->value.u, & type, json_string); type != json_type_t::unknwon){
