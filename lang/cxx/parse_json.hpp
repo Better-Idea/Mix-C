@@ -115,7 +115,7 @@ namespace mixc::lang_cxx_parse_json{
         using jap   = json_arrayp<item_t>;
         using jop   = json_objectp<item_t>;
         using jvp   = json_valuep<item_t>;
-        using final = the_t;
+        using final_t = the_t;
     public:
         json(voidp ptr = nullptr) : ptr(ptr), len(not_exist){}
 
@@ -194,7 +194,7 @@ namespace mixc::lang_cxx_parse_json{
         xprif(plocation_of_error, item_t const *)
     )
         using jarray_t = json_array<item_t>;
-        using final    = the_t;
+        using final_t    = the_t;
         using json<item_t>::json;
 
         jsonx(json_parse_result_t parse_result, item_t const * location_of_error) : 
@@ -571,7 +571,7 @@ namespace mixc::lang_cxx_parse_json{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base{
         using base::base;
         using the_t = core<item_t>;
@@ -590,8 +590,8 @@ namespace mixc::lang_cxx_parse_json::xuser{
     using ::mixc::lang_cxx_parse_json::json;
     using ::mixc::lang_cxx_parse_json::jsonx;
 
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

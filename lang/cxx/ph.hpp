@@ -76,10 +76,10 @@ namespace mixc::lang_cxx_ph{
         xname(place_holder_group)
     ) $
 
-    template<class final, class type = void> struct base_ph;
-    template<class final>
+    template<class final_t, class type = void> struct base_ph;
+    template<class final_t>
     xstruct(
-        xspec(base_ph, final, void),
+        xspec(base_ph, final_t, void),
         xpubb(place_holder_group)
     )
     protected:
@@ -96,7 +96,7 @@ namespace mixc::lang_cxx_ph{
             align_right,
         };
     public:
-        final & c(uxx align_center_width, char left_padding_char, char right_padding_char){
+        final_t & c(uxx align_center_width, char left_padding_char, char right_padding_char){
             the.align_mode              = u08(align_center);
             the.align_width             = u32(align_center_width);
             the.left_padding_char       = left_padding_char;
@@ -104,18 +104,18 @@ namespace mixc::lang_cxx_ph{
             return thex;
         }
 
-        final & c(uxx align_center_width, char padding_char = ' '){
+        final_t & c(uxx align_center_width, char padding_char = ' '){
             return c(align_center_width, padding_char, padding_char);
         }
 
-        final & l(uxx align_left_width, char padding_char = ' '){
+        final_t & l(uxx align_left_width, char padding_char = ' '){
             the.align_mode              = u08(align_left);
             the.align_width             = u32(align_left_width);
             the.right_padding_char      = padding_char;
             return thex;
         }
 
-        final & r(uxx align_right_width, char padding_char = ' '){
+        final_t & r(uxx align_right_width, char padding_char = ' '){
             the.align_mode              = u08(align_right);
             the.align_width             = u32(align_right_width);
             the.left_padding_char       = padding_char;
@@ -163,10 +163,10 @@ namespace mixc::lang_cxx_ph{
         }
     $
 
-    template<class final, class type>
+    template<class final_t, class type>
     xstruct(
-        xtmpl(base_ph, final, type),
-        xpubb(base_ph<final, void>),
+        xtmpl(base_ph, final_t, type),
+        xpubb(base_ph<final_t, void>),
         xprof(value, type)
     )
     public:
@@ -175,14 +175,14 @@ namespace mixc::lang_cxx_ph{
     $
 
     template<
-        class             final, 
+        class             final_t, 
         class             type, 
         inc::numeration_t n,
         bool              with_prefix, 
         bool              keep_leading_zero, 
         auto              lut>
-    struct num : base_ph<final, type>{
-        using base_t = base_ph<final, type>;
+    struct num : base_ph<final_t, type>{
+        using base_t = base_ph<final_t, type>;
         using base_t::base_t;
         num(){}
 
@@ -244,7 +244,7 @@ namespace mixc::lang_cxx_ph{
         template<class type>                                                                            \
         struct name : base_ph<name<type>, equivalent_type_t>{                                           \
             using base_t = base_ph<name<type>, equivalent_type_t>;                                      \
-            using final  = num<name<type>, equivalent_type_t, numeration, prefix, leading_zero, lut>;   \
+            using final_t  = num<name<type>, equivalent_type_t, numeration, prefix, leading_zero, lut>;   \
             name(){}                                                                                    \
             name(type const & value) :                                                                  \
                 base_t(equivalent_type_t(value)){                                                       \
@@ -287,9 +287,9 @@ namespace mixc::lang_cxx_ph::origin::ph{
 }
 
 namespace mixc::lang_cxx_ph{
-    template<class final, class ... args> struct v;
-    template<class final, class a0, class ... args>
-    struct v<final, a0, args...> : v<final, args...> {
+    template<class final_t, class ... args> struct v;
+    template<class final_t, class a0, class ... args>
+    struct v<final_t, a0, args...> : v<final_t, args...> {
     private:
         static auto configure(){
             if constexpr (inc::is_based_on<place_holder_group, a0>){
@@ -310,7 +310,7 @@ namespace mixc::lang_cxx_ph{
         }
 
         using val_t  = inc::remove_ptr<decltype(configure())>;
-        using base_t = v<final, args...>;
+        using base_t = v<final_t, args...>;
 
         val_t item;
     public:
@@ -368,10 +368,10 @@ namespace mixc::lang_cxx_ph{
         }
     };
 
-    template<class final>
-    struct v<final> : base_ph<final> {
-        using base_t = base_ph<final>;
-        using the_t  = v<final>;
+    template<class final_t>
+    struct v<final_t> : base_ph<final_t> {
+        using base_t = base_ph<final_t>;
+        using the_t  = v<final_t>;
 
         template<class item_t, class fmt_t = decltype(nullptr)>
         item_t * combine(uxx length, fmt_t const & fmt = nullptr){

@@ -57,9 +57,9 @@ namespace mixc::gc_ref{
     static inline uxx                               empty_mem[32];
     static inline voidp                             empty_mem_ptr   = empty_mem;
 
-    template<class final, class item_t, class attribute_t, bool is_array, bool is_binary_aligned_alloc>
+    template<class final_t, class item_t, class attribute_t, bool is_array, bool is_binary_aligned_alloc>
     xstruct(
-        xtmpl(meta, final, item_t, attribute_t, is_array, is_binary_aligned_alloc),
+        xtmpl(meta, final_t, item_t, attribute_t, is_array, is_binary_aligned_alloc),
         xpubb(self_management),
         xasso(attribute_t),
         xasso(item_t)
@@ -217,7 +217,7 @@ namespace mixc::gc_ref{
             the = nullptr;
         }
     public:
-        final & operator = (the_t const & object){
+        final_t & operator = (the_t const & object){
             /* 当 object == nullptr 时，实际上指向的是 the_t::null()
              * 对外而言依旧与 nullptr 比较判断是否是空对象
              * the_t::null() 是一块不为 nullptr 可用的内存，只是它不能当作对象实例使用
@@ -242,7 +242,7 @@ namespace mixc::gc_ref{
             return thex;
         }
 
-        final & operator = (the_t && object){
+        final_t & operator = (the_t && object){
             the_t         old;
             token_mix_t * m     = atom_swap(& the.mem, object.mem);
             old.mem             = m;
@@ -254,8 +254,8 @@ namespace mixc::gc_ref{
 
         xis_nullptr(mem == null());
 
-        final & operator=(decltype(nullptr)){
-            using guide = decltype(make_guide<final>());
+        final_t & operator=(decltype(nullptr)){
+            using guide = decltype(make_guide<final_t>());
             constexpr bool need_gc = guide::length != 0;
             token_mix_t *  ptr = null();
             uxx            cnt;
@@ -403,12 +403,12 @@ namespace mixc::gc_ref{
         the_t & operator=(the_t const &)    = default;          \
         the_t & operator=(the_t &&)         = default;          \
 
-    template<class final, class attribute_t>
+    template<class final_t, class attribute_t>
     xstruct(
-        xtmpl(ref_ptr, final, attribute_t),
-        xpubb(meta<final, void, attribute_t, false, false>)
+        xtmpl(ref_ptr, final_t, attribute_t),
+        xpubb(meta<final_t, void, attribute_t, false, false>)
     )
-        using base_t = meta<final, void, attribute_t, false, false>;
+        using base_t = meta<final_t, void, attribute_t, false, false>;
 
         xgen(ref_ptr)
 
@@ -420,16 +420,16 @@ namespace mixc::gc_ref{
     $
 
     template<
-        class   final, 
+        class   final_t, 
         class   item_t, 
         class   attribute_t, 
         bool    is_binary_aligned_alloc
     >
     xstruct(
-        xtmpl(ref_array, final, item_t, attribute_t, is_binary_aligned_alloc),
-        xpubb(meta<final, item_t, attribute_t, true, is_binary_aligned_alloc>)
+        xtmpl(ref_array, final_t, item_t, attribute_t, is_binary_aligned_alloc),
+        xpubb(meta<final_t, item_t, attribute_t, true, is_binary_aligned_alloc>)
     )
-        using base_t = meta<final, item_t, attribute_t, true, is_binary_aligned_alloc>;
+        using base_t = meta<final_t, item_t, attribute_t, true, is_binary_aligned_alloc>;
         using typename base_t::item_initial_invoke;
         using typename base_t::item_initial_invokex;
 
@@ -460,15 +460,15 @@ namespace mixc::gc_ref{
     $
 
     template<
-        class   final, 
+        class   final_t, 
         class   item_t, 
         bool    is_binary_aligned_alloc
     >
     xstruct(
-        xspec(ref_array, final, item_t, void, is_binary_aligned_alloc),
-        xpubb(meta<final, item_t, void, true, is_binary_aligned_alloc>)
+        xspec(ref_array, final_t, item_t, void, is_binary_aligned_alloc),
+        xpubb(meta<final_t, item_t, void, true, is_binary_aligned_alloc>)
     )
-        using base_t = meta<final, item_t, void, true, is_binary_aligned_alloc>;
+        using base_t = meta<final_t, item_t, void, true, is_binary_aligned_alloc>;
         using typename base_t::item_initial_invoke;
         using typename base_t::item_initial_invokex;
 

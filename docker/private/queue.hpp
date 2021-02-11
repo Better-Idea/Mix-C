@@ -43,9 +43,9 @@ namespace mixc::docker_queue {
         when<head_xw>::can<                push,      foreach, head_xr, head_xw>::concurrency<co_max>
     >;
 
-    template<class final, class item_t, is_attached_lock lock_t>
+    template<class final_t, class item_t, is_attached_lock lock_t>
     xstruct(
-        xtmpl(queue, final, item_t, lock_t),
+        xtmpl(queue, final_t, item_t, lock_t),
         xpubb(self_management),
         xpubb(disable_copy),
         xprof(node, single_linked_node_ptr<item_t, lock_t>) // 带锁的节点指针类型

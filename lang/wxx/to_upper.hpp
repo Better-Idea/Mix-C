@@ -27,16 +27,16 @@ namespace mixc::lang_wxx_to_upper{
         }
     };
 
-    template<class final, class base, class type>
+    template<class final_t, class base, class type>
     struct meta: base {
         using base::base;
         using the_t = core<type>;
 
-        final to_upper() const {
+        final_t to_upper() const {
             return the.to_upper();
         }
 
-        final & to_upper(final * result) const {
+        final_t & to_upper(final_t * result) const {
             result[0] = the.to_upper();
             return thex;
         }
@@ -46,8 +46,8 @@ namespace mixc::lang_wxx_to_upper{
 #endif
 
 namespace mixc::lang_wxx_to_upper::xuser{
-    template<class final, class item_t>
-    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using wxx = meta<final_t, xusing_lang_wxx::wxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

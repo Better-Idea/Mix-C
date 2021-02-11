@@ -9,7 +9,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_date::origin{
-    template<class final, class field_t> struct date;
+    template<class final_t, class field_t> struct date;
 }
 
 namespace mixc::chrono_private_day::inc{
@@ -24,8 +24,8 @@ namespace mixc::chrono_private_day::origin{
         day(ixx value = 0) : 
             pvalue(value){}
 
-        template<class finalx, class fieldx>
-        day(inc::date<finalx, fieldx> value){
+        template<class finalx_t , class fieldx>
+        day(inc::date<finalx_t, fieldx> value){
             auto y = value.year() - 1;
             auto m = value.month() - 1;
             auto d = value.day();
@@ -48,9 +48,9 @@ namespace mixc::chrono_private_day::origin{
             return the;
         }
 
-        template<class final_date>
-        requires(inc::has_constructor<final_date, void(u32, u32, u32)>)
-        operator final_date() const {
+        template<class final_date_t>
+        requires(inc::has_constructor<final_date_t, void(u32, u32, u32)>)
+        operator final_date_t() const {
             constexpr u32 a = 400 * 365 + 97; // 完整的 400 年共有的天数
             constexpr u32 b = 100 * 365 + 24; // 完整的 100 年共有的天数
             constexpr u32 c = 4   * 365 + 1;  // 完整的 4   年共有的天数
@@ -64,17 +64,17 @@ namespace mixc::chrono_private_day::origin{
             auto p5 = p3 % c;
 
             if (p5 == 0){
-                return final_date(p0 + p2 + p4, 12, 30 + (p2 != 400));
+                return final_date_t(p0 + p2 + p4, 12, 30 + (p2 != 400));
             }
 
             auto p6 = p5 / 365;
             auto p7 = p5 % 365;
 
             if (p7 == 0){
-                return final_date(p0 + p2 + p4 + p6, 12, 30 + (p6 != 4));
+                return final_date_t(p0 + p2 + p4 + p6, 12, 30 + (p6 != 4));
             }
 
-            auto da = final_date(); da.year(p0 + p2 + p4 + p6 + 1);
+            auto da = final_date_t(); da.year(p0 + p2 + p4 + p6 + 1);
             auto lu = da.is_leap() ? inc::sum_leap : inc::sum_normal;
             auto p8 = p7 / 31;
             auto p9 = 

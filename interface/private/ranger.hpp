@@ -57,7 +57,7 @@ namespace mixc::interface_private_ranger{
         xprof(ofs, uxx    )
     )
     private:
-        using final = the_t;
+        using final_t = the_t;
         enum{ mask  = sizeof(voidp) * 2 - 1 };
 
         template<class object, class return_type>
@@ -149,7 +149,7 @@ namespace mixc::interface_private_ranger{
     )
     public:
         using item_t = item_type;
-        using final  = inc::adapter_array_access<the_t>;
+        using final_t  = inc::adapter_array_access<the_t>;
 
         constexpr ranger(the_t const &) = default;
 
@@ -178,7 +178,7 @@ namespace mixc::interface_private_ranger{
             return access<item_t>(index);
         }
 
-        final backward(uxx offset) const {
+        final_t backward(uxx offset) const {
             if (the_t r = the; is_positive_order()){
                 r.ofs += offset;
                 r.len -= offset;
@@ -191,12 +191,12 @@ namespace mixc::interface_private_ranger{
             }
         }
 
-        final forward(uxx offset) const {
+        final_t forward(uxx offset) const {
             return backward(uxx(0) - offset);
         }
 
         template<can_interval interval_t>
-        final subseq(interval_t const & i) const {
+        final_t subseq(interval_t const & i) const {
             the_t r = the;
             i.normalize(the.length());
 

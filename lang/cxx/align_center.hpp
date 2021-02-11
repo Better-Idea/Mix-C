@@ -36,7 +36,7 @@ namespace mixc::lang_cxx_align_center{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base{
         using base::base;
         using the_t = core<item_t>;
@@ -45,7 +45,7 @@ namespace mixc::lang_cxx_align_center{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final align_center(uxx width, alloc_t const & alloc) const {
+        final_t align_center(uxx width, alloc_t const & alloc) const {
             return the.align_center(width, ' ', ' ', alloc);
         }
 
@@ -53,7 +53,7 @@ namespace mixc::lang_cxx_align_center{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final align_center(uxx width, item_t pad, alloc_t const & alloc) const {
+        final_t align_center(uxx width, item_t pad, alloc_t const & alloc) const {
             return the.align_center(width, pad, pad, alloc);
         }
 
@@ -61,7 +61,7 @@ namespace mixc::lang_cxx_align_center{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final align_center(uxx width, item_t pad_left, item_t pad_right, alloc_t const & alloc) const {
+        final_t align_center(uxx width, item_t pad_left, item_t pad_right, alloc_t const & alloc) const {
             return the.align_center(width, pad_left, pad_right, alloc);
         }
     };
@@ -70,8 +70,8 @@ namespace mixc::lang_cxx_align_center{
 #endif
 
 namespace mixc::lang_cxx_align_center::xuser{
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

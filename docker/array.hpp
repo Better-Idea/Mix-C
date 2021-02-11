@@ -11,13 +11,13 @@ namespace xuser{
     template<class item_t>
     struct array<item_t, 0> : 
         xusing_docker_array::array<array<item_t, 0>, item_t, 0>{
-        using final = xusing_docker_array::array<array<item_t, 0>, item_t, 0>;
-        using final::final;
+        using final_t = xusing_docker_array::array<array<item_t, 0>, item_t, 0>;
+        using final_t::final_t;
 
-        // 由于带 class final 的侵入式模板导致 C++ 编译器被绕晕，所以这里偷懒一下，在顶层定义 operator=
+        // 由于带 class final_t 的侵入式模板导致 C++ 编译器被绕晕，所以这里偷懒一下，在顶层定义 operator=
         // bad design
-        final & operator= (decltype(nullptr)){ 
-            thex.~final();
+        final_t & operator= (decltype(nullptr)){ 
+            thex.~final_t();
             return thex;
         }
     };

@@ -43,7 +43,7 @@
     #endif
 
     #define the         (*(the_t *)this)
-    #define thex        (*(final *)this)
+    #define thex        (*(final_t *)this)
 
     namespace mixc::base_type{
         template<int> struct env{};

@@ -22,12 +22,12 @@
 namespace mixc::utils_bit_indicator{
     /* 结构：静态位图
      * 参数：
-     * - final 为接口结构类型
+     * - final_t 为接口结构类型
      * - bits 为总位数
      */
-    template<class final, uxx bits = 0>
+    template<class final_t, uxx bits = 0>
     xstruct(
-        xtmpl(bit_indicator_t, final, bits)
+        xtmpl(bit_indicator_t, final_t, bits)
     )
     private:
         static constexpr uxx lv0 = bits / inc::bwidth + (bits % inc::bwidth != 0);
@@ -85,11 +85,11 @@ namespace mixc::utils_bit_indicator{
 
     /* 结构：动态位图
      * 参数：
-     * - final 为接口结构类型
+     * - final_t 为接口结构类型
      */
-    template<class final>
+    template<class final_t>
     xstruct(
-        xspec(bit_indicator_t, final),
+        xspec(bit_indicator_t, final_t),
         xpubb(inc::disable_copy),
         xprif(pbmp          , uxx *),
         xprif(pheight       , uxx),
@@ -208,9 +208,9 @@ namespace mixc::utils_bit_indicator{
         xpubget_priset(total_bits);
     $
 
-    template<class final, uxx total_bits>
+    template<class final_t, uxx total_bits>
     using bits_indicator = inc::adapter_bit_indicator<
-        bit_indicator_t<final, total_bits>
+        bit_indicator_t<final_t, total_bits>
     >;
 }
 #endif

@@ -13,17 +13,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_priority_queue {
-    template<class final, class item_t>
+    template<class final_t, class item_t>
     xstruct(
-        xtmpl(priority_queue, final, item_t),
+        xtmpl(priority_queue, final_t, item_t),
         xprif(items, inc::shared_array<item_t>)
     )
         using mirror = inc::shared_array<inc::mirror<item_t>>;
 
         priority_queue(){}
 
-        template<class finalx>
-        priority_queue(priority_queue<finalx, item_t> const & object) : 
+        template<class finalx_t >
+        priority_queue(priority_queue<finalx_t, item_t> const & object) : 
             items((inc::shared_array<item_t> &)object.items){}
 
         priority_queue(::length initial_capacity) : 
@@ -53,12 +53,12 @@ namespace mixc::docker_priority_queue {
             items.swap(object);
         }
 
-        final & operator= (decltype(nullptr)){
+        final_t & operator= (decltype(nullptr)){
             items = nullptr;
             return thex;
         }
 
-        final & operator= (the_t const & object){
+        final_t & operator= (the_t const & object){
             items = object.items;
             return thex;
         }

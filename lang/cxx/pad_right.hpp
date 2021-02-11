@@ -32,7 +32,7 @@ namespace mixc::lang_cxx_pad_right{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t = core<item_t>;
@@ -41,7 +41,7 @@ namespace mixc::lang_cxx_pad_right{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final pad_right(uxx count, item_t value, alloc_t const & alloc) const {
+        final_t pad_right(uxx count, item_t value, alloc_t const & alloc) const {
             return the.pad_right(count, value, alloc);
         }
     };
@@ -50,8 +50,8 @@ namespace mixc::lang_cxx_pad_right{
 #endif
 
 namespace mixc::lang_cxx_pad_right::xuser{
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

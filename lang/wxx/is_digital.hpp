@@ -25,7 +25,7 @@ namespace mixc::lang_wxx_is_digital{
         }
     };
 
-    template<class final, class base, class type>
+    template<class final_t, class base, class type>
     struct meta : base {
         using base::base;
         using the_t = core<type>;
@@ -34,7 +34,7 @@ namespace mixc::lang_wxx_is_digital{
             return the.is_digital();
         }
 
-        final & is_digital(bool * result) const {
+        final_t & is_digital(bool * result) const {
             result[0] = the.is_digital();
             return thex;
         }
@@ -43,8 +43,8 @@ namespace mixc::lang_wxx_is_digital{
 #endif
 
 namespace mixc::lang_wxx_is_digital::xuser{
-    template<class final, class item_t>
-    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using wxx = meta<final_t, xusing_lang_wxx::wxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

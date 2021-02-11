@@ -96,7 +96,7 @@ namespace mixc::io_private_tty_key::origin{
         xprif(w16,  char16_t),
         xprif(mlen, u08)
     )
-        using final = tty_key;
+        using final_t = tty_key;
     public:
         constexpr tty_key() :
             type{key_type(0)}, w08{'\0'}, w16('\0'), mlen(0){}

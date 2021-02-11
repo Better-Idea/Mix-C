@@ -63,13 +63,13 @@ namespace mixc::lang_cxx_slice{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t = core<item_t>;
 
         template<can_interval interval_t>
-        final slice(interval_t const & range) const {
+        final_t slice(interval_t const & range) const {
             return the.slice(range);
         }
 
@@ -77,7 +77,7 @@ namespace mixc::lang_cxx_slice{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final slice(interval_t const & range, alloc_t const & alloc) const {
+        final_t slice(interval_t const & range, alloc_t const & alloc) const {
             return the.slice(range, alloc);
         }
     };
@@ -86,8 +86,8 @@ namespace mixc::lang_cxx_slice{
 #endif
 
 namespace mixc::lang_cxx_slice::xuser {
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

@@ -56,7 +56,7 @@ namespace mixc::io_file::origin{
         #endif
     }
 
-    file::final & file::open(inc::c08 path, access_mode_t mode, bstate_t * result) const {
+    file::final_t & file::open(inc::c08 path, access_mode_t mode, bstate_t * result) const {
         auto type = 0;
         auto i    = cpp::c08{path}.index_of_last({'/','\\'});
 
@@ -117,7 +117,7 @@ namespace mixc::io_file::origin{
         return thex;
     }
 
-    file::final & file::close() const {
+    file::final_t & file::close() const {
         if (cpp::atom_swap<ixx>(& fd, -1) < 0){
             return thex;
         }
@@ -132,11 +132,11 @@ namespace mixc::io_file::origin{
         return thex;
     }
 
-    file::final & file::forward(u64 offset) const {
+    file::final_t & file::forward(u64 offset) const {
         return backward(u64(0) - offset);
     }
 
-    file::final & file::backward(u64 offset) const {
+    file::final_t & file::backward(u64 offset) const {
         #if xis_windows
         ::SetFilePointerEx(HANDLE(the.fd), *PLARGE_INTEGER(& offset), NULL, FILE_CURRENT);
         #elif xis_linux
@@ -147,7 +147,7 @@ namespace mixc::io_file::origin{
         return thex;
     }
 
-    file::final & file::seek(i64 offset) const {
+    file::final_t & file::seek(i64 offset) const {
         #if xis_windows
 
         if (offset < 0){
@@ -166,7 +166,7 @@ namespace mixc::io_file::origin{
         return thex;
     }
 
-    file::final & file::flush() const {
+    file::final_t & file::flush() const {
         if (the.fd < 0){
             return thex;
         }

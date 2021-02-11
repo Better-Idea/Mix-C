@@ -92,7 +92,7 @@ namespace mixc::lang_cxx_index_of_first{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t         = core<item_t>;
@@ -118,7 +118,7 @@ namespace mixc::lang_cxx_index_of_first{
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        uxx index_of_first(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
+        uxx index_of_first(final_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(value, compare);
         }
 
@@ -145,7 +145,7 @@ namespace mixc::lang_cxx_index_of_first{
             call_t  const & match, 
             cmp_t   const & compare = inc::default_compare<item_t>) const {
 
-            the.index_of_first(final{& value, 1}, match, compare);
+            the.index_of_first(final_t{& value, 1}, match, compare);
         }
     };
 }
@@ -153,8 +153,8 @@ namespace mixc::lang_cxx_index_of_first{
 #endif
 
 namespace mixc::lang_cxx_index_of_first::xuser {
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

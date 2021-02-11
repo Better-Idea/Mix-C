@@ -44,7 +44,7 @@ namespace mixc::interface_private_seqptr{
     )
     public:
         using item_t            = item_type;
-        using final             = inc::adapter_array_access<the_t>;
+        using final_t             = inc::adapter_array_access<the_t>;
     public:
         constexpr seqptr(the_t const &) : 
             ptr(nullptr), len(0){}
@@ -84,11 +84,11 @@ namespace mixc::interface_private_seqptr{
             return ptr[index];
         }
 
-        final backward(uxx offset) const {
+        final_t backward(uxx offset) const {
             return the_t(ptr + offset, len - offset);
         }
 
-        final forward(uxx offset) const {
+        final_t forward(uxx offset) const {
             return the_t(ptr - offset, len + offset);
         }
 
@@ -102,7 +102,7 @@ namespace mixc::interface_private_seqptr{
 
     public:
         template<can_interval interval_t>
-        final subseq(interval_t const & i) const {
+        final_t subseq(interval_t const & i) const {
             the_t r = the;
             i.normalize(the.length());
 

@@ -17,7 +17,7 @@ namespace mixc::io_dir::origin{
         xpubb(inc::disable_copy),
         xprif(path,  inc::c08)
     )
-        using final = the_t;
+        using final_t = the_t;
     public:
         struct subitem{
             subitem(inc::c08 path, bool for_file) : 

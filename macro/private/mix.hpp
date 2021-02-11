@@ -9,7 +9,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx{
-    template<class final, class item_t> struct cxx_t;
+    template<class final_t, class item_t> struct cxx_t;
 }
 
 namespace mixc::macro_private_mix::inc{

@@ -188,9 +188,9 @@ namespace mixc::docker_btree{
 
     static inline const i32 null_node = 0;
 
-    template<class final, class item_type>
+    template<class final_t, class item_type>
     xstruct(
-        xtmpl(btree, final, item_type),
+        xtmpl(btree, final_t, item_type),
         xpubb(inc::disable_copy),
         xasso(item_type)
     )
@@ -544,9 +544,9 @@ namespace mixc::docker_btree{
 }
 
 namespace mixc::docker_btree::origin{
-    template<class final, class item_t>
+    template<class final_t, class item_t>
     using btree = inc::adapter_array_access<
-        mixc::docker_btree::btree<final, item_t>
+        mixc::docker_btree::btree<final_t, item_t>
     >;
 }
 

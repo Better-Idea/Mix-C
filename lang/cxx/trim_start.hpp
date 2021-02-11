@@ -39,16 +39,16 @@ namespace mixc::lang_cxx_trim_start{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t = core<item_t>;
 
-        final trim_start(item_t value) const {
+        final_t trim_start(item_t value) const {
             return the.trim_start({ value }, nullptr);
         }
 
-        final trim_start(inc::initializer_list<item_t> values) const {
+        final_t trim_start(inc::initializer_list<item_t> values) const {
             return the.trim_start(values, nullptr);
         }
 
@@ -56,7 +56,7 @@ namespace mixc::lang_cxx_trim_start{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_start(item_t value, alloc_t const & alloc) const {
+        final_t trim_start(item_t value, alloc_t const & alloc) const {
             return the.trim_start({ value }, alloc);
         }
 
@@ -64,7 +64,7 @@ namespace mixc::lang_cxx_trim_start{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final trim_start(inc::initializer_list<item_t> values, alloc_t const & alloc) const {
+        final_t trim_start(inc::initializer_list<item_t> values, alloc_t const & alloc) const {
             return the.trim_start(values, alloc);
         }
     };
@@ -73,8 +73,8 @@ namespace mixc::lang_cxx_trim_start{
 #endif
 
 namespace mixc::lang_cxx_trim_start::xuser {
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

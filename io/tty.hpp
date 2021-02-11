@@ -20,7 +20,7 @@ namespace mixc::io_tty{
     xstruct(
         xname(tty_t)
     )
-        using final = tty_t;
+        using final_t = tty_t;
 
         xpubget_pubsetx(backcolor, inc::tty_color_t)
             xr { return inc::backcolor(); }

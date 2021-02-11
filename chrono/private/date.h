@@ -34,9 +34,9 @@ namespace mixc::chrono_private_date::origin{
         saturday,
     };
 
-    template<class final, class field_t>
+    template<class final_t, class field_t>
     xstruct(
-        xtmpl(date  , final, field_t),
+        xtmpl(date  , final_t, field_t),
         xproc(pday  , 5 , field_t),
         xproc(pmonth, 4 , field_t),
         xproc(pyear , 23, field_t)  // 按照字节序用于比较
@@ -50,8 +50,8 @@ namespace mixc::chrono_private_date::origin{
             date(now_t::date()){
         }
 
-        template<class finalx, class fieldx>
-        date(date<finalx, fieldx> const & object):
+        template<class finalx_t , class fieldx>
+        date(date<finalx_t, fieldx> const & object):
             date(object.year(), object.month(), object.day()){
         }
 
@@ -72,30 +72,30 @@ namespace mixc::chrono_private_date::origin{
             return year() % 4 == 0 and (year() % 100 != 0 or year() % 400 == 0);
         }
 
-        final tomorrow() const {
+        final_t tomorrow() const {
             auto max_day = days_of_month(is_leap(), month());
 
             if (day() + 1 <= max_day){
-                return final{}.year(year()).month(month()).day(day() + 1);
+                return final_t{}.year(year()).month(month()).day(day() + 1);
             }
             if (month() + 1 <= 12){
-                return final(year(), month() + 1, 1);
+                return final_t(year(), month() + 1, 1);
             }
             else{
-                return final(year() + 1, 1, 1);
+                return final_t(year() + 1, 1, 1);
             }
         }
 
-        final yesterday() const {
+        final_t yesterday() const {
             if (day() > 1){
-                return final{}.year(year()).month(month()).day(day() - 1);
+                return final_t{}.year(year()).month(month()).day(day() - 1);
             }
             if (month() > 1){
                 auto max_day = days_of_month(is_leap(), month() - 1);
-                return final{}.year(year()).month(month() - 1).day(field_t(max_day));
+                return final_t{}.year(year()).month(month() - 1).day(field_t(max_day));
             }
             else{
-                return final{}.year(year() - 1).month(12).day(31);
+                return final_t{}.year(year() - 1).month(12).day(31);
             }
         }
 
@@ -122,24 +122,24 @@ namespace mixc::chrono_private_date::origin{
             return day_t(self) - day_t(value);
         }
 
-        friend final operator - (the_t const & self, day_t value) {
+        friend final_t operator - (the_t const & self, day_t value) {
             day_t a = self;
             day_t b = a - value;
             return b;
         }
 
-        friend final operator + (the_t const & self, day_t value) {
+        friend final_t operator + (the_t const & self, day_t value) {
             day_t a = self;
             day_t b = a + value;
             return b;
         }
 
-        friend final operator -= (the_t & self, day_t value){
+        friend final_t operator -= (the_t & self, day_t value){
             self = self - value;
             return self;
         }
 
-        friend final operator += (the_t & self, day_t value){
+        friend final_t operator += (the_t & self, day_t value){
             self = self + value;
             return self;
         }

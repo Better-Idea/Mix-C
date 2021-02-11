@@ -32,7 +32,7 @@ namespace mixc::lang_cxx_is_ends_with{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t = core<item_t>;
@@ -41,7 +41,7 @@ namespace mixc::lang_cxx_is_ends_with{
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        bool is_ends_with(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
+        bool is_ends_with(final_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.is_ends_with(value, compare);
         }
     };
@@ -50,8 +50,8 @@ namespace mixc::lang_cxx_is_ends_with{
 #endif
 
 namespace mixc::lang_cxx_is_ends_with::xuser{
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

@@ -17,15 +17,15 @@ namespace mixc::chrono_private_datetime::inc{
 }
 
 namespace mixc::chrono_private_datetime::origin{
-    template<class final, class field_date = u32, class field_time = field_date>
+    template<class final_t, class field_date = u32, class field_time = field_date>
     xstruct(
-        xtmpl(datetime, final, field_date, field_time),
-        xpubb(inc::time<final, field_time>),    // 低位
-        xpubb(inc::date<final, field_date>)     // 高位 先比较
+        xtmpl(datetime, final_t, field_date, field_time),
+        xpubb(inc::time<final_t, field_time>),    // 低位
+        xpubb(inc::date<final_t, field_date>)     // 高位 先比较
     )
     private:
-        using the_time  = inc::time<final, field_time>;
-        using the_date  = inc::date<final, field_date>;
+        using the_time  = inc::time<final_t, field_time>;
+        using the_date  = inc::date<final_t, field_date>;
         using the_time::is_valid_24h_clock;
         using the_time::total_milisecond;
         using the_time::compare;
@@ -39,8 +39,8 @@ namespace mixc::chrono_private_datetime::origin{
             datetime(now_t::datetime()){
         }
 
-        template<class finalx, class field_datex, class field_timex>
-        datetime(datetime<finalx, field_datex, field_timex> const & object):
+        template<class finalx_t , class field_datex, class field_timex>
+        datetime(datetime<finalx_t, field_datex, field_timex> const & object):
             datetime(
                 object.year(),
                 object.month(),
@@ -64,27 +64,27 @@ namespace mixc::chrono_private_datetime::origin{
             the_date(year, month, day){
         }
 
-        template<class finala, class field_datex, class finalb, class field_timex>
+        template<class finala_t, class field_datex_t, class finalb_t, class field_timex_t>
         datetime(
-            inc::date<finala, field_datex> const & date, 
-            inc::time<finalb, field_timex> const & time): 
+            inc::date<finala_t, field_datex_t> const & date, 
+            inc::time<finalb_t, field_timex_t> const & time): 
             the_time(time), the_date(date){
         }
 
-        template<class finala, class field_datex>
-        datetime(inc::date<finala, field_datex> date): 
+        template<class finala_t, class field_datex_t>
+        datetime(inc::date<finala_t, field_datex_t> date): 
             the_time(), the_date(date){
         }
 
-        template<class finala, class field_timex>
-        datetime(inc::time<finala, field_timex> const & time): 
+        template<class finala_t, class field_timex_t>
+        datetime(inc::time<finala_t, field_timex_t> const & time): 
             the_time(time), the_date(){
         }
 
         bool is_valid(uxx max_second = 59) const {
             return 
-                inc::date<final, field_date>::is_valid() and 
-                inc::time<final, field_time>::is_valid_24h_clock(max_second);
+                inc::date<final_t, field_date>::is_valid() and 
+                inc::time<final_t, field_time>::is_valid_24h_clock(max_second);
         }
 
         ixx compare(the_t const & value) const {
@@ -95,24 +95,24 @@ namespace mixc::chrono_private_datetime::origin{
             return (ixx)(left.total_milisecond() - right.total_milisecond());
         }
 
-        friend final operator- (the_t const & left, inc::day right) {
-            final r         = (final &)(the_t &)left;
+        friend final_t operator- (the_t const & left, inc::day right) {
+            final_t r         = (final_t &)(the_t &)left;
             (the_date &)r  -= right;
             return r;
         }
 
-        friend final operator-= (the_t & left, inc::day right) {
+        friend final_t operator-= (the_t & left, inc::day right) {
             left = left - right;
             return left;
         }
 
-        friend final operator+ (the_t const & left, inc::day right) {
-            final r         = (final &)(the_t &)left;
+        friend final_t operator+ (the_t const & left, inc::day right) {
+            final_t r         = (final_t &)(the_t &)left;
             (the_date &)r  += right;
             return r;
         }
 
-        friend final operator+= (the_t & left, inc::day right) {
+        friend final_t operator+= (the_t & left, inc::day right) {
             left = left + right;
             return left;
         }
@@ -125,14 +125,14 @@ namespace mixc::chrono_private_datetime::origin{
         xpubget_pubsetx(total_milisecond, u64)
             xr{
                 constexpr u64 one_day = 24 * 3600 * 1000;
-                u64 part_a  = inc::time<final, field_time>::total_milisecond();
+                u64 part_a  = inc::time<final_t, field_time>::total_milisecond();
                 u64 part_b  = one_day * inc::day(the);
                 u64 ms      = part_a + part_b;
                 return ms;
             }
             xw{
                 constexpr u64 one_day = 24 * 3600 * 1000;
-                inc::time<final, field_time>::total_milisecond(value % one_day);
+                inc::time<final_t, field_time>::total_milisecond(value % one_day);
                 value      /= one_day;
                 the         = inc::day(value);
             }

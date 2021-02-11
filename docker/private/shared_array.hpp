@@ -32,19 +32,19 @@ namespace mixc::docker_shared_array::origin{
 namespace mixc::docker_shared_array{
     using namespace origin;
 
-    template<class final, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
+    template<class final_t, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
     xstruct(
-        xtmpl(shared_array_t, final, type, rank, attribute, is_binary_aligned_alloc),
+        xtmpl(shared_array_t, final_t, type, rank, attribute, is_binary_aligned_alloc),
         xpubb(inc::ref_array<
-            final,
+            final_t,
             typename 
-            shared_array_t<final, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t,
+            shared_array_t<final_t, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t,
             attribute,
             is_binary_aligned_alloc
         >)
     )
-        using item_t = typename shared_array_t<final, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t;
-        using base_t = inc::ref_array<final, item_t, attribute, is_binary_aligned_alloc>;
+        using item_t = typename shared_array_t<final_t, type, rank - 1, attribute, is_binary_aligned_alloc>::the_t;
+        using base_t = inc::ref_array<final_t, item_t, attribute, is_binary_aligned_alloc>;
         using typename base_t::item_initial_invoke;
         using typename base_t::item_initial_invokex;
         using base_t::operator==;
@@ -53,9 +53,9 @@ namespace mixc::docker_shared_array{
     public:
         shared_array_t(decltype(nullptr) = nullptr) : base_t(){}
 
-        template<class finalx>
-        shared_array_t(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
-            shared_array_t((the_t &)(shared_array_t<finalx, type, rank, attribute, is_binary_aligned_alloc> &)self){
+        template<class finalx_t >
+        shared_array_t(shared_array_t<finalx_t, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
+            shared_array_t((the_t &)(shared_array_t<finalx_t, type, rank, attribute, is_binary_aligned_alloc> &)self){
         }
 
         the_t & operator=(the_t const &)            = default;
@@ -94,14 +94,14 @@ namespace mixc::docker_shared_array{
             xw{ base_t::length(value); }
     $
 
-    template<class final, class type, class attribute, bool is_binary_aligned_alloc>
-    struct shared_array_t<final, type, 0, attribute, is_binary_aligned_alloc>{
+    template<class final_t, class type, class attribute, bool is_binary_aligned_alloc>
+    struct shared_array_t<final_t, type, 0, attribute, is_binary_aligned_alloc>{
         using the_t = type;
     };
 
-    template<class final, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
+    template<class final_t, class type, uxx rank, class attribute, bool is_binary_aligned_alloc>
     using shared_array = inc::adapter_array_access<
-        shared_array_t<final, type, rank, attribute, is_binary_aligned_alloc>
+        shared_array_t<final_t, type, rank, attribute, is_binary_aligned_alloc>
     >;
 }
 

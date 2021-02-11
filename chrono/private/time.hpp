@@ -11,9 +11,9 @@
 namespace mixc::chrono_private_time::origin{
     constexpr uxx allow_leap_second = 60;
 
-    template<class final, class field_t = u32>
+    template<class final_t, class field_t = u32>
     xstruct(
-        xtmpl(time, final, field_t),
+        xtmpl(time, final_t, field_t),
         xproc(pmilisecond, 10                      , field_t),  // 低位
         xproc(psecond    , 6                       , field_t),
         xproc(pminute    , 6                       , field_t),
@@ -22,7 +22,7 @@ namespace mixc::chrono_private_time::origin{
         template<class, class> friend struct time;
 
         time(time const &) = default;
-        
+
         template<class now_t>
         requires(now_t::im_now_t == true)
         time(now_t):
@@ -36,8 +36,8 @@ namespace mixc::chrono_private_time::origin{
             phour(hour){
         }
 
-        template<class finalx, class f>
-        time(time<finalx, f> const & value) : 
+        template<class finalx_t , class f>
+        time(time<finalx_t, f> const & value) : 
             time(
                 value.phour,
                 value.pminute,

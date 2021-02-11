@@ -35,7 +35,7 @@ namespace mixc::lang_cxx_index_of_first_miss{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t         = core<item_t>;
@@ -62,8 +62,8 @@ namespace mixc::lang_cxx_index_of_first_miss{
 #endif
 
 namespace mixc::lang_cxx_index_of_first_miss::xuser {
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

@@ -27,16 +27,16 @@ namespace mixc::lang_wxx_to_lower{
         }
     };
 
-    template<class final, class base, class type>
+    template<class final_t, class base, class type>
     struct meta: base {
         using base::base;
         using the_t = core<type>;
 
-        final to_lower() const {
+        final_t to_lower() const {
             return the.to_lower();
         }
 
-        final & to_lower(final * result) const {
+        final_t & to_lower(final_t * result) const {
             result[0] = the.to_lower();
             return thex;
         }
@@ -46,8 +46,8 @@ namespace mixc::lang_wxx_to_lower{
 #endif
 
 namespace mixc::lang_wxx_to_lower::xuser{
-    template<class final, class item_t>
-    using wxx = meta<final, xusing_lang_wxx::wxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using wxx = meta<final_t, xusing_lang_wxx::wxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx

@@ -18,7 +18,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_is_contains{
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base{
         using base::base;
         using the_t = inc::cxx<item_t>;
@@ -44,7 +44,7 @@ namespace mixc::lang_cxx_is_contains{
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        bool is_contains(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
+        bool is_contains(final_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.index_of_first(value, compare) != not_exist;
         }
     };
@@ -53,8 +53,8 @@ namespace mixc::lang_cxx_is_contains{
 #endif
 
 namespace mixc::lang_cxx_is_contains::xuser{
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

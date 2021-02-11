@@ -317,14 +317,14 @@ get_modify:                                                                     
 
 #define __get__(get_modify,name,...)                                            \
     __get_core__(__COUNTER__, get_modify, name, __VA_ARGS__)                    \
-    final & name(__rr<__VA_ARGS__> * receive){                                  \
+    final_t & name(__rr<__VA_ARGS__> * receive){                                  \
         receive[0] = name();                                                    \
         return thex;                                                            \
     }
 
 #define __set__(set_modify,name,...)                                            \
 set_modify:                                                                     \
-    final & name(__VA_ARGS__ value){                                            \
+    final_t & name(__VA_ARGS__ value){                                            \
         the(__dph<(__COUNTER__ - __start) / 4>(), value);                       \
         return thex;                                                            \
     }

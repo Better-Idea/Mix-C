@@ -8,17 +8,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_wxx{
-    template<class final, class type>
+    template<class final_t, class type>
     xstruct(
-        xtmpl(wxx, final, type),
+        xtmpl(wxx, final_t, type),
         xprof(data, type)
     )
         constexpr wxx() : data('\0'){};
         constexpr wxx(wxx const &) = default;
         constexpr wxx(type value) : data(value){}
 
-        template<class final_t>
-        wxx(wxx<final_t, type> const & self) :
+        template<class finalx_t>
+        wxx(wxx<finalx_t, type> const & self) :
             wxx((the_t &)self) {
         }
 

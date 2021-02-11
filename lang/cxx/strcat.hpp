@@ -48,7 +48,7 @@ namespace mixc::lang_cxx_strcat{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base{
         using base::base;
         using the_t = core<item_t>;
@@ -57,7 +57,7 @@ namespace mixc::lang_cxx_strcat{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final strcat(final values, alloc_t const & alloc) const {
+        final_t strcat(final_t values, alloc_t const & alloc) const {
             return the.strcat(& values, 1, alloc);
         }
 
@@ -65,7 +65,7 @@ namespace mixc::lang_cxx_strcat{
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
-        final strcat(inc::initializer_list<final> values, alloc_t const & alloc) const {
+        final_t strcat(inc::initializer_list<final_t> values, alloc_t const & alloc) const {
             return the.strcat(values.begin(), values.size(), alloc);
         }
     };
@@ -74,8 +74,8 @@ namespace mixc::lang_cxx_strcat{
 #endif
 
 namespace mixc::lang_cxx_strcat::xuser{
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

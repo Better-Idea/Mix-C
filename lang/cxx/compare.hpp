@@ -34,7 +34,7 @@ namespace mixc::lang_cxx_compare{
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t = core<item_t>;
@@ -43,21 +43,21 @@ namespace mixc::lang_cxx_compare{
         requires(
             inc::can_compare<cmp_t, item_t>
         )
-        ixx compare(final value, cmp_t const & compare = inc::default_compare<item_t>) const {
+        ixx compare(final_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
             return the.compare(value, compare);
         }
 
-        #define xa_args_list       final const & left, final const & right
+        #define xa_args_list       final_t const & left, final_t const & right
         #define xa_invoke          left.compare_fastly(right)
         #define xa_is_friend
         #include"macro/xgen.cmp.hpp"
 
-        #define xa_args_list       item_t const * left, final const & right
-        #define xa_invoke          final{left}.compare_fastly(right)
+        #define xa_args_list       item_t const * left, final_t const & right
+        #define xa_invoke          final_t{left}.compare_fastly(right)
         #define xa_is_friend
         #include"macro/xgen.cmp.hpp"
 
-        #define xa_args_list       final const & left, item_t const * right
+        #define xa_args_list       final_t const & left, item_t const * right
         #define xa_invoke          left.compare_fastly(right)
         #define xa_is_friend
         #include"macro/xgen.cmp.hpp"
@@ -67,8 +67,8 @@ namespace mixc::lang_cxx_compare{
 #endif
 
 namespace mixc::lang_cxx_compare::xuser{
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

@@ -28,7 +28,7 @@ namespace mixc::math_index_system::origin{
         xprof(pleft,    ixx),
         xprof(pright,   ixx)
     )
-        using final = cc;
+        using final_t = cc;
 
         template<class left_t, class right_t = ixx>
         cc(left_t left, right_t right = right_t(-1)) : 

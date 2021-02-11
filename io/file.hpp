@@ -25,7 +25,7 @@ namespace mixc::io_file::origin{
         xprif(fd,    ixx),
         xprif(path,  inc::c08)
     )
-        using final = the_t;
+        using final_t = the_t;
     public:
         file();
         file(file &&);
@@ -37,7 +37,7 @@ namespace mixc::io_file::origin{
             the.close();
         }
 
-        final & operator=(file && value){
+        final_t & operator=(file && value){
             if (this == & value){
                 return thex;
             }
@@ -47,12 +47,12 @@ namespace mixc::io_file::origin{
         }
 
         u64     length()                                const;
-        final & open(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) const;
-        final & close()                                 const;
-        final & forward(u64 offset)                     const;
-        final & backward(u64 offset)                    const;
-        final & seek(i64 offset)                        const;
-        final & flush()                                 const;
+        final_t & open(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) const;
+        final_t & close()                                 const;
+        final_t & forward(u64 offset)                     const;
+        final_t & backward(u64 offset)                    const;
+        final_t & seek(i64 offset)                        const;
+        final_t & flush()                                 const;
         uxx     read(voidp buffer, uxx bytes)           const;
         uxx     write(void const * buffer, uxx bytes)   const;
 
