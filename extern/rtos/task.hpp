@@ -115,7 +115,7 @@ namespace mixc::extern_rtos_task::origin{
         xprif(pinvoke,              invoke_t),
         xprif(parg_ptr,             voidp)
     )
-        using final = task_config;
+        using final_t = task_config;
 
         task_config():
             pstack_size(4096),

@@ -27,7 +27,7 @@ namespace mixc::extern_gui_paint_masker_mini::origin {
             pixel_per_column                = width / columns
         };
 
-        using final                         = the_t;
+        using final_t                         = the_t;
         using idc_t                         = inc::bits_indicator<pixel_per_row * pixel_per_column>;
         idc_t   idc;
         u16     pixel_count[rows * columns] = {};

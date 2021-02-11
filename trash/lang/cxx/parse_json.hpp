@@ -88,13 +88,13 @@ namespace mixc::lang_cxx_parse_json{
         }
     };
 
-    template<class final, class item_t, class index_t>
+    template<class final_t, class item_t, class index_t>
     struct json_t {
         using jval  = json_value_t<index_t>;
-        using the_t = json_t<final, item_t, index_t>;
+        using the_t = json_t<final_t, item_t, index_t>;
 
         json_t(){}
-        json_t(final json, jval value) :
+        json_t(final_t json, jval value) :
             json(json), value(value){
         }
 
@@ -110,14 +110,14 @@ namespace mixc::lang_cxx_parse_json{
             return origin().number != 0;
         }
 
-        operator final() const {
+        operator final_t() const {
             auto str = origin().string;
             return json.backward(str.offset).length(str.length);
         }
 
         template<class key_t>
         the_t operator[](key_t const & index) const {
-            using match_t = inc::more_fit<key_t, final, uxx>;
+            using match_t = inc::more_fit<key_t, final_t, uxx>;
 
             if constexpr (match_t::index == 0){
                 auto & obj = origin().object[0];
@@ -154,7 +154,7 @@ namespace mixc::lang_cxx_parse_json{
             temp.type = 0;
             return temp;
         }
-        final json;
+        final_t json;
         jval  value;
     };
 
@@ -364,22 +364,22 @@ namespace mixc::lang_cxx_parse_json{
             return f64(r);
         }
 
-        template<class final, class index_t = u32>
-        json_t<final, item_t, index_t> parse_json(inc::can_alloc<byte> alloc) {
+        template<class final_t, class index_t = u32>
+        json_t<final_t, item_t, index_t> parse_json(inc::can_alloc<byte> alloc) {
             uxx i   = 0;
             any mem = alloc(the.length() * 5 + 1);
             return { the, the.template parse_value<index_t>(i, mem) };
         }
     };
 
-    template<class final, class base, class item_t>
+    template<class final_t, class base, class item_t>
     struct meta : base {
         using base::base;
         using the_t = core<item_t>;
 
         template<class index_t = u32>
         auto parse_json(inc::can_alloc<byte> alloc) {
-            return the.template parse_json<final, index_t>(alloc);
+            return the.template parse_json<final_t, index_t>(alloc);
         }
     };
 }
@@ -387,8 +387,8 @@ namespace mixc::lang_cxx_parse_json{
 #endif
 
 namespace mixc::lang_cxx_parse_json::xuser {
-    template<class final, class item_t>
-    using cxx = meta<final, xusing_lang_cxx::cxx<final, item_t>, item_t>;
+    template<class final_t, class item_t>
+    using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_cxx

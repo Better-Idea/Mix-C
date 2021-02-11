@@ -39,7 +39,7 @@
 
         struct area_t {
             using the_t = area_t;
-            using final = area_t;
+            using final_t = area_t;
 
             xpubget_pubset(code, uxx){
                 xr { return the.code_size; }

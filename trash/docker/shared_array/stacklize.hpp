@@ -24,9 +24,9 @@ namespace mixc::docker_shared_array_stacklize::origin {
 }
 
 namespace mixc::docker_shared_array_stacklize {
-    template<class final, class type, uxx rank, class attribute>
+    template<class final_t, class type, uxx rank, class attribute>
     xstruct(
-        xtmpl(shared_array, final, type, rank, attribute),
+        xtmpl(shared_array, final_t, type, rank, attribute),
         xpubb(inc::shared_array<type, rank, attribute, true /* is_binary_aligned_alloc */>)
     )
         using base_t                 = inc::shared_array<type, rank, attribute, true /* is_binary_aligned_alloc */>;
