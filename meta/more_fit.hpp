@@ -5,6 +5,7 @@
 #define xuser mixc::meta_more_fit::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xwarning.hpp"
 #include"math/const.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/has_operator_cast.hpp"
@@ -51,9 +52,12 @@ namespace mixc::meta_more_fit{
                 meta<index + 1, source, target...>::invoke()
             );
 
+            xwarning_disable(6287)
             constexpr u08 is_narrow_or_widen    = 
                 (inc::is_signed<source>   and inc::is_signed<first>) or
                 (inc::is_unsigned<source> and inc::is_unsigned<first>);
+            xwarning_enable()
+
             constexpr ixx  diff                 = ixx(sizeof(first) - sizeof(source));
             constexpr bool cond0 = (next::has_implicit_cast);
             constexpr bool cond1 = (next::different >= 0 and (diff < 0 or diff > next::different));
