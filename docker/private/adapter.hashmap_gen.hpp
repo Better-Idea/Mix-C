@@ -44,7 +44,7 @@ xstruct(
         }
 
         for(auto cur = this; ; cur = cur->next){
-            if (inc::cmp_with_operator((key_t &)cur->key, (key_t &)key) == 0){
+            if ((key_t &)cur->key == (key_t &)key){
                 cur->xarg_item.assign_with_operator(xarg_item);
                 return hashmap_set_result_t::override;
             }
@@ -58,7 +58,7 @@ xstruct(
     xarg_item_t & get(key_t const & key){
         if (not is_empty()){
             for(auto cur = this; cur != nullptr; cur = cur->next){
-                if (inc::cmp_with_operator((key_t &)cur->key, (key_t &)key) == 0){
+                if ((key_t &)cur->key == (key_t &)key){
                     return cur->xarg_item;
                 }
             }
@@ -78,7 +78,7 @@ xstruct(
             if (cur == nullptr){
                 return inc::nullref;
             }
-            if (inc::cmp_with_operator((key_t &)cur->key, (key_t &)key) == 0){
+            if ((key_t &)cur->key == (key_t &)key){
                 break;
             }
             pre = cur;
@@ -142,11 +142,13 @@ xstruct(
 $
 
 #ifdef xarg_has_val_t
-template<class final, class key_t, class val_t>
+#define xarg_name  kvhashmap
+
+template<class final_t, inc::has_cmp_equal key_t, class val_t>
 xstruct(
-    xtmpl(hashmap, final, key_t, val_t),
-    xpubb(inc::self_management),
+    xtmpl(kvhashmap, final_t, key_t, val_t),
     xpubb(inc::disable_copy),
+    xpubb(inc::self_management),
     xprif(lines,  uxx),
     xprif(count,  uxx),
     xprif(seed ,  uxx),
@@ -155,11 +157,13 @@ xstruct(
 )
     using node_t   = node<key_t, val_t>;
 #else
-template<class final, class key_t>
+#define xarg_name  khashmap
+
+template<class final_t, inc::has_cmp_equal key_t>
 xstruct(
-    xspec(hashmap, final, key_t, void),
-    xpubb(inc::self_management),
+    xtmpl(khashmap, final_t, key_t),
     xpubb(inc::disable_copy),
+    xpubb(inc::self_management),
     xprif(lines,  uxx),
     xprif(count,  uxx),
     xprif(seed ,  uxx),
@@ -174,16 +178,16 @@ private:
 
     // 构造/析构区
 public:
-    hashmap() : hashmap(start_capcity){}
-    hashmap(uxx start_capcity) : hashmap(start_capcity, inc::random<uxx>()){}
-    hashmap(uxx start_capcity, uxx seed) : 
+    xarg_name() : xarg_name(start_capcity){}
+    xarg_name(uxx start_capcity) : xarg_name(start_capcity, inc::random<uxx>()){}
+    xarg_name(uxx start_capcity, uxx seed) : 
         lines(inc::align(start_capcity)), 
         count(0), 
         seed(seed),
         nodes(the_t::alloc(xref bmp, lines)) {
     }
 protected:
-    ~hashmap(){
+    ~xarg_name(){
         the.clear();
         the.free();
     }
@@ -439,7 +443,9 @@ $
 #ifdef xarg_has_val_t
     #undef xarg_has_val_t
 #endif
+
 #undef  xarg_val_t_decl
 #undef  xarg_val
 #undef  xarg_item_t
 #undef  xarg_item
+#undef  xarg_name

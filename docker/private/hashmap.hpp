@@ -17,6 +17,8 @@
 #include"memop/copy.hpp"
 #include"memop/cmp.hpp"
 #include"memop/swap.hpp"
+#include"meta/has_cmp_equal.hpp"
+#include"meta/remove_ptr.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
 #include"utils/bits_indicator.hpp"
@@ -38,12 +40,41 @@ namespace mixc::docker_hashmap{
         override,
     };
 
-    template<class key_t, class val_t>              struct node;
-    template<class final, class key_t, class val_t> struct hashmap;
-
     #define xarg_has_val_t
     #include"docker/private/adapter.hashmap_gen.hpp"
     #include"docker/private/adapter.hashmap_gen.hpp"
+
+    /* 
+     * struct __single_inheritance X;
+     * 
+     * struct A { };
+     * struct B { };
+     * struct X : A, B { };  // C2292, X uses multiple inheritance
+     * 
+     * C2292 的指示被声明单继承的类不能多继承，
+     * 而 Mix-C 的项目从未使用该约束，但还是莫名奇妙的产生了该错误，并且暂时无法通过简化的代码模拟再现该错误
+     * 所以只能拆成两个类(kvhashmap、khashmap) msvc 让作者心碎
+     */
+    template<class final_t, class key_t, class val_t>
+    inline auto configure(key_t *, val_t *) {
+        return (kvhashmap<final_t, key_t, val_t> *)nullptr;
+    }
+
+    template<class final_t, class key_t>
+    inline auto configure(final_t *, key_t *, voidp) {
+        return (khashmap<final_t, key_t> *)nullptr;
+    }
+
+    template<class final_t, inc::has_cmp_equal key_t, class val_t>
+    using hashmap = inc::remove_ptr<
+        decltype(
+            configure(
+                (final_t *)nullptr,
+                (key_t   *)nullptr,
+                (val_t   *)nullptr
+            )
+        )
+    >;
 }
 
 namespace mixc::docker_hashmap::origin{
