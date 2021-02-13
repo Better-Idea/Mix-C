@@ -415,8 +415,6 @@ namespace mixc::lang_cxx_parse_json{
                 except_next                 = false;                // 新创建子节点的首个元素忽略此状态
             };
             auto fetch_str                  = [&]() -> jsonx<item_t> {
-                cur_lv[0]->type(json_type_t::jstring);
-                cur_lv[0]->value.s          = buf_string;
                 json_string                 = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
                 json_string                += 1;
 
@@ -478,6 +476,9 @@ namespace mixc::lang_cxx_parse_json{
 
                     // 提取元素值
                     if (c == '\"'){
+                        cur_lv[0]->type(json_type_t::jstring);
+                        cur_lv[0]->value.s  = buf_string;
+
                         if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
                             return r;
                         }
@@ -557,8 +558,9 @@ namespace mixc::lang_cxx_parse_json{
                     if (json_string[0] != '\"'){
                         return { json_parse_result_t::unexpected_key_format, json_string };
                     }
-
-                    jop(cur_lv[0])->key     = static_cast<item_t *>(buf_string);
+                    else{
+                        jop(cur_lv[0])->key = static_cast<item_t *>(buf_string);
+                    }
 
                     if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
                         return r;
