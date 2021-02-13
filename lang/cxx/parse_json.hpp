@@ -251,7 +251,7 @@ namespace mixc::lang_cxx_parse_json{
             }
 
             if (json_string += 1; json_string[0] == '\0'){
-                // error
+                return json_string;
             }
 
             switch(json_string[0]){
@@ -264,11 +264,10 @@ namespace mixc::lang_cxx_parse_json{
             case 'r' : buf[0] = '\r'; buf += 1; break;
             case 't' : buf[0] = '\t'; buf += 1; break;
             case 'u' : 
-                // to convert
+                // to convert =============================================
                 break;
             default:
-                // error
-                break;
+                return json_string; // 未知转义符
             }
         }
         buf[0]                  = '\0';
@@ -375,15 +374,16 @@ namespace mixc::lang_cxx_parse_json{
                 match,
             };
 
-            using node = json_array<item_t> *;
+            using jap                       = json_arrayp<item_t>;
+            using jop                       = json_objectp<item_t>;
 
             constexpr uxx json_depth        = 256;
-            node stack[json_depth];
+            jap  stack[json_depth];
             char terminator[2];
             auto bytes                      = the.length() * sizeof(json_object<item_t>);
             auto buffer                     = alloc(bytes);
             auto buffer_end                 = u08p(buffer) + bytes;
-            auto root                       = node{};
+            auto root                       = jap{};
             auto cur_lv                     = & stack[0];
             auto c                          = item_t('\0');
             auto except_next                = false;                // 遇到 ',' 逗号，表示还有下一个元素
@@ -407,24 +407,32 @@ namespace mixc::lang_cxx_parse_json{
             auto create_element             = [&](json_type_t type, voidp item, operation_t opr){
                 cur_lv[0]->type(type);
                 cur_lv[0]->value.u          = uxx(item);            // 赋值给联合体
-                cur_lv[1]                   = node(item);
+                cur_lv[1]                   = jap(item);
                 cur_lv                     += 1;
                 json_string                += 1;
                 closure                     = closure_t(type);      // closure_t 与 json_type_t 保持一致
                 op                          = opr;
                 except_next                 = false;                // 新创建子节点的首个元素忽略此状态
             };
-            auto fetch                      = [&](){
-                if (c == '\"'){
-                    cur_lv[0]->type(json_type_t::jstring);
-                    cur_lv[0]->value.s      = buf_string;
-                    json_string             = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
+            auto fetch_str                  = [&]() -> jsonx<item_t> {
+                cur_lv[0]->type(json_type_t::jstring);
+                cur_lv[0]->value.s          = buf_string;
+                json_string                 = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
+                json_string                += 1;
 
-                    if (json_string++; json_string[-1] == '\0'){
-                        return { json_parse_result_t::unexpected_termination, json_string };
-                    }
+                if (json_string[-1] == '\0'){
+                    return { json_parse_result_t::unexpected_termination, json_string };
                 }
-                else if (json_string = parse_number(& cur_lv[0]->value.u, & type, json_string); type != json_type_t::unknwon){
+                if (json_string[-1] != '\"'){ // 未知转义符
+                    return { json_parse_result_t::unexpected_key_format, json_string };
+                }
+                else{
+                    return { json_parse_result_t::success, json_string };
+                }
+            };
+            auto fetch                      = [&](){
+                if (json_string = parse_number(xref cur_lv[0]->value.u, xref type, json_string); 
+                    type != json_type_t::unknwon){
                     cur_lv[0]->type(type);
                 }
                 else if (start_with(json_string, "true")){
@@ -445,8 +453,8 @@ namespace mixc::lang_cxx_parse_json{
 
             terminator[in_object]           = '}';
             terminator[in_array]            = ']';
-            cur_lv[0]                       = node(& root);
-            cur_lv[1]                       = node(alloc_array()); // 与上文中的 closure 保持一致
+            cur_lv[0]                       = jap(& root);
+            cur_lv[1]                       = jap(alloc_array()); // 与上文中的 closure 保持一致
             cur_lv[0]->type(json_type_t::jarray);
             cur_lv                         += 1;
 
@@ -469,7 +477,12 @@ namespace mixc::lang_cxx_parse_json{
                     }
 
                     // 提取元素值
-                    if (fetch() == mismatch and except_next){
+                    if (c == '\"'){
+                        if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
+                            return r;
+                        }
+                    }
+                    else if (fetch() == mismatch and except_next){
                         return { json_parse_result_t::remainder_comma, json_string };
                     }
 
@@ -511,10 +524,10 @@ namespace mixc::lang_cxx_parse_json{
                     if (c = json_string[0]; c == ','){ 
                         if (closure == in_object){
                             op              = fetch_key;
-                            cur_lv[1]       = node(alloc_object());
+                            cur_lv[1]       = jap(alloc_object());
                         }
                         else{
-                            cur_lv[1]       = node(alloc_array());
+                            cur_lv[1]       = jap(alloc_array());
                         }
 
                         // 旧的队列尾元素指向新元素
@@ -544,22 +557,13 @@ namespace mixc::lang_cxx_parse_json{
                     if (json_string[0] != '\"'){
                         return { json_parse_result_t::unexpected_key_format, json_string };
                     }
-                    if (json_string += 1; json_string[0] == '\0'){
-                        return { json_parse_result_t::unexpected_termination, json_string };
+
+                    jop(cur_lv[0])->key     = static_cast<item_t *>(buf_string);
+
+                    if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
+                        return r;
                     }
-
-                    json_objectp<item_t>(cur_lv[0])->key 
-                                            = static_cast<item_t *>(buf_string);
-                    json_string             = parse_string(& buf_string, json_string); 
-
-                    if (json_string[0] != '\"'){
-                        return { json_parse_result_t::unexpected_key_format, json_string };
-                    }
-
-                    json_string            += 1; // skip '\"'
-                    json_string             = skip_whitespace(json_string);
-
-                    if (json_string[0] != ':'){
+                    if (json_string = skip_whitespace(json_string); json_string[0] != ':'){
                         return { json_parse_result_t::colon_mismatch, json_string };
                     }
 
@@ -573,7 +577,7 @@ namespace mixc::lang_cxx_parse_json{
             if (cur_lv != & stack[1]){
                 return { json_parse_result_t::terminator_missing, json_string };
             }
-            return { json_arrayp<item_t>(cur_lv[0]) };
+            return { cur_lv[0] };
         }
     };
 
