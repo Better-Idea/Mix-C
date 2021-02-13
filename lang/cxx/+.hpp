@@ -20,6 +20,7 @@
 #include"lang/cxx/pad_left.hpp"
 #include"lang/cxx/pad_right.hpp"
 #include"lang/cxx/parse.hpp"
+#include"lang/cxx/parse_json.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx/remove.hpp"
 #include"lang/cxx/replace.hpp"
