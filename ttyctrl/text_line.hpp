@@ -30,7 +30,7 @@ namespace mixc::ttyctrl_text_line{
         xprif(pcursor_index  ,   u32),
         xprif(plength        ,   u32)
     )
-        using final = the_t;
+        using final_t = the_t;
 
         enum{ over_boundary = true, };
 
@@ -114,7 +114,7 @@ namespace mixc::ttyctrl_text_line{
         }
 
         void write(char16_t value){
-            uxx new_length = inc::insert<char16_t>(the.ptext, the.pcursor_index, value);
+            uxx new_length = inc::insert(the.ptext, the.pcursor_index, value);
 
             if (the.capacity() == new_length){
                 the.resize(new_length * 4);
@@ -122,7 +122,7 @@ namespace mixc::ttyctrl_text_line{
         }
     private:
         bool compact(){
-            uxx new_length = inc::remove<char16_t>(the.ptext, the.pcursor_index);
+            uxx new_length = inc::remove(the.ptext, the.pcursor_index);
             if (the.capacity() == new_length * 4){
                 the.resize(new_length);
             }
