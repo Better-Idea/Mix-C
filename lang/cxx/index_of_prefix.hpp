@@ -30,7 +30,7 @@ namespace mixc::lang_cxx_index_of_prefix{
                 if (the.length() < prefix.length() or prefix.length() == 0){
                     continue;
                 }
-                if (auto && content = inc::cxx{the}.length(prefix.length());
+                if (auto && content = the_t{the}.length(prefix.length());
                     content.compare_fastly(prefix, compare) == 0){
                     return i;
                 }
