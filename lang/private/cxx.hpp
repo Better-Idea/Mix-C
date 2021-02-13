@@ -5,6 +5,7 @@
 #define xuser mixc::lang_cxx::inc
 #include"algo/hash.hpp"
 #include"define/base_type.hpp"
+#include"docker/private/adapter.array_access.hpp"
 #include"interface/ranger.hpp"
 #include"macro/xstruct.hpp"
 #include"macro/xsv.hpp"
@@ -168,6 +169,13 @@ namespace mixc::lang_cxx{
     };
 }
 
+namespace mixc::lang_cxx::origin{
+    template<class final_t, class item_t>
+    using cxx = inc::adapter_array_access<
+        mixc::lang_cxx::cxx<final_t, item_t>
+    >;
+}
+
 #if xis_os64
     #define xc08(str)      xsv(char, "0123456789abcdef", str)
 #elif xis_os32
@@ -175,4 +183,4 @@ namespace mixc::lang_cxx{
 #endif
 #endif
 
-#define xusing_lang_cxx     ::mixc::lang_cxx
+#define xusing_lang_cxx     ::mixc::lang_cxx::origin
