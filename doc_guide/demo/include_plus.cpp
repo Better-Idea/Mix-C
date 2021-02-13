@@ -59,7 +59,6 @@ int main(int argc, asciis * argv){
         "define/",
         "docker/",
         "dumb/",
-        "enum/",
         "instruction/",
         "interface/",
         "io/",
@@ -75,6 +74,7 @@ int main(int argc, asciis * argv){
         "meta/",
         "meta_seq/",
         "utils/",
+        "utils/enum/",
         "test/algo/",
     });
     return 0;
