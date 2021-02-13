@@ -59,6 +59,7 @@ int main(int argc, asciis * argv){
         "define/",
         "docker/",
         "dumb/",
+        "enum/",
         "instruction/",
         "interface/",
         "io/",
