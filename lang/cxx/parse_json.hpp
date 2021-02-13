@@ -108,16 +108,15 @@ namespace mixc::lang_cxx_parse_json{
     template<class item_t>
     xstruct(
         xtmpl(json, item_t),
-        xprif(ptr, voidp),
-        xprif(len, uxx)
+        xprif(ptr, voidp)
     )
     private:
-        using jap   = json_arrayp<item_t>;
-        using jop   = json_objectp<item_t>;
-        using jvp   = json_valuep<item_t>;
-        using final_t = the_t;
+        using jap       = json_arrayp<item_t>;
+        using jop       = json_objectp<item_t>;
+        using jvp       = json_valuep<item_t>;
+        using final_t   = the_t;
     public:
-        json(voidp ptr = nullptr) : ptr(ptr), len(not_exist){}
+        json(voidp ptr = nullptr) : ptr(ptr){}
 
         json<item_t> operator[](item_t const * name) const {
             return the[inc::cxx<item_t>{name}];
@@ -165,6 +164,10 @@ namespace mixc::lang_cxx_parse_json{
             return jop(ptr)->value.s;
         }
 
+        operator bool() const {
+            return jop(ptr)->value.i != 0;
+        }
+
         template<class type_t>
         operator type_t () const {
             using result_t  = inc::more_fit<type_t, f64, i64, u64, inc::cxx<item_t>>;
@@ -174,15 +177,18 @@ namespace mixc::lang_cxx_parse_json{
         }
 
         xpubgetx(length, uxx){
-            if (len == not_exist){
-                len         = 0;
+            uxx len     = 0;
+            jop object  = jop(ptr)->value.o;
 
-                for(jop object = jop(ptr)->value.o; object != nullptr;){
-                    object  = object->next();
-                    len    += 1;
-                }
+            while(object != nullptr){
+                object  = object->next();
+                len    += 1;
             }
             return len;
+        }
+
+        xpubgetx(type, json_type_t){
+            return jop(ptr)->type();
         }
     $
 
