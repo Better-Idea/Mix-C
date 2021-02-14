@@ -141,7 +141,7 @@ xstruct(
     }
 $
 
-#ifdef xarg_has_val_t
+#ifdef  xarg_has_val_t
 #define xarg_name  kvhashmap
 
 template<class final_t, inc::has_cmp_equal key_t, class val_t>
@@ -172,6 +172,7 @@ xstruct(
 )
     using node_t   = node<key_t, void>;
 #endif
+
 private:
     static constexpr uxx multi         = 4;
     static constexpr uxx start_capcity = 16;
@@ -285,11 +286,10 @@ public:
         auto & node = nodes[index];
 
         #ifdef xarg_has_val_t
-        xdebug(im_docker_hashmap_set, index, key, val);
+            xdebug(im_docker_hashmap_set, index, key, val);
         #else
-        xdebug(im_docker_hashmap_set, index, key);
+            xdebug(im_docker_hashmap_set, index, key);
         #endif
-
 
         if (node.is_empty()){
             bmp.set(index);

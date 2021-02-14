@@ -56,7 +56,7 @@ namespace mixc::docker_hashmap{
      * 所以只能拆成两个类(kvhashmap、khashmap) msvc 让作者心碎
      */
     template<class final_t, class key_t, class val_t>
-    inline auto configure(key_t *, val_t *) {
+    inline auto configure(final_t *, key_t *, val_t *) {
         return (kvhashmap<final_t, key_t, val_t> *)nullptr;
     }
 
