@@ -440,7 +440,7 @@ namespace mixc::lang_cxx_parse_json{
             auto c                          = item_t('\0');
             auto except_next                = false;                // 遇到 ',' 逗号，表示还有下一个元素
             auto miss_terminator            = true;                 // 缺少终结符
-            auto need_bracket               = true;                 // 只在开始时需要匹配一次
+            auto need_left_bracket         = true;                 // 只在开始时需要匹配一次
             auto op                         = fetch_value;
             auto closure                    = in_array;
             auto type                       = json_type_t::unknwon;
@@ -519,15 +519,15 @@ namespace mixc::lang_cxx_parse_json{
                     // 进入子节点
                     if (c = json_string[0]; c == '{'){
                         create_element(json_type_t::jobject, alloc_object(), fetch_key);
-                        need_bracket        = false;
+                        need_left_bracket   = false;
                         continue;
                     }
                     if (c == '['){
                         create_element(json_type_t::jarray, alloc_array(), fetch_value);
-                        need_bracket        = false;
+                        need_left_bracket   = false;
                         continue;
                     }
-                    if (need_bracket){
+                    if (need_left_bracket){
                         return { json_parse_result_t::forbidden, json_string };
                     }
 
