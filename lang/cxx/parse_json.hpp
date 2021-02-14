@@ -40,11 +40,11 @@ namespace mixc::lang_cxx_parse_json{
         depth_overflow,             // json 嵌套太深
         terminator_missing,         // 终结符缺失 '}' or ']'
         terminator_mismatch,        // 终结符不匹配，要求 '{' 匹配 '}'，'[' 匹配 ']'
+        terminator_redundant,       // 终结符多余，多出 '}' 或 ']'
         colon_mismatch,             // 对象类型缺失 ':'
         unexpected_termination,     // 遇到意外的 '\0' 终结符
-        unexpected_key_format,      // 对象类型要求以 '\"' 开始
-        next_value_missing,         // 要求匹配一个值但实际上匹配失败，如 ',' 逗号或 ':' 冒号后边需要跟一个值
-        redundant_terminator,       // 多余的终结符 '}' 或 ']'
+        unexpected_key_format,      // 对象类型元素要求以 '\"' 开始（键为字符串格式）
+        unexpected_value_format,    // 要求匹配一个值但实际上匹配失败，如 ',' 逗号或 ':' 冒号后边需要跟一个值
     };
 
     template<class item_t>
@@ -536,12 +536,12 @@ namespace mixc::lang_cxx_parse_json{
                         cur_lv[0]->value.s  = buf_string;
 
                         if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
-                            return r;
+                            return { json_parse_result_t::unexpected_value_format, json_string };
                         }
                     }
                     // 可以是空节点，except_next 的意义在于指示不是空节点
                     else if (except_next and fetch() == mismatch){
-                        return { json_parse_result_t::next_value_missing, json_string };
+                        return { json_parse_result_t::unexpected_value_format, json_string };
                     }
 
                     // 跳过空白字符
@@ -562,7 +562,7 @@ namespace mixc::lang_cxx_parse_json{
 
                         // 栈底不能再退栈
                         if (cur_lv == & stack[0]){
-                            return { json_parse_result_t::redundant_terminator, json_string };
+                            return { json_parse_result_t::terminator_redundant, json_string };
                         }
 
                         cur_lv             -= 1;
