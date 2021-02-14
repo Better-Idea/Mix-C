@@ -68,14 +68,8 @@ namespace mixc::docker_array{
         xtmpl(array_t, final_t, type, count, rest...),
         xprif(data, items<final_t, type, count, rest...>)
     )
-    private:
-        static auto * item_type(){ // 兼容 linux g++
-            using item_ref_t = decltype(the_t::data[0]);
-            using item_t     = inc::remove_ref<item_ref_t>;
-            return (item_t *)nullptr;
-        }
     public:
-        using item_t = inc::remove_ptr<decltype(item_type())>;
+        using item_t = inc::remove_ref<decltype(the_t::data[0])>;
 
         constexpr array_t(array_t const &) = default;
 
