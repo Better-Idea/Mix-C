@@ -13,10 +13,10 @@ namespace xuser{
             xhint(demo);
 
             // 不设置初始元素的数组
-            array<uxx, 10>  buf;
+            array<i32, 10>  buf;
 
             // 创建长度为 10 的数组，默认只设置开始的 4 个元素
-            array<uxx, 10>  ary{ 10, 20, 30, 40 };
+            array<i32, 10>  ary{ 10, 20, 30, 40 };
 
             uxx             new_length;
 
@@ -61,13 +61,13 @@ namespace xuser{
             xhint(demo);
 
             // 不设置初始元素的数组
-            array<uxx, 10>  buf;
+            array<i32, 10>  buf;
 
             // 创建长度为 10 的数组，默认只设置开始的 4 个元素
-            array<uxx, 10>  ary{ 10, 20, 30, 40 };
+            array<i32, 10>  ary{ 10, 20, 30, 40 };
 
             // 用于追加的数组
-            auto &&         append_ary = array_view{ uxx(50), 60, 70 };
+            auto &&         append_ary = array_view{ 50, 60, 70 };
 
             uxx             new_length;
 
