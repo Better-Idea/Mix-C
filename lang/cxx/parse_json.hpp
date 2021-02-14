@@ -35,17 +35,16 @@ namespace mixc::lang_cxx_parse_json{
     };
 
     enum class json_parse_result_t : uxx{
-        success,
-        forbidden,
-        depth_overflow,
-        terminator_missing,
-        terminator_mismatch,
-        colon_mismatch,
-        unexpected_termination,
-        unexpected_key_format,
-        unexpected_value_format,
-        remainder_comma,
-        remainder_terminator,
+        success,                    // 成功
+        forbidden,                  // 遇到 json 攻击或不是以 '{' 或 '[' 开始的格式
+        depth_overflow,             // json 嵌套太深
+        terminator_missing,         // 终结符缺失 '}' or ']'
+        terminator_mismatch,        // 终结符不匹配，要求 '{' 匹配 '}'，'[' 匹配 ']'
+        colon_mismatch,             // 对象类型缺失 ':'
+        unexpected_termination,     // 遇到意外的 '\0' 终结符
+        unexpected_key_format,      // 对象类型要求以 '\"' 开始
+        next_value_missing,         // 要求匹配一个值但实际上匹配失败，如 ',' 逗号或 ':' 冒号后边需要跟一个值
+        redundant_terminator,       // 多余的终结符 '}' 或 ']'
     };
 
     template<class item_t>
@@ -540,8 +539,9 @@ namespace mixc::lang_cxx_parse_json{
                             return r;
                         }
                     }
-                    else if (fetch() == mismatch and except_next){
-                        return { json_parse_result_t::remainder_comma, json_string };
+                    // 可以是空节点，except_next 的意义在于指示不是空节点
+                    else if (except_next and fetch() == mismatch){
+                        return { json_parse_result_t::next_value_missing, json_string };
                     }
 
                     // 跳过空白字符
@@ -562,7 +562,7 @@ namespace mixc::lang_cxx_parse_json{
 
                         // 栈底不能再退栈
                         if (cur_lv == & stack[0]){
-                            return { json_parse_result_t::remainder_terminator, json_string };
+                            return { json_parse_result_t::redundant_terminator, json_string };
                         }
 
                         cur_lv             -= 1;
@@ -628,6 +628,7 @@ namespace mixc::lang_cxx_parse_json{
 
                     json_string            += 1;
                     op                      = fetch_value;
+                    except_next             = true;
                     continue;
                 }
             }
