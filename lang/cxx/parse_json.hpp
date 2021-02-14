@@ -594,17 +594,21 @@ namespace mixc::lang_cxx_parse_json{
     };
 }
 
-#endif
-
-namespace mixc::lang_cxx_parse_json::xuser{
+namespace mixc::lang_cxx_parse_json::origin{
     using ::mixc::lang_cxx_parse_json::json_type_t;
     using ::mixc::lang_cxx_parse_json::json_parse_result_t;
     using ::mixc::lang_cxx_parse_json::json;
     using ::mixc::lang_cxx_parse_json::jsonx;
+}
 
+#endif
+
+namespace mixc::lang_cxx_parse_json::xuser{
     template<class final_t, class item_t>
     using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
+
+xexport_space(mixc::lang_cxx_parse_json::origin)
 
 #undef  xusing_lang_cxx
 #define xusing_lang_cxx ::mixc::lang_cxx_parse_json::xuser
