@@ -394,8 +394,8 @@ namespace mixc::lang_cxx_parse_json{
             bytes               = 0;
         }
         else{
-            bytes               = ~0x1f & (bytes + 0x1f);
             bytes              -= ignore;
+            bytes               = ~0x1f & (bytes + 0x1f);
         }
         return bytes;
     }
