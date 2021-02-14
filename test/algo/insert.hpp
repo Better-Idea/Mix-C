@@ -11,8 +11,8 @@
 
 namespace mixc::test_algo_insert{
     xtest("insert"){
-        auto && a       = inc::array<u32, 32>();
-        auto && b       = inc::array_view{ 0u,0,2,3,0,0 };
+        auto && a       = inc::array<i32, 32>();
+        auto && b       = inc::array_view{ 0,0,2,3,0,0 };
         auto    c       = b;
 
         // 指向 c[2, 3] 区间的 2 个元素
