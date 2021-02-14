@@ -16,6 +16,7 @@
 #include"dumb/init_by.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
+#include"interface/ranger.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"macro/xnew.hpp"
 #include"meta/has_cast.hpp"
@@ -92,6 +93,9 @@ namespace mixc::docker_shared_array{
         xpubget_prosetx(length, uxx)
             xr{ return base_t::length(); }
             xw{ base_t::length(value); }
+
+    public:
+        xranger(item_t)
     $
 
     template<class final_t, class type, class attribute, bool is_binary_aligned_alloc>
