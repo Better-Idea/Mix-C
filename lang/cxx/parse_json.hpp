@@ -38,10 +38,9 @@ namespace mixc::lang_cxx_parse_json{
         success,                    // 成功
         forbidden,                  // 遇到 json 攻击或不是以 '{' 或 '[' 开始的格式
         depth_overflow,             // json 嵌套太深
-        terminator_missing,         // 终结符缺失 '}' or ']'
-        terminator_mismatch,        // 终结符不匹配，要求 '{' 匹配 '}'，'[' 匹配 ']'
-        terminator_redundant,       // 终结符多余，多出 '}' 或 ']'
+        redundant_content,          // 顶层括号后边还有内容
         colon_mismatch,             // 对象类型缺失 ':'
+        terminator_mismatch,        // 终结符不匹配，要求 '{' 匹配 '}'，'[' 匹配 ']'
         unexpected_termination,     // 遇到意外的 '\0' 终结符
         unexpected_key_format,      // 对象类型元素要求以 '\"' 开始（键为字符串格式）
         unexpected_value_format,    // 要求匹配一个值但实际上匹配失败，如 ',' 逗号或 ':' 冒号后边需要跟一个值
@@ -201,7 +200,10 @@ namespace mixc::lang_cxx_parse_json{
     )
         using jarray_t = json_array<item_t>;
         using final_t    = the_t;
-        using json<item_t>::json;
+        
+        jsonx(voidp ptr) : 
+            json<item_t>(ptr), pparse_result(json_parse_result_t::success){
+        }
 
         jsonx(json_parse_result_t parse_result, item_t const * location_of_error) : 
             pparse_result(parse_result), plocation_of_error(location_of_error){
@@ -438,8 +440,7 @@ namespace mixc::lang_cxx_parse_json{
             auto cur_lv                     = & stack[0];
             auto c                          = item_t('\0');
             auto except_next                = false;                // 遇到 ',' 逗号，表示还有下一个元素
-            auto miss_terminator            = true;                 // 缺少终结符
-            auto need_left_bracket         = true;                 // 只在开始时需要匹配一次
+            auto expect_left_bracket        = true;                 // 只在开始时需要匹配一次
             auto op                         = fetch_value;
             auto closure                    = in_array;
             auto type                       = json_type_t::unknwon;
@@ -490,9 +491,9 @@ namespace mixc::lang_cxx_parse_json{
                     cur_lv[0]->value.u      = 1;
                 }
                 else if (start_with(json_string, "false") or start_with(json_string, "null")){
-                    json_string        += json_string[0] == 'f'/*is "false"*/ ? 5 : 4;
+                    json_string            += json_string[0] == 'f'/*is "false"*/ ? 5 : 4;
                     cur_lv[0]->type(json_type_t::jinteger);
-                    cur_lv[0]->value.u  = 0;
+                    cur_lv[0]->value.u      = 0;
                 }
                 else{
                     return mismatch;
@@ -502,31 +503,25 @@ namespace mixc::lang_cxx_parse_json{
 
             terminator[in_object]           = '}';
             terminator[in_array]            = ']';
-            cur_lv[0]                       = jap(& root);
-            cur_lv[1]                       = jap(alloc_array()); // 与上文中的 closure 保持一致
-            cur_lv[0]->type(json_type_t::jarray);
-            cur_lv                         += 1;
+            cur_lv[0]                       = jap(alloc_array());
 
             while(true){
                 if (cur_lv == & stack[json_depth - 1]){
                     return { json_parse_result_t::depth_overflow, json_string };
                 }
-                if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
-                    break;
-                }
-                if (op == fetch_value){
+                if (json_string = skip_whitespace(json_string); op == fetch_value){
                     // 进入子节点
                     if (c = json_string[0]; c == '{'){
                         create_element(json_type_t::jobject, alloc_object(), fetch_key);
-                        need_left_bracket   = false;
+                        expect_left_bracket = false;
                         continue;
                     }
                     if (c == '['){
                         create_element(json_type_t::jarray, alloc_array(), fetch_value);
-                        need_left_bracket   = false;
+                        expect_left_bracket = false;
                         continue;
                     }
-                    if (need_left_bracket){
+                    if (expect_left_bracket){
                         return { json_parse_result_t::forbidden, json_string };
                     }
 
@@ -539,74 +534,83 @@ namespace mixc::lang_cxx_parse_json{
                             return { json_parse_result_t::unexpected_value_format, json_string };
                         }
                     }
-                    // 可以是空节点，except_next 的意义在于指示不是空节点
-                    else if (except_next and fetch() == mismatch){
-                        return { json_parse_result_t::unexpected_value_format, json_string };
-                    }
-
-                    // 跳过空白字符
-                    if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
-                        return { json_parse_result_t::unexpected_termination, json_string };
-                    }
-
-                    // 退出子节点
-                    for (miss_terminator = true;;){
-                        if (c = json_string[0]; c != '}' and c != ']'){
-                            break;
+                    // 注意：需要先 fetch
+                    else if (fetch() == mismatch){
+                        // 由于 except_next = false 且没有 fetch 到值，所以假定是空数组，要求匹配终结符
+                        // 可以是：
+                        // []
+                        // 不可以：
+                        // [,]
+                        if (not except_next){
+                            except_next     = true;
                         }
-
-                        // 终结括号不匹配
-                        if (c != terminator[closure]){
-                            return { json_parse_result_t::terminator_mismatch, json_string };
-                        }
-
-                        // 栈底不能再退栈
-                        if (cur_lv == & stack[0]){
-                            return { json_parse_result_t::terminator_redundant, json_string };
-                        }
-
-                        cur_lv             -= 1;
-
-                        // 当前节点的父节点存放着自己的类型
-                        closure             = closure_t(cur_lv[-1]->type());
-                        op                  = closure == in_object ? fetch_key : fetch_value;
-                        json_string        += 1;
-                        miss_terminator     = false; 
-
-                        if (json_string = skip_whitespace(json_string); json_string[0] == '\0'){
-                            break;
-                        }
-                    }
-
-                    // 还存在元素，创建平级节点，并设置 except_next 期待下轮循环 fetch 到元素
-                    if (c = json_string[0]; c == ','){ 
-                        if (closure == in_object){
-                            op              = fetch_key;
-                            cur_lv[1]       = jap(alloc_object());
-                        }
+                        // 不可以多出 ',' 逗号
+                        // [1,2,]
                         else{
-                            cur_lv[1]       = jap(alloc_array());
+                            return { json_parse_result_t::unexpected_value_format, json_string };
                         }
-
-                        // 旧的队列尾元素指向新元素
-                        cur_lv[0]->next(cur_lv[1]);
-
-                        // 新节点作为队列尾部
-                        cur_lv[0]           = cur_lv[1];
-
-                        json_string        += 1;
-                        miss_terminator     = false;
-                        except_next         = true;
-                        continue;
                     }
                     else{
                         except_next         = false;
                     }
 
-                    // 当前字符不是终结符('}', ']', ',')
-                    if (miss_terminator){
-                        return { json_parse_result_t::terminator_mismatch, json_string };
+                    // 回溯
+                    while(true){
+                        json_string         = skip_whitespace(json_string); 
+                        c                   = json_string[0]; 
+
+                        // 未到栈底
+                        if (cur_lv != xref stack[0]){
+                            if (c == '}' or c == ']'){
+                                ; // pass
+                            }
+                            // 空数组或对象不能带 ','，如下：
+                            // [,]
+                            else if (c != ',' or except_next){ 
+                                return { json_parse_result_t::terminator_mismatch, json_string };
+                            }
+                            else{
+                                break;
+                            }
+                        }
+                        else if (c == '\0'){
+                            return { cur_lv[0] };
+                        }
+                        else{
+                            return { json_parse_result_t::redundant_content, json_string };
+                        }
+
+                        // 父节点存放着自己的类型
+                        json_string        += 1;
+                        cur_lv             -= 1;
+                        closure             = closure_t(cur_lv[0]->type());
+
+                        // 已经匹配到终结符
+                        except_next         = false;
+
+                        // 终结括号不匹配
+                        if (c != terminator[closure]){
+                            return { json_parse_result_t::terminator_mismatch, json_string };
+                        }
                     }
+
+                    // 还存在元素，创建平级节点，并设置 except_next 期待下轮循环 fetch 到元素
+                    if (closure = closure_t(cur_lv[-1]->type()); closure == in_object){
+                        op                  = fetch_key;
+                        cur_lv[1]           = jap(alloc_object());
+                    }
+                    else{
+                        cur_lv[1]           = jap(alloc_array());
+                    }
+
+                    // 旧的队列尾元素指向新元素
+                    cur_lv[0]->next(cur_lv[1]);
+
+                    // 新节点作为队列尾部
+                    cur_lv[0]               = cur_lv[1];
+
+                    json_string            += 1;
+                    except_next             = true;
                     continue;
                 }
 
@@ -632,12 +636,6 @@ namespace mixc::lang_cxx_parse_json{
                     continue;
                 }
             }
-
-            // 只有括号成对存在并满足正确的嵌套关系才能不会导致退栈失败
-            if (cur_lv != & stack[1]){
-                return { json_parse_result_t::terminator_missing, json_string };
-            }
-            return { cur_lv[0] };
         }
     };
 
