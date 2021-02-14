@@ -48,7 +48,7 @@ namespace mixc::io_file::origin{
         #elif xis_linux
 
         struct stat sta = {};
-        ::stat(path, & sta);
+        ::stat(asciis(path), & sta);
         return sta.st_size;
 
         #else
@@ -105,7 +105,7 @@ namespace mixc::io_file::origin{
         case access_mode_t::read_write: type = O_RDWR;   break;
         }
 
-        the.fd      = ::open(path, type);
+        the.fd      = ::open(asciis(path), type);
 
         #else
         #error "os miss match"
@@ -245,7 +245,7 @@ namespace mixc::io_file::origin{
         #if xis_windows
         ::MoveFileA(asciis(source), asciis(target));
         #elif xis_linux
-        ::rename(source, target);
+        ::rename(asciis(source), asciis(target));
         #else
         #error "os miss match"
         #endif

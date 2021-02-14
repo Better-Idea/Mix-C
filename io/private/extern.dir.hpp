@@ -58,7 +58,7 @@ namespace mixc::io_dir::origin{
         SHFileOperationA(& opr);
 
         #elif xis_linux
-        dir_operator("/bin/mv", "mv", "-r", source, target);
+        cmd("/bin/mv", "mv", "-r", source, target);
         #else
         #error "os miss match"
         #endif
@@ -103,7 +103,7 @@ namespace mixc::io_dir::origin{
 
         typedef struct stat meta_t;
         auto && meta    = meta_t{};
-        auto    exist   = stat(source, & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
+        auto    exist   = stat(asciis(source), & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
 
         #else
         #error "os miss match"
@@ -148,7 +148,7 @@ namespace mixc::io_dir::origin{
         auto &&   buf       = cpp::path_buffer{};
         auto      source    = buf.alloc(path);
 
-        if (fd = opendir(source); fd == nullptr){
+        if (fd = opendir(asciis(source)); fd == nullptr){
             return;
         }
         else{
@@ -222,7 +222,7 @@ namespace mixc::io_dir::origin{
         #if xis_windows
         ::SetCurrentDirectoryA((asciis)target);
         #elif xis_linux
-        ::chdir(target);
+        ::chdir(asciis(target));
         #endif
         buf.free(target, path);
     }
