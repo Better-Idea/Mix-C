@@ -36,6 +36,7 @@ namespace mixc::lang_cxx_parse_json{
 
     enum class json_parse_result_t : uxx{
         success,
+        forbidden,
         depth_overflow,
         terminator_missing,
         terminator_mismatch,
@@ -355,6 +356,51 @@ namespace mixc::lang_cxx_parse_json{
     }
 
     template<class item_t>
+    inline uxx estimate_size(item_t const * ptr, uxx length){
+        uxx bytes               = length * sizeof(item_t);
+        uxx ignore              = 0;
+
+        for(; ptr[0] != '\0'; ptr++){
+            if (ptr[0] == '\"'){
+                for(ptr++; ptr[0] != '\0' and ptr[0] != '\"'; ){
+                    if (ptr[0] != '\\'){
+                        ptr    += 1;
+                        continue;
+                    }
+                    if (ptr[1] != '\0'){
+                        ptr    += 2;
+                    }
+                    else{
+                        break;
+                    }
+                }
+            }
+            if (ptr[0] == '['  or ptr[0] == '{' or ptr[0] == ','){
+                bytes          += sizeof(json_object<item_t>);
+                continue;
+            }
+            if (ptr[0] == ' '   or
+                ptr[0] == ']'   or
+                ptr[0] == '}'   or
+                ptr[0] == ':'   or
+                ptr[0] == '\r'  or
+                ptr[0] == '\n'  or
+                ptr[0] == '\t'){
+                ignore         += sizeof(item_t);
+            }
+        }
+
+        if (ignore >= bytes){ // 内存耗尽攻击 & 终结符攻击
+            bytes               = 0;
+        }
+        else{
+            bytes               = ~0x1f & (bytes + 0x1f);
+            bytes              -= ignore;
+        }
+        return bytes;
+    }
+
+    template<class item_t>
     struct core{
         using the_t = inc::cxx<item_t>;
 
@@ -380,7 +426,13 @@ namespace mixc::lang_cxx_parse_json{
             constexpr uxx json_depth        = 256;
             jap  stack[json_depth];
             char terminator[2];
-            auto bytes                      = the.length() * sizeof(json_object<item_t>);
+            auto json_string                = static_cast<item_t const *>(the);
+            auto bytes                      = estimate_size(json_string, the.length());
+
+            if (bytes == 0){
+                return { json_parse_result_t::forbidden, json_string };
+            }
+
             auto buffer                     = alloc(bytes);
             auto buffer_end                 = u08p(buffer) + bytes;
             auto root                       = jap{};
@@ -388,10 +440,10 @@ namespace mixc::lang_cxx_parse_json{
             auto c                          = item_t('\0');
             auto except_next                = false;                // 遇到 ',' 逗号，表示还有下一个元素
             auto miss_terminator            = true;                 // 缺少终结符
+            auto need_bracket               = true;                 // 只在开始时需要匹配一次
             auto op                         = fetch_value;
             auto closure                    = in_array;
             auto type                       = json_type_t::unknwon;
-            auto json_string                = static_cast<item_t const *>(the);
             auto buf_string                 = static_cast<item_t *>(buffer);
             auto buf_struct                 = static_cast<u08p /*字节数组*/>(buffer_end);
 
@@ -467,11 +519,16 @@ namespace mixc::lang_cxx_parse_json{
                     // 进入子节点
                     if (c = json_string[0]; c == '{'){
                         create_element(json_type_t::jobject, alloc_object(), fetch_key);
+                        need_bracket        = false;
                         continue;
                     }
                     if (c == '['){
                         create_element(json_type_t::jarray, alloc_array(), fetch_value);
+                        need_bracket        = false;
                         continue;
+                    }
+                    if (need_bracket){
+                        return { json_parse_result_t::forbidden, json_string };
                     }
 
                     // 提取元素值
