@@ -107,7 +107,7 @@ namespace mixc::lang_cxx_parse_json{
     template<class item_t>
     xstruct(
         xtmpl(json, item_t),
-        xprif(ptr, voidp)
+        xprif(ptr, json_objectp<item_t>)
     )
     private:
         using jap       = json_arrayp<item_t>;
@@ -115,14 +115,14 @@ namespace mixc::lang_cxx_parse_json{
         using jvp       = json_valuep<item_t>;
         using final_t   = the_t;
     public:
-        json(voidp ptr = nullptr) : ptr(ptr){}
+        json(voidp ptr = nullptr) : ptr(jop(ptr)){}
 
         json<item_t> operator[](item_t const * name) const {
             return the[inc::cxx<item_t>{name}];
         }
 
         json<item_t> operator[](inc::cxx<item_t> name) const {
-            for(jop object = jop(ptr)->value.o;;){
+            for(jop object = ptr->value.o;;){
                 if (name == object->key){
                     return object;
                 }
@@ -134,7 +134,7 @@ namespace mixc::lang_cxx_parse_json{
 
         template<inc::is_number number_t>
         json<item_t> operator[](number_t index) const {
-            jap object  = jop(ptr)->value.a;
+            jap object  = ptr->value.a;
             uxx i       = 0;
 
             while(true){
@@ -148,23 +148,23 @@ namespace mixc::lang_cxx_parse_json{
         }
 
         operator f64 () const {
-            return jop(ptr)->value.f;
+            return ptr->value.f;
         }
 
         operator i64 () const {
-            return jop(ptr)->value.i;
+            return ptr->value.i;
         }
 
         operator u64 () const {
-            return jop(ptr)->value.u;
+            return ptr->value.u;
         }
 
         operator inc::cxx<item_t> () const {
-            return jop(ptr)->value.s;
+            return ptr->value.s;
         }
 
         operator bool() const {
-            return jop(ptr)->value.i != 0;
+            return ptr->value.i != 0;
         }
 
         template<class type_t>
@@ -177,7 +177,7 @@ namespace mixc::lang_cxx_parse_json{
 
         xpubgetx(length, uxx){
             uxx len     = 0;
-            jop object  = jop(ptr)->value.o;
+            jop object  = ptr->value.o;
 
             while(object != nullptr){
                 object  = object->next();
@@ -187,7 +187,7 @@ namespace mixc::lang_cxx_parse_json{
         }
 
         xpubgetx(type, json_type_t){
-            return jop(ptr)->type();
+            return ptr->type();
         }
     $
 
@@ -500,6 +500,47 @@ namespace mixc::lang_cxx_parse_json{
                 }
                 return match;
             };
+            auto back                       = [&]() -> jsonx<item_t> {
+                // 回溯
+                while(true){
+                    json_string             = skip_whitespace(json_string); 
+                    c                       = json_string[0]; 
+
+                    // 未到栈底
+                    if (cur_lv != xref stack[0]){
+                        if (c == '}' or c == ']'){
+                            ; // pass
+                        }
+                        // 空数组或对象不能带 ','，如下：
+                        // [,]
+                        else if (c != ',' or except_next){ 
+                            return { json_parse_result_t::terminator_mismatch, json_string };
+                        }
+                        else{
+                            return { json_parse_result_t(-1), json_string };
+                        }
+                    }
+                    else if (c == '\0'){
+                        return { cur_lv[0] };
+                    }
+                    else{
+                        return { json_parse_result_t::redundant_content, json_string };
+                    }
+
+                    // 父节点存放着自己的类型
+                    json_string            += 1;
+                    cur_lv                 -= 1;
+                    closure                 = closure_t(cur_lv[0]->type());
+
+                    // 已经匹配到终结符
+                    except_next             = false;
+
+                    // 终结括号不匹配
+                    if (c != terminator[closure]){
+                        return { json_parse_result_t::terminator_mismatch, json_string };
+                    }
+                }
+            };
 
             terminator[in_object]           = '}';
             terminator[in_array]            = ']';
@@ -554,44 +595,10 @@ namespace mixc::lang_cxx_parse_json{
                         except_next         = false;
                     }
 
-                    // 回溯
-                    while(true){
-                        json_string         = skip_whitespace(json_string); 
-                        c                   = json_string[0]; 
-
-                        // 未到栈底
-                        if (cur_lv != xref stack[0]){
-                            if (c == '}' or c == ']'){
-                                ; // pass
-                            }
-                            // 空数组或对象不能带 ','，如下：
-                            // [,]
-                            else if (c != ',' or except_next){ 
-                                return { json_parse_result_t::terminator_mismatch, json_string };
-                            }
-                            else{
-                                break;
-                            }
-                        }
-                        else if (c == '\0'){
-                            return { cur_lv[0] };
-                        }
-                        else{
-                            return { json_parse_result_t::redundant_content, json_string };
-                        }
-
-                        // 父节点存放着自己的类型
-                        json_string        += 1;
-                        cur_lv             -= 1;
-                        closure             = closure_t(cur_lv[0]->type());
-
-                        // 已经匹配到终结符
-                        except_next         = false;
-
-                        // 终结括号不匹配
-                        if (c != terminator[closure]){
-                            return { json_parse_result_t::terminator_mismatch, json_string };
-                        }
+                    // 遇到右括号就返回上一级
+                    // -1 表示继续
+                    if (auto r = back(); (ixx)r.parse_result() >= 0){
+                        return r;
                     }
 
                     // 还存在元素，创建平级节点，并设置 except_next 期待下轮循环 fetch 到元素
@@ -616,11 +623,14 @@ namespace mixc::lang_cxx_parse_json{
 
                 // 针对 json_type_t::jobject 的 fetch，先获取键，再在 fetch_value 中获取值
                 if (op == fetch_key){
-                    if (json_string[0] != '\"'){
-                        return { json_parse_result_t::unexpected_key_format, json_string };
-                    }
-                    else{
+                    if (json_string[0] == '\"'){
                         jop(cur_lv[0])->key = static_cast<item_t *>(buf_string);
+                    }
+                    // 遇到右括号就返回上一级
+                    // -1 表示继续
+                    else if (auto r = back(); (ixx)r.parse_result() >= 0){
+                        jop(cur_lv[0])->key = static_cast<item_t *>(inc::cxx<item_t>{}); // 空串
+                        return r;
                     }
 
                     if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
