@@ -63,7 +63,7 @@ namespace mixc::chrono_private_time::origin{
         }
 
         #define xa_args_list       the_t const & left, the_t const & right
-        #define xa_invoke          compare(left, right)
+        #define xa_invoke          left.compare(right)
         #define xa_is_friend
         #include"macro/xgen.cmp.hpp"
 
