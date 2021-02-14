@@ -202,7 +202,9 @@ namespace mixc::lang_cxx_parse_json{
         using final_t    = the_t;
         
         jsonx(voidp ptr) : 
-            json<item_t>(ptr), pparse_result(json_parse_result_t::success){
+            json<item_t>(ptr), 
+            pparse_result(json_parse_result_t::success), 
+            plocation_of_error((item_t *)inc::cxx<item_t>{}){
         }
 
         jsonx(json_parse_result_t parse_result, item_t const * location_of_error) : 
@@ -500,7 +502,85 @@ namespace mixc::lang_cxx_parse_json{
                 }
                 return match;
             };
-            auto back                       = [&]() -> jsonx<item_t> {
+
+            terminator[in_object]           = '}';
+            terminator[in_array]            = ']';
+            cur_lv[0]                       = jap(alloc_array());
+
+            while(true){
+                if (cur_lv == & stack[json_depth - 1]){
+                    return { json_parse_result_t::depth_overflow, json_string };
+                }
+                if (json_string = skip_whitespace(json_string), 
+                    c           = json_string[0]; 
+                    op == fetch_value){
+
+                    // 进入子节点
+                    if (c == '{'){
+                        create_element(json_type_t::jobject, alloc_object(), fetch_key);
+                        expect_left_bracket = false;
+                        continue;
+                    }
+                    if (c == '['){
+                        create_element(json_type_t::jarray, alloc_array(), fetch_value);
+                        expect_left_bracket = false;
+                        continue;
+                    }
+                    if (expect_left_bracket){
+                        return { json_parse_result_t::forbidden, json_string };
+                    }
+
+                    // 提取元素值
+                    if (c == '\"'){
+                        cur_lv[0]->type(json_type_t::jstring);
+                        cur_lv[0]->value.s  = buf_string;
+                        except_next         = false;
+
+                        if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
+                            return { json_parse_result_t::unexpected_value_format, json_string };
+                        }
+                    }
+                    // 注意：需要先 fetch
+                    else if (fetch() == match){
+                        except_next         = false;
+                    }
+                    // 由于 except_next = false 且没有 fetch 到值，所以假定是空数组，要求匹配终结符
+                    // 可以是：
+                    // []
+                    // 不可以：
+                    // [,]
+                    else if (not except_next){
+                        except_next         = true;
+                    }
+                    // 不可以多出 ',' 逗号
+                    // [1,2,]
+                    else{
+                        return { json_parse_result_t::unexpected_value_format, json_string };
+                    }
+                }
+                // 针对 json_type_t::jobject 的 fetch，先获取键，再在 fetch_value 中获取值
+                else if (c == '\"'){
+                    jop(cur_lv[0])->key     = static_cast<item_t *>(buf_string);
+
+                    if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
+                        return r;
+                    }
+                    if (json_string = skip_whitespace(json_string); json_string[0] != ':'){
+                        return { json_parse_result_t::colon_mismatch, json_string };
+                    }
+
+                    json_string            += 1;
+                    op                      = fetch_value;
+                    except_next             = true;
+                    continue;
+                }
+                // 假定为空对象
+                // {}
+                else{
+                    jop(cur_lv[0])->key     = static_cast<item_t *>(inc::cxx<item_t>{}); // 空串
+                    except_next             = true; // 期望终结符
+                }
+
                 // 回溯
                 while(true){
                     json_string             = skip_whitespace(json_string); 
@@ -517,7 +597,7 @@ namespace mixc::lang_cxx_parse_json{
                             return { json_parse_result_t::terminator_mismatch, json_string };
                         }
                         else{
-                            return { json_parse_result_t(-1), json_string };
+                            break;
                         }
                     }
                     else if (c == '\0'){
@@ -540,111 +620,24 @@ namespace mixc::lang_cxx_parse_json{
                         return { json_parse_result_t::terminator_mismatch, json_string };
                     }
                 }
-            };
 
-            terminator[in_object]           = '}';
-            terminator[in_array]            = ']';
-            cur_lv[0]                       = jap(alloc_array());
-
-            while(true){
-                if (cur_lv == & stack[json_depth - 1]){
-                    return { json_parse_result_t::depth_overflow, json_string };
+                // 还存在元素，创建平级节点，并设置 except_next 期待下轮循环 fetch 到元素
+                if (closure = closure_t(cur_lv[-1]->type()); closure == in_object){
+                    op                      = fetch_key;
+                    cur_lv[1]               = jap(alloc_object());
                 }
-                if (json_string = skip_whitespace(json_string); op == fetch_value){
-                    // 进入子节点
-                    if (c = json_string[0]; c == '{'){
-                        create_element(json_type_t::jobject, alloc_object(), fetch_key);
-                        expect_left_bracket = false;
-                        continue;
-                    }
-                    if (c == '['){
-                        create_element(json_type_t::jarray, alloc_array(), fetch_value);
-                        expect_left_bracket = false;
-                        continue;
-                    }
-                    if (expect_left_bracket){
-                        return { json_parse_result_t::forbidden, json_string };
-                    }
-
-                    // 提取元素值
-                    if (c == '\"'){
-                        cur_lv[0]->type(json_type_t::jstring);
-                        cur_lv[0]->value.s  = buf_string;
-
-                        if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
-                            return { json_parse_result_t::unexpected_value_format, json_string };
-                        }
-                    }
-                    // 注意：需要先 fetch
-                    else if (fetch() == mismatch){
-                        // 由于 except_next = false 且没有 fetch 到值，所以假定是空数组，要求匹配终结符
-                        // 可以是：
-                        // []
-                        // 不可以：
-                        // [,]
-                        if (not except_next){
-                            except_next     = true;
-                        }
-                        // 不可以多出 ',' 逗号
-                        // [1,2,]
-                        else{
-                            return { json_parse_result_t::unexpected_value_format, json_string };
-                        }
-                    }
-                    else{
-                        except_next         = false;
-                    }
-
-                    // 遇到右括号就返回上一级
-                    // -1 表示继续
-                    if (auto r = back(); (ixx)r.parse_result() >= 0){
-                        return r;
-                    }
-
-                    // 还存在元素，创建平级节点，并设置 except_next 期待下轮循环 fetch 到元素
-                    if (closure = closure_t(cur_lv[-1]->type()); closure == in_object){
-                        op                  = fetch_key;
-                        cur_lv[1]           = jap(alloc_object());
-                    }
-                    else{
-                        cur_lv[1]           = jap(alloc_array());
-                    }
-
-                    // 旧的队列尾元素指向新元素
-                    cur_lv[0]->next(cur_lv[1]);
-
-                    // 新节点作为队列尾部
-                    cur_lv[0]               = cur_lv[1];
-
-                    json_string            += 1;
-                    except_next             = true;
-                    continue;
+                else{
+                    cur_lv[1]               = jap(alloc_array());
                 }
 
-                // 针对 json_type_t::jobject 的 fetch，先获取键，再在 fetch_value 中获取值
-                if (op == fetch_key){
-                    if (json_string[0] == '\"'){
-                        jop(cur_lv[0])->key = static_cast<item_t *>(buf_string);
-                    }
-                    // 遇到右括号就返回上一级
-                    // -1 表示继续
-                    else if (auto r = back(); (ixx)r.parse_result() >= 0){
-                        jop(cur_lv[0])->key = static_cast<item_t *>(inc::cxx<item_t>{}); // 空串
-                        return r;
-                    }
+                // 旧的队列尾元素指向新元素
+                cur_lv[0]->next(cur_lv[1]);
 
-                    if (auto r = fetch_str(); r.parse_result() != json_parse_result_t::success){
-                        return r;
-                    }
-                    if (json_string = skip_whitespace(json_string); json_string[0] != ':'){
-                        return { json_parse_result_t::colon_mismatch, json_string };
-                    }
+                // 新节点作为队列尾部
+                cur_lv[0]                   = cur_lv[1];
 
-                    json_string            += 1;
-                    op                      = fetch_value;
-                    except_next             = true;
-                    continue;
-                }
+                json_string                += 1;
+                except_next                 = true;
             }
         }
     };
