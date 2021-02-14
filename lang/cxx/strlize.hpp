@@ -479,7 +479,7 @@ namespace mixc::lang_cxx_strlize::xuser{
     using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
-xexport_space(mixc::lang_cxx_strlize)
+xexport_space(mixc::lang_cxx_strlize::origin)
 
 #include"math/numeration_t.hpp"
 #undef  xusing_lang_cxx
