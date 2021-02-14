@@ -467,6 +467,7 @@ namespace mixc::lang_cxx_parse_json{
                 closure                     = closure_t(type);      // closure_t 与 json_type_t 保持一致
                 op                          = opr;
                 except_next                 = false;                // 新创建子节点的首个元素忽略此状态
+                expect_left_bracket         = false;
             };
             auto fetch_str                  = [&]() -> jsonx<item_t> {
                 json_string                 = parse_string(& buf_string, json_string + 1/*skip '\"'*/);
@@ -492,10 +493,15 @@ namespace mixc::lang_cxx_parse_json{
                     cur_lv[0]->type(json_type_t::jinteger);
                     cur_lv[0]->value.u      = 1;
                 }
-                else if (start_with(json_string, "false") or start_with(json_string, "null")){
-                    json_string            += json_string[0] == 'f'/*is "false"*/ ? 5 : 4;
+                else if (start_with(json_string, "false")){
+                    json_string            += 5;
                     cur_lv[0]->type(json_type_t::jinteger);
                     cur_lv[0]->value.u      = 0;
+                }
+                else if (start_with(json_string, "null")){
+                    json_string            += 4;
+                    cur_lv[0]->type(json_type_t::jobject);
+                    cur_lv[0]->value.o      = nullptr;
                 }
                 else{
                     return mismatch;
@@ -518,12 +524,10 @@ namespace mixc::lang_cxx_parse_json{
                     // 进入子节点
                     if (c == '{'){
                         create_element(json_type_t::jobject, alloc_object(), fetch_key);
-                        expect_left_bracket = false;
                         continue;
                     }
                     if (c == '['){
                         create_element(json_type_t::jarray, alloc_array(), fetch_value);
-                        expect_left_bracket = false;
                         continue;
                     }
                     if (expect_left_bracket){
