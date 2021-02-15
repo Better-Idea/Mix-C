@@ -7,7 +7,7 @@
 #include"concurrency/lock/atom_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
 #include"concurrency/lock/atom_swap.hpp"
-#include"concurrency/lock/lock_state_t.hpp"
+#include"concurrency/lock_state_t.hpp"
 #include"concurrency/thread_self.hpp"
 #include"macro/xexport.hpp"
 #include"meta/unsigned_type.hpp"
