@@ -10,9 +10,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::utils_bit_indicator::inc
+#include"concurrency/lock/atom_swap.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
-#include"lock/atom_swap.hpp"
 #include"memop/zeros.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"

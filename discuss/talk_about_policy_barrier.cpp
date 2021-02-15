@@ -3,11 +3,11 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::talk_about_policy_barrier::inc
-#include<thread>
-#include"lock/mutex.hpp"
-#include"lock/atom_add.hpp"
-#include"lock/policy_barrier.hpp"
+#include"concurrency/lock/mutex.hpp"
+#include"concurrency/lock/atom_add.hpp"
+#include"concurrency/lock/policy_barrier.hpp"
 #include"macro/xhint.hpp"
+#include<thread>
 #pragma pop_macro("xuser")
 
 namespace mixc::talk_about_policy_barrier::inc{

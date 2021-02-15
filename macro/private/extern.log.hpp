@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_private_log::ext
+#include"concurrency/lock/mutex.hpp"
 #include"configure.hpp"
 #include"define/base_type.hpp"
 #include"macro/private/log.hpp"
@@ -14,7 +15,6 @@
 #include"lang/cxx/strlize.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
-#include"lock/mutex.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_private_log::origin{

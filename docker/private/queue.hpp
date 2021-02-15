@@ -3,12 +3,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_queue::inc
+#include"concurrency/lock/builtin_lock.hpp"
+#include"concurrency/lock/policy_barrier.hpp"
 #include"dumb/disable_copy.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"
-#include"lock/builtin_lock.hpp"
-#include"lock/policy_barrier.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"memory/allocator.hpp"
 #include"meta/is_attached_lock.hpp"

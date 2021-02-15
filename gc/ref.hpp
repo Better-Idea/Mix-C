@@ -14,7 +14,7 @@
 #include"gc/private/tuple.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_callback.hpp"
-#include"lock/atom_swap.hpp"
+#include"concurrency/lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xis_nullptr.hpp"

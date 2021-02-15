@@ -10,12 +10,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_array::inc
+#include"concurrency/lock/atom_swap.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/ranger.hpp"
-#include"lock/atom_swap.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"macro/xnew.hpp"
 #include"memop/cast.hpp"

@@ -3,10 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_private_token::inc
+#include"concurrency/lock/atom_add.hpp"
+#include"concurrency/lock/atom_sub.hpp"
+#include"concurrency/lock/atom_load.hpp"
 #include"dumb/struct_type.hpp"
-#include"lock/atom_add.hpp"
-#include"lock/atom_sub.hpp"
-#include"lock/atom_load.hpp"
 #include"meta/is_same.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")

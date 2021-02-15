@@ -7,9 +7,9 @@
 #include"memory/private/tiny_allocator.hpp"
 
 #if xuse_libc_malloc
+#include"concurrency/lock/atom_add.hpp"
+#include"concurrency/lock/atom_sub.hpp"
 #include<malloc.h>
-#include"lock/atom_add.hpp"
-#include"lock/atom_sub.hpp"
 namespace mixc::memory_alloctor{
     uxx pused_bytes      = 0;
     uxx pneed_free_count = 0;

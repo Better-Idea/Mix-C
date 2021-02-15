@@ -3,10 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::talk_about_multi_barrier::inc
-#include<thread>
+#include"concurrency/lock/multi_barrier.hpp"
 #include"io/tty.hpp"
-#include"lock/multi_barrier.hpp"
 #include"mixc.hpp"
+#include<thread>
 #pragma pop_macro("xuser")
 
 namespace mixc::talk_about_multi_barrier::inc{
