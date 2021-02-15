@@ -71,13 +71,6 @@ namespace mixc::concurrency_thread::origin{
     $
 
     xstruct(
-        xname(thread_self)
-    )
-        static void sleep(uxx millisecond);
-        static void yield();
-    $
-
-    xstruct(
         xname(thread),
         xpubb(inc::disable_copy),
         xprif(mem, thread_local_layout *)
