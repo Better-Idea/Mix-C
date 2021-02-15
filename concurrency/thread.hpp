@@ -5,9 +5,14 @@
 #define xuser mixc::concurrency_thread::inc
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
+#include"macro/xcstyle.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
 #include"math/min.hpp"
+#include"meta/function.hpp"
+#include"meta/is_ptr.hpp"
+#include"meta/is_same.hpp"
+#include"meta/is_empty_class.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::concurrency_thread{
@@ -50,11 +55,30 @@ namespace mixc::concurrency_thread::origin{
             ppriority (thread_priority_t{0}){
         }
 
-        xpubget_pubset(routine  )
-        xpubget_pubset(args     )
-        xpubget_pubset(is_detach)
-        xpubget(policy)
-        xpubget(priority)
+        template<
+            inc::is_empty_class routine_t, 
+            class               func_t = decltype(& routine_t::operator()),
+            class               ret_t  = typename inc::function<func_t>::return_type,
+            class               arg_t  = typename inc::function<func_t>::template args<0>
+        >
+        requires(
+            inc::is_ptr<arg_t> and (inc::is_same<ret_t, void> or inc::is_ptr<ret_t>)
+        )
+        final_t & routine(routine_t const &){
+            struct closure{
+                static voidp call(voidp args){
+                    if constexpr (inc::is_same<void, ret_t>){
+                        routine_t()(arg_t(args));
+                        return nullptr;
+                    }
+                    else{
+                        return routine_t()(arg_t(args));
+                    }
+                }
+            };
+            the.proutine = & closure::call;
+            return thex;
+        }
 
         final_t & sched(
             thread_policy_t     method, 
@@ -68,6 +92,13 @@ namespace mixc::concurrency_thread::origin{
             );
             return thex;
         }
+
+        xpubget_pubset(routine  )
+        xpubget_pubset(args     )
+        xpubget_pubset(is_detach)
+        xpubget(policy)
+        xpubget(priority)
+
     $
 
     xstruct(
@@ -82,6 +113,5 @@ namespace mixc::concurrency_thread::origin{
 }
 
 #endif
-#include"macro/xcstyle.hpp"
 
 xexport_space(mixc::concurrency_thread::origin)
