@@ -2,12 +2,12 @@
 #define xpack_lock_atom_swap
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_atom_swap::inc
+#define xuser mixc::concurrency_lock_atom_swap::inc
 #include"configure.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::lock_atom_swap{
+namespace mixc::concurrency_lock_atom_swap{
     #if xis_msvc_native // msvc 16.8 不支持模板内部声明外部函数
         extern u64 atom_swap(voidp a, u64 b, uxx bytes);
     #endif
@@ -29,4 +29,4 @@ namespace mixc::lock_atom_swap{
 
 #endif
 
-xexport(mixc::lock_atom_swap::atom_swap)
+xexport(mixc::concurrency_lock_atom_swap::atom_swap)

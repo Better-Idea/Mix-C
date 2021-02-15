@@ -28,7 +28,7 @@
 #define xuser mixc::lock_policy_barrier::inc
 #include"concurrency/lock/atom_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
-#include"concurrency/lock/private/thread_yield.hpp"
+#include"concurrency/thread_self.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"meta/fit_bits.hpp"
 #include"meta/is_same.hpp"
@@ -234,7 +234,7 @@ namespace mixc::lock_policy_barrier{
                 if (uxx channel = try_lock<operation>(); channel != not_exist){
                     return channel;
                 }
-                thread_yield();
+                thread_self::yield();
             }
         }
 

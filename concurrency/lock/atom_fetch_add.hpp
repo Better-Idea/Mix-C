@@ -2,12 +2,12 @@
 #define xpack_lock_atom_fetch_add
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_atom_fetch_add::inc
+#define xuser mixc::concurrency_lock_atom_fetch_add::inc
 #include"configure.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::lock_atom_fetch_add{
+namespace mixc::concurrency_lock_atom_fetch_add{
     #if xis_msvc_native // msvc 16.8 不支持模板内部声明外部函数
         extern u64 atom_fetch_add(voidp a, u64 b, uxx bytes);
     #endif
@@ -24,4 +24,4 @@ namespace mixc::lock_atom_fetch_add{
 
 #endif
 
-xexport(mixc::lock_atom_fetch_add::atom_fetch_add)
+xexport(mixc::concurrency_lock_atom_fetch_add::atom_fetch_add)

@@ -7,8 +7,8 @@
 #include"concurrency/lock/atom_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
 #include"concurrency/lock/atom_swap.hpp"
-#include"concurrency/lock/private/lock_state_t.hpp"
-#include"concurrency/lock/private/thread_yield.hpp"
+#include"concurrency/lock/lock_state_t.hpp"
+#include"concurrency/thread_self.hpp"
 #include"macro/xexport.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
@@ -29,7 +29,7 @@ namespace mixc::lock_mutex::origin{
 
         void lock() const {
             while(try_lock() == lock_state_t::blocked){
-                inc::thread_yield();
+                inc::thread_self::yield();
             }
         }
 
@@ -68,7 +68,7 @@ namespace mixc::lock_mutex::origin{
         template<class type, class callback>
         static void lock(type * field, uxx index, callback const & call){
             while(try_lock(field, index) == lock_state_t::blocked){
-                inc::thread_yield();
+                inc::thread_self::yield();
             }
             call();
             unlock(field, index);
