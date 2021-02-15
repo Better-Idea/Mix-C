@@ -1,5 +1,6 @@
-#include"concurrency/lock/private/extern.atom.hpp"
-#include"concurrency/lock/private/extern.thread_yield.hpp"
+#include"concurrency/private/extern.atom.hpp"
+#include"concurrency/private/extern.thread.hpp"
+#include"concurrency/private/extern.thread_self.hpp"
 #include"chrono/private/extern.+.hpp"
 #include"instruction/private/extern.isa.hpp"
 #include"io/private/extern.dir.hpp"
