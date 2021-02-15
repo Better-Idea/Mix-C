@@ -24,7 +24,7 @@ namespace mixc::concurrency_thread{
         return routine(args);
     }
 
-    enum{ stack_align = 64 * 1024 };
+    enum{ aligned_stack_size = 64 * 1024 };
 }
 
 namespace mixc::concurrency_thread::origin{
@@ -39,8 +39,8 @@ namespace mixc::concurrency_thread::origin{
         auto tid                = pthread_t{};
         auto prior              = sched_param{ (int)ta.priority() };
         auto conf               = pthread_attr_t{};
-        auto bytes              = stack_align;
-        the.mem                 = static_cast<tllp>(inc::malloc_aligned(bytes, stack_align));
+        auto bytes              = aligned_stack_size;
+        the.mem                 = static_cast<tllp>(inc::malloc_aligned(bytes, aligned_stack_size));
         the.mem->routine        = ta.routine();
         the.mem->args           = ta.args();
 
