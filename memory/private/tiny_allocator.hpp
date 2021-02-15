@@ -14,11 +14,6 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::memory_private_tiny_allocator{
-    extern voidp malloc(size_t bytes);
-    extern voidp malloc_aligned(size_t bytes, size_t align_bytes);
-    extern void  free(voidp ptr);
-    extern void  free_aligned(voidp ptr);
-
     typedef struct node{
         node * previous;
         node * next;
@@ -154,6 +149,11 @@ namespace mixc::memory_private_tiny_allocator{
 }
 
 namespace mixc::memory_private_tiny_allocator::origin{
+    extern voidp malloc(size_t bytes);
+    extern voidp malloc_aligned(size_t bytes, size_t align_bytes);
+    extern void  mfree(voidp ptr);
+    extern void  mfree_aligned(voidp ptr);
+
     namespace inner{
         using namespace mixc::memory_private_tiny_allocator;
     }
@@ -207,7 +207,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
             if (return_size_index >= page_block_count){
                 palive_pages       -= 1;
-                inner::free(ptr);
+                mfree(ptr);
                 return;
             }
 
@@ -244,7 +244,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
         void origin_free(page_header * ptr){
             auto next      = ptr->next;
             auto prev      = ptr->previous;
-            inner::free_aligned(ptr);
+            mfree_aligned(ptr);
             palive_pages  -= 1;
 
             if (next == ptr){
@@ -262,10 +262,10 @@ namespace mixc::memory_private_tiny_allocator::origin{
         voidp origin_alloc(uxx require_size_index){
             // 超出管理范畴
             if (palive_pages += 1; require_size_index > page_block_count){
-                return inner::malloc((require_size_index + 1) * scale_one);
+                return malloc((require_size_index + 1) * scale_one);
             }
 
-            auto meta   = inner::malloc_aligned(page_bytes, page_bytes);
+            auto meta   = malloc_aligned(page_bytes, page_bytes);
             auto page   = xnew(meta) page_header;
             auto first  = page->first_block();
 

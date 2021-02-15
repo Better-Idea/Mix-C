@@ -8,12 +8,12 @@
 
 #include<malloc.h>
 
-namespace mixc::memory_private_tiny_allocator{
-    voidp malloc(size_t bytes){
+namespace mixc::memory_private_tiny_allocator::origin{
+    extern voidp malloc(size_t bytes){
         return ::malloc(bytes);
     }
 
-    voidp malloc_aligned(size_t bytes, size_t align_bytes){
+    extern voidp malloc_aligned(size_t bytes, size_t align_bytes){
         #if xis_windows
             return ::_mm_malloc(bytes, align_bytes);
         #endif
@@ -23,11 +23,11 @@ namespace mixc::memory_private_tiny_allocator{
         #endif
     }
 
-    void free(voidp ptr){
+    extern void mfree(voidp ptr){
         ::free(ptr);
     }
 
-    void free_aligned(voidp ptr){
+    extern void mfree_aligned(voidp ptr){
         #if xis_windows
             ::_mm_free(ptr);
         #endif
