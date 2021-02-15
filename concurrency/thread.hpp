@@ -62,17 +62,29 @@ namespace mixc::concurrency_thread::origin{
             class               arg_t  = typename inc::function<func_t>::template args<0>
         >
         requires(
-            inc::is_ptr<arg_t> and (inc::is_same<ret_t, void> or inc::is_ptr<ret_t>)
+            (inc::is_ptr<arg_t> or inc::function<func_t>::args_count == 0) and 
+            (inc::is_ptr<ret_t> or inc::is_same<ret_t, void>)
         )
         final_t & routine(routine_t const &){
             struct closure{
                 static voidp call(voidp args){
-                    if constexpr (inc::is_same<void, ret_t>){
-                        routine_t()(arg_t(args));
-                        return nullptr;
+                    if constexpr (inc::is_same<ret_t, void>){
+                        if constexpr (inc::function<func_t>::args_count == 0){
+                            routine_t()();
+                            return nullptr;
+                        }
+                        else{
+                            routine_t()(arg_t(args));
+                            return nullptr;
+                        }
                     }
                     else{
-                        return routine_t()(arg_t(args));
+                        if constexpr (inc::function<func_t>::args_count == 0){
+                            return routine_t()();
+                        }
+                        else{
+                            return routine_t()(arg_t(args));
+                        }
                     }
                 }
             };
