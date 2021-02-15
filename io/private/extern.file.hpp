@@ -3,13 +3,13 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_private_file::inc
+#include"concurrency/lock/atom_swap.hpp"
 #include"configure.hpp"
 #include"io/file.hpp"
 #include"io/dir.hpp"
 #include"io/private/path_buffer.hpp"
 #include"lang/cxx/index_of_last.hpp"
 #include"lang/cxx.hpp"
-#include"lock/atom_swap.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
