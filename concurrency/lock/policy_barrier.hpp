@@ -26,9 +26,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::lock_policy_barrier::inc
-#include"lock/atom_and.hpp"
-#include"lock/atom_fetch_or.hpp"
-#include"lock/private/thread_yield.hpp"
+#include"concurrency/lock/atom_and.hpp"
+#include"concurrency/lock/atom_fetch_or.hpp"
+#include"concurrency/lock/private/thread_yield.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"meta/fit_bits.hpp"
 #include"meta/is_same.hpp"

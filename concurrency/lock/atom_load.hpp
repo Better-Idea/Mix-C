@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::lock_atom_load::inc
-#include"lock/atom_fetch_or.hpp"
+#include"concurrency/lock/atom_fetch_or.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

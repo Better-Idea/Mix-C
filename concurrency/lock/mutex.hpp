@@ -4,11 +4,11 @@
 #undef  xuser
 #define xuser mixc::lock_mutex::inc
 #include"define/base_type.hpp"
-#include"lock/atom_and.hpp"
-#include"lock/atom_fetch_or.hpp"
-#include"lock/atom_swap.hpp"
-#include"lock/private/lock_state_t.hpp"
-#include"lock/private/thread_yield.hpp"
+#include"concurrency/lock/atom_and.hpp"
+#include"concurrency/lock/atom_fetch_or.hpp"
+#include"concurrency/lock/atom_swap.hpp"
+#include"concurrency/lock/private/lock_state_t.hpp"
+#include"concurrency/lock/private/thread_yield.hpp"
 #include"macro/xexport.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")

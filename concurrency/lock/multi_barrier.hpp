@@ -3,9 +3,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::multi_barrier::inc
-#include"lock/atom_fetch_add.hpp"
-#include"lock/atom_fetch_sub.hpp"
-#include"lock/private/lock_state_t.hpp"
+#include"concurrency/lock/atom_fetch_add.hpp"
+#include"concurrency/lock/atom_fetch_sub.hpp"
+#include"concurrency/lock/private/lock_state_t.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

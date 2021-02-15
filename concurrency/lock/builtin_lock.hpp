@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::lock_builtin_lock::inc
 #include"define/base_type.hpp"
-#include"lock/mutex.hpp"
+#include"concurrency/lock/mutex.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
