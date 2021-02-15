@@ -17,6 +17,8 @@
 #include"macro/private/word.hpp"
 #include"macro/xdummy.hpp"
 #include"macro/xlink.hpp"
+#include"meta/is_same.hpp"
+#include"meta/has_cast.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/vlist.hpp"
@@ -317,14 +319,21 @@ get_modify:                                                                     
 
 #define __get__(get_modify,name,...)                                            \
     __get_core__(__COUNTER__, get_modify, name, __VA_ARGS__)                    \
-    final_t & name(__rr<__VA_ARGS__> * receive){                                  \
+    template<class __rrx = __rr<__VA_ARGS__>>                                   \
+    requires(                                                                   \
+        ::mixc::macro_xstruct                                                   \
+        ::is_same<decltype(nullptr), __rrx> and                                 \
+        ::mixc::macro_xstruct                                                   \
+        ::has_cast<__rrx, __rr<__VA_ARGS__>>                                    \
+    )                                                                           \
+    final_t & name(__rrx * receive){                                            \
         receive[0] = name();                                                    \
         return thex;                                                            \
     }
 
 #define __set__(set_modify,name,...)                                            \
 set_modify:                                                                     \
-    final_t & name(__VA_ARGS__ value){                                            \
+    final_t & name(__VA_ARGS__ value){                                          \
         the(__dph<(__COUNTER__ - __start) / 4>(), value);                       \
         return thex;                                                            \
     }
