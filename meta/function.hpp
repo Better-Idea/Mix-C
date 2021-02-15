@@ -12,20 +12,14 @@
 namespace mixc::meta_function{
     template<class type> struct function;
 
-    #define gen(a,...)                                                      \
-    template<a class ret_type, class ... list>                              \
-    struct function<ret_type __VA_ARGS__(list...)> {                        \
-        static constexpr uxx args_count = sizeof...(list);                  \
-        using return_type = ret_type;                                       \
-        template<ixx index>                                                 \
-        using args = inc::tget<inc::tlist<list...>, index>;                 \
-    };
+    #include"meta/private/xgen.function.hpp"
 
-    #define gen_arg class object, 
-    gen(,);
-    gen(gen_arg, (object::*));
-    #undef gen
-    #undef gen_arg
+    #define xa_has_object
+    #include"meta/private/xgen.function.hpp"
+
+    #define xa_has_object
+    #define xa_has_const
+    #include"meta/private/xgen.function.hpp"
 }
 
 #endif
