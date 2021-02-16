@@ -10,10 +10,16 @@
 
 namespace mixc::concurrency_thread_self::origin{
     void thread_self::sleep(uxx millisecond){
-        do{
-            usleep(millisecond % 1000 * 1000);
-            millisecond -= millisecond % 1000;
-        }while(millisecond != 0);
+        while(true){
+            if (millisecond > 1000){
+                usleep(1000 * 1000);
+                millisecond -= 1000;
+            }
+            else{
+                usleep(millisecond * 1000);
+                break;
+            }
+        }
     }
 
     void thread_self::yield(){
