@@ -187,18 +187,17 @@ namespace mixc::lang_cxx_ph{
 
         template<class item_t>
         inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){
-            auto buf        = (item_t *)nullptr;
+            auto head       = (item_t *)nullptr;
             auto total      = (uxx)0;
 
             inc::cxx<item_t>(deformation(), n, lut, [&](uxx length) {
-                buf = operation<item_t>(length, xref total, alloc);
-                return buf;
+                return operation<item_t>(length, xref head, xref total, alloc);
             });
-            return { buf - base_t::offset_to_head, total };
+            return { head - base_t::offset_to_head, total };
         }
     private:
         template<class item_t>
-        item_t * operation(uxx length, uxx * total, inc::ialloc<item_t> const & alloc){
+        item_t * operation(uxx length, item_t ** head, uxx * total, inc::ialloc<item_t> const & alloc){
             auto klz_length = sizeof(type) * 8; // keep leading zero length
 
             if constexpr (n == inc::numeration_t::hex){
@@ -211,9 +210,11 @@ namespace mixc::lang_cxx_ph{
                 ; // klz_length = klz_length;
             }
 
-            auto new_length = (keep_leading_zero ? klz_length : length) + (with_prefix ? 2 : 0);
-            auto zero_count = (new_length - length);
-            auto mem        = (base_t::template align<item_t>(new_length, total, alloc));
+            auto prefix_len = (with_prefix ? 2 : 0);
+            auto new_len    = (keep_leading_zero ? klz_length : length) + prefix_len;
+            auto zero_count = (new_len - length - prefix_len);
+            auto mem        = (base_t::template align<item_t>(new_len, total, alloc));
+            head[0]         = (mem);
 
             if constexpr (with_prefix){ // only in hex
                 inc::copy_with_operator_unsafe(mem, "0x", 2);
