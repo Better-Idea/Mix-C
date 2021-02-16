@@ -5,8 +5,11 @@
 #define xuser mixc::concurrency_thread::inc
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
+#include"dumb/move.hpp"
+#include"interface/can_callback.hpp"
 #include"macro/xcstyle.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xnew.hpp"
 #include"macro/xstruct.hpp"
 #include"math/min.hpp"
 #include"meta/function.hpp"
@@ -18,112 +21,109 @@
 namespace mixc::concurrency_thread{
     struct thread_local_layout;
 
-    inline voidp do_nothing(voidp){
-        return nullptr;
-    }
+    template<class lambda_t>
+    struct lambda_joinable : lambda_t{
+        static constexpr bool is_joinable = true;
+        static constexpr bool is_detached = false;
+
+        lambda_joinable(lambda_t const & lambda) : 
+            lambda_t(lambda){
+        }
+    };
+    
+    template<class lambda_t>
+    struct lambda_detached : lambda_t{
+        static constexpr bool is_joinable = false;
+        static constexpr bool is_detached = true;
+
+        lambda_detached(lambda_t const & lambda) : 
+            lambda_t(lambda){
+        }
+    };
+
+    struct clambda{
+        clambda(){}
+
+        template<class lambda_t>
+        requires(inc::can_callback<lambda_t, void()>)
+        clambda(lambda_t const & lambda, bool is_detached) : im_detached(is_detached){
+            struct closure{
+                static void copy(voidp local, voidp lambda){
+                    xnew(local) lambda_t(
+                        inc::move(*(lambda_t *)lambda)
+                    );
+                }
+
+                static void call(voidp lambda){
+                    ((lambda_t *)lambda)->operator()();
+                }
+
+                static void release(voidp lambda){
+                    ((lambda_t *)lambda)->~lambda_t();
+                }
+            };
+            this->lambda    = & const_cast<lambda_t &>(lambda);
+            this->copy      = & closure::copy;
+            this->call      = & closure::call;
+            this->release   = & closure::release;
+        }
+
+        void invoke() const {
+            call(lambda);
+        }
+
+        void release_bind_args() const {
+            release(lambda);
+        }
+
+        void keep_args_copy_to(voidp local) const {
+            copy(local, lambda);
+        }
+
+        bool is_detached() const {
+            return im_detached;
+        }
+    private:
+        bool   im_detached;
+        voidp  lambda;
+        void(* copy)   (voidp local, voidp lambda);
+        void(* call)   (voidp lambda);
+        void(* release)(voidp lambda);
+    };
+
+    template<bool is_detached>
+    struct sugar{
+        template<class lambda_t>
+        clambda operator *(lambda_t const & lambda){
+            return { lambda, is_detached };
+        }
+    };
+
+    struct helper{
+        static void thread_create(thread_local_layout ** mem, clambda const & lambda);
+    };
 }
 
 namespace mixc::concurrency_thread::origin{
-    using thread_routine = voidp(*)(voidp args);
-
-    enum class thread_policy_t : u08{
-        other,
-        fifo,
-        round_robin,
-    };
-
-    enum class thread_priority_t : i08{};
-
-    extern uxx min_priority_of(thread_policy_t method);
-    extern uxx max_priority_of(thread_policy_t method);
-
-    xstruct(
-        xname(thread_args),
-        xprif(proutine  , thread_routine),
-        xprif(pargs     , voidp),
-        xprif(pis_detach, bool),
-        xprif(ppolicy   , thread_policy_t),
-        xprif(ppriority , thread_priority_t)
-    )
-        using final_t = the_t;
-
-        thread_args() :
-            proutine  (& do_nothing),
-            pargs     (nullptr),
-            pis_detach(false),
-            ppolicy   (thread_policy_t::other),
-            ppriority (thread_priority_t{0}){
-        }
-
-        template<
-            inc::is_empty_class routine_t, 
-            class               func_t = decltype(& routine_t::operator()),
-            class               ret_t  = typename inc::function<func_t>::return_type,
-            class               arg_t  = typename inc::function<func_t>::template args<0>
-        >
-        requires(
-            (inc::is_ptr<arg_t> or inc::function<func_t>::args_count == 0) and 
-            (inc::is_ptr<ret_t> or inc::is_same<ret_t, void>)
-        )
-        final_t & routine(routine_t const &){
-            struct closure{
-                static voidp call(voidp args){
-                    if constexpr (inc::is_same<ret_t, void>){
-                        if constexpr (inc::function<func_t>::args_count == 0){
-                            routine_t()();
-                            return nullptr;
-                        }
-                        else{
-                            routine_t()(arg_t(args));
-                            return nullptr;
-                        }
-                    }
-                    else{
-                        if constexpr (inc::function<func_t>::args_count == 0){
-                            return routine_t()();
-                        }
-                        else{
-                            return routine_t()(arg_t(args));
-                        }
-                    }
-                }
-            };
-            the.proutine = & closure::call;
-            return thex;
-        }
-
-        final_t & sched(
-            thread_policy_t     method, 
-            thread_priority_t   priority = thread_priority_t{0}) const{
-
-            auto min_prior  = min_priority_of(method);
-            auto max_prior  = max_priority_of(method);
-            the.ppolicy     = method;
-            the.ppriority   = static_cast<thread_priority_t>(
-                inc::min(max_prior, min_prior + uxx(priority))
-            );
-            return thex;
-        }
-
-        xpubget_pubset(routine  )
-        xpubget_pubset(args     )
-        xpubget_pubset(is_detach)
-        xpubget(policy)
-        xpubget(priority)
-
-    $
-
     xstruct(
         xname(thread),
         xpubb(inc::disable_copy),
         xprif(mem, thread_local_layout *)
     )
+        friend helper;
+
         thread() : mem(nullptr) {}
-        thread(thread_args ta);
+
+        thread(clambda const & lambda){
+            helper::thread_create(xref mem, lambda);
+        }
+
        ~thread();
     $
 }
 
+#define xjoinable           ::mixc::concurrency_thread::sugar<false>() * [=]() mutable
+#define xdetached           ::mixc::concurrency_thread::sugar<true >() * [=]() mutable
 #endif
 
 xexport_space(mixc::concurrency_thread::origin)
