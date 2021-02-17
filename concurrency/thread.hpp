@@ -3,47 +3,21 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::concurrency_thread::inc
+#include"concurrency/lock/atom_swap.hpp"
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/move.hpp"
 #include"interface/can_callback.hpp"
-#include"macro/xcstyle.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xstruct.hpp"
-#include"math/min.hpp"
-#include"meta/function.hpp"
-#include"meta/is_ptr.hpp"
-#include"meta/is_same.hpp"
 #include"meta/is_empty_class.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::concurrency_thread{
     struct thread_local_layout;
 
-    template<class lambda_t>
-    struct lambda_joinable : lambda_t{
-        static constexpr bool is_joinable = true;
-        static constexpr bool is_detached = false;
-
-        lambda_joinable(lambda_t const & lambda) : 
-            lambda_t(lambda){
-        }
-    };
-    
-    template<class lambda_t>
-    struct lambda_detached : lambda_t{
-        static constexpr bool is_joinable = false;
-        static constexpr bool is_detached = true;
-
-        lambda_detached(lambda_t const & lambda) : 
-            lambda_t(lambda){
-        }
-    };
-
     struct clambda{
-        clambda(){}
-
         template<class lambda_t>
         requires(inc::can_callback<lambda_t, void()>)
         clambda(lambda_t const & lambda, bool is_detached) : im_detached(is_detached){
@@ -62,10 +36,12 @@ namespace mixc::concurrency_thread{
                     ((lambda_t *)lambda)->~lambda_t();
                 }
             };
-            this->lambda    = & const_cast<lambda_t &>(lambda);
-            this->copy      = & closure::copy;
-            this->call      = & closure::call;
-            this->release   = & closure::release;
+
+            this->lambda_arg_size   = inc::is_empty_class<lambda_t> ? 0 : sizeof(lambda_t);
+            this->lambda            = & const_cast<lambda_t &>(lambda);
+            this->copy              = & closure::copy;
+            this->call              = & closure::call;
+            this->release           = & closure::release;
         }
 
         void invoke() const {
@@ -83,8 +59,13 @@ namespace mixc::concurrency_thread{
         bool is_detached() const {
             return im_detached;
         }
+
+        uxx args_bytes() const {
+            return lambda_arg_size;
+        }
     private:
         bool   im_detached;
+        u16    lambda_arg_size;
         voidp  lambda;
         void(* copy)   (voidp local, voidp lambda);
         void(* call)   (voidp lambda);
@@ -113,6 +94,10 @@ namespace mixc::concurrency_thread::origin{
         friend helper;
 
         thread() : mem(nullptr) {}
+
+        thread(thread && self) : 
+            mem(inc::atom_swap<thread_local_layout *>(xref self.mem, nullptr)) {
+        }
 
         thread(clambda const & lambda){
             helper::thread_create(xref mem, lambda);
