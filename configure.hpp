@@ -57,12 +57,12 @@
  * =================================================================*/
 
 // auto select os-bits
-#if   __SIZE_WIDTH__ == 32
-    #define xis_os32                1
-#elif __SIZE_WIDTH__ == 64
+#if   __SIZE_WIDTH__ == 64 or _WIN64
     #define xis_os64                1
-#else
+#elif __SIZE_WIDTH__ == 32 or _WIN32
     #define xis_os32                1
+#else
+    #error "unknown os bits"
 #endif
 
 // auto select os
