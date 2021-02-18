@@ -12,11 +12,13 @@
 
 #if xis_windows
 #include<windows.h>
+#define xapi            WINAPI
 #define xhandler_t      HANDLE
 #define xret_t          DWORD
 #elif xis_linux
 #include<bits/local_lim.h>
 #include<pthread.h>
+#define xapi
 #define xhandler_t      pthread_t
 #define xret_t          voidp
 #endif
@@ -127,5 +129,6 @@ namespace mixc::concurrency_thread::origin{
     }
 }
 
+#undef  xapi
 #undef  xhandler_t
 #undef  xret_t
