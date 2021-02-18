@@ -12,18 +12,20 @@
 
 #if xis_windows
 #include<windows.h>
-#define handler_t       HANDLE
+#define xhandler_t      HANDLE
+#define xret_t          DWORD
 #elif xis_linux
 #include<bits/local_lim.h>
 #include<pthread.h>
-#define handler_t       pthread_t
+#define xhandler_t      pthread_t
+#define xret_t          voidp
 #endif
 
 namespace mixc::concurrency_thread{
     typedef struct thread_local_layout{
         clambda                 lambda;
-        handler_t               handler;
-        handler_t               sem_for_join;
+        xhandler_t              handler;
+        xhandler_t              sem_for_join;
 
         xalign(64)
         u08                     lambda_buf[1];
@@ -32,9 +34,8 @@ namespace mixc::concurrency_thread{
     enum{ aligned_stack_size = 64 * 1024 };
 
     inline auto thread_entry(voidp ptr){
-        // 使用原子操作保证其他 cpu 线程可见
-        auto mem            = tllp(ptr);
-        auto handler        = mem->handler = 
+        auto mem                    = tllp(ptr);
+        auto handler                = mem->handler = 
         
         #if xis_windows
             GetCurrentThread();
@@ -57,20 +58,13 @@ namespace mixc::concurrency_thread{
                 ReleaseSemaphore(mem->sem_for_join, 1, nullptr);
             #endif
         }
-        
-        #if xis_windows
-            return DWORD{};
-        #elif xis_linux
-            return voidp{};
-        #else
-            #error ""
-        #endif
+        return xret_t{};
     }
 
     void helper::thread_create(thread_local_layout ** mem_ptr, clambda const & lambda){
         auto & mem                  = mem_ptr[0];
         auto   create_fail          = false;
-        mem                         = tllp(inc::malloc_aligned(sizeof(thread_local_layout) + lambda.args_bytes(), 0x100));
+        mem                         = tllp(inc::malloc_aligned(sizeof(thread_local_layout) + lambda.args_bytes(), 0x80));
 
         if (mem == nullptr){
             return;
@@ -132,3 +126,6 @@ namespace mixc::concurrency_thread::origin{
         inc::mfree_aligned(h);
     }
 }
+
+#undef  xhandler_t
+#undef  xret_t
