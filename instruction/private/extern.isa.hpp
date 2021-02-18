@@ -11,6 +11,7 @@ namespace mixc::instruction_time_stamp{
     }
 }
 
+#if xis_os64
 namespace mixc::instruction_mul{
     extern u128 mul(u64 a, u64 b){
         unsigned __int64 high;
@@ -29,6 +30,7 @@ namespace mixc::instruction_mod{
     }
 }
 
+#endif
 #endif
 
 namespace mixc::instruction_mod{

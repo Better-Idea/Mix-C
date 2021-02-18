@@ -8,7 +8,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_mul{
-    #if xis_msvc_native
+    #if xis_msvc_native and xis_os64
     extern u128 mul(u64 a, u64 b);
     #else
     inline u128 mul(u64 a, u64 b){

@@ -12,7 +12,7 @@
 namespace mixc::instruction_mod{
     extern f64 mod(f64 a, f64 b);
 
-    #if xis_msvc_native
+    #if xis_msvc_native and xis_os64
     extern u64 mod(u128 a, u64 b);
     #else
     inline u64 mod(u128 a, u64 b){
