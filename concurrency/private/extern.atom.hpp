@@ -1,8 +1,8 @@
 #include"configure.hpp"
-#include"define/base_type.hpp"
-#include<atomic>
 
 #ifdef xis_msvc_native
+#include"define/base_type.hpp"
+#include<atomic>
 #define xatomop(name,op)                                                    \
 namespace mixc::concurrency_lock_ ## name{                                  \
     u64 name(voidp a, u64 b, uxx bytes){                                    \
