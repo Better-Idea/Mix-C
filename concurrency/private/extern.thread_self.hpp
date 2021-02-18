@@ -18,7 +18,7 @@ namespace mixc::concurrency_thread_self::origin{
     void thread_self::sleep(uxx millisecond){
         #ifdef xis_windows
             Sleep(millisecond);
-        #elif 
+        #elif  xis_linux
             while(true){
                 if (millisecond > 1000){
                     usleep(1000 * 1000);
