@@ -57,9 +57,9 @@
  * =================================================================*/
 
 // auto select os-bits
-#if __i386 || __i386__ || __i686  || __i686__
+#if   __SIZE_WIDTH__ == 32
     #define xis_os32                1
-#elif __x86_64 || __x86_64__ || _M_X64
+#elif __SIZE_WIDTH__ == 64
     #define xis_os64                1
 #else
     #define xis_os32                1
