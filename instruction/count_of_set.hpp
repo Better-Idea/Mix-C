@@ -22,7 +22,7 @@ namespace mixc::instruction_count_of_set{
                 return __popcnt64(uv);
             #elif xis_os32
                 if constexpr (sizeof(uv) == 8){
-                    return __popcnt(uv & u32(-1)) + __popcnt(uv >> 32);
+                    return uxx(__popcnt(uv & u32(-1)) + __popcnt(uv >> 32));
                 }
                 else {
                     return __popcnt(uv);
