@@ -24,44 +24,12 @@ namespace mixc::concurrency_thread{
         clambda                 lambda;
         handler_t               handler;
         handler_t               sem_for_join;
-        uxx                     rbp;
-        uxx                     rsp;
 
         xalign(64)
         u08                     lambda_buf[1];
     } * tllp;
 
     enum{ aligned_stack_size = 64 * 1024 };
-
-    static void thread_entry_core(tllp ptr){
-        #if xis_x86
-            #if xis_os64
-                #define r "r"
-            #elif xis_os32
-                #define r "e"
-            #endif
-
-            asm("mov  %%" r "bp, %0":"=m"(ptr->rbp));
-            asm("mov  %%" r "sp, %0":"=m"(ptr->rsp));
-            asm("mov  %0, %%" r "ax"::"r"(uxx(ptr) + aligned_stack_size - 0x100));
-            asm("push %" r "ax");
-            asm("mov  %0, %%" r "ax"::"r"(ptr->rbp - ptr->rsp));
-            asm("pop  %" r "bp");
-            asm("mov  %" r "bp, %" r "sp");
-            asm("sub  %" r "ax, %" r "sp");
-
-            tllp mem;
-            asm("mov  %%" r "bp, %0":"=m"(mem));
-            mem                 = tllp(uxx(mem) & ~(aligned_stack_size - 1));
-            mem->lambda.invoke();
-            mem->lambda.release_bind_args();
-            asm("mov  %0, %%" r "sp"::"r"(mem->rsp));
-            asm("mov  %0, %%" r "bp"::"r"(mem->rbp));
-            #undef  r
-        #else
-            #error ""
-        #endif
-    }
 
     inline auto thread_entry(voidp ptr){
         // 使用原子操作保证其他 cpu 线程可见
@@ -74,7 +42,8 @@ namespace mixc::concurrency_thread{
             pthread_self();
         #endif
 
-        thread_entry_core(mem);
+        mem->lambda.invoke();
+        mem->lambda.release_bind_args();
 
         if (mem->lambda.is_detached()){
             inc::mfree_aligned(mem);
@@ -101,17 +70,18 @@ namespace mixc::concurrency_thread{
     void helper::thread_create(thread_local_layout ** mem_ptr, clambda const & lambda){
         auto & mem                  = mem_ptr[0];
         auto   create_fail          = false;
-        mem                         = tllp(inc::malloc_aligned(aligned_stack_size, aligned_stack_size));
+        mem                         = tllp(inc::malloc_aligned(sizeof(thread_local_layout) + lambda.args_bytes(), 0x100));
 
         if (mem == nullptr){
             return;
         }
 
         mem->lambda                 = lambda;
+        lambda.keep_args_copy_to(mem->lambda_buf);
 
         #if xis_windows
             mem->sem_for_join       = CreateSemaphoreA(nullptr, 0/*初始值*/, 1/*最大值*/, nullptr);
-            mem->handler            = CreateThread(nullptr, 16 * 1024, & thread_entry, mem, 0/*立即运行*/, nullptr);
+            mem->handler            = CreateThread(nullptr, aligned_stack_size, & thread_entry, mem, 0/*立即运行*/, nullptr);
             create_fail             = mem->handler == INVALID_HANDLE_VALUE;
 
             if (create_fail){
@@ -119,12 +89,9 @@ namespace mixc::concurrency_thread{
             }
         #else
             auto conf               = pthread_attr_t{};
-            lambda.keep_args_copy_to(mem->lambda_buf);
-
             pthread_attr_init(& conf);
             pthread_attr_setdetachstate(& conf, lambda.is_detached());
-            pthread_attr_setstacksize(& conf, PTHREAD_STACK_MIN);
-
+            pthread_attr_setstacksize(& conf, aligned_stack_size);
             create_fail             = pthread_create(& mem->handler, & conf, & thread_entry, mem) != 0;
         #endif
 
