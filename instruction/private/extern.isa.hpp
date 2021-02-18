@@ -40,13 +40,13 @@ namespace mixc::instruction_mod{
             #else
             asm("fldl %0"::"m"(b));
             asm("fldl %0"::"m"(a));
-            asm("push %rax");
+            asm("push %ax");
             asm("L:");
             asm("fprem");
             asm("fstsw %ax");
             asm("sahf");
             asm("jp L");
-            asm("pop %rax");
+            asm("pop %ax");
             asm("fstp %%st(1)":"=t"(r));
             #endif
             return r;
