@@ -199,7 +199,7 @@ namespace mixc::io_file::origin{
         if (size == not_exist){
             return 0;
         }
-        return size;
+        return uxx(size);
     }
 
     uxx file::write(void const * buffer, uxx bytes) const {
@@ -220,7 +220,7 @@ namespace mixc::io_file::origin{
         if (size == not_exist){
             return 0;
         }
-        return size;
+        return uxx(size);
     }
 
     void file::remove() const{
