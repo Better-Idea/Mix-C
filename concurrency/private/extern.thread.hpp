@@ -25,6 +25,7 @@ namespace mixc::concurrency_thread{
         handler_t               handler;
         handler_t               sem_for_join;
         uxx                     rbp;
+        uxx                     rsp;
 
         xalign(64)
         u08                     lambda_buf[1];
@@ -32,38 +33,33 @@ namespace mixc::concurrency_thread{
 
     enum{ aligned_stack_size = 64 * 1024 };
 
-    static void thread_entry_core(tllp mem_old){
+    static void thread_entry_core(tllp ptr){
         #if xis_x86
-            #if xis_os32
-                #define xrbp    "%ebp"
-                #define xrsp    "%esp"
-            #else
-                #define xrbp    "%rbp"
-                #define xrsp    "%rsp"
+            #if xis_os64
+                #define r "r"
+            #elif xis_os32
+                #define r "e"
             #endif
-        #elif xis_arm
-            #define xrbp        "%sp"
-        #endif
 
-        #ifdef xrsp
-            asm("push " xrsp);
-        #endif
+            asm("mov  %%" r "bp, %0":"=m"(ptr->rbp));
+            asm("mov  %%" r "sp, %0":"=m"(ptr->rsp));
+            asm("mov  %0, %%" r "ax"::"r"(uxx(ptr) + aligned_stack_size - 0x100));
+            asm("push %" r "ax");
+            asm("mov  %0, %%" r "ax"::"r"(ptr->rbp - ptr->rsp));
+            asm("pop  %" r "bp");
+            asm("mov  %" r "bp, %" r "sp");
+            asm("sub  %" r "ax, %" r "sp");
 
-        auto new_sp     = u08p(mem_old) + aligned_stack_size - sizeof(voidp) * 64;
-        asm("mov %" xrbp ", %0":"=m"(mem_old->rbp));
-        asm("mov %0, %" xrbp ""::"r"(new_sp));
-
-        uxx  sp         = uxx(& sp) & ~(aligned_stack_size - 1);
-        tllp mem        = tllp(sp);
-        auto end        = u08p(mem) + aligned_stack_size - sizeof(voidp) * 64;
-
-        mem->lambda.invoke();
-        mem->lambda.release_bind_args();
-
-        asm("mov %0, %" xrbp::"r"(mem->rbp));
-        
-        #ifdef xrsp
-            asm("pop " xrsp);
+            tllp mem;
+            asm("mov  %%" r "bp, %0":"=m"(mem));
+            mem                 = tllp(uxx(mem) & ~(aligned_stack_size - 1));
+            mem->lambda.invoke();
+            mem->lambda.release_bind_args();
+            asm("mov  %0, %%" r "sp"::"r"(mem->rsp));
+            asm("mov  %0, %%" r "bp"::"r"(mem->rbp));
+            #undef  r
+        #else
+            #error ""
         #endif
     }
 
@@ -105,7 +101,7 @@ namespace mixc::concurrency_thread{
     void helper::thread_create(thread_local_layout ** mem_ptr, clambda const & lambda){
         auto & mem                  = mem_ptr[0];
         auto   create_fail          = false;
-        mem                         = (tllp)inc::malloc_aligned(aligned_stack_size, aligned_stack_size);
+        mem                         = tllp(inc::malloc_aligned(aligned_stack_size, aligned_stack_size));
 
         if (mem == nullptr){
             return;
