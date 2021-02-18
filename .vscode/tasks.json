@@ -7,7 +7,13 @@
             "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++2a", "-fconcepts", "-mavx", "-mavx2", "-Wno-empty-body",
+                "-fconcepts", 
+                "-std=c++2a", 
+                "-mavx", 
+                "-mavx2", 
+                "-Wno-empty-body", 
+                "-pthread",
+                // "-m32",
                 // "-O2",
                 "-g",
                 "${workspaceFolder}/extern.api_g++.o", 
@@ -26,7 +32,15 @@
             "command": "g++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++2a", "-fconcepts", "-mavx", "-mavx2", "-g",
+                "-fconcepts", 
+                "-std=c++2a", 
+                "-mavx", 
+                "-mavx2", 
+                "-Wno-empty-body", 
+                "-pthread",
+                // "-m32",
+                // "-O2",
+                "-g",
                 "${workspaceFolder}/extern.api_g++.cpp",
                 "-c"
             ],
@@ -41,7 +55,13 @@
             "command": "clang++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++20", "-mavx", "-mavx2", "-Wno-empty-body",
+                "-std=c++20", 
+                "-mavx", 
+                "-mavx2", 
+                "-Wno-empty-body", 
+                "-pthread",
+                // "-m32",
+                // "-O2",
                 "-g", 
                 "${workspaceFolder}/extern.api_clang++.o",
                 "${file}", "-o", "${workspaceFolder}/../main.exe"
@@ -55,7 +75,14 @@
             "command": "clang++",
             "args": [
                 "-I${workspaceFolder}",
-                "-std=c++20", "-mavx", "-mavx2", "-g", "-Wno-empty-body",
+                "-std=c++20", 
+                "-mavx", 
+                "-mavx2", 
+                "-Wno-empty-body", 
+                "-pthread",
+                // "-m32",
+                // "-O2",
+                "-g", 
                 "${workspaceFolder}/extern.api_clang++.cpp", "-c"
             ],
             "problemMatcher": [ "$gcc" ],
@@ -63,3 +90,8 @@
         }
     ]
 }
+
+/*
+# 安装 32bit 库
+sudo apt-get install gcc-multilib g++-multilib
+*/
