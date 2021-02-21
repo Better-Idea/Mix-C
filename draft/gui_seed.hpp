@@ -1,10 +1,15 @@
+#ifdef  xuser
+#undef  xuser
+#endif
+
 #define xuser  mixc::powerful_cat::inc
 #include<windows.h>
-#include"extern/gui/private/virtual_screen.hpp"
-#include"extern/gui/private/extern.virtual_screen.hpp"
+#include"graphic/private/virtual_screen.hpp"
+#include"graphic/private/extern.virtual_screen.hpp"
 
-extern xuser::virtual_screen vscreen;
-extern void display();
+xuser::virtual_screen vscreen;
+
+extern void (*display)();
 
 LRESULT CALLBACK event(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
     switch(message){
