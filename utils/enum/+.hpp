@@ -1,4 +1,4 @@
-#include"enum/operator_and.hpp"
-#include"enum/operator_inversion.hpp"
-#include"enum/operator_or.hpp"
-#include"enum/operator_xor.hpp"
+#include"utils/enum/operator_and.hpp"
+#include"utils/enum/operator_inversion.hpp"
+#include"utils/enum/operator_or.hpp"
+#include"utils/enum/operator_xor.hpp"
