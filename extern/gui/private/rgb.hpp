@@ -17,9 +17,9 @@ namespace mixc::extern_gui_rgb::origin {
         xprif(pred   , u08)
     )
         template<class finalx_t>
-        requires(sizeof(finalx_t) == sizeof(final_t))
         constexpr rgb(rgb<finalx_t> const & self){
             thex = (final_t &)self;
+            static_assert(sizeof(finalx_t) == sizeof(final_t));
         }
 
         constexpr rgb(u08 r, u08 g, u08 b) : 
