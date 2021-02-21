@@ -13,42 +13,42 @@
 namespace mixc::extern_gui_paint_masker_mini::origin {
     using inc::try_paint_result_t;
 
-    template<uxx width, uxx height, uxx rows, uxx columns>
+    template<uxx width_v, uxx height_v, uxx rows_v, uxx columns_v>
     requires(
-        height % rows == 0 and width % columns == 0
+        height_v % rows_v == 0 and width_v % columns_v == 0
     )
     xstruct(
-        xtmpl(paint_masker_mini, width, height, rows, columns),
-        xpubb(inc::addressing<width, height>)
+        xtmpl(paint_masker_mini, width_v, height_v, rows_v, columns_v),
+        xpubb(inc::addressing<width_v, height_v>)
     )
     private:
         enum{
-            pixel_per_row                   = height / rows,
-            pixel_per_column                = width / columns
+            pixel_per_row                   = height_v / rows_v,
+            pixel_per_column                = width_v / columns_v
         };
 
-        using final_t                         = the_t;
+        using final_t                       = the_t;
         using idc_t                         = inc::bits_indicator<pixel_per_row * pixel_per_column>;
-        idc_t   idc;
-        u16     pixel_count[rows * columns] = {};
-        u16     i                           = rows * columns - 1;
 
+        idc_t   idc;
+        u16     pixel_count[rows_v * columns_v] = {};
+        u16     i                           = rows_v * columns_v - 1;
     public:
         void analysis(uxx x, uxx y){
             x                              /= pixel_per_column;
             y                              /= pixel_per_row;
-            pixel_count[x * columns + y]   += 1;
+            pixel_count[x * columns_v + y]   += 1;
         }
 
         try_paint_result_t try_paint(uxx x, uxx y){
             uxx index;
             uxx r;
             uxx c;
-            x                              /= pixel_per_column;
-            c                              %= pixel_per_column;
-            y                              /= pixel_per_row;
-            r                              %= pixel_per_row;
-            index                           = x * columns + y;
+            c                               = x % pixel_per_column;
+            x                               = x / pixel_per_column;
+            r                               = y % pixel_per_row;
+            y                               = y / pixel_per_row;
+            index                           = x * columns_v + y;
 
             while (true){
                 if (i == not_exist){
@@ -104,12 +104,12 @@ namespace mixc::extern_gui_paint_masker_mini::origin {
         }
 
         xpubgetx(block_begin_x, uxx){
-            uxx offset_x    = i % columns * pixel_per_column;
+            uxx offset_x    = i % columns_v * pixel_per_column;
             return offset_x;
         }
 
         xpubgetx(block_begin_y, uxx){
-            uxx offset_y    = i / columns * pixel_per_row;
+            uxx offset_y    = i / columns_v * pixel_per_row;
             return offset_y;
         }
 
@@ -127,6 +127,14 @@ namespace mixc::extern_gui_paint_masker_mini::origin {
 
         xpubgetx(is_finished, bool){
             return i == not_exist;
+        }
+
+        xpubgetx(columns, uxx){
+            return columns_v;
+        }
+
+        xpubgetx(rows, uxx){
+            return rows_v;
         }
     $
 }
