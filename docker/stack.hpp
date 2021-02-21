@@ -1,4 +1,4 @@
-#ifdef xuser
+#ifdef  xuser
 #ifndef xusing_docker_stack
 #include"docker/private/stack.hpp"
 #endif

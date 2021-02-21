@@ -1,4 +1,4 @@
-#ifdef xuser
+#ifdef  xuser
 #ifndef xusing_docker_array
 #include"docker/private/array.hpp"
 #endif
