@@ -3,8 +3,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_gui_paint_masker_plus::inc
-#include"extern/gui/private/addressing.hpp"
-#include"extern/gui/private/try_paint_result_t.hpp"
+#include"graphic/private/addressing.hpp"
+#include"graphic/private/try_paint_result_t.hpp"
 #include"math/index_system.hpp"
 #include"memop/swap.hpp"
 #include"mixc.hpp"

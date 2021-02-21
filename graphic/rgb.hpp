@@ -1,6 +1,6 @@
 #ifdef  xuser
 #ifndef xusing_extern_gui_rgb
-#include"extern/gui/private/rgb.hpp"
+#include"graphic/private/rgb.hpp"
 #endif
 #include"macro/xfinal.hpp"
 

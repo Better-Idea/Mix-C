@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_gui_private_virtual_screen::inc
-#include"extern/gui/rgb.hpp"
+#include"graphic/rgb.hpp"
 #include"memop/fill.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")

@@ -4,7 +4,7 @@
 
 #define xuser   mixc::extern_gui_private_virtual_screen::inc
 #include<windows.h>
-#include"extern/gui/private/virtual_screen.hpp"
+#include"graphic/private/virtual_screen.hpp"
 
 namespace mixc::extern_gui_private_virtual_screen::origin{
     void virtual_screen::configure(voidp hwnd){
