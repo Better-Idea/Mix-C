@@ -9,26 +9,8 @@
 #include"memop/swap.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::draft_2d{
+namespace mixc::draft_2d::origin{
     using stdpt = inc::pt2wx;
-
-    template<class rander_invoke>
-    inline void widenh(stdpt p, uxx thickness, rander_invoke const & rander){
-        for(auto i = 1; i <= thickness / 2; i++){
-            rander(p.x() - i, p.y());
-            rander(p.x() + i, p.y());
-        }
-        rander(p.x(), p.y());
-    }
-
-    template<class rander_invoke>
-    inline void widenv(stdpt p, uxx thickness, rander_invoke const & rander){
-        for(auto i = 1; i <= thickness / 2; i++){
-            rander(p.x(), p.y() - i);
-            rander(p.x(), p.y() + i);
-        }
-        rander(p.x(), p.y());
-    }
 
     template<class rander_invoke>
     inline void draw_quarter_ellipse(uxx rx, uxx ry, rander_invoke const & rander){
@@ -40,8 +22,8 @@ namespace mixc::draft_2d{
         ixx y       = ry;
         ixx px      = 0;
         ixx py      = rx2 * y;
-        ixx p       = (ixx)adv::round_unsafe(f32(ryy + rxx * ry) + (0.25f * rxx));
-        
+        ixx p       = (ixx)inc::round_unsafe(f32(ryy + rxx * ry) + (0.25f * rxx));
+
         for(rander(x, y); px < py; rander(x, y)){
             x      += 1;
             px     += ry2;
@@ -56,7 +38,7 @@ namespace mixc::draft_2d{
             }
         }
 
-        for(p = adv::round_unsafe(f32(ryy) * (0.5 + x) * (0.5 + x) + rxx * (y - 1) * (y - 1) - rxx * ryy);
+        for(p = inc::round_unsafe(f32(ryy) * (0.5 + x) * (0.5 + x) + rxx * (y - 1) * (y - 1) - rxx * ryy);
             y-- > 0;
             rander(x, y)){
 
@@ -81,21 +63,18 @@ namespace mixc::draft_2d{
         };
 
         draw_quarter_ellipse(rx, ry, [&](auto x, auto y){
-            widenv(stdpt{}.x(x).y(y), thickness, randerx);
+            widenv(stdpt{}.x(x).y(y), randerx);
         });
     }
 
 
     template<class rander_invoke>
-    inline void draw_eight_circular(uxx r, uxx thickness, rander_invoke const & rander){
+    inline void draw_eight_circular(uxx r, rander_invoke const & rander){
         ixx e = ixx(1 - r);
         ixx x = 0;
         ixx y = ixx(r);
 
-        for(widenv(stdpt{}.x(x).y(y), thickness, rander); 
-            x <= y; x += 1, 
-            widenv(stdpt{}.x(x).y(y), thickness, rander)){
-
+        for(rander(x, y); x <= y; x += 1, rander(x, y)){
             if (e < 0){
                 e += 2 * x + 3;
             }
@@ -107,8 +86,8 @@ namespace mixc::draft_2d{
     }
 
     template<class rander_invoke>
-    inline void draw_circular(stdpt p, uxx r, uxx thickness, rander_invoke const & rander){
-        draw_eight_circular(r, thickness, [&](auto x, auto y){
+    inline void draw_circular(stdpt p, uxx r, rander_invoke const & rander){
+        draw_eight_circular(r, [&](auto x, auto y){
             rander(p.x() + x, p.y() + y);
             rander(p.x() + x, p.y() - y);
             rander(p.x() - x, p.y() + y);
@@ -121,42 +100,40 @@ namespace mixc::draft_2d{
     }
 
     template<class rander_invoke>
-    inline void draw_linev(stdpt p, uxx height_of_bottom_to_top, uxx thickness, rander_invoke const & rander){
+    inline void draw_linev(stdpt p, uxx height_of_bottom_to_top, rander_invoke const & rander){
         while(height_of_bottom_to_top-- > 0){
-            widenh(p, thickness, rander);
+            rander(p.x(), p.y());
             p = p(0, 1);
         }
-        widenh(p, thickness, rander);
     }
 
     template<class rander_invoke>
-    inline void draw_lineh(stdpt p, uxx width_of_left_to_right, uxx thickness, rander_invoke const & rander){
+    inline void draw_lineh(stdpt p, uxx width_of_left_to_right, rander_invoke const & rander){
         while(width_of_left_to_right-- > 0){
-            widenv(p, thickness, rander);
+            rander(p.x(), p.y());
             p = p(1, 0);
         }
-        widenv(p, thickness, rander);
     }
 
     template<class rander_invoke>
-    inline void draw_line(stdpt p0, stdpt p1, uxx thickness, rander_invoke const & rander){
+    inline void draw_line(stdpt p0, stdpt p1, rander_invoke const & rander){
         auto dis = p1 - p0;
 
         if (dis.x() == 0){
             if (dis.y() > 0){
-                return draw_linev(p0,  dis.y(), thickness,  rander);
+                return draw_linev(p0,  dis.y(),  rander);
             }
             else{
-                return draw_linev(p1, -dis.y(), thickness, rander);
+                return draw_linev(p1, -dis.y(), rander);
             }
         }
 
         if (dis.y() == 0){
             if (dis.x() > 0){
-                return draw_linev(p0,  dis.x(), thickness, rander);
+                return draw_linev(p0,  dis.x(), rander);
             }
             else{
-                return draw_linev(p1, -dis.x(), thickness, rander);
+                return draw_linev(p1, -dis.x(), rander);
             }
         }
 
@@ -171,30 +148,30 @@ namespace mixc::draft_2d{
         if (absx <= absy){
             ixx k       = (ixx(dis.x()) << half) / absy;
             ixx sk      = (ixx(p0.x()) << half);
-            ixx step_y  = (dis.y() / absy);
+            ixx step_y  = (dis.y() > 0 ? 1 : -1);
 
-            while(y != p1.y()){
-                widenh({x, y}, thickness, rander);
+            do{
+                rander(uxx(x), uxx(y));
                 sk     += k;
                 x       = sk >> half;
                 y      += step_y;
-            }
-            widenh({x, y}, thickness, rander);
+            }while(y != p1.y());
         }
         else{
             ixx k       = (ixx(dis.y()) << half) / absx;
             ixx sk      = (ixx(p0.y()) << half);
-            ixx step_x  = (dis.x() / absx);
+            ixx step_x  = (dis.x() > 0 ? 1 : -1);
 
-            while(x != p1.x()){
-                widenv({x, y}, thickness, rander);
+            do{
+                rander(uxx(x), uxx(y));
                 sk     += k;
                 y       = sk >> half;
                 x      += step_x;
-            }
-            widenv({x, y}, thickness, rander);
+            }while(x != p1.x());
         }
     }
 }
 
 #endif
+
+xexport_space(mixc::draft_2d::origin)
