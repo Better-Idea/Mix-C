@@ -11,8 +11,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_mirror{
-    template<class type>
-    using item_t = u08 [sizeof(type)];
+    template<class type_t>
+    using item_t = u08 [sizeof(type_t)];
 }
 
 namespace mixc::dumb_mirror::origin{
@@ -21,47 +21,47 @@ namespace mixc::dumb_mirror::origin{
         execute,
     };
 
-    template<class type>
+    template<class type_t>
     xstruct(
-        xtmpl(mirror, type),
-        xprif(data, item_t<type>)
+        xtmpl(mirror, type_t),
+        xprif(data, item_t<type_t>)
     )
         mirror(): data{0}{}
-        mirror(type const & value, construction_t mode){
+        mirror(type_t const & value, construction_t mode){
             if (mode == construction_t::ignore){
-                this[0] = *(mirror<type> *)(xref value);
+                this[0] = *(mirror<type_t> *)(xref value);
             }
             else{
-                xnew (data) type(value);
+                xnew (data) type_t(value);
             }
         }
 
-        void assign(type const & value){
+        void assign(type_t const & value){
             xnew (this) the_t(value, construction_t::ignore);
         }
 
-        void assign_with_operator(type const & value){
-            operator type &() = value;
+        void assign_with_operator(type_t const & value){
+            operator type_t &() = value;
         }
 
-        type * operator->(){
-            return (type *)data;
+        type_t * operator->(){
+            return (type_t *)data;
         }
 
-        const type * operator->() const {
-            return (type *)data;
+        const type_t * operator->() const {
+            return (type_t *)data;
         }
 
-        operator type & (){
-            return *(type *)data;
+        operator type_t & (){
+            return *(type_t *)data;
         }
 
-        operator type & () const {
-            return *(type *)data;
+        operator type_t & () const {
+            return *(type_t *)data;
         }
 
         constexpr uxx bytes() const {
-            return sizeof(type);
+            return sizeof(type_t);
         }
     $
 

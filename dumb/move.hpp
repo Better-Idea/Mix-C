@@ -7,9 +7,9 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_move::origin{
-    template<class type>
-    inline type && move(type const & value){
-        return (type &&)(type &)value;
+    template<class type_t>
+    inline type_t && move(type_t const & value){
+        return (type_t &&)(type_t &)value;
     }
 }
 

@@ -8,14 +8,14 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_place_holder{
-    template<uxx i, bool hidden = false>
+    template<uxx i_v, bool hidden_v = false>
     struct place_holder{
         constexpr place_holder(){}
-        enum{ index = i };
+        enum{ index = i_v };
     };
 
-    template<uxx i>
-    struct place_holder<i, true> {};
+    template<uxx i_v>
+    struct place_holder<i_v, true> {};
 }
 
 #endif

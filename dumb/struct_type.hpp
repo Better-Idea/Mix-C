@@ -10,33 +10,33 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_struct_type{
-    template<class type, bool is_class> struct struct_type;
-    template<class type>
+    template<class type_t, bool is_class_v> struct struct_type;
+    template<class type_t>
     xstruct(
-        xspec(struct_type, type, true),
-        xpubb(type)
+        xspec(struct_type, type_t, true),
+        xpubb(type_t)
     )
-        using type::type;
+        using type_t::type_t;
 
-        struct_type(type const & value) : 
-            type(value){}
+        struct_type(type_t const & value) : 
+            type_t(value){}
     $
 
-    template<class type>
+    template<class type_t>
     xstruct(
-        xspec(struct_type, type, false),
-        xprif(data, type)
+        xspec(struct_type, type_t, false),
+        xprif(data, type_t)
     )
         template<class ... args>
         struct_type(args const & ... list) : 
             data(list...){
         }
 
-        operator type & (){
+        operator type_t & (){
             return data;
         }
 
-        operator const type & () const {
+        operator const type_t & () const {
             return data;
         }
     $
@@ -48,8 +48,8 @@ namespace mixc::dumb_struct_type{
 }
 
 namespace mixc::dumb_struct_type::origin{
-    template<class type>
-    using struct_type = mixc::dumb_struct_type::struct_type<type, inc::is_class<type>>;
+    template<class type_t>
+    using struct_type = mixc::dumb_struct_type::struct_type<type_t, inc::is_class<type_t>>;
 }
 
 #endif

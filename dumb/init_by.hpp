@@ -7,45 +7,45 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_init_by{
-    template<class object_t, class ... args>
-    concept can_new = requires(args const  & ... list){
+    template<class object_t, class ... args_t>
+    concept can_new = requires(args_t const  & ... list){
         object_t{list...};
     };
 }
 
 namespace mixc::dumb_init_by::origin{
-    template<class a0 = void, class ... args> struct init_by;
+    template<class a0_t = void, class ... args_t> struct init_by;
 
-    template<class a0, class ... args>
-    struct init_by : init_by<args...>{
-        constexpr init_by(a0 const & first, args const & ... rest) :
-            init_by<args...>(rest...), arg(first) {}
+    template<class a0_t, class ... args_t>
+    struct init_by : init_by<args_t...>{
+        constexpr init_by(a0_t const & first, args_t const & ... rest) :
+            init_by<args_t...>(rest...), arg(first) {}
 
-        template<class object_t, class ... argsx>
-        void make(object_t * this_ptr, argsx const & ... list) const {
-            init_by<args...>::make(this_ptr, list..., arg);
+        template<class object_t, class ... argsx_t>
+        void make(object_t * this_ptr, argsx_t const & ... list) const {
+            init_by<args_t...>::make(this_ptr, list..., arg);
         }
 
-        template<class object_t, class ... argsx>
+        template<class object_t, class ... argsx_t>
         static constexpr bool test() {
-            return init_by<args...>::template test<object_t, argsx..., a0>();
+            return init_by<args_t...>::template test<object_t, argsx_t..., a0_t>();
         }
     private:
-        a0 const & arg;
+        a0_t const & arg;
     };
 
     template<>
     struct init_by<void>{
         constexpr init_by(){}
 
-        template<class object_t, class ... argsx>
-        void make(object_t * this_ptr, argsx const & ... list) const {
+        template<class object_t, class ... argsx_t>
+        void make(object_t * this_ptr, argsx_t const & ... list) const {
             xnew(this_ptr) object_t(list...);
         }
 
-        template<class object_t, class ... argsx>
+        template<class object_t, class ... argsx_t>
         static constexpr bool test() {
-            return can_new<object_t, argsx...>;
+            return can_new<object_t, argsx_t...>;
         }
     };
 
