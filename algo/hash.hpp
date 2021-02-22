@@ -56,12 +56,12 @@ namespace mixc::algo_hash::origin{
      * 返回：
      * - hash 结果
      */
-    template<class type>
-    inline uxx hash(type const & value, uxx seed = 0){
+    template<class type_t>
+    inline uxx hash(type_t const & value, uxx seed = 0){
         if constexpr (
-            inc::is_same<type, asciis> or 
-            inc::is_same<type, words> or 
-            inc::is_origin_array<type>){
+            inc::is_same<type_t, asciis> or 
+            inc::is_same<type_t, words> or 
+            inc::is_origin_array<type_t>){
 
             uxx i = 0;
             while(value[i] != '\0'){
@@ -70,7 +70,7 @@ namespace mixc::algo_hash::origin{
             return hash(voidp(value), i / sizeof(uxx), i % sizeof(uxx), seed);
         }
         else{
-            return hash(inc::addressof(value), sizeof(type) / sizeof(uxx), sizeof(type) % sizeof(uxx), seed);
+            return hash(inc::addressof(value), sizeof(type_t) / sizeof(uxx), sizeof(type_t) % sizeof(uxx), seed);
         }
     }
 }

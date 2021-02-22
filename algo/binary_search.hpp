@@ -32,8 +32,8 @@ namespace mixc::algo_binary_search{
      * 返回：
      * - result_t 结构
      */
-    template<class compare_invoke>
-    inline auto match_core(uxx length, compare_invoke const & compare) {
+    template<class compare_invoke_t>
+    inline auto match_core(uxx length, compare_invoke_t const & compare) {
         struct result_t {
             // 刚好匹配的索引
             uxx match;
