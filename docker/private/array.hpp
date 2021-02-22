@@ -29,29 +29,29 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_array{
-    template<class item_t, uxx count>
-    using pack = item_t[count];
+    template<class item_t, uxx count_v>
+    using pack = item_t[count_v];
 
-    template<class final_t, class type, uxx count = 0, uxx ... rest>
+    template<class final_t, class type_t, uxx count_v = 0, uxx ... rest_v>
     struct array_t;
 
-    template<class final_t, class type, uxx count, uxx ... rest>
-    inline auto configure(final_t *, type *, inc::vlist<count, rest...>){
-        if constexpr (sizeof...(rest) == 0){
-            return (pack<type, count> *)nullptr;
+    template<class final_t, class type_t, uxx count_v, uxx ... rest_v>
+    inline auto configure(final_t *, type_t *, inc::vlist<count_v, rest_v...>){
+        if constexpr (sizeof...(rest_v) == 0){
+            return (pack<type_t, count_v> *)nullptr;
         }
         else{
-            return (pack<array_t<final_t, type, rest...>, count> *)nullptr;
+            return (pack<array_t<final_t, type_t, rest_v...>, count_v> *)nullptr;
         }
     }
 
-    template<class final_t, class type, uxx count, uxx ... rest>
+    template<class final_t, class type_t, uxx count_v, uxx ... rest_v>
     using items = inc::remove_ptr<
         decltype(
             configure(
                 (final_t *)nullptr, 
-                (type  *)nullptr, 
-                (inc::vlist<count, rest...>{})
+                (type_t  *)nullptr, 
+                (inc::vlist<count_v, rest_v...>{})
             )
         )
     >;
@@ -59,14 +59,14 @@ namespace mixc::docker_array{
     /* 结构：静态数组
      * 参数：
      * - final_t 为接口结构类型
-     * - type 为第一维度元素类型
-     * - count 为第一维度元素个数
-     * - rest 为更高维度元素个数
+     * - type_t 为第一维度元素类型
+     * - count_v 为第一维度元素个数
+     * - rest_v 为更高维度元素个数
      */
-    template<class final_t, class type, uxx count, uxx ... rest>
+    template<class final_t, class type_t, uxx count_v, uxx ... rest_v>
     xstruct(
-        xtmpl(array_t, final_t, type, count, rest...),
-        xprif(data, items<final_t, type, count, rest...>)
+        xtmpl(array_t, final_t, type_t, count_v, rest_v...),
+        xprif(data, items<final_t, type_t, count_v, rest_v...>)
     )
     public:
         using item_t = inc::remove_ref<decltype(the_t::data[0])>;
@@ -81,8 +81,8 @@ namespace mixc::docker_array{
             data { ((args &)list)... } {}
 
         template<class finalx_t >
-        constexpr array_t(array_t<finalx_t, type, count, rest...> const & self) : 
-            array_t((the_t &)(array_t<finalx_t, type, count, rest...> &)self) {
+        constexpr array_t(array_t<finalx_t, type_t, count_v, rest_v...> const & self) : 
+            array_t((the_t &)(array_t<finalx_t, type_t, count_v, rest_v...> &)self) {
         }
 
         /* 函数：下标随机访问
@@ -117,7 +117,7 @@ namespace mixc::docker_array{
 
         /* 属性：当前维度数组元素的个数 */
         xpubgetx(length, uxx){
-            return count;
+            return count_v;
         }
 
     public:
@@ -126,13 +126,13 @@ namespace mixc::docker_array{
 
     static inline uxx   empty_array     = 0;
 
-    template<class final_t, class type>
+    template<class final_t, class type_t>
     xstruct(
-        xspec(array_t, final_t, type),
+        xspec(array_t, final_t, type_t),
         xpubb(inc::disable_copy),
-        xprif(data, type *)
+        xprif(data, type_t *)
     )
-        using item_t                = type;
+        using item_t                = type_t;
         using item_initial_invoke   = inc::icallback<void(item_t * item_ptr)>;
         using item_initial_invokex  = inc::icallback<void(uxx i, item_t * item_ptr)>;
 
@@ -302,9 +302,9 @@ namespace mixc::docker_array{
         xranger(item_t)
     $
 
-    template<class final_t, class type, uxx count, uxx ... rest>
+    template<class final_t, class type_t, uxx count_v, uxx ... rest_v>
     using array = inc::adapter_array_access<
-        array_t<final_t, type, count, rest...>
+        array_t<final_t, type_t, count_v, rest_v...>
     >;
 }
 

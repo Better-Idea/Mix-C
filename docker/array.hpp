@@ -5,8 +5,8 @@
 #include"macro/xfinal.hpp"
 
 namespace xuser{
-    template<class item_t, uxx count = 0, uxx ... rest>
-    xfinal_tmpl(xusing_docker_array, array, item_t, count, rest...);
+    template<class item_t, uxx count_v = 0, uxx ... rest_v>
+    xfinal_tmpl(xusing_docker_array, array, item_t, count_v, rest_v...);
 
     template<class item_t>
     struct array<item_t, 0> : 
