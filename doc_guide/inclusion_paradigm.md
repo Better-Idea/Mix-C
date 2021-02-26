@@ -20,8 +20,8 @@
 #include"lang/cxx.hpp"
 ...
 // 实例 foo 只会包含 index_of_first 和 cxx 中的基础功能
-inc::cxx foo = "hello powerful cat! do you love cat?";
-uxx i        = foo.index_of_first("cat");
+cxx foo     = "hello powerful cat! do you love cat?";
+uxx i       = foo.index_of_first("cat");
 ...
 
 // b.hpp 只包含 lang/cxx/align_center 和 lang/cxx/align_right 功能
@@ -37,7 +37,7 @@ uxx i        = foo.index_of_first("cat");
 ...
 ```
 
-情况三：头文件包含了类似 `stdio.h` 这样的库，在不增加 `.cpp` 文件的情况下怎么隐藏不必要的符号名称
+情况三：包含了类似 `stdio.h` 这样的头文件，在不增加 `.cpp` 文件的情况下怎么隐藏不必要的符号名称
 ```C++
 // a.hpp
 #include<stdio.h>
@@ -112,9 +112,11 @@ xexport_space(mixc::foo_bar::origin)
 #pragma pop_macro("xuser")
 
 // 该命名空间和 xuser 命名保持一致
-// 问：为什么不把 #pragma pop_macro("xuser") 放到 #endif 前一行，这样这里就可以用 namespace xuser{ 这种写法了
+// 问：为什么不把 #pragma pop_macro("xuser") 放到 #endif 前一行，
+//     这样这里就可以用 namespace xuser{ 这种写法了
 // 答：我推荐你使用代码片段生成该包含范式框架。
-//     主要时为了避免漏写，如果这个命名空间里包含了较多代码，也许你复制粘贴时会漏了 #pragma pop_macro("xuser")
+//     主要时为了避免漏写，如果这个命名空间里包含了较多代码，
+//     也许你复制粘贴时会漏了 #pragma pop_macro("xuser")
 //     然后你会陷入痛苦的预处理排错阶段
 // 问：预编译出错了怎么办？
 // 答：使用下方命令（记得更改参数），祝你好运~
@@ -253,4 +255,58 @@ xexport_space(mixc::func_b::origin)
 ### 彻底隐藏
 对于类似 windows.h 这样的文件，它既庞大又与平台相关。直接包含它会拖慢编译速度同时也会在全局命名空间布满各种符号。
 包含范式有两个包含分支，一个是主分支，它结束于 main 函数所在的顶层包含文件。另一个是从分支，该分支就用于隔离 windows.h 这样的头文件，将它预先编译成 .o 文件后重复使用，主分支的变更不不影响该分支。  
-经常变动、需要 inline 的文件放到主分支，而稳定的、需要隔离的文件放到从分支。
+经常变动、需要 inline 的文件放到主分支，而稳定的、需要隔离的文件放到从分支。  
+
+**对外**
+```C++
+// file:foo/bar.hpp
+#ifndef xpack_foo_bar           // 主体
+#define xpack_foo_bar
+#pragma push_macro("xuser")
+#define xuser mixc::foo_bar::inc
+#include"foo/pack_a.hpp"
+#include"mixc.hpp"
+#pragma pop_macro("xuser")
+
+namespace mixc::foo_bar::origin{
+    struct bar{
+        void hello();
+    };
+}
+
+#endif
+
+xexport_space(mixc::foo_bar::origin);
+```
+
+**对内**
+```C++
+// file:foo/private/extern.bar.hpp
+// 推荐在文件名前加 `extern.` 前缀
+#ifdef  xuser
+#undef  xuser
+#endif
+
+// 和 foo/bar.hpp 中保持一致
+#define xuser  mixc::foo_bar::inc
+#include"foo/bar.hpp"
+// 不用重复包含
+// #include"foo/pack_a.hpp"
+
+// 肆无忌惮包含 Windows.h、stdio.h 这样的头文件
+#include<Windows.h>
+
+// 和 foo/bar.hpp 中保持一致
+namespace mixc::foo_bar::origin{
+    void bar::hello(){
+        // 在这里愉快的调用系统 API
+        // ...
+    }
+}
+```
+
+**对内的模块扔到 extern.api.cpp** 这样的源文件中
+```C++
+// file:extern.api.cpp
+#include"foo/private/extern.bar.hpp"
+```
