@@ -37,7 +37,7 @@ uxx i        = foo.index_of_first("cat");
 ...
 ```
 
-情况三：头文件包含了类似 **stdio.h** 这样的库，在不增加 .cpp 文件的情况下怎么隐藏不必要的符号名称
+情况三：头文件包含了类似 `stdio.h` 这样的库，在不增加 `.cpp` 文件的情况下怎么隐藏不必要的符号名称
 ```C++
 // a.hpp
 #include<stdio.h>
@@ -45,7 +45,7 @@ uxx i        = foo.index_of_first("cat");
 ```
 
 ## 用法
-实际的包含范式与以上写法有所出入，下面将我们介绍规范的写法。
+实际的包含范式与以上写法有所出入，下面我们将介绍规范的写法。
 ```C++
 // file:foo/bar.hpp
 // 命名规则(推荐)：
@@ -94,7 +94,6 @@ xexport_space(mixc::foo_bar::origin)
 
 ```
 
-
 ```C++
 // file:foo/function.hpp
 // 命名规则(推荐)：
@@ -140,8 +139,8 @@ xexport(mixc::foo_function::function)
 - 彻底隐藏
 
 ### 循环包含
-在 .h/.cpp 模式下由于 .cpp 可以单独作为一个编译空间，所以 a.cpp 可以同时包含 a.h 和 b.h 而
-b.cpp 也可以同时包含 a.h 和 b.h。  
+在 `.h/.cpp` 模式下由于 `.cpp` 可以单独作为一个编译空间，所以 `a.cpp` 可以同时包含 `a.h` 和 `b.h` 而
+`b.cpp` 也可以同时包含 `a.h` 和 `b.h`。  
 对于只有头文件的情况怎么解决循环包含的情况的呢？方法如下：
 
 #### **file:func/private/a.hpp**
@@ -210,7 +209,6 @@ namespace mixc::func_a::origin{ // 命名空间与 func/private/a.hpp 保持一�
         }
     };
 
-    // 我们约定该接口一定会出现在实现的前面
     // 这里无需再填写默认参数类型
     template<class a0, class a1>
     struct ax{
