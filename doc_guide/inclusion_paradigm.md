@@ -100,12 +100,14 @@ xexport_space(mixc::foo_bar::origin)
 // xpack_ ## 目录名_ ## 模块名
 #ifndef xpack_foo_function
 #define xpack_foo_function
+// 保存并取消 xuser 定义
 #pragma push_macro("xuser")
+#undef  xuser
 
 // 命名规则：
 // 项目名::目录名_模块名
 // 作用：
-// 告诉下面包含的模块，将可见模块导出到 xuser::inc 空间
+// 告诉下面包含的模块，将可见模块导出到 mixc::foo_function::inc 空间
 #define xuser mixc::foo_function::inc
 #include"foo/bar.hpp"
 #include"mixc.hpp"
@@ -150,6 +152,7 @@ xexport(mixc::foo_function::function)
 #ifndef xpack_func_private_a    // 这里 xpack_xxx 包含 private
 #define xpack_func_private_a
 #pragma push_macro("xuser")
+#undef  xuser
 #define xuser mixc::func_a::inc // 这里不是 mixc::func_private_a
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -159,7 +162,7 @@ namespace mixc::func_a::origin{ // 这里不是 mixc::func_private_a
 
     // 我们约定该接口一定会出现在实现的前面
     // 所以模板的默认参数在这里填写
-    template<class a0, class a1 = u32>
+    template<class a0_t, class a1_t = u32>
     struct ax;
 
     // 其他需要对外暴露的符号
@@ -178,6 +181,7 @@ xexport_space(mixc::func_a::origin)
 #ifndef xpack_func_private_b    // 声明
 #define xpack_func_private_b
 #pragma push_macro("xuser")
+#undef  xuser
 #define xuser mixc::func_b
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
@@ -196,6 +200,7 @@ xexport_space(mixc::func_b::origin)
 #ifndef xpack_func_a            // 主体
 #define xpack_func_a
 #pragma push_macro("xuser")
+#undef  xuser
 #define xuser mixc::func_a::inc
 #include"func/private/a.hpp"    // private 包放到前面
 #include"func/private/b.hpp"
@@ -212,7 +217,7 @@ namespace mixc::func_a::origin{ // 命名空间与 func/private/a.hpp 保持一�
     };
 
     // 这里无需再填写默认参数类型
-    template<class a0, class a1>
+    template<class a0_t, class a1_t>
     struct ax{
         void hi(){
             ...
@@ -230,6 +235,7 @@ xexport_space(mixc::func_a::origin)
 #ifndef xpack_func_b            // 主体 pack
 #define xpack_func_b
 #pragma push_macro("xuser")
+#undef  xuser
 #define xuser mixc::func_b::inc
 #include"func/private/a.hpp"    // private 包放到前面
 #include"func/private/b.hpp"
@@ -263,6 +269,7 @@ xexport_space(mixc::func_b::origin)
 #ifndef xpack_foo_bar           // 主体
 #define xpack_foo_bar
 #pragma push_macro("xuser")
+#undef  xuser
 #define xuser mixc::foo_bar::inc
 #include"foo/pack_a.hpp"
 #include"mixc.hpp"
@@ -282,7 +289,7 @@ xexport_space(mixc::foo_bar::origin);
 **对内**
 ```C++
 // file:foo/private/extern.bar.hpp
-// 推荐在文件名前加 `extern.` 前缀
+// 推荐在该类型的文件名前加 `extern.` 前缀
 #ifdef  xuser
 #undef  xuser
 #endif
