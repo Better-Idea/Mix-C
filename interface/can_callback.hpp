@@ -4,20 +4,31 @@
 #undef  xuser
 #define xuser mixc::interface_can_callback::inc
 #include"macro/xinterface.hpp"
+#include"macro/xis_nullptr.hpp"
 #include"memop/signature.hpp"
+#include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_callback::origin{
-    template<class func> struct icallback;
+    template<class func_t> struct icallback;
 
-    template<class ret, class ... args>
-    struct icallback<ret(args...)>{
-        template<class object>
-        requires(inc::signature<ret(args...)>::has(& object::operator()))
-        constexpr icallback(object const & this_ref){
+    template<class ret_t, class ... args_t>
+    struct icallback<ret_t(args_t...)>{
+    private:
+        using func_t        = ret_t(*)(voidp, args_t...);
+        using the_t         = icallback<ret_t(args_t...)>;
+        voidp   this_ptr    = nullptr;
+        func_t  this_func   = nullptr;
+    public:
+        template<class object_t>
+        requires(
+            inc::signature<ret_t(args_t...)>::has(& object_t::operator()) or
+            inc::is_same<ret_t(*)(args_t...), object_t>
+        )
+        constexpr icallback(object_t const & this_ref){
             struct closure{
-                static ret shell(object * this_ptr, args ... list){
-                    return this_ptr->operator()(list...);
+                static ret_t shell(object_t * this_ptr, args_t ... list){
+                    return (*this_ptr)(list...);
                 }
             };
             
@@ -27,14 +38,11 @@ namespace mixc::interface_can_callback::origin{
 
         constexpr icallback(){}
 
-        ret operator()(args ... list) const {
+        ret_t operator()(args_t ... list) const {
             return this_func(this_ptr, list...);
         }
 
-    private:
-        using func_t = ret(*)(voidp, args...);
-        voidp   this_ptr  = nullptr;
-        func_t  this_func = nullptr;
+        xis_nullptr(this_func == nullptr)
     };
 
     template<class functor_t, class signature>
