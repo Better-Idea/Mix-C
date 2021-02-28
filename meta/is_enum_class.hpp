@@ -9,8 +9,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_enum_class::origin{
-    template<class a>
-    concept is_enum_class = not inc::has_cast<u64, a> and __is_enum(a);
+    template<class type_t>
+    concept is_enum_class = not inc::has_cast<u64, type_t> and __is_enum(type_t);
 }
 
 #endif

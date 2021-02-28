@@ -22,8 +22,8 @@ namespace mixc::meta_item_of{
         using result = decltype(invoke());
     };
 
-    template<class item_t, uxx len>
-    struct meta<item_t[len]>{
+    template<class item_t, uxx length_v>
+    struct meta<item_t[length_v]>{
         using result = item_t;
     };
 

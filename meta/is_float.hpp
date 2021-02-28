@@ -8,7 +8,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_float{
-    template<class a> struct meta {
+    template<class type_t> struct meta {
         static constexpr bool result = false;
     };
 
@@ -20,8 +20,8 @@ namespace mixc::meta_is_float{
         static constexpr bool result = true;
     };
 
-    template<class a>
-    concept is_float = meta<a>::result;
+    template<class type_t>
+    concept is_float = meta<type_t>::result;
 }
 
 #endif

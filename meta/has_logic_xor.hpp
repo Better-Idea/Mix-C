@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_logic_xor::origin{
-    template<class a>
-    concept has_logic_xor = requires(a left, a right){
+    template<class type_t>
+    concept has_logic_xor = requires(type_t left, type_t right){
         left ^ right;
     };
 }

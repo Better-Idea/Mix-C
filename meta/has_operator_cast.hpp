@@ -2,9 +2,9 @@
 #ifndef xpack_meta_has_operator_cast
 #define xpack_meta_has_operator_cast
 namespace mixc::meta_has_operator_cast{
-    template<class target, class source>
-    concept has_operator_cast = requires(source value){
-        value.operator target();
+    template<class target_t, class source_t>
+    concept has_operator_cast = requires(source_t value){
+        value.operator target_t();
     };
 }
 

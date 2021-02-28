@@ -9,16 +9,16 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_volatile{
-    template<class a> struct meta {
+    template<class type_t> struct meta {
         static constexpr bool result = false;
     };
 
-    template<class a> struct meta<volatile a> {
+    template<class type_t> struct meta<volatile type_t> {
         static constexpr bool result = true;
     };
 
-    template<class a>
-    concept is_volatile = meta<a>::result;
+    template<class type_t>
+    concept is_volatile = meta<type_t>::result;
 }
 
 #endif

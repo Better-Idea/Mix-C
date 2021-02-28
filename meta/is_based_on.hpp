@@ -9,8 +9,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_based_on{
-    template<class father, class child>
-    concept is_based_on = __is_base_of(father, child);
+    template<class father_t, class child_t>
+    concept is_based_on = __is_base_of(father_t, child_t);
 }
 
 #endif

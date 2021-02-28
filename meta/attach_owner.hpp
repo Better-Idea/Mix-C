@@ -7,15 +7,15 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_attach_owner{
-    template<class object, class func> struct meta;
+    template<class object_t, class func_t> struct meta;
 
-    template<class object, class ret, class ... args>
-    struct meta<object, ret(args...)>{
-        using type = ret(object::*)(args...);
+    template<class object_t, class ret_t, class ... args_t>
+    struct meta<object_t, ret_t(args_t...)>{
+        using type = ret_t(object_t::*)(args_t...);
     };
 
-    template<class object, class func> 
-    using attach_owner = typename meta<object, func>::type;
+    template<class object_t, class func_t> 
+    using attach_owner = typename meta<object_t, func_t>::type;
 }
 
 #endif

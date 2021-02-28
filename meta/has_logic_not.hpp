@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_logic_not::origin{
-    template<class a>
-    concept has_logic_not = requires(a left){
+    template<class type_t>
+    concept has_logic_not = requires(type_t left){
         ~left;
     };
 }

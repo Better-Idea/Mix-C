@@ -8,7 +8,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_unsigned{
-    template<class a> struct meta {
+    template<class type_t> struct meta {
         static constexpr bool result = false;
     };
 
@@ -28,8 +28,8 @@ namespace mixc::meta_is_unsigned{
         static constexpr bool result = true;
     };
 
-    template<class a>
-    concept is_unsigned = meta<a>::result;
+    template<class type_t>
+    concept is_unsigned = meta<type_t>::result;
 }
 
 #endif

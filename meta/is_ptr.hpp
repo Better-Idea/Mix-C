@@ -8,28 +8,28 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_ptr{
-    template<class a> struct meta {
+    template<class type_t> struct meta {
         static constexpr bool result = false;
     };
     
-    template<class a> struct meta<a *> {
+    template<class type_t> struct meta<type_t *> {
         static constexpr bool result = true;
     };
     
-    template<class a> struct meta<a const *> {
+    template<class type_t> struct meta<type_t const *> {
         static constexpr bool result = true;
     };
 
-    template<class a> struct meta<a * const> {
+    template<class type_t> struct meta<type_t * const> {
         static constexpr bool result = true;
     };
 
-    template<class a> struct meta<const a * const> {
+    template<class type_t> struct meta<const type_t * const> {
         static constexpr bool result = true;
     };
 
-    template<class a>
-    concept is_ptr = meta<a>::result;
+    template<class type_t>
+    concept is_ptr = meta<type_t>::result;
 }
 
 #endif

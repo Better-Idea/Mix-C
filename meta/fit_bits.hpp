@@ -8,28 +8,28 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_fit_bits{
-    template<uxx bits>
+    template<uxx bits_v>
     struct meta{
         static auto invoke(){
-            static_assert(bits <= 64);
+            static_assert(bits_v <= 64);
 
-            if constexpr (bits <= 8){
+            if constexpr (bits_v <= 8){
                 return u08();
             }
-            else if constexpr (bits <= 16){
+            else if constexpr (bits_v <= 16){
                 return u16();
             }
-            else if constexpr (bits <= 32){
+            else if constexpr (bits_v <= 32){
                 return u32();
             }
-            else if constexpr (bits <= 64){
+            else if constexpr (bits_v <= 64){
                 return u64();
             }
         }
     };
 
-    template<uxx bits>
-    using fit_bits = decltype(meta<bits>::invoke());
+    template<uxx bits_v>
+    using fit_bits = decltype(meta<bits_v>::invoke());
 }
 
 #endif

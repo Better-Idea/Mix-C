@@ -8,19 +8,19 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_remove_ref{
-    template<class a>
+    template<class type_t>
     struct meta {
-        using result = a;
+        using result = type_t;
     };
 
-    template<class a>
-    struct meta<a &> {
-        using result = a;
+    template<class type_t>
+    struct meta<type_t &> {
+        using result = type_t;
     };
 
-    template<class a>
-    struct meta<a &&> {
-        using result = a;
+    template<class type_t>
+    struct meta<type_t &&> {
+        using result = type_t;
     };
 
     template<class type>

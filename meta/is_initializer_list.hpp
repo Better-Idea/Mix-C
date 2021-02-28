@@ -9,7 +9,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_initializer_list{
-    template<class type>
+    template<class type_t>
     struct meta{
         enum{ result = false };
     };
@@ -19,8 +19,8 @@ namespace mixc::meta_is_initializer_list{
         enum{ result = true };
     };
 
-    template<class type>
-    concept is_initializer_list = meta<type>::result == true;
+    template<class type_t>
+    concept is_initializer_list = meta<type_t>::result == true;
 }
 
 #endif

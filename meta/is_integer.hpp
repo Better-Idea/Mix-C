@@ -5,18 +5,19 @@
 #define xuser mixc::meta_is_integer::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
-#include"meta/is_unsigned.hpp"
 #include"meta/is_signed.hpp"
+#include"meta/is_unsigned.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_integer{
-    template<class a>
+    template<class type_t>
     struct meta {
-        static constexpr bool result = inc::is_signed<a> or inc::is_unsigned<a>;
+        static constexpr bool result = 
+            inc::is_signed<type_t> or inc::is_unsigned<type_t>;
     };
 
-    template<class a>
-    concept is_integer = meta<a>::result;
+    template<class type_t>
+    concept is_integer = meta<type_t>::result;
 }
 
 #endif

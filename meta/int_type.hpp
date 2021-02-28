@@ -8,7 +8,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_int_type{
-    template<uxx, bool is_signed>
+    template<uxx, bool>
     struct meta{};
     template<> struct meta<1, false> { using result = u08; };
     template<> struct meta<2, false> { using result = u16; };
@@ -19,9 +19,9 @@ namespace mixc::meta_int_type{
     template<> struct meta<4, true>  { using result = i32; };
     template<> struct meta<8, true>  { using result = i64; };
 
-    template<class type>
+    template<class type_t>
     using int_type = 
-        typename meta<sizeof(type), (type(-1) < 0)>::result;
+        typename meta<sizeof(type_t), (type_t(-1) < 0)>::result;
 }
 
 #endif

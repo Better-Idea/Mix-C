@@ -15,8 +15,8 @@ namespace mixc::meta_unsigned_type{
     template<> struct meta<4> { using result = u32; };
     template<> struct meta<8> { using result = u64; };
 
-    template<class type>
-    using unsigned_type = typename meta<sizeof(type)>::result;
+    template<class type_t>
+    using unsigned_type = typename meta<sizeof(type_t)>::result;
 }
 
 #endif

@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_class{
-    template<class a>
-    concept is_class = __is_class(a);
+    template<class type_t>
+    concept is_class = __is_class(type_t);
 }
 
 #endif

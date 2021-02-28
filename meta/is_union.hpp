@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_union{
-    template<class a>
-    concept is_union = __is_union(a);
+    template<class type_t>
+    concept is_union = __is_union(type_t);
 }
 
 #endif

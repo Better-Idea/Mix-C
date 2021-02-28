@@ -11,12 +11,13 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_number{
-    template<class a> struct meta {
-        static constexpr bool result = inc::is_integer<a> || inc::is_float<a> || inc::is_enum<a>;
+    template<class type_t> struct meta {
+        static constexpr bool result = 
+            inc::is_integer<type_t> or inc::is_float<type_t> or inc::is_enum<type_t>;
     };
 
-    template<class a>
-    concept is_number = meta<a>::result;
+    template<class type_t>
+    concept is_number = meta<type_t>::result;
 }
 
 #endif

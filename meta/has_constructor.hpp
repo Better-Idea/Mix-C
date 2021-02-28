@@ -7,20 +7,20 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_constructor{
-    template<class object_t, class ... args>
-    concept meta = requires(object_t, args ... list){
+    template<class object_t, class ... args_t>
+    concept meta = requires(object_t, args_t ... list){
         object_t{list...};
     };
 
-    template<class object, class ... args> 
-    inline constexpr bool invoke(object *, void(*)(args...)){
-        return meta<object, args...>;
+    template<class object_t, class ... args_t> 
+    inline constexpr bool invoke(object_t *, void(*)(args_t...)){
+        return meta<object_t, args_t...>;
     }
 }
 
 namespace mixc::meta_has_constructor::origin{
-    template<class object_t, class constructor>
-    concept has_constructor = invoke((object_t *)nullptr, (constructor *)nullptr);
+    template<class object_t, class constructor_t>
+    concept has_constructor = invoke((object_t *)nullptr, (constructor_t *)nullptr);
 }
 
 #endif

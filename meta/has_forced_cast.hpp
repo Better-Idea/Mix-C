@@ -9,9 +9,9 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_forced_cast{
-    template<class target, class source>
-    concept has_forced_cast = requires(target tar, source src){
-        tar = static_cast<target>(src);
+    template<class target_t, class source_t>
+    concept has_forced_cast = requires(target_t tar, source_t src){
+        tar = static_cast<target_t>(src);
     };
 }
 

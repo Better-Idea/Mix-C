@@ -8,37 +8,37 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_remove_membership{
-    template<class object> struct meta{
-        using result = object;
+    template<class object_t> struct meta{
+        using result = object_t;
     };
 
-    template<class type, class object>
-    struct meta<type object::*>{
-        using result = type;
+    template<class type_t, class object_t>
+    struct meta<type_t object_t::*>{
+        using result = type_t;
     };
 
-    template<class ret_t, class object, class ... args>
-    struct meta<ret_t (object::*)(args...) const>{
-        using result = ret_t (*)(args...);
+    template<class ret_t, class object_t, class ... args_t>
+    struct meta<ret_t (object_t::*)(args_t...) const>{
+        using result = ret_t (*)(args_t...);
     };
 
-    template<class ret_t, class object, class ... args>
-    struct meta<ret_t (object::* const)(args...)>{
-        using result = ret_t (* const)(args...);
+    template<class ret_t, class object_t, class ... args_t>
+    struct meta<ret_t (object_t::* const)(args_t...)>{
+        using result = ret_t (* const)(args_t...);
     };
 
-    template<class ret_t, class ... args>
-    struct meta<ret_t (*)(args...)>{
-        using result = ret_t (*)(args...);
+    template<class ret_t, class ... args_t>
+    struct meta<ret_t (*)(args_t...)>{
+        using result = ret_t (*)(args_t...);
     };
 
-    template<class ret_t, class ... args>
-    struct meta<ret_t (* const)(args...)>{
-        using result = ret_t (* const)(args...);
+    template<class ret_t, class ... args_t>
+    struct meta<ret_t (* const)(args_t...)>{
+        using result = ret_t (* const)(args_t...);
     };
 
-    template<class type>
-    using remove_membership = typename meta<type>::result;
+    template<class type_t>
+    using remove_membership = typename meta<type_t>::result;
 }
 
 #endif

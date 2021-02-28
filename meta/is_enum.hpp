@@ -8,8 +8,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_enum{
-    template<class a>
-    concept is_enum = __is_enum(a);
+    template<class type_t>
+    concept is_enum = __is_enum(type_t);
 }
 
 #endif

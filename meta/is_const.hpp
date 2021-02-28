@@ -8,16 +8,16 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_const{
-    template<class a> struct meta {
+    template<class type_t> struct meta {
         static constexpr bool result = false;
     };
 
-    template<class a> struct meta<const a> {
+    template<class type_t> struct meta<const type_t> {
         static constexpr bool result = true;
     };
 
-    template<class a>
-    concept is_const = meta<a>::result;
+    template<class type_t>
+    concept is_const = meta<type_t>::result;
 }
 
 #endif

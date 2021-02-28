@@ -10,7 +10,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_function{
-    template<class type> struct function;
+    template<class type_t> struct function;
 
     #include"meta/private/xgen.function.hpp"
 

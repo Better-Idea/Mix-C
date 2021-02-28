@@ -11,11 +11,11 @@ namespace mixc::meta_is_origin_array{
     template<class>
     struct meta{ enum { result = false }; };
 
-    template<class a, uxx length>
-    struct meta<a[length]>{ enum { result = true }; };
+    template<class type_t, uxx length_v>
+    struct meta<type_t[length_v]>{ enum { result = true }; };
 
-    template<class a>
-    concept is_origin_array = bool(meta<a>::result);
+    template<class type_t>
+    concept is_origin_array = bool(meta<type_t>::result);
 }
 
 #endif

@@ -19,8 +19,8 @@ namespace mixc::meta_is_initializer_listx{
         enum{ result = true };
     };
 
-    template<class may_list, class item_t>
-    concept is_initializer_listx = meta<may_list, item_t>::result == true;
+    template<class may_list_t, class item_t>
+    concept is_initializer_listx = meta<may_list_t, item_t>::result == true;
 }
 
 #endif

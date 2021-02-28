@@ -14,14 +14,14 @@
     #define xa_has_const        const
 #endif
 
-template<xa_object_t class ret_type, class ... list>
-struct function<ret_type xa_object (list...) xa_has_const> {
-    static constexpr uxx args_count = sizeof...(list);
+template<xa_object_t class ret_t, class ... args_t>
+struct function<ret_t xa_object (args_t...) xa_has_const> {
+    static constexpr uxx args_count = sizeof...(args_t);
 
-    using return_type = ret_type;
+    using return_type = ret_t;
 
     template<ixx index>
-    using args = inc::tget<inc::tlist<list...>, index>;
+    using args = inc::tget<inc::tlist<args_t...>, index>;
 };
 
 #undef  xa_object_t

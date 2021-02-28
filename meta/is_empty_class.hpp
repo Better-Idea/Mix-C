@@ -8,10 +8,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_empty_class{
-    template<class a>
+    template<class type_t>
     inline constexpr bool meta(){
-        if constexpr (__is_class(a)){
-            struct test : a{ char dummy; };
+        if constexpr (__is_class(type_t)){
+            struct test : type_t{ char dummy; };
             return sizeof(test) == 1;
         }
         else{
@@ -19,8 +19,8 @@ namespace mixc::meta_is_empty_class{
         }
     }
 
-    template<class a>
-    concept is_empty_class = meta<a>();
+    template<class type_t>
+    concept is_empty_class = meta<type_t>();
 }
 
 #endif
