@@ -8,7 +8,7 @@
 https://github.com/Better-Idea/Mix-C/blob/master/memory/private/tiny_allocator.hpp
 
 - 策略锁：功能比读写锁更完整、更通用化。同步开销和自旋锁相当，可配置且能有效的管理线程并发和同步，同时避免了传统读写锁可能出现的线程饥饿问题。  
-https://github.com/Better-Idea/Mix-C/blob/master/lock/policy_barrier.hpp  
+https://github.com/Better-Idea/Mix-C/blob/master/concurrency/lock/policy_barrier.hpp  
 https://github.com/Better-Idea/Mix-C/blob/master/discuss/talk_about_policy_barrier.cpp
 
 - 半伪随机数生成算法：一款高质量的伪随机数生成算法，速度比线性同余更快，周期比 mt19937更长（理论上没有周期）  
@@ -36,6 +36,7 @@ https://github.com/Better-Idea/Mix-C/blob/master/math
 | Dir                   | Description                                                            |
 |-----------------------|------------------------------------------------------------------------|
 | algo                  | 通用算法类，多以函数单体形式提供                                       |
+| concurrency           | 为并发提供支持库，包含原子操作、线程接口                               |
 | chrono                | 与计时相关的库，以对象形式提供                                         |
 | define                | 提供基础类型的定义，以及类似 nan 非数与 nullref 空引用字面量语法糖     |
 | discuss               | 一个专门讨论模块可用性的目录，提供示例以供参考                         |
@@ -48,7 +49,6 @@ https://github.com/Better-Idea/Mix-C/blob/master/math
 | interface             | 通用接口类，目前只限于作为函数参数                                     |
 | io                    | 对控制台、文件系统等输入输出类的包装                                   |
 | lang                  | 底层的原始字符处理模块，包含字符以及字符串的基本处理                   |
-| lock                  | 对原子操作的基本封装                                                   |
 | macro                 | 为构成的模块提供简便写法，用于简化代码、实现奇特的效果                 |
 | math                  | 提供初等数学以及概率统计相关的函数                                     |
 | memop                 | 直接操作内存的库                                                       |
