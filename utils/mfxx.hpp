@@ -44,51 +44,76 @@
 
 namespace mixc::utils_mfxx{
     template<
-        class   float_type, 
-        class   equivalent_type, 
-        uxx     dec_bits, 
-        uxx     exp_bits, 
-        uxx     exp_offset,
-        uxx     prec_dec>
+        class   float_t, 
+        class   equivalent_t, 
+        uxx     dec_bits_v, 
+        uxx     exp_bits_v, 
+        uxx     exp_offset_v,
+        uxx     prec_dec_v>
     xstruct(
         xtmpl(mfxx,
-            float_type,
-            equivalent_type,
-            dec_bits,
-            exp_bits,
-            exp_offset,
-            prec_dec
+            float_t,
+            equivalent_t,
+            dec_bits_v,
+            exp_bits_v,
+            exp_offset_v,
+            prec_dec_v
         )
     )
         union{
             struct {
-                equivalent_type decimal : dec_bits;
-                equivalent_type exp     : exp_bits;
-                equivalent_type sign    : 1;
+                equivalent_t decimal : dec_bits_v;
+                equivalent_t exp     : exp_bits_v;
+                equivalent_t sign    : 1;
             };
 
-            float_type value;
+            float_t value;
         };
 
-        mfxx() : value(0) { }
-        mfxx(float_type value) : value(value) { }
-
-        constexpr mfxx(equivalent_type sign, equivalent_type exp, equivalent_type decimal) : 
+        constexpr mfxx() : value(0) { }
+        constexpr mfxx(float_t value) : value(value) { }
+        constexpr mfxx(equivalent_t sign, equivalent_t exp, equivalent_t decimal) : 
             decimal(decimal), exp(exp), sign(sign) {}
 
         // 函数：设置浮点数实际的指数
         // 参数：
         // - value 为新的指数值
         // 返回：当前对象的的引用
+        // 注意：这里不考虑原始指数为 0 的情况（f32/f64 不使用隐藏位的情况）
+        the_t & real_exp_unsafe(ixx value){
+            the.exp = value + exp_offset_v;
+            return the;
+        }
+
+        // 函数：设置浮点数实际的指数
+        // 参数：
+        // - value 为新的指数值
+        // 返回：当前对象的的引用
         the_t & real_exp(ixx value){
-            the.exp = value + exp_offset;
+            if constexpr (has_hidden_bit()){
+                // 特殊情况，具有隐藏位的浮点数原始指数为 0 时不使用隐藏位
+                // 此时 decimal 中存放所有有效位
+                // 实数位（原来的隐藏位）放在最高位
+                // 从不具有隐藏位转换到具有隐藏位
+                if (the.exp == 0){
+                    if (uxx(-value) != exp_offset_v){
+                        the.decimal <<= 1;
+                    }
+                }
+                // 从具有隐藏位转换到不具有隐藏位
+                else if (uxx(-value) == exp_offset_v){
+                    the.decimal = (the.decimal >> 1) | (u64(1) << (dec_bits_v - 1));
+                }
+            }
+
+            real_exp_unsafe(value);
             return the;
         }
 
         // 函数：获取浮点数实际的指数[不带检查]
         // 注意：如果该浮点数值为 0，则会得到错误的指数部分
         ixx real_exp_unsafe() const {
-            return ixx(the.exp) - exp_offset;
+            return ixx(the.exp) - exp_offset_v;
         }
 
         // 函数：获取浮点数实际的指数
@@ -104,8 +129,8 @@ namespace mixc::utils_mfxx{
         // - 如果该浮点数值为 0，则会得到错误的指数部分
         // - f80 与 f64, f32 的小数部分不同，f80 没有隐藏位
         u64 real_dec_unsafe() const {
-            if (not inc::is_same<float_type, f80>){
-                return u64(u64(1) << dec_bits | the.decimal);
+            if constexpr (not inc::is_same<float_t, f80>){
+                return u64(u64(1) << dec_bits_v | the.decimal);
             }
             else{
                 return u64(the.decimal);
@@ -123,27 +148,31 @@ namespace mixc::utils_mfxx{
         }
 
         // 函数：尾数部分的位数
-        constexpr uxx decimal_bits(){
-            return dec_bits;
+        static constexpr uxx decimal_bits(){
+            return dec_bits_v;
         }
 
         // 函数：包括隐藏位的尾数部分的尾数
         // 注意：
         // - f80 与 f64, f32 的小数部分不同，f80 没有隐藏位
-        constexpr uxx decimal_bits_full(){
-            return dec_bits + not inc::is_same<float_type, f80>;
+        static constexpr uxx decimal_bits_full(){
+            return dec_bits_v + not inc::is_same<float_t, f80>;
+        }
+
+        static constexpr bool has_hidden_bit(){
+            return not inc::is_same<float_t, f80>;
         }
 
         // 函数：该浮点数最大的精度（10进制）
-        constexpr uxx precious(){
-            return prec_dec;
+        static constexpr uxx precious(){
+            return prec_dec_v;
         }
 
-        operator float_type & () {
+        operator float_t & () {
             return value;
         }
 
-        operator const float_type & () const {
+        operator const float_t & () const {
             return value;
         }
     $
