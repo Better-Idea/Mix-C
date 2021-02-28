@@ -126,7 +126,7 @@ namespace mixc::lang_cxx_strlize{
             #undef  xgen
 
             item_t buf[64];
-            item_t buf_exp[8]     = {'+'};
+            item_t buf_exp[8]   = {'+'};
             auto pce            = ixx(precious);
             auto ptr            = buf;
             auto m              = inc::mfxx<type>{value};
@@ -162,7 +162,7 @@ namespace mixc::lang_cxx_strlize{
                 m              *= inc::expr10_unsafe(uxx(exp));
             }
 
-            if (m < 1.0){
+            if (m != 0 and m < 1.0){
                 m              *= 10;
                 exp            -= 1;
                 buf_exp[0]      = '-';
