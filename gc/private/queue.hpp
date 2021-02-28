@@ -4,14 +4,14 @@
 #undef  xuser
 #define xuser mixc::gc_queue::inc
 #include"interface/can_callback.hpp"
-#include"lock/atom_fetch_add.hpp"
-#include"lock/atom_swap.hpp"
+#include"concurrency/lock/atom_fetch_add.hpp"
+#include"concurrency/lock/atom_swap.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_queue{
-    using release_callback = inc::can_callback<void()>;
+    using release_callback = inc::icallback<void()>;
 
     struct queue{
         struct node{

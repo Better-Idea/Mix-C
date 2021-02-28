@@ -4,8 +4,8 @@
 #undef  xuser
 #define xuser mixc::gc_private_token::inc
 #include"concurrency/lock/atom_add.hpp"
-#include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_load.hpp"
+#include"concurrency/lock/atom_sub.hpp"
 #include"dumb/struct_type.hpp"
 #include"meta/is_same.hpp"
 #include"mixc.hpp"
@@ -54,52 +54,52 @@ namespace mixc::gc_private_token::origin{
         }
     $
 
-    template<class type, class attribute, class addition>
+    template<class type_t, class attribute_t, class addition_t>
     struct token_mix;
 
-    template<class type, class addition>
+    template<class type_t, class addition_t>
     xstruct(
-        xspec(token_mix, type, void, addition),
-        xpubb(addition)
+        xspec(token_mix, type_t, void, addition_t),
+        xpubb(addition_t)
     )
-        using base_t = addition;
+        using base_t = addition_t;
         using base_t::base_t;
 
         token_mix(token_mix const &)        = delete;
         void operator=(token_mix const &)   = delete;
 
-        type * item_ptr(uxx index){
-            if constexpr (inc::is_same<void, type>){
+        type_t * item_ptr(uxx index){
+            if constexpr (inc::is_same<void, type_t>){
                 return nullptr;
             }
             else{
-                return ((type *)(this + 1)) + index;
+                return ((type_t *)(this + 1)) + index;
             }
         }
 
         ~token_mix() {
-            if constexpr (not inc::is_same<void, type>){
-                for(uxx i = 0; i < addition::this_length(); i++) {
-                    item_ptr(i)->~type();
+            if constexpr (not inc::is_same<void, type_t>){
+                for(uxx i = 0; i < addition_t::this_length(); i++) {
+                    item_ptr(i)->~type_t();
                 }
             }
         }
     $
 
-    template<class type, class attribute, class addition>
+    template<class type_t, class attribute_t, class addition_t>
     xstruct(
-        xtmpl(token_mix, type, attribute, addition),
-        xpubb(token_mix<type, void, addition>), 
-        xpubb(inc::struct_type<attribute>)
+        xtmpl(token_mix, type_t, attribute_t, addition_t),
+        xpubb(token_mix<type_t, void, addition_t>), 
+        xpubb(inc::struct_type<attribute_t>)
     )
-        using base_t = token_mix<type, void, addition>;
+        using base_t = token_mix<type_t, void, addition_t>;
 
-        template<class ... args>
-        token_mix(uxx length, args const & ... list) : 
-            base_t(length), inc::struct_type<attribute>(list...) {}
+        template<class ... args_t>
+        token_mix(uxx length, args_t const & ... list) : 
+            base_t(length), inc::struct_type<attribute_t>(list...) {}
 
-        attribute * attribute_ptr() const {
-            return (attribute *)(inc::struct_type<attribute> *)this;
+        attribute_t * attribute_ptr() const {
+            return (attribute_t *)(inc::struct_type<attribute_t> *)this;
         }
     $
 }

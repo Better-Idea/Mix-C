@@ -8,20 +8,20 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_private_make_guide::inc
-#include"gc/private/routing.hpp"
 #include"gc/private/collect.hpp"
+#include"gc/private/routing.hpp"
 #include"meta/is_class.hpp"
 #include"meta_seq/tlist.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_make_guide{
-    template<class root>
+    template<class root_t>
     inline auto make_guide() {
         using namespace inc;
-        if constexpr (is_class<root>){
-            using routing_result = typename routing<root>::result_kvlist;
-            using guide = typename collect<root, routing_result>::result_list;
+        if constexpr (is_class<root_t>){
+            using routing_result = typename routing<root_t>::result_kvlist;
+            using guide = typename collect<root_t, routing_result>::result_list;
             return guide();
         }
         else{
