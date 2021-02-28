@@ -15,6 +15,16 @@ namespace mixc::meta_seq_tpop_by{
 
     template<
         template<class> class   selector_t, 
+        class                   key_t, 
+        class ...               vals_t, 
+        class ...               rest_t
+    >
+    inline auto invoke(key_t *, tlist<>, tlist<tlist<vals_t...> , tlist<rest_t...>> r){
+        return r;
+    }
+
+    template<
+        template<class> class   selector_t, 
         class                   key_t,
         class                   first_t, 
         class ...               args_t, 
@@ -25,21 +35,11 @@ namespace mixc::meta_seq_tpop_by{
         using current_key = typename selector_t<first_t>::item_t;
 
         if constexpr (tlist<args_t...> src; is_same<current_key, key_t>){
-            return invoke<selector_t>(k, src, tlist<tlist<vals_t..., first_t> , tlist<rest_t...>>{});
+            return invoke<selector_t>(k, src, tlist<tlist<vals_t..., first_t>, tlist<rest_t...>>{});
         }
         else{
-            return invoke(k, src, tlist<tlist<vals_t...> , tlist<rest_t..., first_t>>{});
+            return invoke<selector_t>(k, src, tlist<tlist<vals_t...>, tlist<rest_t..., first_t>>{});
         }
-    }
-
-    template<
-        template<class> class   selector_t, 
-        class                   key_t, 
-        class ...               vals_t, 
-        class ...               rest_t
-    >
-    inline auto invoke(key_t *, tlist<>, tlist<tlist<vals_t...> , tlist<rest_t...>> r){
-        return r;
     }
 
     template<class ... vals_t, class ... rest_t>
