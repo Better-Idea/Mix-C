@@ -45,9 +45,9 @@ namespace mixc::interface_can_callback::origin{
         xis_nullptr(this_func == nullptr)
     };
 
-    template<class functor_t, class signature>
+    template<class functor_t, class signature_t>
     concept can_callback = requires(functor_t const & call){
-        icallback<signature>(call);
+        icallback<signature_t>(call);
     };
 }
 

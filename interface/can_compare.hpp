@@ -6,8 +6,8 @@
 #include"define/base_type.hpp"
 #include"interface/can_callback.hpp"
 #include"macro/xcmp.hpp"
+#include"macro/xexport.hpp"
 #include"memop/cmp.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_compare::origin{

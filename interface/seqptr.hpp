@@ -37,7 +37,7 @@ namespace mixc::interface_private_seqptr{
     )
     public:
         using item_t            = item_type;
-        using final_t             = inc::adapter_array_access<the_t>;
+        using final_t           = inc::adapter_array_access<the_t>;
     public:
         constexpr seqptr(the_t const &) : 
             ptr(nullptr), len(0){}
