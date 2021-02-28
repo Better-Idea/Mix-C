@@ -18,12 +18,12 @@ namespace mixc::math_partial_sum{
             return;
         }
 
-        auto tmp = des[0] = src[0];
+        auto tmp        = des[0] = src[0];
 
         for(uxx i = 1, length = src.length(); i < length; i++){
-            auto last = tmp;
-            tmp    = des[i];
-            des[i] = last + src[i];
+            auto last   = tmp;
+            tmp         = des[i];
+            des[i]      = last + src[i];
         }
     }
 

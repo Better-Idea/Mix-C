@@ -3,8 +3,8 @@
 #include"macro/xexport.hpp"
 
 namespace mixc::math_abs::origin{
-    template<class type>
-    inline type abs(type const & value){
+    template<class type_t>
+    inline type_t abs(type_t const & value){
         return value < 0 ? -value : value;
     }
 }

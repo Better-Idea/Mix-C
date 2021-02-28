@@ -15,16 +15,16 @@ namespace mixc::math_point {
         xprif(py, posy_t),
         xprif(pz, posz_t)
     ) 
-        point() : 
+        constexpr point() : 
             point(0, 0, 0){
         }
 
-        point(posx_t x, posy_t y, posz_t z):
+        constexpr point(posx_t x, posy_t y, posz_t z):
             px(x), py(y), pz(z){
         }
 
         template<class finalx_t >
-        point(point<finalx_t, posx_t, posy_t, posz_t> const & self) :
+        constexpr point(point<finalx_t, posx_t, posy_t, posz_t> const & self) :
             point(self.x(), self.y(), self.z()){
         }
 

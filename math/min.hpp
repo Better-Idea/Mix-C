@@ -13,7 +13,7 @@
 
 namespace mixc::math_min::origin{
     template<class type>
-    inline type min(type left, type right){
+    inline type const & min(type const & left, type const & right){
         return left < right ? left : right;
     }
 }

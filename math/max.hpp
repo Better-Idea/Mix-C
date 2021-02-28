@@ -1,7 +1,7 @@
 #ifndef xpack_math_max
 #define xpack_math_max
 #ifdef max
-    #undef max
+#undef max
 #endif
 
 #pragma push_macro("xuser")
@@ -12,8 +12,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_max::origin{
-    template<class type>
-    inline type max(type left, type right){
+    template<class type_t>
+    inline type_t const & max(type_t const & left, type_t const & right){
         return left > right ? left : right;
     }
 }

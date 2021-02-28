@@ -38,9 +38,9 @@ namespace mixc::math_random::inc{
 }
 
 namespace mixc::math_random{
-    template<class type>
-    inline type random(){
-        if constexpr (inc::is_same<type, f32>){
+    template<class type_t>
+    inline type_t random(){
+        if constexpr (inc::is_same<type_t, f32>){
             union {
                 u64 u;
                 f32 candidate[2];
@@ -55,7 +55,7 @@ namespace mixc::math_random{
                 }
             }
         }
-        else if constexpr (inc::is_same<type, f64>){
+        else if constexpr (inc::is_same<type_t, f64>){
             union {
                 u64 u;
                 f64 candidate;
@@ -67,11 +67,11 @@ namespace mixc::math_random{
                 }
             }
         }
-        else if constexpr (inc::is_same<type, bool>){
+        else if constexpr (inc::is_same<type_t, bool>){
             return inc::random() % 2 == 0;
         }
         else{
-            return type(inc::random());
+            return type_t(inc::random());
         }
     }
 }

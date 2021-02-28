@@ -12,13 +12,13 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_cos::origin{
-    template<class type, class ... args>
-    inline auto cos_unsafe(type x0, args ... xn) {
+    template<class type_t, class ... args_t>
+    inline auto cos_unsafe(type_t x0, args_t ... xn) {
         return inc::sin_unsafe(x0 + inc::pi / 2, (xn + inc::pi / 2)...);
     }
 
-    template<class type, class ... args>
-    inline auto cos(type x0, args ... xn) {
+    template<class type_t, class ... args_t>
+    inline auto cos(type_t x0, args_t ... xn) {
         return inc::sin(x0 + inc::pi / 2, (xn + inc::pi / 2)...);
     }
 }

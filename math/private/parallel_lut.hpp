@@ -9,26 +9,26 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::math_private_parallel_lut{
-    template<uxx multiple, uxx i, class type, class ... args>
-    inline constexpr auto parallel_lut_core(decltype(nullptr), type a0, args ... rest){
-        return inc::array<type, 1 + sizeof...(args)>{ a0, rest... };
+    template<uxx multiple_v, uxx i_v, class type_t, class ... args_t>
+    inline constexpr auto parallel_lut_core(decltype(nullptr), type_t a0, args_t ... rest){
+        return inc::array<type_t, 1 + sizeof...(args_t)>{ a0, rest... };
     }
 
-    template<uxx multiple, uxx i, class type, class ... args>
-    inline constexpr auto parallel_lut_core(type a0, args ... rest){
-        if constexpr (i < multiple){
-            return parallel_lut_core<multiple, i + 1>(a0, rest..., a0);
+    template<uxx multiple_v, uxx i_v, class type_t, class ... args_t>
+    inline constexpr auto parallel_lut_core(type_t a0, args_t ... rest){
+        if constexpr (i_v < multiple_v){
+            return parallel_lut_core<multiple_v, i_v + 1>(a0, rest..., a0);
         }
         else{
-            return parallel_lut_core<multiple, 0>(rest...);
+            return parallel_lut_core<multiple_v, 0>(rest...);
         }
     }
 }
 
 namespace mixc::math_private_parallel_lut::origin{
-    template<uxx multiple, class type, class ... args>
-    inline constexpr auto parallel_lut(type a0, args ... rest){
-        return parallel_lut_core<multiple, 0>(a0, rest..., nullptr);
+    template<uxx multiple_v, class type_t, class ... args_t>
+    inline constexpr auto parallel_lut(type_t a0, args_t ... rest){
+        return parallel_lut_core<multiple_v, 0>(a0, rest..., nullptr);
     }
 }
 

@@ -28,7 +28,7 @@ public:                                                             \
 template<class float_t>                                             \
 constexpr float_t coe_ ## name<float_t>::value(uxx n)
 
-namespace mixc::math_private_taylor::adv::imm{
+namespace mixc::math_private_taylor::imm{
     template<class type>
     inline constexpr type factorial(type n){
         if (n <= 1){
@@ -99,4 +99,4 @@ namespace mixc::math_private_taylor::origin{
 #endif
 
 xexport_space(mixc::math_private_taylor::origin)
-xexport_space_adv(mixc::math_private_taylor::adv)
+xexport_spacex(adv, mixc::math_private_taylor::imm)
