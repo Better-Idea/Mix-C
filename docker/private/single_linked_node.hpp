@@ -18,8 +18,8 @@ namespace mixc::docker_single_linked_node::origin {
         xpubb(inc::struct_type<item_t>),
         xpubf(next, single_linked_node<item_t> *)
     )
-        template<class ... args>
-        single_linked_node(args const & ... list) :
+        template<class ... args_t>
+        single_linked_node(args_t const & ... list) :
             inc::struct_type<item_t>(list...), next(nullptr){
         }
     $

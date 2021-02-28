@@ -80,7 +80,7 @@ namespace mixc::docker_adapter_array_access {
 
             for(;; l += step){
                 xitr_switch(mode, index, state, invoke, the[l]);
-                
+
                 if (l == r or state == loop_t::finish){
                     break;
                 }

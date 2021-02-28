@@ -73,12 +73,12 @@ namespace mixc::docker_array{
 
         constexpr array_t(array_t const &) = default;
 
-        template<class ... args>
-        requires(... and inc::has_cast<item_t, args>)
-        constexpr array_t(args const & ... list) : 
-            // (item_t &)(args &) 和指针的转换类似，会导致不正确的行为
-            // data { ((item_t &)(args &)list)... } {}
-            data { ((args &)list)... } {}
+        template<class ... args_t>
+        requires(... and inc::has_cast<item_t, args_t>)
+        constexpr array_t(args_t const & ... list) : 
+            // (item_t &)(args_t &) 和指针的转换类似，会导致不正确的行为
+            // data { ((item_t &)(args_t &)list)... } {}
+            data { ((args_t &)list)... } {}
 
         template<class finalx_t >
         constexpr array_t(array_t<finalx_t, type_t, count_v, rest_v...> const & self) : 
@@ -168,18 +168,18 @@ namespace mixc::docker_array{
             the.need_free(true);
         }
 
-        template<class ... args>
-        requires(inc::has_constructor<item_t, void(args const & ...)> == true)
-        array_t(::length capacity, inc::ialloc<void> alloc, args const & ... item_initial_args):
+        template<class ... args_t>
+        requires(inc::has_constructor<item_t, void(args_t const & ...)> == true)
+        array_t(::length capacity, inc::ialloc<void> alloc, args_t const & ... item_initial_args):
             // 编译器差异导致必须让 concept 和 bool true 比较才可以被 requires 接受
             array_t(capacity, alloc, [&](item_t * item_ptr){
                 xnew(item_ptr) item_t(item_initial_args...);
             }){
         }
 
-        template<class ... args>
-        requires(inc::has_constructor<item_t, void(args const & ...)> == true)
-        array_t(::length capacity, args const & ... item_initial_args){
+        template<class ... args_t>
+        requires(inc::has_constructor<item_t, void(args_t const & ...)> == true)
+        array_t(::length capacity, args_t const & ... item_initial_args){
             array_t(capacity, [&](item_t * item_ptr){
                 xnew(item_ptr) item_t(item_initial_args...);
             });
@@ -190,11 +190,11 @@ namespace mixc::docker_array{
                 xnew(item_ptr) item_t();
             }){}
 
-        template<class ... args>
-        requires(... and inc::has_cast<item_t, args>)
-        array_t(args const & ... list) : 
+        template<class ... args_t>
+        requires(... and inc::has_cast<item_t, args_t>)
+        array_t(args_t const & ... list) : 
             data(
-                create(::length{ sizeof...(args) }, inc::default_alloc<void>)
+                create(::length{ sizeof...(args_t) }, inc::default_alloc<void>)
             ){
 
             struct item_ref{
