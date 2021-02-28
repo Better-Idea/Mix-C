@@ -8,10 +8,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tkv{
-    template<class key_type, class val_type>
+    template<class key_t, class val_t>
     struct tkv{
-        using key = key_type;
-        using val = val_type;
+        using key = key_t;
+        using val = val_t;
     };
 }
 

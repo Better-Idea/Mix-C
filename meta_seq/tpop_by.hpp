@@ -13,46 +13,61 @@
 namespace mixc::meta_seq_tpop_by{
     using namespace inc;
 
-    template<class list, class key, template<class> class selector>
+    template<
+        template<class> class   selector_t, 
+        class                   key_t,
+        class                   first_t, 
+        class ...               args_t, 
+        class ...               vals_t, 
+        class ...               rest_t
+    >
+    inline auto invoke(key_t * k, tlist<first_t, args_t...>, tlist<tlist<vals_t...> , tlist<rest_t...>>){
+        using current_key = typename selector_t<first_t>::item_t;
+
+        if constexpr (tlist<args_t...> src; is_same<current_key, key_t>){
+            return invoke<selector_t>(k, src, tlist<tlist<vals_t..., first_t> , tlist<rest_t...>>{});
+        }
+        else{
+            return invoke(k, src, tlist<tlist<vals_t...> , tlist<rest_t..., first_t>>{});
+        }
+    }
+
+    template<
+        template<class> class   selector_t, 
+        class                   key_t, 
+        class ...               vals_t, 
+        class ...               rest_t
+    >
+    inline auto invoke(key_t *, tlist<>, tlist<tlist<vals_t...> , tlist<rest_t...>> r){
+        return r;
+    }
+
+    template<class ... vals_t, class ... rest_t>
+    inline auto val(tlist<tlist<vals_t...>, tlist<rest_t...>>){
+        return tlist<vals_t...>();
+    }
+
+    template<class ... vals_t, class ... rest_t>
+    inline auto rest(tlist<tlist<vals_t...> , tlist<rest_t...>>){
+        return tlist<rest_t...>();
+    }
+
+    template<class tlist_t, class key_t, template<class> class selector_t>
     struct tpop_by{
-    private:
-        template<class first, class ... args, class ... vals, class ... rest>
-        static auto invoke(tlist<first, args...>, tlist<tlist<vals...> , tlist<rest...>>){
-            tlist<args...> src;
-            using current_key = typename selector<first>::item_t;
-
-            if constexpr (is_same<current_key, key>){
-                return invoke(src, tlist<tlist<vals..., first> , tlist<rest...>> ());
-            }
-            else{
-                return invoke(src, tlist<tlist<vals...> , tlist<rest..., first>> ());
-            }
-        }
-
-        template<class ... vals, class ... rest>
-        static auto invoke(tlist<>, tlist<tlist<vals...> , tlist<rest...>> r){
-            return r;
-        }
-
-        template<class ... vals, class ... rest>
-        static auto val(tlist<tlist<vals...>, tlist<rest...>>){
-            return tlist<vals...>();
-        }
-
-        template<class ... vals, class ... rest>
-        static auto res(tlist<tlist<vals...> , tlist<rest...>>){
-            return tlist<rest...>();
-        }
-
-        using pair = decltype(
-            invoke(list(), tlist<tlist<>, tlist<>>())
-        );
-    public:
         using item_list = decltype(
-            val(pair())
+            val(
+                decltype(
+                    invoke<selector_t>((key_t *)nullptr, tlist_t{}, tlist<tlist<>, tlist<>>{})
+                ){}
+            )
         );
+
         using new_list = decltype(
-            res(pair())
+            rest(
+                decltype(
+                    invoke<selector_t>((key_t *)nullptr, tlist_t{}, tlist<tlist<>, tlist<>>{})
+                ){}
+            )
         );
     };
 }

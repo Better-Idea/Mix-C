@@ -13,22 +13,22 @@ namespace mixc::meta_seq_tin{
     using namespace inc;
 
     template<class item_t>
-    inline constexpr bool meta(tlist<>){
+    inline constexpr bool invoke(tlist<>){
         return false;
     }
 
-    template<class item_t, class first, class ... args>
-    inline constexpr bool meta(tlist<first, args...>){
-        if constexpr (is_same<first, item_t>){
+    template<class item_t, class first_t, class ... args_t>
+    inline constexpr bool invoke(tlist<first_t, args_t...>){
+        if constexpr (is_same<first_t, item_t>){
             return true;
         }
         else{
-            return meta<item_t>(tlist<args...>());
+            return invoke<item_t>(tlist<args_t...>());
         }
     }
 
     template<class tlist, class item_t>
-    constexpr bool tin = meta<item_t>(tlist());
+    constexpr bool tin = invoke<item_t>(tlist());
 }
 
 #endif

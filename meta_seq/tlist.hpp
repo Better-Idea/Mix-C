@@ -8,9 +8,9 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tlist{
-    template<class ... args>
+    template<class ... args_t>
     struct tlist{
-        static constexpr uxx length = sizeof...(args);
+        static constexpr uxx length = sizeof...(args_t);
     };
 }
 

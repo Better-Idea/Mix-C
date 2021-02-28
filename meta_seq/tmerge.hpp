@@ -11,10 +11,10 @@
 namespace mixc::meta_seq_tmerge{
     using namespace inc;
 
-    template<class list_a, class list_b> struct tmerge;
-    template<class ... args_a, class ... args_b> 
-    struct tmerge<tlist<args_a ...>, tlist<args_b ...>>{
-        using new_list = tlist<args_a ..., args_b ...>;
+    template<class tlist0_t, class tlist1_t> struct tmerge;
+    template<class ... args0_t, class ... args1_t> 
+    struct tmerge<tlist<args0_t ...>, tlist<args1_t ...>>{
+        using new_list = tlist<args0_t ..., args1_t ...>;
     };
 }
 

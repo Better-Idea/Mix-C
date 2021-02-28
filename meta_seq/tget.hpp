@@ -12,26 +12,26 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tget{
-    template<ixx index, class first, class ... args>
-    inline auto invoke(inc::tlist<first, args...>){
-        if constexpr (index == 0 or -index == 1 + sizeof...(args)){
-            return (first *)nullptr;
+    template<ixx index_v, class first_t, class ... args_t>
+    inline auto invoke(inc::tlist<first_t, args_t...>){
+        if constexpr (index_v == 0 or -index_v == 1 + sizeof...(args_t)){
+            return (first_t *)nullptr;
         }
         else{
             return invoke<
-                (index < 0 ? index : index - 1)
-            >(inc::tlist<args...>{});
+                (index_v < 0 ? index_v : index_v - 1)
+            >(inc::tlist<args_t...>{});
         }
     }
 
-    template<ixx index>
+    template<ixx index_v>
     inline auto invoke(inc::tlist<>){
         return (inc::tnull *)nullptr;
     }
 
-    template<class tlist, ixx index>
+    template<class tlist_t, ixx index_v>
     using tget = inc::remove_ptr<
-        decltype(invoke<index>(tlist{}))
+        decltype(invoke<index_v>(tlist_t{}))
     >;
 }
 

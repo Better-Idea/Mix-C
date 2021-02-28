@@ -11,23 +11,23 @@
 namespace mixc::meta_seq_vin{
     using namespace inc;
 
-    template<auto val>
-    inline constexpr bool meta(vlist<>){
+    template<auto val_v>
+    inline constexpr bool invoke(vlist<>){
         return false;
     }
 
-    template<auto val, auto first, auto ... args>
-    inline constexpr bool meta(vlist<first, args...>){
-        if constexpr (first == val){
+    template<auto val_v, auto first, auto ... args_t>
+    inline constexpr bool invoke(vlist<first, args_t...>){
+        if constexpr (first == val_v){
             return true;
         }
         else{
-            return meta<val>(vlist<args...>());
+            return invoke<val_v>(vlist<args_t...>{});
         }
     }
 
     template<class vlist, auto item_t>
-    constexpr bool vin = meta<item_t>(vlist());
+    constexpr bool vin = invoke<item_t>(vlist{});
 }
 
 #endif

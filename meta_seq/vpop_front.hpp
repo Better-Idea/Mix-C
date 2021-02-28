@@ -10,16 +10,16 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_vpop_front{
-    template<class list> struct vpop_front;
-    template<auto first, auto ... args>
-    struct vpop_front<inc::vlist<first, args...>>{
-        static constexpr auto item_t  = first;
-        using new_list              = inc::vlist<args...>;
+    template<class vlist_t> struct vpop_front;
+    template<auto first_v, auto ... args_v>
+    struct vpop_front<inc::vlist<first_v, args_v...>>{
+        static constexpr auto item  = first_v;
+        using new_list              = inc::vlist<args_v...>;
     };
 
     template<>
     struct vpop_front<inc::vlist<>>{
-        static constexpr auto item_t  = inc::vnull;
+        static constexpr auto item  = inc::vnull;
         using new_list              = inc::vlist<>;
     };
 }

@@ -11,10 +11,10 @@
 namespace mixc::meta_seq_vmerge{
     using namespace inc;
 
-    template<class list_a, class list_b> struct vmerge;
-    template<auto ... values_a, auto ... values_b> 
-    struct vmerge<vlist<values_a ...>, vlist<values_b ...>>{
-        using new_list = vlist<values_a ..., values_b ...>;
+    template<class vlist0_t, class vlist1_t> struct vmerge;
+    template<auto ... vals0_v, auto ... vals1_v> 
+    struct vmerge<vlist<vals0_v ...>, vlist<vals1_v ...>>{
+        using new_list = vlist<vals0_v ..., vals1_v ...>;
     };
 }
 

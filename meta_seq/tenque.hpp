@@ -9,8 +9,8 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tenque{
-    template<class tlist, class item_t> 
-    using tenque = inc::tappend<tlist, item_t>;
+    template<class tlist_t, class item_t> 
+    using tenque = inc::tappend<tlist_t, item_t>;
 }
 
 #endif

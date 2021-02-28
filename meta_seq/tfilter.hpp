@@ -11,25 +11,29 @@
 namespace mixc::meta_seq_tfilter{
     using namespace inc;
 
-    template<class list, template <class> class selector>
-    struct tfilter{
-    private:
-        template<class ... result_args>
-        static auto invoke(tlist<>, tlist<result_args...> r){
-            return r;
-        }
+    template<template <class> class selector_t, class ... result_args_t>
+    inline auto invoke(tlist<>, tlist<result_args_t...> r){
+        return r;
+    }
 
-        template<class first, class ... args, class ... result_args>
-        static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            using item_t = typename selector<first>::item_t;
-            return invoke(
-                tlist<args...>(), 
-                tlist<result_args..., item_t>()
-            );
-        }
-    public:
+    template<
+        template <class> class  selector_t, 
+        class                   first_t, 
+        class ...               args_t, 
+        class ...               result_args_t
+    >
+    inline auto invoke(tlist<first_t, args_t...>, tlist<result_args_t...>){
+        using item_t = typename selector_t<first_t>::item_t;
+        return invoke<selector_t>(
+            tlist<args_t...>{}, 
+            tlist<result_args_t..., item_t>{}
+        );
+    }
+
+    template<class tlist_t, template <class> class selector_t>
+    struct tfilter{
         using new_list = decltype(
-            invoke(list(), tlist<>())
+            invoke<selector_t>(tlist_t{}, tlist<>{})
         );
     };
 }

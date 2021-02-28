@@ -13,34 +13,33 @@
 namespace mixc::meta_seq_tdistinct{
     using namespace inc;
 
-    template<class list>
-    struct tdistinct{
-    private:
-        template<class first, class ... args, class ... result_args>
-        static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            using old_list = tlist<result_args...>;
-            using new_list = tlist<result_args..., first>;
-            if constexpr (tin<tlist<result_args...>, first>){
-                return invoke(
-                    tlist<args...>(),
-                    old_list()
-                );
-            }
-            else{
-                return invoke(
-                    tlist<args...>(),
-                    new_list()
-                );
-            }
+    template<class first_t, class ... args_t, class ... result_args_t>
+    inline auto invoke(tlist<first_t, args_t...>, tlist<result_args_t...>){
+        using old_list = tlist<result_args_t...>;
+        using new_list = tlist<result_args_t..., first_t>;
+        if constexpr (tin<tlist<result_args_t...>, first_t>){
+            return invoke(
+                tlist<args_t...>{},
+                old_list{}
+            );
         }
+        else{
+            return invoke(
+                tlist<args_t...>{},
+                new_list{}
+            );
+        }
+    }
 
-        template<class result>
-        static auto invoke(tlist<>, result r){
-            return r;
-        }
-    public:
+    template<class result_t>
+    inline auto invoke(tlist<>, result_t r){
+        return r;
+    }
+
+    template<class list_t>
+    struct tdistinct{
         using new_list = decltype(
-            invoke(list(), tlist<>())
+            invoke(list_t{}, tlist<>{})
         );
     };
 }

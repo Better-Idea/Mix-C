@@ -13,11 +13,11 @@
 namespace mixc::meta_seq_tdeque{
     using namespace inc;
 
-    template<class tlist> struct tdeque;
-    template<class first, class ... args>
-    struct tdeque<tlist<first, args...>>{
-        using item_t = first;
-        using new_list = tlist<args...>;
+    template<class tlist_t> struct tdeque;
+    template<class first_t, class ... args_t>
+    struct tdeque<tlist<first_t, args_t...>>{
+        using item_t    = first_t;
+        using new_list  = tlist<args_t...>;
     };
 
     template<>

@@ -13,27 +13,25 @@
 namespace mixc::meta_seq_vget{
     using namespace inc;
 
-    template<class list, ixx index> struct vget{
-    private:
-        template<ixx i>
-        static constexpr auto invoke(vlist<>){
-            return vnull;
-        }
+    template<ixx i_v>
+    inline constexpr auto invoke(vlist<>){
+        return vnull;
+    }
 
-        template<ixx i, auto first, auto ... values>
-        static constexpr auto invoke(vlist<first, values...>){
-            if constexpr (i == 0 or -i == 1 + sizeof...(values)){
-                return first;
-            }
-            else{
-                return invoke<
-                    (i < 0 ? i : i - 1), values...
-                >(vlist<values...>());
-            }
+    template<ixx i_v, auto first_v, auto ... values_v>
+    inline constexpr auto invoke(vlist<first_v, values_v...>){
+        if constexpr (i_v == 0 or -i_v == 1 + sizeof...(values_v)){
+            return first_v;
         }
+        else{
+            return invoke<
+                (i_v < 0 ? i_v : i_v - 1), values_v...
+            >(vlist<values_v...>{});
+        }
+    }
 
-    public:
-        static constexpr auto value = invoke<index>(list());
+    template<class vlist_t, ixx index_v> struct vget{
+        static constexpr auto value = invoke<index_v>(vlist_t{});
     };
 }
 

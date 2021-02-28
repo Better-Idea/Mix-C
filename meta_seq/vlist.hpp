@@ -9,10 +9,10 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_vlist{
-    template<auto ... values>
+    template<auto ... vals_v>
     struct vlist{
-        using type_list = inc::tlist<decltype(values)...>;
-        static constexpr uxx length = sizeof...(values);
+        using type_list = inc::tlist<decltype(vals_v)...>;
+        static constexpr uxx length = sizeof...(vals_v);
     };
 }
 

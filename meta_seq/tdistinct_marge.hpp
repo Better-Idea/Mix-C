@@ -12,32 +12,34 @@
 namespace mixc::meta_seq_tdistinct_merge{
     using namespace inc;
 
-    template<class list_a, class list_b>
-    struct tdistinct_merge{
-    private:
-        template<class first, class ... args, class ... result_args>
-        static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            if constexpr (tin<tlist<result_args...>, first>){
-                return invoke(
-                    tlist<args...>(), 
-                    tlist<result_args...>()
-                );
-            }
-            else{
-                return invoke(
-                    tlist<args...>(), 
-                    tlist<result_args..., first>()
-                );
-            }
+    template<class first_t, class ... args_t, class ... result_args_t>
+    inline auto invoke(tlist<first_t, args_t...>, tlist<result_args_t...>){
+        if constexpr (tin<tlist<result_args_t...>, first_t>){
+            return invoke(
+                tlist<args_t...>(), 
+                tlist<result_args_t...>()
+            );
         }
+        else{
+            return invoke(
+                tlist<args_t...>(), 
+                tlist<result_args_t..., first_t>()
+            );
+        }
+    }
 
-        template<class result_list>
-        static auto invoke(tlist<>, result_list r){
-            return r;
-        }
-    public:
+    template<class result_list>
+    inline auto invoke(tlist<>, result_list r){
+        return r;
+    }
+
+    template<class tlist0_t, class tlist1_t>
+    struct tdistinct_merge{
         using new_list = decltype(
-            invoke(list_b(), list_a())
+            invoke(
+                tlist1_t{}, 
+                invoke(tlist0_t{}, tlist<>{})
+            )
         );
     };
 }

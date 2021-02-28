@@ -11,10 +11,10 @@
 namespace mixc::meta_seq_tpush_front{
     using namespace inc;
 
-    template<class tlist, class item_t> struct tpush_front;
-    template<class item_t, class ... args>
-    struct tpush_front<tlist<args...>, item_t>{
-        using new_list = tlist<item_t, args...>;
+    template<class tlist_t, class item_t> struct tpush_front;
+    template<class item_t, class ... args_t>
+    struct tpush_front<tlist<args_t...>, item_t>{
+        using new_list = tlist<item_t, args_t...>;
     };
 }
 

@@ -12,25 +12,26 @@
 namespace mixc::meta_seq_tremove{
     using namespace inc;
 
-    template<class list, class item_t>
-    struct tremove{
-    private:
-        template<class first, class ... args, class ... result_args>
-        static auto invoke(tlist<first, args...>, tlist<result_args...>){
-            if constexpr (is_same<first, item_t>){
-                return invoke(tlist<args...>(), tlist<result_args...>());
-            }
-            else{
-                return invoke(tlist<args...>(), tlist<result_args..., first>());
-            }
+    template<class item_t, class first_t, class ... args_t, class ... result_args>
+    inline auto invoke(item_t *, tlist<first_t, args_t...>, tlist<result_args...>){
+        if constexpr (is_same<first_t, item_t>){
+            return invoke(tlist<args_t...>{}, tlist<result_args...>{});
         }
+        else{
+            return invoke(tlist<args_t...>{}, tlist<result_args..., first_t>{});
+        }
+    }
 
-        template<class result>
-        static auto invoke(tlist<>, result r){
-            return r;
-        }
-    public:
-        using new_list = decltype(invoke(list(), tlist<>()));
+    template<class item_t, class result>
+    inline auto invoke(item_t *, tlist<>, result r){
+        return r;
+    }
+
+    template<class tlist_t, class item_t>
+    struct tremove{
+        using new_list = decltype(
+            invoke((item_t *)nullptr, tlist_t{}, tlist<>{})
+        );
     };
 }
 

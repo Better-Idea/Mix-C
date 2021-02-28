@@ -16,11 +16,11 @@ namespace mixc::meta_seq_tpop{
     // error: class template partial specialization contains template parameters that cannot be deduced
     // this partial specialization will never be used
 
-    // template<class list> struct tpop;
-    // template<class last, class ... args>
-    // struct tpop<tlist<args..., last>>{
-    //     using item_t = last;
-    //     using new_tlist = tlist<args...>;
+    // template<class list_t> struct tpop;
+    // template<class last_t, class ... args_t>
+    // struct tpop<tlist<args_t..., last_t>>{
+    //     using item_t = last_t;
+    //     using new_tlist = tlist<args_t...>;
     // };
 
     // template<>
@@ -28,41 +28,41 @@ namespace mixc::meta_seq_tpop{
     //     using item_t = tnull;
     //     using new_tlist = tlist<>;
     // };
-
-    template<class list>
-    struct tpop{
-    private:
-        template<class first, class second, class ... args, class ... result_args>
-        static auto invoke(tlist<first, second, args...>, tlist<result_args...>){
-            return invoke(
-                tlist<second, args...>(),
-                tlist<result_args..., first>()
-            );
-        }
-
-        template<class last, class ... result_args>
-        static auto invoke(tlist<last>, tlist<result_args...>){
-            struct pair{
-                using item_t = last;
-                using new_list = tlist<result_args...>;
-            };
-            return pair();
-        }
-
-        template<class ... result_args>
-        static auto invoke(tlist<>, tlist<result_args...>){
-            struct pair{
-                using item_t = tnull;
-                using new_list = tlist<result_args...>;
-            };
-            return pair();
-        }
-        using pair = decltype(
-            invoke(list(), tlist<>())
+    template<class first_t, class second_t, class ... args_t, class ... result_args_t>
+    inline auto invoke(tlist<first_t, second_t, args_t...>, tlist<result_args_t...>){
+        return invoke(
+            tlist<second_t, args_t...>(),
+            tlist<result_args_t..., first_t>()
         );
-    public:
-        using item_t = typename pair::item_t;
-        using new_list = typename pair::new_list;
+    }
+
+    template<class last_t, class ... result_args_t>
+    inline auto invoke(tlist<last_t>, tlist<result_args_t...>){
+        struct pair{
+            using item_t    = last_t;
+            using new_list  = tlist<result_args_t...>;
+        };
+        return pair();
+    }
+
+    template<class ... result_args_t>
+    inline auto invoke(tlist<>, tlist<result_args_t...>){
+        struct pair{
+            using item_t = tnull;
+            using new_list = tlist<result_args_t...>;
+        };
+        return pair();
+    }
+
+    template<class list_t>
+    struct tpop{
+        using item_t    = typename decltype(
+            invoke(list_t{}, tlist<>{})
+        )::item_t;
+
+        using new_list  = typename decltype(
+            invoke(list_t{}, tlist<>{})
+        )::new_list;
     };
 }
 

@@ -13,29 +13,31 @@
 namespace mixc::meta_seq_tsub{
     using namespace inc;
 
-    template<class tlist_a, class tlist_b> struct tsub;
-    template<class minus, class first, class ... args>
-    struct tsub<tlist<first, args...>, minus>{
-    private:
-        static auto invoke(){
-            if constexpr (inc::tin<minus, first>){
-                return tlist<>{};
-            }
-            else{
-                return tlist<first>{};    
-            }
+    template<class minus_t, class first_t, class ... args_t, class ... result_args_t>
+    inline auto invoke(
+        tlist<first_t, args_t...>, 
+        minus_t                     minus, 
+        tlist<result_args_t...>     result){
+
+        if constexpr (tin<minus_t, first_t>){
+            return invoke(tlist<args_t...>{}, minus, result);
         }
+        else{
+            return invoke(tlist<args_t...>{}, minus, tlist<result_args_t..., first_t>{});
+        }
+    }
 
-        using item_t    = decltype(invoke());
-        using next      = typename tsub<tlist<args...>, minus>::new_list;
-    public:
-        using new_list  = typename tmerge<item_t, next>::new_list;
+    template<class minus_t, class result_t>
+    inline auto invoke(tlist<>, minus_t, result_t){
+        return result_t{};
+    }
+
+    template<class tlist0_t, class tlist1_t>
+    struct tsub{
+        using new_list = decltype(
+            invoke(tlist0_t{}, tlist1_t{}, tlist<>{})
+        );
     };
-
-    template<class minus>
-    struct tsub<tlist<>, minus>{
-        using new_list = tlist<>;
-    };        
 }
 
 #endif

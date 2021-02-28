@@ -10,17 +10,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tpop_front{
-    template<class list> struct tpop_front;
-    template<class first, class ... args>
-    struct tpop_front<inc::tlist<first, args...>>{
-        using item_t = first;
-        using new_list = inc::tlist<args...>;
+    template<class list_t> struct tpop_front;
+    template<class first_t, class ... args_t>
+    struct tpop_front<inc::tlist<first_t, args_t...>>{
+        using item_t    = first_t;
+        using new_list  = inc::tlist<args_t...>;
     };
 
     template<>
     struct tpop_front<inc::tlist<>>{
-        using item_t = inc::tnull;
-        using new_list = inc::tlist<>;
+        using item_t    = inc::tnull;
+        using new_list  = inc::tlist<>;
     };
 }
 
