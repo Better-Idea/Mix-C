@@ -4,7 +4,8 @@
 #undef  xuser
 #define xuser mixc::concurrency_lock_atom_swap::inc
 #include"configure.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
+#include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::concurrency_lock_atom_swap{
@@ -12,17 +13,20 @@ namespace mixc::concurrency_lock_atom_swap{
         extern u64 atom_swap(voidp a, u64 b, uxx bytes);
     #endif
 
-    template<class a>
-    inline a atom_swap(a * left, a right){
+    template<class type_t>
+    inline type_t atom_swap(type_t * left, type_t right){
         // function equals to 
         // r = left[0]
         // left[0] = right
+        using u0_t  = inc::unsigned_type<type_t>;
+        using up_t  = u0_t *;
+
         #if xis_msvc_native
-            return (a)atom_swap(left, u64(right), sizeof(a));
+            return (type_t)atom_swap((up_t)(left), (u0_t)(right), sizeof(u0_t));
         #else
-            a r;
-            __atomic_exchange(left, & right, & r, 5);
-            return r;
+            u0_t r;
+            __atomic_exchange((up_t)left, (up_t)& right, & r, 5);
+            return *(type_t *)& r;
         #endif
     }
 }

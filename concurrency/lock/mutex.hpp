@@ -37,36 +37,36 @@ namespace mixc::lock_mutex::origin{
             inc::atom_swap(xref item, false);
         }
 
-        template<class callback>
-        void lock(callback const & call) const {
+        template<class callback_t>
+        void lock(callback_t const & call) const {
             lock();
             call();
             unlock();
         }
 
         // 兼容 meta/is_builtin_lock 的接口
-        template<auto opr, class this_t, class callback>
-        void lock(this_t, callback const & call) const {
+        template<auto, class this_t, class callback_t>
+        void lock(this_t, callback_t const & call) const {
             lock(call);
         }
 
-        template<class type>
-        static lock_state_t try_lock(type * field, uxx index){
-            using ut = inc::unsigned_type<type>;
+        template<class type_t>
+        static lock_state_t try_lock(type_t * field, uxx index){
+            using ut = inc::unsigned_type<type_t>;
             ut mask  = ut(1) << index;
             return inc::atom_fetch_or<ut>((ut *)field, mask) & mask ?
                 lock_state_t::blocked : lock_state_t::accept;
         }
 
-        template<class type>
-        static void unlock(type * field, uxx index){
-            using ut = inc::unsigned_type<type>;
+        template<class type_t>
+        static void unlock(type_t * field, uxx index){
+            using ut = inc::unsigned_type<type_t>;
             ut mask  = ~(ut(1) << index);
             inc::atom_and<ut>((ut *)field, mask);
         }
 
-        template<class type, class callback>
-        static void lock(type * field, uxx index, callback const & call){
+        template<class type_t, class callback_t>
+        static void lock(type_t * field, uxx index, callback_t const & call){
             while(try_lock(field, index) == lock_state_t::blocked){
                 inc::thread_self::yield();
             }

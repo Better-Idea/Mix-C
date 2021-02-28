@@ -15,7 +15,7 @@ namespace mixc::lock_builtin_lock::origin{
     )
         constexpr with_lwmutex(){}
 
-        template<auto opr, class this_t, class invoke_t>
+        template<auto opr_v, class this_t, class invoke_t>
         void lock(this_t * ptr, invoke_t const & call) const {
             inc::mutex::lock(ptr, 0, call); // 第 0 位作为互斥位
         }
@@ -26,7 +26,7 @@ namespace mixc::lock_builtin_lock::origin{
     )
         constexpr lock_free(){}
 
-        template<auto opr, class this_t, class callback>
+        template<auto opr_v, class this_t, class callback>
         void lock(this_t, callback const & call) const {
             call();
         }
