@@ -68,20 +68,20 @@ int main(){
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xinterface{
-    template<class object, uxx length>
-    static inline voidp s_func_table[length];
+    template<class object_t, uxx length_v>
+    static inline voidp s_func_table[length_v];
 
     struct dummy{ enum { __func_length }; };
 
-    template<class __func_list>
+    template<class func_list_t>
     struct this_call_pair{
         voidp   this_ptr    = nullptr;
         voidp * func_table  = nullptr;
 
-        template<class object>
-        constexpr this_call_pair(object const & this_ref) : 
+        template<class object_t>
+        constexpr this_call_pair(object_t const & this_ref) : 
             this_ptr(xref this_ref), 
-            func_table(s_func_table<object, __func_list::__func_length>){
+            func_table(s_func_table<object_t, func_list_t::__func_length>){
         }
 
         constexpr this_call_pair(){};
@@ -90,33 +90,33 @@ namespace mixc::macro_xinterface{
     using this_call_pairp =  this_call_pair<dummy> *;
 
     template<
-        template<uxx, class ...> class  docker, 
+        template<uxx, class ...> class  docker_t, 
         uxx                             i, 
         class                           ret,
-        class ...                       args,
+        class ...                       args_t,
         class ...                       old_overloadx,
         class ...                       new_overloadx
     >
-    inline auto make_flat(inc::tlist<new_overloadx...> result, ret(*)(args...), old_overloadx...){
+    inline auto make_flat(inc::tlist<new_overloadx...> result, ret(*)(args_t...), old_overloadx...){
         using new_list = inc::tlist<
             new_overloadx...,
-            docker<i, ret, args...>
+            docker_t<i, ret, args_t...>
         >;
 
         if constexpr (sizeof...(old_overloadx) == 0){
             return new_list{};
         }
         else{
-            return make_flat<docker, i + 1>(new_list{}, (old_overloadx)nullptr...);
+            return make_flat<docker_t, i + 1>(new_list{}, (old_overloadx)nullptr...);
         }
     }
 
     template<
-        template<class ...> class       docker,
-        class ...                       overload
+        template<class ...> class       docker_t,
+        class ...                       overloads_t
     >
-    inline auto docker_specialize(inc::tlist<overload...>){
-        return docker<overload...>{};
+    inline auto docker_specialize(inc::tlist<overloads_t...>){
+        return docker_t<overloads_t...>{};
     }
 
     template<
@@ -124,8 +124,8 @@ namespace mixc::macro_xinterface{
         template<uxx> class         ... func
     >
     struct functional_assembly{
-        template<class object>
-        constexpr functional_assembly(object const & this_ref){}
+        template<class object_t>
+        constexpr functional_assembly(object_t const & this_ref){}
         constexpr functional_assembly(){}
     private:
         template<class> friend struct this_call_pair;
@@ -143,11 +143,11 @@ namespace mixc::macro_xinterface{
 
         using base_t = functional_assembly<i + func<i>::__overload_list::length, funcx...>;
 
-        template<class object>
+        template<class object_t>
         requires(
-            inc::has_constructor<func<i>, void(object)>
+            inc::has_constructor<func<i>, void(object_t)>
         )
-        constexpr functional_assembly(object const & this_ref) :
+        constexpr functional_assembly(object_t const & this_ref) :
             func<i>(this_ref), base_t(this_ref){
         }
         constexpr functional_assembly(){}
@@ -185,18 +185,18 @@ namespace mixc::macro_xinterface{
     template<
         template<uxx, class ...> class  func_docker,
         uxx                             i,
-        class                       ... overload
+        class                       ... overloads_t
     >
     using overload_list = decltype(
-        make_flat<func_docker, i>(inc::tlist<>{}, (overload *)nullptr...)
+        make_flat<func_docker, i>(inc::tlist<>{}, (overloads_t *)nullptr...)
     );
 
     template<
-        template<class ...> class       docker,
+        template<class ...> class       docker_t,
         class                           overload_list
     >
     using specialized_docker = decltype(
-        docker_specialize<docker>(overload_list{})
+        docker_specialize<docker_t>(overload_list{})
     );
 
     template<class target, class constructor>
@@ -226,15 +226,15 @@ using __itf_sg          = mixc::macro_xinterface::__itf_sg<func>;
 template<
     template<uxx, class ...> class  func_docker,
     uxx                             i,
-    class                       ... overload
+    class ...                       overloads_t
 >
-using __itf_ol          = mixc::macro_xinterface::overload_list<func_docker, i, overload...>;
+using __itf_ol          = mixc::macro_xinterface::overload_list<func_docker, i, overloads_t...>;
 
 template<
-    template<class ...> class       docker,
+    template<class ...> class       docker_t,
     class                           overload_list
 >
-using __itf_sd          = mixc::macro_xinterface::specialized_docker<docker, overload_list>;
+using __itf_sd          = mixc::macro_xinterface::specialized_docker<docker_t, overload_list>;
 
 template<
     uxx                             i, 

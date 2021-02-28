@@ -8,19 +8,19 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xdefer {
-    template<class lambda>
-    struct defer : lambda{
-        defer(lambda const & call) : 
-            lambda(call){
+    template<class lambda_t>
+    struct defer : lambda_t{
+        defer(lambda_t const & call) : 
+            lambda_t(call){
         }
         ~defer(){
-            lambda::operator()();
+            lambda_t::operator()();
         }
     };
 
     struct sugar{
-        template<class lambda>
-        auto operator * (lambda const & relase){
+        template<class lambda_t>
+        auto operator * (lambda_t const & relase){
             return defer{ relase };
         }
     };

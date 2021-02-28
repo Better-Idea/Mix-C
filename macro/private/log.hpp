@@ -24,7 +24,7 @@ namespace mixc::macro_private_log::origin{
 
     extern void log(log_type_t log_type, asciis file, uxx line, asciis func_name, asciis message, message_type_t message_type);
 
-    template<class a0, class ... args>
+    template<class a0_t, class ... args_t>
     inline void log(
         log_type_t          log_type, 
         asciis              file, 
@@ -32,8 +32,8 @@ namespace mixc::macro_private_log::origin{
         asciis              func_name, 
         asciis              message, 
         message_type_t      message_type,
-        a0 const &          first, 
-        args const & ...    list){
+        a0_t const &          first, 
+        args_t const & ...    list){
 
         extern void log(
             log_type_t      log_type, 
@@ -47,7 +47,7 @@ namespace mixc::macro_private_log::origin{
         );
 
         inc::mix items[] = { first, list... };
-        log(log_type, file, line, func_name, message, message_type, items, 1 + sizeof...(args));
+        log(log_type, file, line, func_name, message, message_type, items, 1 + sizeof...(args_t));
     }
 }
 

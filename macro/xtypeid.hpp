@@ -18,16 +18,16 @@ namespace mixc::macro_xtypeid{
 
     struct __dummy{};
 
-    template<class type, class dummy> struct __typeid;
-    template<class type>
-    struct __typeid<type, __dummy> {
+    template<class type_t, class dummy_t> struct __typeid;
+    template<class type_t>
+    struct __typeid<type_t, __dummy> {
         using the_type = remove_ref<
-            remove_const<type>
+            remove_const<type_t>
         >;
 
         union{
             operator asciis() const {
-                #define xgen(target)      else if constexpr (is_same<type, target>){ return # target; }
+                #define xgen(target)      else if constexpr (is_same<type_t, target>){ return # target; }
                 constexpr int len       = 32;
                 constexpr int leave_out = 3;
                 static char the_name[len + leave_out + 1/* \0 */] = { 0 };
@@ -91,7 +91,7 @@ namespace mixc::macro_xtypeid{
 
         union{
             operator uxx () const {
-                #define xgen(type)      else if constexpr (is_same<the_type, type>){ return __COUNTER__ - __start; }
+                #define xgen(type_t)      else if constexpr (is_same<the_type, type_t>){ return __COUNTER__ - __start; }
                 enum { __start = __COUNTER__ + 1 };
 
                 if constexpr (is_class<the_type>){
@@ -135,11 +135,11 @@ namespace mixc::macro_xtypeid{
         } class_id;
     };
 
-    template<class type, class dummy>
-    struct __typeid : __typeid<type, __dummy> {
+    template<class type_t, class dummy_t>
+    struct __typeid : __typeid<type_t, __dummy> {
         template<class callback>
-        void foreach_fields(type const & value, callback const & call){
-            using bl    = typename type::base_list;
+        void foreach_fields(type_t const & value, callback const & call){
+            using bl    = typename type_t::base_list;
             foreach_base(bl(), value, call);
         }
     private:
@@ -147,8 +147,8 @@ namespace mixc::macro_xtypeid{
         void foreach_base(tlist<base, rest_base...>, expand const & child, callback const & call){
             using bl    = typename base::base_list;
 
-            foreach_base(bl(), (base &)child/*二重李氏转换*/, call);
-            foreach_base(tlist<rest_base...>(), child/*李氏转换*/, call);
+            foreach_base(bl(), (base &)child/*二重里氏转换*/, call);
+            foreach_base(tlist<rest_base...>(), child/*里氏转换*/, call);
         }
 
         template<class callback, class expand>

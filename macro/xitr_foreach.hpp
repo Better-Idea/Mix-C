@@ -14,33 +14,33 @@ namespace mixc::macro_iterator{
         itr_miss_match          = not_exist,
     };
 
-    template<class invoke_t, class ... args>
-    concept full_version = requires(invoke_t lambda, loop_t state, uxx i, args ... list){
+    template<class invoke_t, class ... args_t>
+    concept full_version = requires(invoke_t lambda, loop_t state, uxx i, args_t ... list){
         state = lambda(i, list...);
     };
 
-    template<class invoke_t, class ... args>
-    concept has_loop_control = requires(invoke_t lambda, loop_t state, args ... list){
+    template<class invoke_t, class ... args_t>
+    concept has_loop_control = requires(invoke_t lambda, loop_t state, args_t ... list){
         state = lambda(list...);
     };
 
-    template<class invoke_t, class ... args>
-    concept has_index = requires(invoke_t lambda, uxx i, args ... list){
+    template<class invoke_t, class ... args_t>
+    concept has_index = requires(invoke_t lambda, uxx i, args_t ... list){
         lambda(i, list...);
     };
 
-    template<class invoke_t, class ... args>
-    concept reduced_version = requires(invoke_t lambda, uxx i, args ... list){
+    template<class invoke_t, class ... args_t>
+    concept reduced_version = requires(invoke_t lambda, uxx i, args_t ... list){
         lambda(list...);
     };
 
-    template<class invoke_t, class ... args>
+    template<class invoke_t, class ... args_t>
     constexpr auto detect_mode = 
         // 保持判定的顺序
-        full_version<invoke_t, args...>     == true ? itr_has_loop_control | itr_has_index :
-        has_loop_control<invoke_t, args...> == true ? itr_has_loop_control :
-        has_index<invoke_t, args...>        == true ? itr_has_index : 
-        reduced_version<invoke_t, args...>  == true ? itr_reduced : itr_miss_match;
+        full_version<invoke_t, args_t...>     == true ? itr_has_loop_control | itr_has_index :
+        has_loop_control<invoke_t, args_t...> == true ? itr_has_loop_control :
+        has_index<invoke_t, args_t...>        == true ? itr_has_index : 
+        reduced_version<invoke_t, args_t...>  == true ? itr_reduced : itr_miss_match;
 
     #define xitr_switch(mode,index,state,invoke,...) {                                                                 \
         using namespace ::mixc::macro_iterator;                                                                        \

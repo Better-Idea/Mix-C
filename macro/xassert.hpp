@@ -11,8 +11,8 @@
 
 namespace mixc::macro_xassert::origin{
     struct closure{
-        template<class lambda>
-        closure(lambda && call){
+        template<class lambda_t>
+        closure(lambda_t && call){
             call();
         }
     };
@@ -27,8 +27,8 @@ namespace mixc::macro_xassert::origin{
         mixc_test_context(asciis path, uxx line, asciis func_name);
         ~mixc_test_context();
 
-        template<class ... args>
-        bool fail_if(bool fail, uxx line, asciis message, args const & ... rest){
+        template<class ... args_t>
+        bool fail_if(bool fail, uxx line, asciis message, args_t const & ... rest){
             using namespace inc;
 
             if (case_count++; not fail){

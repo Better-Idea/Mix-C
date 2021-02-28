@@ -4,10 +4,10 @@
 namespace mixc::macro_xcstyle{
     template<class> struct meta;
 
-    template<class ret, class lambda, class ... args>
-    struct meta<ret(lambda::*)(args...) const>{
-        static ret cstyle(args ... list){
-            return lambda()(list...);
+    template<class ret_t, class lambda_t, class ... args_t>
+    struct meta<ret_t(lambda_t::*)(args_t...) const>{
+        static ret_t cstyle(args_t ... list){
+            return lambda_t()(list...);
         }
     };
 
