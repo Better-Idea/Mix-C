@@ -13,4 +13,5 @@
 #include"math/private/extern.sqrt.hpp"
 #include"math/private/extern.trigo+.hpp"
 #include"memory/private/extern.allocator.hpp"
-#include"memory/private/extern.malloc.hpp"
+
+// #include"draft/gui_seed.hpp"
