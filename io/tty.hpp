@@ -34,10 +34,6 @@ namespace mixc::io_tty{
             xr { return inc::forecolor(); }
             xw { inc::forecolor(value); }
 
-        xpubgetx(read_key, inc::tty_key){
-            return inc::read_key(false);
-        }
-
     public:
         void clear() const {
             inc::clear();
@@ -51,8 +47,8 @@ namespace mixc::io_tty{
             inc::print_core(& chr, 1);
         }
 
-        template<class a0, class ... args>
-        void write(a0 const & first, args const & ... list) const {
+        template<class a0_t, class ... args_t>
+        void write(a0_t const & first, args_t const & ... list) const {
             using namespace inc::ph;
             inc::c08  content;
             char      buf_stack[128];
@@ -70,7 +66,7 @@ namespace mixc::io_tty{
                 });
             };
 
-            if constexpr (inc::has_cast<inc::c08, a0 const &> and sizeof...(list) > 0){
+            if constexpr (inc::has_cast<inc::c08, a0_t const &> and sizeof...(list) > 0){
                 content         = format(first, v{list...});
             }
             else{
@@ -86,9 +82,13 @@ namespace mixc::io_tty{
             inc::print_core(xlocal_endl, xlocal_endl_length);
         }
         
-        template<class a0, class ... args>
-        void write_line(a0 const & first, args const & ... list) const {
+        template<class a0_t, class ... args_t>
+        void write_line(a0_t const & first, args_t const & ... list) const {
             write(first, list..., xlocal_endl);
+        }
+
+        inc::tty_key read_key() const {
+            return inc::read_key(false);
         }
 
         void read_line(inc::ialloc<char> alloc) const {
@@ -99,7 +99,6 @@ namespace mixc::io_tty{
             inc::read_line(alloc);
         }
     $
-
 }
 
 namespace mixc::io_tty::origin{
