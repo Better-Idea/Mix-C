@@ -65,23 +65,23 @@ namespace mixc::define_inf::origin{
     struct inf_t{
         constexpr inf_t(){}
 
-        template<class type>
-        friend bool operator == (type const & value, inf_t){
+        template<class type_t>
+        friend bool operator == (type_t const & value, inf_t){
             return value == inf_pos or value == inf_neg;
         }
 
-        template<class type>
-        friend bool operator != (type const & value, inf_t){
+        template<class type_t>
+        friend bool operator != (type_t const & value, inf_t){
             return value != inf_pos and value != inf_neg;
         }
 
-        template<class type>
-        friend bool operator == (inf_t, type const & value){
+        template<class type_t>
+        friend bool operator == (inf_t, type_t const & value){
             return value == inf_pos or value == inf_neg;
         }
 
-        template<class type>
-        friend bool operator != (inf_t, type const & value){
+        template<class type_t>
+        friend bool operator != (inf_t, type_t const & value){
             return value != inf_pos and value != inf_neg;
         }
 

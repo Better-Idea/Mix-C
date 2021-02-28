@@ -82,17 +82,17 @@
         }
     };
 
-    template<class type>
+    template<class type_t>
     struct quo_rem_pair{
-        type quotient;
-        type remainder;
+        type_t quotient;
+        type_t remainder;
 
-        auto & q(type value){
+        auto & q(type_t value){
             quotient = value;
             return this[0];
         }
 
-        auto & r(type value){
+        auto & r(type_t value){
             remainder = value;
             return this[0];
         }
