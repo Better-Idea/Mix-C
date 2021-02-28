@@ -10,23 +10,23 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_bits::origin{
-    template<class type, class bit_type = bool>
+    template<class type_t, class bit_t = bool>
     xstruct(
-        xtmpl(bits, type),
-        xprif(data, type)
+        xtmpl(bits, type_t),
+        xprif(data, type_t)
     )
-        bits() : bits(0){}
-        bits(type const & value) : data(value){}
+        constexpr bits() : bits(0){}
+        constexpr bits(type_t const & value) : data(value){}
 
-        inc::bits_bind<type, bit_type> operator [](uxx index) const {
-            return inc::bits_bind<type, bit_type>(xref data, index);
+        inc::bits_bind<type_t, bit_t> operator [](uxx index) const {
+            return inc::bits_bind<type_t, bit_t>(xref data, index);
         }
 
         uxx length() const {
-            return sizeof(type) * 8;
+            return sizeof(type_t) * 8;
         }
 
-        operator type & () const {
+        operator type_t & () const {
             return data;
         }
     $

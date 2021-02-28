@@ -5,8 +5,8 @@
 #include"macro/xfinal.hpp"
 
 namespace xuser{
-    template<uxx bits = 0>
-    xfinal_tmpl(xusing_utils_bit_indicator, bits_indicator, bits);
+    template<uxx bits_v = 0>
+    xfinal_tmpl(xusing_utils_bit_indicator, bits_indicator, bits_v);
 }
 
 #undef xusing_utils_bit_indicator
