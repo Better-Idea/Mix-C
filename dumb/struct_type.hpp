@@ -27,8 +27,8 @@ namespace mixc::dumb_struct_type{
         xspec(struct_type, type_t, false),
         xprif(data, type_t)
     )
-        template<class ... args>
-        struct_type(args const & ... list) : 
+        template<class ... args_t>
+        struct_type(args_t const & ... list) : 
             data(list...){
         }
 

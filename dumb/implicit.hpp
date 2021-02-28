@@ -1,8 +1,8 @@
 /*
 用作将指定类型b隐式转换成类型a
 场景：
-template<class ... args>
-auto function(args const & ... list){
+template<class ... args_t>
+auto function(args_t const & ... list){
     implicit<int &> seq[] = { list... };
     ...
 }

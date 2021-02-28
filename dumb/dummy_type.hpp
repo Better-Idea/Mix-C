@@ -12,8 +12,8 @@ namespace mixc::dumb_dummy_type{
     xstruct(
         xname(dummy_type)
     )
-        template<class ... args>
-        constexpr dummy_type(args const & ...){}
+        template<class ... args_t>
+        constexpr dummy_type(args_t const & ...){}
     $
 }
 
