@@ -4,9 +4,9 @@
 
 #define xuser mixc::memory_alloctor::inc
 #include"configure.hpp"
+#include<malloc.h>
 
 #if xuse_libc_malloc
-#include<malloc.h>
 
 namespace mixc::memory_alloctor{
     inline thread_local uxx pused_bytes      = 0;
