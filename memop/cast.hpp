@@ -8,9 +8,9 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_cast{
-    template<class target, class source> 
-    inline target & cast(source const & value){
-        return *(target *)inc::addressof(value);
+    template<class target_t, class source_t> 
+    inline target_t & cast(source_t const & value){
+        return *(target_t *)inc::addressof(value);
     }
 }
 

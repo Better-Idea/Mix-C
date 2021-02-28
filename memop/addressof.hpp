@@ -3,18 +3,18 @@
 #include"macro/xexport.hpp"
 
 namespace mixc::memop_addressof{
-    template<class type> 
-    inline type * addressof(type const & value){
+    template<class type_t> 
+    inline type_t * addressof(type_t const & value){
         struct inner{
-            inner(type & value) : value(value){ }
-            type & value;
-        } got((type &)value);
-        return (*(type **)& got);
+            inner(type_t & value) : value(value){ }
+            type_t & value;
+        } got((type_t &)value);
+        return (*(type_t **)& got);
     }
 
     struct sugar{
-        template<class type>
-        auto * operator * (type const & value){
+        template<class type_t>
+        auto * operator * (type_t const & value){
             return addressof(value);
         }
     };

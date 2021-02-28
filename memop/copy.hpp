@@ -10,17 +10,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_copy::origin{
-    template<class a, class b = a>
-    inline void copy(a * des, b const & src){
-        using mp = inc::mirror<a> *;
+    template<class a0_t, class a1_t = a0_t>
+    inline void copy(a0_t * des, a1_t const & src){
+        using mp = inc::mirror<a0_t> *;
         enum{
-            dis = sizeof(a) - sizeof(b)
+            dis = sizeof(a0_t) - sizeof(a1_t)
         };
         auto m   = *mp(xref src);
         
         // 高位 0 扩展
         if constexpr (dis > 0){
-            inc::zeros(u08p(xref m) + sizeof(b), dis);
+            inc::zeros(u08p(xref m) + sizeof(a1_t), dis);
         }
         *mp(des) = m;
     }
@@ -28,9 +28,9 @@ namespace mixc::memop_copy::origin{
     constexpr bool with_operator = true;
     constexpr bool is_safe       = true;
 
-    template<bool is_safe, bool with_operator, class a, class b>
-    inline void copy_core(a & target, b const & source, uxx count) {
-        if constexpr (is_safe){
+    template<bool is_safe_v, bool with_operator_v, class a0_t, class a1_t>
+    inline void copy_core(a0_t & target, a1_t const & source, uxx count) {
+        if constexpr (is_safe_v){
             struct itr{ 
                 uxx begin; uxx end; uxx step;
             };
@@ -40,7 +40,7 @@ namespace mixc::memop_copy::origin{
                 itr{ 0, count, 1 };
 
             for(; i.begin != i.end; i.begin += i.step){
-                if constexpr (with_operator){
+                if constexpr (with_operator_v){
                     target[i.begin] = source[i.begin];
                 }
                 else{
@@ -50,7 +50,7 @@ namespace mixc::memop_copy::origin{
         }
         else{
             while(count-- > 0){
-                if constexpr (with_operator){
+                if constexpr (with_operator_v){
                     target[count] = source[count];
                 }
                 else{
@@ -60,15 +60,15 @@ namespace mixc::memop_copy::origin{
         }
     }
 
-    #define xgen(name,is_safe,with_opr)                                         \
-    template<class a, class b = a>                                              \
-    inline void name(a & target, b const & source, uxx count){                  \
-        copy_core<is_safe, with_opr, a, b>((a &)target, source, count);         \
-    }                                                                           \
-                                                                                \
-    template<class a, class b = a>                                              \
-    inline void name(a && target, b const & source, uxx count){                 \
-        name((a &)target, source, count);                                       \
+    #define xgen(name,is_safe,with_opr)                                                 \
+    template<class a0_t, class a1_t = a0_t>                                             \
+    inline void name(a0_t & target, a1_t const & source, uxx count){                    \
+        copy_core<is_safe, with_opr, a0_t, a1_t>((a0_t &)target, source, count);        \
+    }                                                                                   \
+                                                                                        \
+    template<class a0_t, class a1_t = a0_t>                                             \
+    inline void name(a0_t && target, a1_t const & source, uxx count){                   \
+        name((a0_t &)target, source, count);                                            \
     }
 
     // 无运算符重载的拷贝

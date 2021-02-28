@@ -13,9 +13,9 @@ namespace mixc::memop_zeros{
         }
     }
 
-    template<class a>
-    inline void zeros(a * ptr) {
-        zeros(ptr, sizeof(a));
+    template<class type_t>
+    inline void zeros(type_t * ptr) {
+        zeros(ptr, sizeof(type_t));
     }
 }
 

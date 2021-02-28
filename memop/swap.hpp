@@ -3,13 +3,14 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_swap::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_swap{
-    template<class a>
-    inline void swap(a * left, a * right){
-        struct m{ char bytes[sizeof(a)]; };
+    template<class type_t>
+    inline void swap(type_t * left, type_t * right){
+        struct m{ char bytes[sizeof(type_t)]; };
         using mp = m *;
         m & l = mp(left)[0];
         m & r = mp(right)[0];

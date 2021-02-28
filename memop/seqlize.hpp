@@ -10,12 +10,12 @@
 
 namespace mixc::memop_seqlize{
     // 把type转换成指定长度的无符号整数指针
-    template<class type>
-    inline auto seqlize(type const & value){
+    template<class type_t>
+    inline auto seqlize(type_t const & value){
         #define xgen(unsigned_t)                                                \
-        if constexpr (sizeof(type) % sizeof(unsigned_t) == 0){                  \
+        if constexpr (sizeof(type_t) % sizeof(unsigned_t) == 0){                \
             return inc::seqptr<unsigned_t>(                                     \
-                (unsigned_t *)(xref value), sizeof(type) / sizeof(unsigned_t)   \
+                (unsigned_t *)(xref value), sizeof(type_t) / sizeof(unsigned_t) \
             );                                                                  \
         } else
 

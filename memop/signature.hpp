@@ -8,27 +8,27 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_signature{
-    template<class function> struct signature;
+    template<class function_t> struct signature;
 
-    template<class ret, class ... args>
-    struct signature<ret(args...)>{ 
-        template<class owner>
-        static auto fetch(ret(owner::* member_func)(args...)){ 
+    template<class ret_t, class ... args_t>
+    struct signature<ret_t(args_t...)>{ 
+        template<class owner_t>
+        static auto fetch(ret_t(owner_t::* member_func)(args_t...)){ 
             return member_func;
         } 
 
-        template<class owner>
-        static auto fetch(ret(owner::* member_func)(args...) const){ 
+        template<class owner_t>
+        static auto fetch(ret_t(owner_t::* member_func)(args_t...) const){ 
             return member_func;
         }
 
-        template<class owner>
-        static constexpr bool has(ret(owner::*)(args...)){ 
+        template<class owner_t>
+        static constexpr bool has(ret_t(owner_t::*)(args_t...)){ 
             return true;
         }
 
-        template<class owner>
-        static constexpr bool has(ret(owner::*)(args...) const){ 
+        template<class owner_t>
+        static constexpr bool has(ret_t(owner_t::*)(args_t...) const){ 
             return true;
         }
     };

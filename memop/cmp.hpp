@@ -14,11 +14,11 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_cmp::origin{
-    template<class a>
-    inline ixx cmp_with_operator(a const & left, a const & right);
+    template<class type_t>
+    inline ixx cmp_with_operator(type_t const & left, type_t const & right);
 
-    template<class a>
-    inline ixx cmp(a const & left, a const & right){
+    template<class type_t>
+    inline ixx cmp(type_t const & left, type_t const & right){
         auto l = inc::seqlize(left);
         auto r = inc::seqlize(right);
 
@@ -30,8 +30,8 @@ namespace mixc::memop_cmp::origin{
         return 0;
     }
 
-    template<class a>
-    inline ixx cmp_des(a const & left, a const & right){
+    template<class type_t>
+    inline ixx cmp_des(type_t const & left, type_t const & right){
         auto l = inc::seqlize(left);
         auto r = inc::seqlize(right);
 
@@ -43,9 +43,9 @@ namespace mixc::memop_cmp::origin{
         return 0;
     }
 
-    template<class a>
-    inline ixx cmp_with_operator(a const & left, a const & right){
-        if constexpr (inc::is_same<asciis, a> or inc::is_same<words, a>){
+    template<class type_t>
+    inline ixx cmp_with_operator(type_t const & left, type_t const & right){
+        if constexpr (inc::is_same<asciis, type_t> or inc::is_same<words, type_t>){
             auto * l        = left;
             auto * r        = right;
             using item_t    = inc::unsigned_type<decltype(l[0])>;
@@ -57,7 +57,7 @@ namespace mixc::memop_cmp::origin{
             }
             return ixx(item_t(l[0]) - item_t(r[0]));
         }
-        else if constexpr (inc::has_comparator<a>){
+        else if constexpr (inc::has_comparator<type_t>){
             return
                 left > right ? 1 : 
                 left < right ? -1 : 0;
