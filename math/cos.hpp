@@ -4,9 +4,7 @@
 #undef  xuser
 #define xuser mixc::math_cos::inc
 #include"define/base_type.hpp"
-#include"docker/array.hpp"
 #include"macro/xexport.hpp"
-#include"math/private/parallel_lut.hpp"
 #include"math/const.hpp"
 #include"math/sin.hpp"
 #pragma pop_macro("xuser")
