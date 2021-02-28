@@ -43,15 +43,15 @@ namespace mixc::macro_xstruct{
     template<class self, class ... list>
     struct data_field_collector{
     private:
-        template<class a0, class ... args, auto ... result>
+        template<class a0_t, class ... args_t, auto ... result>
         static auto merge(vlist<result...>){
-            typename vmerge<vlist<result...>, a0>::new_list items;
+            typename vmerge<vlist<result...>, a0_t>::new_list items;
 
-            if constexpr (sizeof...(args) == 0){
+            if constexpr (sizeof...(args_t) == 0){
                 return items;
             }
             else{
-                return merge<args...>(items);
+                return merge<args_t...>(items);
             }
         }
     public:
@@ -76,9 +76,9 @@ namespace mixc::macro_xstruct{
         using type = t;
     };
 
-    template<class ret, class ... args>
-    struct repeat<ret(args...)>{
-        using type = ret(*)(args...);
+    template<class ret, class ... args_t>
+    struct repeat<ret(args_t...)>{
+        using type = ret(*)(args_t...);
     };
 }
 
@@ -377,6 +377,10 @@ private:
 #define xpubgetx(name,...)                          __get__(public      , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
 #define xprogetx(name,...)                          __get__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
 #define xprigetx(name,...)                          __get__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
+
+#define xpubgetx_constexpr(name,...)                __get__(public      , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) constexpr __VA_ARGS__ xr
+#define xprogetx_constexpr(name,...)                __get__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) constexpr __VA_ARGS__ xr
+#define xprigetx_constexpr(name,...)                __get__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) constexpr __VA_ARGS__ xr
 
 #define xpubget(name,...)                           xpubgetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
 #define xproget(name,...)                           xprogetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
