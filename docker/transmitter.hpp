@@ -8,29 +8,29 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_transmitter{
-    template<class type>
+    template<class type_t>
     xstruct(
-        xtmpl(transmitter, type),
-        xpubb(inc::struct_type<type>),
+        xtmpl(transmitter, type_t),
+        xpubb(inc::struct_type<type_t>),
         xprif(phas_hold_value, bool)
     )
         using final_t = the_t;
     public:
         transmitter(): phas_hold_value(false){}
-        transmitter(type const & value) : 
-            inc::struct_type<type>(value), 
+        transmitter(type_t const & value) : 
+            inc::struct_type<type_t>(value), 
             phas_hold_value(true){
         }
 
-        auto & operator=(type const & value){
-            auto & ori      = *(type *)this;
+        auto & operator=(type_t const & value){
+            auto & ori      = *(type_t *)this;
             ori             = value;
             phas_hold_value = true;
             return this[0];
         }
 
-        auto & operator=(transmitter<type> const & value){
-            this[0] = (inc::struct_type<type> &) value;
+        auto & operator=(transmitter<type_t> const & value){
+            this[0] = (inc::struct_type<type_t> &) value;
             phas_hold_value = value.phas_hold_value;
             return this[0];
         }

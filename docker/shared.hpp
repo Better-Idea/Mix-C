@@ -13,11 +13,11 @@ namespace mixc::docker_shared::origin{
     using inc::init_by;
     using inc::default_init_by;
 
-    template<class type> struct shared;
-    template<class type>
-    struct shared : inc::ref_ptr<shared<type>, type>{
-        using the_t  = shared<type>;
-        using base_t = inc::ref_ptr<shared<type>, type>;
+    template<class type_t> struct shared;
+    template<class type_t>
+    struct shared : inc::ref_ptr<shared<type_t>, type_t>{
+        using the_t  = shared<type_t>;
+        using base_t = inc::ref_ptr<shared<type_t>, type_t>;
         using base_t::operator==;
         using base_t::operator!=;
         using base_t::base_t;
@@ -28,19 +28,19 @@ namespace mixc::docker_shared::origin{
         the_t & operator=(the_t const &)    = default;
         the_t & operator=(the_t &&)         = default;
 
-        type & operator * () {
+        type_t & operator * () {
             return * base_t::operator->();
         }
 
-        type const & operator * () const {
+        type_t const & operator * () const {
             return * base_t::operator->();
         }
 
-        type * operator->() {
+        type_t * operator->() {
             return base_t::operator->();
         }
 
-        type const * operator->() const {
+        type_t const * operator->() const {
             return base_t::operator->();
         }
     };

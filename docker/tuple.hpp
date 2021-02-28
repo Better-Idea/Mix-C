@@ -13,37 +13,37 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_tuple{
-    template<class a0>
+    template<class a0_t>
     inline auto meta(){
-        if constexpr (inc::is_origin_array<a0>){
-            using item_t = inc::item_origin_of<a0>;
-            return (inc::array<item_t, sizeof(a0) / sizeof(item_t)> *)nullptr;
+        if constexpr (inc::is_origin_array<a0_t>){
+            using item_t = inc::item_origin_of<a0_t>;
+            return (inc::array<item_t, sizeof(a0_t) / sizeof(item_t)> *)nullptr;
         }
         else{
-            return (a0 *)nullptr;
+            return (a0_t *)nullptr;
         }
     }
 
-    template<class a0>
+    template<class a0_t>
     using item_t = inc::remove_ptr<
-        decltype(meta<a0>())
+        decltype(meta<a0_t>())
     >;
 }
 
 namespace mixc::docker_tuple::origin{
-    template<class a0 = decltype(nullptr), class ... args>
+    template<class a0_t = decltype(nullptr), class ... args_t>
     xstruct(
-        xtmpl(tuple, a0, args...),
-        xprob(tuple<args...>),
-        xprif(value, item_t<a0>)
+        xtmpl(tuple, a0_t, args_t...),
+        xprob(tuple<args_t...>),
+        xprif(value, item_t<a0_t>)
     )
-        using base = tuple<args...>;
+        using base = tuple<args_t...>;
 
         template<class ...>
         constexpr tuple(){}
 
-        constexpr tuple(a0 const & first, args const & ... result) : 
-            value(*(item_t<a0> *)& first), base(result...){
+        constexpr tuple(a0_t const & first, args_t const & ... result) : 
+            value(*(item_t<a0_t> *)& first), base(result...){
         }
 
         template<uxx index>
@@ -63,7 +63,7 @@ namespace mixc::docker_tuple::origin{
         }
 
         static constexpr uxx length(){
-            return 1 + sizeof...(args);
+            return 1 + sizeof...(args_t);
         }
     $
 

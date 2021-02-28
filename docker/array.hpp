@@ -22,10 +22,10 @@ namespace xuser{
         }
     };
 
-    template<class type, class ... args>
-    struct array_view : array<type, 1 + sizeof...(args)>{
-        array_view(type const & first, args const & ... list) : 
-            array<type, 1 + sizeof...(args)>(first, list...) {
+    template<class type_t, class ... args_t>
+    struct array_view : array<type_t, 1 + sizeof...(args_t)>{
+        array_view(type_t const & first, args_t const & ... list) : 
+            array<type_t, 1 + sizeof...(args_t)>(first, list...) {
         }
     };
 }
