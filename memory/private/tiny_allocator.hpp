@@ -8,6 +8,7 @@
 #include"macro/xexport.hpp"
 #include"macro/xdebug+.hpp"
 #include"macro/xnew.hpp"
+#include"memory/allocator.hpp"
 #include"instruction/bit_test.hpp"
 #include"instruction/bit_test_and_set.hpp"
 #include"instruction/bit_test_and_reset.hpp"
@@ -149,15 +150,6 @@ namespace mixc::memory_private_tiny_allocator{
 }
 
 namespace mixc::memory_private_tiny_allocator::origin{
-    extern voidp malloc(size_t bytes);
-    extern voidp malloc_aligned(size_t bytes, size_t align_bytes);
-    extern void  mfree(voidp ptr);
-    extern void  mfree_aligned(voidp ptr);
-
-    namespace inner{
-        using namespace mixc::memory_private_tiny_allocator;
-    }
-
     struct tiny_allocator{
     private:
         using indicator_t = inc::bits_indicator<scale>;
@@ -175,10 +167,9 @@ namespace mixc::memory_private_tiny_allocator::origin{
         }
 
         voidp alloc(uxx bytes){
-            pused_bytes         += bytes;
-            pneed_free_count    += 1;
-
             auto require_size_index = (bytes - 1) / scale_one;
+            pused_bytes            += bytes;
+            pneed_free_count       += 1;
 
             // slot 中置位位表示空闲的块
             // 选择最接近但不小于所需大小的块
@@ -200,14 +191,13 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 return;
             }
 
-            pused_bytes            -= bytes;
-            pneed_free_count       -= 1;
-
-            auto return_size_index = (bytes - 1) / scale_one;
+            auto return_size_index  = (bytes - 1) / scale_one;
+            pused_bytes            -= (bytes);
+            pneed_free_count       -= (1);
 
             if (return_size_index >= page_block_count){
                 palive_pages       -= 1;
-                mfree(ptr);
+                inc::mfree(ptr);
                 return;
             }
 
@@ -244,7 +234,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
         void origin_free(page_header * ptr){
             auto next      = ptr->next;
             auto prev      = ptr->previous;
-            mfree_aligned(ptr);
+            inc::mfree_aligned(ptr);
             palive_pages  -= 1;
 
             if (next == ptr){
@@ -262,10 +252,10 @@ namespace mixc::memory_private_tiny_allocator::origin{
         voidp origin_alloc(uxx require_size_index){
             // 超出管理范畴
             if (palive_pages += 1; require_size_index > page_block_count){
-                return malloc((require_size_index + 1) * scale_one);
+                return inc::malloc((require_size_index + 1) * scale_one);
             }
 
-            auto meta   = malloc_aligned(page_bytes, page_bytes);
+            auto meta   = inc::malloc_aligned(page_bytes, page_bytes);
             auto page   = xnew(meta) page_header;
             auto first  = page->first_block();
 

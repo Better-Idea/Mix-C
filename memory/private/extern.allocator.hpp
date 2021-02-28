@@ -1,70 +1,101 @@
 #ifdef xuser
-    #undef xuser
+#undef xuser
 #endif
 
 #define xuser mixc::memory_alloctor::inc
 #include"configure.hpp"
-#include"memory/private/tiny_allocator.hpp"
 
 #if xuse_libc_malloc
-#include"concurrency/lock/atom_add.hpp"
-#include"concurrency/lock/atom_sub.hpp"
 #include<malloc.h>
-namespace mixc::memory_alloctor{
-    uxx pused_bytes      = 0;
-    uxx pneed_free_count = 0;
 
-    voidp malloc(uxx bytes){
-        inc::atom_add(& pused_bytes, bytes);
-        inc::atom_add(& pneed_free_count, uxx(1));
+namespace mixc::memory_alloctor{
+    inline thread_local uxx pused_bytes      = 0;
+    inline thread_local uxx pneed_free_count = 0;
+
+    extern voidp tiny_alloc(uxx bytes){
+        pused_bytes        += bytes;
+        pneed_free_count   += 1；
         return ::malloc(bytes);
     }
 
-    void mfree(voidp ptr, uxx bytes){
-        inc::atom_sub(& pused_bytes, bytes);
-        inc::atom_sub(& pneed_free_count, uxx(1));
+    extern void tiny_free(voidp ptr, uxx bytes){
+        pused_bytes        -= bytes;
+        pneed_free_count   -= 1；
         ::free(ptr);
     }
 }
+
 namespace mixc::memory_alloctor::origin{
-    uxx used_bytes(){
+    extern uxx used_bytes(){
         return pused_bytes;
     }
 
-    uxx need_free_count(){
+    extern uxx need_free_count(){
         return pneed_free_count;
     }
 
-    uxx alive_pages(){
+    extern uxx alive_pages(){
         return pused_bytes / 4096 + (pused_bytes % 4096 != 0);
     }
 }
 #else
 
-namespace mixc::memory_alloctor{
-    // 单线程
-    inline static inc::tiny_allocator mem;
+#include"memory/private/tiny_allocator.hpp"
 
-    voidp malloc(uxx bytes){
+namespace mixc::memory_alloctor{
+    inline thread_local inc::tiny_allocator mem;
+
+    extern voidp tiny_alloc(uxx bytes){
         return mem.alloc(bytes);
     }
 
-    void mfree(voidp ptr, uxx bytes){
+    extern void tiny_free(voidp ptr, uxx bytes){
         mem.free(ptr, bytes);
     }
 }
 
 namespace mixc::memory_alloctor::origin{
-    uxx used_bytes(){
+    extern uxx used_bytes(){
         return mem.used_bytes();
     }
 
-    uxx need_free_count(){
+    extern uxx need_free_count(){
         return mem.need_free_count();
     }
 
-    uxx alive_pages(){
+    extern uxx alive_pages(){
         return mem.alive_pages();
     }
 }
+
 #endif
+
+namespace mixc::memory_alloctor::origin{
+    extern voidp malloc(size_t bytes){
+        return ::malloc(bytes);
+    }
+
+    extern voidp malloc_aligned(size_t bytes, size_t align_bytes){
+        #if xis_windows
+            return ::_mm_malloc(bytes, align_bytes);
+        #endif
+
+        #if xis_linux
+            return ::memalign(align_bytes, bytes);
+        #endif
+    }
+
+    extern void mfree(voidp ptr){
+        ::free(ptr);
+    }
+
+    extern void mfree_aligned(voidp ptr){
+        #if xis_windows
+            ::_mm_free(ptr);
+        #endif
+
+        #if xis_linux
+            return ::free(ptr);
+        #endif
+    }
+}
