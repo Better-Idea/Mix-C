@@ -1,5 +1,4 @@
 #include"meta/attach_owner.hpp"
-#include"meta/first.hpp"
 #include"meta/fit_bits.hpp"
 #include"meta/function.hpp"
 #include"meta/has_cast.hpp"
