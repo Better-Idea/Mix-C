@@ -111,9 +111,9 @@ namespace mixc::lang_cxx_strlize{
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class type, class call_t>
+        template<class type_t, class call_t>
         requires(can_cxx_format<call_t, item_t>)
-        static auto strlize(type value, bool is_scientific_notation, uxx precious, call_t const & invoke){
+        static auto strlize(type_t value, bool is_scientific_notation, uxx precious, call_t const & invoke){
             #define xgen(v,str)                                         \
             if (value == v){                                            \
                 the_t  real = value < 0 ? "-" str : "+" str;            \
@@ -129,7 +129,7 @@ namespace mixc::lang_cxx_strlize{
             item_t buf_exp[8]   = {'+'};
             auto pce            = ixx(precious);
             auto ptr            = buf;
-            auto m              = inc::mfxx<type>{value};
+            auto m              = inc::mfxx<type_t>{value};
             auto is_neg         = false;
 
             // 默认 precious 是 not_exist (max_value_of<uxx>)
@@ -253,12 +253,12 @@ namespace mixc::lang_cxx_strlize{
             }
         }
 
-        template<class type, class alloc_t>
+        template<class type_t, class alloc_t>
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
         static auto strlize(
-            type                    value,
+            type_t                  value,
             float_format_t          modes, 
             uxx                     precious, 
             alloc_t const &         alloc){
@@ -344,12 +344,12 @@ namespace mixc::lang_cxx_strlize{
             });
         }
 
-        template<class type, class alloc_t>
+        template<class type_t, class alloc_t>
         requires(
             inc::can_alloc<alloc_t, item_t>
         )
         auto strlize(
-            type                    value, 
+            type_t                  value, 
             int_format_t            mode, 
             inc::numeration_t       radix, 
             asciis                  lut, 
@@ -359,18 +359,18 @@ namespace mixc::lang_cxx_strlize{
             u08p ptr            = buf;
             uxx  base           = uxx(radix);
 
-            using unsigned_t    = inc::unsigned_type<type>;
-            auto u              = unsigned_t(value);
+            using u_t           = inc::unsigned_type<type_t>;
+            auto u              = u_t(value);
             auto is_neg         = value < 0;
 
             if (is_neg){
-                u               = unsigned_t(0) - u;
+                u               = u_t(0) - u;
             }
 
             do {
                 ptr[0]          = lut[u % base];
                 ptr            += 1;
-                u              /= unsigned_t(base);
+                u              /= u_t(base);
             } while(u != 0);
 
             uxx      len        = ptr - buf;

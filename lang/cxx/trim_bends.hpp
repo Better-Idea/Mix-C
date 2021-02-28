@@ -43,9 +43,9 @@ namespace mixc::lang_cxx_trim_bends{
         }
     };
 
-    template<class final_t, class base, class item_t>
-    struct meta : base{
-        using base::base;
+    template<class final_t, class base_t, class item_t>
+    struct meta : base_t{
+        using base_t::base_t;
         using the_t = core<item_t>;
 
         final_t trim_bends(item_t value) const {

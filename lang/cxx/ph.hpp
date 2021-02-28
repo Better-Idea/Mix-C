@@ -287,35 +287,35 @@ namespace mixc::lang_cxx_ph::origin::ph{
 }
 
 namespace mixc::lang_cxx_ph{
-    template<class final_t, class ... args> struct v;
-    template<class final_t, class a0, class ... args>
-    struct v<final_t, a0, args...> : v<final_t, args...> {
+    template<class final_t, class ... args_t> struct v;
+    template<class final_t, class a0_t, class ... args_t>
+    struct v<final_t, a0_t, args_t...> : v<final_t, args_t...> {
     private:
         static auto configure(){
-            if constexpr (inc::is_based_on<place_holder_group, a0>){
-                return (a0 *)nullptr;
+            if constexpr (inc::is_based_on<place_holder_group, a0_t>){
+                return (a0_t *)nullptr;
             }
-            else if constexpr (inc::is_origin_array<a0>){
-                return (const inc::item_origin_of<a0> **)nullptr;
+            else if constexpr (inc::is_origin_array<a0_t>){
+                return (const inc::item_origin_of<a0_t> **)nullptr;
             }
-            else if constexpr (inc::has_cast<inc::c08, a0>){
+            else if constexpr (inc::has_cast<inc::c08, a0_t>){
                 return (inc::c08 *)nullptr;
             }
-            else if constexpr (inc::is_ptr<a0>){
+            else if constexpr (inc::is_ptr<a0_t>){
                 return (origin::ph::zX<const void *> *)nullptr;
             }
             else{
-                return (a0 *)nullptr;
+                return (a0_t *)nullptr;
             }
         }
 
         using val_t  = inc::remove_ptr<decltype(configure())>;
-        using base_t = v<final_t, args...>;
+        using base_t = v<final_t, args_t...>;
 
         val_t item;
     public:
-        constexpr v(a0 const & first, args const & ... rest) : 
-            base_t(rest...), item((val_t)(a0 &)first) {
+        constexpr v(a0_t const & first, args_t const & ... rest) : 
+            base_t(rest...), item((val_t)(a0_t &)first) {
         }
 
         template<class item_t, class fmt_t = decltype(nullptr)>
@@ -340,11 +340,11 @@ namespace mixc::lang_cxx_ph{
                     }
                 }
 
-                if (base_t * base = this; i_e == not_exist) {
-                    buf         = base->template combine<item_t>(total);
+                if (base_t * base_t = this; i_e == not_exist) {
+                    buf         = base_t->template combine<item_t>(total);
                 }
                 else{
-                    buf         = base->template combine<item_t>(total + i_e, next);
+                    buf         = base_t->template combine<item_t>(total + i_e, next);
                 }
 
                 buf             = buf - this_length;
@@ -406,11 +406,11 @@ namespace mixc::lang_cxx_ph{
 }
 
 namespace mixc::lang_cxx_ph::origin::ph{
-    template<class a0, class ... args>
-    struct v : mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>{
-        using base_t = mixc::lang_cxx_ph::v<v<a0, args...>, a0, args...>;
+    template<class a0_t, class ... args_t>
+    struct v : mixc::lang_cxx_ph::v<v<a0_t, args_t...>, a0_t, args_t...>{
+        using base_t = mixc::lang_cxx_ph::v<v<a0_t, args_t...>, a0_t, args_t...>;
 
-        v(a0 const & first, args const & ... rest) : 
+        v(a0_t const & first, args_t const & ... rest) : 
             base_t(first, rest...){}
 
         template<class item_t>

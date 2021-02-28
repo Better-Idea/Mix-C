@@ -66,7 +66,7 @@ namespace mixc::lang_cxx_parse{
         using the_t = inc::cxx<item_t>;
 
         template<class target>
-        parse_result<target> parse(uxx base) const {
+        parse_result<target> parse(uxx base_t) const {
             bool        is_neg = false;
             target      value  = 0;
             item_t *    cur    = the;
@@ -190,11 +190,11 @@ namespace mixc::lang_cxx_parse{
                     uxx dis = uxx(cur[0] - '0');
                     uxx v   = lut[dis & mask];
 
-                    if (dis >= base or v == lut_error){
+                    if (dis >= base_t or v == lut_error){
                         return parse_result<target>(value, cur - begin);
                     }
                     else{
-                        value = value * base + v;
+                        value = value * base_t + v;
                     }
                 }
 
@@ -206,9 +206,9 @@ namespace mixc::lang_cxx_parse{
         }
     };
 
-    template<class final_t, class base, class item_t>
-    struct meta : base{
-        using base::base;
+    template<class final_t, class base_t, class item_t>
+    struct meta : base_t{
+        using base_t::base_t;
         using the_t = core<item_t>;
 
         template<class target>
