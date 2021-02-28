@@ -8,7 +8,7 @@
 #include"concurrency/thread_self.hpp"
 #include"configure.hpp"
 #include"macro/xalign.hpp"
-#include"memory/private/tiny_allocator.hpp"
+#include"memory/allocator.hpp"
 
 #if xis_windows
 #include<windows.h>
