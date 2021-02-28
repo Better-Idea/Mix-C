@@ -351,93 +351,93 @@ namespace mixc::docker_btree{
                 }
             }
 
-            //if (auto vals = unmark(cur); vals->insert(i, value) != is_full){
-            //    return;
-            //}
-            //else{
-            //    new_item                    = vals->split();
-            //    offset                      = new_item->count;
-            //    new_item                    = mark_is_item_level(new_item);
-            //    new_node                    = (path_node *)new_item;
-            //}
+            if (auto vals = unmark(cur); vals->insert(i, value) != is_full){
+               return;
+            }
+            else{
+               new_item                    = vals->split();
+               offset                      = new_item->count;
+               new_item                    = mark_is_item_level(new_item);
+               new_node                    = (path_node *)new_item;
+            }
 
-            //while(path_ptr != xref path[0]){
-            //    iofsg_ptr                  -= 1;
-            //    path_ptr                   -= 1;
-            //    iofs                        = iofsg_ptr[0];
-            //    parent                      = path_ptr[0];
-            //    offset                     += iofs ? parent->offset[iofs - 1] : 0;
-            //    auto need_return            = parent->bottom[7] == nullptr;
-            //    auto node_temp              = new_node;
+            while(path_ptr != xref path[0]){
+               iofsg_ptr                  -= 1;
+               path_ptr                   -= 1;
+               iofs                        = iofsg_ptr[0];
+               parent                      = path_ptr[0];
+               offset                     += iofs ? parent->offset[iofs - 1] : 0;
+               auto need_return            = parent->bottom[7] == nullptr;
+               auto node_temp              = new_node;
 
-            //    while(iofs < 8 and node_temp != nullptr){
-            //        inc::swap(xref parent->offset[iofs], xref offset); 
-            //        inc::swap(xref parent->bottom[iofs], xref node_temp);
-            //        iofs                   += 1;
-            //    }
+               while(iofs < 8 and node_temp != nullptr){
+                   inc::swap(xref parent->offset[iofs], xref offset); 
+                   inc::swap(xref parent->bottom[iofs], xref node_temp);
+                   iofs                   += 1;
+               }
 
-            //    if (need_return){
-            //        return;
-            //    }
+               if (need_return){
+                   return;
+               }
 
-            //    new_node                    = alloc_path_node();
-            //    new_node->bottom[0]         = parent->bottom[0];
-            //    new_node->bottom[1]         = parent->bottom[1];
-            //    new_node->bottom[2]         = parent->bottom[2];
-            //    new_node->bottom[3]         = parent->bottom[3];
-            //    new_node->bottom[4]         = nullptr;
-            //    new_node->bottom[5]         = nullptr;
-            //    new_node->bottom[6]         = nullptr;
-            //    new_node->bottom[7]         = nullptr;
-            //    parent->bottom[0]           = parent->bottom[4];
-            //    parent->bottom[1]           = parent->bottom[5];
-            //    parent->bottom[2]           = parent->bottom[6];
-            //    parent->bottom[3]           = parent->bottom[7];
-            //    parent->bottom[4]           = node_temp;
-            //    parent->bottom[5]           = nullptr;
-            //    parent->bottom[6]           = nullptr;
-            //    parent->bottom[7]           = nullptr;
+               new_node                    = alloc_path_node();
+               new_node->bottom[0]         = parent->bottom[0];
+               new_node->bottom[1]         = parent->bottom[1];
+               new_node->bottom[2]         = parent->bottom[2];
+               new_node->bottom[3]         = parent->bottom[3];
+               new_node->bottom[4]         = nullptr;
+               new_node->bottom[5]         = nullptr;
+               new_node->bottom[6]         = nullptr;
+               new_node->bottom[7]         = nullptr;
+               parent->bottom[0]           = parent->bottom[4];
+               parent->bottom[1]           = parent->bottom[5];
+               parent->bottom[2]           = parent->bottom[6];
+               parent->bottom[3]           = parent->bottom[7];
+               parent->bottom[4]           = node_temp;
+               parent->bottom[5]           = nullptr;
+               parent->bottom[6]           = nullptr;
+               parent->bottom[7]           = nullptr;
 
-            //    // 转移偏移
-            //    new_node->offset[0]         = parent->offset[0];
-            //    new_node->offset[1]         = parent->offset[1];
-            //    new_node->offset[2]         = parent->offset[2];
-            //    new_node->offset[3]         = parent->offset[3];
-            //    new_node->offset[4]         = parent->offset[3];
-            //    new_node->offset[5]         = parent->offset[3];
-            //    new_node->offset[6]         = parent->offset[3];
-            //    new_node->offset[7]         = parent->offset[3];
+               // 转移偏移
+               new_node->offset[0]         = parent->offset[0];
+               new_node->offset[1]         = parent->offset[1];
+               new_node->offset[2]         = parent->offset[2];
+               new_node->offset[3]         = parent->offset[3];
+               new_node->offset[4]         = parent->offset[3];
+               new_node->offset[5]         = parent->offset[3];
+               new_node->offset[6]         = parent->offset[3];
+               new_node->offset[7]         = parent->offset[3];
 
-            //    parent->offset[0]           = parent->offset[4] - parent->offset[3];
-            //    parent->offset[1]           = parent->offset[5] - parent->offset[3];
-            //    parent->offset[2]           = parent->offset[6] - parent->offset[3];
-            //    parent->offset[3]           = parent->offset[7] - parent->offset[3];
-            //    parent->offset[4]           = parent->offset[3] + offset - parent->offset[7];
-            //    parent->offset[5]           = parent->offset[4];
-            //    parent->offset[6]           = parent->offset[4];
-            //    parent->offset[7]           = parent->offset[4];
-            //    offset                      = new_node->offset[7];
-            //}
+               parent->offset[0]           = parent->offset[4] - parent->offset[3];
+               parent->offset[1]           = parent->offset[5] - parent->offset[3];
+               parent->offset[2]           = parent->offset[6] - parent->offset[3];
+               parent->offset[3]           = parent->offset[7] - parent->offset[3];
+               parent->offset[4]           = parent->offset[3] + offset - parent->offset[7];
+               parent->offset[5]           = parent->offset[4];
+               parent->offset[6]           = parent->offset[4];
+               parent->offset[7]           = parent->offset[4];
+               offset                      = new_node->offset[7];
+            }
 
-            //auto new_root                   = alloc_path_node();
-            //new_root->bottom[0]             = new_node;
-            //new_root->bottom[1]             = root;
-            //new_root->bottom[2]             = nullptr;
-            //new_root->bottom[3]             = nullptr;
-            //new_root->bottom[4]             = nullptr;
-            //new_root->bottom[5]             = nullptr;
-            //new_root->bottom[6]             = nullptr;
-            //new_root->bottom[7]             = nullptr;
+            auto new_root                   = alloc_path_node();
+            new_root->bottom[0]             = new_node;
+            new_root->bottom[1]             = root;
+            new_root->bottom[2]             = nullptr;
+            new_root->bottom[3]             = nullptr;
+            new_root->bottom[4]             = nullptr;
+            new_root->bottom[5]             = nullptr;
+            new_root->bottom[6]             = nullptr;
+            new_root->bottom[7]             = nullptr;
 
-            //new_root->offset[0]             = offset;
-            //new_root->offset[1]             = offset + root->offset[7];
-            //new_root->offset[2]             = new_root->offset[1];
-            //new_root->offset[3]             = new_root->offset[1];
-            //new_root->offset[4]             = new_root->offset[1];
-            //new_root->offset[5]             = new_root->offset[1];
-            //new_root->offset[6]             = new_root->offset[1];
-            //new_root->offset[7]             = new_root->offset[1];
-            //root                            = new_root;
+            new_root->offset[0]             = offset;
+            new_root->offset[1]             = offset + root->offset[7];
+            new_root->offset[2]             = new_root->offset[1];
+            new_root->offset[3]             = new_root->offset[1];
+            new_root->offset[4]             = new_root->offset[1];
+            new_root->offset[5]             = new_root->offset[1];
+            new_root->offset[6]             = new_root->offset[1];
+            new_root->offset[7]             = new_root->offset[1];
+            root                            = new_root;
         }
 
         void talk_out(uxx index, item_t * value){
