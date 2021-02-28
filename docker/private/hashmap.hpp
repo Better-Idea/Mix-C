@@ -41,8 +41,8 @@ namespace mixc::docker_hashmap{
     };
 
     #define xarg_has_val_t
-    #include"docker/private/adapter.hashmap_gen.hpp"
-    #include"docker/private/adapter.hashmap_gen.hpp"
+    #include"docker/private/xgen.hashmap.hpp"
+    #include"docker/private/xgen.hashmap.hpp"
 
     /* 
      * struct __single_inheritance X;
