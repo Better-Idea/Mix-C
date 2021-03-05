@@ -13,7 +13,7 @@
 ...
 ```
 
-情况二：提供最小包含，不需要的功能不包含。C++ 认为少就是多，但这不是 `std::string` 孱弱的理由，我们以 `lang/cxx/` 底层字符串库为例，为您提供避免过度设计的指引。
+情况二：提供最小包含，不需要的功能不包含。C++ 认为少就是多，但这不是 `std::string` 孱弱的理由，我们以 `lang/cxx/` 底层字符串库为例，为您提供可组装地设计指引。
 ```C++
 #pragma once
 #include"lang/cxx/index_of_first.hpp"
@@ -149,7 +149,7 @@ xexport(mixc::foo_function::function)
 
 #### **file:func/private/a.hpp**
 ```C++
-#ifndef xpack_func_private_a    // 这里 xpack_xxx 包含 private
+#ifndef xpack_func_private_a    // 注意这里的命名
 #define xpack_func_private_a
 #pragma push_macro("xuser")
 #undef  xuser
@@ -157,17 +157,21 @@ xexport(mixc::foo_function::function)
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
+namespace mixc::func_b::origin{
+    struct b;
+}
+
+namespace mixc::func_a::inc{
+    using namespace mixc::func_b::origin;
+}
+
 namespace mixc::func_a::origin{ // 这里不是 mixc::func_private_a
-    struct a;
+    struct a{
+        void invoke(inc::b);    // 这部分放到外部定义
 
-    // 我们约定该接口一定会出现在实现的前面
-    // 所以模板的默认参数在这里填写
-    template<class a0_t, class a1_t = u32>
-    struct ax;
-
-    // 其他需要对外暴露的符号
-    enum class sth_enum_t{
-        ...
+        void other(){           // 对于不存在循环依赖的函数则不做限制
+            // do sth inline ...
+        }
     };
 }
 
@@ -182,12 +186,26 @@ xexport_space(mixc::func_a::origin)
 #define xpack_func_private_b
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::func_b
+#define xuser mixc::func_b::inc
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::func_b::origin{
-    struct b;
+namespace mixc::func_a::origin{
+    struct a;
+}
+
+namespace mixc::func_b::inc{
+    using namespace mixc::func_a::origin;
+}
+
+namespace mixc::func_b::origin{ // 这里不是 mixc::func_private_a
+    struct b{
+        void invoke(inc::a);    // 这部分放到外部定义
+
+        void other(){           // 对于不存在循环依赖的函数则不做限制
+            // do sth inline ...
+        }
+    };
 }
 
 #endif
@@ -209,19 +227,10 @@ xexport_space(mixc::func_b::origin)
 #pragma pop_macro("xuser")
 
 namespace mixc::func_a::origin{ // 命名空间与 func/private/a.hpp 保持一致
-    struct a{
-        uxx hi(){
-            ... 
-            return inc::b::function(this);
-        }
-    };
-
-    // 这里无需再填写默认参数类型
-    template<class a0_t, class a1_t>
-    struct ax{
-        void hi(){
-            ...
-        }
+    // 这里要用 inline 关键字
+    // 避免被包含到多个 .cpp 文件后导致符号重定义错误
+    inline void a::invoke(inc::b){
+        // ...
     }
 }
 
@@ -244,11 +253,11 @@ xexport_space(mixc::func_a::origin)
 #pragma pop_macro("xuser")
 
 namespace mixc::func_b::origin{
-    struct b{
-        static uxx function(inc::a * ptr){
-            ...
-        }
-    };
+    // 这里要用 inline 关键字
+    // 避免被包含到多个 .cpp 文件后导致符号重定义错误
+    inline void b::invoke(inc::a){
+        // ...
+    }
 }
 
 #endif
