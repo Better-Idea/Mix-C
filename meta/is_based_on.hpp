@@ -5,7 +5,6 @@
 #define xuser mixc::meta_is_based_on::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
-#include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_is_based_on{
