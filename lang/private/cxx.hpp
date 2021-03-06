@@ -9,12 +9,12 @@
 #include"interface/ranger.hpp"
 #include"macro/xstruct.hpp"
 #include"macro/xsv.hpp"
+#include"meta/is_cxx.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_hash::origin{
-    template<class cxx_t>
-    requires(sizeof(typename cxx_t::im_cxx) != 0)
+    template<mixc::lang_cxx::inc::is_cxx cxx_t>
     inline uxx hash(cxx_t const & value, uxx seed = 0){
         return hash(
             static_cast<typename cxx_t::item_t *>(value), 
@@ -132,7 +132,7 @@ namespace mixc::lang_cxx{
             auto e = the.ptr + the.length();
 
             for(; p < e; c++){
-                while((++p)[-1] >= 0x80 and p < e){
+                while(u08((++p)[-1]) >= 0x80 and p < e){
                     ;
                 }
             }
