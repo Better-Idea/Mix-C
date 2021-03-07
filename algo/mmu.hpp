@@ -132,15 +132,15 @@ namespace mixc::algo_mmu::origin {
 
     constexpr bool with_fixed_page_table = true;
 
-    /* 结构：可变大小数组模板
+    /* 结构：可变长度数组模板
      * 参数：
      * - initial_alloc_length 为数组的起始分配长度，需要二进制对齐且大于 0
-     *   只有第一次和第二次分配时，initial_alloc_length 的值不变，此后每次变为之前的两倍
+     *   只有第一次和第二次分配时，分配长度为 initial_alloc_length，此后每次变为之前的两倍
      * - with_fixed_page_table 指示是否使用固定大小的页表
      * 注意：
-     * - 创建数组的在未添加元素时是没有分配内存的，只有在添加元素后才会分配内存
-     * - 使用 with_fixed_page_table 选项后，将不再单独为 page_table_ptr 分配和释放内存，内部假定页表是已分配好的
-     * - 并且要求传入的 page_table_ptr 指向的是一个空指针数组（一个数组，里面的值都是 nullptr）
+     * - 创建数组只有在添加元素后才会分配内存
+     * - 使用 with_fixed_page_table 选项后，将不再单独为 page_table_ptr 分配和释放内存
+     *   内部假定 page_table_ptr 指向可用的内存
      */
     template<uxx initial_alloc_length = 1, bool with_fixed_page_table = not origin::with_fixed_page_table>
     requires(
@@ -173,7 +173,9 @@ namespace mixc::algo_mmu::origin {
             auto   i_page               = (uxx)0;
             auto   i                    = (uxx)0;
             auto   mask                 = (uxx)initial_alloc_length - 1;
-            auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1)); // index_of_last_set(0) -> uxx(-1)
+
+            // index_of_last_set(0) -> uxx(-1)
+            auto   base                 = (inc::index_of_last_set(initial_alloc_length - 1));
 
             if (len == 0) {
                 if constexpr (not with_fixed_page_table){
@@ -187,8 +189,15 @@ namespace mixc::algo_mmu::origin {
                 return;
             }
 
+            // index_of_last_set(0) -> uxx(-1)
+            // 当只有 0 个元素时 i = uxx(-1)，base = uxx(-1)
+            // i_page = i - base = 0，依旧是我们期望的页表索引
             i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
+
+            // i = uxx(-1) = 0xff..ff
+            // i << i = i << (i % bits(uxx))
+            // 此时 mask = uxx(-1) = 0xff..ff
             mask                       |= (uxx(1) << i) - 1;
 
             if (need_new_page and len >= initial_alloc_length) {
