@@ -5,7 +5,7 @@
 #define xuser mixc::meta_seq_tselector_key::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
-#include"meta_seq/template/tselector.hpp"
+#include"meta_seq/private/xgen.tselector.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_seq_tselector_key{
