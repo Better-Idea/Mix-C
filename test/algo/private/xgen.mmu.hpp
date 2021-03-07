@@ -2,12 +2,10 @@
 using namespace inc;
 
 auto alloc = [](uxx bytes){
-    xhint(used_bytes());
     return inc::alloc<void>(inc::memory_size{bytes});
 };
 
 auto free = [](voidp ptr, uxx bytes){
-    xhint(used_bytes());
     inc::free(ptr, inc::memory_size{bytes});
 };
 
