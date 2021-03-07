@@ -15,11 +15,16 @@
 #include"dumb/move.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
+#include"interface/initializer_list.hpp"
+#include"interface/unified_seq.hpp"
 #include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/copy.hpp"
 #include"memory/allocator.hpp"
+#include"meta/has_cast.hpp"
+#include"meta/is_cxx.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -95,24 +100,24 @@ namespace mixc::lang_cxx_split{
     struct core {
         using the_t = inc::cxx<item_t>;
 
-        template<class func_t, class cmp_t>
+        template<class seq_t, class func_t, class cmp_t>
         auto split(
-            the_t                   value, 
+            seq_t           const & value, 
             keep_empty_entries_t    keep_empty_entries,
             cmp_t           const & compare,
             func_t          const & invoke
         ) const {
-            using csi           = cxx_split_item;
+            using csi               = cxx_split_item;
             csi                     last{};
             cxx_split_info<item_t>  info{};
 
             // 使用 u08 数组代替 csi 数组避免不必要的构造初始化
             u08     buffer[sizeof(csi) * begin_length];
             csi  *  table[40];
-            bool    once        = true;
+            bool    once            = true;
 
             // 融合栈内存和堆内存
-            auto allocx = [&](uxx bytes) -> voidp {
+            auto allocx             = [&](uxx bytes) -> voidp {
                 if (once){
                     once = false;
                     return buffer;
@@ -122,12 +127,18 @@ namespace mixc::lang_cxx_split{
                 }
             };
 
-            auto freex = [&](voidp ptr, uxx bytes){
+            auto freex              = [&](voidp ptr, uxx bytes){
                 if (ptr == voidp(buffer)){
                     return;
                 }
                 inc::free(ptr, inc::memory_size{bytes});
             };
+
+            uxx length              = 1/*字符数组*/;
+
+            if constexpr (inc::is_cxx<seq_t>){
+                length              = value.length();
+            }
 
             if (info.ptable = table; uxx(keep_empty_entries)){
                 the.find(value, compare, [&](uxx index){
@@ -137,14 +148,14 @@ namespace mixc::lang_cxx_split{
                                   += 1;
 
                     if (index == 0){
-                        last.pindex = index + value.length();
+                        last.pindex = index + length;
                         return;
                     }
 
                     last.pindex     = index;
                     last.plength    = 0;
                     var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
-                    last.pindex    += value.length();
+                    last.pindex    += length;
                 });
             }
             else{
@@ -154,7 +165,7 @@ namespace mixc::lang_cxx_split{
                     }
                     info.pempty_entries_count
                                    += 1;
-                    last.pindex     = index + value.length();
+                    last.pindex     = index + length;
                 });
             }
 
@@ -173,16 +184,26 @@ namespace mixc::lang_cxx_split{
     struct meta : base_t{
         using base_t::base_t;
         using the_t = core<item_t>;
-
+    private:
         template<class func_t>
         static constexpr bool is_cxx_split_callback =
             inc::can_callback<func_t, void(cxx_split_info<item_t> const &)> or
             inc::can_callback<func_t, void(cxx_split_info<item_t> &&)> or
             inc::can_callback<func_t, void(cxx_split_info<item_t>)>;
 
-        template<class func_t>
-        requires(is_cxx_split_callback<func_t>)
-        void split(final_t value, func_t const & invoke) const {
+        template<class seq_t>
+        static constexpr bool is_char_seq = 
+            inc::can_unified_seqlize<seq_t> and 
+            inc::has_cast<item_t, inc::item_origin_of<seq_t>> and
+            inc::is_cxx<seq_t> == false;
+
+        template<class type_t>
+        static constexpr bool is_pattern =
+            is_char_seq<type_t> or inc::is_cxx<type_t>;
+    public:
+        template<class func_t, class type_t = inc::initializer_list<item_t>>
+        requires(is_pattern<type_t> and is_cxx_split_callback<func_t>)
+        void split(type_t const & value, func_t const & invoke) const {
             the.split(
                 value, 
                 keep_empty_entries_t::remove_empty_entries, 
@@ -191,13 +212,18 @@ namespace mixc::lang_cxx_split{
             );
         }
 
-        template<class func_t, class cmp_t>
+        template<
+            class func_t, 
+            class cmp_t, 
+            class type_t = inc::initializer_list<item_t>
+        >
         requires(
+            is_pattern<type_t> and
             is_cxx_split_callback<func_t> and
             inc::can_compare<cmp_t, item_t>
         )
         void split(
-            final_t                 value,
+            type_t  const &         value,
             cmp_t   const &         compare, 
             func_t  const &         invoke
         ) const {
@@ -209,10 +235,10 @@ namespace mixc::lang_cxx_split{
             );
         }
 
-        template<class func_t>
-        requires(is_cxx_split_callback<func_t>)
+        template<class func_t, class type_t = inc::initializer_list<item_t>>
+        requires(is_pattern<type_t> and is_cxx_split_callback<func_t>)
         void split(
-            final_t                 value,
+            type_t  const &         value,
             keep_empty_entries_t    keep_empty_entries,
             func_t  const &         invoke
         ) const {
@@ -224,13 +250,18 @@ namespace mixc::lang_cxx_split{
             );
         }
 
-        template<class func_t, class cmp_t>
+        template<
+            class func_t, 
+            class cmp_t, 
+            class type_t = inc::initializer_list<item_t>
+        >
         requires(
+            is_pattern<type_t> and
             is_cxx_split_callback<func_t> and
             inc::can_compare<cmp_t, item_t>
         )
         void split(
-            final_t                 value,
+            type_t  const &         value,
             keep_empty_entries_t    keep_empty_entries,
             cmp_t   const &         compare,
             func_t  const &         invoke
