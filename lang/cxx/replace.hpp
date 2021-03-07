@@ -27,7 +27,12 @@ namespace mixc::lang_cxx_replace{
         using the_t = inc::cxx<item_t>;
 
         template<class cmp_t, class alloc_t>
-        auto replace(the_t old_value, the_t new_value, cmp_t const & compare, alloc_t const & alloc) const {
+        auto replace(
+            the_t           old_value, 
+            the_t           new_value, 
+            cmp_t   const & compare, 
+            alloc_t const & alloc
+        ) const {
             constexpr uxx buf_size = 128;
             using var           = inc::var_array<buf_size, inc::with_fixed_page_table>;
 
@@ -98,23 +103,26 @@ namespace mixc::lang_cxx_replace{
         using the_t = core<item_t>;
 
         template<class alloc_t>
-        requires(
-            inc::can_alloc<alloc_t, item_t>
-        )
-        final_t replace(final_t old_value, final_t new_value, alloc_t const & alloc) const {
+        requires(inc::can_alloc<alloc_t, item_t>)
+        final_t replace(
+            final_t         old_value, 
+            final_t         new_value, 
+            alloc_t const & alloc
+        ) const {
             return the.replace(old_value, new_value, inc::default_compare<item_t>, alloc);
         }
 
-        template<class cmp_t, class alloc_t>
+        template<class alloc_t, class cmp_t>
         requires(
             inc::can_compare<cmp_t, item_t> and
             inc::can_alloc<alloc_t, item_t>
         )
         final_t replace(
-            final_t                   old_value, 
-            final_t                   new_value, 
-            cmp_t   const &         compare, 
-            alloc_t const &         alloc) const {
+            final_t         old_value, 
+            final_t         new_value, 
+            cmp_t   const & compare,
+            alloc_t const & alloc
+        ) const {
             return the.replace(old_value, new_value, compare, alloc);
         }
     };
