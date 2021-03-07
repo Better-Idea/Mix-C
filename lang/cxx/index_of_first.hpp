@@ -54,7 +54,8 @@ namespace mixc::lang_cxx_index_of_first{
                 return not_exist;
             }
             while(true){
-                if (index = origin.index_of_first_char(value[miss], compare); index == not_exist){
+                if (index = origin.index_of_first_char(the_t{xref value[miss], 1}, compare); 
+                    index == not_exist){
                     break;
                 }
                 if (origin = origin.forward(miss - index); origin.length() < value.length()) {

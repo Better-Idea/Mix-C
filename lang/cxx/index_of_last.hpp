@@ -62,7 +62,8 @@ namespace mixc::lang_cxx_index_of_last{
                 return not_exist;
             }
             for (origin = origin.shorten(value.length() - 1);;){
-                if (index = origin.index_of_last_char(value[miss], compare); index == not_exist){
+                if (index = origin.index_of_last_char(the_t{xref value[miss], 1}, compare); 
+                    index == not_exist){
                     break;
                 }
 
