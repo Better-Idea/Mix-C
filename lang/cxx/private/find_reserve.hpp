@@ -15,10 +15,10 @@ namespace mixc::lang_cxx_private_find_reserve::origin{
     struct find_reserve {
         using the_t     = inc::cxx<item_t>;
 
-        template<class func_t, class cmp_t>
+        template<class seq_t, class func_t, class cmp_t>
         static uxx invoke(
             the_t               cur, 
-            the_t               value, 
+            seq_t       const & value, 
             func_t      const & match, 
             cmp_t       const & compare
         ) {

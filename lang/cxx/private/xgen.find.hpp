@@ -36,6 +36,46 @@ struct meta : base_t {
 
     template<
         class   func_t, 
+        class   seq_t       = inc::initializer_list<item_t>,
+        class   seq_item_t  = inc::item_origin_of<seq_t>,
+        auto    mode_v      = inc::itr_detect_mode<func_t, uxx>
+    >
+    requires(
+        inc::can_unified_seqlize<seq_t> and 
+        inc::has_cast<item_t, seq_item_t> and
+        inc::is_cxx<seq_t> == false and // 只要不是 cxx 字符串，就假定是字符数组
+        mode_v != inc::itr_miss_match
+    )
+    uxx xa_name(seq_t const & value, func_t const & match) const {
+        return inc::xa_name<item_t, mode_v>
+            ::invoke(thex, inc::unified_seq<seq_t>{value}, match, inc::default_compare<item_t>);
+    }
+
+    template<
+        class   func_t, 
+        class   cmp_t, 
+        class   seq_t       = inc::initializer_list<item_t>,
+        class   seq_item_t  = inc::item_origin_of<seq_t>,
+        auto    mode_v      = inc::itr_detect_mode<func_t, uxx>
+    >
+    requires(
+        inc::can_unified_seqlize<seq_t> and 
+        inc::has_cast<item_t, seq_item_t> and
+        inc::is_cxx<seq_t> == false and // 只要不是 cxx 字符串，就假定是字符数组
+        inc::can_compare<cmp_t, item_t> and 
+        mode_v != inc::itr_miss_match
+    )
+    uxx xa_name(
+        seq_t   const & value, 
+        cmp_t   const & compare,
+        func_t  const & match
+    ) const {
+        return inc::xa_name<item_t, mode_v>
+            ::invoke(thex, value, match, compare);
+    }
+
+    template<
+        class   func_t, 
         auto    mode_v  = inc::itr_detect_mode<func_t, uxx>
     >
     requires(mode_v != inc::itr_miss_match)
@@ -71,6 +111,26 @@ struct meta : base_t {
     ) const {
         return inc::find_mix<item_t, xa_find_mix_type>
             ::invoke(thex, final_t{xref value, 1}, n_th, compare);
+    }
+
+    template<
+        class   seq_t       = inc::initializer_list<item_t>,
+        class   seq_item_t  = inc::item_origin_of<seq_t>,
+        class   cmp_t       = default_cmp_t
+    >
+    requires(
+        inc::can_unified_seqlize<seq_t> and 
+        inc::has_cast<item_t, seq_item_t> and
+        inc::is_cxx<seq_t> == false and // 只要不是 cxx 字符串，就假定是字符数组
+        inc::can_compare<cmp_t, item_t>
+    )
+    uxx xa_name(
+        seq_t   const & value, 
+        ixx             n_th, 
+        cmp_t   const & compare = inc::default_compare<item_t>
+    ) const {
+        return inc::find_mix<item_t, xa_find_mix_type>
+            ::invoke(thex, inc::unified_seq<seq_t>{value}, n_th, compare);
     }
 
     template<class cmp_t = default_cmp_t>
