@@ -25,9 +25,9 @@ namespace mixc::lang_cxx_count_of{
         uxx count_of(the_t substr, cmp_t const & compare) const {
             uxx times       = 0;
 
-            the.find(substr, [&](uxx){
+            the.find(substr, compare, [&](uxx){
                 times      += 1;
-            }, compare);
+            });
             return times;
         }
 
@@ -35,9 +35,9 @@ namespace mixc::lang_cxx_count_of{
         uxx count_of(item_t chr, cmp_t const & compare) const {
             uxx times       = 0;
 
-            the.find(chr, [&](uxx){
+            the.find(chr, compare, [&](uxx){
                 times      += 1;
-            }, compare);
+            });
             return times;
         }
     };
