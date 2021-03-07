@@ -248,6 +248,11 @@ namespace mixc::lang_cxx_split::origin{
     using mixc::lang_cxx_split::cxx_split_item;
     using mixc::lang_cxx_split::cxx_split_info;
     using mixc::lang_cxx_split::keep_empty_entries;
+
+    using c08_split_item = cxx_split_item;
+    using c08_split_info = cxx_split_info<char>;
+    using c16_split_item = cxx_split_item;
+    using c16_split_info = cxx_split_info<char16_t>;
 }
 
 #endif
