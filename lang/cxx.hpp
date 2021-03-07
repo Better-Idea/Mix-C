@@ -1,5 +1,5 @@
 // 注意：cxx<item_t> 主要用作字符串处理，目前仅支持 char/char16_t 两种元素类型
-#ifdef xuser
+#ifdef  xuser
 #ifndef xusing_lang_cxx
 #include"lang/private/cxx.hpp"
 #endif

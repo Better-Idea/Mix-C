@@ -1,5 +1,5 @@
 // 注意：wxx<item_t> 主要用作字符处理，目前仅支持 char/char16_t 两种元素类型
-#ifdef xuser
+#ifdef  xuser
 #ifndef xusing_lang_wxx
 #include"lang/private/wxx.hpp"
 #endif
