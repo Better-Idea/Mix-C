@@ -192,19 +192,21 @@ namespace mixc::algo_mmu::origin {
             mask                       |= (uxx(1) << i) - 1;
 
             if (need_new_page and len >= initial_alloc_length) {
-                if (i_page % 2 == 0 and not with_fixed_page_table) { // i_page 是偶数页就需要分配新页表
-                    new_tab             = (item_t **)alloc(sizeof(voidp) * (i_page + 2));
-                    inc::copy(new_tab, tab, i_page);
-                    free(tab, sizeof(voidp) * i_page);
-                    tab                 = new_tab;
-                    tab[i_page]         = nullptr;
-                    tab[i_page + 1]     = nullptr;
-                    ptr                 = tab[i_page];
+                if (i_page % 2 == 0) { // i_page 是偶数页就需要分配新页表
+                    if constexpr (not with_fixed_page_table){
+                        new_tab         = (item_t **)alloc(sizeof(voidp) * (i_page + 2));
+                        inc::copy(new_tab, tab, i_page);
+                        free(tab, sizeof(voidp) * i_page);
+                        tab             = (new_tab);
+                    }
+
+                    tab[i_page]         = (nullptr);
+                    tab[i_page + 1]     = (nullptr);
                 }
 
-                if (tab[i_page] == nullptr) {
-                    ptr                 = (item_t *)alloc(sizeof(item_t) * len);
-                    tab[i_page]         = (ptr);
+                if (tab[i_page] == nullptr){
+                    tab[i_page]         = (item_t *)alloc(sizeof(item_t) * len);
+                    ptr                 = (tab[i_page]);
                 }
 
                 len                    += (1);
@@ -248,7 +250,7 @@ namespace mixc::algo_mmu::origin {
             i                           = (inc::index_of_last_set(len | (initial_alloc_length - 1)));
             i_page                      = (i - base);
             mask                       |= (uxx(1) << i) - 1;
-            val                         = inc::move(tab[i_page][len & mask]); // 移动语义
+            val                         = (inc::move(tab[i_page][len & mask])); // 移动语义
             tab[i_page][len & mask].~item_t();
 
             if (not need_free_page) {
