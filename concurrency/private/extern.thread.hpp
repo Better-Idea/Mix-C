@@ -35,7 +35,7 @@ namespace mixc::concurrency_thread{
 
     enum{ aligned_stack_size = 64 * 1024 };
 
-    inline auto thread_entry(voidp ptr){
+    inline auto xapi thread_entry(voidp ptr){
         auto mem                    = tllp(ptr);
         auto handler                = mem->handler = 
         
