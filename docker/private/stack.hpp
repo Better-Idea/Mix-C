@@ -109,15 +109,16 @@ namespace mixc::docker_stack{
 
         // 迭代器区
     private:
-        template<auto mode, class interator_t>
+        template<auto mode_v, class interator_t>
         void foreach_template(interator_t invoke) const {
             node.template lock<opr::foreach>([&](){
                 nodep  cur   = node.top();
                 uxx    index = 0;
-                loop_t state = loop_t::go_on;
 
-                while(cur != nullptr and state != loop_t::finish){
-                    xitr_switch(mode, index, state, invoke, *cur);
+                while(cur != nullptr){
+                    if (inc::itr_switch<mode_v>(xref index, invoke, *cur) == loop_t::finish){
+                        break;
+                    }
                     cur = cur->next;
                 }
             });

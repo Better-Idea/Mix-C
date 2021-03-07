@@ -193,16 +193,16 @@ protected:
         the.free();
     }
 
-    template<auto mode, class invoke_t>
+    template<auto mode_v, class invoke_t>
     void foreach_template(invoke_t const & invoke) const {
         loop_t state = loop_t::go_on;
 
         for(uxx i = uxx(-1), index = 0; not_exist != (i = bmp.index_of_first_set(i + 1));){
             for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next){
                 #ifdef xarg_has_val_t
-                    xitr_switch(mode, index, state, invoke, (key_t &)cur->key, (val_t &)cur->val);
+                    xitr_switch<mode_v>(xref index, xref state, invoke, (key_t &)cur->key, (val_t &)cur->val);
                 #else
-                    xitr_switch(mode, index, state, invoke, (key_t &)cur->key);
+                    xitr_switch<mode_v>(xref index, xref state, invoke, (key_t &)cur->key);
                 #endif
 
                 if (state == loop_t::finish){

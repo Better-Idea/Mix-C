@@ -68,7 +68,7 @@ namespace mixc::docker_adapter_array_access {
          *   loop_t invoke(uxx index, item_t const & value);
          * - itv 为访问区间
          */
-        template<auto mode, class invoke_t, can_interval interval_t = co>
+        template<auto mode_v, class invoke_t, can_interval interval_t = co>
         void foreach_template(invoke_t const & invoke, interval_t const & itv = co{0, -1}) const {
             itv.normalize(the.length());
 
@@ -76,12 +76,9 @@ namespace mixc::docker_adapter_array_access {
             uxx    r     = itv.right();
             uxx    step  = l <= r ? uxx(1) : uxx(-1);
             uxx    index = 0;
-            loop_t state = loop_t::go_on;
 
             for(;; l += step){
-                xitr_switch(mode, index, state, invoke, the[l]);
-
-                if (l == r or state == loop_t::finish){
+                if (inc::itr_switch<mode_v>(xref index, invoke, the[l]) == loop_t::finish or l == r){
                     break;
                 }
             }

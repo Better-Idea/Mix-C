@@ -126,22 +126,20 @@ namespace mixc::docker_queue {
 
         // 迭代器区
     private:
-        template<auto mode, class iterator_t>
+        template<auto mode_v, class iterator_t>
         void foreach_template(iterator_t const & invoke) const {
             node.template lock<opr::foreach>([&](){
-                nodep  top   = node.top();
-                nodep  cur   = top;
-                uxx    index = 0;
-                loop_t state = loop_t::go_on;
+                nodep  top      = node.top();
+                nodep  cur      = top;
+                uxx    index    = 0;
 
                 if (top == nullptr){
                     return;
                 }
 
                 do{
-                    cur = cur->next;
-                    xitr_switch(mode, index, state, invoke, *cur);
-                }while(cur != top and state != loop_t::finish);
+                    cur         = cur->next;
+                }while(inc::itr_switch<mode_v>(xref index, invoke, *cur) != loop_t::finish and cur != top);
             });
         }
     public:
