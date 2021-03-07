@@ -35,7 +35,10 @@ namespace mixc::lang_cxx{
         xprif(ptr, item_type *),
         xprif(plength, uxx)
     )
-        using im_cxx = final_t;
+        struct im_cxx{
+            static constexpr bool ensure = true;
+        };
+
         using item_t = item_type;
     public:
         xranger(item_t)

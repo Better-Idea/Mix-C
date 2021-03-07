@@ -9,7 +9,7 @@
 
 namespace mixc::meta_is_cxx::origin{
     template<class may_cxx_t>
-    concept is_cxx = sizeof(typename may_cxx_t::im_cxx) != 0;
+    concept is_cxx = may_cxx_t::im_cxx::ensure;
 }
 
 #endif
