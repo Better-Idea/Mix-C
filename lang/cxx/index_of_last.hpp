@@ -9,34 +9,33 @@
 #undef  xusing_lang_cxx
 #undef  xuser
 #define xuser mixc::lang_cxx_index_of_last::inc
-#include"define/base_type.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/initializer_list.hpp"
+#include"interface/unified_seq.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xlink.hpp"
+#include"meta/has_cast.hpp"
+#include"meta/is_cxx.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_index_of_last{
     template<class item_t>
     struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
+        using the_t             = core<item_t>;
+        using base_t            = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class cmp_t>
-        uxx index_of_last(item_t pattern, cmp_t const & compare) const {
-            return index_of_last(& pattern, 1, compare);
-        }
-
-        template<class cmp_t>
-        uxx index_of_last(item_t const * pattern, uxx length, cmp_t const & compare) const {
+        template<class seq_t, class cmp_t>
+        uxx index_of_last_char(seq_t const & seq, cmp_t const & compare) const {
             for(uxx i = the.length(); i--; ){
-                for(uxx ii = 0; ii < length; ii++){
-                    if (compare(the[i], pattern[ii]) == 0){
+                for(uxx ii = 0; ii < seq.length(); ii++){
+                    if (compare(the[i], seq[ii]) == 0){
                         return i;
                     }
                 }
@@ -45,7 +44,7 @@ namespace mixc::lang_cxx_index_of_last{
         }
 
         template<class cmp_t>
-        uxx index_of_last(the_t pattern, cmp_t const & compare) const {
+        uxx index_of_last(the_t value, cmp_t const & compare) const {
             // miss 为未匹配项的索引
             // 每次都去匹配上一次未匹配的字符 str[miss]
             // 每当在 index 处匹配，就将原串缩短 index - miss + 1
@@ -53,17 +52,17 @@ namespace mixc::lang_cxx_index_of_last{
             //            |
             //         |--+--|
             // origin "123451235"
-            // pattern        "34"
+            // value         "34"
             the_t   origin = the;
             the_t   temp   = the;
             uxx     miss   = 0;
             uxx     index;
 
-            if (origin.length() < pattern.length() or pattern.length() == 0) {
+            if (origin.length() < value.length() or value.length() == 0) {
                 return not_exist;
             }
-            for (origin = origin.shorten(pattern.length() - 1);;){
-                if (index = origin.index_of_last(pattern[miss], compare); index == not_exist){
+            for (origin = origin.shorten(value.length() - 1);;){
+                if (index = origin.index_of_last_char(value[miss], compare); index == not_exist){
                     break;
                 }
 
@@ -72,10 +71,10 @@ namespace mixc::lang_cxx_index_of_last{
                 origin        = origin.elongate(1);
                 
                 for (index = 0; ; index++){
-                    if (index == pattern.length()) {
+                    if (index == value.length()) {
                         return origin.length() - 1;
                     }
-                    if (compare(temp[index], pattern[index]) != 0) {
+                    if (compare(temp[index], value[index]) != 0) {
                         miss = index;
                         break;
                     }
@@ -83,81 +82,10 @@ namespace mixc::lang_cxx_index_of_last{
             }
             return not_exist;
         }
-
-        template<class call_t, class cmp_t>
-        requires(
-            inc::can_callback<call_t, void(uxx index)> and  // 此处保留 requires 约束以区分 index_of_last 重载
-            inc::can_compare<cmp_t, item_t>
-        )
-        void index_of_last(the_t pattern, call_t const & match, cmp_t const & compare) const {
-            for(auto cur = the;;){
-                if (uxx i = cur.index_of_last(pattern, compare); i == not_exist){
-                    return;
-                }
-                else{
-                    cur = cur.length(i);
-                    match(i);
-                }
-            }
-        }
     };
 
-    template<class final_t, class base_t, class item_t>
-    struct meta : base_t {
-        using base_t::base_t;
-        using the_t         = core<item_t>;
-        using default_cmp_t = decltype(inc::default_compare<item_t>);
-
-        template<class cmp_t = default_cmp_t>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_last(item_t pattern, cmp_t const & compare = inc::default_compare<item_t>) const {
-            return the.index_of_last(pattern, compare);
-        }
-
-        template<class cmp_t = default_cmp_t>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_last(inc::initializer_list<item_t> patterns, cmp_t const & compare = inc::default_compare<item_t>) const {
-            return the.index_of_last(patterns.begin(), patterns.size(), compare);
-        }
-
-        template<class cmp_t = default_cmp_t>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_last(final_t pattern, cmp_t const & compare = inc::default_compare<item_t>) const {
-            return the.index_of_last(pattern, compare);
-        }
-
-        template<class call_t, class cmp_t = default_cmp_t>
-        requires(
-            inc::can_callback<call_t, void(uxx index)> and
-            inc::can_compare<cmp_t, item_t>
-        )
-        void index_of_last(
-            final_t           pattern, 
-            call_t  const & match,
-            cmp_t   const & compare = inc::default_compare<item_t>) const {
-
-            the.index_of_last(pattern, match, compare);
-        }
-
-        template<class call_t, class cmp_t = default_cmp_t>
-        requires(
-            inc::can_callback<call_t, void(uxx index)> and
-            inc::can_compare<cmp_t, item_t>
-        )
-        void index_of_last(
-            item_t          value, 
-            call_t  const & match, 
-            cmp_t   const & compare = inc::default_compare<item_t>) const {
-
-            the.index_of_last(final_t{& value, 1}, match, compare);
-        }
-    };
+    #define xa_name     index_of_last
+    #include"lang/cxx/private/xgen.index_of.hpp"
 }
 
 #endif
