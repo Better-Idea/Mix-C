@@ -14,7 +14,7 @@
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
-#include"lang/cxx/index_of_first.hpp"
+#include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
 #include"memop/copy.hpp"
 #include"memory/allocator.hpp"
@@ -26,11 +26,10 @@ namespace mixc::lang_cxx_replace{
     struct core {
         using the_t = inc::cxx<item_t>;
 
-
         template<class cmp_t, class alloc_t>
         auto replace(the_t old_value, the_t new_value, cmp_t const & compare, alloc_t const & alloc) const {
             constexpr uxx buf_size = 128;
-            using va            = inc::var_array<buf_size, inc::with_fixed_page_table>;
+            using var           = inc::var_array<buf_size, inc::with_fixed_page_table>;
 
             uxx     buffer[buf_size];
             uxx *   table[40];
@@ -57,25 +56,25 @@ namespace mixc::lang_cxx_replace{
                 inc::free(ptr, inc::memory_size{bytes});
             };
 
-            the.index_of_first(old_value, [&](uxx index){
-                va::push(& page_table, & count, index - last_index, allocx, freex);
+            the.find(old_value, [&](uxx index){
+                var::push(& page_table, & count, index - last_index, allocx, freex);
                 last_index      = index + old_value.length();
             }, compare);
 
-            auto    dis         = new_value.length() - old_value.length();
-            auto    len_this    = the.length();
-            auto    len_old     = old_value.length();
-            auto    len_new     = new_value.length();
-            auto    len         = len_this + dis * count;
-            auto    buf         = alloc(len);
-            auto    ptr         = buf;
-            auto    ptr_origin  = (item_t *)the;
-            auto    ptr_new     = (item_t *)new_value;
-            auto    offset      = (uxx)0;
-            auto    copy_size   = (uxx)offset;
+            auto dis            = (new_value.length() - old_value.length());
+            auto len_this       = (the.length());
+            auto len_old        = (old_value.length());
+            auto len_new        = (new_value.length());
+            auto len            = (len_this + dis * count);
+            auto buf            = (alloc(len));
+            auto ptr            = (buf);
+            auto ptr_origin     = (item_t *)the;
+            auto ptr_new        = (item_t *)new_value;
+            auto offset         = (uxx)0;
+            auto copy_size      = (uxx)offset;
 
             for(uxx i = 0; i < count; i++){
-                offset          = va::access(page_table, i);
+                offset          = var::access(page_table, i);
                 copy_size       = offset;
                 inc::copy_with_operator(ptr, ptr_origin, copy_size);
                 ptr            += offset;
@@ -88,7 +87,7 @@ namespace mixc::lang_cxx_replace{
             }
 
             inc::copy_with_operator(ptr, ptr_origin, len_this - last_index);
-            va::clear(& page_table, & count, freex);
+            var::clear(& page_table, & count, freex);
             return the_t{ buf, len };
         }
     };

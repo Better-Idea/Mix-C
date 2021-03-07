@@ -11,7 +11,7 @@
 #define xuser mixc::lang_cxx_count_of::inc
 #include"define/base_type.hpp"
 #include"interface/can_compare.hpp"
-#include"lang/cxx/index_of_first.hpp"
+#include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -25,7 +25,7 @@ namespace mixc::lang_cxx_count_of{
         uxx count_of(the_t substr, cmp_t const & compare) const {
             uxx times       = 0;
 
-            the.index_of_first(substr, [&](uxx){
+            the.find(substr, [&](uxx){
                 times      += 1;
             }, compare);
             return times;
@@ -35,7 +35,7 @@ namespace mixc::lang_cxx_count_of{
         uxx count_of(item_t chr, cmp_t const & compare) const {
             uxx times       = 0;
 
-            the.index_of_first(chr, [&](uxx){
+            the.find(chr, [&](uxx){
                 times      += 1;
             }, compare);
             return times;
