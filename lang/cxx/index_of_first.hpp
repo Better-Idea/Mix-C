@@ -12,7 +12,12 @@
 #include"interface/can_callback.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/initializer_list.hpp"
+#include"interface/unified_seq.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xlink.hpp"
+#include"meta/has_cast.hpp"
+#include"meta/is_cxx.hpp"
+#include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -20,28 +25,23 @@
 namespace mixc::lang_cxx_index_of_first{
     template<class item_t>
     struct core : inc::cxx<item_t> {
-        using base_t = inc::cxx<item_t>;
+        using the_t     = core<item_t>;
+        using base_t    = inc::cxx<item_t>;
         using base_t::base_t;
-        using the_t = core<item_t>;
 
         core(base_t const & self) : 
             base_t(self){}
 
-        template<class cmp_t>
-        uxx index_of_first(item_t const * value, uxx length, cmp_t const & compare) const {
+        template<class seq_t, class cmp_t>
+        uxx index_of_first_char(seq_t const & seq, cmp_t const & compare) const {
             for(uxx i = 0; i < the.length(); i++){
-                for(uxx ii = 0; ii < length; ii++){
-                    if (compare(the[i], value[ii]) == 0){
+                for(uxx ii = 0; ii < seq.length(); ii++){
+                    if (compare(the[i], seq[ii]) == 0){
                         return i;
                     }
                 }
             }
             return not_exist;
-        }
-
-        template<class cmp_t>
-        uxx index_of_first(item_t value, cmp_t const & compare) const {
-            return index_of_first(xref value, 1, compare);
         }
 
         template<class compare_invoke>
@@ -54,15 +54,15 @@ namespace mixc::lang_cxx_index_of_first{
                 return not_exist;
             }
             while(true){
-                if (index = origin.index_of_first(value[miss], compare); index == not_exist){
+                if (index = origin.index_of_first_char(value[miss], compare); index == not_exist){
                     break;
                 }
                 if (origin = origin.forward(miss - index); origin.length() < value.length()) {
                     break;
                 }
-                for (index = 0; ; index++){
+                for(index = 0; ; index++){
                     if (index == value.length()) {
-                        return uxx(asciis(origin) - asciis(the));
+                        return uxx((item_t *)(origin) - (item_t *)(the));
                     }
                     if (compare(origin[index], value[index]) != 0) {
                         origin = origin.backward(miss);
@@ -73,81 +73,10 @@ namespace mixc::lang_cxx_index_of_first{
             }
             return not_exist;
         }
-
-        template<class call_t, class cmp_t>
-        requires(
-            inc::can_callback<call_t, void(uxx index)> and  // 此处保留 requires 约束以区分 index_of_first 重载
-            inc::can_compare<cmp_t, item_t>
-        )
-        void index_of_first(the_t value, call_t const & match, cmp_t const & compare) const {
-            for(auto cur = the;;){
-                if (uxx i = cur.index_of_first(value, compare); i == not_exist){
-                    return;
-                }
-                else{
-                    match(asciis(cur) - asciis(the) + i);
-                    cur = cur.backward(i + value.length());
-                }
-            }
-        }
     };
 
-    template<class final_t, class base_t, class item_t>
-    struct meta : base_t {
-        using base_t::base_t;
-        using the_t         = core<item_t>;
-        using default_cmp_t = decltype(inc::default_compare<item_t>);
-
-        template<class cmp_t = default_cmp_t>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_first(item_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
-            return the.index_of_first(& value, 1, compare);
-        }
-
-        template<class cmp_t = default_cmp_t>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_first(inc::initializer_list<item_t> values, cmp_t const & compare = inc::default_compare<item_t>) const {
-            return the.index_of_first(values.begin(), values.size(), compare);
-        }
-
-        template<class cmp_t = default_cmp_t>
-        requires(
-            inc::can_compare<cmp_t, item_t>
-        )
-        uxx index_of_first(final_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
-            return the.index_of_first(value, compare);
-        }
-
-        template<class call_t, class cmp_t = default_cmp_t>
-        requires(
-            inc::can_callback<call_t, void(uxx index)> and
-            inc::can_compare<cmp_t, item_t>
-        )
-        void index_of_first(
-            the_t           value, 
-            call_t  const & match, 
-            cmp_t   const & compare = inc::default_compare<item_t>) const {
-
-            the.index_of_first(value, match, compare);
-        }
-
-        template<class call_t, class cmp_t = default_cmp_t>
-        requires(
-            inc::can_callback<call_t, void(uxx index)> and
-            inc::can_compare<cmp_t, item_t>
-        )
-        void index_of_first(
-            item_t          value, 
-            call_t  const & match, 
-            cmp_t   const & compare = inc::default_compare<item_t>) const {
-
-            the.index_of_first(final_t{& value, 1}, match, compare);
-        }
-    };
+    #define xa_name     index_of_first
+    #include"lang/cxx/private/xgen.index_of.hpp"
 }
 
 #endif
