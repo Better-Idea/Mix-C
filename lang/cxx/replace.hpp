@@ -61,10 +61,10 @@ namespace mixc::lang_cxx_replace{
                 inc::free(ptr, inc::memory_size{bytes});
             };
 
-            the.find(old_value, [&](uxx index){
+            the.find(old_value, compare, [&](uxx index){
                 var::push(& page_table, & count, index - last_index, allocx, freex);
                 last_index      = index + old_value.length();
-            }, compare);
+            });
 
             auto dis            = (new_value.length() - old_value.length());
             auto len_this       = (the.length());
