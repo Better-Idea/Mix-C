@@ -8,6 +8,16 @@ struct meta : base_t {
 
     template<
         class   func_t, 
+        auto    mode_v  = inc::itr_detect_mode<func_t, uxx>
+    >
+    requires(mode_v != inc::itr_miss_match)
+    uxx xa_name(item_t value, func_t const & match) const {
+        return inc::xa_name<item_t, mode_v>
+            ::invoke(thex, final_t{xref value, 1}, match, inc::default_compare<item_t>);
+    }
+
+    template<
+        class   func_t, 
         class   cmp_t   = default_cmp_t, 
         auto    mode_v  = inc::itr_detect_mode<func_t, uxx>
     >
@@ -17,11 +27,21 @@ struct meta : base_t {
     )
     uxx xa_name(
         item_t          value, 
-        func_t  const & match, 
-        cmp_t   const & compare = inc::default_compare<item_t>
+        cmp_t   const & compare,
+        func_t  const & match
     ) const {
         return inc::xa_name<item_t, mode_v>
             ::invoke(thex, final_t{xref value, 1}, match, compare);
+    }
+
+    template<
+        class   func_t, 
+        auto    mode_v  = inc::itr_detect_mode<func_t, uxx>
+    >
+    requires(mode_v != inc::itr_miss_match)
+    uxx xa_name(final_t value, func_t const & match) const {
+        return inc::xa_name<item_t, mode_v>
+            ::invoke(thex, value, match, inc::default_compare<item_t>);
     }
 
     template<
@@ -35,8 +55,8 @@ struct meta : base_t {
     )
     uxx xa_name(
         final_t         value, 
-        func_t  const & match, 
-        cmp_t   const & compare = inc::default_compare<item_t>
+        cmp_t   const & compare,
+        func_t  const & match
     ) const {
         return inc::xa_name<item_t, mode_v>
             ::invoke(thex, value, match, compare);
