@@ -57,8 +57,8 @@ namespace mixc::lang_cxx_split{
     xstruct(
         xtmpl(cxx_split_info, item_t),
         xpubb(inc::disable_copy),
-        xprif(pmatch_count, uxx),
         xprif(psegment_count, uxx),
+        xprif(pempty_entries_count, uxx),
         xprif(ptable, cxx_split_item **),
         xprif(pcontent, item_t const *)
     )
@@ -67,8 +67,8 @@ namespace mixc::lang_cxx_split{
         template<class> friend struct core;
 
         constexpr cxx_split_info():
-            pmatch_count(0),
             psegment_count(0),
+            pempty_entries_count(0),
             ptable(nullptr),
             pcontent(nullptr){
         }
@@ -78,11 +78,8 @@ namespace mixc::lang_cxx_split{
             inc::copy(xref the, self);
         }
 
-        xpubget(match_count)
         xpubget(segment_count)
-        xpubgetx(empty_entries_count, uxx){
-            return pmatch_count - psegment_count;
-        }
+        xpubget(empty_entries_count)
     public:
         cxx_split_item segment_of(uxx index) const {
             return var_array::access(ptable, index);
@@ -133,9 +130,11 @@ namespace mixc::lang_cxx_split{
             };
 
             if (info.ptable = table; uxx(keep_empty_entries)){
-                info.pmatch_count   = the.find(value, compare, [&](uxx index){
+                the.find(value, compare, [&](uxx index){
                     last.plength    = index - last.pindex;
                     var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
+                    info.pempty_entries_count
+                                  += 1;
 
                     if (index == 0){
                         last.pindex = index + value.length();
@@ -149,10 +148,12 @@ namespace mixc::lang_cxx_split{
                 });
             }
             else{
-                info.pmatch_count   = the.find(value, compare, [&](uxx index){
+                the.find(value, compare, [&](uxx index){
                     if (last.plength = index - last.pindex; last.plength != 0){
                         var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
                     }
+                    info.pempty_entries_count
+                                   += 1;
                     last.pindex     = index + value.length();
                 });
             }
@@ -164,7 +165,7 @@ namespace mixc::lang_cxx_split{
 
             info.pcontent           = (item_t *)the;
             invoke(inc::move(info));
-            var_array::clear(xref info.ptable, xref info.pmatch_count, freex);
+            var_array::clear(xref info.ptable, xref info.psegment_count, freex);
         }
     };
 
