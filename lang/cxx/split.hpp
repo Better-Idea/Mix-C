@@ -199,7 +199,9 @@ namespace mixc::lang_cxx_split{
 
         template<class type_t>
         static constexpr bool is_pattern =
-            is_char_seq<type_t> or inc::is_cxx<type_t>;
+            is_char_seq<type_t> or 
+            inc::is_cxx<type_t> or 
+            inc::has_cast<item_t, type_t>;
     public:
         template<class func_t, class type_t = inc::initializer_list<item_t>>
         requires(is_pattern<type_t> and is_cxx_split_callback<func_t>)
