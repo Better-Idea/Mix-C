@@ -3,6 +3,9 @@
 #pragma push_macro("xuser")  
 #undef  xuser
 #define xuser mixc::memory_private_tiny_allocator::inc
+#include"concurrency/lock/atom_load.hpp"
+#include"concurrency/lock/atom_store.hpp"
+#include"concurrency/lock/atom_swap.hpp"
 #include"define/base_type.hpp"
 #include"utils/bits_indicator.hpp"
 #include"macro/xexport.hpp"
@@ -14,11 +17,20 @@
 #include"instruction/bit_test_and_reset.hpp"
 #pragma pop_macro("xuser")
 
+namespace mixc::memory_private_tiny_allocator::origin{
+    struct tiny_allocator;
+}
+
 namespace mixc::memory_private_tiny_allocator{
     typedef struct node{
-        node * previous;
-        node * next;
+        node      * previous;
+        node      * next;
     } * nodep;
+
+    typedef struct node_free{
+        node_free * next;
+        uxx         bytes;
+    } * node_freep;
 
     typedef struct node_plus : node{
         uxx    blocks;
@@ -40,6 +52,9 @@ namespace mixc::memory_private_tiny_allocator{
         // 每次从底层分配器中获取一个页来管理，每一个页都是按 page_bytes 对齐
         page_bytes              = scale_two * scale,
 
+        // 页对齐大小
+        page_align_size         = page_bytes,
+
         // 用于获取页内偏移
         mask_to_get_offset      = page_bytes - 1,
 
@@ -48,14 +63,18 @@ namespace mixc::memory_private_tiny_allocator{
 
         // 页首部位指示器位数
         max_bits                = page_bytes / scale_one,
+
+        // 跳过检查的次数
+        // 从其他线程推送过来的释放请求
+        max_skip_times          = 8,
     };
 
     typedef struct page_header{
     private:
-        u08 bmp[max_bits / 8] = {0};
+        u08                         bmp[max_bits / 8] = {0};
         struct pair{ nodep begin = nullptr; uxx length = 0; };
     public:
-        page_header();
+        page_header(origin::tiny_allocator * owner);
 
         bool get(uxx index){
             index += 1;
@@ -130,19 +149,23 @@ namespace mixc::memory_private_tiny_allocator{
             reset(index + length - 1);
         }
 
-        page_header * previous;
-        page_header * next;
+        page_header               * previous;
+        page_header               * next;
+        origin::tiny_allocator    * owner;
+        voidp                     * reserved; // 对齐
     } * page_headerp;
 
     enum : uxx{
         // 一个页一共有多少可用块
-        page_block_count        = (page_bytes - sizeof(page_header)) / scale_one,
+        blocks_per_page         = (page_bytes - sizeof(page_header)) / scale_one,
     };
 
-    inline page_header::page_header(){
+    inline page_header::page_header(origin::tiny_allocator * owner):
+        owner(owner){
+
         // 设置哨兵位
         set(uxx(-1));
-        set(page_block_count);
+        set(blocks_per_page);
     }
 
     // 必须是 2 的次幂
@@ -178,7 +201,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
                     return take_out(closest_index, require_size_index, slot, free_list_array);
                 }
             }
-            if (require_size_index < page_block_count){
+            if (require_size_index < blocks_per_page){
                 if (auto closest_index = slot_plus.index_of_first_set(require_size_index / boundary); closest_index != not_exist){
                     return take_out(closest_index, require_size_index, slot_plus, free_list_array_plus);
                 }
@@ -191,38 +214,55 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 return;
             }
 
-            auto return_size_index  = (bytes - 1) / scale_one;
-            pused_bytes            -= (bytes);
-            pneed_free_count       -= (1);
+            auto   scale_index      = (bytes - 1) / scale_one; 
+            auto   cur              = (nodep)ptr;
+            auto & head             = (get_page_header_by(cur));
 
-            if (return_size_index >= page_block_count){
+            // 超出管理的大小
+            if (scale_index >= blocks_per_page){
                 palive_pages       -= 1;
                 inc::mfree(ptr);
                 return;
             }
 
-            auto   cur              = nodep(ptr);
-            auto & bmp              = get_page_header_by(cur);
-            auto   free_block       = cur;
-            auto   free_size        = return_size_index + 1;
-            auto   left             = bmp.left_free_block_of(cur);
-            auto   right            = bmp.right_free_block_of(cur, free_size);
+            // 如果该内存属于其他线程，就推送到分配它的线程
+            if (auto owner = head.owner; owner != this){
+                owner->async_push(cur, bytes);
+                return;
+            }
 
-            if (bmp.mark_free(cur, return_size_index + 1); left.begin != nullptr){
-                bmp.mark_free(left.begin, left.length);
+            // 处理其他线程归还的内存
+            this->async_pop();
+            this->free_core(ptr, bytes);
+        }
+
+    private:
+        void free_core(voidp ptr, uxx bytes){
+            auto   cur              = (nodep)ptr;
+            auto & head             = (get_page_header_by(cur));
+            auto   scale_index      = (bytes - 1) / scale_one;
+            auto   free_block       = (cur);
+            auto   free_size        = (scale_index + 1);
+            auto   left             = (head.left_free_block_of(cur));
+            auto   right            = (head.right_free_block_of(cur, free_size));
+            pused_bytes            -= (bytes);
+            pneed_free_count       -= (1);
+
+            if (head.mark_free(cur, scale_index + 1); left.begin != nullptr){
+                head.mark_free(left.begin, left.length);
                 free_block          = left.begin;
                 free_size          += left.length;
                 remove(left.begin, left.length);
             }
             if (right.begin != nullptr){
                 free_size          += right.length;
-                bmp.mark_free(right.begin, right.length);
+                head.mark_free(right.begin, right.length);
                 remove(right.begin, right.length);
             }
 
             // 整个页都空闲时就释放该页
-            if (free_size == page_block_count){
-                origin_free(xref bmp);
+            if (free_size == blocks_per_page){
+                origin_free(xref head);
                 return;
             }
 
@@ -230,7 +270,89 @@ namespace mixc::memory_private_tiny_allocator::origin{
             append(free_block, free_size);
         }
 
-    private:
+        void async_push(voidp mem, uxx bytes){
+            auto self               = node_freep(mem);
+            auto prev               = node_freep(nullptr);
+            self->next              = nullptr;
+            self->bytes             = bytes;
+            prev                    = inc::atom_swap(xref async_free_list_tail, self);
+
+            if (prev == nullptr){
+                inc::atom_store(xref async_free_list_head, self);
+            }
+            else{
+                inc::atom_store(xref prev->next, self);
+            }
+        }
+
+        void async_pop(){
+            // 忽略一定次数后就响应一下
+            // 尽可能减少无效的原子操作
+            if (skip_count += 1; skip_count < max_skip_times){
+                return;
+            }
+
+            auto next               = node_freep(nullptr);
+            auto null               = node_freep(nullptr);
+            auto head               = node_freep(nullptr);
+            skip_count              = 0;
+
+            // 只要出现了当前要释放节点的下一个节点为 nullptr，但它又不是最后一个节点
+            // 此时属于链接未完成的情况，我们可以先不管它
+            while(async_pend_head != async_pend_tail){
+                // 可能其他 cpu 缓存信息还未同步到当前 cpu
+                // 所以需要在读到 nullptr 的 next 时还需要通过原子操作再读一次
+                // 这里事先不用原子操作读取是为了避免性能损失
+                if (next = async_pend_head->next; next == nullptr){
+                    if (next = inc::atom_load(xref async_pend_head->next);
+                        next == nullptr){
+                        return;
+                    }
+                }
+
+                free_core(async_pend_head, async_pend_head->bytes);
+                async_pend_head     = next;
+            }
+
+            // 拿走首节点
+            if (head = inc::atom_swap(xref async_free_list_head, null); 
+                head == nullptr){
+                return;
+            }
+
+            while(true){
+                // 如果存在下一个节点就释放当前节点
+                if (next = head->next; next != nullptr){
+                    free_core(head, head->bytes);
+                    head            = next;
+                    continue;
+                }
+
+                // 竞争尾节点
+                // 如果其他线程没有获取到 async_free_list_tail
+                // 那么就不会设置 async_free_list_tail->next
+                // 因为 async_free_list_tail is head 
+                // 所以我们可以安全的释放掉该节点
+                if (next = inc::atom_swap(xref async_free_list_tail, null); 
+                    next == head){
+                    free_core(head, head->bytes);
+                    return;
+                }
+                // 此时处于其他线程已经获得了 async_free_list_tail
+                // 但还未修改 async_free_list_tail->next 的状态
+                // 此时将产生待定的链表（未完成链接），需要下一次进入该函数时先处理它
+                // 由于我们把 async_free_list_tail 置 null
+                // 导致其他线程认为现在是空节点的状态
+                // 第一个设置 async_free_list_tail 的其他线程会再设置 async_free_list_head
+                // 此时我们将有两组待释放的链表
+                else{
+                    async_pend_head = head;
+                    async_pend_tail = next;
+                    return;
+                }
+            }
+        }
+
         void origin_free(page_header * ptr){
             auto next      = ptr->next;
             auto prev      = ptr->previous;
@@ -251,13 +373,13 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
         voidp origin_alloc(uxx require_size_index){
             // 超出管理范畴
-            if (palive_pages += 1; require_size_index > page_block_count){
+            if (palive_pages += 1; require_size_index >= blocks_per_page){
                 return inc::malloc((require_size_index + 1) * scale_one);
             }
 
-            auto meta   = inc::malloc_aligned(page_bytes, page_bytes);
-            auto page   = xnew(meta) page_header;
-            auto first  = page->first_block();
+            auto meta                   = inc::malloc_aligned(page_bytes, page_align_size);
+            auto page                   = xnew(meta) page_header(this/*owner*/);
+            auto first                  = page->first_block();
 
             if (page_list == nullptr){
                 page_list               = page;
@@ -270,7 +392,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 first->previous         = page;
                 page->next              = first;
             }
-            return split(first, page_block_count, require_size_index);
+            return split(first, blocks_per_page, require_size_index);
         }
 
         voidp take_out(uxx closest_index, uxx require_size_index, indicator_t & slot, node ** free_list){
@@ -371,10 +493,15 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
         indicator_t     slot;
         indicator_t     slot_plus;
-        uxx             palive_pages        = 0;
-        uxx             pused_bytes         = 0;
-        uxx             pneed_free_count    = 0;
-        page_header *   page_list           = nullptr;
+        uxx             palive_pages            = 0;
+        uxx             pused_bytes             = 0;
+        uxx             pneed_free_count        = 0;
+        uxx             skip_count              = 0;
+        page_header *   page_list               = nullptr;
+        node_free   *   async_pend_head         = nullptr;
+        node_free   *   async_pend_tail         = nullptr;
+        node_free   *   async_free_list_head    = nullptr;
+        node_free   *   async_free_list_tail    = nullptr;
         node        *   free_list_array[scale];
         node        *   free_list_array_plus[scale];
     };

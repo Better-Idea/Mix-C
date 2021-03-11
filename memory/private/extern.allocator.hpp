@@ -43,7 +43,7 @@ namespace mixc::memory_alloctor::origin{
 #include"memory/private/tiny_allocator.hpp"
 
 namespace mixc::memory_alloctor{
-    inline thread_local inc::tiny_allocator mem;
+    thread_local inline inc::tiny_allocator mem;
 
     extern voidp tiny_alloc(uxx bytes){
         return mem.alloc(bytes);
