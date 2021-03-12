@@ -3,9 +3,14 @@
 #pragma push_macro("xuser")  
 #undef  xuser
 #define xuser mixc::memory_private_tiny_allocator::inc
+#include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_store.hpp"
+#include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_swap.hpp"
+#include"concurrency/lock/mutex.hpp"
+#include"concurrency/thread.hpp"
+#include"concurrency/thread_self.hpp"
 #include"define/base_type.hpp"
 #include"utils/bits_indicator.hpp"
 #include"macro/xexport.hpp"
@@ -106,7 +111,7 @@ namespace mixc::memory_private_tiny_allocator{
             }
             else{
                 auto len = *uxxp(cur - 1);
-                return pair{ cur - len ,len };
+                return pair{ cur - len, len };
             }
         }
 
@@ -173,10 +178,87 @@ namespace mixc::memory_private_tiny_allocator{
 }
 
 namespace mixc::memory_private_tiny_allocator::origin{
+    static inline tiny_allocator        * daemon  = nullptr;
+    static inline inc::mutex              mutex;
+    static inline uxx                     remainder_alive_pages;
+    static inline uxx                     remainder_used_bytes;
+    static inline uxx                     remainder_need_free_count;
+
     struct tiny_allocator{
     private:
         using indicator_t = inc::bits_indicator<scale>;
+
+        static void do_clean(){
+            // 无需析构，所以使用 mirror
+            u08  mirror[sizeof(tiny_allocator)];
+            auto mem                    = xnew(mirror) tiny_allocator();
+            auto new_alive_pages        = uxx(0);
+            auto new_used_bytes         = uxx(0);
+            auto new_need_free_count    = uxx(0);
+
+            for(inc::atom_store(xref daemon, mem);;){
+                inc::thread_self::sleep(10);
+
+                // 先获取 remainder_used_bytes
+                // 与 ~tiny_allocator 保持协调
+                if (new_used_bytes = inc::atom_load(xref remainder_used_bytes);
+                    new_used_bytes == 0 and mem->pused_bytes == 0){
+                    continue;
+                }
+
+                new_alive_pages         = inc::atom_load(xref remainder_alive_pages);
+                new_need_free_count     = inc::atom_load(xref remainder_need_free_count);
+                mem->palive_pages      += new_alive_pages;
+                mem->pused_bytes       += new_used_bytes;
+                mem->pneed_free_count  += new_need_free_count;
+                inc::atom_sub(xref remainder_alive_pages, new_alive_pages);
+                inc::atom_sub(xref remainder_used_bytes, new_used_bytes);
+                inc::atom_sub(xref remainder_need_free_count, new_need_free_count);
+
+                // 先处理计数器，后处理释放操作
+                mem->async_pop_core();
+            }
+        }
     public:
+        ~tiny_allocator(){
+            if (need_free_count() == 0){
+                return;
+            }
+
+            if (mutex.try_lock() == inc::lock_state_t::accept){
+                inc::thread clean_daemon = xdetached{
+                    tiny_allocator::do_clean();
+                };
+            }
+
+            auto mem        = (tiny_allocator *)nullptr;
+            auto head       = (page_list);
+            auto cur        = (page_list);
+
+            while(true){
+                if (mem = inc::atom_load(xref daemon); mem != nullptr){
+                    break;
+                }
+                inc::thread_self::yield();
+            }
+
+            do{
+                inc::atom_store(xref cur->owner, mem);
+                cur         = cur->next;
+            }while(cur != head);
+
+            // 再做一次清理，再转交所有权前可能其他线程推送释放内容
+            // 内部会再计算 palive_pages、pused_bytes、pneed_free_count 这些字段
+            this->async_pop_core();
+
+            // 等 async_pop 处理完成后再计算
+            inc::atom_add(xref remainder_alive_pages, palive_pages);
+            inc::atom_add(xref remainder_need_free_count, pneed_free_count);
+
+            // 最后设置，确保读到该值时之前的 remainder_alive_pages 和 remainder_need_free_count 都已有效
+            inc::atom_add(xref remainder_used_bytes, pused_bytes);
+        }
+
         uxx used_bytes() {
             return pused_bytes;
         }
@@ -191,8 +273,8 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
         voidp alloc(uxx bytes){
             auto require_size_index = (bytes - 1) / scale_one;
-            pused_bytes            += bytes;
-            pneed_free_count       += 1;
+            pused_bytes            += (bytes);
+            pneed_free_count       += (1);
 
             // slot 中置位位表示空闲的块
             // 选择最接近但不小于所需大小的块
@@ -217,23 +299,31 @@ namespace mixc::memory_private_tiny_allocator::origin{
             auto   scale_index      = (bytes - 1) / scale_one; 
             auto   cur              = (nodep)ptr;
             auto & head             = (get_page_header_by(cur));
+            auto   owner            = (head.owner);
 
             // 超出管理的大小
             if (scale_index >= blocks_per_page){
                 palive_pages       -= 1;
+                pneed_free_count   -= 1;
+                pused_bytes        -= bytes;
                 inc::mfree(ptr);
                 return;
             }
 
-            // 如果该内存属于其他线程，就推送到分配它的线程
-            if (auto owner = head.owner; owner != this){
-                owner->async_push(cur, bytes);
+            // 处理其他线程归还的内存
+            if (owner == this){
+                this->async_pop();
+                this->free_core(ptr, bytes);
                 return;
             }
+            
+            // 分配该内存的线程可能已经退出并将所有权转交给后台内存清理线程
+            // cpu 读了一次 head.owner 后可能会被缓存下来
+            // 所以该改动需要原子操作才能读取到
+            owner                   = inc::atom_load(xref head.owner);
 
-            // 处理其他线程归还的内存
-            this->async_pop();
-            this->free_core(ptr, bytes);
+            // 如果该内存属于其他线程，就推送到分配它的线程
+            owner->async_push(cur, bytes);
         }
 
     private:
@@ -288,14 +378,16 @@ namespace mixc::memory_private_tiny_allocator::origin{
         void async_pop(){
             // 忽略一定次数后就响应一下
             // 尽可能减少无效的原子操作
-            if (skip_count += 1; skip_count < max_skip_times){
-                return;
+            if (skip_count += 1; skip_count == max_skip_times){
+                skip_count          = 0;
+                async_pop_core();
             }
+        }
 
+        void async_pop_core(){
             auto next               = node_freep(nullptr);
             auto null               = node_freep(nullptr);
             auto head               = node_freep(nullptr);
-            skip_count              = 0;
 
             // 只要出现了当前要释放节点的下一个节点为 nullptr，但它又不是最后一个节点
             // 此时属于链接未完成的情况，我们可以先不管它
@@ -386,11 +478,11 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 page->next              = page->previous = page;
             }
             else{
-                auto first              = page_list;
-                first->previous->next   = page;
-                page->previous          = first->previous;
-                first->previous         = page;
-                page->next              = first;
+                auto head               = page_list;
+                head->previous->next    = page;
+                page->previous          = head->previous;
+                head->previous          = page;
+                page->next              = head;
             }
             return split(first, blocks_per_page, require_size_index);
         }
