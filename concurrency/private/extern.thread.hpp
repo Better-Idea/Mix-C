@@ -76,11 +76,17 @@ namespace mixc::concurrency_thread{
         lambda.keep_args_copy_to(mem->lambda_buf);
 
         #if xis_windows
-            mem->sem_for_join       = CreateSemaphoreA(nullptr, 0/*初始值*/, 1/*最大值*/, nullptr);
+            if (not lambda.is_detached()) {
+                mem->sem_for_join   = CreateSemaphoreA(nullptr, 0/*初始值*/, 1/*最大值*/, nullptr);
+            }
+            else {
+                mem->sem_for_join   = nullptr;
+            }
+
             mem->handler            = CreateThread(nullptr, aligned_stack_size, & thread_entry, mem, 0/*立即运行*/, nullptr);
             create_fail             = mem->handler == INVALID_HANDLE_VALUE;
 
-            if (create_fail){
+            if (create_fail and mem->sem_for_join){
                 CloseHandle(mem->sem_for_join);
             }
         #else
@@ -114,13 +120,13 @@ namespace mixc::concurrency_thread::origin{
         }
 
         #if xis_windows
-            DWORD ret_code; 
-            WaitForSingleObject(h->sem_for_join, INFINITE);
-
-            while(GetExitCodeThread(h->handler, & ret_code) == STILL_ACTIVE){
+            for(WaitForSingleObject(h->sem_for_join, INFINITE);
+                GetExitCodeThread(h->handler, nullptr) == STILL_ACTIVE;){
                 inc::thread_self::yield();
             }
+
             CloseHandle(h->handler);
+            CloseHandle(mem->sem_for_join);
         #elif xis_linux
             pthread_join(h->handler, nullptr);
         #endif
