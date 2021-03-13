@@ -179,7 +179,6 @@ namespace mixc::memory_private_tiny_allocator{
 
 namespace mixc::memory_private_tiny_allocator::origin{
     static inline tiny_allocator        * daemon  = nullptr;
-    static inline inc::mutex              mutex;
     static inline uxx                     remainder_alive_pages;
     static inline uxx                     remainder_used_bytes;
     static inline uxx                     remainder_need_free_count;
@@ -187,7 +186,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
     struct tiny_allocator{
     private:
         using indicator_t = inc::bits_indicator<scale>;
-
+    public:
         static void do_clean(){
             // 无需析构，所以使用 mirror
             u08  mirror[sizeof(tiny_allocator)];
@@ -216,19 +215,13 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 inc::atom_sub(xref remainder_need_free_count, new_need_free_count);
 
                 // 先处理计数器，后处理释放操作
-                mem->async_pop_core();
+                mem->async_pop();
             }
         }
-    public:
+
         ~tiny_allocator(){
             if (need_free_count() == 0){
                 return;
-            }
-
-            if (mutex.try_lock() == inc::lock_state_t::accept){
-                inc::thread clean_daemon = xdetached{
-                    tiny_allocator::do_clean();
-                };
             }
 
             auto mem        = (tiny_allocator *)nullptr;
@@ -249,7 +242,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
             // 再做一次清理，再转交所有权前可能其他线程推送释放内容
             // 内部会再计算 palive_pages、pused_bytes、pneed_free_count 这些字段
-            this->async_pop_core();
+            this->async_pop();
 
             // 等 async_pop 处理完成后再计算
             inc::atom_add(xref remainder_alive_pages, palive_pages);
@@ -312,7 +305,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
             // 处理其他线程归还的内存
             if (owner == this){
-                this->async_pop();
+                this->async_pop_lazily();
                 this->free_core(ptr, bytes);
                 return;
             }
@@ -375,16 +368,16 @@ namespace mixc::memory_private_tiny_allocator::origin{
             }
         }
 
-        void async_pop(){
+        void async_pop_lazily(){
             // 忽略一定次数后就响应一下
             // 尽可能减少无效的原子操作
             if (skip_count += 1; skip_count == max_skip_times){
                 skip_count          = 0;
-                async_pop_core();
+                async_pop();
             }
         }
 
-        void async_pop_core(){
+        void async_pop(){
             auto next               = node_freep(nullptr);
             auto null               = node_freep(nullptr);
             auto head               = node_freep(nullptr);
@@ -597,6 +590,18 @@ namespace mixc::memory_private_tiny_allocator::origin{
         node        *   free_list_array[scale];
         node        *   free_list_array_plus[scale];
     };
+
+    static inline auto do_clean(){
+        return xdetached{
+            tiny_allocator::do_clean();
+        };
+    }
+
+    // 兼容 windows，linux 端不会如下问题
+    // 后台内存清理守护线程无法在 tiny_allocator::~tiny_allocator 中运行，所以放到全局，可能原因：
+    // - 在子线程中使用了 thread_local
+    // - 使用了对齐内存分配
+    static inline inc::thread clean_daemon      = do_clean();
 }
 
 #endif
