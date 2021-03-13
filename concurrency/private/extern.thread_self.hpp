@@ -36,7 +36,7 @@ namespace mixc::concurrency_thread_self::origin{
 
     void thread_self::yield(){
         #if xis_windows
-            Sleep(0);
+            SwitchToThread();
         #elif xis_linux
             pthread_yield();
         #else
