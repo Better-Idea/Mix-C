@@ -52,7 +52,7 @@ namespace mixc::concurrency_thread{
                 }
             };
 
-            auto args_bytes         = inc::is_empty_class<lambda_t> ? sizeof(lambda_t) : 0;
+            auto args_bytes         = inc::is_empty_class<lambda_t> ? 0 : sizeof(lambda_t);
             auto total_bytes        = inc::memory_size{ args_bytes + sizeof(clambda_meta) };
 
             if (plambda = inc::alloc<clambda_meta>(total_bytes);
