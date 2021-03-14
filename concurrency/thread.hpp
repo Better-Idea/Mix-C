@@ -11,77 +11,123 @@
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xstruct.hpp"
+#include"memory/allocator.hpp"
 #include"meta/is_empty_class.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::concurrency_thread{
-    struct thread_local_layout;
+    using lambda_call = void(*)(voidp lambda);
 
-    struct clambda{
+    xstruct(
+        xname(clambda_meta),
+        xpubf(bytes,        uxx),
+        xpubf(is_detached,  bool),
+        xpubf(call,         lambda_call),
+        xpubf(release,      lambda_call),
+        xpubf(sem,          voidp),
+        xpubf(handler,      voidp)
+
+        // this + 1 定位到 lambda 参数的偏移
+    ) $
+
+    xstruct(
+        xname(clambda),
+        xprif(plambda, clambda_meta *)
+    )
+        clambda() : plambda(nullptr){}
+        clambda(clambda const &) = default;
+
         template<class lambda_t>
         requires(inc::can_callback<lambda_t, void()>)
-        clambda(lambda_t const & lambda, bool is_detached) : im_detached(is_detached){
+        clambda(lambda_t const & lambda, bool is_detached){
             struct closure{
-                static void copy(voidp local, voidp lambda){
-                    xnew(local) lambda_t(
-                        inc::move(*(lambda_t *)lambda)
-                    );
-                }
+                using lp = lambda_t *;
 
                 static void call(voidp lambda){
-                    ((lambda_t *)lambda)->operator()();
+                    lp(lambda)->operator()();
                 }
 
                 static void release(voidp lambda){
-                    ((lambda_t *)lambda)->~lambda_t();
+                    lp(lambda)->~lambda_t();
                 }
             };
 
-            this->lambda_arg_size   = inc::is_empty_class<lambda_t> ? 0 : sizeof(lambda_t);
-            this->lambda            = & const_cast<lambda_t &>(lambda);
-            this->copy              = & closure::copy;
-            this->call              = & closure::call;
-            this->release           = & closure::release;
+            auto args_bytes         = inc::is_empty_class<lambda_t> ? sizeof(lambda_t) : 0;
+            auto total_bytes        = inc::memory_size{ args_bytes + sizeof(clambda_meta) };
+
+            if (plambda = inc::alloc<clambda_meta>(total_bytes);
+                plambda == nullptr){
+                im_initialize_fail();
+                return;
+            }
+
+            xnew(plambda + 1) lambda_t(
+                inc::move(lambda)
+            );
+
+            plambda->bytes          = total_bytes;
+            plambda->is_detached    = is_detached;
+            plambda->call           = & closure::call;
+            plambda->release        = & closure::release;
+            plambda->sem            = nullptr;
+            plambda->handler        = nullptr;
         }
 
         void invoke() const {
-            call(lambda);
+            auto call               = plambda->call;
+            auto args               = plambda + 1;
+            call(args);
         }
 
-        void release_bind_args() const {
-            release(lambda);
-        }
-
-        void keep_args_copy_to(voidp local) const {
-            copy(local, lambda);
+        void release() const {
+            auto call               = plambda->release;
+            auto args               = plambda + 1;
+            call(args);
+            inc::free(plambda, inc::memory_size{plambda->bytes});
+            plambda                 = nullptr;
         }
 
         bool is_detached() const {
-            return im_detached;
+            return plambda->is_detached;
         }
 
-        uxx args_bytes() const {
-            return lambda_arg_size;
+        void semaphore_for_join(voidp value){
+            plambda->sem            = value;
         }
-    private:
-        bool   im_detached;
-        u16    lambda_arg_size;
-        voidp  lambda;
-        void(* copy)   (voidp local, voidp lambda);
-        void(* call)   (voidp lambda);
-        void(* release)(voidp lambda);
-    };
 
-    template<bool is_detached>
+        voidp semaphore_for_join() const {
+            return plambda->sem;
+        }
+
+        void handler(voidp value){
+            plambda->handler        = value;
+        }
+
+        voidp handler() const {
+            return plambda->handler;
+        }
+
+        bool is_initialize_fail() const {
+            return uxx(plambda) == not_exist;
+        }
+
+        void im_initialize_fail() const {
+            // 不提供 is_initialize_fail(false) 接口
+            // 会覆盖 clambda::plambda 原有指针的内容
+            plambda                 = (clambda_meta *)(not_exist);
+        }
+
+        bool is_valid() const {
+            return plambda != nullptr && uxx(plambda) != not_exist;
+        }
+    $
+
+    template<bool is_detached_v>
     struct sugar{
         template<class lambda_t>
         clambda operator *(lambda_t const & lambda){
-            return { lambda, is_detached };
+            return { lambda, is_detached_v };
         }
-    };
-
-    struct helper{
-        static void thread_create(thread_local_layout ** mem, clambda const & lambda);
     };
 }
 
@@ -89,21 +135,16 @@ namespace mixc::concurrency_thread::origin{
     xstruct(
         xname(thread),
         xpubb(inc::disable_copy),
-        xprif(mem, thread_local_layout *)
+        xprif(plambda, clambda)
     )
-        friend helper;
-
-        thread() : mem(nullptr) {}
-
-        thread(thread && self) : 
-            mem(inc::atom_swap<thread_local_layout *>(xref self.mem, nullptr)) {
-        }
-
-        thread(clambda const & lambda){
-            helper::thread_create(xref mem, lambda);
-        }
-
+        thread()                = default;
+        thread(thread && self)  = default;
+        thread(clambda && lambda);
        ~thread();
+
+        bool is_initialize_fail() const {
+            return plambda.is_initialize_fail();
+        }
     $
 }
 
