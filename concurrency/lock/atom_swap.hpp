@@ -22,12 +22,12 @@ namespace mixc::concurrency_lock_atom_swap{
         using up_t  = u0_t *;
 
         #if xis_msvc_native
-            return (type_t)atom_swap((up_t)(left), (u0_t)(right), sizeof(u0_t));
+            u0_t r  = (u0_t)atom_swap((up_t)(left), *(u0_t *)(& right), sizeof(u0_t));
         #else
             u0_t r;
             __atomic_exchange((up_t)left, (up_t)& right, & r, 5);
-            return *(type_t *)& r;
         #endif
+        return *(type_t *)& r;
     }
 }
 
