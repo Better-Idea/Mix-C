@@ -598,9 +598,8 @@ namespace mixc::memory_private_tiny_allocator::origin{
     }
 
     // 兼容 windows，linux 端不会如下问题
-    // 后台内存清理守护线程无法在 tiny_allocator::~tiny_allocator 中运行，所以放到全局，可能原因：
-    // - 在子线程中使用了 thread_local
-    // - 使用了对齐内存分配
+    // 在 tiny_allocator::~tiny_allocator 创建内存清理守护线程的父线程没有退出 thread_local 析构的代码段时
+    // 守护线程将无法得到执行，为了避免这一问题，所以将它放到全局
     static inline inc::thread clean_daemon      = do_clean();
 }
 
