@@ -102,31 +102,31 @@ namespace mixc::memory_private_tiny_allocator{
             return node - nodep(this + 1);
         }
 
-        pair left_free_block_of(nodep cur){
-            if (uxx index = index_of(cur); get(index - 1)){
+        pair left_free_block_of(nodep current){
+            if (uxx index = index_of(current); get(index - 1)){
                 return pair{};
             }
             else if (get(index - 2)){
-                return pair{ cur - 1, 1 };
+                return pair{ current - 1, 1 };
             }
             else{
-                auto len = *uxxp(cur - 1);
-                return pair{ cur - len, len };
+                auto len = *uxxp(current - 1);
+                return pair{ current - len, len };
             }
         }
 
-        pair right_free_block_of(nodep cur, uxx length){
-            if ((mask_to_get_offset & uxx(cur += length)) == 0){
+        pair right_free_block_of(nodep current, uxx length){
+            if ((mask_to_get_offset & uxx(current += length)) == 0){
                 return {};
             }
-            if (uxx index = index_of(cur); get(index)){
+            if (uxx index = index_of(current); get(index)){
                 return {};
             }
             else if (get(index + 1)){
-                return { cur, 1 };
+                return { current, 1 };
             }
             else{
-                return { cur, node_plusp(cur)->blocks };
+                return { current, node_plusp(current)->blocks };
             }
         }
 
@@ -134,22 +134,22 @@ namespace mixc::memory_private_tiny_allocator{
             return nodep(this + 1);
         }
 
-        void set_rest(nodep cur, uxx length){
+        void set_rest(nodep current, uxx length){
             if (length <= 1){
                 return;
             }
-            (node_plusp(cur))->blocks   = length;
-            (uxxp(cur + length - 1))[0] = length;
+            (node_plusp(current))->blocks   = length;
+            (uxxp(current + length - 1))[0] = length;
         }
 
-        void mark_in_use(nodep cur, uxx length){
-            uxx index = index_of(cur);
+        void mark_in_use(nodep current, uxx length){
+            uxx index = index_of(current);
             set(index);
             set(index + length - 1);
         }
 
-        void mark_free(nodep cur, uxx length){
-            uxx index = index_of(cur);
+        void mark_free(nodep current, uxx length){
+            uxx index = index_of(current);
             reset(index);
             reset(index + length - 1);
         }
@@ -178,44 +178,58 @@ namespace mixc::memory_private_tiny_allocator{
 }
 
 namespace mixc::memory_private_tiny_allocator::origin{
-    static inline tiny_allocator        * daemon  = nullptr;
+    struct tiny_allocator_header{
+        using indicator_t = inc::bits_indicator<scale>;
+
+        indicator_t     slot;
+        indicator_t     slot_plus;
+        uxx             palive_pages            = 0;
+        uxx             pused_bytes             = 0;
+        uxx             pneed_free_count        = 0;
+        uxx             skip_count              = 0;
+        page_header *   page_list               = nullptr;
+        node_free   *   async_pend_head         = nullptr;
+        node_free   *   async_pend_tail         = nullptr;
+        node_free   *   async_free_list_head    = nullptr;
+        node_free   *   async_free_list_tail    = nullptr;
+        node        *   free_list_array[scale];
+        node        *   free_list_array_plus[scale];
+    };
+
+    struct tiny_allocator;
     static inline uxx                     remainder_alive_pages;
     static inline uxx                     remainder_used_bytes;
     static inline uxx                     remainder_need_free_count;
+    static inline inc::mutex              once;
+    static inline u08   mirror_allocator[sizeof(tiny_allocator_header)];
+    static inline
+    tiny_allocator *    recycler                = (tiny_allocator *)xnew(mirror_allocator)tiny_allocator_header();
 
-    struct tiny_allocator{
-    private:
-        using indicator_t = inc::bits_indicator<scale>;
-    public:
+    struct tiny_allocator : tiny_allocator_header{
         static void do_clean(){
-            // 无需析构，所以使用 mirror
-            u08  mirror[sizeof(tiny_allocator)];
-            auto mem                    = xnew(mirror) tiny_allocator();
-            auto new_alive_pages        = uxx(0);
-            auto new_used_bytes         = uxx(0);
-            auto new_need_free_count    = uxx(0);
+            auto new_alive_pages            = uxx(0);
+            auto new_used_bytes             = uxx(0);
+            auto new_need_free_count        = uxx(0);
 
-            for(inc::atom_store(xref daemon, mem);;){
+            while(true){
+                // 后续补充信号量作为等待对象，这里暂时使用固定的等待10ms
                 inc::thread_self::sleep(10);
 
                 // 先获取 remainder_used_bytes
                 // 与 ~tiny_allocator 保持协调
-                if (new_used_bytes = inc::atom_load(xref remainder_used_bytes);
-                    new_used_bytes == 0 and mem->pused_bytes == 0){
+                if (new_used_bytes = inc::atom_swap<uxx>(xref remainder_used_bytes, 0);
+                    new_used_bytes == 0 and recycler->pused_bytes == 0){
                     continue;
                 }
 
-                new_alive_pages         = inc::atom_load(xref remainder_alive_pages);
-                new_need_free_count     = inc::atom_load(xref remainder_need_free_count);
-                mem->palive_pages      += new_alive_pages;
-                mem->pused_bytes       += new_used_bytes;
-                mem->pneed_free_count  += new_need_free_count;
-                inc::atom_sub(xref remainder_alive_pages, new_alive_pages);
-                inc::atom_sub(xref remainder_used_bytes, new_used_bytes);
-                inc::atom_sub(xref remainder_need_free_count, new_need_free_count);
+                new_alive_pages             = inc::atom_swap<uxx>(xref remainder_alive_pages, 0);
+                new_need_free_count         = inc::atom_swap<uxx>(xref remainder_need_free_count, 0);
+                recycler->palive_pages     += new_alive_pages;
+                recycler->pused_bytes      += new_used_bytes;
+                recycler->pneed_free_count += new_need_free_count;
 
                 // 先处理计数器，后处理释放操作
-                mem->async_pop();
+                recycler->async_pop();
             }
         }
 
@@ -224,21 +238,23 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 return;
             }
 
-            auto mem        = (tiny_allocator *)nullptr;
-            auto head       = (page_list);
-            auto cur        = (page_list);
+            auto head                       = (page_list);
+            auto current                    = (page_list);
 
-            while(true){
-                if (mem = inc::atom_load(xref daemon); mem != nullptr){
-                    break;
-                }
-                inc::thread_self::yield();
+            // windows 平台：
+            // 在 tiny_allocator::~tiny_allocator 创建内存清理守护线程的父线程没有退出 thread_local 析构的代码段时
+            // 守护线程将无法得到执行，所以这里静态分配了 tiny_allocator 对象 recycler
+            // 当需要时再创建清理线程
+            if (once.try_lock() == inc::lock_state_t::accept){
+                inc::thread(xdetached{
+                    tiny_allocator::do_clean();
+                });
             }
 
             do{
-                inc::atom_store(xref cur->owner, mem);
-                cur         = cur->next;
-            }while(cur != head);
+                inc::atom_store(xref current->owner, recycler);
+                current                     = current->next;
+            }while(current != head);
 
             // 再做一次清理，再转交所有权前可能其他线程推送释放内容
             // 内部会再计算 palive_pages、pused_bytes、pneed_free_count 这些字段
@@ -290,8 +306,8 @@ namespace mixc::memory_private_tiny_allocator::origin{
             }
 
             auto   scale_index      = (bytes - 1) / scale_one; 
-            auto   cur              = (nodep)ptr;
-            auto & head             = (get_page_header_by(cur));
+            auto   current          = (nodep)ptr;
+            auto & head             = (get_page_header_by(current));
             auto   owner            = (head.owner);
 
             // 超出管理的大小
@@ -316,22 +332,22 @@ namespace mixc::memory_private_tiny_allocator::origin{
             owner                   = inc::atom_load(xref head.owner);
 
             // 如果该内存属于其他线程，就推送到分配它的线程
-            owner->async_push(cur, bytes);
+            owner->async_push(current, bytes);
         }
 
     private:
         void free_core(voidp ptr, uxx bytes){
-            auto   cur              = (nodep)ptr;
-            auto & head             = (get_page_header_by(cur));
+            auto   current          = (nodep)ptr;
+            auto & head             = (get_page_header_by(current));
             auto   scale_index      = (bytes - 1) / scale_one;
-            auto   free_block       = (cur);
+            auto   free_block       = (current);
             auto   free_size        = (scale_index + 1);
-            auto   left             = (head.left_free_block_of(cur));
-            auto   right            = (head.right_free_block_of(cur, free_size));
+            auto   left             = (head.left_free_block_of(current));
+            auto   right            = (head.right_free_block_of(current, free_size));
             pused_bytes            -= (bytes);
             pneed_free_count       -= (1);
 
-            if (head.mark_free(cur, scale_index + 1); left.begin != nullptr){
+            if (head.mark_free(current, scale_index + 1); left.begin != nullptr){
                 head.mark_free(left.begin, left.length);
                 free_block          = left.begin;
                 free_size          += left.length;
@@ -503,17 +519,17 @@ namespace mixc::memory_private_tiny_allocator::origin{
             }
         }
 
-        voidp split(nodep cur, uxx total_size, uxx require_size_index){
-            if (get_page_header_by(cur).mark_in_use(cur, require_size_index + 1);
+        voidp split(nodep current, uxx total_size, uxx require_size_index){
+            if (get_page_header_by(current).mark_in_use(current, require_size_index + 1);
                 total_size > require_size_index + 1){
                 auto require_size    = require_size_index + 1;
-                auto rest            = cur + require_size;
+                auto rest            = current + require_size;
                 auto rest_size       = total_size - require_size;
-                xdebug(im_memory_tiny_allocator_split, cur, rest, total_size, require_size, rest_size);
+                xdebug(im_memory_tiny_allocator_split, current, rest, total_size, require_size, rest_size);
                 xdebug_fail(rest_size > total_size);
                 append(rest, rest_size);
             }
-            return cur;
+            return current;
         }
 
         void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
@@ -575,32 +591,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
             auto begin = uxx(ptr) & mask_to_get_header;
             return *((page_header *)begin);
         }
-
-        indicator_t     slot;
-        indicator_t     slot_plus;
-        uxx             palive_pages            = 0;
-        uxx             pused_bytes             = 0;
-        uxx             pneed_free_count        = 0;
-        uxx             skip_count              = 0;
-        page_header *   page_list               = nullptr;
-        node_free   *   async_pend_head         = nullptr;
-        node_free   *   async_pend_tail         = nullptr;
-        node_free   *   async_free_list_head    = nullptr;
-        node_free   *   async_free_list_tail    = nullptr;
-        node        *   free_list_array[scale];
-        node        *   free_list_array_plus[scale];
     };
-
-    static inline auto do_clean(){
-        return xdetached{
-            tiny_allocator::do_clean();
-        };
-    }
-
-    // 兼容 windows，linux 端不会如下问题
-    // 在 tiny_allocator::~tiny_allocator 创建内存清理守护线程的父线程没有退出 thread_local 析构的代码段时
-    // 守护线程将无法得到执行，为了避免这一问题，所以将它放到全局
-    static inline inc::thread clean_daemon      = do_clean();
 }
 
 #endif
