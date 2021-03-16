@@ -13,9 +13,10 @@ namespace mixc::memop_copy::origin{
     template<class a0_t, class a1_t = a0_t>
     inline void copy(a0_t * des, a1_t const & src){
         using mp = inc::mirror<a0_t> *;
-        enum{
-            dis = sizeof(a0_t) - sizeof(a1_t)
+        enum : ixx{
+            dis = ixx(sizeof(a0_t) - sizeof(a1_t))
         };
+
         auto m   = *mp(xref src);
         
         // 高位 0 扩展
