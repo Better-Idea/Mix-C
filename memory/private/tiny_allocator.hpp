@@ -6,7 +6,6 @@
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_store.hpp"
-#include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/lock/mutex.hpp"
 #include"concurrency/thread.hpp"
@@ -256,7 +255,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 current                     = current->next;
             }while(current != head);
 
-            // 再做一次清理，再转交所有权前可能其他线程推送释放内容
+            // 再做一次清理，在转交所有权前可能其他线程推送释放内容
             // 内部会再计算 palive_pages、pused_bytes、pneed_free_count 这些字段
             this->async_pop();
 
