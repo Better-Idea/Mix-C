@@ -15,7 +15,7 @@
 namespace mixc::interface_private_seqptr{
     template<class seq_t, class item_t>
     concept has_ptr_length_pairx = requires(seq_t seq, item_t * ptr, uxx length){
-        ptr     = (item_t *)seq; // 适应一些使用 explict operator 的类
+        ptr     = (static_cast<item_t *>(seq)); // 适应一些使用 explict operator 的类
         length  = (seq.length());
     };
 
