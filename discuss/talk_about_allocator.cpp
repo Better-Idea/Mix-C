@@ -7,37 +7,46 @@
 #include"docker/array.hpp"
 #include"math/random.hpp"
 #include"memory/allocator.hpp"
+#include"memop/fill.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::talk_about_allocator::inc{
     void test(){
-        struct pair{ voidp ptr; uxx size; };
-        static array<pair, 1024 * 1024> record;
-        uxx len = 0;
-        xhint(alive_pages());
+        struct pair{ u08p ptr; uxx size; };
+        static array<pair, 1024 * 100> record;
+        xhint(used_bytes());
 
-        for(uxx i = 0; i < record.length(); i++){
-            auto r0 = random<u08>() % 3;
-            auto r1 = random<u16>() % 4096 + 1;
-            auto pr = pair();
+        for(uxx i = 0; i < record.length(); ){
+            auto mode           = uxx(random<u08>() % (3));
+            auto bytes          = uxx(random<u16>() % (64 * 64) * 16);
+            auto pr             = pair();
+            auto pt             = pair();
 
-            if (r0 == 0 and len != 0){
-                pr        = record[0];
-                record[0] = record[--len];
-                free(pr.ptr, memory_size{pr.size});
+            if (bytes == 0){
+                bytes           = 16;
+            }
+
+            if (mode == 0 and i != 0){
+                auto index      = uxx(random<uxx>() % i);
+                pt              = record[index];
+                record[index]   = record[--i];
+                inc::free(pt.ptr, memory_size{pt.size});
             }
             else{
-                pr.size   = r1;
-                pr.ptr    = alloc<u08>(memory_size{pr.size});
-                record[len++] = pr;
+                pr.ptr          = inc::alloc<u08>(memory_size{bytes});
+                pr.size         = bytes;
+                record[i++]     = pr;
+                inc::fill(pr.ptr, 0xff, bytes); // 写脏
             }
         }
 
-        for(uxx i = 0; i < len; i++){
-            auto pr = record[i];
-            free(pr.ptr, memory_size{pr.size});
+        xhint(used_bytes());
+
+        for(uxx i = 0; i < record.length(); i++){
+            auto pr             = record[i];
+            inc::free(pr.ptr, memory_size{pr.size});
         }
-        xhint(alive_pages());
+        xhint(used_bytes());
     }
 }
 
