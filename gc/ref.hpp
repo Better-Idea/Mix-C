@@ -439,8 +439,8 @@ namespace mixc::gc_ref{
             mem->~token_mix_t();
 
             // 添加到释放列表，在完成一轮 gc 后再释放
-            // 避免释放了整个[潜质类型]，在下一轮 gc 的时候
-            // 注意：这里修改该 mem 中的内容
+            // 避免在对下一个和 mem 指向相同元素 gc 的时候，访问了释放的内存
+            // 注意：这里修改该 mem 中的内容，也相当于间接调用了 in_gc_queue(false)
             auto node       = free_nodep(mem);
             auto length     = the_t::real(mem->this_length());
             node->bytes     = the_t::size(length);
