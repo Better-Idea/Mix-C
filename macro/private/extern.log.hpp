@@ -34,14 +34,13 @@ namespace mixc::macro_private_log::origin{
     void log_header_lock_free(log_type_t log_type, asciis file, uxx line, asciis func_name){
         using namespace ext;
         using namespace ext::ph;
-        static uxx skip = 0;
+        uxx skip = 0;
 
+        // skip 值可能不是固定的
         #if xuse_xdebug_short_path
-            if (skip == 0){
-                if (auto i = c08{file}.index_of_last(xmixc); i != not_exist){
-                    skip  = i + sizeof(xmixc);
-                    skip += file[skip] == '/' or file[skip] == '\\';
-                }
+            if (auto i = c08{file}.index_of_last(xmixc); i != not_exist){
+                skip  = i + sizeof(xmixc);
+                skip += file[skip] == '/' or file[skip] == '\\';
             }
         #endif
 
