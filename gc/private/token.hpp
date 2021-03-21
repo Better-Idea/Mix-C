@@ -4,6 +4,8 @@
 #undef  xuser
 #define xuser mixc::gc_private_token::inc
 #include"concurrency/lock/atom_add.hpp"
+#include"concurrency/lock/atom_fetch_and.hpp"
+#include"concurrency/lock/atom_fetch_or.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_sub.hpp"
 #include"dumb/struct_type.hpp"
@@ -12,7 +14,9 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_token::origin{
-    constexpr uxx step = uxx(1);
+    constexpr uxx shift_to_get_owners   = 1;
+    constexpr uxx step                  = uxx(1 << shift_to_get_owners);
+    constexpr uxx bit_in_gc_queue       = 1 << 0;
 
     xstruct(
         xname(token),
@@ -23,15 +27,28 @@ namespace mixc::gc_private_token::origin{
         constexpr uxx  this_length() const { return uxx(0); }
         constexpr void this_length(uxx) const { }
 
-        uxx owners() const {
-            return inc::atom_load(& record);
+        bool in_gc_queue() const {
+            return inc::atom_load(& record) & bit_in_gc_queue;
         }
 
-        uxx owners_inc() const {
+        bool in_gc_queue(bool value) {
+            if (value){
+                return (inc::atom_fetch_or(& record, bit_in_gc_queue) & bit_in_gc_queue) != 0;
+            }
+            else{
+                return (inc::atom_fetch_and(& record, ~bit_in_gc_queue) & bit_in_gc_queue) != 0;
+            }
+        }
+
+        uxx owners() const {
+            return inc::atom_load(& record) >> shift_to_get_owners;
+        }
+
+        uxx owners_increase() const {
             return inc::atom_add(& record, step);
         }
 
-        uxx owners_dec() const {
+        uxx owners_decrease() const {
             return inc::atom_sub(& record, step);
         }
     $
