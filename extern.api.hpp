@@ -15,3 +15,20 @@
 #include"memory/private/extern.allocator.hpp"
 
 // #include"draft/gui_seed.hpp"
+
+#undef  xuser
+#define xuser mixc::powerful_cat
+#include"concurrency/thread.hpp"
+#include"dumb/move.hpp"
+#include"gc/private/background.hpp"
+
+extern int run();
+
+int main(){
+    xuser::gc_thread = xuser::thread(xdetached{
+        xuser::gc_execute();
+    });
+
+    auto state = run();
+    return state;
+}
