@@ -50,7 +50,10 @@
  * =================================================================*/
 
 // select memory allocator
-#define xuse_libc_malloc            0
+#define xuse_libc_malloc            1
+
+// gc 队列元素个数（需要是 2^n）
+#define xgc_queue_depth             65536
 
 /* mixc::auto =======================================================
  * 
