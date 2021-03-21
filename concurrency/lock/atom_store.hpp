@@ -9,7 +9,7 @@
 #include"memop/cast.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::concurrency_lock_atom_store{
+namespace mixc::concurrency_lock_atom_store::origin{
     template<class a0_t, class a1_t = a0_t>
     inline void atom_store(a0_t * left, a1_t right){
         using u0_t  = inc::unsigned_type<a0_t>;
@@ -21,4 +21,4 @@ namespace mixc::concurrency_lock_atom_store{
 
 #endif
 
-xexport(mixc::concurrency_lock_atom_store::atom_store)
+xexport_space(mixc::concurrency_lock_atom_store::origin)

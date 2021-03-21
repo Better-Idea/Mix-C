@@ -5,4 +5,4 @@
 #include"concurrency/lock/private/xgen.atomop.hpp"
 #endif
 
-xexport(mixc::concurrency_lock_atom_or::atom_or)
+xexport_space(mixc::concurrency_lock_atom_or::origin)

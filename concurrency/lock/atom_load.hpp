@@ -9,7 +9,7 @@
 #include"memop/cast.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::concurrency_lock_atom_load{
+namespace mixc::concurrency_lock_atom_load::origin{
     template<class type_t>
     requires(sizeof(type_t) <= sizeof(uxx))
     inline type_t atom_load(type_t * left){
@@ -21,4 +21,4 @@ namespace mixc::concurrency_lock_atom_load{
 
 #endif
 
-xexport(mixc::concurrency_lock_atom_load::atom_load)
+xexport_space(mixc::concurrency_lock_atom_load::origin)

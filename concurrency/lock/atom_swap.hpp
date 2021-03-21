@@ -10,8 +10,18 @@
 
 namespace mixc::concurrency_lock_atom_swap{
     #if xis_msvc_native // msvc 16.8 不支持模板内部声明外部函数
-        extern u64 atom_swap(voidp a, u64 b, uxx bytes);
+        extern u08 atom(u08p a, u08 b);
+        extern u16 atom(u16p a, u16 b);
+        extern u32 atom(u32p a, u32 b);
+
+        #if xis_os32
+        #else
+        extern u64 atom_swap(u64p a, u64 b);
+        #endif
     #endif
+}
+
+namespace mixc::concurrency_lock_atom_swap::origin{
 
     template<class type_t>
     inline type_t atom_swap(type_t * left, type_t right){
@@ -22,7 +32,7 @@ namespace mixc::concurrency_lock_atom_swap{
         using up_t  = u0_t *;
 
         #if xis_msvc_native
-            u0_t r  = (u0_t)atom_swap((up_t)(left), *(u0_t *)(& right), sizeof(u0_t));
+            u0_t r  = (u0_t)atom(up_t(left), *(u0_t *)(& right));
         #else
             u0_t r;
             __atomic_exchange((up_t)left, (up_t)& right, & r, 5);
@@ -33,4 +43,4 @@ namespace mixc::concurrency_lock_atom_swap{
 
 #endif
 
-xexport(mixc::concurrency_lock_atom_swap::atom_swap)
+xexport_space(mixc::concurrency_lock_atom_swap::origin)
