@@ -5,6 +5,7 @@
 #define xuser mixc::macro_xdebug_fail::inc
 #include"macro/xunlikely.hpp"
 #include"macro/private/log.hpp"
+#include"macro/xwarning.hpp"
 #pragma pop_macro("xuser")
 
 #if xuse_xdebug_fail
@@ -19,6 +20,7 @@
                 return error;                                                   \
             }                                                                   \
         })(__func__, __VA_ARGS__))
+    xwarning_disable(4390)
 #else
     #define xdebug_fail(...)  if (false)
 #endif

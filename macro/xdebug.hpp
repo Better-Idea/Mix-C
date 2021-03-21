@@ -18,6 +18,8 @@
         return true;                                        \
     })(__func__))
 
+    xwarning_disable(4390)
+
     // 在 xon 后面的枚举是启用 xdebug 打印的
     #define xon         xlink2(__enable, __COUNTER__)       = 0
 
@@ -27,11 +29,11 @@
     enum{
         // docker/private/hashmap.hpp
         xon,
+        xoff,
             im_docker_hashmap_addressing,
             im_docker_hashmap_node_set,
             im_docker_hashmap_set,
             im_docker_hashmap_get,
-        xoff,
 
         // memory/tiny_allocator
         xon,
@@ -44,9 +46,9 @@
 
         // memop/memory.hpp
         xon,
-            im_alloc_with_initial,
             im_alloc,
             im_free,
+            im_alloc_with_initial,
             im_free_with_destroy,
         xoff,
 
