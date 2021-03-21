@@ -27,7 +27,7 @@ namespace mixc::algo_hash::origin{
 
 namespace mixc::lang_cxx{
     template<class item_t>
-    static inline item_t empty = item_t(0);
+    inline item_t empty = item_t(0);
 
     template<class final_t, class item_type>
     xstruct(

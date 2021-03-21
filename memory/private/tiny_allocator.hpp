@@ -6,6 +6,7 @@
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_store.hpp"
+#include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/lock/mutex.hpp"
 #include"concurrency/thread.hpp"
@@ -182,6 +183,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
         indicator_t     slot;
         indicator_t     slot_plus;
+        uxx             async_push_bytes        = 0;
         uxx             palive_pages            = 0;
         uxx             pused_bytes             = 0;
         uxx             pneed_free_count        = 0;
@@ -196,13 +198,12 @@ namespace mixc::memory_private_tiny_allocator::origin{
     };
 
     struct tiny_allocator;
-    static inline uxx                     remainder_alive_pages;
-    static inline uxx                     remainder_used_bytes;
-    static inline uxx                     remainder_need_free_count;
-    static inline inc::mutex              once;
-    static inline u08   mirror_allocator[sizeof(tiny_allocator_header)];
-    static inline
-    tiny_allocator *    recycler                = (tiny_allocator *)xnew(mirror_allocator)tiny_allocator_header();
+    inline uxx                      remainder_alive_pages;
+    inline uxx                      remainder_used_bytes;
+    inline uxx                      remainder_need_free_count;
+    inline inc::mutex               once;
+    inline u08                      mirror_allocator[sizeof(tiny_allocator_header)];
+    inline tiny_allocator *         recycler = (tiny_allocator *)xnew(mirror_allocator)tiny_allocator_header();
 
     struct tiny_allocator : tiny_allocator_header{
         static void do_clean(){
@@ -239,11 +240,19 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
             auto head                       = (page_list);
             auto current                    = (page_list);
+            auto aysnc_free_size            = (inc::atom_load(xref async_push_bytes));
+            auto all_return                 = (aysnc_free_size == need_free_count());
+
+            if (all_return){
+                this->async_pop();
+                return;
+            }
 
             // windows 平台：
             // 在 tiny_allocator::~tiny_allocator 创建内存清理守护线程的父线程没有退出 thread_local 析构的代码段时
             // 守护线程将无法得到执行，所以这里静态分配了 tiny_allocator 对象 recycler
             // 当需要时再创建清理线程
+            // 如果其他线程已经归还所有属于本线程的内存就无需
             if (once.try_lock() == inc::lock_state_t::accept){
                 inc::thread(xdetached{
                     tiny_allocator::do_clean();
@@ -374,6 +383,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
             self->next              = nullptr;
             self->bytes             = bytes;
             prev                    = inc::atom_swap(xref async_free_list_tail, self);
+            inc::atom_add(xref async_push_bytes, bytes);
 
             if (prev == nullptr){
                 inc::atom_store(xref async_free_list_head, self);
@@ -396,6 +406,11 @@ namespace mixc::memory_private_tiny_allocator::origin{
             auto next               = node_freep(nullptr);
             auto null               = node_freep(nullptr);
             auto head               = node_freep(nullptr);
+            auto free_size          = 0;
+
+            xdefer{
+                inc::atom_sub(xref async_push_bytes, free_size);
+            };
 
             // 只要出现了当前要释放节点的下一个节点为 nullptr，但它又不是最后一个节点
             // 此时属于链接未完成的情况，我们可以先不管它
@@ -410,6 +425,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
                     }
                 }
 
+                free_size          += async_pend_head->bytes;
                 free_core(async_pend_head, async_pend_head->bytes);
                 async_pend_head     = next;
             }
@@ -423,6 +439,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
             while(true){
                 // 如果存在下一个节点就释放当前节点
                 if (next = head->next; next != nullptr){
+                    free_size      += head->bytes;
                     free_core(head, head->bytes);
                     head            = next;
                     continue;
@@ -435,6 +452,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 // 所以我们可以安全的释放掉该节点
                 if (next = inc::atom_swap(xref async_free_list_tail, null); 
                     next == head){
+                    free_size      += head->bytes;
                     free_core(head, head->bytes);
                     return;
                 }

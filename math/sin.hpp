@@ -13,7 +13,7 @@
 
 namespace mixc::math_sin{
     template<class type_t, uxx multiple>
-    static inline xalign(32) auto lut = inc::parallel_lut<multiple>(
+    inline xalign(32) auto lut = inc::parallel_lut<multiple>(
         type_t(+1.00000000000000000e+00),
         type_t(-1.66666666666666657e-01),
         type_t(+8.33333333333333322e-03),
@@ -26,7 +26,7 @@ namespace mixc::math_sin{
         type_t(-8.22063524662432950e-18)
     );
 
-    static inline auto lut_f64x1 = (f64 *)lut<f64, 1>;
+    inline auto lut_f64x1 = (f64 *)lut<f64, 1>;
 }
 
 namespace mixc::math_sin::origin{
