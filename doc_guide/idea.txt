@@ -49,9 +49,9 @@ struct cxx<item_t>{
 在未包含 "lang/cxx/compare.hpp" 之类的扩展之前
 
 hashmap<cxx<item_t>, val_t> map;
-c08 a0 = "foo";
-c08 a1 = "foo";
-map.set(a0);
+c08 a0   = "foo";
+c08 a1   = "foo";
+map.set(a0_t);
 
 // Q: false!?, what's the fuck?
 // A: the fuck is you forget include the `lang/cxx/compare_fastly.hpp`

@@ -201,24 +201,24 @@
                         return the;
                     }
 
-                    template<class ... args>
-                    auto & any(u32 index, args ... list){
+                    template<class ... args_t>
+                    auto & any(u32 index, args_t ... list){
                         xset(nwrp, ~mask(index, list...));
                         return the;
                     }
 
-                    template<class ... args>
-                    auto & except(u32 index, args ... list){
+                    template<class ... args_t>
+                    auto & except(u32 index, args_t ... list){
                         xset(nwrp, mask(index, list...));
                         return the;
                     }
                 private:
-                    template<class ... args>
-                    auto mask(args ... list){
+                    template<class ... args_t>
+                    auto mask(args_t ... list){
                         u32 gorup[] = { list... };
                         u32 r = 0;
 
-                        for(u32 i = 0; i < sizeof...(args); i++){
+                        for(u32 i = 0; i < sizeof...(args_t); i++){
                             r |= 1 << gorup[i];
                         }
                         return r;

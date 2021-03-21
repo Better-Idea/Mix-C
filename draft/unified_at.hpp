@@ -109,9 +109,9 @@ namespace xuser{
         ixx    i = ignore;
     };
 
-    template<class a0, class ... args>
-    inline match_result_t fetch(asciis line, asciis fmt, a0 & first, args & ... rest){
-        return sscanf_s(line, fmt, & first, (& rest)...) == 1 + sizeof...(args) ? match_result_t::ack : match_result_t::nak;
+    template<class a0_t, class ... args_t>
+    inline match_result_t fetch(asciis line, asciis fmt, a0_t & first, args_t & ... rest){
+        return sscanf_s(line, fmt, & first, (& rest)...) == 1 + sizeof...(args_t) ? match_result_t::ack : match_result_t::nak;
     }
 
     inline uxx truncated_last(char * str, uxx length, char value){

@@ -73,8 +73,8 @@
         public:
             constexpr _gpio(){}
 
-            template<class ... args>
-            auto & config(io_mode mode, args ... ports) const {
+            template<class ... args_t>
+            auto & config(io_mode mode, args_t ... ports) const {
                 config_reflect  items[] = { ports... };
                 mode_t          props = mode;
                 u32             base;

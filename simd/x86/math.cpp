@@ -11,7 +11,7 @@ enum class threshold_mode_t{
     saturation_upper_bound,
 };
 
-template<class item_t, threshold_mode_t mode>
+template<class item_t, threshold_mode_t mode_v>
 inline void threshold_core(item_t * buffer, item_t const * source, uxx length, item_t level){
     using namespace xuser;
 
@@ -26,7 +26,7 @@ inline void threshold_core(item_t * buffer, item_t const * source, uxx length, i
     auto i                  = uxx(0);
     auto loop_round = [&](uxx i, uxx length){
         for(; i < length; i++){
-            if constexpr (mode == threshold_mode_t::saturation_lower_bound){
+            if constexpr (mode_v == threshold_mode_t::saturation_lower_bound){
                 buffer[i]   = source[i] < level ? level : source[i];
             }
             else{
