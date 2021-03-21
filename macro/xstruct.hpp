@@ -104,7 +104,7 @@ template<class type>
 using __rp  = typename ::mixc::macro_xstruct::repeat<type>::type;
 
 [[maybe_unused]]
-static inline uxx __class_id = 0x80000000;
+inline uxx __class_id = 0x80000000;
 
 #define __ignore__(...)
 

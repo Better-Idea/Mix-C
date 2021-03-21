@@ -69,7 +69,7 @@ int main(){
 
 namespace mixc::macro_xinterface{
     template<class object_t, uxx length_v>
-    static inline voidp s_func_table[length_v];
+    inline voidp s_func_table[length_v];
 
     struct dummy{ enum { __func_length }; };
 
