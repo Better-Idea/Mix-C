@@ -43,7 +43,7 @@ struct meta : base_t {
     requires(
         inc::can_unified_seqlize<seq_t> and 
         inc::has_cast<item_t, seq_item_t> and
-        inc::is_cxx<seq_t> == false and // 只要不是 cxx 字符串，就假定是字符数组
+        inc::has_cast<final_t, seq_t> == false and
         mode_v != inc::itr_miss_match
     )
     uxx xa_name(seq_t const & value, func_t const & match) const {
@@ -61,7 +61,7 @@ struct meta : base_t {
     requires(
         inc::can_unified_seqlize<seq_t> and 
         inc::has_cast<item_t, seq_item_t> and
-        inc::is_cxx<seq_t> == false and // 只要不是 cxx 字符串，就假定是字符数组
+        inc::has_cast<final_t, seq_t> == false and
         inc::can_compare<cmp_t, item_t> and 
         mode_v != inc::itr_miss_match
     )
@@ -121,7 +121,7 @@ struct meta : base_t {
     requires(
         inc::can_unified_seqlize<seq_t> and 
         inc::has_cast<item_t, seq_item_t> and
-        inc::is_cxx<seq_t> == false and // 只要不是 cxx 字符串，就假定是字符数组
+        inc::has_cast<final_t, seq_t> == false and
         inc::can_compare<cmp_t, item_t>
     )
     uxx xa_name(

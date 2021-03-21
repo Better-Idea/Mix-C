@@ -16,7 +16,6 @@
 #include"lang/cxx/private/find_mix.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"meta/has_cast.hpp"
-#include"meta/is_cxx.hpp"
 #include"meta/item_origin_of.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xusing_lang_cxx")

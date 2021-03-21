@@ -20,7 +20,7 @@ struct meta : base_t {
     requires(
         inc::can_unified_seqlize<seq_t> and 
         inc::has_cast<item_t, seq_item_t> and
-        inc::is_cxx<seq_t> == false // 只要不是 cxx 字符串，就假定是字符数组
+        inc::has_cast<final_t, seq_t> == false
     )
     uxx xa_name(seq_t const & char_seq, cmp_t const & compare = inc::default_compare<item_t>) const {
         return the.xlink2(xa_name, _char)(inc::unified_seq<seq_t>{char_seq}, compare);
