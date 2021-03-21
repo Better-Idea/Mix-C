@@ -3,8 +3,10 @@
 #endif
 
 #define xuser mixc::concurrency_thread_self::inc
+#include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
 #include"configure.hpp"
+#include"gc/private/background.hpp"
 
 #if xis_windows
 #include<windows.h>
@@ -17,19 +19,22 @@
 namespace mixc::concurrency_thread{
     #ifndef xdecl_l_lambda
         #define xdecl_l_lambda
-        // 不加 static inline 可能会有初始化问题，特定版本编译器的 bug
-        thread_local static inline clambda  l_lambda;
+        inline thread_local voidp l_lambda;
+
+        inline auto clambda_wrap(){
+            return (clambda *)(xref l_lambda);
+        }
     #endif
 }
 
 namespace mixc::concurrency_thread_self::origin{
     #if xis_windows
         // 用 mutex 无法阻塞主线程
-        static inline voidp h_sem_for_suspend = CreateSemaphoreA(nullptr, 0, 1, nullptr);
+        inline voidp h_sem_for_suspend = CreateSemaphoreA(nullptr, 0, 1, nullptr);
     #endif
 
     uxx thread_self::id(){
-        return inc::cast<uxx>(mixc::concurrency_thread::l_lambda);
+        return uxx(mixc::concurrency_thread::l_lambda);
     }
 
     void thread_self::resume(uxx thread_id){
@@ -38,12 +43,7 @@ namespace mixc::concurrency_thread_self::origin{
         auto is_main        = thread_id == 0;
 
         #ifdef xis_windows
-            if (is_main){
-                ReleaseSemaphore(h_sem_for_suspend, 1, nullptr);
-            }
-            else{
-                ReleaseMutex(the_thread.mutex_for_suspend());
-            }
+            ReleaseSemaphore(is_main ? h_sem_for_suspend : the_thread.semaphore_for_suspend(), 1, nullptr);
         #else
             #error"pending"
         #endif
@@ -51,11 +51,12 @@ namespace mixc::concurrency_thread_self::origin{
 
     void thread_self::suspend(uxx timeout){
         using namespace mixc::concurrency_thread;
-        auto is_main = is_main_thread();
+        auto is_main    = is_main_thread();
+        auto wrap       = clambda_wrap();
 
         #ifdef xis_windows
-            WaitForSingleObject(
-                is_main ? h_sem_for_suspend : l_lambda.mutex_for_suspend(), 
+            auto r = WaitForSingleObject(
+                is_main ? h_sem_for_suspend : wrap->semaphore_for_suspend(), 
                 DWORD(timeout)
             );
         #else
@@ -90,5 +91,9 @@ namespace mixc::concurrency_thread_self::origin{
         #else
             #error""
         #endif
+    }
+
+    void thread_self::gc_sync(){
+        inc::gc_sync();
     }
 }

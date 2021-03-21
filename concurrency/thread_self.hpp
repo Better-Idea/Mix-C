@@ -3,7 +3,6 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::concurrency_thread_self::inc
-#include"concurrency/thread.hpp"
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"memop/cast.hpp"
@@ -26,6 +25,7 @@ namespace mixc::concurrency_thread_self::origin{
         }
         static void sleep(uxx millisecond);
         static void yield();
+        static void gc_sync();
     };
 }
 

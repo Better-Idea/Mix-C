@@ -3,6 +3,7 @@
 #endif
 
 #define xuser mixc::concurrency_thread::inc
+#include"define/base_type.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_store.hpp"
 #include"concurrency/lock/atom_swap.hpp"
@@ -10,19 +11,17 @@
 #include"concurrency/thread_self.hpp"
 #include"configure.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xvolatile.hpp"
 #include"memop/cast.hpp"
 #include"memory/allocator.hpp"
 
 #if xis_windows
 #include<windows.h>
 #define xapi            WINAPI
-#define xhandler_t      HANDLE
 #define xret_t          DWORD
 #elif xis_linux
-#include<bits/local_lim.h>
 #include<pthread.h>
 #define xapi
-#define xhandler_t      pthread_t
 #define xret_t          voidp
 #endif
 
@@ -31,20 +30,23 @@ namespace mixc::concurrency_thread{
 
     #ifndef xdecl_l_lambda
         #define xdecl_l_lambda
-        // 不加 static inline 可能会有初始化问题，特定版本编译器的 bug
-        thread_local static inline clambda  l_lambda;
+        inline thread_local voidp l_lambda;
+
+        inline auto clambda_wrap(){
+            return (clambda *)(xref l_lambda);
+        }
     #endif
 
     inline auto xapi thread_entry(voidp ptr){
         auto lambda                 = inc::cast<clambda>(ptr);
-        l_lambda                    = lambda;
+        l_lambda                    = inc::cast<clambda_meta *>(ptr);
 
         // windows 分离线程需要自己释放线程句柄，但是未用到信号量
         // 释放 lambda
         if (lambda.invoke(); lambda.is_detached()){
             #if xis_windows
                 CloseHandle(lambda.handler());
-                CloseHandle(lambda.mutex_for_suspend());
+                CloseHandle(lambda.semaphore_for_suspend());
             #endif
 
             lambda.release();
@@ -91,8 +93,8 @@ namespace mixc::concurrency_thread::origin{
                 return;
             }
 
-            if (lambda.mutex_for_suspend(CreateMutexA(nullptr, true, nullptr));
-                lambda.mutex_for_suspend() == nullptr){
+            if (lambda.semaphore_for_suspend(CreateSemaphoreA(nullptr/*不带名称*/, 0/*初始值*/, 1/*最大值*/, nullptr));
+                lambda.semaphore_for_suspend() == nullptr){
                 CloseHandle(lambda.semaphore_for_join());
                 return;
             }
@@ -112,7 +114,7 @@ namespace mixc::concurrency_thread::origin{
                 if (not is_detached){ // 顺带释放信号量句柄
                     CloseHandle(lambda.semaphore_for_join());
                 }
-                CloseHandle(lambda.mutex_for_suspend());
+                CloseHandle(lambda.semaphore_for_suspend());
                 return;
             }
         #else
@@ -153,7 +155,7 @@ namespace mixc::concurrency_thread::origin{
 
                 CloseHandle(h.handler());
                 CloseHandle(h.semaphore_for_join());
-                CloseHandle(h.mutex_for_suspend());
+                CloseHandle(h.semaphore_for_suspend());
             #elif xis_linux
                 pthread_join(h.handler(), nullptr);
             #endif
@@ -168,5 +170,4 @@ namespace mixc::concurrency_thread::origin{
 }
 
 #undef  xapi
-#undef  xhandler_t
 #undef  xret_t

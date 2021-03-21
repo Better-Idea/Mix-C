@@ -102,11 +102,11 @@ namespace mixc::concurrency_thread{
             return plambda->sem;
         }
 
-        void mutex_for_suspend(voidp value){
+        void semaphore_for_suspend(voidp value){
             plambda->mutex          = value;
         }
 
-        voidp mutex_for_suspend() const {
+        voidp semaphore_for_suspend() const {
             return plambda->mutex;
         }
 
@@ -149,9 +149,15 @@ namespace mixc::concurrency_thread::origin{
         xprif(plambda, clambda)
     )
         thread()                = default;
-        thread(thread && self)  = default;
+        thread(thread && self) : 
+            plambda(inc::atom_swap(xref self.plambda, clambda{})){
+        }
         thread(clambda && lambda);
        ~thread();
+
+        void operator=(thread && self){
+            plambda = inc::atom_swap(xref self.plambda, clambda{});
+        }
 
         bool is_initialize_fail() const {
             return plambda.is_initialize_fail();
