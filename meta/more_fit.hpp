@@ -52,11 +52,12 @@ namespace mixc::meta_more_fit{
                 meta<index_v + 1, source_t, target_t...>::invoke()
             );
 
+            xwarning_push()
             xwarning_disable(6287)
             constexpr u08 is_narrow_or_widen    = 
                 (inc::is_signed<source_t>   and inc::is_signed<first_t>) or
                 (inc::is_unsigned<source_t> and inc::is_unsigned<first_t>);
-            xwarning_enable()
+            xwarning_pop()
 
             constexpr ixx  diff  = ixx(sizeof(first_t) - sizeof(source_t));
             constexpr bool cond0 = (next::has_implicit_cast);
