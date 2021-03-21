@@ -28,12 +28,20 @@ namespace xuser{
     }
 }
 
-int main(i32 argc, asciis argv[]){
-    if (argc != 2){
-        return -1;
-    }
+char path[1024];
 
-    xuser::dir{argv[1]}.as_cwd();
+int run(){
+    using namespace xuser;
+    tty.write_line("please input the mix-c project full root path");
+    tty.read_line([](uxx length){
+        if (length >= sizeof(path)){
+            throw;
+        }
+        path[length] = '\0';
+        return path;
+    });
+
+    xuser::dir{path}.as_cwd();
     xuser::foreach();
     xhint(lines);
     return 0;

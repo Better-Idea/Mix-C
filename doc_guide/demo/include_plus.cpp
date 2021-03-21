@@ -48,12 +48,20 @@ namespace xuser{
     }
 }
 
-int main(int argc, asciis * argv){
-    if (argc != 2){
-        return -1;
-    }
+char path[1024];
 
-    xuser::foreach(argv[1], {
+int run(){
+    using namespace xuser;
+    tty.write_line("please input the mix-c project full root path");
+    tty.read_line([](uxx length){
+        if (length >= sizeof(path)){
+            throw;
+        }
+        path[length] = '\0';
+        return path;
+    });
+
+    foreach(path, {
         "algo/",
         "chrono/",
         "concurrency/",
