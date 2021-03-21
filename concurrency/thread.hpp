@@ -11,6 +11,7 @@
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xstruct.hpp"
+#include"memop/cast.hpp"
 #include"memory/allocator.hpp"
 #include"meta/is_empty_class.hpp"
 #pragma pop_macro("xuser")
@@ -25,6 +26,7 @@ namespace mixc::concurrency_thread{
         xpubf(call,         lambda_call),
         xpubf(release,      lambda_call),
         xpubf(sem,          voidp),
+        xpubf(mutex,        voidp),
         xpubf(handler,      voidp)
 
         // this + 1 定位到 lambda 参数的偏移
@@ -70,6 +72,7 @@ namespace mixc::concurrency_thread{
             plambda->call           = & closure::call;
             plambda->release        = & closure::release;
             plambda->sem            = nullptr;
+            plambda->mutex          = nullptr;
             plambda->handler        = nullptr;
         }
 
@@ -97,6 +100,14 @@ namespace mixc::concurrency_thread{
 
         voidp semaphore_for_join() const {
             return plambda->sem;
+        }
+
+        void mutex_for_suspend(voidp value){
+            plambda->mutex          = value;
+        }
+
+        voidp mutex_for_suspend() const {
+            return plambda->mutex;
         }
 
         void handler(voidp value){
@@ -145,11 +156,19 @@ namespace mixc::concurrency_thread::origin{
         bool is_initialize_fail() const {
             return plambda.is_initialize_fail();
         }
+
+        uxx id() const {
+            return inc::cast<uxx>(plambda);
+        }
+
+        void resume();
     $
 }
 
 #define xjoinable           ::mixc::concurrency_thread::sugar<false>() * [=]() mutable
 #define xdetached           ::mixc::concurrency_thread::sugar<true >() * [=]() mutable
+#define xjoinable_global    ::mixc::concurrency_thread::sugar<false>() * []()
+#define xdetached_global    ::mixc::concurrency_thread::sugar<true >() * []()
 #endif
 
 xexport_space(mixc::concurrency_thread::origin)

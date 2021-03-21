@@ -3,6 +3,8 @@
 #endif
 
 #define xuser mixc::concurrency_thread::inc
+#include"concurrency/lock/atom_load.hpp"
+#include"concurrency/lock/atom_store.hpp"
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
@@ -27,14 +29,22 @@
 namespace mixc::concurrency_thread{
     enum{ aligned_stack_size = 64 * 1024 };
 
+    #ifndef xdecl_l_lambda
+        #define xdecl_l_lambda
+        // 不加 static inline 可能会有初始化问题，特定版本编译器的 bug
+        thread_local static inline clambda  l_lambda;
+    #endif
+
     inline auto xapi thread_entry(voidp ptr){
         auto lambda                 = inc::cast<clambda>(ptr);
+        l_lambda                    = lambda;
 
         // windows 分离线程需要自己释放线程句柄，但是未用到信号量
         // 释放 lambda
         if (lambda.invoke(); lambda.is_detached()){
             #if xis_windows
                 CloseHandle(lambda.handler());
+                CloseHandle(lambda.mutex_for_suspend());
             #endif
 
             lambda.release();
@@ -67,14 +77,24 @@ namespace mixc::concurrency_thread::origin{
                 // 设置当前失败状态
                 plambda.im_initialize_fail();
             }
+            else{
+                plambda             = lambda;
+            }
         };
 
         #if xis_windows
-            if (not is_detached) {
-                if (lambda.semaphore_for_join(CreateSemaphoreA(nullptr/*不带名称*/, 0/*初始值*/, 1/*最大值*/, nullptr));
-                    lambda.semaphore_for_join() == nullptr){
-                    return;
-                }
+            if (is_detached) {
+                ; // pass
+            }
+            else if (lambda.semaphore_for_join(CreateSemaphoreA(nullptr/*不带名称*/, 0/*初始值*/, 1/*最大值*/, nullptr));
+                lambda.semaphore_for_join() == nullptr){
+                return;
+            }
+
+            if (lambda.mutex_for_suspend(CreateMutexA(nullptr, true, nullptr));
+                lambda.mutex_for_suspend() == nullptr){
+                CloseHandle(lambda.semaphore_for_join());
+                return;
             }
 
             lambda.handler(
@@ -92,6 +112,7 @@ namespace mixc::concurrency_thread::origin{
                 if (not is_detached){ // 顺带释放信号量句柄
                     CloseHandle(lambda.semaphore_for_join());
                 }
+                CloseHandle(lambda.mutex_for_suspend());
                 return;
             }
         #else
@@ -113,14 +134,13 @@ namespace mixc::concurrency_thread::origin{
         // 抵达这里表示初始化成功了
         // 设置 is_fail = false，指示之前的 xdefer 不再释放 lambda
         // 如果不是分离的线程，那么就需要让当前线程也指向 lambda
-        if (is_fail = false; not is_detached){
-            plambda                 = lambda;
-        }
+        is_fail                     = false;
+        plambda                     = lambda;
     }
 
     thread::~thread(){
         if (auto h = inc::atom_swap<clambda>(xref the.plambda, clambda{}); 
-            h.is_valid()){
+            h.is_valid() and not h.is_detached()){
 
             #if xis_windows
                 // 必须接收返回值，不能使用 nullptr
@@ -133,12 +153,17 @@ namespace mixc::concurrency_thread::origin{
 
                 CloseHandle(h.handler());
                 CloseHandle(h.semaphore_for_join());
+                CloseHandle(h.mutex_for_suspend());
             #elif xis_linux
                 pthread_join(h.handler(), nullptr);
             #endif
 
             h.release();
         }
+    }
+
+    void thread::resume(){
+        inc::thread_self::resume(the.id());
     }
 }
 
