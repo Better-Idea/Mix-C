@@ -81,7 +81,6 @@ void decode(){
 #include"algo/mmu.hpp"
 #include"configure.hpp"
 #include"define/base_type.hpp"
-#include"docker/array.hpp"
 #include"interface/can_alloc.hpp"
 #include"io/private/tty.hpp"
 #include"io/private/tty_color_t.hpp"
@@ -120,10 +119,6 @@ namespace mixc::io_private_tty::origin{
     } color;
 
     bool the_cursor_visiable = true;
-
-    void print_core(asciis str, uxx length){
-        fwrite(str, 1, length, stdout);
-    }
 
     inc::tty_color_t backcolor() {
         return inc::tty_color_t(color.back);
@@ -351,30 +346,40 @@ namespace mixc::io_private_tty::origin{
         return key;
     }
 
+    void print_core(asciis str, uxx length) {
+        fwrite(str, 1, length, stdout);
+    }
+
     #elif xis_windows
+
+    static HANDLE h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    static HANDLE h_stdin  = GetStdHandle(STD_INPUT_HANDLE);
+
+    void print_core(asciis str, uxx length) {
+        WriteConsoleA(h_stdout, str, DWORD(length), nullptr, nullptr);
+    }
 
     inc::tty_key read_key(bool echo){
         // need lock ===================================
         inc::tty_key key;
 
         if (key_str.length() == 0) {
-            HANDLE         h = GetStdHandle(STD_INPUT_HANDLE);
             DWORD          mode;
             DWORD          length;
-            GetConsoleMode(h, & mode);
-            SetConsoleMode(h, ~(
+            GetConsoleMode(h_stdin, & mode);
+            SetConsoleMode(h_stdin, ~(
                 ENABLE_LINE_INPUT | 
                 ENABLE_PROCESSED_INPUT | (
                     not echo ? ENABLE_ECHO_INPUT : 0
                 )
             ));
-            ReadConsoleW(h, buf_key, sizeof(buf_key) / sizeof(buf_key[0]), & length, NULL);
-            SetConsoleMode(h, mode); // recover
+            ReadConsoleW(h_stdin, buf_key, sizeof(buf_key) / sizeof(buf_key[0]), & length, NULL);
+            SetConsoleMode(h_stdin, mode); // recover
             key_str = { buf_key, length };
         }
 
-        key     = decode(key_str, & rest);
-        key_str = key_str.backward(key_str.length() - rest);
+        key                     = decode(key_str, & rest);
+        key_str                 = key_str.backward(key_str.length() - rest);
         return key;
     }
 
@@ -388,7 +393,6 @@ namespace mixc::io_private_tty::origin{
         uxx         read_length = 0;
         uxx         dummy;
         auto        read        = sizeof(item_t) == 1 ? xref ReadConsoleA : xref ReadConsoleW;
-        auto        h           = GetStdHandle(STD_INPUT_HANDLE);
         buf[initial_length - 1] = 0;
 
         auto alloc = [](uxx bytes) -> voidp {
@@ -400,14 +404,14 @@ namespace mixc::io_private_tty::origin{
         };
 
         do {
-            read(h, buf, initial_length, LPDWORD(xref read_length), NULL);
+            read(h_stdin, buf, initial_length, LPDWORD(xref read_length), NULL);
 
             if (buf[read_length - 1] == '\n'){
-                read_length         -= 2;
+                read_length    -= 2;
             }
             else if(buf[read_length - 1] == '\r'){
-                read_length         -= 1;
-                read(h, & dummy, 1, NULL, NULL);
+                read_length    -= 1;
+                read(h_stdin, & dummy, 1, NULL, NULL);
             }
 
             for(uxx i = 0; i < read_length; i++){
@@ -418,7 +422,7 @@ namespace mixc::io_private_tty::origin{
         auto target = allocx(length);
 
         for(uxx i = 0; i < length; i++){
-            target[i] = var::access(table, i);
+            target[i]           = var::access(table, i);
         }
         var::clear(xref table, xref length, free);
     }
@@ -452,13 +456,13 @@ namespace mixc::io_private_tty::origin{
     };
 
     void forecolor(inc::tty_color_t value) {
-        color.fore = map[uxx(value)];
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+        color.fore          = map[uxx(value)];
+        SetConsoleTextAttribute(h_stdout, color);
     }
 
     void backcolor(inc::tty_color_t value) {
-        color.back = map[uxx(value)];
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+        color.back          = map[uxx(value)];
+        SetConsoleTextAttribute(h_stdout, color);
     }
 
     void clear(){
@@ -468,10 +472,10 @@ namespace mixc::io_private_tty::origin{
     }
 
     void cursor_visiable(bool value){
-        CONSOLE_CURSOR_INFO info;    
-        info.bVisible = value;    
-        info.dwSize = sizeof(info);
-        SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), & info);
+        CONSOLE_CURSOR_INFO info;
+        info.bVisible       = value;    
+        info.dwSize         = sizeof(info);
+        SetConsoleCursorInfo(h_stdout, & info);
     }
 
     #endif

@@ -57,11 +57,12 @@ namespace mixc::io_tty{
                 return ph.format(fmt, [&](uxx length) {
                     auto ptr         = buf_stack;
 
-                    if (length > sizeof(buf_stack) / sizeof(buf_stack[0])){
+                    if (length >= sizeof(buf_stack) / sizeof(buf_stack[0])){
                         ptr = buf_heap = inc::alloc<char>(
-                            inc::memory_size(length)
+                            inc::memory_size(length + 1)
                         );
                     }
+                    ptr[length] = '\0';
                     return ptr;
                 });
             };
@@ -74,7 +75,7 @@ namespace mixc::io_tty{
             }
 
             if (inc::print_core(asciis(content), content.length()); buf_heap != nullptr){
-                inc::free(buf_heap, inc::memory_size(content.length()));
+                inc::free(buf_heap, inc::memory_size(content.length() + 1));
             }
         }
 
@@ -105,7 +106,7 @@ namespace mixc::io_tty::origin{
     using inc::tty_color_t;
     using inc::tty_key;
 
-    static inline tty_t tty;
+    inline tty_t tty;
 }
 
 #endif
