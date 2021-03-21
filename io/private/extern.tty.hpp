@@ -113,6 +113,8 @@ namespace mixc::io_private_tty::origin{
             u08 back           : 4;
         };
 
+        color_t();
+
         operator u08(){
             return *u08p(this);
         }
@@ -352,8 +354,17 @@ namespace mixc::io_private_tty::origin{
 
     #elif xis_windows
 
-    static HANDLE h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    static HANDLE h_stdin  = GetStdHandle(STD_INPUT_HANDLE);
+    static HANDLE h_stdout;
+    static HANDLE h_stdin;
+
+    color_t::color_t(){
+        CONSOLE_SCREEN_BUFFER_INFO info;
+        h_stdout    = GetStdHandle(STD_OUTPUT_HANDLE);
+        h_stdin     = GetStdHandle(STD_INPUT_HANDLE);
+        GetConsoleScreenBufferInfo(h_stdout, & info);
+        this->fore  = (info.wAttributes >> 0) & 0xf;
+        this->back  = (info.wAttributes >> 4) & 0xf;
+    }
 
     void print_core(asciis str, uxx length) {
         WriteConsoleA(h_stdout, str, DWORD(length), nullptr, nullptr);
