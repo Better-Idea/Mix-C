@@ -186,7 +186,7 @@ namespace mixc::docker_btree{
         i32                         offset[8]   = {};
     };
 
-    static inline const i32 null_node = 0;
+    inline const i32 null_node = 0;
 
     template<class final_t, class item_type>
     xstruct(

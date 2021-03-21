@@ -52,8 +52,8 @@ namespace mixc::define_nullref_t{
         }
     $
 
-    static volatile nullref_t * null = nullptr;
-    static inline const nullref_t & nullref = (nullref_t &) *null;
+    inline volatile nullref_t * null    = nullptr;
+    inline const    nullref_t & nullref = (nullref_t &) *null;
 }
 
 #endif

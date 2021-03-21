@@ -124,7 +124,7 @@ namespace mixc::docker_array{
         xranger(item_t)
     $
 
-    static inline uxx   empty_array     = 0;
+    inline uxx   empty_array     = 0;
 
     template<class final_t, class type_t>
     xstruct(
