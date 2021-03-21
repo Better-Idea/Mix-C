@@ -1,11 +1,7 @@
-#ifndef xpack_talk_about_gc
-#define xpack_talk_about_gc
-#pragma push_macro("xuser")
-#undef  xuser
 #define xuser mixc::talk_about_gc::inc
+#include"concurrency/thread_self.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/shared.hpp"
-#include"macro/xhint.hpp"
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
 #include"utils/counter.hpp"
@@ -82,10 +78,13 @@ namespace xuser{
                     b->b = b;
                     xhint(step, used_bytes());
                 }
+                thread_self::gc_sync();
                 xhint(step, used_bytes());
             }
+            thread_self::gc_sync();
             xhint(step, used_bytes());
         }
+        thread_self::gc_sync();
         xhint(step, used_bytes());
 
         {
@@ -117,16 +116,22 @@ namespace xuser{
                                 n2_4->na    = n2_2;
                                 n2_3->nc    = n3;
                             }
+                            thread_self::gc_sync();
                             xhint(step, used_bytes());
                         }
+                        thread_self::gc_sync();
                         xhint(step, used_bytes());
                     }
+                    thread_self::gc_sync();
                     xhint(step, used_bytes());
                 }
+                thread_self::gc_sync();
                 xhint(step, used_bytes());
             }
+            thread_self::gc_sync();
             xhint(step, used_bytes());
         }
+        thread_self::gc_sync();
         xhint(step, used_bytes());
 
         {
@@ -143,6 +148,7 @@ namespace xuser{
             n2_4->na                = n2_2;
             xhint(step, used_bytes());
         }
+        thread_self::gc_sync();
         xhint(step, used_bytes());
 
         {
@@ -150,13 +156,12 @@ namespace xuser{
             n4->n                   = { n4, n4, n4, n4 }; // 创建长度为 4 的数组，并将每个元素赋值为 n4
             xhint(step, used_bytes());
         }
+        thread_self::gc_sync();
         xhint(step, used_bytes());
     }
 }
 
-int main(){
-    mixc::talk_about_gc::inc::test();
+int run(){
+    xuser::test();
     return 0;
 }
-
-#endif
