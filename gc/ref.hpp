@@ -3,60 +3,35 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_ref::inc
+#include"concurrency/lock/atom_swap.hpp"
+#include"configure.hpp"
 #include"define/nullref.hpp"
-#include"docker/hashmap.hpp"
 #include"dumb/dummy_type.hpp"
 #include"dumb/init_by.hpp"
-#include"dumb/struct_type.hpp"
 #include"gc/self_management.hpp"
+#include"gc/private/background.hpp"
 #include"gc/private/make_guide.hpp"
 #include"gc/private/token.hpp"
 #include"gc/private/tuple.hpp"
 #include"instruction/index_of_last_set.hpp"
-#include"interface/can_callback.hpp"
-#include"concurrency/lock/atom_swap.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"memory/allocator.hpp"
 #include"memop/addressof.hpp"
-#include"memop/cast.hpp"
 #include"meta/has_cast.hpp"
-#include"meta/has_constructor.hpp"
-#include"meta/is_based_on.hpp"
 #include"meta/is_same.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tkv.hpp"
-#include"meta_seq/tlist.hpp"
-#include"meta_seq/vlist.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_ref{
     using namespace inc;
 
-    xstruct(
-        xname(gc_info_t_t)
-    )
-        uxx can_arrive_root : 1;
-        uxx visited         : sizeof(uxx) * 8 - 1;
-
-        gc_info_t_t() : 
-            can_arrive_root(0), visited(0){}
-
-        operator uxx (){
-            return uxxp(this)[0];
-        }
-    $
-
-    using visited_ptr_t = voidp;
-    using gc_map_t      = hashmap<visited_ptr_t, gc_info_t_t>;
-    static inline gc_map_t          gc_map;
-    static inline uxx               degree_dvalue;
-    static inline visited_ptr_t     root;
-    static inline bool              can_free_whole_ring;
-    static inline uxx               empty_mem[32];
-    static inline voidp             empty_mem_ptr   = empty_mem;
+    // 代替 nullptr 作为空对象
+    inline uxx                 empty_mem[32];
+    inline voidp               empty_mem_ptr       = empty_mem;
 
     template<
         class final_t, 
@@ -83,7 +58,7 @@ namespace mixc::gc_ref{
 
         using length_t                      = typename decltype(configure())::key;
         using converted_item_t              = typename decltype(configure())::val;
-        using token_mix_t                   = token_mix<item_t, attribute_t, length_t>;
+        using token_mix_t                   = inc::token_mix<item_t, attribute_t, length_t>;
 
         static constexpr bool has_attribute = not is_same<void, attribute_t>;
         static constexpr bool has_array     = not is_same<void, item_t>;
@@ -92,96 +67,107 @@ namespace mixc::gc_ref{
             return (token_mix_t *)empty_mem_ptr;
         }
 
-        template<class guide>
+        template<class guide_t>
         bool routing() {
-            using tuplep = tuple<attribute_t> *;
+            using tuplep = inc::tuple<attribute_t> *;
 
-            bool can_arrive_root = false;
+            auto ptr                = the.mem;
+            auto can_arrive_root    = false;
 
             // 无法通向 root
-            if (mem == null()){
+            if (ptr == null()){
                 return false;
             }
 
-            xdebug(im_gc_meta_routing, mem, xtypeid(attribute_t).name, mem->owners(), the.length());
+            xdebug(im_gc_meta_routing, ptr, xtypeid(attribute_t).name, ptr->owners(), the.length());
 
             // 我们把经过的节点存下来
             // 如果是首次经过就让它遍历成员节点
             // 如果该节点可以通往 root，那么曾经拜访过该节点的附和节点也可以通往根节点
             // 实际过程如下：
             // root --> 此节点 --> 附和节点 -> 此节点
-            //             |   
+            //             |
             //             +-----> 其他节点 -> root
             // 在此时附和节点不能确定此节点是否还存在可以通往 root 的路径，所以指示暂时的让此节点的 visited 访问计数器加一
             // 而计数汇总的工作则是交给此节点来完成
-            if (gc_info_t_t & info = gc_map.get(mem); info == nullref){
-                gc_info_t_t        this_node;
-                this_node.can_arrive_root       = mem == root;
-                this_node.visited               = mem != root; // 除了根节点，其他节点都有直接的入边（表示从前一个节点到此节点）
-                gc_map.set(mem, this_node);
-                xdebug(im_gc_meta_routing, mem, "set to gc_map");
+            inc::gc_info_t & info   = inc::gc_map.get(ptr); 
+            inc::gc_info_t   gi;
 
-                // 如果数组元素 item_t 属于 guide 类型集合，那么就遍历数组元素
-                if constexpr (tin<guide, item_t>){
-                    can_arrive_root            |= tuple<void>::template routing<guide>(the, the.length());
+            if (info != nullref){
+                if (info.can_arrive_root){
+                    xdebug(im_gc_meta_routing, "can_arrive_root");
+                    degree_dvalue  -= 1;
+                    return true;
                 }
-                
-                // 如果 attribute_t 属于 guide 类型集合，就遍历该对象的字段
-                if constexpr (tin<guide, attribute_t>){
-                    attribute_t * ptr           = mem; // 里氏转换
-                    can_arrive_root            |= tuplep(ptr)->template routing<guide>();
-                }
-
-                if (can_arrive_root){
-                    gc_info_t_t & this_node          = gc_map.get(mem);
-                    this_node.can_arrive_root   = true;
-                    degree_dvalue              += mem->owners() - this_node.visited;
+                else{
+                    info.visited   += 1;
+                    xdebug(im_gc_meta_routing, info.visited);
+                    return false;
                 }
             }
-            else if (info.can_arrive_root){
-                xdebug(im_gc_meta_routing, "can_arrive_root");
-                degree_dvalue                  -= 1;
-                can_arrive_root                 = true;
+
+            // 从非根节点开始计算
+            gi.can_arrive_root      = ptr == root;
+            gi.visited              = ptr != root;
+            inc::gc_map.set(ptr, gi);
+            xdebug(im_gc_meta_routing, ptr, "set to gc_map");
+
+            // 如果数组元素 item_t 属于 guide_t 类型集合，那么就遍历数组元素
+            if constexpr (tin<guide_t, item_t>){
+                can_arrive_root    |= tuple<void>::template routing<guide_t>(the, the.length());
             }
-            else{
-                info.visited                   += 1;
-                xdebug(im_gc_meta_routing, info.visited);
+            
+            // 如果 attribute_t 属于 guide_t 类型集合，就遍历该对象的字段
+            if constexpr (tin<guide_t, attribute_t>){
+                attribute_t * attr  = ptr; // 里氏转换
+                can_arrive_root    |= tuplep(attr)->template routing<guide_t>();
+            }
+
+            if (can_arrive_root){
+                inc::gc_info_t & gi = inc::gc_map.get(ptr); 
+                inc::degree_dvalue += ptr->owners() - gi.visited;
+                gi.can_arrive_root  = true;
             }
             return can_arrive_root;
         }
 
-        template<class guide>
+        template<class guide_t>
         bool can_release(){
-            bool    state;
-            root            = mem;
+            inc::root               = mem;
+            inc::degree_dvalue      = 0;
 
-            // not can_arrive_root
-            if (not the.template routing<guide>()){
+            // 只有可以再次回到根节点 degree_dvalue 的值才有意义
+            if (not the.template routing<guide_t>()){
                 return false;
             }
-
-            state           = degree_dvalue == 0;
-            degree_dvalue   = 0;
-            return state;
+            return inc::degree_dvalue == 0;
         }
     public:
         meta() : mem(null()) { }
 
         meta(the_t const & object){
-            object.mem->owners_inc();
-            mem     = object.mem;
+            auto m                  = object.mem;
+            mem                     = m;
+            m->owners_increase();
         }
 
-        meta(the_t && object){
-            the.mem = atom_swap(& object.mem, null());
+        meta(the_t && object) : 
+            mem(
+                atom_swap(xref object.mem, null())
+            ){
         }
     protected:
+        // 对外隐藏析构函数
+        ~meta(){
+            the                     = nullptr;
+        }
+
         using item_initial_invoke   = icallback<void(converted_item_t * item_ptr)>;
         using item_initial_invokex  = icallback<void(uxx i, converted_item_t * item_ptr)>;
 
         template<class initial_invoke_t, class ... args_t>
         void init(::length length, init_by<args_t...> const & init_attr, initial_invoke_t const & init_ary) {
-            mem     = alloc(length, init_attr);
+            mem                     = the_t::alloc(length, init_attr);
 
             for(uxx i = 0; i < length; i++) {
                 if constexpr (inc::has_cast<item_initial_invoke, initial_invoke_t>){
@@ -193,18 +179,18 @@ namespace mixc::gc_ref{
             }
         }
 
-        template<class ... args_t, class ... argsx>
+        template<class ... args_t, class ... argsx_t>
         void init_one_by_one(
             init_by<args_t...>  const &     init_attr, 
             converted_item_t    const &     first, 
-            argsx               const & ... rest){
+            argsx_t             const & ... rest){
 
             struct item_ref{
                 converted_item_t const & value;
                 item_ref(converted_item_t const & value) : value(value){}
             } items[] = {first, rest...};
 
-            mem     = alloc(1 + sizeof...(rest), init_attr);
+            mem                     = the_t::alloc(1 + sizeof...(rest), init_attr);
 
             for(uxx i = 0, count = 1 + sizeof...(rest); i < count; i++) {
                 xnew(mem->item_ptr(i)) converted_item_t(items[i].value);
@@ -214,98 +200,147 @@ namespace mixc::gc_ref{
         template<class ... args_t>
         requires(can_init<attribute_t, init_by<args_t...>> == true)
         void init_ptr(init_by<args_t...> const & init) {
-            mem     = alloc(::length(0), init);
+            mem                     = the_t::alloc(::length(0), init);
         }
 
-        ~meta(){
-            the = nullptr;
+        template<class guide_t, bool need_gc_v>
+        static void release(voidp ptr){
+            auto mem                = (token_mix_t *)ptr;
+            auto old                = (the_t *)& mem;
+            auto owners             = (mem->owners());
+
+            xdebug(im_gc__meta, xtypeid(attribute_t).name, owners, mem);
+
+            if (owners == 0){
+                the_t::free_with_destroy(mem);
+                return;
+            }
+
+            if constexpr (not need_gc_v){
+                return;
+            }
+
+            // 如果可以释放
+            // 设置 thread_local 变量 in_release 
+            // 让成员变量析构操作不再推送到 gc_thread
+            if (old->template can_release<guide_t>()){
+                auto & gi           = inc::gc_map.get(mem);
+                inc::in_release     = true;
+                gi.can_arrive_root  = false;
+                the_t::free_with_destroy(mem);
+                inc::in_release     = false;
+            }
         }
     public:
-        final_t & operator = (the_t const & object){
+        xis_nullptr(
+            mem == the_t::null()
+        );
+
+        final_t & operator= (the_t const & object){
             /* 当 object == nullptr 时，实际上指向的是 the_t::null()
              * 对外而言依旧与 nullptr 比较判断是否是空对象
-             * the_t::null() 是一块不为 nullptr 可用的内存，只是它不能当作对象实例使用
+             * the_t::null() 是一块不为 nullptr 可用的内存，只是我们不应该访问它里面的内容
              * 具体情况：
              * 对于该函数 operator=(the_t const & object)
              * 假如 object.mem 为空时指向的是 nullptr
              * 那么在增加计数器时我们需要额外判断它是否为 nullptr
              * 此外下列步骤在多线程环境并不安全：
-             * if (object.mem != nullptr){      // 前一刻不为 nullptr
-             *     object.mem->owners_inc();    // 后一刻为 nullptr
+             * 
+             * // 前一刻不为 nullptr
+             * if (object.mem != nullptr){
+             *     // 后一刻在其他线程释放了
+             *     // 由于 cache 的存在，当前 cpu 可能看不见其他 cpu 对它的改动
+             *     object.mem->owners_increase();   
              * }
              * 
              * 所以我们用静态的空对象 null() 代替 nullptr
              * 这样我们我们可以放心的直接增加计数器并且消除了线程不一致问题
              */
-            object.mem->owners_inc();
+
+            // 避免 debug 模式多次从内存中访问 object.mem
+            // object.mem 前后可能不一致
+            using guide             = decltype(make_guide<final_t>());
+            constexpr bool need_gc  = guide::length != 0;
+            token_mix_t * om        = object.mem;
+
+            if (om == mem){
+                return thex;
+            }
+
+            om->owners_increase();
 
             // 当有多个线程对该对象赋值时，该原子操作可以保证正确性
             the_t         old{};
-            token_mix_t * m     = atom_swap(& the.mem, object.mem);
+            token_mix_t * m         = inc::atom_swap(& the.mem, om);
 
             // 把原先的 the.mem 交给 old 进行析构操作
-            old.mem             = m;
+            old.mem                 = m;
             return thex;
         }
 
-        final_t & operator = (the_t && object){
+        final_t & operator=(the_t && object){
             the_t         old{};
             token_mix_t * m;
 
             // 先夺取 object.mem
-            m                   = atom_swap(& object.mem, null());
+            m                       = inc::atom_swap(xref object.mem, the_t::null());
 
             // 即使其他线程也想与 the.mem 交换
             // 后交换的线程会把先交换的内容挤出来放到 m 中
             // 由 old 析构
-            m                   = atom_swap(& the.mem, m);
-            old.mem             = m;
+            m                       = inc::atom_swap(xref the.mem, m);
+            old.mem                 = m;
             return thex;
         }
 
-        xis_nullptr(mem == null());
-
         final_t & operator=(decltype(nullptr)){
-            using guide = decltype(make_guide<final_t>());
+            using guide             = decltype(make_guide<final_t>());
+            using thep              = the_t *;
             constexpr bool need_gc  = guide::length != 0;
-            token_mix_t *  ptr      = null();
-            uxx            cnt;
+            token_mix_t *  ptr      = the_t::null();
+            the_t       *  old;
+            uxx            owners;
 
-            if (ptr = atom_swap(& mem, ptr); ptr == null()) { // enter only once
+            if (ptr = atom_swap(& mem, ptr); ptr == the_t::null()) {
+                return thex;
+            }
+            else{
+                old                 = thep(& ptr);
+            }
+
+            // in_release 是一个 thread_local 变量
+            // 非 gc_thread 线程 in_release 永远是 false
+            // 前台[外析构]的剩余步骤会推送到 gc_thread 后台线程执行
+            // 后台 gc_thread 线程执行[内析构]前会将 in_release 置 true
+            // 表示[内析构]直接执行而不推送到自身的 gc_que 队列中
+            // 这么做保证了释放的顺序，同时避免了 gc_que 存满时的死锁
+            if (not in_release){
+                gc_push(ptr, xref the_t::release<guide, need_gc>);
                 return thex;
             }
 
-            // 后面的代码可以推送给后台 gc 线程
-            auto old                = (the_t *)& ptr;
-
-            if (can_free_whole_ring){
-                if constexpr (not need_gc){
-                    if (ptr->owners_dec() == 0){
-                        old->free();
-                    }
+            // 对于[平凡类型]只要计数器为 0 就可以[内析构]
+            if constexpr (not need_gc){
+                if (owners = ptr->owners_decrease(); owners == 0){
+                    the_t::free_with_destroy(ptr);
                 }
-                else if (auto && i = gc_map.take_out(ptr); i.has_hold_value()){
-                    if (i.can_arrive_root){
-                        old->free();
-                    }
-                }
-                return thex;
             }
-
-            cnt                     = ptr->owners_dec();
-            xdebug(im_gc__meta, xtypeid(attribute_t).name, cnt, ptr);
-
-            if (cnt == 0){
-                old->free();
-            }
-            else if constexpr (need_gc){
-                if (old->template can_release<guide>()){
-                    can_free_whole_ring = true;
-                    gc_map.take_out(ptr);
-                    old->free();
-                    can_free_whole_ring = false;
+            // 此节点可能不属于当前[类型环]
+            // 遍历子节点，如果可以释放就执行[内析构]操作
+            else if (auto & i = inc::gc_map.get(ptr); i == nullref){
+                if (owners = ptr->owners_decrease(); 
+                    owners == 0 or old->template can_release<guide>()){
+                    auto  & gi          = inc::gc_map.get(ptr);
+                    gi.can_arrive_root  = false; // 避免重入
+                    the_t::free_with_destroy(ptr);
                 }
-                gc_map.clear();
+            }
+            // 如果 gc 经过了该节点，且它可以抵达根节点
+            else {
+                if (i.can_arrive_root){
+                    i.can_arrive_root   = false; // 避免重入
+                    the_t::free_with_destroy(ptr);
+                }
             }
             return thex;
         }
@@ -319,12 +354,12 @@ namespace mixc::gc_ref{
         }
 
         void swap(the_t * object) {
-            object->mem = atom_swap(& mem, object->mem);
+            object->mem = the_t::atom_swap(& mem, object->mem);
         }
 
     protected:
         operator item_t * () const {
-            return mem[0].item_ptr(0);
+            return mem->item_ptr(0);
         }
 
         attribute_t * operator->() const {
@@ -344,12 +379,8 @@ namespace mixc::gc_ref{
             mem->this_length(value);
         }
 
-        constexpr static uxx header_size(){
-            return sizeof(token_mix_t);
-        }
-
         uxx capacity() const {
-            return real(mem->this_length());
+            return the_t::real(mem->this_length());
         }
     private:
         mutable token_mix_t * mem;
@@ -370,14 +401,14 @@ namespace mixc::gc_ref{
             return length;
         }
 
-        static memory_size size(uxx length) {
+        static inc::memory_size size(uxx length) {
             if constexpr (has_array){
-                return memory_size(
+                return inc::memory_size(
                     sizeof(token_mix_t) + length * sizeof(item_t)
                 );
             }
             else{
-                return memory_size(
+                return inc::memory_size(
                     sizeof(token_mix_t)
                 );
             }
@@ -386,8 +417,10 @@ namespace mixc::gc_ref{
         template<class ... args_t>
         static auto alloc(uxx length, init_by<args_t...> const & init) {
             // 这里只初始化不带属性的部分（引用计数器（*必选）、数组长度（*可选））
-            auto real_length    = real(length);
-            auto mem            = (token_mix_t *)alloc_with_initial<typename token_mix_t::base_t>(size(real_length), length);
+            auto real_length    = (the_t::real(length));
+            auto mem            = (token_mix_t *)inc::alloc_with_initial<typename token_mix_t::base_t>(
+                the_t::size(real_length), length
+            );
 
             // 再根据实际情况初始化属性部分
             if constexpr (has_attribute){
@@ -396,14 +429,18 @@ namespace mixc::gc_ref{
             return mem;
         }
 
-        void free() const {
-            uxx length = capacity();
-
+        static void free_with_destroy(token_mix_t * mem) {
             // 先析构
             mem->~token_mix_t();
 
-            // 再根据实际内存大小释放
-            inc::free(mem, size(length));
+            // 添加到释放列表，在完成一轮 gc 后再释放
+            // 避免释放了整个[潜质类型]，在下一轮 gc 的时候
+            // 注意：这里修改该 mem 中的内容
+            auto node       = free_nodep(mem);
+            auto length     = the_t::real(mem->this_length());
+            node->bytes     = the_t::size(length);
+            node->previous  = free_list;
+            free_list       = node;
         }
     $
 
