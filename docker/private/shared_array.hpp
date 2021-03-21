@@ -52,7 +52,10 @@ namespace mixc::docker_shared_array{
         using base_t::operator!=;
         using base_t::base_t;
     public:
-        shared_array_t(decltype(nullptr) = nullptr) : base_t(){}
+        // 兼容 msvc，shared_array_t(decltype(nullptr) = nullptr) 可能会被认为默认无参构造函数不存在
+        // 导致无法无参初始化
+        shared_array_t() = default;
+        shared_array_t(decltype(nullptr)) : base_t() {}
 
         template<class finalx_t >
         shared_array_t(shared_array_t<finalx_t, type, rank, attribute, is_binary_aligned_alloc> const & self) : 
