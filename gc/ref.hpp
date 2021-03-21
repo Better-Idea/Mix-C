@@ -335,6 +335,10 @@ namespace mixc::gc_ref{
                     gi.can_arrive_root  = false; // 避免重入
                     the_t::free_with_destroy(ptr);
                 }
+                else{
+                    // 从 gc 队列中标记移除（可能本来就不在），避免本轮 gc 做多余的处理
+                    ptr->in_gc_queue(false);
+                }
             }
             // 如果 gc 经过了该节点，且它可以抵达根节点
             else {
