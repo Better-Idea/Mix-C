@@ -24,7 +24,7 @@ namespace mixc::docker_single_linked_node::origin {
         }
     $
 
-    template<class item_t, inc::is_attached_lock lock_t = inc::lock_free>
+    template<class item_t, inc::is_attached_lock lock_t = inc::with_lock_free>
     xstruct(
         xtmpl(single_linked_node_ptr, item_t, lock_t),
         xprib(lock_t),

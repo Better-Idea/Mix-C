@@ -22,9 +22,9 @@ namespace mixc::lock_builtin_lock::origin{
     $
 
     xstruct(
-        xname(lock_free)
+        xname(with_lock_free)
     )
-        constexpr lock_free(){}
+        constexpr with_lock_free(){}
 
         template<auto opr_v, class this_t, class callback>
         void lock(this_t, callback const & call) const {

@@ -7,9 +7,9 @@
 namespace xuser {
     using xusing_docker_queue::with_queue_policy_lock;
     using xusing_docker_queue::with_lwmutex;
-    using xusing_docker_queue::lock_free;
+    using xusing_docker_queue::with_lock_free;
 
-    template<class item_t, xusing_docker_queue::is_attached_lock lock_t = xusing_docker_queue::lock_free>
+    template<class item_t, xusing_docker_queue::is_attached_lock lock_t = xusing_docker_queue::with_lock_free>
     xfinal_tmpl(xusing_docker_queue, queue, item_t, lock_t);
 }
 
