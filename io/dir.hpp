@@ -28,13 +28,13 @@ namespace mixc::io_dir::origin{
             inc::c08 path;
             bool     for_file;
 
-            template<auto mode, class invoke_t>
+            template<auto mode_v, class invoke_t>
             void foreach_template(invoke_t invoke) const {
-                uxx    index = 0;
-                loop_t state = loop_t::go_on;
+                uxx    index    = 0;
+                loop_t state    = loop_t::go_on;
 
                 dir::foreach_template(for_file, path, [&](asciis name){
-                    xitr_switch(mode, index, state, invoke, name);
+                    state       = inc::itr_switch<mode_v>(xref index, invoke, name);
                     return state;
                 });
             }
