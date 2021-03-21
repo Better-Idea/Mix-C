@@ -53,8 +53,7 @@ https://github.com/Better-Idea/Mix-C/blob/master/math
 | math                  | 提供初等数学以及概率统计相关的函数                                     |
 | memop                 | 直接操作内存的库                                                       |
 | memory                | 底层内存分配模块                                                       |
-| meta                  | 为元编程提供元信息的库                                                 |
-| meta_ctr              | [枯萎中]                                                               |
+| meta                  | 为元编程提供元信息                                                     |
 | meta_seq              | 为编译期的类型数组与常量数组提供基础操作                               |
 | simd                  | 与 cpu 相关的矢量运算库，用于发掘 cpu 的性能                           |
 | test                  | 测试单元                                                               |
