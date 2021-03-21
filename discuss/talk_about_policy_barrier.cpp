@@ -1,16 +1,12 @@
-#ifndef xpack_talk_about_policy_barrier
-#define xpack_talk_about_policy_barrier
-#pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::talk_about_policy_barrier::inc
 #include"concurrency/lock/mutex.hpp"
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/policy_barrier.hpp"
+#include"concurrency/thread.hpp"
 #include"macro/xhint.hpp"
-#include<thread>
-#pragma pop_macro("xuser")
 
-namespace mixc::talk_about_policy_barrier::inc{
+namespace xuser{
     // 操作列表
     enum opr{
         push,
@@ -39,58 +35,50 @@ namespace mixc::talk_about_policy_barrier::inc{
             bool has_value = false;
             barrier.lock<opr::pop>([&](){
                 if (counter != 0){
-                    counter -= 1;
+                    counter  -= 1;
                     has_value = true;
                 }
             });
             return has_value;
         }
     };
-
-    void test(){
-        using namespace std;
-        uxx     step = 1000000;
-        uxx     sum  = step * 4;
-        foo     mod;
-
-        auto push_invoke = [&](voidp id){
-            xhint("push", id);
-            for(uxx i = 0; i < step; i++){
-                mod.push();
-            }
-            xhint("finish push");
-        };
-
-        auto pop_invoke = [&](voidp id){
-            xhint("pop", id);
-            for(uxx i = 0; i < step * 2;){
-                if (mod.pop()){
-                    i++;
-                }
-            }
-            xhint("finish pop");
-        };
-        
-        thread list[] = {
-            thread(push_invoke, voidp(0)),
-            thread(push_invoke, voidp(1)),
-            thread(push_invoke, voidp(2)),
-            thread(push_invoke, voidp(3)),
-            thread(pop_invoke,  voidp(4)),
-            thread(pop_invoke,  voidp(5)),
-        };
-
-        for(auto & t : list){
-            t.join();
-        }
-
-        xhint(mod.counter);
-    }
 }
 
-int main(){
-    mixc::talk_about_policy_barrier::inc::test();
+int run(){
+    using namespace xuser;
+    uxx     step = 1000000;
+    uxx     sum  = step * 4;
+    foo     mod;
+
+    auto push_invoke = [&](voidp id){
+        xhint("push", id);
+        for(uxx i = 0; i < step; i++){
+            mod.push();
+        }
+        xhint("finish push", id);
+    };
+
+    auto pop_invoke = [&](voidp id){
+        xhint("pop", id);
+        for(uxx i = 0; i < step * 2;){
+            if (mod.pop()){
+                i++;
+            }
+        }
+        xhint("finish pop", id);
+    };
+
+    {
+        thread list[] = {
+            xjoinable{ push_invoke(voidp(0)); },
+            xjoinable{ push_invoke(voidp(1)); },
+            xjoinable{ push_invoke(voidp(2)); },
+            xjoinable{ push_invoke(voidp(3)); },
+            xjoinable{ pop_invoke (voidp(4)); },
+            xjoinable{ pop_invoke (voidp(5)); },
+        };
+    }
+
+    xhint(mod.counter);
     return 0;
 }
-
-#endif

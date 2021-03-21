@@ -51,34 +51,34 @@ namespace xuser{
         xname(N4_t),
         xpubf(n, shared_array<shared<N4_t>>)
     ) $
+}
 
-    void test(){
-        // CAT WARNING：
-        // 以下千层饼结构仅用于演示指针指针在作用域内外的行为，实际代码编写请避免以下风格
-        counter step = 0;
+int run(){
+    using namespace xuser;
+
+    // CAT WARNING：
+    // 以下千层饼结构仅用于演示指针指针在作用域内外的行为，实际代码编写请避免以下风格
+    counter step = 0;
+    {
+        xhint(step, used_bytes());
+        shared<uxx> c { default_init_by };
         {
             xhint(step, used_bytes());
-            shared<uxx> c { default_init_by };
+            shared<ax> x { default_init_by };
             {
                 xhint(step, used_bytes());
-                shared<ax> x { default_init_by };
-                {
-                    xhint(step, used_bytes());
-                    shared<ax> a{ default_init_by };
-                    xhint(step, used_bytes());
-                    shared<bx> b{ default_init_by };
-                    xhint(step, used_bytes());
-                    x->a = a;
-                    x->b = b;
-                    x->c = c;
-                    a->a = x;
-                    a->b = b;
-                    a->c = c;
-                    b->a = x;
-                    b->b = b;
-                    xhint(step, used_bytes());
-                }
-                thread_self::gc_sync();
+                shared<ax> a{ default_init_by };
+                xhint(step, used_bytes());
+                shared<bx> b{ default_init_by };
+                xhint(step, used_bytes());
+                x->a = a;
+                x->b = b;
+                x->c = c;
+                a->a = x;
+                a->b = b;
+                a->c = c;
+                b->a = x;
+                b->b = b;
                 xhint(step, used_bytes());
             }
             thread_self::gc_sync();
@@ -86,38 +86,38 @@ namespace xuser{
         }
         thread_self::gc_sync();
         xhint(step, used_bytes());
+    }
+    thread_self::gc_sync();
+    xhint(step, used_bytes());
 
-        {
-            shared<N1_t> n1{ default_init_by };{ 
-                n1->name = "n1"; 
+    {
+        shared<N1_t> n1{ default_init_by };{ 
+            n1->name = "n1"; 
+            xhint(step, used_bytes());
+            shared<N2_t> n2_1{ default_init_by };{ 
+                n2_1->name = "n2_1";
                 xhint(step, used_bytes());
-                shared<N2_t> n2_1{ default_init_by };{ 
-                    n2_1->name = "n2_1";
+                shared<N2_t> n2_2{ default_init_by };{ 
+                    n2_2->name = "n2_2";
                     xhint(step, used_bytes());
-                    shared<N2_t> n2_2{ default_init_by };{ 
-                        n2_2->name = "n2_2";
+                    shared<N2_t> n2_3{ default_init_by };{
+                        n2_3->name = "n2_3";
                         xhint(step, used_bytes());
-                        shared<N2_t> n2_3{ default_init_by };{
-                            n2_3->name = "n2_3";
+                        shared<N2_t> n2_4{ default_init_by };{
+                            n2_3->name = "n2_4";
                             xhint(step, used_bytes());
-                            shared<N2_t> n2_4{ default_init_by };{
-                                n2_3->name = "n2_4";
-                                xhint(step, used_bytes());
 
-                                shared<N3_t> n3{ default_init_by }; 
-                                n3->name = "n3";
-                                xhint(step, used_bytes());
-
-                                n1->na      = n2_1;
-                                n2_1->na    = n2_2;
-                                n2_2->na    = n2_3;
-                                n2_1->nb    = n2_3;
-                                n2_3->na    = n2_4;
-                                n2_4->na    = n2_2;
-                                n2_3->nc    = n3;
-                            }
-                            thread_self::gc_sync();
+                            shared<N3_t> n3{ default_init_by }; 
+                            n3->name = "n3";
                             xhint(step, used_bytes());
+
+                            n1->na      = n2_1;
+                            n2_1->na    = n2_2;
+                            n2_2->na    = n2_3;
+                            n2_1->nb    = n2_3;
+                            n2_3->na    = n2_4;
+                            n2_4->na    = n2_2;
+                            n2_3->nc    = n3;
                         }
                         thread_self::gc_sync();
                         xhint(step, used_bytes());
@@ -133,35 +133,33 @@ namespace xuser{
         }
         thread_self::gc_sync();
         xhint(step, used_bytes());
+    }
+    thread_self::gc_sync();
+    xhint(step, used_bytes());
 
-        {
-            // 其实我们更推荐这么写
-            // 这样可以减少栈上环对象的个数，避免无用的析构操作
-            shared<N3_t> n3{ default_init_by };
-            shared<N1_t> n1{ default_init_by };
-            auto & n2_1 = n1->na    = { default_init_by };
-            auto & n2_2 = n2_1      = { default_init_by };
-            auto & n2_3 = n2_2      = { default_init_by };
-            auto & n2_4 = n2_3      = { default_init_by };
-            n2_1->nb                = n2_3;
-            n2_3->nc                = n3;
-            n2_4->na                = n2_2;
-            xhint(step, used_bytes());
-        }
-        thread_self::gc_sync();
-        xhint(step, used_bytes());
-
-        {
-            shared<N4_t> n4         = { default_init_by };
-            n4->n                   = { n4, n4, n4, n4 }; // 创建长度为 4 的数组，并将每个元素赋值为 n4
-            xhint(step, used_bytes());
-        }
-        thread_self::gc_sync();
+    {
+        // 其实我们更推荐这么写
+        // 这样可以减少栈上环对象的个数，避免无用的析构操作
+        shared<N3_t> n3{ default_init_by };
+        shared<N1_t> n1{ default_init_by };
+        auto & n2_1 = n1->na    = { default_init_by };
+        auto & n2_2 = n2_1      = { default_init_by };
+        auto & n2_3 = n2_2      = { default_init_by };
+        auto & n2_4 = n2_3      = { default_init_by };
+        n2_1->nb                = n2_3;
+        n2_3->nc                = n3;
+        n2_4->na                = n2_2;
         xhint(step, used_bytes());
     }
-}
+    thread_self::gc_sync();
+    xhint(step, used_bytes());
 
-int run(){
-    xuser::test();
+    {
+        shared<N4_t> n4         = { default_init_by };
+        n4->n                   = { n4, n4, n4, n4 }; // 创建长度为 4 的数组，并将每个元素赋值为 n4
+        xhint(step, used_bytes());
+    }
+    thread_self::gc_sync();
+    xhint(step, used_bytes());
     return 0;
 }
