@@ -200,9 +200,9 @@ protected:
         for(uxx i = uxx(-1), index = 0; not_exist != (i = bmp.index_of_first_set(i + 1));){
             for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next){
                 #ifdef xarg_has_val_t
-                    xitr_switch<mode_v>(xref index, xref state, invoke, (key_t &)cur->key, (val_t &)cur->val);
+                    state = inc::itr_switch<mode_v>(xref index, invoke, (key_t &)cur->key, (val_t &)cur->val);
                 #else
-                    xitr_switch<mode_v>(xref index, xref state, invoke, (key_t &)cur->key);
+                    state = inc::itr_switch<mode_v>(xref index, invoke, (key_t &)cur->key);
                 #endif
 
                 if (state == loop_t::finish){
