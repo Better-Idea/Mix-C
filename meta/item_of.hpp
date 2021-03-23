@@ -11,10 +11,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_item_of{
-    template<class may_seq_t>
-    struct meta{
-        using result = void;
-    };
+    template<class> struct meta;
 
     template<inc::is_indexable seq_t>
     struct meta<seq_t>{
