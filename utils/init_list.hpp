@@ -86,7 +86,7 @@ namespace mixc::utils_init_list::origin{
 // 实际初始化会被推迟到 main 中执行
 #define xinit(...)                                              \
     inline ::mixc::utils_init_list::init_listx<__VA_ARGS__>     \
-    xlink2(__init_list, __LINE__) = xcstyle(auto & the_init_list = xlink2(__init_list, __LINE__)) -> void
+    xlink2(__init_list, __LINE__) = xcstyle() -> void
 #endif
 
 xexport_space(mixc::utils_init_list::origin)
