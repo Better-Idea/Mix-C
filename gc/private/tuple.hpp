@@ -44,7 +44,7 @@ namespace mixc::gc_private_tuple{
                     can_arrive_root    |= field->template routing<guide_t>();
                 }
                 else{
-                    auto entry = (tuple<origin> *)field;
+                    auto entry          = (tuple<origin> *)field;
                     can_arrive_root    |= entry->template routing<guide_t>();
                 }
             }

@@ -133,9 +133,13 @@ namespace mixc::gc_private_background::origin{
                 }
             };
 
+            if (dis >= xgc_queue_depth) {
+                i_push              = i_pop_gc_que + xgc_queue_depth;
+            }
+
             if (first = inc::atom_load(xref gc_pend_head->next); dis == 0){
                 resume();
-                inc::thread_self::suspend();
+                inc::thread_self::suspend(64/*ms*/);
                 continue;
             }
             if (first == nullptr and dis < gc_queue_threshold){
@@ -144,9 +148,9 @@ namespace mixc::gc_private_background::origin{
 
             using tp                = inc::token *;
             using rpp               = release_pair *;
-            auto i_begin            = i_pop_gc_que & gc_queue_depth_mask;
-            auto i_end              = i_push & gc_queue_depth_mask;
-            auto i                  = i_end;
+            auto i_begin            = i_pop_gc_que;
+            auto i_end              = i_push;
+            auto i                  = i_push;
             auto release            = release_invoke{};
             auto mem                = tp{};
             auto item               = rpp{};
@@ -156,7 +160,7 @@ namespace mixc::gc_private_background::origin{
             // 批量让引用计数器减一
             while(i != i_begin){
                 i                  -= 1;
-                item                = xref gc_que[i];
+                item                = xref gc_que[i & gc_queue_depth_mask];
 
                 // mem 为 nullptr 指示当前元素在对应的线程中还未完成设置
                 while(true){
@@ -179,7 +183,7 @@ namespace mixc::gc_private_background::origin{
             }
 
             while(i != i_end){
-                item                = xref gc_que[i];
+                item                = xref gc_que[i & gc_queue_depth_mask];
                 i                  += 1;
                 i_pop              += 1;
                 release             = item->release;
@@ -197,13 +201,14 @@ namespace mixc::gc_private_background::origin{
                     // 则此处需要再复位一下 in_gc_queue，以便下一轮 gc 可以正确响应
                     mem->in_gc_queue(false);
 
-                    // 置为 nulptr
-                    // 只有下一次读到 mem 值不为 nullptr 时才响应
-                    item->mem       = nullptr;
                 }
 
                 // 让 gc_que 立即腾出可用的空间
                 inc::atom_store(xref i_pop_gc_que, i_pop);
+
+                // 置为 nulptr
+                // 只有下一次读到 mem 值不为 nullptr 时才响应
+                item->mem           = nullptr;
                 resume();
             }
 
@@ -213,7 +218,6 @@ namespace mixc::gc_private_background::origin{
                 free_list           = free_list->previous;
                 inc::free(current, current->bytes);
             }
-
             gc_map.clear();
         }
     }

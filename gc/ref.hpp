@@ -97,7 +97,7 @@ namespace mixc::gc_ref{
             if (info != nullref){
                 if (info.can_arrive_root){
                     xdebug(im_gc_meta_routing, "can_arrive_root");
-                    degree_dvalue  -= 1;
+                    degree_dvalue -= 1;
                     return true;
                 }
                 else{
@@ -110,6 +110,7 @@ namespace mixc::gc_ref{
             // 从非根节点开始计算
             gi.can_arrive_root      = ptr == root;
             gi.visited              = ptr != root;
+            ptr->in_gc_queue(false);
             inc::gc_map.set(ptr, gi);
             xdebug(im_gc_meta_routing, ptr, "set to gc_map");
 
@@ -210,21 +211,20 @@ namespace mixc::gc_ref{
             auto old                = (the_t *)& mem;
             auto owners             = (mem->owners());
 
-            xdebug(im_gc__meta, xtypeid(attribute_t).name, owners, mem);
-
-            if (owners == 0){
-                the_t::free_with_destroy(mem);
-                return;
-            }
-
             if constexpr (not need_gc_v){
-                return;
+                if (owners != 0){
+                    return;
+                }
+
+                inc::in_release     = true;
+                the_t::free_with_destroy(mem);
+                inc::in_release     = false;
             }
 
             // 如果可以释放
             // 设置 thread_local 变量 in_release 
             // 让成员变量析构操作不再推送到 gc_thread
-            if (old->template can_release<guide_t>()){
+            else if (old->template can_release<guide_t>()){
                 auto & gi           = inc::gc_map.get(mem);
                 inc::in_release     = true;
                 gi.can_arrive_root  = false;
@@ -330,14 +330,10 @@ namespace mixc::gc_ref{
             // 遍历子节点，如果可以释放就执行[内析构]操作
             else if (auto & i = inc::gc_map.get(ptr); i == nullref){
                 if (owners = ptr->owners_decrease(); 
-                    owners == 0 or old->template can_release<guide>()){
+                    old->template can_release<guide>()){
                     auto  & gi          = inc::gc_map.get(ptr);
                     gi.can_arrive_root  = false; // 避免重入
                     the_t::free_with_destroy(ptr);
-                }
-                else{
-                    // 从 gc 队列中标记移除（可能本来就不在），避免本轮 gc 做多余的处理
-                    ptr->in_gc_queue(false);
                 }
             }
             // 如果 gc 经过了该节点，且它可以抵达根节点
