@@ -21,6 +21,7 @@
 #include"concurrency/thread.hpp"
 #include"dumb/move.hpp"
 #include"gc/private/background.hpp"
+#include"utils/init_list.hpp"
 
 extern int run();
 
@@ -29,6 +30,7 @@ int main(){
         xuser::gc_execute();
     });
 
+    xuser::init_list_execute();
     auto state = run();
     return state;
 }
