@@ -332,8 +332,10 @@ namespace mixc::gc_ref{
             // 此节点可能不属于当前[类型环]
             // 遍历子节点，如果可以释放就执行[内析构]操作
             else if (auto & i = inc::gc_map.get(ptr); i == nullref){
-                if (owners = ptr->owners_decrease(); 
-                    old->template can_release<guide>()){
+                if (owners = ptr->owners_decrease(); owners == 0){
+                    the_t::free_with_destroy(ptr);
+                }
+                else if (old->template can_release<guide>()){
                     auto  & gi          = inc::gc_map.get(ptr);
                     gi.can_arrive_root  = false; // 避免重入
                     the_t::free_with_destroy(ptr);
