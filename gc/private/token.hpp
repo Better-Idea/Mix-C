@@ -45,11 +45,11 @@ namespace mixc::gc_private_token::origin{
         }
 
         uxx owners_increase() const {
-            return inc::atom_add(& record, step);
+            return inc::atom_add(& record, step) >> shift_to_get_owners;
         }
 
         uxx owners_decrease() const {
-            return inc::atom_sub(& record, step);
+            return inc::atom_sub(& record, step) >> shift_to_get_owners;
         }
     $
 
