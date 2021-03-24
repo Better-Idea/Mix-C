@@ -219,7 +219,6 @@ namespace mixc::gc_private_background::origin{
     }
 
     inline void gc_sync(){
-        xhint(xref i_push_gc_que);
         auto node                   = pending_node{};
         auto current                = xref node;
         auto i_push                 = inc::atom_load(xref i_push_gc_que);
