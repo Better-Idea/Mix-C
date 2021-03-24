@@ -97,6 +97,9 @@ namespace mixc::gc_ref{
             if (info != nullref){
                 if (info.can_arrive_root){
                     xdebug(im_gc_meta_routing, "can_arrive_root");
+
+                    // 这里必须设置 degree_dvalue -= 1 而不是 visited += 1
+                    // 因为后续可能不一定会有关于该节点的 owners - visited
                     degree_dvalue -= 1;
                     return true;
                 }
