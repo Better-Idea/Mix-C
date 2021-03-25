@@ -5,6 +5,7 @@
 #include"memory/allocator.hpp"
 #include"mixc.hpp"
 #include"utils/counter.hpp"
+#include"math/random.hpp"
 
 namespace xuser{
     struct ax;
@@ -12,6 +13,7 @@ namespace xuser{
 
     xstruct(
         xname(ax),
+        xpubf(name, asciis),
         xpubf(a, shared<ax>),
         xpubf(b, shared<bx>),
         xpubf(c, shared<uxx>)
@@ -19,6 +21,7 @@ namespace xuser{
 
     xstruct(
         xname(bx),
+        xpubf(name, asciis),
         xpubf(a, shared<ax>),
         xpubf(b, shared<bx>)
     ) $
@@ -51,6 +54,17 @@ namespace xuser{
         xname(N4_t),
         xpubf(n, shared_array<shared<N4_t>>)
     ) $
+
+    xstruct(
+        xname(groupa),
+        xpubf(a, shared<groupa>)
+    ) $
+
+    xstruct(
+        xname(groupb),
+        xpubf(a, shared<groupa>),
+        xpubf(b, shared<groupb>)
+    ) $
 }
 
 int run(){
@@ -66,10 +80,13 @@ int run(){
             xhint(step, used_bytes());
             shared<ax> x { default_init_by };
             {
+                x->name = "x";
                 xhint(step, used_bytes());
                 shared<ax> a{ default_init_by };
                 xhint(step, used_bytes());
                 shared<bx> b{ default_init_by };
+                a->name = "a";
+                b->name = "b";
                 xhint(step, used_bytes());
                 x->a = a;
                 x->b = b;
@@ -157,6 +174,21 @@ int run(){
     {
         shared<N4_t> n4         = { default_init_by };
         n4->n                   = { n4, n4, n4, n4 }; // 创建长度为 4 的数组，并将每个元素赋值为 n4
+        xhint(step, used_bytes());
+    }
+    thread_self::gc_sync();
+    xhint(step, used_bytes());
+
+    // 一个[潜质类型]包含另一个[潜质类型]
+    {
+        shared<groupb> b        = default_init_by;
+        {
+            auto & b_a          = b->a = default_init_by;
+            auto & b_b          = b->b = default_init_by;
+            b_b->b              = b;
+            b_a->a              = b_a;
+        }
+        thread_self::gc_sync();
         xhint(step, used_bytes());
     }
     thread_self::gc_sync();
