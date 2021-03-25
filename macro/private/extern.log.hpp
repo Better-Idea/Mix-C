@@ -1,13 +1,8 @@
-#ifndef xpack_macro_private_extern_log
-#define xpack_macro_private_extern_log
-#pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::macro_private_log::ext
+#define xuser mixc::macro_private_log::inc
 #include"concurrency/lock/mutex.hpp"
 #include"configure.hpp"
-#include"define/base_type.hpp"
 #include"macro/private/log.hpp"
-#include"macro/private/mix.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"macro/xdefer.hpp"
 #include"io/tty.hpp"
@@ -15,13 +10,12 @@
 #include"lang/cxx/strlize.hpp"
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
-#pragma pop_macro("xuser")
 
 namespace mixc::macro_private_log::origin{
-    ext::mutex print_mutex;
+    inline inc::mutex print_mutex;
 
     void log_set_color(message_type_t type){
-        using namespace ext;
+        using namespace inc;
 
         tty_color_t conf[4];
         conf[uxx(success)] = tty_color_t::green;
@@ -32,8 +26,8 @@ namespace mixc::macro_private_log::origin{
     }
 
     void log_header_lock_free(log_type_t log_type, asciis file, uxx line, asciis func_name){
-        using namespace ext;
-        using namespace ext::ph;
+        using namespace inc;
+        using namespace inc::ph;
         uxx skip = 0;
 
         // skip 值可能不是固定的
@@ -58,11 +52,18 @@ namespace mixc::macro_private_log::origin{
         auto i  = uxx(log_type);
         file   += skip;
         tty.forecolor(conf[i].color);
-        tty.write(conf[i].type, " | ", v{file, ':', line}.l(60), " | ", v{func_name}.l(20), " | ");
+        tty.write(conf[i].type, " | ", v{file, ':', line}.l(50), " | ", v{func_name}.l(20), " | ");
     }
 
-    void log(log_type_t log_type, asciis file, uxx line, asciis func_name, asciis message, message_type_t message_type){
-        using namespace ext;
+    void log(
+        log_type_t          log_type, 
+        asciis              file, 
+        uxx                 line, 
+        asciis              func_name, 
+        asciis              message, 
+        message_type_t      message_type
+    ){
+        using namespace inc;
 
         print_mutex.lock([&](){
             auto color = tty.forecolor();
@@ -73,8 +74,13 @@ namespace mixc::macro_private_log::origin{
         });
     }
 
-    void log_hint_lock_free(asciis message, message_type_t message_type, ext::mix * items, uxx items_length){
-        using namespace ext;
+    void log_hint_lock_free(
+        asciis              message, 
+        message_type_t      message_type, 
+        inc::mix const    * items, 
+        uxx                 items_length
+    ){
+        using namespace inc;
         char buf[32];
         auto backup = tty.forecolor();
         xdefer{
@@ -85,19 +91,19 @@ namespace mixc::macro_private_log::origin{
         for(uxx i = 0; i < items_length; i++, items++){
             // quotes_first 和 label_first 只有一个为 true
             // 指示当前元素是否是纯字符串
-            bool quotes_first   = false;
-            bool label_first    = false;
-            bool in_origin_text = false;
-            uxx  brackets       = 0;
+            bool quotes_first           = false;
+            bool label_first            = false;
+            bool in_origin_text         = false;
+            uxx  brackets               = 0;
 
             do {
                 if (message += 1; not in_origin_text){
                     switch(message[-1]){
-                    case '(':  brackets++;              break;
-                    case ')':  brackets--;              break;
+                    case '(':  brackets++;  break;
+                    case ')':  brackets--;  break;
                     case '\"': 
-                        quotes_first   = not label_first; 
-                        in_origin_text = true;
+                        quotes_first    = not label_first; 
+                        in_origin_text  = true;
                         break;
                     default:
                         label_first     = label_first or (message[-1] != ' ' and not quotes_first);
@@ -109,11 +115,11 @@ namespace mixc::macro_private_log::origin{
                 else switch(message[-1]){
                 case '\\':
                     tty.write("\\", message[0]);
-                    message        += 1;
+                    message            += 1;
                     break;
                 case '\"':
                     tty.write("\"");
-                    in_origin_text = false;
+                    in_origin_text      = false;
                     break;
                 default:
                     tty.write(message[-1]);
@@ -123,7 +129,7 @@ namespace mixc::macro_private_log::origin{
                 // message 表达式可能包含函数调用，小括号间包含个 ',' 分隔符
                 // 例如：message = "a, b, c.call(a, \"hello\", c),"
                 // 但需要下列表达式同时满足时才表示结束语义
-            }while(not (message[0] == ',' and brackets == 0) or in_origin_text);
+            }while(message[0] != ',' or brackets != 0 or in_origin_text);
 
             if (message += 1; quotes_first){
                 continue;
@@ -141,8 +147,11 @@ namespace mixc::macro_private_log::origin{
                 });
                 break;
             case classify_type_t::is_str_t:
-                tty.write(':', "\"", items->slen == not_exist ? 
-                    ext::c08{items->s} : ext::c08{items->s, items->slen}, 
+                tty.write(':', 
+                    "\"", 
+                    items->slen == not_exist ? 
+                        inc::c08{items->s} : 
+                        inc::c08{items->s, items->slen}, 
                     "\""
                 );
                 break;
@@ -154,16 +163,16 @@ namespace mixc::macro_private_log::origin{
     }
 
     void log(
-        log_type_t      log_type, 
-        asciis          file, 
-        uxx             line, 
-        asciis          func_name, 
-        asciis          message, 
-        message_type_t  message_type,
-        ext::mix *      items, 
-        uxx             items_length
+        log_type_t          log_type, 
+        asciis              file, 
+        uxx                 line, 
+        asciis              func_name, 
+        asciis              message, 
+        message_type_t      message_type,
+        inc::mix const    * items, 
+        uxx                 items_length
     ){
-        using namespace ext;
+        using namespace inc;
 
         print_mutex.lock([&](){
             auto color = tty.forecolor();
@@ -174,5 +183,3 @@ namespace mixc::macro_private_log::origin{
         });
     }
 }
-
-#endif
