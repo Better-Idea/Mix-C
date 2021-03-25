@@ -18,6 +18,9 @@ namespace mixc::memory_alloctor{
     extern voidp tiny_alloc(uxx bytes){
         inc::atom_add(xref pused_bytes, bytes);
         inc::atom_add(xref pneed_free_count, 1);
+
+        // 按 16 字节对齐
+        bytes                   = (bytes + 0xf) & ~0xf;
         return ::malloc(bytes);
     }
 
@@ -76,6 +79,8 @@ namespace mixc::memory_alloctor::origin{
 
 namespace mixc::memory_alloctor::origin{
     extern voidp malloc(size_t bytes){
+        // 按 16 字节对齐
+        bytes                   = (bytes + 0xf) & ~0xf;
         return ::malloc(bytes);
     }
 
