@@ -3,20 +3,15 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xassert::inc
+#include"configure/init_order.hpp"
 #include"dumb/place_holder.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xlink.hpp"
+#include"utils/init_list.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xassert::origin{
-    struct closure{
-        template<class lambda_t>
-        closure(lambda_t && call){
-            call();
-        }
-    };
-
     struct mixc_test_context{
         uxx     case_count = 0;
         uxx     pass_count = 0;
@@ -43,10 +38,26 @@ namespace mixc::macro_xassert::origin{
             return true;
         }
     };
+
+    template<uxx priority_v = inc::the_test>
+    struct test_item : inc::init_listx<priority_v>{
+        template<class lambda_t>
+        struct wrap{
+            static void invoke(){
+                lambda_t()();
+            }
+        };
+
+        template<class lambda_t>
+        test_item(lambda_t const &):
+            inc::init_listx<priority_v>(xref wrap<lambda_t>::invoke){
+        }
+    };
 }
 
-#define xtest(func_name)    ::mixc::macro_xassert::origin::closure xlink2(__test, __COUNTER__) =    \
-    [](::mixc::macro_xassert::origin::mixc_test_context && __test_context =                         \
+#define xtest(func_name,...)                                                                    \
+       ::mixc::macro_xassert::origin::test_item<__VA_ARGS__> xlink2(__test, __COUNTER__) =      \
+    [](::mixc::macro_xassert::origin::mixc_test_context && __test_context =                     \
        ::mixc::macro_xassert::origin::mixc_test_context(__FILE__, __LINE__, func_name))
 
 #define xfail_if(condition,...)     if (__test_context.fail_if((condition), __LINE__, #__VA_ARGS__ ",", ## __VA_ARGS__))
