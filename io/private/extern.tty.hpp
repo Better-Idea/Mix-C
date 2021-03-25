@@ -122,6 +122,7 @@ namespace mixc::io_private_tty::origin{
 
     inline bool     the_cursor_visiable = true;
     inline color_t  color;
+    inline uxx      cursor_width;
 
     inc::tty_color_t backcolor() {
         return inc::tty_color_t(color.back);
@@ -360,11 +361,14 @@ namespace mixc::io_private_tty::origin{
 
     xinit(inc::the_io_private_tty){
         CONSOLE_SCREEN_BUFFER_INFO info{};
-        h_stdout    = (GetStdHandle(STD_OUTPUT_HANDLE));
-        h_stdin     = (GetStdHandle(STD_INPUT_HANDLE));
+        CONSOLE_CURSOR_INFO cursor_info;
+        h_stdout        = (GetStdHandle(STD_OUTPUT_HANDLE));
+        h_stdin         = (GetStdHandle(STD_INPUT_HANDLE));
         GetConsoleScreenBufferInfo(h_stdout, & info);
-        color.fore  = (info.wAttributes >> 0) & 0xf;
-        color.back  = (info.wAttributes >> 4) & 0xf;
+        GetConsoleCursorInfo(h_stdout, & cursor_info);
+        color.fore      = (info.wAttributes >> 0) & 0xf;
+        color.back      = (info.wAttributes >> 4) & 0xf;
+        cursor_width    = (cursor_info.dwSize);
     };
 
     void print_core(asciis str, uxx length) {
@@ -486,7 +490,7 @@ namespace mixc::io_private_tty::origin{
     void cursor_visiable(bool value){
         CONSOLE_CURSOR_INFO info;
         info.bVisible       = value;    
-        info.dwSize         = sizeof(info);
+        info.dwSize         = cursor_width;
         SetConsoleCursorInfo(h_stdout, & info);
     }
 
