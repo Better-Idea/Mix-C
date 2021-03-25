@@ -80,6 +80,7 @@ void decode(){
 #include"algo/binary_search.hpp"
 #include"algo/mmu.hpp"
 #include"configure.hpp"
+#include"configure/init_order.hpp"
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"io/private/tty.hpp"
@@ -89,6 +90,7 @@ void decode(){
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"memory/allocator.hpp"
+#include"utils/init_list.hpp"
 
 #if xis_windows
 #include<windows.h>
@@ -113,14 +115,13 @@ namespace mixc::io_private_tty::origin{
             u08 back           : 4;
         };
 
-        color_t();
-
         operator u08(){
             return *u08p(this);
         }
-    } color;
+    };
 
-    bool the_cursor_visiable = true;
+    inline bool     the_cursor_visiable = true;
+    inline color_t  color;
 
     inc::tty_color_t backcolor() {
         return inc::tty_color_t(color.back);
@@ -354,17 +355,17 @@ namespace mixc::io_private_tty::origin{
 
     #elif xis_windows
 
-    static HANDLE h_stdout;
-    static HANDLE h_stdin;
+    inline HANDLE h_stdout;
+    inline HANDLE h_stdin;
 
-    color_t::color_t(){
-        CONSOLE_SCREEN_BUFFER_INFO info;
-        h_stdout    = GetStdHandle(STD_OUTPUT_HANDLE);
-        h_stdin     = GetStdHandle(STD_INPUT_HANDLE);
+    xinit(inc::the_io_private_tty){
+        CONSOLE_SCREEN_BUFFER_INFO info{};
+        h_stdout    = (GetStdHandle(STD_OUTPUT_HANDLE));
+        h_stdin     = (GetStdHandle(STD_INPUT_HANDLE));
         GetConsoleScreenBufferInfo(h_stdout, & info);
-        this->fore  = (info.wAttributes >> 0) & 0xf;
-        this->back  = (info.wAttributes >> 4) & 0xf;
-    }
+        color.fore  = (info.wAttributes >> 0) & 0xf;
+        color.back  = (info.wAttributes >> 4) & 0xf;
+    };
 
     void print_core(asciis str, uxx length) {
         WriteConsoleA(h_stdout, str, DWORD(length), nullptr, nullptr);
