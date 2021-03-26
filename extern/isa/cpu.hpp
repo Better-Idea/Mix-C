@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_isa_cpu::origin::inc
-#include"configure.hpp"
+#include"configure/platform.hpp"
 #include"macro/xdefer.hpp"
 #include"math/const.hpp"
 #include"memop/cast.hpp"

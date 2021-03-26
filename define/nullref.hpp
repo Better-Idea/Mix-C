@@ -29,26 +29,26 @@ namespace mixc::define_nullref_t{
     xstruct(
         xname(nullref_t)
     )
-        template<class a> bool operator == (a const & value) const {
+        template<class type_t> bool operator == (type_t const & value) const {
             auto ptr = inc::addressof(value);
             return voidp(ptr) == this;
         }
 
-        template<class a> friend bool operator == (a const & value, nullref_t const & nullref) {
+        template<class type_t> friend bool operator == (type_t const & value, nullref_t const & nullref) {
             return nullref.operator==(value);
         }
 
-        template<class a> friend bool operator != (a const & value, nullref_t const & nullref) {
+        template<class type_t> friend bool operator != (type_t const & value, nullref_t const & nullref) {
             return not (nullref == value);
         }
 
-        template<class a> friend bool operator != (nullref_t const & nullref, a const & value) {
+        template<class type_t> friend bool operator != (nullref_t const & nullref, type_t const & value) {
             return not (nullref == value);
         }
 
-        template<class a>
-        operator a & () const {
-            return *(a *)this;
+        template<class type_t>
+        operator type_t & () const {
+            return *(type_t *)this;
         }
     $
 
