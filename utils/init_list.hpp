@@ -73,6 +73,9 @@ namespace mixc::utils_init_list{
 }
 
 namespace mixc::utils_init_list::origin{
+    using mixc::utils_init_list::init_list;
+    using mixc::utils_init_list::init_listx;
+
     inline void init_list_execute(){
         for(init_list * head = top; head != nullptr; head = head->next_level){
             for(init_list * current = head; current != nullptr; current = current->next_item){
@@ -86,7 +89,7 @@ namespace mixc::utils_init_list::origin{
 // 实际初始化会被推迟到 main 中执行
 #define xinit(...)                                              \
     inline ::mixc::utils_init_list::init_listx<__VA_ARGS__>     \
-    xlink2(__init_list, __LINE__) = xcstyle() -> void
+    xlink2(__init_list, __COUNTER__) = xcstyle() -> void
 #endif
 
 xexport_space(mixc::utils_init_list::origin)
