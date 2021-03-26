@@ -1,8 +1,8 @@
-#ifndef xpack_memory_private_tiny_allocator
-#define xpack_memory_private_tiny_allocator 
+#ifndef xpack_utils_private_tiny_allocator
+#define xpack_utils_private_tiny_allocator 
 #pragma push_macro("xuser")  
 #undef  xuser
-#define xuser mixc::memory_private_tiny_allocator::inc
+#define xuser mixc::utils_private_tiny_allocator::inc
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_store.hpp"
@@ -12,21 +12,22 @@
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
 #include"define/base_type.hpp"
-#include"utils/bits_indicator.hpp"
-#include"macro/xexport.hpp"
-#include"macro/xdebug+.hpp"
-#include"macro/xnew.hpp"
-#include"memory/allocator.hpp"
 #include"instruction/bit_test.hpp"
 #include"instruction/bit_test_and_set.hpp"
 #include"instruction/bit_test_and_reset.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xdebug+.hpp"
+#include"macro/xdefer.hpp"
+#include"macro/xnew.hpp"
+#include"utils/allocator.hpp"
+#include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::memory_private_tiny_allocator::origin{
+namespace mixc::utils_private_tiny_allocator::origin{
     struct tiny_allocator;
 }
 
-namespace mixc::memory_private_tiny_allocator{
+namespace mixc::utils_private_tiny_allocator{
     typedef struct node{
         node      * previous;
         node      * next;
@@ -177,7 +178,7 @@ namespace mixc::memory_private_tiny_allocator{
     static_assert((page_bytes & (page_bytes - 1)) == 0);
 }
 
-namespace mixc::memory_private_tiny_allocator::origin{
+namespace mixc::utils_private_tiny_allocator::origin{
     struct tiny_allocator_header{
         using indicator_t = inc::bits_indicator<scale>;
 
@@ -542,7 +543,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
                 auto require_size    = require_size_index + 1;
                 auto rest            = current + require_size;
                 auto rest_size       = total_size - require_size;
-                xdebug(im_memory_tiny_allocator_split, current, rest, total_size, require_size, rest_size);
+                xdebug(im_utils_tiny_allocator_split, current, rest, total_size, require_size, rest_size);
                 xdebug_fail(rest_size > total_size);
                 append(rest, rest_size);
             }
@@ -550,7 +551,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
         }
 
         void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
-            xdebug(im_memory_tiny_allocator_append, index, slot.get(index));
+            xdebug(im_utils_tiny_allocator_append, index, slot.get(index));
 
             if (slot.get(index) == 0){
                 slot.set(index);
@@ -581,7 +582,7 @@ namespace mixc::memory_private_tiny_allocator::origin{
         void remove(nodep block, uxx index, indicator_t & slot, nodep * free_list){
             auto next = block->next;
             auto prev = block->previous;
-            xdebug(im_memory_tiny_allocator_remove, block, next, index);
+            xdebug(im_utils_tiny_allocator_remove, block, next, index);
 
             if (next == block){
                 slot.reset(index);
@@ -613,4 +614,4 @@ namespace mixc::memory_private_tiny_allocator::origin{
 
 #endif
 
-xexport_space(mixc::memory_private_tiny_allocator::origin)
+xexport_space(mixc::utils_private_tiny_allocator::origin)

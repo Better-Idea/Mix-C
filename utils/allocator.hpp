@@ -1,20 +1,20 @@
-#ifndef xpack_memory_alloctor
-#define xpack_memory_alloctor
+#ifndef xpack_utils_allocator
+#define xpack_utils_allocator
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::memory_alloctor::inc
+#define xuser mixc::utils_allocator::inc
 #include"macro/xdebug.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xtypeid.hpp"
 #include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::memory_alloctor{
+namespace mixc::utils_allocator{
     extern voidp tiny_alloc(uxx bytes);
     extern void  tiny_free(voidp ptr, uxx bytes);
 }
 
-namespace mixc::memory_alloctor::origin{
+namespace mixc::utils_allocator::origin{
     struct memory_size{
         explicit memory_size(uxx size) : 
             size(size){
@@ -93,8 +93,8 @@ namespace mixc::memory_alloctor::origin{
 }
 
 #define xmemory_sizeof(...)       \
-    ::mixc::memory_alloctor::origin::memory_size{ sizeof(__VA_ARGS__) }
+    ::mixc::utils_allocator::origin::memory_size{ sizeof(__VA_ARGS__) }
 
 #endif
 
-xexport_space(mixc::memory_alloctor::origin)
+xexport_space(mixc::utils_allocator::origin)

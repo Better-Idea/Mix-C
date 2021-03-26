@@ -1,5 +1,5 @@
 #undef  xuser
-#define xuser mixc::memory_alloctor::inc
+#define xuser mixc::utils_allocator::inc
 #include"configure/switch.hpp"
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_sub.hpp"
@@ -8,7 +8,7 @@
 #if xuse_libc_malloc
 #include<malloc.h>
 
-namespace mixc::memory_alloctor{
+namespace mixc::utils_allocator{
     inline uxx pused_bytes      = 0;
     inline uxx pneed_free_count = 0;
 
@@ -28,7 +28,7 @@ namespace mixc::memory_alloctor{
     }
 }
 
-namespace mixc::memory_alloctor::origin{
+namespace mixc::utils_allocator::origin{
     extern uxx used_bytes(){
         return inc::atom_load(xref pused_bytes);
     }
@@ -46,7 +46,7 @@ namespace mixc::memory_alloctor::origin{
 
 #include"memory/private/tiny_allocator.hpp"
 
-namespace mixc::memory_alloctor{
+namespace mixc::utils_allocator{
     inline thread_local inc::tiny_allocator mem;
 
     extern voidp tiny_alloc(uxx bytes){
@@ -58,7 +58,7 @@ namespace mixc::memory_alloctor{
     }
 }
 
-namespace mixc::memory_alloctor::origin{
+namespace mixc::utils_allocator::origin{
     extern uxx used_bytes(){
         return mem.used_bytes();
     }
@@ -74,7 +74,7 @@ namespace mixc::memory_alloctor::origin{
 
 #endif
 
-namespace mixc::memory_alloctor::origin{
+namespace mixc::utils_allocator::origin{
     extern voidp malloc(size_t bytes){
         // 按 16 字节对齐
         bytes                   = (bytes + 0xf) & ~0xf;

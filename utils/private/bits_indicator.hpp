@@ -14,8 +14,8 @@
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
 #include"memop/zeros.hpp"
-#include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #include"utils/private/adapter.bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
