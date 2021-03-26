@@ -11,6 +11,7 @@
 #include"lang/cxx/index_of_last.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xindex_rollback.hpp"
+#include"macro/xdefer.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -223,83 +224,98 @@ namespace mixc::io_file::origin{
         return uxx(size);
     }
 
-    void file::remove() const{
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
+    bstate_t file::remove() const{
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
 
         #if xis_windows
-        ::DeleteFileA(asciis(source));
+        auto    is_success  = ::DeleteFileA(asciis(source)) ?
+            bstate_t::success : bstate_t::fail;
+
         #elif xis_linux
-        ::remove(asciis(source));
+        auto    is_success  = ::remove(asciis(source)) == 0 ?
+            bstate_t::success : bstate_t::fail;
         #else
         #error "os miss match"
         #endif
 
         buf.free(source, the.path);
+        return is_success;
     }
 
-    void file::move_to(inc::c08 new_path) const{
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
-        auto    target  = buf.alloc(new_path);
+    bstate_t file::move_to(inc::c08 new_path) const{
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
+        auto    target      = buf.alloc(new_path);
         #if xis_windows
-        ::MoveFileA(asciis(source), asciis(target));
+        auto    is_success  = ::MoveFileA(asciis(source), asciis(target)) ?
+            bstate_t::success : bstate_t::fail;
+
         #elif xis_linux
-        ::rename(asciis(source), asciis(target));
+        auto    is_success  = ::rename(asciis(source), asciis(target)) == 0 ?
+            bstate_t::success : bstate_t::fail;
         #else
         #error "os miss match"
         #endif
+
         buf.free(target, new_path);
         buf.free(source, the.path);
+        return is_success;
     }
 
-    void file::move_to_forcedly(inc::c08 new_path) const {
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
-        auto    target  = buf.alloc(new_path);
+    bstate_t file::move_to_forcedly(inc::c08 new_path) const {
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
+        auto    target      = buf.alloc(new_path);
         #if xis_windows
-        ::MoveFileExA(asciis(source), asciis(target), 
+        auto    is_success  = ::MoveFileExA(asciis(source), asciis(target), 
             MOVEFILE_COPY_ALLOWED |     // 允许跨分区移动，避免移动失败后丢失
             MOVEFILE_REPLACE_EXISTING   // 允许覆盖
-        );
+        ) ? bstate_t::success : bstate_t::fail;
+
         #elif xis_linux
-        cmd("/bin/mv", "mv", source, target);
+        auto    is_success  = cmd("/bin/mv", "mv", source, target);
         #else
         #error "os miss match"
         #endif
 
         buf.free(target, new_path);
         buf.free(source, the.path);
+        return is_success;
     }
 
-    void file::copy_to(inc::c08 new_path) const{
+    bstate_t file::copy_to(inc::c08 new_path) const{
         auto && buf     = cpp::path_buffer{};
         auto    source  = buf.alloc(the.path);
         auto    target  = buf.alloc(new_path);
 
         #if xis_windows
-        ::CopyFileA(asciis(source), asciis(target), true/*override*/);
+        auto is_success = ::CopyFileA(asciis(source), asciis(target), true/*override*/) ?
+            bstate_t::success : bstate_t::fail;
         #elif xis_linux
-        cmd("/bin/cp", "cp", source, target);
+        auto is_success = cmd("/bin/cp", "cp", source, target);
         #else
         #error "os miss match"
         #endif
 
         buf.free(target, new_path);
         buf.free(source, the.path);
+        return is_success;
     }
 
     bool file::is_exist() const{
         auto && buf     = cpp::path_buffer{};
         auto    source  = buf.alloc(the.path);
 
-        #if xis_windows
+        xdefer{
+            buf.free(source, the.path);
+        };
 
+        #if xis_windows
         auto    word    = GetFileAttributesA(asciis(the.path));
         return  word != INVALID_FILE_ATTRIBUTES and 0 == (word & FILE_ATTRIBUTE_DIRECTORY);
 
         #elif xis_linux
-
         typedef struct stat meta_t;
         auto && meta    = meta_t{};
         auto    exist   = stat(asciis(source), & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
@@ -308,8 +324,6 @@ namespace mixc::io_file::origin{
         #else
         #error "os miss match"
         #endif
-
-        buf.free(source, the.path);
     }
 }
 
