@@ -42,8 +42,8 @@ namespace mixc::algo_heap_root{
     xheader inline void push_core(
         seq_t                               seq, 
         inc::item_origin_of<seq_t> const &  value, 
-        cmp_t const &                       compare){
-
+        cmp_t const &                       compare
+    ){
         // 注意：
         // [value] 可能存在 [seq] 中, 
         // 所以需要一个 [value] 的副本
@@ -82,14 +82,14 @@ namespace mixc::algo_heap_root{
         seq_t                               seq, 
         uxx                                 index, 
         inc::item_origin_of<seq_t> const &  insert_value, 
-        cmp_t                      const &  compare){
-
+        cmp_t                      const &  compare
+    ){
         // 注意：
         // 提前保存要取出元素的副本，避免后续的元素覆盖它
         item_t  wanted      = (seq[index]);
         uxx     i           = (index);
         uxx     left_index  = (index << 1) + 1;
-        uxx     len         = seq.length();
+        uxx     len         = (seq.length());
 
         while(left_index + 1 < len) {
             item_t & left   = seq[left_index];
@@ -99,7 +99,7 @@ namespace mixc::algo_heap_root{
             // 小根堆 父节点要小于左右节点 所以要找子节点中较小者
             if (compare(left, right) > 0){
                 select      = xref right;
-                left_index++;
+                left_index += 1;
             }
             else{
                 select      = xref left;
@@ -117,8 +117,8 @@ namespace mixc::algo_heap_root{
 
         // left_index 可能会等于 len，所以这里需要判断一下才能确认是否存在左节点
         if (left_index < len and compare(seq[left_index], insert_value) < 0){
-            seq[i]          = (seq[left_index]);
-            i               = (left_index);
+            seq[i]          = seq[left_index];
+            i               = left_index;
         }
 
         seq[i]              = insert_value;
@@ -149,8 +149,8 @@ namespace mixc::algo_heap_root::origin::heap_root{
         seq_t                       const & seq,
         uxx                                 length,
         inc::item_origin_of<seq_t>  const & value, 
-        cmp_t                       const & compare = inc::default_compare<item_t>){
-
+        cmp_t                       const & compare = inc::default_compare<item_t>
+    ){
         push_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
             value, 
@@ -176,8 +176,8 @@ namespace mixc::algo_heap_root::origin::heap_root{
         seq_t                       const & seq, 
         uxx                                 length, 
         inc::item_origin_of<seq_t>  const & insert_value, 
-        cmp_t                       const & compare = inc::default_compare<item_t>){
-
+        cmp_t                       const & compare = inc::default_compare<item_t>
+    ){
         return pop_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
             0,
@@ -206,15 +206,23 @@ namespace mixc::algo_heap_root::origin::heap_root{
         uxx                                 length, 
         ixx                                 index,
         inc::item_origin_of<seq_t>  const & insert_value, 
-        cmp_t                       const & compare = inc::default_compare<item_t>){
-
+        cmp_t                       const & compare = inc::default_compare<item_t>
+    ){
         xindex_rollback(length, index);
-        return pop_core(
+        auto && wanted = pop_core(
             inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), 
             index,
             insert_value, 
             compare
         );
+
+        if (compare(seq[index], seq[index >> 1]) < 0){
+            length          = index;
+            push_core(
+                inc::unified_seq<seq_t>{seq}.subseq(co{0, length}), seq[index], compare
+            );
+        }
+        return wanted;
     }
 
     /* 函数：大小根堆弹栈操作
@@ -233,8 +241,8 @@ namespace mixc::algo_heap_root::origin::heap_root{
     xheader inline auto pop(
         seq_t                       const & seq, 
         uxx                                 length, 
-        cmp_t                       const & compare = inc::default_compare<item_t>){
-
+        cmp_t                       const & compare = inc::default_compare<item_t>
+    ){
         inc::unified_seq<seq_t> v{seq};
         return pop_core(
             v.subseq(co{0, length}), 0,
@@ -257,15 +265,9 @@ namespace mixc::algo_heap_root::origin::heap_root{
         seq_t                       const & seq, 
         uxx                                 length, 
         ixx                                 index,
-        cmp_t                       const & compare = inc::default_compare<item_t>){
-
-        xindex_rollback(length, index);
-        inc::unified_seq<seq_t> v{seq};
-        return pop_core(
-            v.subseq(co{0, length}), index,
-            v[length - 1], 
-            compare
-        );
+        cmp_t                       const & compare = inc::default_compare<item_t>
+    ){
+        return pop_by_index(seq, length, index, seq[length - 1], compare);
     }
 
     #undef  xheader
