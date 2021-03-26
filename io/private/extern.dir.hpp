@@ -45,21 +45,21 @@ namespace mixc::io_dir::origin{
     }
 
     bstate_t dir::move_to(inc::c08 new_path) const{
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
-        auto    target  = buf.alloc(new_path);
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
+        auto    target      = buf.alloc(new_path);
 
         #if xis_windows
-        auto && opr     = SHFILEOPSTRUCTA{};
-        opr.wFunc       = FO_MOVE;
-        opr.pFrom       = (asciis)source;
-        opr.pTo         = (asciis)target;
-        opr.fFlags      = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
-        auto is_success = SHFileOperationA(& opr) == 0 ?
+        auto && opr         = SHFILEOPSTRUCTA{};
+        opr.wFunc           = FO_MOVE;
+        opr.pFrom           = (asciis)source;
+        opr.pTo             = (asciis)target;
+        opr.fFlags          = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
+        auto is_success     = SHFileOperationA(& opr) == 0 ?
             bstate_t::success : bstate_t::fail;
 
         #elif xis_linux
-        auto is_success = cmd("/bin/mv", "mv", "-r", source, target);
+        auto is_success     = cmd("/bin/mv", "mv", "-r", source, target);
         #else
         #error "os miss match"
         #endif
@@ -70,21 +70,21 @@ namespace mixc::io_dir::origin{
     }
 
     bstate_t dir::copy_to(inc::c08 new_path) const{
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
-        auto    target  = buf.alloc(new_path);
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
+        auto    target      = buf.alloc(new_path);
 
         #if xis_windows
-        auto && opr     = SHFILEOPSTRUCTA{};
-        opr.wFunc       = FO_COPY;
-        opr.pFrom       = (asciis)source;
-        opr.pTo         = (asciis)target;
-        opr.fFlags      = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
-        auto is_success = SHFileOperationA(& opr) == 0
+        auto && opr         = SHFILEOPSTRUCTA{};
+        opr.wFunc           = FO_COPY;
+        opr.pFrom           = (asciis)source;
+        opr.pTo             = (asciis)target;
+        opr.fFlags          = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
+        auto is_success     = SHFileOperationA(& opr) == 0
             bstate_t::success : bstate_t::fail;
 
         #elif xis_linux
-        auto is_success = cmd("/bin/cp", "cp", "-r", source, target);
+        auto is_success     = cmd("/bin/cp", "cp", "-r", source, target);
         #else
         #error "os miss match"
         #endif
@@ -176,7 +176,7 @@ namespace mixc::io_dir::origin{
                 ptr         = cpp::alloc<char>(cpp::memory_size{length + 1});
             }
 
-            ptr[length] = '\0';
+            ptr[length]     = '\0';
             return ptr;
         });
 
@@ -219,18 +219,18 @@ namespace mixc::io_dir::origin{
     }
     
     bool dir::is_exist() const {
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
 
         #if xis_windows
-        auto    attr    = GetFileAttributesA((asciis)source);
-        auto    exist   = INVALID_FILE_ATTRIBUTES != attr and 0 != (attr & FILE_ATTRIBUTE_DIRECTORY);
+        auto    attr        = GetFileAttributesA((asciis)source);
+        auto    exist       = INVALID_FILE_ATTRIBUTES != attr and 0 != (attr & FILE_ATTRIBUTE_DIRECTORY);
 
         #elif xis_linux
 
         typedef struct stat meta_t;
-        auto && meta    = meta_t{};
-        auto    exist   = stat(asciis(source), & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
+        auto && meta        = meta_t{};
+        auto    exist       = stat(asciis(source), & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
 
         #else
         #error "os miss match"
