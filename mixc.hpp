@@ -1,4 +1,3 @@
-#include"configure.hpp"
 #include"define/base_type.hpp"
 #include"macro/xdebug+.hpp"
 #include"macro/xexport.hpp"

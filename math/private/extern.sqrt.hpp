@@ -1,9 +1,6 @@
-#ifdef xuser
-    #undef xuser
-#endif
-
+#undef  xuser
 #define xuser mixc::math_sqrt::inc
-#include"configure.hpp"
+#include"configure/lookup_table.hpp"
 #include"mixc.hpp"
 #include"math/const.hpp"
 #include"utils/mfxx.hpp"

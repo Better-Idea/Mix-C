@@ -1,5 +1,5 @@
 #pragma once
-#include"configure.hpp"
+#include"configure/switch.hpp"
 
 #if xis_msvc_native
     #define xpragma(...)        __pragma(__VA_ARGS__)

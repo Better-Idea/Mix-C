@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xdebug::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"macro/xlink.hpp"
 #include"macro/private/log.hpp"
 #pragma pop_macro("xuser")
@@ -26,7 +26,7 @@
     // 在 xoff 后面的枚举是禁用 xdebug 打印的
     #define xoff        xlink2(__disable, __COUNTER__)      = -100000000
 
-    enum{
+    enum : int{
         // docker/private/hashmap.hpp
         xon,
         xoff,

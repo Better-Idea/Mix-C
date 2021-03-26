@@ -1,7 +1,7 @@
 #undef  xuser
 #define xuser mixc::macro_private_log::inc
 #include"concurrency/lock/mutex.hpp"
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"macro/xdefer.hpp"

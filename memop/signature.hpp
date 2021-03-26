@@ -3,8 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_signature::inc
-#include"configure.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_signature{

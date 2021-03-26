@@ -9,7 +9,7 @@
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
-#include"configure.hpp"
+#include"configure/platform.hpp"
 #include"macro/xdefer.hpp"
 #include"macro/xvolatile.hpp"
 #include"memop/cast.hpp"

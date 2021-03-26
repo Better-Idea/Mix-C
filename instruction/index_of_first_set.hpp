@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::instruction_index_of_first_set::inc
-#include"configure.hpp"
+#include"configure/platform.hpp"
 #include"memop/cast.hpp"
 #include"meta/unsigned_type.hpp"
 #include"meta/is_number.hpp"

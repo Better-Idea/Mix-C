@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_tty::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"io/private/tty.hpp"

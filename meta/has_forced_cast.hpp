@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::meta_has_forced_cast::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #pragma pop_macro("xuser")

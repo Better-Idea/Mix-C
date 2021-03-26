@@ -1,9 +1,6 @@
-#ifdef xuser
-    #undef xuser
-#endif
-
+#undef  xuser
 #define xuser mixc::math_expe::inc
-#include"configure.hpp"
+#include"configure/lookup_table.hpp"
 #include"define/base_type.hpp"
 #include"define/inf.hpp"
 #include"math/expe.hpp"

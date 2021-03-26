@@ -1,11 +1,9 @@
-#ifdef  xuser
 #undef  xuser
-#endif
-
 #define xuser mixc::concurrency_thread_self::inc
+#include"configure/platform.hpp"
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"gc/private/background.hpp"
 
 #if xis_windows

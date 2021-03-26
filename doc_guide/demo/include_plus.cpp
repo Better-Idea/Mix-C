@@ -1,5 +1,5 @@
 #define xuser mixc::powerful_cat
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"interface/seqptr.hpp"
 #include"io/dir.hpp"
 #include"io/file.hpp"

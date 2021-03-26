@@ -36,7 +36,7 @@ c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3
 #include<stdio.h>
 #include"algo/binary_search.hpp"
 #include"algo/mmu.hpp"
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"configure/init_order.hpp"
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"

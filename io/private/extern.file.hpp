@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::io_private_file::inc
 #include"concurrency/lock/atom_swap.hpp"
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"io/file.hpp"
 #include"io/dir.hpp"
 #include"io/private/path_buffer.hpp"

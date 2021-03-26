@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::instruction_mul::inc
-#include"configure.hpp"
+#include"configure/platform.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 

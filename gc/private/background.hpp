@@ -10,7 +10,7 @@
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
-#include"configure.hpp"
+#include"configure/buffer.hpp"
 #include"docker/hashmap.hpp"
 #include"gc/private/token.hpp"
 #include"macro/xexport.hpp"

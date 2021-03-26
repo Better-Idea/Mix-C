@@ -1,4 +1,4 @@
-#include"configure.hpp"
+#include"configure/switch.hpp"
 
 #ifdef  xis_msvc_native
 

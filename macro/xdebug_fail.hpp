@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xdebug_fail::inc
+#include"configure/switch.hpp"
 #include"macro/xunlikely.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xwarning.hpp"

@@ -1,6 +1,6 @@
 // 暂不支持[大端模式]
 
-#include"configure.hpp"
+#include"configure/platform.hpp"
 #include"define/base_type.hpp"
 
 template<class big_int_t>

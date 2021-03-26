@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::gc_ref::inc
 #include"concurrency/lock/atom_swap.hpp"
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"define/nullref.hpp"
 #include"dumb/dummy_type.hpp"
 #include"dumb/init_by.hpp"

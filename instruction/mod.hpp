@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::instruction_mod::inc
-#include"configure.hpp"
+#include"configure/platform.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"math/min.hpp"
 #include"mixc.hpp"

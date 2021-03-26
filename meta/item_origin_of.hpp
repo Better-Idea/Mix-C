@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::meta_item_origin_of::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"macro/xexport.hpp"
 #include"meta/item_of.hpp"
 #include"meta/remove_ref.hpp"

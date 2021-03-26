@@ -1,5 +1,5 @@
 #pragma once
-#include"configure.hpp"
+#include"configure/switch.hpp"
 
 #ifndef xis_msvc_native
     #define xlikely(...)      if (__builtin_expect(__VA_ARGS__, 1))

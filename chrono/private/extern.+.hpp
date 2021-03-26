@@ -1,8 +1,5 @@
-#ifdef xuser
-    #undef xuser
-#endif
-
-#include"configure.hpp"
+#undef  xuser
+#include"configure/switch.hpp"
 #include"chrono/now.hpp"
 
 #if xis_windows

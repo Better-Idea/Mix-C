@@ -1,7 +1,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser xlink2(mixc::concurrency_lock_, xa_name)::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xlink.hpp"
 #include"memop/addressof.hpp"

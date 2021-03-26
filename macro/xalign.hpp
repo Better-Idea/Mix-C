@@ -1,5 +1,5 @@
 #pragma once
-#include"configure.hpp"
+#include"configure/switch.hpp"
 
 #if xis_msvc_native
     #define xalign(...)     __declspec(align(__VA_ARGS__))

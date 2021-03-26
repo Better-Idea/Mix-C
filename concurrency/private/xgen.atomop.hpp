@@ -1,5 +1,5 @@
 #if defined xa_name && defined xa_func && defined xa_addition
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"define/base_type.hpp"
 #include"macro/xlink.hpp"
 #include<intrin.h>

@@ -5,7 +5,7 @@
 #undef  xuser
 #define xuser mixc::docker_btree::inc
 #include"concurrency/lock/atom_swap.hpp"
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/mirror.hpp"

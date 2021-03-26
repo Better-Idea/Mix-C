@@ -1,9 +1,6 @@
-#ifdef xuser
-#undef xuser
-#endif
-
+#undef  xuser
 #define xuser mixc::memory_alloctor::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_load.hpp"

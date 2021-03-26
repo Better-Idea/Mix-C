@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xsv::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"gc/private/token.hpp"
 #include"macro/xnew.hpp"
 #include"mixc.hpp"

@@ -1,10 +1,7 @@
-#ifdef xuser
-    #undef xuser
-#endif
-
+#undef  xuser
 #define xuser mixc::math_tan::inc
 #include<math.h>
-#include"configure.hpp"
+#include"configure/lookup_table.hpp"
 #include"macro/xalign.hpp"
 #include"math/tan.hpp"
 #include"utils/mfxx.hpp"
@@ -160,7 +157,7 @@ namespace mixc::math_tan{
 #endif
 
 #define xuser mixc::math_atan::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"utils/mfxx.hpp"
 #include"math/const.hpp"
 
@@ -185,7 +182,7 @@ namespace mixc::math_atan{
         { 0.000000000000000000, 0.000000003725290298, 0.000000007450580597, 0.000000011175870895, 0.000000014901161194, 0.000000018626451492, 0.000000022351741791, 0.000000026077032089, 0.000000029802322388, 0.000000033527612686, 0.000000037252902985, 0.000000040978193283, 0.000000044703483582, 0.000000048428773880, 0.000000052154064178, 0.000000055879354477, },
     };
     #else
-    constexpr autp step = not_exist;
+    constexpr auto step = not_exist;
     #endif
 
     constexpr f64 lutx[] = {

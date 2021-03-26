@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_private_dir::inc
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"io/dir.hpp"
 #include"io/private/path_buffer.hpp"
 #include"lang/cxx/compare_fastly.hpp"

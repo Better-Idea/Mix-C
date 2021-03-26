@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::chrono_private_day::inc
-#include"chrono/private/lut.hpp"
+#include"chrono/private/lookup_table.hpp"
 #include"meta/has_constructor.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")

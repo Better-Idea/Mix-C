@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xassert::ext
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"define/base_type.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xassert.hpp"
