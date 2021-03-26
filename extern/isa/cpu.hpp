@@ -9,7 +9,6 @@
 #include"memop/cast.hpp"
 #include"memop/signature.hpp"
 #include"memop/swap.hpp"
-#include"memory/allocator.hpp"
 #include"meta/is_float.hpp"
 #include"meta/is_integer.hpp"
 #include"meta/is_signed.hpp"
@@ -20,6 +19,7 @@
 #include"instruction/shift_right.hpp"
 #include"instruction/sub.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_isa_cpu::origin{

@@ -1,6 +1,6 @@
 #ifndef xpack_draft_x64
 #define xpack_draft_x86
-#include"configure.hpp"
+#include"configure/switch.hpp"
 #include"define/base_type.hpp"
 
 #if xis_msvc_native

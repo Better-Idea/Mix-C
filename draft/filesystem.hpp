@@ -9,8 +9,8 @@
 #include"lang/cxx.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"memop/copy.hpp"
-#include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::draft_file_system{
