@@ -14,6 +14,10 @@
 #include"macro/xexport.hpp"
 #include"memory/allocator.hpp"
 #include"meta/has_cast.hpp"
+
+#undef  xuser
+#define xuser mixc::io_tty::ext
+#include"lang/cxx.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_tty{
@@ -92,12 +96,12 @@ namespace mixc::io_tty{
             return inc::read_key(false);
         }
 
-        void read_line(inc::ialloc<char> alloc) const {
-            inc::read_line(alloc);
+        ext::c08 read_line(inc::ialloc<char> alloc) const {
+            return inc::read_line(alloc);
         }
 
-        void read_line(inc::ialloc<char16_t> alloc) const {
-            inc::read_line(alloc);
+        ext::c16 read_line(inc::ialloc<char16_t> alloc) const {
+            return inc::read_line(alloc);
         }
     $
 }

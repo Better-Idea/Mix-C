@@ -29,52 +29,9 @@ ctrl    p2 35 50    p2 35 51    p2 35 52    p2 35 53    p1 35 3b 35 7e   p1 37 3
 c+s     p2 36 50    p2 36 51    p2 36 52    p2 36 53    p1 35 3b 36 7e   p1 37 3b 36 7e   p1 38 3b 36 7e   p1 39 3b 36 7e   p3 30 3b 36 7e   p3 31 3b 36 7e   p3 33 3b 36 7e   p3 34 3b 36 7e   
 c+a     p2 37 50    p2 37 51    p2 37 52    p2 37 53    p1 35 3b 37 7e   p1 37 3b 37 7e   p1 38 3b 37 7e   p1 39 3b 37 7e   p3 30 3b 37 7e   p3 31 3b 37 7e   p3 33 3b 37 7e   p3 34 3b 37 7e   
 c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3b 38 7e   p1 38 3b 38 7e   p1 39 3b 38 7e   p3 30 3b 38 7e   p3 31 3b 38 7e   p3 33 3b 38 7e   p3 34 3b 38 7e   
-
-void decode(){
-    char c0, c1, c2, c3, c4, c5, c6, c7;
-    uxx  k;
-
-    auto key_direction = [](char key){
-        switch(key){
-        case 0x41: return top;
-        case 0x42: return buttom;
-        case 0x43: return right;
-        case 0x44: return left;
-        default:   return unknown;
-        }
-    };
-
-    auto key_modify = [](char key){
-        switch(key){
-        case 0x32: return shift;
-        case 0x33: return shift;
-        case 0x34: return shift;
-        case 0x35: return shift;
-        case 0x36: return shift;
-        case 0x37: return shift;
-        case 0x38: return shift;
-        }
-    };
-
-    if (c0 = get(); a0 == 0x1b){
-        c1 = get();
-        k  = key_direction();
-
-        if (k != unknown){
-            return k;
-        }
-        if (c1 == 0x5b){
-
-        }
-    }
-}
-
 */
 
-#ifdef xuser
-    #undef xuser
-#endif
-
+#undef  xuser
 #define xuser mixc::io_private_tty::inc
 #include<stdio.h>
 #include"algo/binary_search.hpp"
@@ -86,8 +43,6 @@ void decode(){
 #include"io/private/tty.hpp"
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
-#include"lang/cxx/compare.hpp"
-#include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"memory/allocator.hpp"
 #include"utils/init_list.hpp"
@@ -104,11 +59,6 @@ void decode(){
 #endif
 
 namespace mixc::io_private_tty::origin{
-    inc::tty_key const  unknown_key{};
-    inc::c16            key_str;
-    char16_t            buf_key[8];
-    uxx                 rest;
-
     union color_t{
         struct{
             u08 fore           : 4;
@@ -120,9 +70,13 @@ namespace mixc::io_private_tty::origin{
         }
     };
 
-    inline bool     the_cursor_visiable = true;
-    inline color_t  color;
-    inline uxx      cursor_width;
+    inline inc::tty_key const   unknown_key{};
+    inline inc::c16             key_str;
+    inline char16_t             buf_key[8];
+    inline uxx                  rest;
+    inline bool                 the_cursor_visiable = true;
+    inline color_t              color;
+    inline uxx                  cursor_width;
 
     inc::tty_color_t backcolor() {
         return inc::tty_color_t(color.back);
@@ -281,18 +235,18 @@ namespace mixc::io_private_tty::origin{
         constexpr asciis map[] = {
             "\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[90m", "\e[91m", "\e[92m", "\e[93m", "\e[94m", "\e[95m", "\e[96m", "\e[97m",
         };
-        print_core(map[uxx(value)], 5);
+        print_core(map[uxx(value)], 5/*length*/);
     }
 
     void backcolor(inc::tty_color_t value) {
         constexpr asciis map[]{
             "\e[40m", "\e[41m", "\e[42m", "\e[43m", "\e[44m", "\e[45m", "\e[46m", "\e[47m", "\e[100m", "\e[101m", "\e[102m", "\e[103m", "\e[104m", "\e[105m", "\e[106m", "\e[107m",
         };
-        print_core(map[uxx(value)], 5);
+        print_core(map[uxx(value)], 5/*length*/);
     }
 
     void clear(){
-        print_core("\e[0m\e[0;0H\e[2J", 14);
+        print_core("\e[0m\e[0;0H\e[2J", 14/*length*/);
         // backcolor(back);
         forecolor((inc::tty_color_t)color.fore);
         print_flush();
@@ -300,22 +254,22 @@ namespace mixc::io_private_tty::origin{
 
     void cursor_visiable(bool value){
         the_cursor_visiable = true;
-        print_core(value ? "\e[?25h" : "\e[?25l", 6);
+        print_core(value ? "\e[?25h" : "\e[?25l", 6/*length*/);
         print_flush();
     }
 
     void configure(bool echo){
-        static bool is_echo   = false;
-        static bool is_inited = false;
+        static bool is_echo         = false;
+        static bool is_inited       = false;
 
         if (uxx echo_mask = echo ? 0 : ECHO; not is_inited or (is_echo != echo)){
-            is_inited   = true;
-            is_echo     = echo;
+            is_inited               = true;
+            is_echo                 = echo;
             termios oldattr;
             tcgetattr(STDIN_FILENO, & oldattr);
-            oldattr.c_lflag     &= ~(ICANON | echo_mask | ECHOE | ISIG);
-            oldattr.c_cc[VSTART] = 0xff;
-            oldattr.c_cc[VSTOP]  = 0xff;
+            oldattr.c_lflag        &= ~(ICANON | echo_mask | ECHOE | ISIG);
+            oldattr.c_cc[VSTART]    = 0xff;
+            oldattr.c_cc[VSTOP]     = 0xff;
             tcsetattr(STDIN_FILENO, TCSANOW, & oldattr);
         }
     }
@@ -326,10 +280,10 @@ namespace mixc::io_private_tty::origin{
 
         if (key_str.length() == 0){
             // 阻塞式读取
-            buf_key[0] = (char16_t)getchar();
+            buf_key[0]  = (char16_t)getchar();
 
             // 非阻塞式读取
-            auto oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+            auto oldf   = fcntl(STDIN_FILENO, F_GETFL, 0);
             fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
 
             for(rest = 1; rest < sizeof(buf_key) / sizeof(buf_key[0]); rest++){
@@ -342,11 +296,11 @@ namespace mixc::io_private_tty::origin{
             }
 
             fcntl(STDIN_FILENO, F_SETFL, oldf);
-            key_str = { buf_key, rest };
+            key_str     = { buf_key, rest };
         }
 
-        key     = decode(key_str, & rest);
-        key_str = key_str.backward(key_str.length() - rest);
+        key             = decode(key_str, & rest);
+        key_str         = key_str.backward(key_str.length() - rest);
         return key;
     }
 
@@ -400,7 +354,7 @@ namespace mixc::io_private_tty::origin{
     }
 
     template<class item_t>
-    void read_line(inc::ialloc<item_t> allocx){
+    inc::cxx<item_t> read_line(inc::ialloc<item_t> allocx){
         enum { initial_length = 64 };
         using var = inc::var_array<initial_length>;
         item_t      buf[initial_length];
@@ -436,19 +390,21 @@ namespace mixc::io_private_tty::origin{
         }while(read_length == initial_length);
 
         auto target = allocx(length);
+        auto result = inc::cxx<item_t>{ target, length };
 
         for(uxx i = 0; i < length; i++){
             target[i]           = var::access(table, i);
         }
         var::clear(xref table, xref length, free);
+        return result;
     }
 
-    void read_line(inc::ialloc<char> alloc){
-        read_line<char>(alloc);
+    inc::c08 read_line(inc::ialloc<char> alloc){
+        return read_line<char>(alloc);
     }
 
-    void read_line(inc::ialloc<char16_t> alloc){
-        read_line<char16_t>(alloc);
+    inc::c16 read_line(inc::ialloc<char16_t> alloc){
+        return read_line<char16_t>(alloc);
     }
 
     constexpr u08 map[]{
@@ -482,14 +438,31 @@ namespace mixc::io_private_tty::origin{
     }
 
     void clear(){
-        backcolor(inc::tty_color_t(color.back));
-        forecolor(inc::tty_color_t(color.fore));
-        print_flush();
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        COORD coordScreen { 0, 0 };
+        DWORD cCharsWritten;
+        DWORD dwConSize;
+
+        if (not GetConsoleScreenBufferInfo(h_stdout, & csbi)){
+            return;
+        }
+        if (dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+            not FillConsoleOutputCharacter(h_stdout, TCHAR(' '), dwConSize, coordScreen, & cCharsWritten)){
+            return;
+        }
+        if (not GetConsoleScreenBufferInfo(h_stdout, & csbi)){
+            return;
+        }
+        if (not FillConsoleOutputAttribute(h_stdout, csbi.wAttributes, dwConSize, coordScreen, &cCharsWritten)){
+            return;
+        }
+
+        SetConsoleCursorPosition(h_stdout, coordScreen);
     }
 
     void cursor_visiable(bool value){
         CONSOLE_CURSOR_INFO info;
-        info.bVisible       = value;    
+        info.bVisible       = value;
         info.dwSize         = cursor_width;
         SetConsoleCursorInfo(h_stdout, & info);
     }
