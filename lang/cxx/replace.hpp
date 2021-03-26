@@ -17,7 +17,7 @@
 #include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
 #include"memop/copy.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 

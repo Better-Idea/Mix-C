@@ -21,10 +21,10 @@
 #include"lang/cxx.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/copy.hpp"
-#include"memory/allocator.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/is_cxx.hpp"
 #include"meta/item_origin_of.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 

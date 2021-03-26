@@ -2,8 +2,8 @@
 #include"macro/xhint.hpp"
 #include"docker/array.hpp"
 #include"math/random.hpp"
-#include"memory/allocator.hpp"
 #include"memop/fill.hpp"
+#include"utils/allocator.hpp"
 
 int run(){
     using namespace xuser;

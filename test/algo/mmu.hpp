@@ -5,7 +5,7 @@
 #define xuser mixc::test_algo_mmu::inc
 #include"algo/mmu.hpp"
 #include"macro/xassert.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::test_algo_mmu{

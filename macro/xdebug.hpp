@@ -35,14 +35,14 @@
             im_docker_hashmap_set,
             im_docker_hashmap_get,
 
-        // memory/tiny_allocator
+        // utils/tiny_allocator
         xon,
         xoff,
-            im_memory_tiny_allocator_free,
-            im_memory_tiny_allocator_take_out,
-            im_memory_tiny_allocator_split,
-            im_memory_tiny_allocator_append,
-            im_memory_tiny_allocator_remove,
+            im_utils_tiny_allocator_free,
+            im_utils_tiny_allocator_take_out,
+            im_utils_tiny_allocator_split,
+            im_utils_tiny_allocator_append,
+            im_utils_tiny_allocator_remove,
 
         // memop/memory.hpp
         xon,

@@ -19,8 +19,8 @@
 #include"memop/swap.hpp"
 #include"meta/has_cmp_equal.hpp"
 #include"meta/remove_ptr.hpp"
-#include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 

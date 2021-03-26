@@ -2,8 +2,8 @@
 #include"concurrency/thread_self.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/shared.hpp"
-#include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #include"utils/counter.hpp"
 #include"math/random.hpp"
 

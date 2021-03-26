@@ -12,8 +12,8 @@
 #include"macro/xnew.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/cast.hpp"
-#include"memory/allocator.hpp"
 #include"meta/is_empty_class.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::concurrency_thread{

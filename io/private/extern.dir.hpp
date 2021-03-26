@@ -11,7 +11,7 @@
 #include"lang/cxx.hpp"
 #include"macro/xdefer.hpp"
 #include"memop/copy.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_dir::cpp{

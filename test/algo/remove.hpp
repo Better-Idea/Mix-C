@@ -8,8 +8,8 @@
 #include"docker/array.hpp"
 #include"docker/shared.hpp"
 #include"macro/xassert.hpp"
-#include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::test_algo_remove{

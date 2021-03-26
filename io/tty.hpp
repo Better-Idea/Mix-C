@@ -12,8 +12,8 @@
 #include"lang/cxx/ph.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
-#include"memory/allocator.hpp"
 #include"meta/has_cast.hpp"
+#include"utils/allocator.hpp"
 
 #undef  xuser
 #define xuser mixc::io_tty::ext

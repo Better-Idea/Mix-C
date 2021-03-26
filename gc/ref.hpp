@@ -18,13 +18,13 @@
 #include"macro/xdebug.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xis_nullptr.hpp"
-#include"memory/allocator.hpp"
 #include"memop/addressof.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/is_same.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tkv.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_ref{

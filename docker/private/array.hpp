@@ -19,13 +19,13 @@
 #include"macro/xis_nullptr.hpp"
 #include"macro/xnew.hpp"
 #include"memop/cast.hpp"
-#include"memory/allocator.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/has_constructor.hpp"
 #include"meta/remove_ptr.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta_seq/vlist.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_array{

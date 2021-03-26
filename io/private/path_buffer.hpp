@@ -7,7 +7,7 @@
 #include"lang/cxx/clone.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_private_path_buffer::origin{

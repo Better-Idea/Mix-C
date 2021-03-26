@@ -44,7 +44,7 @@ c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
 #include"macro/xdebug_fail.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #include"utils/init_list.hpp"
 
 #if xis_windows

@@ -7,7 +7,7 @@
 #include"docker/array.hpp"
 #include"macro/xassert.hpp"
 #include"math/random.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 

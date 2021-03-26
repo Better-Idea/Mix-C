@@ -13,7 +13,7 @@
 #include"macro/xdefer.hpp"
 #include"macro/xvolatile.hpp"
 #include"memop/cast.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 
 #if xis_windows
 #include<windows.h>

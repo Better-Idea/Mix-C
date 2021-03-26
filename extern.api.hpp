@@ -12,7 +12,7 @@
 #include"math/private/extern.ln.hpp"
 #include"math/private/extern.sqrt.hpp"
 #include"math/private/extern.trigo+.hpp"
-#include"memory/private/extern.allocator.hpp"
+#include"utils/private/extern.allocator.hpp"
 
 // #include"draft/gui_seed.hpp"
 

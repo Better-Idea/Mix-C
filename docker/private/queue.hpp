@@ -10,9 +10,9 @@
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"
 #include"macro/xitr_foreach.hpp"
-#include"memory/allocator.hpp"
 #include"meta/is_attached_lock.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_queue {

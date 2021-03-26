@@ -14,7 +14,7 @@
 #include"docker/hashmap.hpp"
 #include"gc/private/token.hpp"
 #include"macro/xexport.hpp"
-#include"memory/allocator.hpp"
+#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_background::origin{

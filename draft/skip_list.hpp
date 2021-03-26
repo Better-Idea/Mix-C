@@ -2,8 +2,8 @@
 #define xuser mixc::powerful_cat
 #include"define/base_type.hpp"
 #include"memop/swap.hpp"
-#include"memory/allocator.hpp"
 #include"macro/xnew.hpp"
+#include"utils/allocator.hpp"
 
 namespace xuser{
     struct skip_node;

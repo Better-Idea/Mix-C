@@ -5,16 +5,17 @@
 #undef  xuser
 #define xuser mixc::docker_btree::inc
 #include"concurrency/lock/atom_swap.hpp"
-#include"configure/switch.hpp"
+#include"configure/platform.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/move.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"memop/swap.hpp"
-#include"memory/allocator.hpp"
 #include"mixc.hpp"
+#include"utils/allocator.hpp"
 #include"utils/bits_indexer.hpp"
+
 #if xis_msvc_native
 #include<intrin.h>
 #define __m256i_u  __m256i
