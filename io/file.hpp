@@ -46,21 +46,21 @@ namespace mixc::io_file::origin{
             return thex;
         }
 
-        u64     length()                                const;
-        final_t & open(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) const;
-        final_t & close()                                 const;
-        final_t & forward(u64 offset)                     const;
-        final_t & backward(u64 offset)                    const;
-        final_t & seek(i64 offset)                        const;
-        final_t & flush()                                 const;
-        uxx     read(voidp buffer, uxx bytes)           const;
-        uxx     write(void const * buffer, uxx bytes)   const;
+        u64         length()                                const;
+        final_t &   open(inc::c08 path, access_mode_t mode, bstate_t * result = nullptr) const;
+        final_t &   close()                                 const;
+        final_t &   forward(u64 offset)                     const;
+        final_t &   backward(u64 offset)                    const;
+        final_t &   seek(i64 offset)                        const;
+        final_t &   flush()                                 const;
+        uxx         read(voidp buffer, uxx bytes)           const;
+        uxx         write(void const * buffer, uxx bytes)   const;
 
-        void    remove()                                const;
-        void    move_to(inc::c08 new_path)              const;
-        void    move_to_forcedly(inc::c08 new_path)     const;
-        void    copy_to(inc::c08 new_path)              const;
-        bool    is_exist()                              const;
+        bstate_t    remove()                                const;
+        bstate_t    move_to(inc::c08 new_path)              const;
+        bstate_t    move_to_forcedly(inc::c08 new_path)     const;
+        bstate_t    copy_to(inc::c08 new_path)              const;
+        bool        is_exist()                              const;
 
         template<class item_t>
         uxx read(inc::seqptr<item_t> seq) const {
