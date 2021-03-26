@@ -43,12 +43,12 @@ namespace mixc::io_dir::origin{
         dir();
         dir(inc::c08 path) : path(path){}
 
-        void    remove()                                const;
-        void    move_to(inc::c08 new_path)              const;
-        void    copy_to(inc::c08 new_path)              const;
-        bool    is_exist()                              const;
-        void    create()                                const;
-        void    as_cwd()                                const;
+        bstate_t    remove()                                const;
+        bstate_t    move_to(inc::c08 new_path)              const;
+        bstate_t    copy_to(inc::c08 new_path)              const;
+        bstate_t    create()                                const;
+        bstate_t    as_cwd()                                const;
+        bool        is_exist()                              const;
 
         auto subfiles() const {
             return subitem(path, true);

@@ -1,18 +1,15 @@
-#ifndef xpack_io_private_dir
-#define xpack_io_private_dir
-#pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::io_private_dir::inc
 #include"configure/switch.hpp"
 #include"io/dir.hpp"
 #include"io/private/path_buffer.hpp"
 #include"lang/cxx/compare_fastly.hpp"
+#include"lang/cxx/is_contains.hpp"
 #include"lang/cxx/strcat.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdefer.hpp"
 #include"memop/copy.hpp"
 #include"utils/allocator.hpp"
-#pragma pop_macro("xuser")
 
 namespace mixc::io_dir::cpp{
     using namespace mixc::io_private_dir::inc;
@@ -30,87 +27,71 @@ namespace mixc::io_dir::cpp{
 #endif
 
 namespace mixc::io_dir::origin{
-    void dir::remove() const{
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
+    bstate_t dir::remove() const{
+        auto && buf         = cpp::path_buffer{};
+        auto    source      = buf.alloc(the.path);
         #if xis_windows
-        ::RemoveDirectoryA(asciis(source));
+        auto    is_success  = ::RemoveDirectoryA(asciis(source)) ?
+            bstate_t::success : bstate_t::fail;
+
         #elif xis_linux
-        cmd("/bin/rm", "rm", "-rf", source);
+        auto    is_success  = cmd("/bin/rm", "rm", "-rf", source);
         #else
         #error "os miss match"
         #endif
+
         buf.free(source, path);
+        return is_success;
     }
 
-    void dir::move_to(inc::c08 new_path) const{
+    bstate_t dir::move_to(inc::c08 new_path) const{
         auto && buf     = cpp::path_buffer{};
         auto    source  = buf.alloc(the.path);
         auto    target  = buf.alloc(new_path);
 
         #if xis_windows
-
         auto && opr     = SHFILEOPSTRUCTA{};
         opr.wFunc       = FO_MOVE;
         opr.pFrom       = (asciis)source;
         opr.pTo         = (asciis)target;
         opr.fFlags      = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
-        SHFileOperationA(& opr);
+        auto is_success = SHFileOperationA(& opr) == 0 ?
+            bstate_t::success : bstate_t::fail;
 
         #elif xis_linux
-        cmd("/bin/mv", "mv", "-r", source, target);
+        auto is_success = cmd("/bin/mv", "mv", "-r", source, target);
         #else
         #error "os miss match"
         #endif
 
         buf.free(target, new_path);
         buf.free(source, the.path);
+        return is_success;
     }
 
-    void dir::copy_to(inc::c08 new_path) const{
+    bstate_t dir::copy_to(inc::c08 new_path) const{
         auto && buf     = cpp::path_buffer{};
         auto    source  = buf.alloc(the.path);
         auto    target  = buf.alloc(new_path);
 
         #if xis_windows
-
         auto && opr     = SHFILEOPSTRUCTA{};
         opr.wFunc       = FO_COPY;
         opr.pFrom       = (asciis)source;
         opr.pTo         = (asciis)target;
         opr.fFlags      = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
-        SHFileOperationA(& opr);
+        auto is_success = SHFileOperationA(& opr) == 0
+            bstate_t::success : bstate_t::fail;
 
         #elif xis_linux
-        cmd("/bin/cp", "cp", "-r", source, target);
+        auto is_success = cmd("/bin/cp", "cp", "-r", source, target);
         #else
         #error "os miss match"
         #endif
 
         buf.free(target, new_path);
         buf.free(source, the.path);
-    }
-
-    bool dir::is_exist() const {
-        auto && buf     = cpp::path_buffer{};
-        auto    source  = buf.alloc(the.path);
-
-        #if xis_windows
-        auto    attr    = GetFileAttributesA((asciis)source);
-        auto    exist   = INVALID_FILE_ATTRIBUTES != attr and 0 != (attr & FILE_ATTRIBUTE_DIRECTORY);
-
-        #elif xis_linux
-
-        typedef struct stat meta_t;
-        auto && meta    = meta_t{};
-        auto    exist   = stat(asciis(source), & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
-
-        #else
-        #error "os miss match"
-        #endif
-
-        buf.free(source, path);
-        return  exist;
+        return is_success;
     }
 
     void dir::foreach_template(bool for_file, inc::c08 path, inc::icallback< loop_t(asciis path) > invoke){
@@ -118,7 +99,6 @@ namespace mixc::io_dir::origin{
         auto is_dir         = false;
 
         #if xis_windows
-
         auto entry          = WIN32_FIND_DATAA{};
         auto fd             = ([](auto path, auto * entry){
             char root[256];
@@ -141,7 +121,6 @@ namespace mixc::io_dir::origin{
         #define xhas_next       (FindNextFileA(fd, xref entry) != 0)
 
         #elif xis_linux
-
         struct
         dirent  * entry;
         DIR     * fd;
@@ -182,50 +161,82 @@ namespace mixc::io_dir::origin{
         #undef  xhas_next
     }
 
-    void dir::create() const {
+    bstate_t dir::create() const {
         #if xis_windows
+        // 防止注入攻击
+        if (inc::c08{path}.is_contains('\"')){
+            return bstate_t::fail;
+        }
 
         char buf[256];
-        auto mkdir      = cpp::c08{"mkdir \""}.strcat({path, "\""}, [&](uxx length){
-            auto ptr    = buf;
+        auto mkdir          = cpp::c08{"mkdir \""}.strcat({path, "\""}, [&](uxx length){
+            auto ptr        = buf;
 
             if (length >= sizeof(buf) - 1){
-                ptr     = cpp::alloc<char>(cpp::memory_size{length + 1});
+                ptr         = cpp::alloc<char>(cpp::memory_size{length + 1});
             }
 
             ptr[length] = '\0';
             return ptr;
         });
 
-        system((asciis)mkdir);
+        auto is_success     = system((asciis)mkdir) == 0 ?
+            bstate_t::success : bstate_t::fail;
 
         if (mkdir.operator char *() != buf){
             cpp::free<char>((char *)mkdir, cpp::memory_size{mkdir.length() + 1});
         }
 
         #elif xis_linux
-
-        auto && buf     = cpp::path_buffer{};
-        auto    target  = buf.alloc(the.path);
-        cmd("/bin/mkdir", "mkdir", "-p", target);
+        auto && buf         = cpp::path_buffer{};
+        auto    target      = buf.alloc(the.path);
+        auto    is_success  = cmd("/bin/mkdir", "mkdir", "-p", target);
         buf.free(target, path);
 
         #else
         #error "os miss match"
         #endif
+
+        return is_success;
     }
 
-    void dir::as_cwd() const {
-        auto && buf     = cpp::path_buffer{};
-        auto    target  = buf.alloc(the.path);
+    bstate_t dir::as_cwd() const {
+        auto && buf         = cpp::path_buffer{};
+        auto    target      = buf.alloc(the.path);
 
         #if xis_windows
-        ::SetCurrentDirectoryA((asciis)target);
+        auto    is_success  = ::SetCurrentDirectoryA((asciis)target) ?
+            bstate_t::success : bstate_t::fail;
+
         #elif xis_linux
-        ::chdir(asciis(target));
+        auto    is_success  = ::chdir(asciis(target)) == 0 ?
+            bstate_t::success : bstate_t::fail;
+
         #endif
+
         buf.free(target, path);
+        return is_success;
+    }
+    
+    bool dir::is_exist() const {
+        auto && buf     = cpp::path_buffer{};
+        auto    source  = buf.alloc(the.path);
+
+        #if xis_windows
+        auto    attr    = GetFileAttributesA((asciis)source);
+        auto    exist   = INVALID_FILE_ATTRIBUTES != attr and 0 != (attr & FILE_ATTRIBUTE_DIRECTORY);
+
+        #elif xis_linux
+
+        typedef struct stat meta_t;
+        auto && meta    = meta_t{};
+        auto    exist   = stat(asciis(source), & meta) != -1 and (meta.st_mode & S_IFDIR) != 0;
+
+        #else
+        #error "os miss match"
+        #endif
+
+        buf.free(source, path);
+        return  exist;
     }
 }
-
-#endif
