@@ -80,7 +80,7 @@ namespace mixc::io_dir::origin{
         opr.pFrom           = (asciis)source;
         opr.pTo             = (asciis)target;
         opr.fFlags          = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR;
-        auto is_success     = SHFileOperationA(& opr) == 0
+        auto is_success     = SHFileOperationA(& opr) == 0 ?
             bstate_t::success : bstate_t::fail;
 
         #elif xis_linux
@@ -164,7 +164,7 @@ namespace mixc::io_dir::origin{
     bstate_t dir::create() const {
         #if xis_windows
         // 防止注入攻击
-        if (inc::c08{path}.is_contains('\"')){
+        if (cpp::c08{path}.is_contains('\"')){
             return bstate_t::fail;
         }
 
