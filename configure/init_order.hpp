@@ -4,6 +4,9 @@
 
 namespace mixc::configure_init_order::origin{
     enum init_order_t{
+        // 主线程 mutex 初始化
+        the_concurrency_thread_self,
+
         // 控制台初始化模块
         the_io_private_tty  = 16,
 
