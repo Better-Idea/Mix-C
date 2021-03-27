@@ -151,7 +151,6 @@ int run(){
     }
     wait(); xhint(step, used_bytes());
 
-    xhint(step, need_free_count());
     {
         // 其实我们更推荐这么写
         // 这样可以减少栈上环对象的个数，避免无用的析构操作
