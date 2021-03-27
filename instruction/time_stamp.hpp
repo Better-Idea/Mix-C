@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::instruction_time_stamp::inc
-#include"configure/switch.hpp"
+#include"configure/platform.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
