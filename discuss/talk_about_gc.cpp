@@ -67,6 +67,12 @@ namespace xuser{
     ) $
 }
 
+void wait(){
+    using namespace xuser;
+    thread_self::gc_sync();     // 等待垃圾收集完成
+    thread_self::sleep(32);     // 等待内存释放
+}
+
 int run(){
     using namespace xuser;
 
@@ -98,14 +104,11 @@ int run(){
                 b->b = b;
                 xhint(step, used_bytes());
             }
-            thread_self::gc_sync();
-            xhint(step, used_bytes());
+            wait(); xhint(step, used_bytes());
         }
-        thread_self::gc_sync();
-        xhint(step, used_bytes());
+        wait(); xhint(step, used_bytes());
     }
-    thread_self::gc_sync();
-    xhint(step, used_bytes());
+    wait(); xhint(step, used_bytes());
 
     {
         shared<N1_t> n1{ default_init_by };{ 
@@ -136,29 +139,26 @@ int run(){
                             n2_4->na    = n2_2;
                             n2_3->nc    = n3;
                         }
-                        thread_self::gc_sync();
-                        xhint(step, used_bytes());
+                        wait(); xhint(step, used_bytes());
                     }
-                    thread_self::gc_sync();
-                    xhint(step, used_bytes());
+                    wait(); xhint(step, used_bytes());
                 }
-                thread_self::gc_sync();
-                xhint(step, used_bytes());
+                wait(); xhint(step, used_bytes());
             }
-            thread_self::gc_sync();
-            xhint(step, used_bytes());
+            wait(); xhint(step, used_bytes());
         }
-        thread_self::gc_sync();
-        xhint(step, used_bytes());
+        wait(); xhint(step, used_bytes());
     }
-    thread_self::gc_sync();
-    xhint(step, used_bytes());
+    wait(); xhint(step, used_bytes());
 
+    xhint(step, need_free_count());
     {
         // 其实我们更推荐这么写
         // 这样可以减少栈上环对象的个数，避免无用的析构操作
         shared<N3_t> n3{ default_init_by };
+        xhint(step, used_bytes());
         shared<N1_t> n1{ default_init_by };
+        xhint(step, used_bytes());
         auto & n2_1 = n1->na    = { default_init_by };
         auto & n2_2 = n2_1      = { default_init_by };
         auto & n2_3 = n2_2      = { default_init_by };
@@ -166,18 +166,15 @@ int run(){
         n2_1->nb                = n2_3;
         n2_3->nc                = n3;
         n2_4->na                = n2_2;
-        xhint(step, used_bytes());
     }
-    thread_self::gc_sync();
-    xhint(step, used_bytes());
+    wait(); xhint(step, used_bytes());
 
     {
         shared<N4_t> n4         = { default_init_by };
         n4->n                   = { n4, n4, n4, n4 }; // 创建长度为 4 的数组，并将每个元素赋值为 n4
         xhint(step, used_bytes());
     }
-    thread_self::gc_sync();
-    xhint(step, used_bytes());
+    wait(); xhint(step, used_bytes());
 
     // 一个[潜质类型]包含另一个[潜质类型]
     {
@@ -188,10 +185,8 @@ int run(){
             b_b->b              = b;
             b_a->a              = b_a;
         }
-        thread_self::gc_sync();
-        xhint(step, used_bytes());
+        wait(); xhint(step, used_bytes());
     }
-    thread_self::gc_sync();
-    xhint(step, used_bytes());
+    wait(); xhint(step, used_bytes());
     return 0;
 }
