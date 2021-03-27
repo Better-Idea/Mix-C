@@ -200,7 +200,6 @@ namespace mixc::gc_private_background::origin{
                     // 如果经过一次 gc 发现 mem 不可以释放([内析构]没有执行)
                     // 则此处需要再复位一下 in_gc_queue，以便下一轮 gc 可以正确响应
                     mem->in_gc_queue(false);
-
                 }
 
                 // 让 gc_que 立即腾出可用的空间

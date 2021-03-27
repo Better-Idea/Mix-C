@@ -214,16 +214,18 @@ namespace mixc::gc_ref{
             auto old                = (the_t *)& mem;
             auto owners             = (mem->owners());
 
-            if constexpr (not need_gc_v){
-                if (owners != 0){
-                    return;
-                }
-
+            // 只要计数器为 0 就可以直接释放
+            // 有些[潜质类型]可能不存在环，但是此时计数器为 0
+            if (owners == 0){
                 inc::in_release     = true;
                 the_t::free_with_destroy(mem);
                 inc::in_release     = false;
+                return;
             }
 
+            if constexpr (not need_gc_v){
+                ; // pass
+            }
             // 如果可以释放
             // 设置 thread_local 变量 in_release 
             // 让成员变量析构操作不再推送到 gc_thread
