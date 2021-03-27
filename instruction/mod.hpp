@@ -4,9 +4,10 @@
 #undef  xuser
 #define xuser mixc::instruction_mod::inc
 #include"configure/platform.hpp"
+#include"define/base_type.hpp"
 #include"instruction/index_of_last_set.hpp"
+#include"macro/xexport.hpp"
 #include"math/min.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_mod{

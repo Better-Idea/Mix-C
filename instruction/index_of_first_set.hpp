@@ -4,10 +4,11 @@
 #undef  xuser
 #define xuser mixc::instruction_index_of_first_set::inc
 #include"configure/platform.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"memop/cast.hpp"
 #include"meta/unsigned_type.hpp"
 #include"meta/is_number.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::instruction_index_of_first_set{
