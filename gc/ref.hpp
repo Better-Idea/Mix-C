@@ -217,9 +217,9 @@ namespace mixc::gc_ref{
             // 只要计数器为 0 就可以直接释放
             // 有些[潜质类型]可能不存在环，但是此时计数器为 0
             if (owners == 0){
-                inc::in_release     = true;
+                inc::l_in_release   = true;
                 the_t::free_with_destroy(mem);
-                inc::in_release     = false;
+                inc::l_in_release   = false;
                 return;
             }
 
@@ -227,14 +227,14 @@ namespace mixc::gc_ref{
                 ; // pass
             }
             // 如果可以释放
-            // 设置 thread_local 变量 in_release 
+            // 设置 thread_local 变量 l_in_release 
             // 让成员变量析构操作不再推送到 gc_thread
             else if (old->template can_release<guide_t>()){
                 auto & gi           = inc::gc_map.get(mem);
-                inc::in_release     = true;
+                inc::l_in_release   = true;
                 gi.can_arrive_root  = false;
                 the_t::free_with_destroy(mem);
-                inc::in_release     = false;
+                inc::l_in_release   = false;
             }
         }
     public:
@@ -314,14 +314,15 @@ namespace mixc::gc_ref{
                 old                 = thep(& ptr);
             }
 
-            // in_release 是一个 thread_local 变量
-            // 非 gc_thread 线程 in_release 永远是 false
+            // l_in_release 是一个 thread_local 变量
+            // 非 gc_thread 线程 l_in_release 永远是 false
             // 前台[外析构]的剩余步骤会推送到 gc_thread 后台线程执行
-            // 后台 gc_thread 线程执行[内析构]前会将 in_release 置 true
+            // 后台 gc_thread 线程执行[内析构]前会将 l_in_release 置 true
             // 表示[内析构]直接执行而不推送到自身的 gc_que 队列中
             // 这么做保证了释放的顺序，同时避免了 gc_que 存满时的死锁
-            if (not in_release){
+            if (not inc::l_in_release){
                 gc_push(ptr, xref the_t::release<guide, need_gc>);
+                process_message();
                 return thex;
             }
 
