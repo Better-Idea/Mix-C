@@ -92,12 +92,12 @@ namespace mixc::gc_private_background::origin{
 
     inline void gc_execute(){
         while(true){
-            auto i_push             = inc::atom_load(xref i_push_gc_que);
-            auto i_pop              = i_pop_gc_que;
-            auto dis                = i_push - i_pop_gc_que;
+            auto i_push         = inc::atom_load(xref i_push_gc_que);
+            auto i_pop          = i_pop_gc_que;
+            auto dis            = i_push - i_pop_gc_que;
 
             if (dis >= xgc_queue_depth) {
-                i_push              = i_pop_gc_que + xgc_queue_depth;
+                i_push          = i_pop_gc_que + xgc_queue_depth;
             }
 
             if (dis == 0){
@@ -110,28 +110,28 @@ namespace mixc::gc_private_background::origin{
                 inc::thread_self::suspend(64/*ms*/);
             }
 
-            using tp                = inc::token *;
-            using rpp               = release_pair *;
-            auto i_begin            = i_pop;
-            auto i_end              = i_push;
-            auto i                  = i_push;
-            auto release            = release_invoke{};
-            auto mem                = tp{};
-            auto item               = rpp{};
-            auto current            = free_nodep{};
+            using tp            = inc::token *;
+            using rpp           = release_pair *;
+            auto i_begin        = i_pop;
+            auto i_end          = i_push;
+            auto i              = i_push;
+            auto release        = release_invoke{};
+            auto mem            = tp{};
+            auto item           = rpp{};
+            auto current        = free_nodep{};
 
             // 去除重复的析构（mem 指向的值一样）
             // 相同指向的 mem 只保留最后的一个，保证释放的顺序，所以循环是从后往前
             // 批量让引用计数器减一
             while(i != i_begin){
-                i                  -= 1;
-                item                = xref gc_que[i & gc_queue_depth_mask];
+                i              -= 1;
+                item            = xref gc_que[i & gc_queue_depth_mask];
 
                 // mem 为 nullptr 指示当前元素在对应的线程中还未完成设置
                 while(true){
                     if (mem = inc::atom_load(xref item->mem); mem != nullptr){
                         // 加载一次 release 让当前 cpu 可见
-                        release     = inc::atom_load(xref item->release);
+                        release = inc::atom_load(xref item->release);
                         mem->owners_decrease();
                         break;
                     }
@@ -139,7 +139,7 @@ namespace mixc::gc_private_background::origin{
                 }
 
                 if (mem->in_gc_queue()){
-                    item->mem       = nullptr;
+                    item->mem   = nullptr;
                 }
                 else{
                     mem->in_gc_queue(true);
@@ -147,11 +147,11 @@ namespace mixc::gc_private_background::origin{
             }
 
             while(i != i_end){
-                item                = xref gc_que[i & gc_queue_depth_mask];
-                i                  += 1;
-                i_pop              += 1;
-                release             = item->release;
-                mem                 = item->mem;
+                item            = xref gc_que[i & gc_queue_depth_mask];
+                i              += 1;
+                i_pop          += 1;
+                release         = item->release;
+                mem             = item->mem;
 
                 // 不执行重复无效的遍历
                 // 只有该节点是在本轮 gc 中第一次访问，才可以进行接下来的[外析构]
@@ -176,8 +176,8 @@ namespace mixc::gc_private_background::origin{
 
             // 然后做释放内存等耗时操作
             while(free_list != nullptr){
-                current             = free_list;
-                free_list           = free_list->previous;
+                current         = free_list;
+                free_list       = free_list->previous;
                 inc::free(current, current->bytes);
             }
             gc_map.clear();
