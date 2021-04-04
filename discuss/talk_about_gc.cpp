@@ -67,7 +67,7 @@ namespace xuser{
     ) $
 }
 
-void wait(){
+inline void wait(){
     using namespace xuser;
     thread_self::gc_sync();     // 等待垃圾收集完成
     thread_self::sleep(32);     // 等待内存释放
