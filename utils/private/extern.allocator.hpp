@@ -10,11 +10,15 @@
 
 namespace mixc::utils_allocator{
     inline uxx pused_bytes      = 0;
-    inline uxx pneed_free_count = 0;
+    inline uxx palive_object = 0;
+
+    extern void tiny_process_message(){
+        ;
+    }
 
     extern voidp tiny_alloc(uxx bytes){
         inc::atom_add(xref pused_bytes, bytes);
-        inc::atom_add(xref pneed_free_count, 1);
+        inc::atom_add(xref palive_object, 1);
 
         // 按 16 字节对齐
         bytes                   = (bytes + 0xf) & ~0xf;
@@ -23,7 +27,7 @@ namespace mixc::utils_allocator{
 
     extern void tiny_free(voidp ptr, uxx bytes){
         inc::atom_sub(xref pused_bytes, bytes);
-        inc::atom_sub(xref pneed_free_count, 1);
+        inc::atom_sub(xref palive_object, 1);
         ::free(ptr);
     }
 }
@@ -33,8 +37,8 @@ namespace mixc::utils_allocator::origin{
         return inc::atom_load(xref pused_bytes);
     }
 
-    extern uxx need_free_count(){
-        return inc::atom_load(xref pneed_free_count);
+    extern uxx alive_object(){
+        return inc::atom_load(xref palive_object);
     }
 
     extern uxx alive_pages(){
@@ -44,10 +48,14 @@ namespace mixc::utils_allocator::origin{
 }
 #else
 
-#include"memory/private/tiny_allocator.hpp"
+#include"utils/private/tiny_allocator.hpp"
 
 namespace mixc::utils_allocator{
     inline thread_local inc::tiny_allocator mem;
+
+    extern void tiny_process_message(){
+        mem.process_message();
+    }
 
     extern voidp tiny_alloc(uxx bytes){
         return mem.alloc(bytes);
@@ -63,8 +71,8 @@ namespace mixc::utils_allocator::origin{
         return mem.used_bytes();
     }
 
-    extern uxx need_free_count(){
-        return mem.need_free_count();
+    extern uxx alive_object(){
+        return mem.alive_object();
     }
 
     extern uxx alive_pages(){
@@ -74,14 +82,16 @@ namespace mixc::utils_allocator::origin{
 
 #endif
 
+#include<malloc.h>
+
 namespace mixc::utils_allocator::origin{
-    extern voidp malloc(size_t bytes){
+    extern voidp malloc(uxx bytes){
         // 按 16 字节对齐
         bytes                   = (bytes + 0xf) & ~0xf;
         return ::malloc(bytes);
     }
 
-    extern voidp malloc_aligned(size_t bytes, size_t align_bytes){
+    extern voidp malloc_aligned(uxx bytes, uxx align_bytes){
         #if xis_windows
             return ::_mm_malloc(bytes, align_bytes);
         #endif

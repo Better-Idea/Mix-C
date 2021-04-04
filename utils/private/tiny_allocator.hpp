@@ -6,12 +6,10 @@
 #include"concurrency/lock/atom_fetch_add.hpp"
 #include"concurrency/lock/atom_fetch_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
-#include"concurrency/lock/atom_fetch_xor.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_store.hpp"
 #include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_swap.hpp"
-#include"concurrency/lock_state_t.hpp"
 #include"concurrency/thread_self.hpp"
 #include"define/base_type.hpp"
 #include"instruction/bit_test.hpp"
@@ -27,7 +25,9 @@
 
 namespace mixc::utils_private_tiny_allocator{
     struct tiny_allocator;
+}
 
+namespace mixc::utils_private_tiny_allocator{
     typedef struct node{
         node      * previous;
         node      * next;
@@ -41,144 +41,6 @@ namespace mixc::utils_private_tiny_allocator{
     typedef struct node_plus : node{
         uxx    blocks;
     } * node_plusp;
-
-    /* 命名：
-     * 我们称 token 原先的所有者为[故主]，新持有者为[新秀]
-     * 
-     * 过程：
-     * - [故主]通过 raise_change_owners 发起变更所有者[公告]
-     * - 有些线程 try_push 时是没有读到置位的 wait_chanage_owners 位，指示它们没有看到[公告]
-     *   此时它们成为 escaped [逃逸线程]
-     * - 有些线程看到了[公告]，此时它们等待[故主]通过设置 i_new_owner 标识钦定[新秀]
-     * - [故主]在设置 wait_chanage_owners 位时会得到最后一个[逃逸线程]的 id
-     *   那么该 id 后一个就是第一个看到[公告]的线程，此时该 id 对应的线程被选为[新秀]
-     * - try_push 会返回当前线程的操作 id，该值是每执行一次 try_push 就增一
-     *   所以各个线程能得到独有的 id
-     * - 当[故主]设置好 i_new_owner 后，之前等待的线程会比对自己是不是被钦定的[新秀]
-     * - 如果自己成为[新秀]，需要将 powner 指向自己，并复位 wait_chanage_owners 位
-     *   指示交接以完成，[新秀]需要接替[故主]内存回收工作，并等待[逃逸线程]完成异步推送
-     * - 其他线程则是等待交接完成再将释放的内存推送给[新秀]
-     * 
-     * 补充：
-     * 这里不让线程完成 push 后使计数器减一，因为这样会导致 id 不唯一
-     */
-    typedef struct tiny_token{
-        using tap   = tiny_allocator *;
-
-        enum{
-            wait_chanage_owners     = 1 << 0,
-            wait_escaped            = 1 << 1,
-            wait_shader             = 1 << 2,
-            i_new_push              = 3,
-            new_push                = 1 << i_new_push,
-        };
-
-        tiny_token(tap owner) : 
-            powner(owner),
-            i_push_count(0),
-            i_escaped_base(0),
-            i_shader(0),
-            i_new_owner(not_exist),
-            state(0),
-            ref_count(0){
-        }
-
-        auto try_push(){
-            struct { inc::lock_state_t state; uxx id; } r;
-            auto fetch          = inc::atom_fetch_add(xref state, new_push);
-            r.id                = fetch >> i_new_push;
-            r.state             = fetch & wait_chanage_owners ?
-                inc::lock_state_t::accept : inc::lock_state_t::blocked;
-            return r;
-        }
-
-        void raise_change_owners(){
-            inc::atom_store(xref i_new_owner, not_exist);
-            inc::atom_store(xref i_escaped_base, 0);
-            auto fetch          = inc::atom_fetch_or(
-                xref state, wait_chanage_owners | wait_escaped
-            );
-            auto new_owner      = fetch >> i_new_push;
-            inc::atom_store(xref i_new_owner, new_owner);
-        };
-
-        template<class lambda_t>
-        tap wait(uxx id, tap new_owner, lambda_t && if_selected){
-            uxx i_owner         = 0;
-            while((i_owner = inc::atom_load(xref i_new_owner)) == not_exist){
-                inc::thread_self::yield();
-            }
-
-            // 被选中
-            if (id == i_owner){
-                auto old_owner  = inc::atom_swap(xref powner, new_owner);
-                inc::atom_fetch_and(xref state, ~wait_chanage_owners);
-                if_selected(old_owner);
-                return new_owner;
-            }
-            else while(inc::atom_load(xref state) & wait_chanage_owners){
-                inc::thread_self::yield();
-            }
-            return inc::atom_load(xref powner);
-        }
-
-        // 只有[新秀]需要等待[逃逸线程]
-        void wait_escaped_thread(){
-            while(inc::atom_load(xref i_escaped_base) != i_new_owner - 1){
-                inc::thread_self::yield();
-            }
-            inc::atom_fetch_xor(xref state, wait_shader/*置位*/ | wait_escaped/*复位*/);
-        }
-
-        void finish_push(uxx id){
-            if (auto mask = inc::atom_fetch_and(xref state, ~wait_shader); mask & wait_escaped){
-                if (id < inc::atom_load(xref i_new_owner)){
-                    inc::atom_fetch_add(xref i_escaped_base, 1);
-                }
-                else{
-                    inc::atom_fetch_add(xref i_shader, 1);
-                }
-            }
-            else {
-                if (mask & wait_shader){
-                    auto shader = inc::atom_swap(xref i_shader, uxx{});
-                    inc::atom_fetch_add(xref i_escaped_base, shader);
-                }
-                else{
-                    inc::atom_fetch_add(xref i_escaped_base, 1);
-                }
-            }
-        }
-
-        tap owner(){
-            return powner;
-        }
-
-        tap owner_atom_load(){
-            return inc::atom_load(xref powner);
-        }
-
-        void owner_increase(){
-            ref_count += 1;
-        }
-        
-        void owner_decrease(){
-            ref_count -= 1;
-        }
-
-        bool has_owner(){
-            return ref_count != 0;
-        }
-
-    private:
-        tap             powner;
-        uxx             i_push_count;
-        uxx             i_escaped_base;
-        uxx             i_shader;
-        uxx             i_new_owner;
-        uxx             state;
-        uxx             ref_count;
-    } * tiny_tokenp;
 
     enum : uxx{
         scale                   = sizeof(uxx) * 8,
@@ -211,7 +73,96 @@ namespace mixc::utils_private_tiny_allocator{
         // 跳过检查的次数
         // 从其他线程推送过来的释放请求
         max_skip_times          = 8,
+
+        wait_change_owners      = 1 << 0,
+        mask_to_get_self_id     = ~(wait_change_owners),
+        i_new_push              = 1,
+        new_push                = 1 << i_new_push,
     };
+
+    /* 命名：
+     * 我们称 token 原先的所有者为[故主]，新持有者为[新秀]
+     * 
+     * 过程：
+     * - [故主]通过 raise_change_owners 发起变更所有者[公告]
+     * - 有些线程 try_push 时是没有读到置位的 wait_change_owners 位，指示它们没有看到[公告]
+     *   此时它们成为 escaped [逃逸线程]
+     * - 有些线程看到了[公告]，此时它们等待[故主]通过设置 i_new_owner 标识钦定[新秀]
+     * - [故主]在设置 wait_change_owners 位时会得到最后一个[逃逸线程]的 id
+     *   那么该 id 后一个就是第一个看到[公告]的线程，此时该 id 对应的线程被选为[新秀]
+     * - try_push 会返回当前线程的操作 self_id，该值是每执行一次 try_push 就增一
+     *   所以各个线程能得到独有的 id
+     * - 当[故主]设置好 i_new_owner 后，之前等待的线程会比对自己是不是被钦定的[新秀]
+     * - 如果自己成为[新秀]，需要将 powner 指向自己，并复位 wait_change_owners 位
+     *   指示交接以完成，[新秀]需要接替[故主]内存回收工作，并等待[逃逸线程]完成异步推送
+     * - 其他线程则是等待交接完成再将释放的内存推送给[新秀]
+     * 
+     * 补充：
+     * 这里不让线程完成 push 后使计数器减一，因为这样会导致 id 不唯一
+     */
+    typedef struct tiny_token{
+        using tap               = origin::tiny_allocator *;
+
+        bool can_release(){
+            return i_ref == 0;
+        }
+
+        auto try_push(){
+            struct { uxx self_id; bool wait_change_owners; } i;
+            uxx mask            = inc::atom_fetch_add(xref state, new_push);
+            i.self_id           = (mask & mask_to_get_self_id);
+            i.wait_change_owners= (mask & wait_change_owners) != 0;
+            return i;
+        }
+
+        void wait_escaped_finish(){
+            // 等到所有[逃逸线程]完成操作
+            while(inc::atom_load(xref i_finished) + new_push != i_new_owner){
+                inc::thread_self::yield();
+            }
+        }
+
+        void raise_change_owners(){
+            inc::atom_store(xref i_new_owner, not_exist);
+            auto fetch          = inc::atom_fetch_or(
+                xref state, wait_change_owners
+            );
+            auto new_owner      = fetch & mask_to_get_self_id;
+
+            // 让以下字段的改动对其他线程可见
+            inc::atom_load(xref alive_pages);
+            inc::atom_load(xref used_bytes);
+            inc::atom_load(xref alive_object);
+
+            // 之前的字段设置完毕，可以设置 i_new_owner，其他线程可能在等待它被赋予新值
+            inc::atom_store(xref i_new_owner, new_owner);
+        }
+
+        void async_push(voidp mem, uxx bytes){
+            auto self               = node_freep(mem);
+            auto prev               = node_freep(nullptr);
+            inc::atom_store(xref self->next, nullptr);
+            inc::atom_store(xref self->bytes, bytes);
+            prev                    = inc::atom_swap(xref async_tail, self);
+            inc::atom_store(xref prev->next, self);
+            inc::atom_fetch_add(xref i_async_push, 1);
+
+            // 完成推送，最后设置该字段
+            inc::atom_fetch_add(xref i_finished, 1);
+        }
+
+        tap             owner{};
+        uxx             state{};
+        uxx             i_ref{};
+        uxx             i_finished{};
+        uxx             i_new_owner{};
+        uxx             i_async_push{};
+        uxx             alive_pages{};
+        uxx             used_bytes{};
+        uxx             alive_object{};
+        node_free       async_head{};
+        node_free     * async_tail = xref async_head;
+    } * tiny_tokenp;
 
     typedef struct page_header{
     private:
@@ -221,7 +172,7 @@ namespace mixc::utils_private_tiny_allocator{
         page_header(tiny_token * token);
 
         ~page_header(){
-            token->owner_decrease();
+            token->i_ref           -= 1;
         }
 
         bool get(uxx index){
@@ -310,7 +261,7 @@ namespace mixc::utils_private_tiny_allocator{
 
     inline page_header::page_header(tiny_token * token) :
         token(token){
-        token->owner_increase();
+        token->i_ref           += 1;
 
         // 设置哨兵位
         set(uxx(-1));
@@ -325,54 +276,85 @@ namespace mixc::utils_private_tiny_allocator{
 
         indicator_t     slot;
         indicator_t     slot_plus;
-        uxx             async_push_bytes        = 0;
-        uxx             palive_pages            = 0;
-        uxx             pused_bytes             = 0;
-        uxx             pneed_free_count        = 0;
         uxx             skip_count              = 0;
         page_header   * page_list               = nullptr;
-        node_free       async_head              = {};
-        node_free     * async_tail              = & async_head;
         tiny_token    * token                   = nullptr;
         node          * free_list_array[scale];
         node          * free_list_array_plus[scale];
     };
+}
 
+namespace mixc::utils_private_tiny_allocator::origin{
     struct tiny_allocator : tiny_allocator_header{
+        friend tiny_token;
+
         tiny_allocator(){
             token                   = tiny_tokenp(inc::malloc(sizeof(tiny_token)));
-            xnew(token) tiny_token(this/*owner*/);
+            inc::atom_store(xref token->owner, this);
+        }
+
+        ~tiny_allocator(){
+            // 如果其他线程归还所有分配的内存就自行析构
+            if (inc::atom_load(xref token->i_async_push) == token->alive_object){
+                for(auto head = token->async_head.next; head != nullptr;){
+                    auto next       = inc::atom_load(xref head->next);
+                    auto bytes      = inc::atom_load(xref head->bytes);
+                    this->free_core(head, bytes);
+                    head            = next;
+                }
+                token->alive_object = 0;
+            }
+            if (token->alive_object == 0){
+                inc::mfree(token);
+                return;
+            }
+            // 否则需要转移所有者
+            else{
+                token->raise_change_owners();
+                token->wait_escaped_finish();
+            }
         }
 
         uxx used_bytes() {
-            return pused_bytes;
+            return token->used_bytes;
         }
 
-        uxx need_free_count() {
-            return pneed_free_count;
+        uxx alive_object() {
+            return token->alive_object;
         }
 
         uxx alive_pages(){
-            return palive_pages;
+            return token->alive_pages;
         }
 
         voidp alloc(uxx bytes){
-            auto i_require_size     = (bytes - 1) / scale_one;
-            pused_bytes            += (bytes);
+            xdebug_fail(bytes == 0){
+                return nullptr;
+            }
+
+            auto i_expect            = (bytes - 1) / scale_one;
+
+            // 超出管理范畴
+            if (i_expect >= blocks_per_page){
+                return inc::malloc((i_expect + 1) * scale_one);
+            }
+
+            token->used_bytes      += bytes;
+            token->alive_object    += 1;
 
             // slot 中置位位表示空闲的块
             // 选择最接近但不小于所需大小的块
-            if (i_require_size < boundary){
-                if (auto i_closest = slot.index_of_first_set(i_require_size); i_closest != not_exist){
-                    return take_out(i_closest, i_require_size, slot, free_list_array);
+            if (i_expect < boundary){
+                if (auto i_closest = slot.index_of_first_set(i_expect); i_closest != not_exist){
+                    return take_out(i_closest, i_expect, slot, free_list_array);
                 }
             }
-            if (i_require_size < blocks_per_page){
-                if (auto i_closest = slot_plus.index_of_first_set(i_require_size / boundary); i_closest != not_exist){
-                    return take_out(i_closest, i_require_size, slot_plus, free_list_array_plus);
+            if (i_expect < blocks_per_page){
+                if (auto i_closest = slot_plus.index_of_first_set(i_expect / boundary); i_closest != not_exist){
+                    return take_out(i_closest, i_expect, slot_plus, free_list_array_plus);
                 }
             }
-            return origin_alloc(i_require_size);
+            return origin_alloc(i_expect);
         }
 
         void free(voidp ptr, uxx bytes){
@@ -380,43 +362,65 @@ namespace mixc::utils_private_tiny_allocator{
                 return;
             }
 
-            auto   i_scale          = (bytes - 1) / scale_one; 
+            auto   i_expect         = (bytes - 1) / scale_one; 
 
             // 超出管理的大小
-            if (i_scale >= blocks_per_page){
+            if (i_expect >= blocks_per_page){
                 inc::mfree(ptr);
                 return;
             }
 
             auto   current          = nodep(ptr);
-            auto & head             = get_page_header_by(current);
-            auto   token            = head.token;
-            auto   owner            = token->owner();
+            auto   head             = get_page_header_by(current);
+            auto   o_token          = head->token;
+            auto   owner            = o_token->owner;
 
-            // 处理其他线程归还的内存
+            // 处理其他线程归还的内存：
+            // 如果 owner 指向 this
+            // 表明本线程还活着，此操作是当前线程自己回收内存
+            // 也就一定没有发生所有者转换，自然也就无需通过原子操作加载
             if (owner == this){
                 this->async_pop_lazily();
                 this->free_core(ptr, bytes);
                 return;
             }
+            // 如果 owner 不指向 this，情况就变复杂了
+            // 它可能正在或者已经变更所有者
+            // 出于并发性能考虑，在转移所有者时，我们不会更改 [故主] 的 page->token
+            // 所以有下面峰回路转的加载操作
             else{
-                owner               = token->owner_atom_load();
+                o_token             = inc::atom_load(xref head->token);
+                owner               = inc::atom_load(xref o_token->owner);
+                o_token             = inc::atom_load(xref owner->token);
             }
 
-            auto   self             = token->try_push(); 
-            auto   if_selected      = [&](tiny_allocator * old_owner){ 
-                palive_pages       += old_owner->palive_pages;
-                pneed_free_count   += old_owner->pneed_free_count;
-                pused_bytes        += old_owner->pused_bytes;
-                this->merge(old_owner);
+            using tap               = tiny_allocator *;
+            auto i                  = o_token->try_push();
+            auto inherit            = [&](){
+                // 更改所有者
+                auto o_owner        = inc::atom_swap(xref o_token->owner, this);
+                auto list           = head;
 
-                // 等待[逃逸线程]完成推送
-                token->wait_escaped_thread();
+                // 其他相关线程可能会等待该位复位
+                // 本来在这之前需要改变 [故主] 所有 page->token
+                // 但如果 [故主] 遗留的 page 较多会导致所有向 [故主] 归还内存的线程都被阻塞
+                // 直到 o_token->state 中的 wait_change_owners 位被复位
+                inc::atom_fetch_and(xref o_token->state, ~wait_change_owners);
+                this->merge(o_owner);
+                this->free_core(ptr, bytes);
 
-                // 代替[故主]处理[逃逸线程]的推送
-                auto head           = inc::atom_load(xref old_owner->async_head.next);
+                // 原子操作读取方可在带缓存的 cpu 中读到改动
+                token->used_bytes  += inc::atom_load(xref o_token->used_bytes);
+                token->alive_pages += inc::atom_load(xref o_token->alive_pages);
+                token->alive_object+= inc::atom_load(xref o_token->alive_object);
+
+                // 等到所有[逃逸线程]完成操作
+                o_token->wait_escaped_finish();
+
+                auto head           = inc::atom_load(xref o_token->async_head.next);
                 auto next           = node_freep{};
                 auto bytes          = uxx{};
+                inc::atom_fetch_add(xref o_token->i_finished, new_push);
 
                 while(head != nullptr){
                     bytes           = inc::atom_load(xref head->bytes);
@@ -426,25 +430,67 @@ namespace mixc::utils_private_tiny_allocator{
                 }
             };
 
-            // 如果该内存属于其他线程，就推送到分配它的线程
-            if (self.state == inc::lock_state_t::blocked){
-                owner               = token->wait(self.id, this, if_selected);
-            }
-            // 分配该内存的线程可能已经退出并将所有权转交给后台内存清理线程
-            // cpu 读了一次 token->owner 后可能会被缓存下来
-            // 所以该改动需要原子操作才能读取到
-            else{
-                owner               = token->owner_atom_load();
+            if (i.wait_change_owners){
+                while(inc::atom_load(xref o_token->i_new_owner) == not_exist){
+                    inc::thread_self::yield();
+                }
+
+                if (o_token->i_new_owner == i.self_id){
+                    inherit();
+                    return;
+                }
+
+                while(inc::atom_load(xref o_token->state) & wait_change_owners){
+                    inc::thread_self::yield();
+                }
+
+                // 重新加载
+                owner               = inc::atom_load(xref token->owner);
+                o_token             = inc::atom_load(xref owner->token);
             }
 
-            owner->async_push(current, bytes);
-            token->finish_push(self.id);
+            // 推送给所属的线程
+            // 如果此时正在发生所有者变更，那么此线程将成为[逃逸线程]
+            // [故主] 和 [新秀] 会等待所有的逃逸线程完成推送
+            // 而相关的后入线程会阻塞，直到 [故主] 与 [新秀] 交接完成
+            o_token->async_push(ptr, bytes);
         }
 
         void process_message(){
             async_pop_lazily();
         }
     private:
+        void async_pop(){
+            auto free_size          = 0;
+            auto phead              = xref token->async_head;
+            auto head               = inc::atom_load(xref phead->next);
+            auto next               = node_freep{};
+            auto bytes              = uxx{};
+            auto i                  = uxx{};
+
+            if (head == nullptr){
+                return;
+            }
+
+            xdefer{
+                inc::atom_sub(xref token->i_async_push, i);
+            };
+
+            while(true){
+                if (next = head->next; next == nullptr){
+                    next            = inc::atom_load(xref head->next);
+                }
+                if (next == nullptr){
+                    phead->next     = head;
+                    return;
+                }
+
+                bytes               = inc::atom_load(xref head->bytes);
+                this->free_core(head, bytes);
+                head                = next;
+            }
+        }
+
         void merge(indicator_t & old_slot, node ** old_free_list_array){
             for(uxx i = 0;;){
                 if (i = old_slot.index_of_first_set(i); i == not_exist){
@@ -476,46 +522,46 @@ namespace mixc::utils_private_tiny_allocator{
 
             if (page_list == nullptr){
                 page_list           = old_owner->page_list;
-                return;
             }
-
-            auto o_head             = old_owner->page_list;
-            auto o_end              = o_head->previous;
-            auto n_head             = page_list;
-            auto n_next             = page_headerp{};
-            n_next                  = n_head->next;
-            o_head->previous        = n_head;
-            n_head->next            = o_head;
-            o_end->next             = n_next;
-            n_next->previous        = o_end;
+            else{
+                auto o_head         = old_owner->page_list;
+                auto o_end          = o_head->previous;
+                auto n_head         = page_list;
+                auto n_next         = page_headerp{};
+                n_next              = n_head->next;
+                o_head->previous    = n_head;
+                n_head->next        = o_head;
+                o_end->next         = n_next;
+                n_next->previous    = o_end;
+            }
         }
 
         void free_core(voidp ptr, uxx bytes){
             auto   current          = (nodep)ptr;
-            auto & head             = (get_page_header_by(current));
-            auto   i_scale          = (bytes - 1) / scale_one;
+            auto   head             = (get_page_header_by(current));
+            auto   i_expect         = (bytes - 1) / scale_one;
             auto   free_block       = (current);
-            auto   free_size        = (i_scale + 1);
-            auto   left             = (head.left_free_block_of(current));
-            auto   right            = (head.right_free_block_of(current, free_size));
-            pused_bytes            -= (bytes);
-            pneed_free_count       -= (1);
+            auto   free_size        = (i_expect + 1);
+            auto   left             = (head->left_free_block_of(current));
+            auto   right            = (head->right_free_block_of(current, free_size));
+            token->used_bytes      -= (bytes);
+            token->alive_object    -= (1);
 
-            if (head.mark_free(current, i_scale + 1); left.begin != nullptr){
-                head.mark_free(left.begin, left.length);
+            if (head->mark_free(current, i_expect + 1); left.begin != nullptr){
+                head->mark_free(left.begin, left.length);
                 free_block          = left.begin;
                 free_size          += left.length;
                 remove(left.begin, left.length);
             }
             if (right.begin != nullptr){
                 free_size          += right.length;
-                head.mark_free(right.begin, right.length);
+                head->mark_free(right.begin, right.length);
                 remove(right.begin, right.length);
             }
 
             // 整个页都空闲时就释放该页
             if (free_size == blocks_per_page){
-                origin_free(xref head);
+                origin_free(head);
                 return;
             }
 
@@ -523,50 +569,12 @@ namespace mixc::utils_private_tiny_allocator{
             append(free_block, free_size);
         }
 
-        void async_push(voidp mem, uxx bytes){
-            auto self               = node_freep(mem);
-            auto prev               = node_freep(nullptr);
-            inc::atom_store(xref self->next, nullptr);
-            inc::atom_store(xref self->bytes, bytes);
-            prev                    = inc::atom_swap(xref async_tail, self);
-            inc::atom_store(xref prev->next, self);
-            inc::atom_fetch_add(xref async_push_bytes, bytes);
-        }
-
         void async_pop_lazily(){
             // 忽略一定次数后就响应一下
             // 尽可能减少无效的原子操作
             if (skip_count += 1; skip_count == max_skip_times){
                 skip_count          = 0;
-                async_pop();
-            }
-        }
-
-        void async_pop(){
-            auto free_size          = 0;
-            auto head               = inc::atom_load(xref async_head.next);
-            auto next               = node_freep{};
-
-            if (head == nullptr){
-                return;
-            }
-
-            xdefer{
-                inc::atom_sub(xref async_push_bytes, free_size);
-            };
-
-            while(true){
-                if (next = head->next; next == nullptr){
-                    next            = inc::atom_load(xref head->next);
-                }
-                if (next == nullptr){
-                    inc::atom_store(xref async_head.next, head);
-                    return;
-                }
-
-                free_size          += head->bytes;
-                free_core(head, head->bytes);
-                head                = next;
+                this->async_pop();
             }
         }
 
@@ -578,14 +586,14 @@ namespace mixc::utils_private_tiny_allocator{
             // 当 page->token 没有使用者了，则表示[故主]所有的 page 都已经释放完毕了
             // 所以无需再保留该 token
             if (page->~page_header();
-                page->token != this->token and not page->token->has_owner()){
+                page->token != this->token and page->token->can_release()){
                 page->token->~tiny_token();
                 inc::mfree(token);
             }
 
             inc::mfree_aligned(page);
 
-            if (palive_pages -= 1; next == page){
+            if (token->alive_pages -= 1; next == page){
                 page_list           = nullptr;
                 return;
             }
@@ -597,16 +605,11 @@ namespace mixc::utils_private_tiny_allocator{
             prev->next              = next;
         }
 
-        voidp origin_alloc(uxx i_require_size){
-            // 超出管理范畴
-            if (i_require_size >= blocks_per_page){
-                return inc::malloc((i_require_size + 1) * scale_one);
-            }
-
+        voidp origin_alloc(uxx i_expect){
             auto meta               = inc::malloc_aligned(page_bytes, page_align_size);
             auto page               = xnew(meta) page_header(token);
             auto first              = page->first_block();
-            palive_pages           += 1;
+            token->alive_pages     += 1;
 
             if (page_list == nullptr){
                 page_list           = page;
@@ -620,15 +623,12 @@ namespace mixc::utils_private_tiny_allocator{
                 head->previous      = page;
                 page->next          = head;
             }
-            return split(first, blocks_per_page, i_require_size);
+            return split(first, blocks_per_page, i_expect);
         }
 
-        voidp take_out(uxx i_closest, uxx i_require_size, indicator_t & slot, node ** free_list){
+        voidp take_out(uxx i_closest, uxx i_expect, indicator_t & slot, node ** free_list){
             auto    first               = free_list[i_closest];
             auto    next                = first->next;
-
-            // 属于本线程的内存个数
-            pneed_free_count           += 1;
 
             // 若当前元素时该链表中最后一个元素，则将该位置的 slot 设置为空
             if (next == first){
@@ -642,21 +642,21 @@ namespace mixc::utils_private_tiny_allocator{
             }
 
             if (free_list == free_list_array){
-                return split(first, i_closest + 1, i_require_size);
+                return split(first, i_closest + 1, i_expect);
             }
             else{
-                return split(first, node_plusp(first)->blocks, i_require_size);
+                return split(first, node_plusp(first)->blocks, i_expect);
             }
         }
 
-        voidp split(nodep current, uxx total_size, uxx i_require_size){
-            if (get_page_header_by(current).mark_in_use(current, i_require_size + 1);
-                total_size > i_require_size + 1){
-                auto require_size    = i_require_size + 1;
-                auto rest            = current + require_size;
-                auto rest_size       = total_size - require_size;
-                xdebug(im_utils_tiny_allocator_split, current, rest, total_size, require_size, rest_size);
-                xdebug_fail(rest_size > total_size);
+        voidp split(nodep current, uxx total_blocks, uxx i_expect){
+            if (get_page_header_by(current)->mark_in_use(current, i_expect + 1);
+                total_blocks > i_expect + 1){
+                auto require_blocks  = i_expect + 1;
+                auto rest            = current + require_blocks;
+                auto rest_size       = total_blocks - require_blocks;
+                xdebug(im_utils_tiny_allocator_split, current, rest, total_blocks, require_blocks, rest_size);
+                xdebug_fail(rest_size > total_blocks);
                 append(rest, rest_size);
             }
             return current;
@@ -683,7 +683,7 @@ namespace mixc::utils_private_tiny_allocator{
         void append(node * rest, uxx rest_size){
             auto rest_size_index = rest_size - 1;
 
-            if (get_page_header_by(rest).set_rest(rest, rest_size); rest_size_index < boundary){
+            if (get_page_header_by(rest)->set_rest(rest, rest_size); rest_size_index < boundary){
                 append(rest, rest_size_index, slot, free_list_array);
             }
             else {
@@ -716,10 +716,10 @@ namespace mixc::utils_private_tiny_allocator{
             }
         }
 
-        page_header & get_page_header_by(node * ptr){
+        page_header * get_page_header_by(node * ptr){
             // 因为在 ptr 块都是来自 64KB 地址对齐的页，所以可以通过屏蔽低 16bit 来得到页首地址
             auto begin = uxx(ptr) & mask_to_get_header;
-            return *((page_header *)begin);
+            return (page_header *)begin;
         }
     };
 }

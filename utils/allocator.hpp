@@ -10,6 +10,7 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_allocator{
+    extern void  tiny_process_message();
     extern voidp tiny_alloc(uxx bytes);
     extern void  tiny_free(voidp ptr, uxx bytes);
 }
@@ -26,8 +27,8 @@ namespace mixc::utils_allocator::origin{
         uxx size;
     };
 
-    extern voidp malloc(size_t bytes);
-    extern voidp malloc_aligned(size_t bytes, size_t align_bytes);
+    extern voidp malloc(uxx bytes);
+    extern voidp malloc_aligned(uxx bytes, uxx align_bytes);
     extern void  mfree(voidp ptr);
     extern void  mfree_aligned(voidp ptr);
 
@@ -87,8 +88,12 @@ namespace mixc::utils_allocator::origin{
         free(ptr, memory_size{bytes});
     };
 
+    inline void process_message(){
+        tiny_process_message();
+    }
+
     extern uxx used_bytes();
-    extern uxx need_free_count();
+    extern uxx alive_object();
     extern uxx alive_pages();
 }
 
