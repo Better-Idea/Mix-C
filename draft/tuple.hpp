@@ -50,10 +50,10 @@ namespace mixc::draft_tuple{
         }
         else{
             struct{
-                bool                        find = false;
-                uxx                         i    = i_v;
-                inc::tnull                * value= nullptr;
-                typename partial::new_list  rest = {};
+                bool                        find    = false;
+                inc::tnull                * value   = nullptr;
+                uxx                         i       = i_v;
+                tlist                       rest    = {};
             } result;
             return result;
         }
@@ -96,7 +96,6 @@ namespace mixc::draft_tuple{
             iv_t    destroy[length]     = {nullptr};
             uxx     offset[length + 1]  = {0};
             uxx     total_bytes         = {0};
-            uxx     length              = sizeof...(args_t);
         } m;
 
         uxx    lut_alignof[]    = { alignof(args_t)..., 0 };
@@ -135,7 +134,7 @@ namespace mixc::draft_tuple::origin{
             constexpr auto meta = configure<args_t...>();
             voidp arg_list[]    = { & items... };
 
-            for(uxx i = 0; i < meta.length; i++){
+            for(uxx i = 0; i < this->length(); i++){
                 uxx offset      = meta.offset[i];
                 meta.initx[i](mem + offset, arg_list[i]);
             }
@@ -148,7 +147,7 @@ namespace mixc::draft_tuple::origin{
         tuple(){
             constexpr auto meta = configure<args_t...>();
 
-            for(uxx i = 0; i < meta.length; i++){
+            for(uxx i = 0; i < this->length(); i++){
                 uxx offset      = meta.offset[i];
                 meta.init[i](mem + offset);
             }
