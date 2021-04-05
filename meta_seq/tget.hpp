@@ -29,7 +29,7 @@ namespace mixc::meta_seq_tget{
     template<class tlist_t, ixx index_v>
     using tget = inc::remove_ptr<
         decltype(invoke<
-            (index_v > 0) ? index_v : tlist_t::length + uxx(index_v)
+            (index_v >= 0) ? index_v : tlist_t::length + uxx(index_v)
         >(tlist_t{}))
     >;
 }
