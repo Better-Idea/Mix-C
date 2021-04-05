@@ -55,7 +55,7 @@ namespace mixc::concurrency_thread{
             l_lambda.handler(voidp(pthread_self()));
         #endif
 
-        // windows 分离线程需要自己释放线程句柄，但是未用到信号量
+        // windows 分离线程需要自己释放线程句柄
         // 释放 lambda
         if (lambda.invoke(); lambda.is_detached()){
             #if xis_windows
@@ -135,6 +135,8 @@ namespace mixc::concurrency_thread::origin{
                 CloseHandle(lambda.semaphore_for_suspend());
                 return;
             }
+            // 由于在线程内部调用 GetCurrentThread 得到的并不是真实句柄
+            // 所以等待 lambda.handler 设置完成后再唤醒子线程
             else{
                 ResumeThread(lambda.handler());
             }

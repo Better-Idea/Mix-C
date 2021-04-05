@@ -1,4 +1,3 @@
-
 #ifndef xpack_meta_seq_tdeque
 #define xpack_meta_seq_tdeque
 #pragma push_macro("xuser")
