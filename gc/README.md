@@ -44,7 +44,7 @@
 - 引用计数器 + 图论
 
 ### 内存分配器
-为了提高内存分配回收的吞吐量，我们为每一个线程单独配置了无锁内存分配器（da）。当独立分配器可用内存耗尽时则从底层带锁内存分配器获取大块内存，独立分配器的实现在这里 -> https://github.com/Better-Idea/Mix-C/blob/master/memory/private/tiny_allocator.hpp
+为了提高内存分配回收的吞吐量，我们为每一个线程单独配置了无锁内存分配器（da）。当独立分配器可用内存耗尽时则从底层带锁内存分配器获取大块内存，独立分配器的实现在这里 -> https://github.com/Better-Idea/Mix-C/blob/master/utils/private/tiny_allocator.hpp
 - 分配：由前台线程完成
 - 释放：委托给后台 GC 线程  
 
