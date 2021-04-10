@@ -743,7 +743,7 @@ namespace mixc::extern_isa_cpu::origin{
             if (address.area){
                 pc.position        |= over_area;
                 wrmem(& pc.area, cs.address, 2/*bytes*/);
-                pc.offset           = address.offset;
+                pc.area             = address.area;
                 cs.address         += 2;
             }
 
