@@ -335,12 +335,15 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void run(){
-            for(;; pc.address += sizeof(ins)){
+            while(true){
                 // 取指令
                 rdmem(& ins, pc.address, sizeof(ins));
 
                 // 执行
                 exec();
+
+                // 程序计数器指向一下条指令
+                pc.address += sizeof(ins);
             }
         }
 
@@ -542,10 +545,6 @@ namespace mixc::extern_isa_cpu::origin{
                     return regs[index + 2];
                 }
             }
-
-            reg_t & rt(){
-                return regs[ins_t::opt];
-            }
         private:
             cpu_t * operator->(){
                 auto offset_ptr = & cpu_t::regs;
@@ -553,7 +552,7 @@ namespace mixc::extern_isa_cpu::origin{
                 return (cpu_t *)((u08p)this - offset);
             }
 
-            reg_t   regs[general_purpose_register_count + 2];
+            reg_t   regs[general_purpose_register_count + 2/*f32.rt + f64.rt*/];
         };
 
         u08p    ram;                                    // 内存起始地址
@@ -654,10 +653,7 @@ namespace mixc::extern_isa_cpu::origin{
             auto ins = inc::cast<cifxx_t>(the.ins);
             cmp(c4_t::c4ab, ins.bank << 2 | ins.opa, ins.bank << 2 | ins.opb);
 
-            // 跳转偏移
-            rim.load(ins.im4, 4/*bits*/);
-
-            switch(cmd_t(ins.mode | cifeq)){
+            switch(rim.load(ins.im4, 4/*bits*/); cmd_t(ins.mode | cifeq)){
             case cifeq: ifxx(    sta.eq);               break;
             case cifne: ifxx(not sta.eq);               break;
             case cifle: ifxx(    sta.eq or not sta.gt); break;
@@ -857,13 +853,15 @@ namespace mixc::extern_isa_cpu::origin{
 
         void rdmem(voidp mem, u64 address, uxx bytes){
             // 平坦模式
+            // TODO：以后考虑大端模式========================
             for(auto ptr = u08p(mem); bytes-- > 0;){
-                ptr[bytes]         |= ram[address + bytes];
+                ptr[bytes]          = ram[address + bytes];
             }
         }
 
         void wrmem(voidp mem, u64 address, uxx bytes){
             // 平坦模式
+            // TODO：以后考虑大端模式========================
             for(uxx i = 0; i < bytes; i++){
                 ram[i + address]    = u08p(mem)[i];
             }
@@ -1093,23 +1091,23 @@ namespace mixc::extern_isa_cpu::origin{
 
         void asm_mul(){
             f8([&](auto & a, auto b, auto c){
-                using ut = decltype(b);
+                using u_t = decltype(b);
 
-                if constexpr (inc::is_float<ut>){
+                if constexpr (inc::is_float<u_t>){
                     a = b * c;
                 }
                 else{
                     u128 m; 
 
                     // 符号位不相等结果为负数，需要符号位扩展
-                    if (inc::is_signed<ut> and (u64(b ^ c) >> 63)){
+                    if (inc::is_signed<u_t> and (u64(b ^ c) >> 63)){
                         m       = inc::mul(u64(b), u64(c)); 
                         m.high |= u64(-1) << inc::index_of_last_set(m.high);
                         sta.cf  = 0;
                         sta.of  = ~m.high != 0;
                     }
                     else {
-                        if (inc::is_signed<ut> and b < 0){
+                        if (inc::is_signed<u_t> and b < 0){
                             m   = inc::mul(u64(-b), u64(-c));
                         }
                         else{
@@ -1130,13 +1128,13 @@ namespace mixc::extern_isa_cpu::origin{
 
         void asm_div(){
             f8([&](auto & a, auto b, auto c){
-                using ut = decltype(b);
+                using u_t = decltype(b);
                 if (c == 0){
                     if (b > 0){
-                        a           = inc::max_value_of<ut>;
+                        a           = inc::max_value_of<u_t>;
                     }
                     else if (b < 0){
-                        a           = inc::min_value_of<ut>;
+                        a           = inc::min_value_of<u_t>;
                     }
                     else{
                         a           = 1;
@@ -1150,7 +1148,7 @@ namespace mixc::extern_isa_cpu::origin{
 
                 a                   = b / c;
 
-                if constexpr (inc::is_integer<ut>){
+                if constexpr (inc::is_integer<u_t>){
                     if (sta.pmod != no_predetermined){
                         regs[sta.pmod]
                                     = b % c;
