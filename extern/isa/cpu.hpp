@@ -1,3 +1,5 @@
+/* 本模块主要用于模拟 Mix-C ISA cpu 行为，有些逻辑为了方便使用了低效的实现
+ */
 #ifndef xpack_extern_isa_cpu
 #define xpack_extern_isa_cpu
 #pragma push_macro("xuser")
@@ -236,7 +238,6 @@ namespace mixc::extern_isa_cpu::origin{
     enum : uxx{
         general_purpose_register_count  = 0x10,
         no_predetermined                = 0x10,
-        over_area                       = 0x1,  // 跨区域跳转
     };
 
     struct cifxx_t{
@@ -437,34 +438,48 @@ namespace mixc::extern_isa_cpu::origin{
             enum{ opt = 15 };           // 临时寄存器的编号
         };
 
-        typedef struct reg_type_group{
+        template<class bits_t, class field_t, uxx bits_v>
+        struct bits_group{
+        private:
+            bits_t bits;
+
+            enum{
+                mask = (1 << bits_v) - 1
+            };
+
             struct bits_delegate{
-                bits_delegate(u32p bits, uxx offset) : 
+                bits_delegate(bits_t * bits, uxx offset) : 
                     bits(bits), offset(offset){
                 }
 
-                operator register_state_t(){
-                    return register_state_t(
-                        (*bits >> offset) & 0x3
+                operator field_t(){
+                    return field_t(
+                        (*bits >> offset) & mask
                     );
                 }
 
-                register_state_t operator=(register_state_t value){
-                    *bits &= ~(0x3   << offset);
+                field_t operator=(field_t value){
+                    *bits &= ~(mask  << offset);
                     *bits |=  (value << offset);
                     return value;
                 }
             private:
-                u32p bits;
-                uxx  offset;
+                bits_t *    bits;
+                uxx         offset;
             };
 
+        public:
+            bits_group(bits_t value) : bits(value){}
+
             bits_delegate operator [](uxx index){
-                return bits_delegate(xref type_group, index * 2);
+                return bits_delegate(xref bits, index * bits_v);
             }
-        private:
-            u32 type_group;
-        } rtg_t;
+        };
+
+        using reg_type_group    = bits_group<u32, register_state_t, 2/*bit per item*/>;
+        using reg_index_group   = bits_group<u64, uxx, 4/*bit per item*/>;
+        using rtg_t             = reg_type_group;
+        using rig_t             = reg_index_group;
 
         struct sta_t{
             // 寄存器类型 2bit * 16
@@ -472,50 +487,70 @@ namespace mixc::extern_isa_cpu::origin{
             // - 01 f64
             // - 10 u64
             // - 11 i64
-            rtg_t   reg_type;
+            // 和 opcode 保持一致
+            rtg_t   reg_type { 0x22222222 };
 
             // 大于
-            u16     gt                  : 1;
+            u16     gt          : 1 = 0;
 
             // 等于
-            u16     eq                  : 1;
+            u16     eq          : 1 = 0;
 
             // 零标志
-            u16     zf                  : 1;
+            u16     zf          : 1 = 0;
 
             // 上溢/进位/借位
-            u16     cf                  : 1;
+            u16     cf          : 1 = 0;
 
             // 下溢
-            u16     of                  : 1;
+            u16     of          : 1 = 0;
 
             // 保留
-            u16                         : 11;
+            u16                 : 11;
 
             // 保留
-            u16                         : 1;
+            u16                 : 1;
 
             // 预设(predetermined)
             // 指定余数存放的寄存器
             // 在指定寄存器获取到余数后该位域被复位为 no_predetermined
-            u16     pmod                : 5 = no_predetermined;
+            u16     pmod        : 5 = no_predetermined;
 
             // 指定乘法高位积存放的寄存器
             // 在指定寄存器获取到高位积后该位域被复位为 no_predetermined
-            u16     pmulh               : 5 = no_predetermined;
+            u16     pmulh       : 5 = no_predetermined;
 
             // 指定移位溢出位存放的寄存器
             // 在指定寄存器获取到溢出位后该位域被复位为 no_predetermined
-            u16     psfto               : 5 = no_predetermined;
+            u16     psfto       : 5 = no_predetermined;
+
+            // 当前函数需要保存的通用寄存器上下文(惰性)
+            u16     psave       = 0;
         };
 
         // 段偏式
         union seg_t{
+            // 仅用于代码段
+            // position 的低 4 位的特殊用途
+            // 要求每一个函数的首地址按 16 字节对齐
+            struct{
+                u16 over_area   : 1;
+                u16             : 1;
+                u16 has_psave   : 1;
+                u16             : 1;
+            };
+
+            enum : u64{
+                mask_code_segment = u64(~0xf),
+            };
+
+            // 仅用于代码段
             struct{
                 u16 position;
                 u16 area;
             };
 
+            // 用于代码段和数据段
             struct{
                 u32 offset;
                 u32 segment;
@@ -555,14 +590,16 @@ namespace mixc::extern_isa_cpu::origin{
             reg_t   regs[general_purpose_register_count + 2/*f32.rt + f64.rt*/];
         };
 
-        u08p    ram;                                    // 内存起始地址
-        imm_t   rim;                                    // 立即数寄存器
-        ins_t   ins;                                    // 指令寄存器
-        regs_t  regs;                                   // 通用寄存器组
-        sta_t   sta;                                    // 状态寄存器
-        seg_t   pc;                                     // 程序计数器
-        seg_t   cs;                                     // 调用栈寄存器
-        seg_t   ss;                                     // 堆栈寄存器
+        u08p    ram{};                                  // 内存起始地址
+        imm_t   rim{};                                  // 立即数寄存器
+        ins_t   ins{};                                  // 指令寄存器
+        regs_t  regs{};                                 // 通用寄存器组
+        regs_t  regss{};                                // 通用寄存器组(影子)
+        sta_t   sta{};                                  // 状态寄存器
+        seg_t   pc{};                                   // 程序计数器
+        seg_t   cs{};                                   // 调用栈寄存器
+        seg_t   ss{};                                   // 堆栈寄存器
+        u16     psave{};                                // 预定跳转时保存的通用寄存器(惰性)
         rtg_t & mode    = sta.reg_type;                 // 寄存器类型
         voidp   cmd[256];                               // 指令集清单
 
@@ -574,7 +611,7 @@ namespace mixc::extern_isa_cpu::origin{
             } u;
 
             u.mem = cmd[ins.opc];
-
+ 
             #if xis_msvc_native
             return (this->*u.msvc_call)();
             #else
@@ -699,8 +736,8 @@ namespace mixc::extern_isa_cpu::origin{
             cs.address             -= 2;
             rdmem(& pc.position, cs.address, 2/*bytes*/);
 
-            if (pc.position & over_area){
-                pc.position        &= ~over_area;
+            if (pc.over_area){
+                pc.over_area        = 0;
                 cs.address         -= 2;
                 rdmem(& pc.area, cs.address, 2/*bytes*/);
             }
@@ -723,7 +760,7 @@ namespace mixc::extern_isa_cpu::origin{
             auto target             = the.ins.opc == jali ? 
                 rim.load(ins.im4_opa, 4/*bit*/).read_with_clear<u64>() :
                 regs[ins.im4_opa].ru64;
-            auto address            = seg_t(target & ~over_area);
+            auto address            = seg_t(target & seg_t::mask_code_segment);
 
             // 跨程序段跳转
             if (address.segment){
@@ -741,8 +778,8 @@ namespace mixc::extern_isa_cpu::origin{
             // 段内跨区域跳转
             // 让 position 排后边，作为第一个读到的 u16，在根据 over_area 位判断是否存在 area
             if (address.area){
-                pc.position        |= over_area;
                 wrmem(& pc.area, cs.address, 2/*bytes*/);
+                pc.over_area        = true;
                 pc.area             = address.area;
                 cs.address         += 2;
             }
@@ -870,17 +907,18 @@ namespace mixc::extern_isa_cpu::origin{
         void asm_ldxx(){
             auto i                  = inc::cast<ldx_t>(ins);
             auto has_sign           = false;
-            auto bytes              = ins.opc <= cmd_t::ldqx ? 
-                1 << i.scale/*m08/m16/m32/m64*/ : 
-                4 << i.scale/*mf32/mf64*/;
+            auto is_float           = ins.opc >= cmd_t::lds;
+            auto bytes              = is_float ? 
+                4 << i.scale/*mf32/mf64*/ :
+                1 << i.scale/*m08/m16/m32/m64*/;
             auto address            = i.with_rt ? 
                 regs[ins.opb].ru64 + regs[ins.opt].ru64 : 
                 regs[ins.opb].ru64;
 
             // 先设置类型
             // 浮点类型
-            if (ins.opc >= cmd_t::lds){
-                mode[ins.opa]       = ins.opc & 1 ? res_t::is_f64 : res_t::is_f32;
+            if (is_float){
+                mode[ins.opa]       = ins.opc & res_t::is_f64 ? res_t::is_f64 : res_t::is_f32;
             }
             // 整数类型
             else{
