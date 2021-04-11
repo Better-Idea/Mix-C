@@ -43,8 +43,8 @@ namespace mixc::extern_isa_cpu::origin{
         ifnz            ,
         ifcf            ,
         ifnc            ,
-        ifof            ,
-        ifno            ,
+        ifuf            ,
+        ifnu            ,
         jmp             ,
         ret             ,
         jali            ,
@@ -251,15 +251,9 @@ namespace mixc::extern_isa_cpu::origin{
 
     struct jalx_t{
         u08             : 8;
-        u08   opt       : 4;
+        u08   opt       : 3;
+        u08   save_flag : 1;
         u08   im4_opa   : 4;
-    };
-
-    enum opt_t : uxx{ 
-        save_lreg_type  = 0x1,  // 保存类型寄存器低 8 组
-        save_hreg_type  = 0x2,  // 保存类型寄存器高 8 组
-        save_op_state   = 0x4,  // 保存运算状态寄存器
-        save_pstate     = 0x8,  // 保存预设寄存器
     };
 
     struct bdc_t{
@@ -482,6 +476,68 @@ namespace mixc::extern_isa_cpu::origin{
         using rig_t             = reg_index_group;
 
         struct sta_t{
+            union{
+                u16 flag        = 0;
+                struct{
+                    // 大于
+                    u16     gt  : 1;
+
+                    // 等于
+                    u16     eq  : 1;
+
+                    // 零标志
+                    u16     zf  : 1;
+
+                    // 上溢/进位/借位
+                    u16     cf  : 1;
+
+                    // 下溢 underflow
+                    u16     uf  : 1;
+
+                    // 保留
+                    u16         : 11;
+                };
+            };
+        private:
+            // 保留
+            u16     r0          = 0;
+        public:
+            union{
+                u16 predetermined = 
+                    no_predetermined << 10 | 
+                    no_predetermined << 5  | 
+                    no_predetermined << 0;
+
+                struct{
+                    // 预设(predetermined)
+                    // 指定余数存放的寄存器
+                    // 在指定寄存器获取到余数后该位域被复位为 no_predetermined
+                    u16     pmod        : 5;
+
+                    // 指定乘法高位积存放的寄存器
+                    // 在指定寄存器获取到高位积后该位域被复位为 no_predetermined
+                    u16     pmulh       : 5;
+
+                    // 指定移位溢出位存放的寄存器
+                    // 在指定寄存器获取到溢出位后该位域被复位为 no_predetermined
+                    u16     psfto       : 5;
+
+                    // 保留
+                    u16                 : 1;
+                };
+            };
+
+            // 当前函数需要保存的通用寄存器上下文(惰性)
+            // predetermined save
+            u16     ps          = 0;
+
+            // predetermined pending save
+            // 进行子过程调用时将该值刷新到 ps 中
+            u16     pps         = 0;
+
+            // predetermined save mask
+            // 每一位分别指示对应的通用寄存器在下一次修改前需要保存
+            u16     psm         = 0;
             // 寄存器类型 2bit * 16
             // - 00 f32
             // - 01 f64
@@ -489,59 +545,17 @@ namespace mixc::extern_isa_cpu::origin{
             // - 11 i64
             // 和 opcode 保持一致
             rtg_t   reg_type { 0x22222222 };
-
-            // 大于
-            u16     gt          : 1 = 0;
-
-            // 等于
-            u16     eq          : 1 = 0;
-
-            // 零标志
-            u16     zf          : 1 = 0;
-
-            // 上溢/进位/借位
-            u16     cf          : 1 = 0;
-
-            // 下溢
-            u16     of          : 1 = 0;
-
-            // 保留
-            u16                 : 11;
-
-            // 保留
-            u16                 : 1;
-
-            // 预设(predetermined)
-            // 指定余数存放的寄存器
-            // 在指定寄存器获取到余数后该位域被复位为 no_predetermined
-            u16     pmod        : 5 = no_predetermined;
-
-            // 指定乘法高位积存放的寄存器
-            // 在指定寄存器获取到高位积后该位域被复位为 no_predetermined
-            u16     pmulh       : 5 = no_predetermined;
-
-            // 指定移位溢出位存放的寄存器
-            // 在指定寄存器获取到溢出位后该位域被复位为 no_predetermined
-            u16     psfto       : 5 = no_predetermined;
-
-            // 当前函数需要保存的通用寄存器上下文(惰性)
-            u16     psave       = 0;
         };
 
         // 段偏式
         union seg_t{
             // 仅用于代码段
-            // position 的低 4 位的特殊用途
-            // 要求每一个函数的首地址按 16 字节对齐
             struct{
                 u16 over_area   : 1;
-                u16             : 1;
-                u16 has_psave   : 1;
-                u16             : 1;
             };
 
             enum : u64{
-                mask_code_segment = u64(~0xf),
+                mask_code_segment = u64(~0x1),
             };
 
             // 仅用于代码段
@@ -568,17 +582,7 @@ namespace mixc::extern_isa_cpu::origin{
             using the_t = regs_t;
 
             reg_t & operator[](uxx index){
-                if (index != ins_t::opt or 
-                    the->mode[index] == is_u64 or 
-                    the->mode[index] == is_i64){
-                    return regs[index];
-                }
-                if (the->mode[ins_t::opt] == is_f32){
-                    return regs[index + 1];
-                }
-                else{
-                    return regs[index + 2];
-                }
+                return regs[index];
             }
         private:
             cpu_t * operator->(){
@@ -587,21 +591,24 @@ namespace mixc::extern_isa_cpu::origin{
                 return (cpu_t *)((u08p)this - offset);
             }
 
-            reg_t   regs[general_purpose_register_count + 2/*f32.rt + f64.rt*/];
+            reg_t   regs[general_purpose_register_count];
         };
 
         u08p    ram{};                                  // 内存起始地址
         imm_t   rim{};                                  // 立即数寄存器
         ins_t   ins{};                                  // 指令寄存器
         regs_t  regs{};                                 // 通用寄存器组
-        regs_t  regss{};                                // 通用寄存器组(影子)
         sta_t   sta{};                                  // 状态寄存器
         seg_t   pc{};                                   // 程序计数器
         seg_t   cs{};                                   // 调用栈寄存器
         seg_t   ss{};                                   // 堆栈寄存器
-        u16     psave{};                                // 预定跳转时保存的通用寄存器(惰性)
         rtg_t & mode    = sta.reg_type;                 // 寄存器类型
         voidp   cmd[256];                               // 指令集清单
+
+        // 注意：需要放在修改寄存器类型、值之前
+        void before_modify_register(uxx i_reg){
+
+        }
 
         void exec(){
             union {
@@ -722,8 +729,8 @@ namespace mixc::extern_isa_cpu::origin{
             case cmd_t::ifnz: ifxx(not sta.zf);               break;
             case cmd_t::ifcf: ifxx(    sta.cf);               break;
             case cmd_t::ifnc: ifxx(not sta.cf);               break;
-            case cmd_t::ifof: ifxx(    sta.of);               break;
-            case cmd_t::ifno: ifxx(not sta.of);               break;
+            case cmd_t::ifuf: ifxx(    sta.uf);               break;
+            case cmd_t::ifnu: ifxx(not sta.uf);               break;
             // case cmd_t::jmp : 
             default:          ifxx(false/*force*/);           break;
             }
@@ -805,7 +812,7 @@ namespace mixc::extern_isa_cpu::origin{
             #define b   regs[ins.opb]
             #define t   regs[ins.opt]
 
-            switch(cmd_t(ins.opc)){
+            switch(before_modify_register(ins.opa); cmd_t(ins.opc)){
             case cmd_t::movqb : mode[ins.opa] = res_t::is_u64; a.ru64 = b.ru08; break;
             case cmd_t::movqbx: mode[ins.opa] = res_t::is_i64; a.ri64 = b.ri08; break;
             case cmd_t::movqw : mode[ins.opa] = res_t::is_u64; a.ru64 = b.ru16; break;
@@ -863,15 +870,16 @@ namespace mixc::extern_isa_cpu::origin{
                         continue;
                     }
 
-                    // 先设置模式，当设置的是临时寄存器的情况，内部会根据当前寄存器的类型进行选择
-                    this->mode[i.bank << 2 | idx] = mode;
-                    this->regs[i.bank << 2 | idx] = value;
+                    auto j = i.bank << 2 | idx;
+                    this->before_modify_register(j);
+                    this->mode[j] = mode;
+                    this->regs[j] = value;
 
                     if (mode != res_t::is_f32){
                         continue;
                     }
 
-                    this->regs[i.bank << 2 | idx].rh32 = 0;
+                    this->regs[j].rh32 = 0;
                 }
             };
 
@@ -915,6 +923,8 @@ namespace mixc::extern_isa_cpu::origin{
                 regs[ins.opb].ru64 + regs[ins.opt].ru64 : 
                 regs[ins.opb].ru64;
 
+            before_modify_register(ins.opa);
+
             // 先设置类型
             // 浮点类型
             if (is_float){
@@ -951,6 +961,7 @@ namespace mixc::extern_isa_cpu::origin{
             auto addr          = ss.address + imm * sizeof(reg_t);
 
             // 先设置寄存器类型
+            before_modify_register(ins.opa);
             mode[ins.opa]      = res_t(ins.type);
             rdmem(& regs[ins.opa], addr, sizeof(reg_t));
 
@@ -975,10 +986,26 @@ namespace mixc::extern_isa_cpu::origin{
             #define t   regs[ins.opt]
 
             switch(f4_t(ins.opc & 0x3)){
-            case f4_t::f4aab: mode[ins.opa] = mode[ins.opa]; invoke(a, a, b); break;
-            case f4_t::f4abt: mode[ins.opa] = mode[ins.opb]; invoke(a, b, t); break;
-            case f4_t::f4tab: mode[ins.opt] = mode[ins.opa]; invoke(t, a, b); break;
-            case f4_t::f4tai: mode[ins.opt] = mode[ins.opa]; invoke(t, a, rim.load(ins.opb, 4/*bits*/).read_with_clear<i64>()); break;
+            case f4_t::f4aab: 
+                before_modify_register(ins.opa);
+                mode[ins.opa] = mode[ins.opa];
+                invoke(a, a, b);
+                break;
+            case f4_t::f4abt: 
+                before_modify_register(ins.opa);
+                mode[ins.opa] = mode[ins.opb];
+                invoke(a, b, t);
+                break;
+            case f4_t::f4tab:
+                before_modify_register(ins.opt);
+                mode[ins.opt] = mode[ins.opa];
+                invoke(t, a, b);
+                break;
+            case f4_t::f4tai:
+                before_modify_register(ins.opt);
+                mode[ins.opt] = mode[ins.opa];
+                invoke(t, a, rim.load(ins.im4, 4/*bits*/).read_with_clear<i64>());
+                break;
             }
 
             #undef a
@@ -1048,15 +1075,47 @@ namespace mixc::extern_isa_cpu::origin{
             #define t       regs[ins.opt]
 
             switch(m){
-            case f8abt: mode[ins.opa] = role_type; sub_f8(role_type, a, b, t, invoke); break;
-            case f8atb: mode[ins.opa] = role_type; sub_f8(role_type, a, t, b, invoke); break;
-            case f8aab: mode[ins.opa] = role_type; sub_f8(role_type, a, a, b, invoke); break;
-            case f8tab: mode[ins.opt] = role_type; sub_f8(role_type, t, a, b, invoke); break;
-            case f8aai: mode[ins.opa] = role_type; sub_f8(role_type, a, a, i, invoke); break;
-            case f8aia: mode[ins.opa] = role_type; sub_f8(role_type, a, i, a, invoke); break;
-            case f8tai: mode[ins.opt] = role_type; sub_f8(role_type, t, a, i, invoke); break;
+            case f8abt:
+                before_modify_register(ins.opa);
+                mode[ins.opa] = role_type;
+                sub_f8(role_type, a, b, t, invoke);
+                break;
+            case f8atb:
+                before_modify_register(ins.opa);
+                mode[ins.opa] = role_type;
+                sub_f8(role_type, a, t, b, invoke);
+                break;
+            case f8aab:
+                before_modify_register(ins.opa);
+                mode[ins.opa] = role_type;
+                sub_f8(role_type, a, a, b, invoke);
+                break;
+            case f8tab:
+                before_modify_register(ins.opt);
+                mode[ins.opt] = role_type;
+                sub_f8(role_type, t, a, b, invoke);
+                break;
+            case f8aai:
+                before_modify_register(ins.opa);
+                mode[ins.opa] = role_type;
+                sub_f8(role_type, a, a, i, invoke);
+                break;
+            case f8aia:
+                before_modify_register(ins.opa);
+                mode[ins.opa] = role_type;
+                sub_f8(role_type, a, i, a, invoke);
+                break;
+            case f8tai:
+                before_modify_register(ins.opt);
+                mode[ins.opt] = role_type;
+                sub_f8(role_type, t, a, i, invoke);
+                break;
             // case f8tia: 
-            default:    mode[ins.opt] = role_type; sub_f8(role_type, t, i, a, invoke); break;
+            default:
+                before_modify_register(ins.opt);
+                mode[ins.opt] = role_type;
+                sub_f8(role_type, t, i, a, invoke);
+                break;
             }
 
             #undef  a
@@ -1091,14 +1150,14 @@ namespace mixc::extern_isa_cpu::origin{
                 auto x2 = u64(a) >> 63;
 
                 // 下溢：同时为负数时，结果符号位变化
-                sta.of  = (x0 != 0 and x2 == 0);
+                sta.uf  = (x0 != 0 and x2 == 0);
 
                 // 上溢：同时为正数，结果符号位变化
                 sta.cf  = (x1 == 0 and x2 == 1);
             }
             else{
                 sta.cf  = (m.high);
-                sta.of  = (0);
+                sta.uf  = (0);
             }
         }
 
@@ -1142,7 +1201,7 @@ namespace mixc::extern_isa_cpu::origin{
                         m       = inc::mul(u64(b), u64(c)); 
                         m.high |= u64(-1) << inc::index_of_last_set(m.high);
                         sta.cf  = 0;
-                        sta.of  = ~m.high != 0;
+                        sta.uf  = ~m.high != 0;
                     }
                     else {
                         if (inc::is_signed<u_t> and b < 0){
@@ -1153,7 +1212,7 @@ namespace mixc::extern_isa_cpu::origin{
                         }
 
                         sta.cf  = m.high != 0;
-                        sta.of  = 0;
+                        sta.uf  = 0;
                     }
 
                     if (a = m.low; sta.pmulh != no_predetermined){
@@ -1179,7 +1238,7 @@ namespace mixc::extern_isa_cpu::origin{
                     }
 
                     sta.cf          = b > 0;
-                    sta.of          = b < 0;
+                    sta.uf          = b < 0;
                     sta.pmod        = no_predetermined;
                     return;
                 }
