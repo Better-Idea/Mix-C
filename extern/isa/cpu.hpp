@@ -518,6 +518,8 @@ namespace mixc::extern_isa_cpu::origin{
         }
     };
 
+    struct cpu_t;
+
     inline voidp cast(void(cpu_t::* func)()){
         union {
             voidp          mem;
@@ -554,7 +556,7 @@ namespace mixc::extern_isa_cpu::origin{
 
             #define xgen(start,end,func)                                    \
                 for(uxx i = uxx(cmd_t::start); i < uxx(cmd_t::end); i++)    \
-                    cmd[i] = the.cast(& cpu_t::func);
+                    cmd[i] = cast(& cpu_t::func);
 
             xgen(cifeq, ciflt +1, asm_cif)
             xgen(ifeq , jmp   +1, asm_if)
