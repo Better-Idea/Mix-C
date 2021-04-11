@@ -251,8 +251,8 @@ namespace mixc::extern_isa_cpu::origin{
 
     struct jalx_t{
         u08             : 8;
-        u08   opt       : 3;
-        u08   save_flag : 1;
+        u08             : 3;
+        u08   sf        : 1; // save flag field
         u08   im4_opa   : 4;
     };
 
@@ -910,13 +910,13 @@ namespace mixc::extern_isa_cpu::origin{
             // 跨程序段跳转
             // TODO====================================================================================
 
-            cs.address             -= 2;
-            rdmem(& pc.position, cs.address, 2/*bytes*/);
+            cs.address             -= sizeof(pc.position);
+            rdmem(& pc.position, cs.address, sizeof(pc.position));
 
             if (pc.over_area){
                 pc.over_area        = 0;
-                cs.address         -= 2;
-                rdmem(& pc.area, cs.address, 2/*bytes*/);
+                cs.address         -= sizeof(pc.position);
+                rdmem(& pc.area, cs.address, sizeof(pc.position));
             }
 
             // 读取 jal 指令信息
@@ -924,11 +924,9 @@ namespace mixc::extern_isa_cpu::origin{
             rdmem(& ins, pc.address, sizeof(ins_t));
 
             // 恢复调用时保存的信息
-            for(uxx i = 4; i-- > 0;){
-                if (u16 & v = u16p(& sta)[i]; ins.opt & (1 << i)){
-                    cs.address     -= 2;
-                    wrmem(& v, cs.address, 2/*bytes*/);
-                }
+            if (ins.sf){
+                cs.address         -= sizeof(sta.flag);
+                wrmem(& sta.flag, cs.address, sizeof(sta.flag));
             }
         }
 
@@ -945,25 +943,23 @@ namespace mixc::extern_isa_cpu::origin{
             }
 
             // 按需保存状态寄存器
-            for(uxx i = 0; i < 4; i++){
-                if (u16 v = u16p(& sta)[i]; ins.opt & (1 << i)){
-                    wrmem(& v, cs.address, 2/*bytes*/);
-                    cs.address     += 2;
-                }
+            if (ins.sf){
+                wrmem(& sta.flag, cs.address, sizeof(sta.flag));
+                cs.address     += sizeof(sta.flag);
             }
 
             // 段内跨区域跳转
             // 让 position 排后边，作为第一个读到的 u16，在根据 over_area 位判断是否存在 area
             if (address.area){
-                wrmem(& pc.area, cs.address, 2/*bytes*/);
+                wrmem(& pc.area, cs.address, sizeof(pc.area));
                 pc.over_area        = true;
                 pc.area             = address.area;
-                cs.address         += 2;
+                cs.address         += sizeof(pc.area);
             }
 
-            wrmem(& pc.position, cs.address, 2/*bytes*/);
+            wrmem(& pc.position, cs.address, sizeof(pc.position));
             pc.position             = address.position;
-            cs.address             += 2;
+            cs.address             += sizeof(pc.position);
 
             // 当执行 jalx 指令后，此时 pc 会指向子函数第一条指令
             // 接着在 the.run() 函数中完成一轮循环，需要将 pc += sizeof(ins_t)
