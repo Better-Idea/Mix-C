@@ -661,6 +661,8 @@ namespace mixc::extern_isa_cpu::origin{
 
                 // 获取组号
                 mask_group      = group_count - 1,
+
+                to_first        = 2,
             };
 
             // 需要二进制对齐
@@ -690,7 +692,7 @@ namespace mixc::extern_isa_cpu::origin{
 
             auto & ctx              = (this->ctx[i_reg]); 
             auto   i                = (ctx.counter & ctx_t::count_per_group) != 0;
-            auto   ix               = (i - 1) & ctx.mask_group; // 最早的组
+            auto   ix               = (i + ctx.to_first/*回绕到最早的一组*/) & ctx.mask_group;
             auto   offset           = (ctx.counter & ctx_t::mask);
             auto & data             = (ctx.group[i].data);
             auto & type             = (ctx.group[i].type);
