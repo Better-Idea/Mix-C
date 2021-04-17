@@ -9,7 +9,7 @@
 #include"macro/xdefer.hpp"
 #include"math/const.hpp"
 #include"memop/cast.hpp"
-#include"memop/signature.hpp"
+#include"memop/copy.hpp"
 #include"memop/swap.hpp"
 #include"meta/is_float.hpp"
 #include"meta/is_integer.hpp"
@@ -115,6 +115,7 @@ namespace mixc::extern_isa_cpu::origin{
         ldqx            = ldq    + 2,
 
         // 读取栈内存
+        // 栈按 8 字节对齐存取
         ldkq            = ldqx   + 2,
         ldkqx           = ldkq   + 2,
         ldks            = ldkqx  + 2,
@@ -150,13 +151,17 @@ namespace mixc::extern_isa_cpu::origin{
         sub             = add    + 8,
         mul             = sub    + 8,
         div             = mul    + 8,
+
+        // 有符号数右移和除以 2 的结果一致
+        // -1 >> 1 会变成 0， -2 >> 2 也会变成 0
+        // 这点和其他 isa 不同
         shr             = div    + 8,
         shl             = shr    + 8,
 
         // 比较
         cmp             = shl    + 8,
 
-        // 位操作
+        // 位操作类
         bop             = cmp    + 4,
 
         // 最小最大值
@@ -168,16 +173,19 @@ namespace mixc::extern_isa_cpu::origin{
         // 内部互斥锁
         lock            ,
 
-        // 调试中断
-        brk             ,
+        // 标记类
+        token           ,
 
         // 立即数加载
         imm             = 256 - 16,
     };
 
+    enum token_t{
+        // 调试中断标记
+        brk,
+    };
+
     enum rduxr_t{
-        rdst            , // 读取临时 f32 结果寄存器
-        rdft            , // 读取临时 f64 结果寄存器
         rdsta           , // 读取状态寄存器
         rdmod           , // 预定除法余数
         rdproh          , // 预定乘法高位
@@ -186,8 +194,6 @@ namespace mixc::extern_isa_cpu::origin{
     };
 
     enum wruxr_t{
-        wrst            , // 写入临时 f32 结果寄存器
-        wrft            , // 写入临时 f64 结果寄存器
         wrsta           , // 写入状态寄存器
     };
 
@@ -241,47 +247,48 @@ namespace mixc::extern_isa_cpu::origin{
     };
 
     struct cifxx_t{
-        u08 opc     : 4;
-        u08 mode    : 2;
-        u08 bank    : 2;
-        u08 opa     : 2;
-        u08 opb     : 2;
-        u08 im4     : 4;
+        u08 opc         : 4;
+        u08 mode        : 2;
+        u08 bank        : 2;
+        u08 opa         : 2;
+        u08 opb         : 2;
+        u08 im4         : 4;
     };
 
     struct jalx_t{
         u08             : 8;
-        u08             : 3;
-        u08   sf        : 1; // save flag field
-        u08   im4_opa   : 4;
+        u08             : 2;
+        u08 ps          : 1; // predetermined save
+        u08 sf          : 1; // save flag field
+        u08 im4_opa     : 4;
     };
 
     struct bdc_t{
-        u08         : 6;
-        u08   bank  : 2;
-        u08   bmp   : 4;
-        u08   opb   : 4;
+        u08             : 6;
+        u08 bank        : 2;
+        u08 bmp         : 4;
+        u08 opb         : 4;
     };
 
     struct ldx_t{
-        u08                : 4;
-        u08    scale       : 2;
-        u08    sign_extern : 1;
-        u08    with_rt     : 1;
+        u08             : 4;
+        u08 scale       : 2;
+        u08 sign_extern : 1;
+        u08 with_rt     : 1;
     };
 
     struct rwss_t{
-        u08                 : 5;
-        u08     type        : 2;
-        u08     side_effect : 1;
-        u08     opa         : 4;
-        u08     im4         : 4;
+        u08             : 5;
+        u08 type        : 2;
+        u08 side_effect : 1;
+        u08 opa         : 4;
+        u08 im4         : 4;
     };
 
     struct stxx_t{
-        u08                 : 5;
-        u08     scale       : 2;
-        u08     with_rt     : 1;
+        u08             : 5;
+        u08 scale       : 2;
+        u08 with_rt     : 1;
     };
 
     struct imm_t{
@@ -295,8 +302,7 @@ namespace mixc::extern_isa_cpu::origin{
         type read_with_clear(){
             // 返回时执行
             xdefer{
-                imm         = 0;
-                total_bits  = 0;
+                this->clear();
             };
 
             if constexpr (inc::is_float<type>){
@@ -312,11 +318,16 @@ namespace mixc::extern_isa_cpu::origin{
                     return 0;
                 }
                 if (inc::index_of_last_set(imm) == total_bits - 1 and 
-                    (inc::is_signed<type> or total_bits > 4) and total_bits <= 64){
+                   (inc::is_signed<type> or total_bits > 4) and total_bits <= 64){
                     imm |= u64(-1) << total_bits;
                 }
                 return type(imm);
             }
+        }
+
+        void clear(){
+            imm         = 0;
+            total_bits  = 0;
         }
     private:
         u64 imm         = 0;
@@ -402,7 +413,7 @@ namespace mixc::extern_isa_cpu::origin{
         };
 
     public:
-        bits_group(bits_t value) : bits(value){}
+        bits_group(bits_t value = 0) : bits(value){}
 
         bits_delegate operator [](uxx index){
             return bits_delegate(xref bits, index * bits_v);
@@ -414,9 +425,22 @@ namespace mixc::extern_isa_cpu::origin{
     using rtg_t             = reg_type_group;
     using rig_t             = reg_index_group;
 
+    typedef struct context_group_t{
+        enum{ count_per_group = 16, mask = count_per_group - 1 };
+
+        context_group_t(){}
+        context_group_t(u32 prev, rtg_t type, u64 data[count_per_group]) :
+            prev(prev), type(type){
+            inc::copy(this->data, data, count_per_group);
+        }
+
+        u32     prev;
+        rtg_t   type;                   // 每一个存放的元素是哪一种类型
+        u64     data[count_per_group];  // 每组 16 个元素
+    } ctx_t;
+
     struct sta_t{
         union{
-            u16 flag        = 0;
             struct{
                 // 大于
                 u16     gt  : 1;
@@ -436,17 +460,13 @@ namespace mixc::extern_isa_cpu::origin{
                 // 保留
                 u16         : 11;
             };
+            u16 flag        = 0;
         };
     private:
         // 保留
         u16     r0          = 0;
     public:
         union{
-            u16 predetermined = 
-                no_predetermined << 10 | 
-                no_predetermined << 5  | 
-                no_predetermined << 0;
-
             struct{
                 // 预设(predetermined)
                 // 指定余数存放的寄存器
@@ -464,27 +484,29 @@ namespace mixc::extern_isa_cpu::origin{
                 // 保留
                 u16                 : 1;
             };
+
+            u16 predetermined = 
+                no_predetermined << 10 | 
+                no_predetermined << 5  | 
+                no_predetermined << 0;
         };
 
         // 当前函数需要保存的通用寄存器上下文(惰性)
         // predetermined save
-        u16     ps          = 0;
-
-        // predetermined pending save
-        // 进行子过程调用时将该值刷新到 ps 中
-        u16     pps         = 0;
+        u16     ps  = 0;
 
         // predetermined save mask
         // 每一位分别指示对应的通用寄存器在下一次修改前需要保存
+        // 每一级调用可以叠加
         u16     psm         = 0;
 
         // 寄存器类型 2bit * 16
         // - 00 f32
         // - 01 f64
-        // - 10 u64
+        // - 10 u64（默认）
         // - 11 i64
         // 和 opcode 保持一致
-        rtg_t   reg_type { 0x22222222 };
+        rtg_t   reg_type { 0xaaaaaaaa };
     };
 
     // 段偏式
@@ -618,12 +640,121 @@ namespace mixc::extern_isa_cpu::origin{
         seg_t   pc{};                                   // 程序计数器
         seg_t   cs{};                                   // 调用栈寄存器
         seg_t   ss{};                                   // 堆栈寄存器
+        seg_t   xs{};                                   // 上下文寄存器
         rtg_t & mode    = sta.reg_type;                 // 寄存器类型
         voidp   cmd[256];                               // 指令集清单
 
+        // type 和 data 都有 2 个分区
+        // 只有存满时才会将较早存放元素的分区刷新到内存
+        struct{
+            enum { 
+                group_count     = 4, 
+
+                count_per_group = ctx_t::count_per_group,
+
+                // 存满
+                full            = group_count * ctx_t::count_per_group,
+
+                // 当只剩一组可存时可以刷新最早的组到内存，这样就可以空出一组
+                need_store      = full - ctx_t::count_per_group,
+
+                // 当只剩一组可取时可以从内存中加载一组
+                need_load       = ctx_t::count_per_group,
+
+                // 获取组号
+                mask_group      = group_count - 1,
+            };
+
+            // 需要二进制对齐
+            static_assert((group_count & (group_count - 1)) == 0);
+
+            seg_t       mem         = not_exist;
+            uxx         counter     = 0;
+
+            // 饱和计数器，计数达到 full 时就将较早的一组 data 刷新到内存并让该计数器减半
+            uxx         counterx    = 0;
+
+            struct{
+                // 16 * 2bit
+                rtg_t   type;
+                u64     data[ctx_t::count_per_group];
+            } group[group_count];
+        } ctx[general_purpose_register_count];
+
         // 注意：需要放在修改寄存器类型、值之前
         void before_modify_register(uxx i_reg){
-            
+            if (u16 mask = u16(1 << i_reg); not (sta.psm & mask)){
+                return;
+            }
+            else{
+                sta.psm            ^= (mask);
+            }
+
+            auto & ctx              = (this->ctx[i_reg]); 
+            auto   i                = (ctx.counter & ctx_t::count_per_group) != 0;
+            auto   ix               = (i - 1) & ctx.mask_group; // 最早的组
+            auto   offset           = (ctx.counter & ctx_t::mask);
+            auto & data             = (ctx.group[i].data);
+            auto & type             = (ctx.group[i].type);
+            auto & old_data         = (ctx.group[ix].data);
+            auto & old_type         = (ctx.group[ix].type);
+            data[offset]            = (regs[i_reg].ru64);
+            type[offset]            = (mode[i_reg]);
+            ctx.counter            += (1);
+            ctx.counterx           += (1);
+
+            if (ctx.counterx == ctx.need_store){
+                ctx_t new_ctx{ ctx.mem.offset/*前一个块*/, old_type, old_data };
+                ctx.mem             = (xs);
+                xs.offset          += (sizeof(ctx_t));
+                wrmem(& new_ctx, ctx.mem.address, sizeof(ctx_t));
+                return;
+            }
+
+            // 存满时，让之前存的一组空出来
+            if (ctx.counterx == ctx.full){
+                ctx.counterx       -= (ctx.count_per_group);
+            }
+        }
+
+        void after_return(uxx need_recover){
+            for(uxx i_reg = 0;; need_recover ^= uxx(1) << i_reg/*复位*/){
+                if (i_reg = inc::index_of_last_set(need_recover); i_reg == not_exist){
+                    return;
+                }
+
+                // 异常情况
+                // 代码段可能被修改过，或者读取了错误的 sta.ps 寄存器值
+                if (this->ctx[i_reg].counter == 0){
+                    continue;
+                }
+
+                auto & ctx          = (this->ctx[i_reg]);
+                auto   i            = (--ctx.counter & ctx_t::count_per_group) != 0;
+                auto   ix           = (i - 1) & ctx.mask_group;
+                auto   offset       = (ctx.counter & ctx_t::mask);
+                auto & data         = (ctx.group[i].data);
+                auto & type         = (ctx.group[i].type);
+                auto & old_data     = (ctx.group[ix].data);
+                auto & old_type     = (ctx.group[ix].type);
+
+                // 需要预先加载一个组
+                if (ctx.counterx = (ctx.counterx - 1);
+                    ctx.counterx == ctx.need_load and ctx.counter > ctx.counterx){
+                    ctx_t buffer;
+                    rdmem(& buffer, ctx.mem.address, sizeof(buffer));
+                    inc::copy(old_data, buffer.data, buffer.count_per_group);
+                    old_type        = (buffer.type);
+                    ctx.mem.offset  = (buffer.prev);
+                    ctx.counterx   += (ctx.count_per_group);
+                }
+
+                // 恢复寄存器类型和值
+                mode[i_reg]         = (type[offset]);
+                regs[i_reg]         = (data[offset]);
+
+                // TODO 回收释放的内存===========================================
+            }
         }
 
         void exec(){
@@ -721,13 +852,20 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void ifxx(bool contiguous){
+            // 当前加载位数的立即数最高位为 1 时会进行符号位扩展，但只加载了 4bit 的 u64 类型不会扩展符号
+            // 这样是为了让 cif 使用完整的 4bit 向下跳转
             i64 offset      = rim.read_with_clear<i64>(); 
 
             // 不满足条件就跳转
             // 向上跳转（回跳）
             // 向下跳转
+            // 不允许跨段跳转
             if (not contiguous){
-                pc.offset  += u32(offset >= 0 ? offset + 1 : offset - 2) * sizeof(ins_t);
+                pc.offset  += u32(
+                    offset >= 0 ? 
+                    offset + 1 :    // 跳到下下条指令（this->exec 执行该指令后，指向下一条指令，所以这里只要 +1）
+                    offset - 2      // 跳到上上条指令
+                ) * sizeof(ins_t);
             }
         }
 
@@ -910,6 +1048,8 @@ namespace mixc::extern_isa_cpu::origin{
             // 跨程序段跳转
             // TODO====================================================================================
 
+            // 清除立即数寄存器
+            rim.clear();
             cs.address             -= sizeof(pc.position);
             rdmem(& pc.position, cs.address, sizeof(pc.position));
 
@@ -923,10 +1063,21 @@ namespace mixc::extern_isa_cpu::origin{
             auto ins                = jalx_t{};
             rdmem(& ins, pc.address, sizeof(ins_t));
 
-            // 恢复调用时保存的信息
+            // 恢复 flag 状态信息
             if (ins.sf){
                 cs.address         -= sizeof(sta.flag);
-                wrmem(& sta.flag, cs.address, sizeof(sta.flag));
+                rdmem(& sta.flag, cs.address, sizeof(sta.flag));
+            }
+
+            // 恢复 ps 通用寄存器
+            if (ins.ps){
+                static_assert(sizeof(ins_t) == sizeof(sta.ps));
+                rdmem(& sta.ps, pc.address + sizeof(ins_t), sizeof(ins_t));
+                auto changed        = sta.psm & sta.ps; // 只取与 sta.ps 相关的位
+                auto need_recover   = changed ^ sta.ps; // 取出改变的位组
+                pc.address         += sizeof(sta.ps);   // 忽略下一条指令
+                cs.address         -= sizeof(sta.ps);
+                after_return(need_recover);
             }
         }
 
@@ -935,11 +1086,28 @@ namespace mixc::extern_isa_cpu::origin{
             auto target             = the.ins.opc == jali ? 
                 rim.load(ins.im4_opa, 4/*bit*/).read_with_clear<u64>() :
                 regs[ins.im4_opa].ru64;
+
+            // 忽略第 0 位
             auto address            = seg_t(target & seg_t::mask_code_segment);
 
-            // 跨程序段跳转
+            // 进入函数调用时需要清空立即数寄存器
+            rim.clear();
+
+            // 跨程序段调用
             if (address.segment){
                 // TODO====================================================================================
+            }
+
+            // 按需保存通用寄存器位组
+            // sta.psm 存放着调用栈期望保存的寄存器
+            // 每个函数可能有不同的保存期望，sta.psm 每经过一次调用就整合当前期望保存的寄存器
+            // 如果设置 ins.ps 位，则指示 jalx 下一条指令是期望保存寄存器的位组
+            if (ins.ps){
+                auto ps         = sta.ps;
+                wrmem(& ps, cs.address, sizeof(ps));
+                rdmem(& ps, pc.address + sizeof(ins_t), sizeof(ins_t));
+                sta.psm        |= ps;
+                cs.address     += sizeof(ps);
             }
 
             // 按需保存状态寄存器
