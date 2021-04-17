@@ -644,8 +644,6 @@ namespace mixc::extern_isa_cpu::origin{
         rtg_t & mode    = sta.reg_type;                 // 寄存器类型
         voidp   cmd[256];                               // 指令集清单
 
-        // type 和 data 都有 2 个分区
-        // 只有存满时才会将较早存放元素的分区刷新到内存
         struct{
             enum { 
                 group_count     = 4, 
