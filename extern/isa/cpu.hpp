@@ -493,7 +493,7 @@ namespace mixc::extern_isa_cpu::origin{
 
         // 当前函数需要保存的通用寄存器上下文(惰性)
         // predetermined save
-        u16     ps  = 0;
+        u16     ps          = 0;
 
         // predetermined save mask
         // 每一位分别指示对应的通用寄存器在下一次修改前需要保存
@@ -662,7 +662,11 @@ namespace mixc::extern_isa_cpu::origin{
                 // 获取组号
                 mask_group      = group_count - 1,
 
+                // 处于只剩一组可存时
                 to_first        = 2,
+
+                // 处于只剩一组可读时
+                to_last         = 1,
             };
 
             // 需要二进制对齐
@@ -696,12 +700,15 @@ namespace mixc::extern_isa_cpu::origin{
             auto   offset           = (ctx.counter & ctx_t::mask);
             auto & data             = (ctx.group[i].data);
             auto & type             = (ctx.group[i].type);
-            auto & old_data         = (ctx.group[ix].data);
-            auto & old_type         = (ctx.group[ix].type);
+
             data[offset]            = (regs[i_reg].ru64);
             type[offset]            = (mode[i_reg]);
             ctx.counter            += (1);
             ctx.counterx           += (1);
+
+            // 只有当 need_store 时以下字段才是有效的
+            auto & old_data         = (ctx.group[ix].data);
+            auto & old_type         = (ctx.group[ix].type);
 
             if (ctx.counterx == ctx.need_store){
                 ctx_t new_ctx{ ctx.mem.offset/*前一个块*/, old_type, old_data };
@@ -731,10 +738,12 @@ namespace mixc::extern_isa_cpu::origin{
 
                 auto & ctx          = (this->ctx[i_reg]);
                 auto   i            = (--ctx.counter & ctx_t::count_per_group) != 0;
-                auto   ix           = (i - 1) & ctx.mask_group;
+                auto   ix           = (i - ctx.to_last) & ctx.mask_group;
                 auto   offset       = (ctx.counter & ctx_t::mask);
                 auto & data         = (ctx.group[i].data);
                 auto & type         = (ctx.group[i].type);
+
+                // 只有当 need_load 时以下字段才是有效的
                 auto & old_data     = (ctx.group[ix].data);
                 auto & old_type     = (ctx.group[ix].type);
 
@@ -852,7 +861,8 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void ifxx(bool contiguous){
-            // 当前加载位数的立即数最高位为 1 时会进行符号位扩展，但只加载了 4bit 的 u64 类型不会扩展符号
+            // 当前加载位数的立即数最高位为 1 时会进行符号位扩展
+            // 但只加载了 4bit 的 i64 类型不会扩展符号
             // 这样是为了让 cif 使用完整的 4bit 向下跳转
             i64 offset      = rim.read_with_clear<i64>(); 
 
