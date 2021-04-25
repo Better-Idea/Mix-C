@@ -256,6 +256,11 @@ namespace mixc::extern_isa_cpu::origin{
         u08 opc         : 4;
         u08 mode        : 2;
         u08 bank        : 2;
+
+        static_assert(general_purpose_register_count == 0x10);
+
+        enum{ get_bank_by_shift = 2, };
+
         u08 opa         : 2;
         u08 opb         : 2;
         u08 im4         : 4;
@@ -477,6 +482,14 @@ namespace mixc::extern_isa_cpu::origin{
                 no_predetermined << 10 | 
                 no_predetermined << 5  | 
                 no_predetermined << 0,
+
+            // 寄存器类型 2bit * 16
+            // - 00 f32
+            // - 01 f64
+            // - 10 u64（默认）
+            // - 11 i64
+            // 和 opcode 保持一致
+            reset_reg_type      = 0xaaaaaaaa,
         };
 
         union{
@@ -516,7 +529,7 @@ namespace mixc::extern_isa_cpu::origin{
         // - 10 u64（默认）
         // - 11 i64
         // 和 opcode 保持一致
-        rtg_t   reg_type { 0xaaaaaaaa };
+        rtg_t   reg_type    = reset_reg_type;
     };
 
     // 段偏式
@@ -1034,7 +1047,11 @@ namespace mixc::extern_isa_cpu::origin{
 
         void asm_cif(){
             auto ins = inc::cast<cifxx_t>(the.ins);
-            cmp(c4_t::c4ab, ins.bank << 2 | ins.opa, ins.bank << 2 | ins.opb);
+            cmp(
+                (c4_t::c4ab), 
+                (ins.bank << ins.get_bank_by_shift) | ins.opa, 
+                (ins.bank << ins.get_bank_by_shift) | ins.opb
+            );
 
             switch(rim.load(ins.im4, 4/*bits*/); cmd_t(ins.mode | cifeq)){
             case cifeq: ifxx(    sta.eq);               break;
