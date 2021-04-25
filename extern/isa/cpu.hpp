@@ -466,6 +466,13 @@ namespace mixc::extern_isa_cpu::origin{
         // 保留
         u16     r0          = 0;
     public:
+        enum{
+            reset_predetermined =
+                no_predetermined << 10 | 
+                no_predetermined << 5  | 
+                no_predetermined << 0,
+        };
+
         union{
             struct{
                 // 预设(predetermined)
@@ -485,10 +492,7 @@ namespace mixc::extern_isa_cpu::origin{
                 u16                 : 1;
             };
 
-            u16 predetermined = 
-                no_predetermined << 10 | 
-                no_predetermined << 5  | 
-                no_predetermined << 0;
+            u16 predetermined = reset_predetermined;
         };
 
         // 当前函数需要保存的通用寄存器上下文(惰性)
@@ -1092,16 +1096,13 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
         void asm_jal(){
-            auto ins                = inc::cast<jalx_t>(the.ins);
-            auto target             = the.ins.opc == jali ? 
+            auto ins            = inc::cast<jalx_t>(the.ins);
+            auto target         = the.ins.opc == jali ? 
                 rim.load(ins.im4_opa, 4/*bit*/).read_with_clear<u64>() :
                 regs[ins.im4_opa].ru64;
 
             // 忽略第 0 位
-            auto address            = seg_t(target & seg_t::mask_code_segment);
-
-            // 进入函数调用时需要清空立即数寄存器
-            rim.clear();
+            auto address        = seg_t(target & seg_t::mask_code_segment);
 
             // 跨程序段调用
             if (address.segment){
@@ -1130,20 +1131,26 @@ namespace mixc::extern_isa_cpu::origin{
             // 让 position 排后边，作为第一个读到的 u16，在根据 over_area 位判断是否存在 area
             if (address.area){
                 wrmem(& pc.area, cs.address, sizeof(pc.area));
-                pc.over_area        = true;
-                pc.area             = address.area;
-                cs.address         += sizeof(pc.area);
+                pc.over_area    = true;
+                pc.area         = address.area;
+                cs.address     += sizeof(pc.area);
             }
 
             wrmem(& pc.position, cs.address, sizeof(pc.position));
-            pc.position             = address.position;
-            cs.address             += sizeof(pc.position);
+            pc.position         = address.position;
+            cs.address         += sizeof(pc.position);
 
             // 当执行 jalx 指令后，此时 pc 会指向子函数第一条指令
             // 接着在 the.run() 函数中完成一轮循环，需要将 pc += sizeof(ins_t)
             // 这里让 pc -= sizeof(ins_t); 保证下一条指令指向子函数第一条指令
             // 在 jalx() 中不直接执行子函数第一条指令，避免恶意的递归调用（第一条指令是 jalx 指令）导致爆栈
-            pc.address             -= sizeof(ins_t);
+            pc.address         -= sizeof(ins_t);
+
+            // 复位 sta.predetermined 避免不必要的副作用
+            sta.predetermined   = sta.reset_predetermined;
+
+            // 进入函数调用时需要清空立即数寄存器
+            rim.clear();
         }
 
         void asm_bdc(){
@@ -1324,7 +1331,7 @@ namespace mixc::extern_isa_cpu::origin{
 
         void asm_add(){
             f8([&](auto & a, auto b, auto c){
-                if (inc::is_float<decltype(a)>){
+                if constexpr (inc::is_float<decltype(a)>){
                     a = b + c;
                 }
                 else{
@@ -1335,7 +1342,7 @@ namespace mixc::extern_isa_cpu::origin{
 
         void asm_sub(){
             f8([&](auto & a, auto b, auto c){
-                if (inc::is_float<decltype(a)>){
+                if constexpr (inc::is_float<decltype(a)>){
                     a = b - c;
                 }
                 else{
