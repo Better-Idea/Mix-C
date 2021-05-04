@@ -43,7 +43,10 @@ c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3
 #include"io/private/tty.hpp"
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
+#include"lang/wxx/length_of_utf8.hpp"
+#include"lang/wxx.hpp"
 #include"macro/xdebug_fail.hpp"
+#include"memop/copy.hpp"
 #include"utils/allocator.hpp"
 #include"utils/init_list.hpp"
 
@@ -353,60 +356,6 @@ namespace mixc::io_private_tty::origin{
         return key;
     }
 
-    template<class item_t>
-    inc::cxx<item_t> read_line(inc::ialloc<item_t> allocx){
-        enum { initial_length = 64 };
-        using var = inc::var_array<initial_length>;
-        item_t      buf[initial_length];
-        item_t **   table       = nullptr;
-        uxx         length      = 0;
-        uxx         read_length = 0;
-        uxx         dummy;
-        auto        read        = sizeof(item_t) == 1 ? xref ReadConsoleA : xref ReadConsoleW;
-        buf[initial_length - 1] = 0;
-
-        auto alloc = [](uxx bytes) -> voidp {
-            return inc::alloc<u08>(inc::memory_size{bytes});
-        };
-
-        auto free = [](voidp ptr, uxx bytes){
-            inc::free(ptr, inc::memory_size{bytes});
-        };
-
-        do {
-            read(h_stdin, buf, initial_length, LPDWORD(xref read_length), NULL);
-
-            if (buf[read_length - 1] == '\n'){
-                read_length    -= 2;
-            }
-            else if(buf[read_length - 1] == '\r'){
-                read_length    -= 1;
-                read(h_stdin, & dummy, 1, NULL, NULL);
-            }
-
-            for(uxx i = 0; i < read_length; i++){
-                var::push(xref table, xref length, buf[i], alloc, free);
-            }
-        }while(read_length == initial_length);
-
-        auto target = allocx(length);
-        auto result = inc::cxx<item_t>{ target, length };
-
-        for(uxx i = 0; i < length; i++){
-            target[i]           = var::access(table, i);
-        }
-        var::clear(xref table, xref length, free);
-        return result;
-    }
-
-    inc::c08 read_line(inc::ialloc<char> alloc){
-        return read_line<char>(alloc);
-    }
-
-    inc::c16 read_line(inc::ialloc<char16_t> alloc){
-        return read_line<char16_t>(alloc);
-    }
-
     constexpr u08 map[]{
         u08(0),
         u08(FOREGROUND_RED),
@@ -468,4 +417,109 @@ namespace mixc::io_private_tty::origin{
     }
 
     #endif
+
+    template<class item_t>
+    inc::cxx<item_t> read_line(inc::ialloc<item_t> allocx){
+        enum { initial_length = 128 };
+        using var = inc::var_array<initial_length>;
+        char        buf[initial_length];
+        char *      bufx        = nullptr;
+        uxx         length      = 0;
+        uxx         lengthx     = 0;
+        uxx         read_length = 0;
+        uxx         dummy;
+
+        auto alloc = [](uxx bytes) -> voidp {
+            return inc::alloc<u08>(inc::memory_size{bytes});
+        };
+
+        auto free = [](voidp ptr, uxx bytes){
+            inc::free(ptr, inc::memory_size{bytes});
+        };
+
+        auto copy = [&](char * buffer, uxx length){
+            uxx real_length = 0;
+            uxx i = 0;
+
+            if constexpr (sizeof(item_t) >= 2){
+                while(i < length){
+                    auto step = inc::wxx<item_t>{ buffer[i] }.length_of_utf8();
+                    i += step;
+                    real_length += 1;
+                }
+            }
+            else{
+                real_length = length;
+            }
+
+            auto target = allocx(real_length);
+
+            if constexpr (sizeof(item_t) >= 2){
+                inc::c08{ buffer, length };
+            }
+
+            auto result = inc::cxx<item_t>{ target, length };
+            inc::copy(target, buffer, length);
+        };
+
+        auto tty_read = [&](voidp buffer, uxx length){
+            #if xis_linux
+                auto fd = fileno(stdin);
+                return read(fd, buffer, sizeof(item_t) * length);
+            #elif xis_windows
+                auto read = sizeof(item_t) == 1 ? xref ReadConsoleA: xref ReadConsoleW;
+                read(h_stdin, buffer, length, LPDWORD(xref length), NULL);
+                return length;
+            #endif
+        };
+
+        do {
+            read_length = tty_read(buf, initial_length);
+
+            #if xis_linux || xis_mac
+                if (ptr[read_length - 1] == '\n'){
+                    read_length -= 1;
+                }
+                if (read_length > 0 and ptr[read_length - 1] == '\r'){
+                    read_length -= 1;
+                }
+            #elif xis_windows 
+                if (buf[read_length - 1] == '\n'){
+                    read_length -= 2;
+                }
+                else if (buf[read_length - 1] == '\r'){
+                    read_length -= 1;
+                    tty_read(& dummy, 1);
+                }
+            #endif
+
+            if (item_t ptr; read_length != initial_length and length == 0){
+                
+                return result;
+            }
+
+            for(uxx i = 0; i < read_length; i++){
+                var::push(xref table, xref length, buf[i], alloc, free);
+            }
+        }while(read_length == initial_length);
+
+        auto target = allocx(length);
+        auto result = inc::cxx<item_t>{ target, length };
+
+        for(uxx i = 0; i < length; i++){
+            target[i] = var::access(table, i);
+        }
+
+        var::clear(xref table, xref length, free);
+        return result;
+    }
+
+    inc::c08 read_line(inc::ialloc<char> alloc){
+        return read_line<char>(alloc);
+    }
+
+    inc::c16 read_line(inc::ialloc<char16_t> alloc){
+        return read_line<char16_t>(alloc);
+    }
+
 }
