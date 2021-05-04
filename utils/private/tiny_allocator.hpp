@@ -23,7 +23,7 @@
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::utils_private_tiny_allocator{
+namespace mixc::utils_private_tiny_allocator::origin{
     struct tiny_allocator;
 }
 
