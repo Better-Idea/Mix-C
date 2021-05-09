@@ -2,13 +2,13 @@
 #include"lang/private/wxx.hpp"
 #endif
 
-#ifndef xpack_lang_wxx_length_of_utf8
-#define xpack_lang_wxx_length_of_utf8
+#ifndef xpack_lang_wxx_length_if_as_utf8
+#define xpack_lang_wxx_length_if_as_utf8
 #pragma push_macro("xuser")
 #pragma push_macro("xusing_lang_wxx")
 #undef  xusing_lang_wxx
 #undef  xuser
-#define xuser mixc::lang_wxx_length_of_utf8::inc
+#define xuser mixc::lang_wxx_length_if_as_utf8::inc
 #include"define/base_type.hpp"
 #include"instruction/index_of_last_reset.hpp"
 #include"lang/wxx.hpp"
@@ -16,15 +16,15 @@
 #pragma pop_macro("xusing_lang_wxx")
 #pragma pop_macro("xuser")
 
-namespace mixc::lang_wxx_length_of_utf8{
+namespace mixc::lang_wxx_length_if_as_utf8{
     template<class type>
     struct core : inc::wxx<type>{
         using inc::wxx<type>::wxx;
         using the_t = core<type>;
 
-        uxx length_of_utf8() const {
+        uxx length_if_as_utf8() const {
             // 无符号类型 char 可能为有符号类型（平台差异）
-            // 我们这里要求 char * 配制成 utf8 字符串 ====================================
+            // 我们这里要求 char * 配置成 utf8 字符串 ====================================
             auto u = inc::unsigned_type<type>(the.data);
 
             // ascii 码只有一个字节
@@ -60,12 +60,12 @@ namespace mixc::lang_wxx_length_of_utf8{
         using base::base;
         using the_t = core<type>;
 
-        uxx length_of_utf8() const {
-            return the.length_of_utf8();
+        uxx length_if_as_utf8() const {
+            return the.length_if_as_utf8();
         }
 
-        final_t & length_of_utf8(uxx * result) const {
-            result[0] = the.length_of_utf8();
+        final_t & length_if_as_utf8(uxx * result) const {
+            result[0] = the.length_if_as_utf8();
             return thex;
         }
     };
@@ -73,10 +73,10 @@ namespace mixc::lang_wxx_length_of_utf8{
 
 #endif
 
-namespace mixc::lang_wxx_length_of_utf8::xuser {
+namespace mixc::lang_wxx_length_if_as_utf8::xuser {
     template<class final_t, class item_t>
     using wxx = meta<final_t, xusing_lang_wxx::wxx<final_t, item_t>, item_t>;
 }
 
 #undef  xusing_lang_wxx
-#define xusing_lang_wxx ::mixc::lang_wxx_length_of_utf8::xuser
+#define xusing_lang_wxx ::mixc::lang_wxx_length_if_as_utf8::xuser
