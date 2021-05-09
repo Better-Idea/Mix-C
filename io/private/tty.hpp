@@ -6,6 +6,7 @@
 #include"interface/can_alloc.hpp"
 #include"io/private/tty_key.hpp"
 #include"io/private/tty_color_t.hpp"
+#include"lang/cxx/encode_item_as.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
 #include"utils/allocator.hpp"
