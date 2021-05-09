@@ -11,14 +11,11 @@
 #define xuser mixc::lang_cxx_encode_first_as::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
-#include"lang/cxx/clone.hpp"
-#include"lang/cxx/pad_bends.hpp"
 #include"lang/cxx.hpp"
-#include"lang/wxx/length_of_utf8.hpp"
+#include"lang/wxx/length_if_as_utf8.hpp"
 #include"lang/wxx.hpp"
 #include"macro/xstruct.hpp"
 #include"meta/is_base_char.hpp"
-#include"lang/wxx/length_of_utf8.hpp"
 #include"meta/unsigned_type.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -56,6 +53,10 @@ namespace mixc::lang_cxx_encode_first_as{
 
         operator item_t &(){
             return the[0];
+        }
+
+        item_t * ptr(){
+            return (item_t *)the.c08;
         }
 
         item_t & operator[](uxx index){
@@ -120,7 +121,7 @@ namespace mixc::lang_cxx_encode_first_as{
 
             if constexpr (inc::is_same<item_t, char>){
                 // length 表示将当前字符编码成 utf8 字符所需的字节数
-                if (length = inc::wxx<item_t>{ the[0] }.length_of_utf8();
+                if (length = inc::wxx<item_t>{ the[0] }.length_if_as_utf8();
                     length > the.length()){
                     return { encode_first_as_result_t::char_seqence_missing, length };
                 }
@@ -160,7 +161,7 @@ namespace mixc::lang_cxx_encode_first_as{
             // 宽字节字符转单字节字符
             else if constexpr (inc::is_same<char_t, char> and sizeof(item_t) >= 2){
                 char buffer[8] = {0};
-                length = inc::wxx<item_t>{ word }.length_of_utf8();
+                length = inc::wxx<item_t>{ word }.length_if_as_utf8();
                 
                 if (length == 1){
                     buffer[0] = char(word);
