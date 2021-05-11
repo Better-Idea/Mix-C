@@ -117,7 +117,7 @@ namespace mixc::utils_private_tiny_allocator{
 
         void wait_escaped_finish(){
             // 等到所有[逃逸线程]完成操作
-            while(inc::atom_load(xref i_finished) + new_push != i_new_owner){
+            while(inc::atom_load(xref i_finished) + new_push < i_new_owner){
                 inc::thread_self::yield();
             }
         }
