@@ -4,31 +4,41 @@
 #undef  xuser
 #define xuser mixc::extern_rtos_task::inc
 #include"define/base_type.hpp"
+#include"extern/rtos/conf.hpp"
+#include"macro/xcheck_binary_aligned.hpp"
 #include"macro/xstruct.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
-#define xtask_max_priority          32
-#define xtask_time_slice            10'000 /*us*/
-#define xtask_stack_guard_bytes     8
 #define xtask                       ::mixc::extern_rtos_task::origin::task_sugar{} * [](voidp arg_ptr)
 
 namespace mixc::extern_rtos_task::origin{
-    struct task_context{
-        task_context *  prev;
-        task_context *  next;
-        uxx             sp_mem;             // 栈指针内存起始地址
-        uxx             sp_cur;             // 栈指针
-        u16             stack_scale;        // 栈空间大小 32bytes pcs
-        u08             priority;           // 优先级
-        u08             priority_current;   // 当前优先级
-    };
+    typedef struct task_id_t{
+        u64 number : 48;    // 每创建一个任务 number 就会加 1，该字段不会回收
+        u64 id     : 16;    // 当有
+
+        operator u64 (){
+            return *u64p(this);
+        }
+    } tit_t;
+
+    typedef struct task_context{
+        using tcp_t = tcp_t;
+        tcp_t   prev;
+        tcp_t   next;
+        tit_t   id;
+        uxx     sp_base;            // 栈指针内存起始地址
+        uxx     sp_current;         // 栈指针
+        u16     stack_scale;        // 栈空间规模，需要乘以 unit_of_stack 才能得到实际栈大小
+        u08     priority;           // 优先级
+        u08     priority_current;   // 当前优先级
+    } * tcp_t;
 
     struct task_list{
-        using idc_t = inc::bits_indicator<xtask_max_priority>;
-        using itm_t = task_context * [xtask_max_priority + 1/*one for defer*/];
+        using idc_t = inc::bits_indicator<inc::conf::max_priority>;
+        using itm_t = tcp_t[inc::conf::max_priority + 1/*one for defer*/];
 
-        void push(task_context * task){
+        void push(tcp_t task){
             uxx priority            = task->priority;
 
             // 当前链表无元素
@@ -48,7 +58,7 @@ namespace mixc::extern_rtos_task::origin{
             task->prev              = last;
         }
 
-        task_context * pop(){
+        tcp_t pop(){
             auto i                  = idc.index_of_first_set();
 
             // TODO：返回空闲任务
@@ -71,24 +81,28 @@ namespace mixc::extern_rtos_task::origin{
             return head;
         }
 
-        void push_defer(task_context * task){
-            auto & last             = list[xtask_max_priority];
+        // 放弃一轮
+        void push_defer(tcp_t task){
+            auto & last             = this->defer_slot();
             task->next              = last;
             last                    = task;
         }
 
         void push_defer_emit(){
-            auto & last             = list[xtask_max_priority];
+            auto & last             = this->defer_slot();
             auto   next             = last;
 
             while(last != nullptr){
                 next                = last->next;
-                push(last);
+                this->push(last);
                 last                = next;
             }
         }
-
     private:
+        tcp_t & defer_slot(){
+            return list[inc::conf::max_priority];
+        }
+
         itm_t   list {};
         idc_t   idc  {};
     };
@@ -109,18 +123,16 @@ namespace mixc::extern_rtos_task::origin{
 
     xstruct(
         xname(task_config),
-        xprif(pstack_size,          uxx),
-        xprif(ppriority,            u08),
-        xprif(puse_stack_guard,     u08),
-        xprif(pinvoke,              invoke_t),
-        xprif(parg_ptr,             voidp)
+        xprif(pstack_size,  uxx),
+        xprif(parg_ptr,     voidp),
+        xprif(pinvoke,      invoke_t),
+        xprif(ppriority,    u08)
     )
         using final_t = task_config;
 
         task_config():
-            pstack_size(4096),
+            pstack_size(inc::conf::default_scale_of_stack),
             ppriority(0),
-            puse_stack_guard(false),
             pinvoke(& do_nothing),
             parg_ptr(nullptr){
         }
@@ -129,20 +141,45 @@ namespace mixc::extern_rtos_task::origin{
         xpubget_pubset(priority)
         xpubget_pubset(invoke)
         xpubget_pubset(arg_ptr)
-        xpubget_pubset(use_stack_guard)
     private:
         static void do_nothing(voidp){
             ;
         }
     $
 
-    using task_handler = uxx;
+    struct task{
+        task(){}
+        task(task_config const & conf);
 
-    extern void task_create(task_handler * handler, task_config const & tc);
-    extern void task_run(task_handler handler);
-    extern void task_exit(uxx exit_code = 0);
-    extern void task_yield();
-    extern void task_sleep(uxx ms);
+        void    run();
+        void    yeild();
+        void    suspend();
+        void    suspend(uxx millisecond);
+        void    resume();
+        void    sleep(uxx millisecond);
+        void    exit(uxx code = inc::conf::default_exit_code);
+        tit_t   task_id();
+
+        template<class lambda_t>
+        void critical(lambda_t const & call){
+            inc::conf::critical_enter();
+            call();
+            inc::conf::critical_exit();
+        }
+
+    private:
+        tcp_t   handle = nullptr;
+    };
+
+    inline task this_task{};
+
+    inline task::task(task_config const & conf){
+        
+    }
+
+    inline void task::run(){
+
+    }
 }
 
 #endif
