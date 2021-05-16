@@ -117,7 +117,7 @@ namespace mixc::extern_rtos_conf::origin{
         return task_lock_times != 0;
     }
 
-    inline void switch_context(){
+    inline void switch_context(voidp next_task_stack_pointer){
         // TODO:
         // 将上下文保存到栈上
         // asm("save register");
