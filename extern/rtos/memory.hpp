@@ -15,11 +15,9 @@
 #include"meta/has_constructor.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::extern_rtos_memory::origin{
-    struct tiny_allocator;
-}
-
 namespace mixc::extern_rtos_memory{
+    struct page_header;
+
     typedef struct node{
         node      * prev;
         node      * next;
@@ -76,7 +74,7 @@ namespace mixc::extern_rtos_memory{
         page_header(uxx bytes){
             bmp_bytes = bytes / size_one / 8;
             auto cost = sizeof(page_header) + bmp_bytes;
-            cost     += size_one;
+            cost     += (size_one - 1);
             cost     &= ~(size_one - 1);
             blocks    = bytes - cost;
 
@@ -109,7 +107,7 @@ namespace mixc::extern_rtos_memory{
         }
 
         uxx index_of(nodep node){
-            return node - nodep(this + 1);
+            return node - this->data_area();
         }
 
         pair left_free_block_of(nodep current){
