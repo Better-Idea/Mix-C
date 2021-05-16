@@ -180,7 +180,8 @@ namespace mixc::extern_rtos_memory{
         u64 area = 0;
     };
 
-    struct tiny_allocator_header{
+    struct memory_header{
+    protected:
         area_t          area[scale_level]       = {};
         uxx             pused_bytes             = 0;
         uxx             palive_object           = 0;
@@ -190,7 +191,7 @@ namespace mixc::extern_rtos_memory{
 }
 
 namespace mixc::extern_rtos_memory::origin{
-    struct tiny_allocator : tiny_allocator_header{
+    struct memory : memory_header{
         /**
          * @brief 获取当前内存已经使用的字节数
          */
