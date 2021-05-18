@@ -115,7 +115,7 @@ namespace mixc::interface_private_ranger{
 
         template<inc::is_origin_array seq_t>
         ranger_base(seq_t const & seq):
-            ranger_base(& seq, sizeof(seq) / sizeof(inc::item_origin_of<seq_t>)){
+            ranger_base((seq_t &)seq, sizeof(seq) / sizeof(inc::item_origin_of<seq_t>)){
         }
 
         xpubgetx(is_positive_order, bool) {
