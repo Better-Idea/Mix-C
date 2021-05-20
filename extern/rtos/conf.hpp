@@ -68,13 +68,19 @@ namespace mixc::extern_rtos_conf::origin{
     constexpr uxx unit_of_stack = 32;           // 32byte 
     constexpr uxx max_task_count = 64;
     constexpr uxx default_scale_of_stack = 2048 / unit_of_stack;
-    constexpr uxx default_priority = end_of_normal_task - 1;
+    constexpr uxx default_priority = uxx(priority_of_task_t::normal);
     constexpr uxx default_exit_code = 0;
+    constexpr uxx length_of_blocked_line = 8;
+    constexpr uxx length_of_blocked_page = 
+        (max_priority / length_of_blocked_line) + 
+        (max_priority % length_of_blocked_line != 0);
     constexpr uxx max_priority = uxx(priority_of_task_t::max);
 
     xcheck_binary_aligned(hz_of_task_tick_counter);
     xcheck_binary_aligned(unit_of_stack);
+    xcheck_binary_aligned(length_of_blocked_line);
 
+    static_assert(length_of_blocked_line < max_priority * 2);
     static_assert(idlex + 1 == idlex_check, "idlex just has one priority");
     static_assert(idle  + 1 == idle_check , "idle just has one priority");
 
