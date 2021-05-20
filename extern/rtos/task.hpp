@@ -13,9 +13,8 @@
 
 #define xtask                       ::mixc::extern_rtos_task::origin::task_sugar{} * [](voidp arg_ptr)
 
-namespace mixc::extern_rtos_task{
-    inline inc::memory g_memory = {};
-    inline u64         g_task_number = 0;
+namespace mixc::extern_rtos_sync::origin{
+    struct sync;
 }
 
 namespace mixc::extern_rtos_task::origin{
@@ -59,6 +58,11 @@ namespace mixc::extern_rtos_task::origin{
 
         uxx priority_of_first_ready() const {
             return bmp.index_of_first_set();
+        }
+
+        void switch_to_first_ready(){
+            auto item = pop_for(task_state_t::running);
+            this->switch_context_at(item->sp_current);
         }
 
         void switch_context_at(voidp stack){
@@ -249,7 +253,7 @@ namespace mixc::extern_rtos_task::origin{
 
         task_config():
             pstack_scale(inc::conf::default_scale_of_stack),
-            ppriority(0),
+            ppriority(inc::conf::default_priority),
             pcallback(& do_nothing),
             parg_ptr(nullptr){
         }
@@ -298,7 +302,16 @@ namespace mixc::extern_rtos_task::origin{
         /**
          * @brief 获取任务标识
          */
-        tit_t id();
+        tit_t id(){
+            return m_handle->id;
+        }
+
+        /**
+         * @brief 获取任务当前优先级
+         */
+        uxx priority_current(){
+            return m_handle->priority_current;
+        }
 
         /**
          * @brief 进入临界区，避免被打断
@@ -331,10 +344,14 @@ namespace mixc::extern_rtos_task::origin{
         inc::memory & memory;
     private:
         tcp_t   m_handle = nullptr;
+
+        friend mixc::extern_rtos_sync::origin::sync;
     };
 
     inline task         g_task_self{};
     inline task_list    g_task_list{};
+    inline inc::memory  g_memory = {};
+    inline u64          g_task_number = 0;
 
     inline task::task(task_config const & conf) :
         memory(g_memory){
@@ -434,10 +451,8 @@ namespace mixc::extern_rtos_task::origin{
     inline void task::exit(uxx code){
         // TODO：===================================
     }
-
-    inline tit_t task::id(){
-        return m_handle->id;
-    }
 }
 
 #endif
+
+xexport_space(mixc::extern_rtos_task::origin)
