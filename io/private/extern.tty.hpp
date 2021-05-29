@@ -457,7 +457,7 @@ namespace mixc::io_private_tty::origin{
                 }
                 else if (buffer_current[read_length - 1] == '\r'){
                     read_length -= 1;
-                    tty_read(& dummy, 1);
+                    ReadConsoleA(h_stdin, & dummy, 1, NULL, NULL);
                 }
             #else
                 #error "wait impliment"
