@@ -1,3 +1,5 @@
+#include"configure/platform.hpp"
+
 #ifdef  xis_msvc_native
 
 #define xa_name         atom_add

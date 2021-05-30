@@ -1,5 +1,5 @@
 #pragma once
-#include"configure/switch.hpp"
+#include"configure/platform.hpp"
 #include"define/base_type.hpp"
 
 #if xis_msvc_native
