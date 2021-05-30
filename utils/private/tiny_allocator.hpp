@@ -1,8 +1,9 @@
 #ifndef xpack_utils_private_tiny_allocator
-#define xpack_utils_private_tiny_allocator 
-#pragma push_macro("xuser")  
+#define xpack_utils_private_tiny_allocator
+#pragma push_macro("xuser") 
 #undef  xuser
 #define xuser mixc::utils_private_tiny_allocator::inc
+#include"configure/platform.hpp"
 #include"concurrency/lock/atom_fetch_add.hpp"
 #include"concurrency/lock/atom_fetch_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
@@ -31,15 +32,34 @@ namespace mixc::utils_private_tiny_allocator{
     typedef struct node{
         node      * previous;
         node      * next;
+
+        #if xis_os32
+    private:
+        uxx         paddingx[2];
+        #endif
     } * nodep;
 
     typedef struct node_free{
         node_free * next;
         uxx         bytes;
+
+        #if xis_os32
+    private:
+        uxx         paddingx[2];
+        #endif
     } * node_freep;
 
     typedef struct node_plus : node{
-        uxx    blocks;
+        // 当前块长度（单位为 size_one）是多少
+        uxx         blocks;
+
+        // 该参数用于对齐
+        uxx         padding;
+
+        #if xis_os32
+    private:
+        uxx         paddingx[2];
+        #endif
     } * node_plusp;
 
     enum : uxx{
@@ -204,16 +224,14 @@ namespace mixc::utils_private_tiny_allocator{
                 return pair{ current - 1, 1 };
             }
             else{
-                auto len = *uxxp(current - 1);
-                return pair{ current - len, len };
+                auto plus = node_plusp(current) - 1;
+                auto blocks = plus->blocks;
+                return pair{ current - blocks, blocks };
             }
         }
 
         pair right_free_block_of(nodep current, uxx length){
-            if ((mask_to_get_offset & uxx(current += length)) == 0){
-                return {};
-            }
-            if (uxx index = index_of(current); get(index)){
+            if (uxx index = index_of(current += length); get(index)){
                 return {};
             }
             else if (get(index + 1)){
@@ -232,8 +250,11 @@ namespace mixc::utils_private_tiny_allocator{
             if (length <= 1){
                 return;
             }
-            (node_plusp(current))->blocks   = length;
-            (uxxp(current + length - 1))[0] = length;
+
+            auto end        = node_plusp(nodep(current + length)) - 1;
+            auto head       = node_plusp(current);
+            head->blocks    = length;
+            end->blocks     = length;
         }
 
         void mark_in_use(nodep current, uxx length){
