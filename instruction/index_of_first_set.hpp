@@ -29,7 +29,7 @@ namespace mixc::instruction_index_of_first_set{
                 _BitScanForward64(& i, uv);
             #elif xis_os32
                 if constexpr (sizeof(v) == 8) {
-                    if (u32(uv) == 0) {
+                    if (u32(uv) != 0) {
                         _BitScanForward(& i, u32(uv));
                     }
                     else{
