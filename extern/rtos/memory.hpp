@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")  
 #undef  xuser
 #define xuser mixc::extern_rtos_memory::inc
+#include"configure/platform.hpp"
 #include"define/base_type.hpp"
 #include"instruction/bit_test.hpp"
 #include"instruction/bit_test_and_set.hpp"
@@ -42,6 +43,11 @@ namespace mixc::extern_rtos_memory{
             auto begin = uxx(this) & ~mask_to_get_header;
             return (page_header *)begin;
         }
+
+        #if xis_os32
+    private:
+        uxx         paddingx[2];
+        #endif
     } * nodep;
 
     typedef struct node_plus : node{
@@ -50,10 +56,16 @@ namespace mixc::extern_rtos_memory{
 
         // 该参数用于对齐
         uxx         padding;
+
+        #if xis_os32
+    private:
+        uxx         paddingx[2];
+        #endif
     } * node_plusp;
 
     typedef struct page_header{
     private:
+        nodep         block_ptr;
         u16           bmp_bytes;
         u16           blocks;
         struct pair{ nodep begin = nullptr; uxx length = 0; };
@@ -63,7 +75,7 @@ namespace mixc::extern_rtos_memory{
         }
 
         nodep data_area(){
-            return nodep(u08p(this + 1) + bmp_bytes);
+            return nodep(block_ptr);
         }
 
     public:
@@ -73,9 +85,9 @@ namespace mixc::extern_rtos_memory{
             bmp_bytes = bytes / size_one / 8;
             auto cost = sizeof(page_header) + bmp_bytes;
             cost     += (size_one - 1);
-            cost     &= ~(size_one - 1);
-            blocks    = bytes - cost;
-
+            cost     &= (~(size_one - 1));
+            blocks    = (bytes - cost) / size_one;
+            block_ptr = (nodep(uxx(this) + bytes)) - blocks;
             inc::zeros(this->bmp_area(), bmp_bytes);
 
             // 设置哨兵位
@@ -135,7 +147,7 @@ namespace mixc::extern_rtos_memory{
         }
 
         nodep first_block(){
-            return nodep(this + 1);
+            return block_ptr;
         }
 
         void set_rest(nodep current, uxx length){
@@ -336,6 +348,10 @@ namespace mixc::extern_rtos_memory::origin{
             // 将页添加到对应的槽中
             this->put_back(page, page->first_block(), page->total_blocks());
             return bstate_t::success;
+        }
+
+        void process_message() {
+
         }
 
     private:
