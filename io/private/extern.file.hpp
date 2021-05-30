@@ -12,6 +12,7 @@
 #include"lang/cxx.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xwarning.hpp"
 #include"mixc.hpp"
 #pragma pop_macro("xuser")
 
@@ -35,6 +36,8 @@ namespace mixc::io_file::origin{
 #include<unistd.h>
 #include"cmd.hpp"
 #endif
+
+xwarning_disable(26444)
 
 namespace mixc::io_file::origin{
     file::file() : fd(-1), path("") {}
