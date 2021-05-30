@@ -26,11 +26,11 @@
 extern int run();
 
 int main(){
-   xuser::gc_thread = xuser::thread(xdetached{
-       xuser::gc_execute();
-   });
+    xuser::init_list_execute();
+    xuser::gc_thread = xuser::thread(xdetached{
+        xuser::gc_execute();
+    });
 
-   xuser::init_list_execute();
-   auto state = run();
-   return state;
+    auto state = run();
+    return state;
 }
