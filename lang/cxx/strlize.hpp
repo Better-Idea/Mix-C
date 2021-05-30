@@ -461,6 +461,15 @@ namespace mixc::lang_cxx_strlize{
             thex            = the_t{ ptr, 1 };
             ptr[0]          = value;
         }
+
+        template<class alloc_t>
+        requires(inc::can_alloc<alloc_t, item_t>)
+        meta(bool value, alloc_t const & alloc) {
+            uxx      len    = value ? 4/*true*/ : 5/*false*/;
+            item_t * ptr    = alloc(len);
+            thex            = the_t{ ptr, len };
+            inc::copy(ptr, value ? "true" : "false", len);
+        }
     };
 
     namespace origin{
