@@ -57,24 +57,24 @@ namespace mixc::utils_allocator::origin{
     }
 
     template<class type>
-    inline void free(type * ptr, memory_size bytes){
+    inline void free(type const * ptr, memory_size bytes){
         xdebug(im_free, xtypeid(type).name, ptr, bytes);
-        tiny_free(ptr, bytes);
+        tiny_free((type *)ptr, bytes);
     }
 
     template<class type>
-    inline void free(type * ptr){
+    inline void free(type const * ptr){
         free(ptr, memory_size(sizeof(type)));
     }
 
     template<class type>
-    inline void free_with_destroy(type * ptr, memory_size bytes){
+    inline void free_with_destroy(type const * ptr, memory_size bytes){
         ptr->~type();
         free(ptr, bytes);
     }
 
     template<class type>
-    inline void free_with_destroy(type * ptr){
+    inline void free_with_destroy(type const * ptr){
         free_with_destroy(ptr, memory_size(sizeof(type)));
     }
 
@@ -94,7 +94,6 @@ namespace mixc::utils_allocator::origin{
 
     extern uxx used_bytes();
     extern uxx alive_object();
-    extern uxx alive_pages();
 }
 
 #define xmemory_sizeof(...)       \
