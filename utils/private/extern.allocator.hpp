@@ -40,11 +40,6 @@ namespace mixc::utils_allocator::origin{
     extern uxx alive_object(){
         return inc::atom_load(xref palive_object);
     }
-
-    extern uxx alive_pages(){
-        auto bytes = inc::atom_load(xref pused_bytes);
-        return bytes / 4096 + (bytes % 4096 != 0);
-    }
 }
 #else
 
@@ -73,10 +68,6 @@ namespace mixc::utils_allocator::origin{
 
     extern uxx alive_object(){
         return mem.alive_object();
-    }
-
-    extern uxx alive_pages(){
-        return mem.alive_pages();
     }
 }
 
