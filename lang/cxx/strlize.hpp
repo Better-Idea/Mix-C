@@ -464,6 +464,15 @@ namespace mixc::lang_cxx_strlize{
 
         template<class alloc_t>
         requires(inc::can_alloc<alloc_t, item_t>)
+        meta(item_t const * value, alloc_t const & alloc){
+            the_t    source = value;
+            item_t * ptr    = alloc(source.length());
+            thex            = the_t{ ptr, source.length() };
+            inc::copy(ptr, value, source.length());
+        }
+
+        template<class alloc_t>
+        requires(inc::can_alloc<alloc_t, item_t>)
         meta(bool value, alloc_t const & alloc) {
             uxx      len    = value ? 4/*true*/ : 5/*false*/;
             item_t * ptr    = alloc(len);
