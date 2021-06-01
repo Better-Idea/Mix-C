@@ -81,9 +81,9 @@
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_free.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
 #include"memop/copy.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_mmu::origin {

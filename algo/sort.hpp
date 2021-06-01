@@ -6,12 +6,12 @@
 #include"algo/heap_root.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
-#include"meta/is_float.hpp"
-#include"math/const.hpp"
 #include"macro/xcmp.hpp"
+#include"macro/xexport.hpp"
+#include"math/const.hpp"
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
+#include"meta/is_float.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 

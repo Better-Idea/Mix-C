@@ -16,8 +16,8 @@
 #include"docker/hashmap.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_distinct::origin{

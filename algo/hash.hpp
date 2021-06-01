@@ -17,10 +17,10 @@
 #include"instruction/ring_shift_left.hpp"
 #include"instruction/count_of_set.hpp"
 #include"interface/seqptr.hpp"
+#include"macro/xexport.hpp"
 #include"memop/addressof.hpp"
 #include"meta/is_origin_array.hpp"
 #include"meta/is_same.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_hash::origin{

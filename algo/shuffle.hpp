@@ -4,10 +4,10 @@
 #undef  xuser
 #define xuser mixc::algo_shuffle::inc
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
 #include"math/random.hpp"
 #include"memop/addressof.hpp"
 #include"memop/swap.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_shuffle{

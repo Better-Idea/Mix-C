@@ -5,11 +5,11 @@
 #define xuser mixc::algo_remove::inc
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_remove{

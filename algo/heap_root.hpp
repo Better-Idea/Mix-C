@@ -10,9 +10,9 @@
 #define xuser mixc::algo_heap_root::inc
 #include"interface/can_compare.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_heap_root{
