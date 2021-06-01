@@ -325,6 +325,7 @@ namespace mixc::io_private_tty::origin{
     };
 
     void print_core(asciis str, uxx length) {
+        h_stdout = (GetStdHandle(STD_OUTPUT_HANDLE));
         WriteConsoleA(h_stdout, str, DWORD(length), nullptr, nullptr);
     }
 
@@ -335,6 +336,7 @@ namespace mixc::io_private_tty::origin{
         if (key_str.length() == 0) {
             DWORD          mode;
             DWORD          length;
+            h_stdin         = (GetStdHandle(STD_INPUT_HANDLE));
             GetConsoleMode(h_stdin, & mode);
             SetConsoleMode(h_stdin, ~(
                 ENABLE_LINE_INPUT | 
@@ -387,6 +389,7 @@ namespace mixc::io_private_tty::origin{
         COORD coordScreen { 0, 0 };
         DWORD cCharsWritten;
         DWORD dwConSize;
+        h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
         if (not GetConsoleScreenBufferInfo(h_stdout, & csbi)){
             return;
@@ -409,6 +412,7 @@ namespace mixc::io_private_tty::origin{
         CONSOLE_CURSOR_INFO info;
         info.bVisible       = value;
         info.dwSize         = cursor_width;
+        h_stdout            = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleCursorInfo(h_stdout, & info);
     }
 
@@ -436,6 +440,8 @@ namespace mixc::io_private_tty::origin{
 
         #if xis_linux || xis_mac
             auto h_stdin = fileno(stdin);
+        #else
+            h_stdin = (GetStdHandle(STD_INPUT_HANDLE));
         #endif
 
         do {

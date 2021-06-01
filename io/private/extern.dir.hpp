@@ -32,7 +32,7 @@ xwarning_disable(26444)
 namespace mixc::io_dir::origin{
     bstate_t dir::remove() const{
         auto && buf         = cpp::path_buffer{};
-        auto    source      = buf.alloc(the.path);
+        auto    source      = buf.alloc(the.m_path);
         #if xis_windows
         auto    is_success  = ::RemoveDirectoryA(asciis(source)) ?
             bstate_t::success : bstate_t::fail;
@@ -43,13 +43,13 @@ namespace mixc::io_dir::origin{
         #error "os miss match"
         #endif
 
-        buf.free(source, path);
+        buf.free(source, m_path);
         return is_success;
     }
 
     bstate_t dir::move_to(inc::c08 new_path) const{
         auto && buf         = cpp::path_buffer{};
-        auto    source      = buf.alloc(the.path);
+        auto    source      = buf.alloc(the.m_path);
         auto    target      = buf.alloc(new_path);
 
         #if xis_windows
@@ -68,13 +68,13 @@ namespace mixc::io_dir::origin{
         #endif
 
         buf.free(target, new_path);
-        buf.free(source, the.path);
+        buf.free(source, the.m_path);
         return is_success;
     }
 
     bstate_t dir::copy_to(inc::c08 new_path) const{
         auto && buf         = cpp::path_buffer{};
-        auto    source      = buf.alloc(the.path);
+        auto    source      = buf.alloc(the.m_path);
         auto    target      = buf.alloc(new_path);
 
         #if xis_windows
@@ -93,7 +93,7 @@ namespace mixc::io_dir::origin{
         #endif
 
         buf.free(target, new_path);
-        buf.free(source, the.path);
+        buf.free(source, the.m_path);
         return is_success;
     }
 
@@ -167,12 +167,12 @@ namespace mixc::io_dir::origin{
     bstate_t dir::create() const {
         #if xis_windows
         // 防止注入攻击
-        if (cpp::c08{path}.is_contains('\"')){
+        if (cpp::c08{m_path}.is_contains('\"')){
             return bstate_t::fail;
         }
 
         char buf[256];
-        auto mkdir          = cpp::c08{"mkdir \""}.strcat({path, "\""}, [&](uxx length){
+        auto mkdir          = cpp::c08{"mkdir \""}.strcat({m_path, "\""}, [&](uxx length){
             auto ptr        = buf;
 
             if (length >= sizeof(buf) - 1){
@@ -192,9 +192,9 @@ namespace mixc::io_dir::origin{
 
         #elif xis_linux
         auto && buf         = cpp::path_buffer{};
-        auto    target      = buf.alloc(the.path);
+        auto    target      = buf.alloc(the.m_path);
         auto    is_success  = cmd("/bin/mkdir", "mkdir", "-p", target);
-        buf.free(target, path);
+        buf.free(target, m_path);
 
         #else
         #error "os miss match"
@@ -205,7 +205,7 @@ namespace mixc::io_dir::origin{
 
     bstate_t dir::as_cwd() const {
         auto && buf         = cpp::path_buffer{};
-        auto    target      = buf.alloc(the.path);
+        auto    target      = buf.alloc(the.m_path);
 
         #if xis_windows
         auto    is_success  = ::SetCurrentDirectoryA((asciis)target) ?
@@ -217,13 +217,13 @@ namespace mixc::io_dir::origin{
 
         #endif
 
-        buf.free(target, path);
+        buf.free(target, m_path);
         return is_success;
     }
     
     bool dir::is_exist() const {
         auto && buf         = cpp::path_buffer{};
-        auto    source      = buf.alloc(the.path);
+        auto    source      = buf.alloc(the.m_path);
 
         #if xis_windows
         auto    attr        = GetFileAttributesA((asciis)source);
@@ -239,7 +239,7 @@ namespace mixc::io_dir::origin{
         #error "os miss match"
         #endif
 
-        buf.free(source, path);
+        buf.free(source, m_path);
         return  exist;
     }
 }

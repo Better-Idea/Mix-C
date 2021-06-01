@@ -15,7 +15,7 @@ namespace mixc::io_dir::origin{
     xstruct(
         xname(dir),
         xpubb(inc::disable_copy),
-        xprif(path,  inc::c08)
+        xprif(m_path,  inc::c08)
     )
         using final_t = the_t;
     public:
@@ -41,7 +41,7 @@ namespace mixc::io_dir::origin{
         };
 
         dir();
-        dir(inc::c08 path) : path(path){}
+        dir(inc::c08 path) : m_path(path){}
 
         bstate_t    remove()                                const;
         bstate_t    move_to(inc::c08 new_path)              const;
@@ -51,11 +51,11 @@ namespace mixc::io_dir::origin{
         bool        is_exist()                              const;
 
         auto subfiles() const {
-            return subitem(path, true);
+            return subitem(m_path, true);
         }
 
         auto subdirs() const {
-            return subitem(path, false);
+            return subitem(m_path, false);
         }
 
     private:

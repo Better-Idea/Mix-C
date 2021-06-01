@@ -5,6 +5,7 @@
 #define xuser mixc::io_private_file::inc
 #include"concurrency/lock/atom_swap.hpp"
 #include"configure/switch.hpp"
+#include"define/base_type.hpp"
 #include"io/file.hpp"
 #include"io/dir.hpp"
 #include"io/private/path_buffer.hpp"
@@ -12,8 +13,8 @@
 #include"lang/cxx.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xwarning.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_file::cpp{

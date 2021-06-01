@@ -91,70 +91,70 @@ namespace mixc::io_private_tty_key::origin{
 
     xstruct(
         xname(tty_key),
-        xprif(type, key_type),
-        xprif(w08,  items_t<4>),
-        xprif(w16,  char16_t),
-        xprif(mlen, u08)
+        xprif(m_type, key_type),
+        xprif(m_w08,  items_t<4>),
+        xprif(m_w16,  char16_t),
+        xprif(m_len, u08)
     )
         using final_t = tty_key;
     public:
         constexpr tty_key() :
-            type{key_type(0)}, w08{'\0'}, w16('\0'), mlen(0){}
+            m_type{key_type(0)}, m_w08{'\0'}, m_w16('\0'), m_len(0){}
 
         xpubget_pubsetx(is_char, bool)
-            xr { return inc::bit(the.type, key_type::is_char); }
-            xw { inc::bit(& the.type, key_type::is_char, value); }
+            xr { return inc::bit(the.m_type, key_type::is_char); }
+            xw { inc::bit(& the.m_type, key_type::is_char, value); }
 
         xpubget_pubsetx(is_func, bool)
-            xr { return inc::bit(the.type, key_type::is_func); }
-            xw { inc::bit(& the.type, key_type::is_func, value); }
+            xr { return inc::bit(the.m_type, key_type::is_func); }
+            xw { inc::bit(& the.m_type, key_type::is_func, value); }
 
         xpubget_pubsetx(has_shift, bool)
-            xr { return inc::bit(the.type, key_type::has_shift); }
-            xw { inc::bit(& the.type, key_type::has_shift, value); }
+            xr { return inc::bit(the.m_type, key_type::has_shift); }
+            xw { inc::bit(& the.m_type, key_type::has_shift, value); }
 
         xpubget_pubsetx(has_alt, bool)
-            xr { return inc::bit(the.type, key_type::has_alt); }
-            xw { inc::bit(& the.type, key_type::has_alt, value); }
+            xr { return inc::bit(the.m_type, key_type::has_alt); }
+            xw { inc::bit(& the.m_type, key_type::has_alt, value); }
 
         xpubget_pubsetx(has_ctrl, bool)
-            xr { return inc::bit(the.type, key_type::has_ctrl); }
-            xw { inc::bit(& the.type, key_type::has_ctrl, value); }
+            xr { return inc::bit(the.m_type, key_type::has_ctrl); }
+            xw { inc::bit(& the.m_type, key_type::has_ctrl, value); }
 
         xpubget_pubsetx(value, char16_t)
-            xr { return the.w16; }
+            xr { return the.m_w16; }
             xw { 
-                //if (the.w16 = value; value >= 0x800){
-                //    w08[0] = 0xe0 | ((value >> 12));
-                //    w08[1] = 0x80 | ((value >> 6) & 0x3f);
-                //    w08[2] = 0x80 | ((value & 0x3f));
-                //    w08[3] = '\0';
-                //    mlen = 3;
+                //if (the.m_w16 = value; value >= 0x800){
+                //    m_w08[0] = 0xe0 | ((value >> 12));
+                //    m_w08[1] = 0x80 | ((value >> 6) & 0x3f);
+                //    m_w08[2] = 0x80 | ((value & 0x3f));
+                //    m_w08[3] = '\0';
+                //    m_len = 3;
                 //}
                 //else if (value >= 0x80){
-                //    w08[0] = 0xc0 | ((value >> 6));
-                //    w08[1] = 0x80 | ((value & 0x3f));
-                //    w08[2] = '\0';
-                //    mlen = 2;
+                //    m_w08[0] = 0xc0 | ((value >> 6));
+                //    m_w08[1] = 0x80 | ((value & 0x3f));
+                //    m_w08[2] = '\0';
+                //    m_len = 2;
                 //}
                 //else{
-                //    w08[0] = value;
-                //    w08[1] = '\0';
-                //    mlen = 1;
+                //    m_w08[0] = value;
+                //    m_w08[1] = '\0';
+                //    m_len = 1;
                 //}
                 // TODO:========================================================
             }
 
         xpubgetx(multi_bytes_char_capacity, uxx){
-            return sizeof(w08);
+            return sizeof(m_w08);
         }
 
         xpubgetx(multi_bytes_char_length, uxx){
-            return mlen;
+            return m_len;
         }
 
         xpubgetx(multi_bytes_char, asciis){
-            return w08;
+            return m_w08;
         }
 
         // 临时设施 ============================================
