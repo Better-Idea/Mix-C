@@ -3,8 +3,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::math_align::inc
+#include"define/base_type.hpp"
 #include"instruction/index_of_last_set.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_align{

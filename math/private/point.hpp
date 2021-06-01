@@ -3,24 +3,26 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::math_point::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"math/sqrt.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_point {
     template<class final_t, class posx_t, class posy_t = posx_t, class posz_t = void>
     xstruct(
         xtmpl(point, final_t, posx_t, posy_t, posz_t),
-        xprif(px, posx_t),
-        xprif(py, posy_t),
-        xprif(pz, posz_t)
+        xprif(m_x, posx_t),
+        xprif(m_y, posy_t),
+        xprif(m_z, posz_t)
     ) 
         constexpr point() : 
             point(0, 0, 0){
         }
 
         constexpr point(posx_t x, posy_t y, posz_t z):
-            px(x), py(y), pz(z){
+            m_x(x), m_y(y), m_z(z){
         }
 
         template<class finalx_t >
@@ -29,7 +31,7 @@ namespace mixc::math_point {
         }
 
         final_t operator()(posx_t x, posy_t y, posz_t z){
-            return final_t(px + x, py + y, pz + z);
+            return final_t(m_x + x, m_y + y, m_z + z);
         }
 
         final_t operator - (final_t const & p){
@@ -55,7 +57,7 @@ namespace mixc::math_point {
         xpubget_pubset(z);
 
         xpubgetx(hypot, posx_t){
-            posx_t pt = (posx_t)inc::sqrt(px * px + py * py + pz * pz);
+            posx_t pt = (posx_t)inc::sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
             return pt;
         }
     $
@@ -63,15 +65,15 @@ namespace mixc::math_point {
     template<class final_t, class posx_t, class posy_t>
     xstruct(
         xspec(point, final_t, posx_t, posy_t, void),
-        xprif(px, posx_t),
-        xprif(py, posy_t)
+        xprif(m_x, posx_t),
+        xprif(m_y, posy_t)
     ) 
         point() : 
             point(0, 0){
         }
 
         point(posx_t x, posy_t y):
-            px(x), py(y){
+            m_x(x), m_y(y){
         }
 
         template<class finalx_t >
@@ -80,7 +82,7 @@ namespace mixc::math_point {
         }
 
         final_t operator()(posx_t x, posy_t y){
-            return final_t(px + x, py + y);
+            return final_t(m_x + x, m_y + y);
         }
 
         final_t operator - (final_t const & p){
@@ -105,7 +107,7 @@ namespace mixc::math_point {
         xpubget_pubset(y);
 
         xpubgetx(hypot, posx_t){
-            posx_t pt = (posx_t)inc::sqrt(px * px + py * py);
+            posx_t pt = (posx_t)inc::sqrt(m_x * m_x + m_y * m_y);
             return pt;
         }
     $

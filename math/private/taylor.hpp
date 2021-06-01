@@ -3,7 +3,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::math_private_taylor::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 // 生成 4x6 常量系数

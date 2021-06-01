@@ -39,22 +39,24 @@ int main(){
 #undef  xuser
 #define xuser mixc::math_distribution_probability::inc
 #include"algo/binary_search.hpp"
+#include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/array.hpp"
 #include"dumb/dummy_type.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"math/random.hpp"
 #include"meta/is_same.hpp"
 #include"meta/item_origin_of.hpp"
 #include"meta/unsigned_type.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::math_distribution_probability::origin{
     template<class type = u32>
     xstruct(
         xtmpl(probability, type),
-        xprif(guide, inc::shared_array<
+        xprif(m_guide, inc::shared_array<
                 inc::unsigned_type<type>
             >
         )
@@ -75,7 +77,7 @@ namespace mixc::math_distribution_probability::origin{
     private:
         template<class seq_t>
         probability(seq_t const & proportion, inc::dummy_type) : 
-            guide(::length{proportion.length()}){
+            m_guide(::length{proportion.length()}){
 
             item_t multi;
 
@@ -91,28 +93,28 @@ namespace mixc::math_distribution_probability::origin{
                 multi = 1;
             }
 
-            guide[0] = item_t(proportion[0] * multi) - 1;
+            m_guide[0] = item_t(proportion[0] * multi) - 1;
 
             // proportion 中存放的是概率比序列
             //    - 比如：存的是 { 2, 3, 4 }，指示的是
             //      0 号元素出现的概率为 2/9，
             //      1 号元素出现的概率为 3/9，
             //      1 号元素出现的概率为 4/9
-            // guide 中存放的是由 proportion 转换而来的范围序列，加入 proportion 依旧存放的是 { 2, 3, 4 }
+            // m_guide 中存放的是由 proportion 转换而来的范围序列，加入 proportion 依旧存放的是 { 2, 3, 4 }
             //    - 那么：guide 将存放 { 1, 4, 8 }
             //      gudie 中两个彼此相邻的元素构成一个范围区间，下标为 0 的元素以 0 为左闭区间
             //      由此可以知道随机生成的数字（值不大于区间左右边界）落在区间 { [0, 1], [2, 4], [5, 8] } 对应概率为 { 2，3，4 } 
-            //    - 通过 inc::random 生成范围不大于 guide 中最大元素的随机值 r，
-            //      然后用 less_equals 二分搜索，在 guide 中寻找不大于 r 但最接近 r 值的索引
+            //    - 通过 inc::random 生成范围不大于 m_guide 中最大元素的随机值 r，
+            //      然后用 less_equals 二分搜索，在 m_guide 中寻找不大于 r 但最接近 r 值的索引
             for (uxx i = 1, length = proportion.length(); i < length; i++){
-                guide[i] = guide[i - 1] + item_t(proportion[i] * multi);
+                m_guide[i] = m_guide[i - 1] + item_t(proportion[i] * multi);
             }
         }
 
         uxx random() const {
-            auto l = guide.length();
-            auto r = inc::random<item_t>() % (guide[l - 1] + 1);
-            auto v = inc::binary_search::less_equals(guide, r);
+            auto l = m_guide.length();
+            auto r = inc::random<item_t>() % (m_guide[l - 1] + 1);
+            auto v = inc::binary_search::less_equals(m_guide, r);
             return v;
         }
 
