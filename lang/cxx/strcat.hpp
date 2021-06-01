@@ -9,11 +9,12 @@
 #undef  xusing_lang_cxx
 #undef  xuser
 #define xuser mixc::lang_cxx_strcat::inc
+#include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/initializer_list.hpp"
 #include"lang/cxx/clone.hpp"
 #include"lang/cxx.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 

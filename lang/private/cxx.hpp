@@ -32,8 +32,8 @@ namespace mixc::lang_cxx{
     template<class final_t, class item_type>
     xstruct(
         xtmpl(cxx_t, final_t, item_type),
-        xprif(ptr, item_type *),
-        xprif(plength, uxx)
+        xprif(m_ptr, item_type *),
+        xprif(m_length, uxx)
     )
         struct im_cxx{
             static constexpr bool ensure = true;
@@ -47,14 +47,14 @@ namespace mixc::lang_cxx{
         cxx_t(cxx_t const &)        = default;
 
         cxx_t(item_t const * str) : 
-            ptr((item_t *)str), plength(0) {
+            m_ptr((item_t *)str), m_length(0) {
 
-            if (ptr == nullptr){
-                ptr                 = & empty<item_t>;
+            if (m_ptr == nullptr){
+                m_ptr               = & empty<item_t>;
             }
 
-            while(ptr[plength] != '\0'){
-                plength            += 1;
+            while(m_ptr[m_length] != '\0'){
+                m_length           += 1;
             }
         }
 
@@ -65,7 +65,7 @@ namespace mixc::lang_cxx{
 
         template<class type>
         cxx_t(type const * ptr, uxx length) : 
-            ptr((item_t *)ptr), plength(length) {
+            m_ptr((item_t *)ptr), m_length(length) {
             static_assert(sizeof(type) == sizeof(item_t));
         }
 
@@ -74,23 +74,23 @@ namespace mixc::lang_cxx{
         }
 
         item_t & operator [](uxx index) const {
-            return the.ptr[index];
+            return the.m_ptr[index];
         }
 
         template<class number_t>
         item_t & operator [](number_t const & index) const {
-            return the.ptr[(uxx)(number_t &)index];
+            return the.m_ptr[(uxx)(number_t &)index];
         }
 
         explicit operator item_t *() const {
             // 使用 explicit 避免出现在未包含 "lang/cxx/compare_xxx.hpp" 时直接变成指针比较 
-            return the.ptr;
+            return the.m_ptr;
         }
 
         final_t backward(uxx value) const {
-            auto tmp     = thex;
-            tmp.ptr     += value;
-            tmp.plength -= uxx(value);
+            auto tmp        = thex;
+            tmp.m_ptr      += value;
+            tmp.m_length   -= uxx(value);
             return tmp;
         }
 
@@ -101,8 +101,8 @@ namespace mixc::lang_cxx{
         }
 
         final_t shorten(uxx length) const {
-            auto tmp     = thex;
-            tmp.plength -= length;
+            auto tmp        = thex;
+            tmp.m_length   -= length;
             return tmp;
         }
 
@@ -131,8 +131,8 @@ namespace mixc::lang_cxx{
 
         xpubgetx(length_for_char16, uxx){
             auto c = uxx(0);
-            auto p = the.ptr;
-            auto e = the.ptr + the.length();
+            auto p = the.m_ptr;
+            auto e = the.m_ptr + the.length();
 
             for(; p < e; c++){
                 while(u08((++p)[-1]) >= 0x80 and p < e){
@@ -153,8 +153,8 @@ namespace mixc::lang_cxx{
 
         xpubgetx(length_for_char, uxx){
             auto c = uxx(0);
-            auto p = the.ptr;
-            auto e = the.ptr + the.length();
+            auto p = the.m_ptr;
+            auto e = the.m_ptr + the.length();
 
             for(; p < e; p++){
                 if (p[0] >= 0x800){

@@ -19,6 +19,7 @@
 #include"interface/unified_seq.hpp"
 #include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/copy.hpp"
 #include"meta/has_cast.hpp"
@@ -31,15 +32,15 @@
 namespace mixc::lang_cxx_split{
     xstruct(
         xname(cxx_split_item),
-        xprif(pindex, uxx),
-        xprif(plength, uxx)
+        xprif(m_index, uxx),
+        xprif(m_length, uxx)
     )
         using final_t = the_t;
         template<class> friend struct core;
 
         constexpr cxx_split_item():
-            pindex(0),
-            plength(0){
+            m_index(0),
+            m_length(0){
         }
 
         xpubget(index)
@@ -62,20 +63,20 @@ namespace mixc::lang_cxx_split{
     xstruct(
         xtmpl(cxx_split_info, item_t),
         xpubb(inc::disable_copy),
-        xprif(psegment_count, uxx),
-        xprif(pempty_entries_count, uxx),
-        xprif(ptable, cxx_split_item **),
-        xprif(pcontent, item_t const *)
+        xprif(m_segment_count, uxx),
+        xprif(m_empty_entries_count, uxx),
+        xprif(m_table, cxx_split_item **),
+        xprif(m_content, item_t const *)
     )
     private:
         using final_t = the_t;
         template<class> friend struct core;
 
         constexpr cxx_split_info():
-            psegment_count(0),
-            pempty_entries_count(0),
-            ptable(nullptr),
-            pcontent(nullptr){
+            m_segment_count(0),
+            m_empty_entries_count(0),
+            m_table(nullptr),
+            m_content(nullptr){
         }
 
     public:
@@ -87,12 +88,12 @@ namespace mixc::lang_cxx_split{
         xpubget(empty_entries_count)
     public:
         cxx_split_item segment_of(uxx index) const {
-            return var_array::access(ptable, index);
+            return var_array::access(m_table, index);
         }
 
         inc::cxx<item_t> segment_content_of(uxx index) const {
-            auto item = var_array::access(ptable, index);
-            return { pcontent + item.index(), item.length() };
+            auto item = var_array::access(m_table, index);
+            return { m_content + item.index(), item.length() };
         }
     $
 
@@ -140,43 +141,43 @@ namespace mixc::lang_cxx_split{
                 length              = value.length();
             }
 
-            if (info.ptable = table; uxx(keep_empty_entries)){
+            if (info.m_table = table; uxx(keep_empty_entries)){
                 the.find(value, compare, [&](uxx index){
-                    last.plength    = index - last.pindex;
-                    var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
-                    info.pempty_entries_count
-                                  += 1;
+                    last.m_length   = index - last.m_index;
+                    var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
+                    info.m_empty_entries_count
+                                   += 1;
 
                     if (index == 0){
-                        last.pindex = index + length;
+                        last.m_index = index + length;
                         return;
                     }
 
-                    last.pindex     = index;
-                    last.plength    = 0;
-                    var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
-                    last.pindex    += length;
+                    last.m_index    = index;
+                    last.m_length   = 0;
+                    var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
+                    last.m_index   += length;
                 });
             }
             else{
                 the.find(value, compare, [&](uxx index){
-                    if (last.plength = index - last.pindex; last.plength != 0){
-                        var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
+                    if (last.m_length = index - last.m_index; last.m_length != 0){
+                        var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
                     }
-                    info.pempty_entries_count
+                    info.m_empty_entries_count
                                    += 1;
-                    last.pindex     = index + length;
+                    last.m_index    = index + length;
                 });
             }
 
-            if (last.pindex + 1 < the.length()){
-                last.plength        = the.length() - last.pindex;
-                var_array::push(xref info.ptable, xref info.psegment_count, last, allocx, freex);
+            if (last.m_index + 1 < the.length()){
+                last.m_length       = the.length() - last.m_index;
+                var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
             }
 
-            info.pcontent           = (item_t *)the;
+            info.m_content          = (item_t *)the;
             invoke(inc::move(info));
-            var_array::clear(xref info.ptable, xref info.psegment_count, freex);
+            var_array::clear(xref info.m_table, xref info.m_segment_count, freex);
         }
     };
 

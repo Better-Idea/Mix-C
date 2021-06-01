@@ -9,15 +9,16 @@
 #undef  xusing_lang_cxx
 #undef  xuser
 #define xuser mixc::lang_cxx_find::inc
+#include"define/base_type.hpp"
 #include"interface/can_compare.hpp"
 #include"interface/initializer_list.hpp"
 #include"interface/unified_seq.hpp"
 #include"lang/cxx/private/find.hpp"
 #include"lang/cxx/private/find_mix.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 

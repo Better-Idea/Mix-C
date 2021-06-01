@@ -11,11 +11,11 @@ namespace mixc::lang_wxx{
     template<class final_t, class type>
     xstruct(
         xtmpl(wxx, final_t, type),
-        xprof(data, type)
+        xprif(m_value, type)
     )
-        constexpr wxx() : data('\0'){};
+        constexpr wxx() : m_value('\0'){};
         constexpr wxx(wxx const &) = default;
-        constexpr wxx(type value) : data(value){}
+        constexpr wxx(type value) : m_value(value){}
 
         template<class finalx_t>
         wxx(wxx<finalx_t, type> const & self) :
@@ -23,7 +23,7 @@ namespace mixc::lang_wxx{
         }
 
         operator type & (){
-            return data;
+            return m_value;
         }
     $
 }

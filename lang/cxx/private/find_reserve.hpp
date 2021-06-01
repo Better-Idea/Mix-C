@@ -3,11 +3,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::lang_cxx_private_find_reserve::inc
+#include"define/base_type.hpp"
 #include"interface/can_compare.hpp"
 #include"lang/cxx/index_of_last.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::lang_cxx_private_find_reserve::origin{

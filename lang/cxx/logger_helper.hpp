@@ -54,7 +54,6 @@ namespace mixc::lang_cxx_logger_helper{
                 this->fmt               = (xref mix::template logger_helper<match>);
                 target                  = (match)(object_t &)(value);
             }
-
         }
 
         inc::cxx<item_t> logger_helper(inc::ialloc<item_t> alloc) const {
