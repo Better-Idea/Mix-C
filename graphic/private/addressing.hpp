@@ -3,7 +3,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_gui_private_addressing::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_gui_private_addressing {

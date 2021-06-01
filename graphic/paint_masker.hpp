@@ -3,10 +3,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_gui_paint_masker::inc
+#include"define/base_type.hpp"
 #include"graphic/private/addressing.hpp"
 #include"graphic/private/try_paint_result_t.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
-#include"mixc.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
 

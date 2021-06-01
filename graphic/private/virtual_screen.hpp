@@ -3,21 +3,23 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_gui_private_virtual_screen::inc
+#include"define/base_type.hpp"
 #include"graphic/rgb.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/fill.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_gui_private_virtual_screen::origin{
     xstruct(
         xname(virtual_screen),
-        xprif(pwidth,       uxx),
-        xprif(pheight,      uxx),
-        xprif(pbuffer,      inc::rgbp),
-        xprif(pbackground,  inc::rgb),
-        xprif(phdc,         voidp),
-        xprif(pmhdc,        voidp),
-        xprif(phbmp,        voidp)
+        xprif(m_width,       uxx),
+        xprif(m_height,      uxx),
+        xprif(m_buffer,      inc::rgbp),
+        xprif(m_background,  inc::rgb),
+        xprif(m_hdc,         voidp),
+        xprif(m_mhdc,        voidp),
+        xprif(m_hbmp,        voidp)
     )
         using final_t = the_t;
     public:
@@ -26,28 +28,28 @@ namespace mixc::extern_gui_private_virtual_screen::origin{
         xpubget_pubset(background)
     public:
         constexpr virtual_screen():
-            pwidth(),
-            pheight(),
-            pbuffer(),
-            pbackground(),
-            phdc(),
-            pmhdc(),
-            phbmp(){
+            m_width(),
+            m_height(),
+            m_buffer(),
+            m_background(),
+            m_hdc(),
+            m_mhdc(),
+            m_hbmp(){
         }
 
         void set_pixel(uxx x, uxx y, inc::rgb value){
-            if (x >= the.pwidth or y >= the.pheight){
+            if (x >= the.m_width or y >= the.m_height){
                 return;
             }
-            pbuffer[y * the.pwidth + x]   = value;
+            m_buffer[y * the.m_width + x]   = value;
         }
 
         inc::rgb get_pixel(uxx x, uxx y){
-            return pbuffer[y * the.pwidth + x];
+            return m_buffer[y * the.m_width + x];
         }
 
         void clear(){
-            inc::fill(the.pbuffer, the.pbackground, the.pheight * the.pwidth);
+            inc::fill(the.m_buffer, the.m_background, the.m_height * the.m_width);
         }
 
         void configure(voidp hwnd);

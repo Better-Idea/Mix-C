@@ -12,9 +12,9 @@ namespace mixc::extern_gui_rgb::origin {
     template<class final_t>
     xstruct(
         xtmpl(rgb, final_t),
-        xprif(pblue  , u08),
-        xprif(pgreen , u08),
-        xprif(pred   , u08)
+        xprif(m_blue  , u08),
+        xprif(m_green , u08),
+        xprif(m_red   , u08)
     )
         template<class finalx_t>
         constexpr rgb(rgb<finalx_t> const & self){
@@ -23,11 +23,11 @@ namespace mixc::extern_gui_rgb::origin {
         }
 
         constexpr rgb(u08 r, u08 g, u08 b) : 
-            pblue(b), pgreen(g), pred(r) {
+            m_blue(b), m_green(g), m_red(r) {
         }
 
         constexpr rgb() : 
-            pblue(0), pgreen(0), pred(0){
+            m_blue(0), m_green(0), m_red(0){
         }
 
         xpubget_pubset(red)
@@ -35,7 +35,7 @@ namespace mixc::extern_gui_rgb::origin {
         xpubget_pubset(blue)
 
         xpubgetx(value, u32){
-            return u32(pred) | u32(pgreen) << 8 | u32(pblue) << 16;
+            return u32(m_red) | u32(m_green) << 8 | u32(m_blue) << 16;
         }
     $
 }
