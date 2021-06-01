@@ -15,14 +15,14 @@ xstruct(
     xpubf(name, asciis)
 ) $
 
-int main(){
+int run(){
     foo f;
     f.sex   = 'M';
     f.age   = 24;
     f.name  = "cat";
 
     xtypeid(foo).foreach_fields(f, [](uxx i, asciis name, auto const & value){
-        tty.write_line(name, ':', value);
+        xuser::tty.write_line(name, ':', value);
     });
     return 0;
 }
