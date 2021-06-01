@@ -5,10 +5,12 @@
 #define xuser mixc::docker_single_linked_node::inc
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/lock/builtin_lock.hpp"
+#include"define/base_type.hpp"
 #include"dumb/struct_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/is_attached_lock.hpp"
 #include"meta/is_same.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_single_linked_node::origin {
@@ -28,7 +30,7 @@ namespace mixc::docker_single_linked_node::origin {
     xstruct(
         xtmpl(single_linked_node_ptr, item_t, lock_t),
         xprib(lock_t),
-        xprif(ptop,       single_linked_node<item_t> *)
+        xprif(m_top,       single_linked_node<item_t> *)
     )
     public:
         using node_t    = single_linked_node<item_t>;
@@ -48,7 +50,7 @@ namespace mixc::docker_single_linked_node::origin {
         }
     public:
         single_linked_node_ptr() : 
-            ptop(nullptr){
+            m_top(nullptr){
         }
 
         template<auto operation, class callback>
@@ -57,11 +59,11 @@ namespace mixc::docker_single_linked_node::origin {
         }
 
         nodep top() const {
-            return origin(ptop);
+            return origin(m_top);
         }
 
         nodep swap_top(nodep value) const {
-            nodep masked_top = inc::atom_swap<nodep>(xref ptop, masked(value));
+            nodep masked_top = inc::atom_swap<nodep>(xref m_top, masked(value));
             return origin(masked_top);
         }
     $

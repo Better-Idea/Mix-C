@@ -149,11 +149,11 @@ xstruct(
     xtmpl(kvhashmap, final_t, key_t, val_t),
     xpubb(inc::disable_copy),
     xpubb(inc::self_management),
-    xprif(lines,  uxx),
-    xprif(count,  uxx),
-    xprif(seed ,  uxx),
-    xprif(bmp  ,  inc::bits_indicator<>),
-    xprif(nodes,  node<key_t, val_t> *)
+    xprif(m_lines,  uxx),
+    xprif(m_count,  uxx),
+    xprif(m_seed ,  uxx),
+    xprif(m_bmp  ,  inc::bits_indicator<>),
+    xprif(m_nodes,  node<key_t, val_t> *)
 )
     using node_t   = node<key_t, val_t>;
 #else
@@ -164,11 +164,11 @@ xstruct(
     xtmpl(khashmap, final_t, key_t),
     xpubb(inc::disable_copy),
     xpubb(inc::self_management),
-    xprif(lines,  uxx),
-    xprif(count,  uxx),
-    xprif(seed ,  uxx),
-    xprif(bmp  ,  inc::bits_indicator<>),
-    xprif(nodes,  node<key_t, void> *)
+    xprif(m_lines,  uxx),
+    xprif(m_count,  uxx),
+    xprif(m_seed ,  uxx),
+    xprif(m_bmp  ,  inc::bits_indicator<>),
+    xprif(m_nodes,  node<key_t, void> *)
 )
     using node_t   = node<key_t, void>;
 #endif
@@ -182,10 +182,10 @@ public:
     xarg_name() : xarg_name(start_capcity){}
     xarg_name(uxx start_capcity) : xarg_name(start_capcity, inc::random<uxx>()){}
     xarg_name(uxx start_capcity, uxx seed) : 
-        lines(inc::align(start_capcity)), 
-        count(0), 
-        seed(seed),
-        nodes(the_t::alloc(xref bmp, lines)) {
+        m_lines(inc::align(start_capcity)), 
+        m_count(0), 
+        m_seed(seed),
+        m_nodes(the_t::alloc(xref m_bmp, m_lines)) {
     }
 protected:
     ~xarg_name(){
@@ -197,8 +197,8 @@ protected:
     void foreach_template(invoke_t const & invoke) const {
         loop_t state = loop_t::go_on;
 
-        for(uxx i = uxx(-1), index = 0; not_exist != (i = bmp.index_of_first_set(i + 1));){
-            for(auto cur = xref nodes[i]; cur != nullptr; cur = cur->next){
+        for(uxx i = uxx(-1), index = 0; not_exist != (i = m_bmp.index_of_first_set(i + 1));){
+            for(auto cur = xref m_nodes[i]; cur != nullptr; cur = cur->next){
                 #ifdef xarg_has_val_t
                     state = inc::itr_switch<mode_v>(xref index, invoke, (key_t &)cur->key, (val_t &)cur->val);
                 #else
@@ -223,14 +223,14 @@ public:
     xarg_item_t & get(key_t const & key) const {
         uxx index = addressing(key);
         xdebug(im_docker_hashmap_get, index);
-        return nodes[index].get(key);
+        return m_nodes[index].get(key);
     }
 
     inc::transmitter<xarg_item_t> take_out(key_t const & key, hashmap_take_out_result_t * state = nullptr) {
         auto   tmp_state  = hashmap_take_out_result_t::item_not_exist;
         auto   index      = addressing(key);
         auto   can_relase = false;
-        auto & node       = nodes[index];
+        auto & node       = m_nodes[index];
         auto & item       = node.take_out(key, xref can_relase);
 
         xdefer{
@@ -244,7 +244,7 @@ public:
         }
         else{
             tmp_state     = hashmap_take_out_result_t::success;
-            count        -= 1; // 需要计数
+            m_count      -= 1; // 需要计数
         }
 
         inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item;
@@ -253,17 +253,17 @@ public:
             inc::free_with_destroy(xref item);
         }
         if (node.is_empty()){
-            bmp.reset(index);
+            m_bmp.reset(index);
         }
         return r;
     }
 
     void clear() {
-        if (nodes != nullptr){
-            for(uxx i = 0; not_exist != (i = bmp.pop_first());){
-                nodes[i].free();
+        if (m_nodes != nullptr){
+            for(uxx i = 0; not_exist != (i = m_bmp.pop_first());){
+                m_nodes[i].free();
             }
-            count = 0;
+            m_count = 0;
         }
     }
 
@@ -276,14 +276,14 @@ public:
     }
 
     void resize() {
-        if (lines >= count * multi * 2 and lines > start_capcity){
-            resize(lines / multi);
+        if (m_lines >= m_count * multi * 2 and m_lines > start_capcity){
+            resize(m_lines / multi);
         }
     }
 
     void set(key_t const & key xarg_val_t_decl, hashmap_set_result_t * state = nullptr){
         auto   index = addressing(key);
-        auto & node = nodes[index];
+        auto & node = m_nodes[index];
 
         #ifdef xarg_has_val_t
             xdebug(im_docker_hashmap_set, index, key, val);
@@ -292,7 +292,7 @@ public:
         #endif
 
         if (node.is_empty()){
-            bmp.set(index);
+            m_bmp.set(index);
         }
 
         auto sta = node.set(key xarg_val);
@@ -301,18 +301,18 @@ public:
             state[0] = sta;
         }
         if (sta == hashmap_set_result_t::success){
-            count   += 1;
+            m_count   += 1;
         }
-        if (lines == count){
-            resize(lines * multi);
+        if (m_lines == m_count){
+            resize(m_lines * multi);
         }
     }
 
     void take_out(key_t const & key, xarg_item_t * value, hashmap_take_out_result_t * state = nullptr) {
         auto sta = hashmap_take_out_result_t::item_not_exist;
 
-        // count -= 1; 注意计数问题
-        // 这里间接调用了 count -= 1 的 take_out 则无需考虑此问题
+        // m_count -= 1; 注意计数问题
+        // 这里间接调用了 m_count -= 1 的 take_out 则无需考虑此问题
         if (auto && r = take_out(key); r.has_hold_value()){
             value[0]  = r;
             sta       = hashmap_take_out_result_t::success;
@@ -333,20 +333,20 @@ public:
     }
 
     xpubgetx(length, uxx) {
-        return count;
+        return m_count;
     }
 
     // 私有区
 private:
     uxx addressing(key_t const & key) const {
-        auto hash  = inc::hash(key, seed);
+        auto hash  = inc::hash(key, m_seed);
         auto index = hash & mask();
         xdebug(im_docker_hashmap_addressing, voidp(hash), index);
         return index;
     }
 
     void resize(uxx capcity){
-        the_t new_hash_map{ capcity, seed };
+        the_t new_hash_map{ capcity, m_seed };
         the.resize_to(new_hash_map);
         inc::swap(xref new_hash_map, xref the);
     }
@@ -354,22 +354,22 @@ private:
     // 该函数用于 hashmap 内部扩容和压缩
     // 要求 map 是新分配的空间，并且内部无元素
     void resize_to(the_t & map) {
-        if (nodes == nullptr){
+        if (m_nodes == nullptr){
             return;
         }
 
-        for(uxx i; not_exist != (i = bmp.pop_first());){
-            auto   old_head    = xref nodes[i];
+        for(uxx i; not_exist != (i = m_bmp.pop_first());){
+            auto   old_head    = xref m_nodes[i];
             auto   cur         = old_head->next;
             auto   index       = map.addressing(old_head->key);
-            auto & new_head    = map.nodes[index];
+            auto & new_head    = map.m_nodes[index];
 
             // 旧的 hashmap 首元不可以当作普通节点一样挂到新的 hashmap 中
             // 因为它是数组中的一个元素，而不是通过 inc::alloc 分配得到的独立节点
             if (new_head.is_empty()){
                 new_head       = old_head[0];
                 new_head.next  = nullptr;
-                map.bmp.set(index);
+                map.m_bmp.set(index);
             }
             // 只有首元
             else if (auto next = inc::alloc_with_initial<node_t>(*old_head); new_head.next == nullptr){
@@ -386,12 +386,12 @@ private:
             for(old_head->next = old_head; nullptr != cur;){
                 auto   next    = cur->next; 
                 auto   index   = map.addressing(cur->key);
-                auto & node    = map.nodes[index];
+                auto & node    = map.m_nodes[index];
 
                 if (node.is_empty()){
                     node       = cur[0];
                     node.next  = nullptr;
-                    map.bmp.set(index);
+                    map.m_bmp.set(index);
                     inc::free(cur);
                 }
                 else if (node.next == nullptr){
@@ -405,18 +405,18 @@ private:
                 cur            = next;
             }
         }
-        map.count = count;
+        map.m_count = m_count;
     }
 
     uxx mask() const {
-        return lines - 1;
+        return m_lines - 1;
     }
 
     void free() {
-        inc::free(nodes, inc::memory_size(
-            lines * sizeof(node_t) + bmp.cost_bytes()
+        inc::free(m_nodes, inc::memory_size(
+            m_lines * sizeof(node_t) + m_bmp.cost_bytes()
         ));
-        nodes = nullptr;
+        m_nodes = nullptr;
     }
 
     static node_t * alloc(inc::bits_indicator<> * bmp, uxx node_count){

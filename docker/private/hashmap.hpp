@@ -4,12 +4,14 @@
 #undef  xuser
 #define xuser mixc::docker_hashmap::inc
 #include"algo/hash.hpp"
+#include"define/base_type.hpp"
 #include"define/nullref.hpp"
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/disable_copy.hpp"
 #include"gc/self_management.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"math/align.hpp"
 #include"math/random.hpp"
@@ -19,7 +21,6 @@
 #include"memop/swap.hpp"
 #include"meta/has_cmp_equal.hpp"
 #include"meta/remove_ptr.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")

@@ -12,16 +12,18 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_shared_array::inc
+#include"define/base_type.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"dumb/init_by.hpp"
 #include"dumb/struct_type.hpp"
 #include"gc/ref.hpp"
 #include"interface/ranger.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xis_nullptr.hpp"
+#include"macro/xstruct.hpp"
 #include"macro/xnew.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/has_constructor.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_shared_array::origin{

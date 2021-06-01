@@ -35,7 +35,7 @@ namespace mixc::docker_tuple::origin{
     xstruct(
         xtmpl(tuple, a0_t, args_t...),
         xprob(tuple<args_t...>),
-        xprif(value, item_t<a0_t>)
+        xprif(m_value, item_t<a0_t>)
     )
         using base = tuple<args_t...>;
 
@@ -43,13 +43,13 @@ namespace mixc::docker_tuple::origin{
         constexpr tuple(){}
 
         constexpr tuple(a0_t const & first, args_t const & ... result) : 
-            value(*(item_t<a0_t> *)& first), base(result...){
+            m_value(*(item_t<a0_t> *)& first), base(result...){
         }
 
         template<uxx index>
         auto & get() const {
             if constexpr (index == 0){
-                return value;
+                return m_value;
             }
             else{
                 return base::template get<index - 1>();
@@ -58,7 +58,7 @@ namespace mixc::docker_tuple::origin{
 
         template<uxx index, class val_t>
         auto & set(val_t const & value){
-            get<index>() = value;
+            get<index>() = m_value;
             return this[0];
         }
 

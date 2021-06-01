@@ -6,13 +6,15 @@
 #define xuser mixc::docker_btree::inc
 #include"concurrency/lock/atom_swap.hpp"
 #include"configure/platform.hpp"
+#include"define/base_type.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/move.hpp"
 #include"instruction/index_of_first_set.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/swap.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #include"utils/bits_indexer.hpp"
 

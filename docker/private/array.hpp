@@ -12,19 +12,21 @@
 #define xuser mixc::docker_array::inc
 #include"concurrency/lock/atom_swap.hpp"
 #include"docker/private/adapter.array_access.hpp"
+#include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/can_callback.hpp"
 #include"interface/ranger.hpp"
 #include"macro/xis_nullptr.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/cast.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/has_constructor.hpp"
 #include"meta/remove_ptr.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta_seq/vlist.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -66,10 +68,10 @@ namespace mixc::docker_array{
     template<class final_t, class type_t, uxx count_v, uxx ... rest_v>
     xstruct(
         xtmpl(array_t, final_t, type_t, count_v, rest_v...),
-        xprif(data, items<final_t, type_t, count_v, rest_v...>)
+        xprif(m_items, items<final_t, type_t, count_v, rest_v...>)
     )
     public:
-        using item_t = inc::remove_ref<decltype(the_t::data[0])>;
+        using item_t = inc::remove_ref<decltype(the_t::m_items[0])>;
 
         constexpr array_t(array_t const &) = default;
 
@@ -77,8 +79,8 @@ namespace mixc::docker_array{
         requires(... and inc::has_cast<item_t, args_t>)
         constexpr array_t(args_t const & ... list) : 
             // (item_t &)(args_t &) 和指针的转换类似，会导致不正确的行为
-            // data { ((item_t &)(args_t &)list)... } {}
-            data { ((args_t &)list)... } {}
+            // m_items { ((item_t &)(args_t &)list)... } {}
+            m_items { ((args_t &)list)... } {}
 
         template<class finalx_t >
         constexpr array_t(array_t<finalx_t, type_t, count_v, rest_v...> const & self) : 
@@ -92,7 +94,7 @@ namespace mixc::docker_array{
          * - 指定索引的元素的引用
          */
         item_t & operator[] (uxx index) {
-            return data[index];
+            return m_items[index];
         }
 
         /* 函数：下标随机访问（const 修饰）
@@ -102,17 +104,17 @@ namespace mixc::docker_array{
          * - 指定索引的元素的引用
          */
         item_t const & operator[] (uxx index) const {
-            return data[index];
+            return m_items[index];
         }
 
         /* 函数：获取数组元素的首地址 */
         operator item_t *() {
-            return data;
+            return m_items;
         }
 
         /* 函数：获取数组元素的首地址（const 修饰） */
         operator item_t const *() const {
-            return data;
+            return m_items;
         }
 
         /* 属性：当前维度数组元素的个数 */
@@ -130,14 +132,14 @@ namespace mixc::docker_array{
     xstruct(
         xspec(array_t, final_t, type_t),
         xpubb(inc::disable_copy),
-        xprif(data, type_t *)
+        xprif(m_items, type_t *)
     )
         using item_t                = type_t;
         using item_initial_invoke   = inc::icallback<void(item_t * item_ptr)>;
         using item_initial_invokex  = inc::icallback<void(uxx i, item_t * item_ptr)>;
 
         constexpr array_t(decltype(nullptr) = nullptr) : 
-            data(empty_array_ptr()){
+            m_items(empty_array_ptr()){
         }
 
         template<class initial_invoke>
@@ -146,14 +148,14 @@ namespace mixc::docker_array{
             inc::has_cast<item_initial_invokex, initial_invoke>
         )
         array_t(::length capacity, inc::ialloc<void> alloc, initial_invoke const & initial) : 
-            data(create(capacity, alloc)){
+            m_items(create(capacity, alloc)){
 
             for(uxx i = 0, len = the.length(); i < len; i++){
                 if constexpr (inc::has_cast<item_initial_invoke, initial_invoke>){
-                    initial(data + i);
+                    initial(m_items + i);
                 }
                 else{
-                    initial(i, data + i);
+                    initial(i, m_items + i);
                 }
             }
         }
@@ -193,7 +195,7 @@ namespace mixc::docker_array{
         template<class ... args_t>
         requires(... and inc::has_cast<item_t, args_t>)
         array_t(args_t const & ... list) : 
-            data(
+            m_items(
                 create(::length{ sizeof...(args_t) }, inc::default_alloc<void>)
             ){
 
@@ -203,7 +205,7 @@ namespace mixc::docker_array{
             } items[] = { list... };
 
             for(uxx i = 0, len = the.length(); i < len; i++){
-                xnew(the.data + i) item_t(items[i].value);
+                xnew(the.m_items + i) item_t(items[i].value);
             }
         }
     protected:
@@ -214,7 +216,7 @@ namespace mixc::docker_array{
 
             auto   old_ptr  = empty_array_ptr();
             auto & old      = inc::cast<the_t>(old_ptr);
-            old.data        = inc::atom_swap(& data, old.data);
+            old.m_items        = inc::atom_swap(& m_items, old.m_items);
 
             if (not old.need_free()){
                 return;
@@ -245,11 +247,11 @@ namespace mixc::docker_array{
         }
 
         item_t * origin() const {
-            return origin(data);
+            return origin(m_items);
         }
 
         uxxp header() const {
-            return uxxp(uxx(data) & ~uxx(1)) - 1;
+            return uxxp(uxx(m_items) & ~uxx(1)) - 1;
         }
     public:
         /* 函数：下标随机访问
@@ -288,10 +290,10 @@ namespace mixc::docker_array{
 
         xpriget_prisetx(need_free, bool)
             xr{ 
-                return (uxx(data) & 1) != 0;
+                return (uxx(m_items) & 1) != 0;
             }
             xw{ 
-                data = (item_t *)(uxx(origin()) | uxx(value));
+                m_items = (item_t *)(uxx(origin()) | uxx(value));
             }
 
         xpubgetx(length, uxx){

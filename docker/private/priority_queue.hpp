@@ -4,19 +4,21 @@
 #undef  xuser
 #define xuser mixc::docker_priority_queue::inc
 #include"algo/heap_root.hpp"
+#include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xis_nullptr.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/cast.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_priority_queue {
     template<class final_t, class item_t>
     xstruct(
         xtmpl(priority_queue, final_t, item_t),
-        xprif(items, inc::shared_array<item_t>)
+        xprif(m_items, inc::shared_array<item_t>)
     )
         using mirror = inc::shared_array<inc::mirror<item_t>>;
 
@@ -24,59 +26,59 @@ namespace mixc::docker_priority_queue {
 
         template<class finalx_t >
         priority_queue(priority_queue<finalx_t, item_t> const & object) : 
-            items((inc::shared_array<item_t> &)object.items){}
+            m_items((inc::shared_array<item_t> &)object.m_items){}
 
         priority_queue(::length initial_capacity) : 
-            items(initial_capacity){}
+            m_items(initial_capacity){}
 
         void clear() {
-            the_t{}.items.swap(xref items);
+            the_t{}.m_items.swap(xref m_items);
         }
 
         void push(item_t const & value) {
             // 本次 push 无需拷贝构造
-            inc::cast<mirror>(items).push(inc::mirror<item_t>{});
+            inc::cast<mirror>(m_items).push(inc::mirror<item_t>{});
 
             // 本次 push 默认内部拷贝构造
-            inc::heap_root::push(items, items.length() - 1, value);
+            inc::heap_root::push(m_items, m_items.length() - 1, value);
         }
 
         inc::transmitter<item_t> pop() {
-            auto length = items.length();
-            inc::transmitter<item_t> r = items[0];
-            inc::heap_root::pop(items, length, items[length - 1]);
-            inc::cast<mirror>(items).pop();
+            auto length = m_items.length();
+            inc::transmitter<item_t> r = m_items[0];
+            inc::heap_root::pop(m_items, length, m_items[length - 1]);
+            inc::cast<mirror>(m_items).pop();
             return r;
         }
 
         void swap(the_t * object){
-            items.swap(object);
+            m_items.swap(object);
         }
 
         final_t & operator= (decltype(nullptr)){
-            items = nullptr;
+            m_items = nullptr;
             return thex;
         }
 
         final_t & operator= (the_t const & object){
-            items = object.items;
+            m_items = object.m_items;
             return thex;
         }
 
         xpubgetx(root, inc::transmitter<item_t>){
-            return items[0];
+            return m_items[0];
         }
 
         xpubgetx(length, uxx){
-            return items.length();
+            return m_items.length();
         }
 
         xpubgetx(is_empty, bool){
-            return items.length() == 0;
+            return m_items.length() == 0;
         }
 
         xis_nullptr(
-            items == nullptr
+            m_items == nullptr
         )
     };
 }

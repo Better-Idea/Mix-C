@@ -3,10 +3,11 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::docker_shared::inc
+#include"define/base_type.hpp"
 #include"dumb/init_by.hpp"
 #include"gc/ref.hpp"
+#include"macro/xexport.hpp"
 #include"meta/has_constructor.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_shared::origin{

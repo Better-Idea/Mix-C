@@ -5,13 +5,15 @@
 #define xuser mixc::docker_queue::inc
 #include"concurrency/lock/builtin_lock.hpp"
 #include"concurrency/lock/policy_barrier.hpp"
+#include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"gc/self_management.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/is_attached_lock.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -48,7 +50,7 @@ namespace mixc::docker_queue {
         xtmpl(queue, final_t, item_t, lock_t),
         xpubb(self_management),
         xpubb(disable_copy),
-        xprof(node, single_linked_node_ptr<item_t, lock_t>) // 带锁的节点指针类型
+        xprof(m_node, single_linked_node_ptr<item_t, lock_t>) // 带锁的节点指针类型
     )
     private:
         using node_t    = single_linked_node<item_t>;       // 纯节点类型
@@ -63,8 +65,8 @@ namespace mixc::docker_queue {
             nodep tmp;
             nodep top;
 
-            node.template lock<opr::clear>([&](){
-                top = node.swap_top(nullptr);
+            m_node.template lock<opr::clear>([&](){
+                top = m_node.swap_top(nullptr);
             });
 
             if (top == nullptr) {
@@ -84,15 +86,15 @@ namespace mixc::docker_queue {
         void push(item_t const & value) {
             auto new_top = alloc_with_initial<node_t>(value);
 
-            node.template lock<opr::push>([&](){
-                if (auto top = node.top(); top != nullptr){
+            m_node.template lock<opr::push>([&](){
+                if (auto top = m_node.top(); top != nullptr){
                     new_top->next = top->next;
                     top->next     = new_top;
-                    node.swap_top(new_top);
+                    m_node.swap_top(new_top);
                 }
                 else{
                     new_top->next = new_top;
-                    node.swap_top(new_top);
+                    m_node.swap_top(new_top);
                 }
             });
         }
@@ -101,8 +103,8 @@ namespace mixc::docker_queue {
             transmitter<item_t> r;
             nodep               head = nullptr;
 
-            node.template lock<opr::pop>([&](){
-                auto top = node.top(); 
+            m_node.template lock<opr::pop>([&](){
+                auto top = m_node.top(); 
                 if (top == nullptr){
                     return;
                 }
@@ -111,7 +113,7 @@ namespace mixc::docker_queue {
                 r       = *head;
 
                 if (head == top){
-                    node.swap_top(nullptr);
+                    m_node.swap_top(nullptr);
                 }
                 else{
                     top->next = head->next;
@@ -128,8 +130,8 @@ namespace mixc::docker_queue {
     private:
         template<auto mode_v, class iterator_t>
         void foreach_template(iterator_t const & invoke) const {
-            node.template lock<opr::foreach>([&](){
-                nodep  top      = node.top();
+            m_node.template lock<opr::foreach>([&](){
+                nodep  top      = m_node.top();
                 nodep  cur      = top;
                 uxx    index    = 0;
 
@@ -148,23 +150,23 @@ namespace mixc::docker_queue {
         xpubget_pubsetx(head, transmitter<item_t>)
             xr{
                 transmitter<item_t> r;
-                node.template lock<opr::head_xr>([&](){
-                    if (nodep cur = node.top(); cur != nullptr){
+                m_node.template lock<opr::head_xr>([&](){
+                    if (nodep cur = m_node.top(); cur != nullptr){
                         r = cur->next[0];
                     }
                 });
                 return r;
             }
             xw{
-                node.template lock<opr::head_xw>([&](){
-                    if (nodep cur = node.top(); cur != nullptr){
+                m_node.template lock<opr::head_xw>([&](){
+                    if (nodep cur = m_node.top(); cur != nullptr){
                         cur->next[0] = value;
                     }
                 });
             }
 
         xpubgetx(is_empty, bool){
-            return node.top() == nullptr;
+            return m_node.top() == nullptr;
         }
     $
 }

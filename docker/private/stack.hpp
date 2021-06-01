@@ -5,13 +5,15 @@
 #define xuser mixc::docker_stack::inc
 #include"concurrency/lock/builtin_lock.hpp"
 #include"concurrency/lock/policy_barrier.hpp"
+#include"define/base_type.hpp"
 #include"docker/transmitter.hpp"
 #include"docker/private/single_linked_node.hpp"
 #include"dumb/disable_copy.hpp"
 #include"gc/self_management.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/is_attached_lock.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -48,7 +50,7 @@ namespace mixc::docker_stack{
         xtmpl(stack, final_t, item_t, lock_t),
         xpubb(self_management),
         xpubb(disable_copy),
-        xprof(node, single_linked_node_ptr<item_t, lock_t>) // 带锁的节点指针类型
+        xprof(m_node, single_linked_node_ptr<item_t, lock_t>) // 带锁的节点指针类型
     )
     private:
         using node_t    = single_linked_node<item_t>;       // 纯节点类型
@@ -72,8 +74,8 @@ namespace mixc::docker_stack{
             nodep cur = nullptr;
             nodep tmp;
 
-            node.template lock<opr::clear>([&](){
-                cur = node.swap_top(nullptr);
+            m_node.template lock<opr::clear>([&](){
+                cur = m_node.swap_top(nullptr);
             });
 
             while(cur != nullptr){
@@ -85,19 +87,19 @@ namespace mixc::docker_stack{
 
         void push(item_t const & value) {
             nodep new_top = alloc_with_initial<node_t>(value);
-            node.template lock<opr::push>([&](){
-                new_top->next = node.swap_top(new_top);
+            m_node.template lock<opr::push>([&](){
+                new_top->next = m_node.swap_top(new_top);
             });
         }
 
         transmitter<item_t> pop() {
             transmitter<item_t> r;
             nodep               free_item = nullptr;
-            node.template lock<opr::pop>([&](){
-                if (nodep cur = node.top(); cur != nullptr){
+            m_node.template lock<opr::pop>([&](){
+                if (nodep cur = m_node.top(); cur != nullptr){
                     free_item = cur;
                     r         = cur[0];
-                    node.swap_top(cur->next);
+                    m_node.swap_top(cur->next);
                 }
             });
 
@@ -111,8 +113,8 @@ namespace mixc::docker_stack{
     private:
         template<auto mode_v, class interator_t>
         void foreach_template(interator_t invoke) const {
-            node.template lock<opr::foreach>([&](){
-                nodep  cur   = node.top();
+            m_node.template lock<opr::foreach>([&](){
+                nodep  cur   = m_node.top();
                 uxx    index = 0;
 
                 while(cur != nullptr){
@@ -131,16 +133,16 @@ namespace mixc::docker_stack{
         xpubget_pubsetx(top, transmitter<item_t>)
             xr{
                 transmitter<item_t> r;
-                node.template lock<opr::top_xr>([&](){
-                    if (nodep cur = node.top(); cur != nullptr){
+                m_node.template lock<opr::top_xr>([&](){
+                    if (nodep cur = m_node.top(); cur != nullptr){
                         r = cur[0];
                     }
                 });
                 return r;
             }
             xw{
-                node.template lock<opr::top_xw>([&](){
-                    if (nodep cur = node.top(); cur != nullptr){
+                m_node.template lock<opr::top_xw>([&](){
+                    if (nodep cur = m_node.top(); cur != nullptr){
                         cur[0] = value;
                     }
                 });
@@ -149,7 +151,7 @@ namespace mixc::docker_stack{
         // 注意：
         // 多线程环境即使读取到的 stack::is_empty() 为 false 也不能确定该 stack 非空
         xpubgetx(is_empty, bool){
-            return node.top() == nullptr;
+            return m_node.top() == nullptr;
         }
     };
 }
