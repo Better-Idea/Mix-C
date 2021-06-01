@@ -5,11 +5,13 @@
 #define xuser mixc::ttyctrl_text_line::inc
 #include"algo/insert.hpp"
 #include"algo/remove.hpp"
+#include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"macro/xindex_rollback.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::ttyctrl_text_line{
@@ -22,33 +24,33 @@ namespace mixc::ttyctrl_text_line{
 
     xstruct(
         xname(text_line),
-        xprif(ptext          ,   inc::shared_array<char16_t>),
-        xprif(pleft          ,   u16),
-        xprif(ptop           ,   u16),
-        xprif(pcolumn        ,   u16),
-        xprif(pcursor_column ,   u16),
-        xprif(pcursor_index  ,   u32),
-        xprif(plength        ,   u32)
+        xprif(m_text          ,   inc::shared_array<char16_t>),
+        xprif(m_left          ,   u16),
+        xprif(m_top           ,   u16),
+        xprif(m_column        ,   u16),
+        xprif(m_cursor_column ,   u16),
+        xprif(m_cursor_index  ,   u32),
+        xprif(m_length        ,   u32)
     )
         using final_t = the_t;
 
         enum{ over_boundary = true, };
 
         xprigetx(capacity, uxx){
-            return the.ptext.length();
+            return the.m_text.length();
         }
     public:
         text_line() : 
-            ptext(::length{4}){
+            m_text(::length{4}){
         }
 
         char16_t & operator[](ixx index){
             xindex_rollback(length(), index);
-            return the.ptext[uxx(index)];
+            return the.m_text[uxx(index)];
         }
 
         xpubgetx(length, uxx){ 
-            return the.ptext.length();
+            return the.m_text.length();
         }
 
         xpubget_pubset(left)
@@ -58,45 +60,45 @@ namespace mixc::ttyctrl_text_line{
         xpubget_pubset(cursor_column)
 
         bool go_left(){
-            if (the.pcursor_column != the.pleft){
-                auto v = the[pcursor_index];
-                the.pcursor_column -= inc::tty_width(v);
+            if (the.m_cursor_column != the.m_left){
+                auto v = the[m_cursor_index];
+                the.m_cursor_column -= inc::tty_width(v);
 
-                if (the.pcursor_column + 1 == the.pleft){ // over bound
-                    the.pcursor_column += 1;
+                if (the.m_cursor_column + 1 == the.m_left){ // over bound
+                    the.m_cursor_column += 1;
                 }
             }
-            if (the.pcursor_index != 0){
-                the.pcursor_index -= 1;
+            if (the.m_cursor_index != 0){
+                the.m_cursor_index -= 1;
                 return not over_boundary;
             }
             return over_boundary;
         }
 
         bool go_right(){
-            if (auto bound = pleft + pcolumn; pcursor_column != bound){
-                auto v = the[pcursor_index];
-                the.pcursor_column += inc::tty_width(v);
+            if (auto bound = m_left + m_column; m_cursor_column != bound){
+                auto v = the[m_cursor_index];
+                the.m_cursor_column += inc::tty_width(v);
 
-                if (the.pcursor_column - 1 == bound){ // over bound
-                    the.pcursor_column -= 1;
+                if (the.m_cursor_column - 1 == bound){ // over bound
+                    the.m_cursor_column -= 1;
                 }
             }
-            if (the.pcursor_index != the.length()){
-                the.pcursor_index += 1;
+            if (the.m_cursor_index != the.length()){
+                the.m_cursor_index += 1;
                 return not over_boundary;
             }
             return over_boundary;
         }
 
         void go_home(){
-            the.pcursor_column = the.pleft;
-            the.pcursor_index  = 0;
+            the.m_cursor_column = the.m_left;
+            the.m_cursor_index  = 0;
         }
 
         void go_end(){
-            the.pcursor_column = the.pleft + the.pcolumn;
-            the.pcursor_index  = the.length();
+            the.m_cursor_column = the.m_left + the.m_column;
+            the.m_cursor_index  = the.length();
         }
 
         bool backspace(){
@@ -107,14 +109,14 @@ namespace mixc::ttyctrl_text_line{
         }
 
         bool deletes(){
-            if (the.pcursor_index == the.length()){
+            if (the.m_cursor_index == the.length()){
                 return over_boundary;
             }
             return the.compact();
         }
 
         void write(char16_t value){
-            uxx new_length = inc::insert(the.ptext, the.pcursor_index, value);
+            uxx new_length = inc::insert(the.m_text, the.m_cursor_index, value);
 
             if (the.capacity() == new_length){
                 the.resize(new_length * 4);
@@ -122,7 +124,7 @@ namespace mixc::ttyctrl_text_line{
         }
     private:
         bool compact(){
-            uxx new_length = inc::remove(the.ptext, the.pcursor_index);
+            uxx new_length = inc::remove(the.m_text, the.m_cursor_index);
             if (the.capacity() == new_length * 4){
                 the.resize(new_length);
             }
@@ -133,8 +135,8 @@ namespace mixc::ttyctrl_text_line{
             inc::shared_array<char16_t> compact {
                 ::length{new_length}
             };
-            inc::copy(compact, the.ptext, compact.length());
-            the.ptext.swap(xref compact);
+            inc::copy(compact, the.m_text, compact.length());
+            the.m_text.swap(xref compact);
         }
     $
 }
