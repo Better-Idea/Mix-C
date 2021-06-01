@@ -40,7 +40,7 @@ namespace mixc::math_tan{
             m.real_dec() >> -m.real_exp() : 
             m.real_dec() <<  m.real_exp();
 
-        auto prec = m.decimal_bits() - 32;
+        auto prec = m.bits_of_mantissa() - 32;
         auto olde = m.real_exp();
         auto e    = prec - olde;
         auto t    = m;
@@ -208,7 +208,7 @@ namespace mixc::math_atan{
             auto v                  = (f64)0.0;
             auto m                  = (inc::mf64{x});
             auto minus              = (inc::mf64{x});
-            auto end                = (m.decimal_bits_full() + 1) / 2; // half 
+            auto end                = (m.bits_of_precision() + 1) / 2; // half 
 
             if (auto exp = m.real_exp(); exp >= 64){
                 return is_neg ? -inc::pi / 2 : inc::pi / 2;
@@ -226,7 +226,7 @@ namespace mixc::math_atan{
                 }
 
                 j                   = (i / step);
-                shift               = (i % step + m.decimal_bits_full() - step);
+                shift               = (i % step + m.bits_of_precision() - step);
                 index               = (m.real_dec_unsafe() >> shift);
                 minus.decimal      &= (u64)-1 << shift;
                 v                   = (lut[j][index]);

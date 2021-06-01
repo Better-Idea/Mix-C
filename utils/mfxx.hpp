@@ -46,7 +46,7 @@ namespace mixc::utils_mfxx{
     template<
         class   float_t, 
         class   equivalent_t, 
-        uxx     dec_bits_v, 
+        uxx     effect_bits_v, 
         uxx     exp_bits_v, 
         uxx     exp_offset_v,
         uxx     prec_dec_v>
@@ -54,7 +54,7 @@ namespace mixc::utils_mfxx{
         xtmpl(mfxx,
             float_t,
             equivalent_t,
-            dec_bits_v,
+            effect_bits_v,
             exp_bits_v,
             exp_offset_v,
             prec_dec_v
@@ -62,7 +62,7 @@ namespace mixc::utils_mfxx{
     )
         union{
             struct {
-                equivalent_t decimal : dec_bits_v;
+                equivalent_t decimal : effect_bits_v - not inc::is_same<float_t, f80>;
                 equivalent_t exp     : exp_bits_v;
                 equivalent_t sign    : 1;
             };
@@ -102,7 +102,7 @@ namespace mixc::utils_mfxx{
                 }
                 // 从具有隐藏位转换到不具有隐藏位
                 else if (uxx(-value) == exp_offset_v){
-                    the.decimal = (the.decimal >> 1) | (u64(1) << (dec_bits_v - 1));
+                    the.decimal = (the.decimal >> 1) | (u64(1) << (effect_bits_v - 1));
                 }
             }
 
@@ -130,7 +130,7 @@ namespace mixc::utils_mfxx{
         // - f80 与 f64, f32 的小数部分不同，f80 没有隐藏位
         u64 real_dec_unsafe() const {
             if constexpr (not inc::is_same<float_t, f80>){
-                return u64(u64(1) << dec_bits_v | the.decimal);
+                return u64(u64(1) << effect_bits_v | the.decimal);
             }
             else{
                 return u64(the.decimal);
@@ -148,15 +148,15 @@ namespace mixc::utils_mfxx{
         }
 
         // 函数：尾数部分的位数
-        static constexpr uxx decimal_bits(){
-            return dec_bits_v;
+        static constexpr uxx bits_of_mantissa(){
+            return effect_bits_v - 1;
         }
 
         // 函数：包括隐藏位的尾数部分的尾数
         // 注意：
         // - f80 与 f64, f32 的小数部分不同，f80 没有隐藏位
-        static constexpr uxx decimal_bits_full(){
-            return dec_bits_v + not inc::is_same<float_t, f80>;
+        static constexpr uxx bits_of_precision(){
+            return effect_bits_v;
         }
 
         static constexpr bool has_hidden_bit(){
@@ -177,8 +177,8 @@ namespace mixc::utils_mfxx{
         }
     $
 
-    using mf32 = mixc::utils_mfxx::mfxx<f32, u32, 23, 8 , (1 <<  7) - 1, 7 >;
-    using mf64 = mixc::utils_mfxx::mfxx<f64, u64, 52, 11, (1 << 10) - 1, 17>;
+    using mf32 = mixc::utils_mfxx::mfxx<f32, u32, 24, 8 , (1 <<  7) - 1, 7 >;
+    using mf64 = mixc::utils_mfxx::mfxx<f64, u64, 53, 11, (1 << 10) - 1, 17>;
     using mf80 = mixc::utils_mfxx::mfxx<f80, u64, 64, 15, (1 << 14) - 1, 19>;
 
     template<class> struct base;

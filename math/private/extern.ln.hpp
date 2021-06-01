@@ -35,7 +35,7 @@ namespace mixc::math_ln{
         // ln(a / b) = ln(a) - ln(b)
         // ln(x) = left:ln(x / a0 / a1 / a2 / ... / an) + right:{ln(a0) + ln(a1) + ln(a2) + ln(an)}
         // 此算法通过迭代让 left 部分等于 ln(1)
-        for(uxx i = 0, shift = m.decimal_bits() - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
+        for(uxx i = 0, shift = m.bits_of_mantissa() - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
             auto idx    = m.decimal >> shift;
             auto pair   = lut[i][idx];
             auto mdiv   = pair[0]; // 倒数乘法代替除法

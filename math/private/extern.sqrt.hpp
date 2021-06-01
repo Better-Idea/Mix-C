@@ -1,7 +1,8 @@
 #undef  xuser
 #define xuser mixc::math_sqrt::inc
 #include"configure/lookup_table.hpp"
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"math/const.hpp"
 #include"utils/mfxx.hpp"
 
@@ -44,7 +45,7 @@ namespace mixc::math_sqrt::origin{
 
         // sqrt(x) = left:{sqrt(x / a0 / a1 ... / an)} * right:{sqrt(a0) * sqrt(a1) * ... * sqrt(an)}
         // 此算法通过查表让 left 趋近于 sqrt(1)
-        for(uxx i = 0, shift = m.decimal_bits() - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
+        for(uxx i = 0, shift = m.bits_of_mantissa() - step; i < sizeof(lut) / sizeof(lut[0]); i++, shift -= step){
             auto idx    = m.decimal >> shift;
             auto pair   = lut[i][idx];
             auto mdiv   = pair[0]; // 倒数乘法代替除法

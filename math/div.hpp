@@ -23,7 +23,7 @@ namespace mixc::math_div{
         auto ma = inc::mfxx{a};
         auto mb = inc::mfxx{b};
         
-        if (ma.real_exp() - mb.real_exp() <= ixx(ma.decimal_bits())){
+        if (ma.real_exp() - mb.real_exp() <= ixx(ma.bits_of_mantissa())){
             return div_unsafe_core(a, b);
         }
         return quo_rem_pair<type>{ a / b, (type)inc::mod(a, b) };

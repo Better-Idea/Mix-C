@@ -22,8 +22,8 @@ namespace mixc::draft_mod{
         auto e2  = e1;
         auto r0  = e2 % 64;
         e2       = e2 / 64;
-        ma.real_exp(ma.decimal_bits() + r0);
-        mb.real_exp(mb.decimal_bits());
+        ma.real_exp(ma.bits_of_mantissa() + r0);
+        mb.real_exp(mb.bits_of_mantissa());
         auto da  = mul(ma.real_dec_unsafe(), 1ull << r0);
         auto db  = mb.real_dec_unsafe();
         auto m   = mod(da, db);

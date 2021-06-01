@@ -198,7 +198,8 @@ namespace mixc::lang_cxx_strlize{
                 u64     full;
             }f;
 
-            auto rd             = m.real_dec() << (52 - m.decimal_bits());
+            // TODO:f80
+            auto rd             = m.real_dec() << (52 - m.bits_of_mantissa());
             auto re             = m.real_exp();
             auto num_len        = uxx(0);
             f.full              = re > 0 ? rd << re : rd >> -re;
