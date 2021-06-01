@@ -80,13 +80,13 @@ namespace mixc::concurrency_thread{
 }
 
 namespace mixc::concurrency_thread::origin{
-    thread::thread(clambda && lambda) : plambda(/*默认为 nullptr*/){
+    thread::thread(clambda && lambda) : m_lambda(/*默认为 nullptr*/){
         if (not lambda.is_valid()){
             return;
         }
         else{
             // 由于线程创建就运行了，所以需要提前准备好该字段
-            plambda                 = lambda;
+            m_lambda                 = lambda;
         }
 
         // 提前获取 is_detached 属性，避免 lambda 在创建的线程中释放后产生非法访问
@@ -98,7 +98,7 @@ namespace mixc::concurrency_thread::origin{
                 lambda.release();
 
                 // 设置当前失败状态
-                plambda.im_initialize_fail();
+                m_lambda.im_initialize_fail();
             }
         };
 
@@ -181,7 +181,7 @@ namespace mixc::concurrency_thread::origin{
     }
 
     thread::~thread(){
-        if (auto h = inc::atom_swap<clambda>(xref the.plambda, clambda{}); 
+        if (auto h = inc::atom_swap<clambda>(xref the.m_lambda, clambda{}); 
             h.is_valid() and not h.is_detached()){
 
             #if xis_windows

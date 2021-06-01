@@ -10,6 +10,7 @@
 #include"concurrency/lock_state_t.hpp"
 #include"concurrency/thread_self.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
 

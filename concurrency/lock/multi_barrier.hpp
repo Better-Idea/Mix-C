@@ -6,7 +6,8 @@
 #include"concurrency/lock/atom_fetch_add.hpp"
 #include"concurrency/lock/atom_fetch_sub.hpp"
 #include"concurrency/lock_state_t.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::multi_barrier::origin{

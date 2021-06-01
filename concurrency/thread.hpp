@@ -21,22 +21,22 @@ namespace mixc::concurrency_thread{
 
     xstruct(
         xname(clambda_meta),
-        xpubf(bytes,        uxx),
-        xpubf(is_detached,  bool),
-        xpubf(call,         lambda_call),
-        xpubf(release,      lambda_call),
-        xpubf(sem,          voidp),
-        xpubf(mutex,        voidp),
-        xpubf(handler,      voidp)
+        xpubf(m_bytes,        uxx),
+        xpubf(m_is_detached,  bool),
+        xpubf(m_call,         lambda_call),
+        xpubf(m_release,      lambda_call),
+        xpubf(m_sem,          voidp),
+        xpubf(m_mutex,        voidp),
+        xpubf(m_handler,      voidp)
 
         // this + 1 定位到 lambda 参数的偏移
     ) $
 
     xstruct(
         xname(clambda),
-        xprif(plambda, clambda_meta *)
+        xprif(m_lambda, clambda_meta *)
     )
-        clambda() : plambda(nullptr){}
+        clambda() : m_lambda(nullptr){}
         clambda(clambda const &) = default;
 
         template<class lambda_t>
@@ -57,79 +57,79 @@ namespace mixc::concurrency_thread{
             auto args_bytes         = inc::is_empty_class<lambda_t> ? 0 : sizeof(lambda_t);
             auto total_bytes        = inc::memory_size{ args_bytes + sizeof(clambda_meta) };
 
-            if (plambda = inc::alloc<clambda_meta>(total_bytes);
-                plambda == nullptr){
+            if (m_lambda = inc::alloc<clambda_meta>(total_bytes);
+                m_lambda == nullptr){
                 im_initialize_fail();
                 return;
             }
 
-            xnew(plambda + 1) lambda_t(
+            xnew(m_lambda + 1) lambda_t(
                 inc::move(lambda)
             );
 
-            plambda->bytes          = total_bytes;
-            plambda->is_detached    = is_detached;
-            plambda->call           = & closure::call;
-            plambda->release        = & closure::release;
-            plambda->sem            = nullptr;
-            plambda->mutex          = nullptr;
-            plambda->handler        = nullptr;
+            m_lambda->m_bytes        = total_bytes;
+            m_lambda->m_is_detached  = is_detached;
+            m_lambda->m_call         = & closure::call;
+            m_lambda->m_release      = & closure::release;
+            m_lambda->m_sem          = nullptr;
+            m_lambda->m_mutex        = nullptr;
+            m_lambda->m_handler      = nullptr;
         }
 
         void invoke() const {
-            auto call               = plambda->call;
-            auto args               = plambda + 1;
+            auto call               = m_lambda->m_call;
+            auto args               = m_lambda + 1;
             call(args);
         }
 
         void release() const {
-            auto call               = plambda->release;
-            auto args               = plambda + 1;
+            auto call               = m_lambda->m_release;
+            auto args               = m_lambda + 1;
             call(args);
-            inc::free(plambda, inc::memory_size{plambda->bytes});
-            plambda                 = nullptr;
+            inc::free(m_lambda, inc::memory_size{m_lambda->m_bytes});
+            m_lambda                 = nullptr;
         }
 
         bool is_detached() const {
-            return plambda->is_detached;
+            return m_lambda->m_is_detached;
         }
 
         void semaphore_for_join(voidp value){
-            plambda->sem            = value;
+            m_lambda->m_sem          = value;
         }
 
         voidp semaphore_for_join() const {
-            return plambda->sem;
+            return m_lambda->m_sem;
         }
 
         void semaphore_for_suspend(voidp value){
-            plambda->mutex          = value;
+            m_lambda->m_mutex        = value;
         }
 
         voidp semaphore_for_suspend() const {
-            return plambda->mutex;
+            return m_lambda->m_mutex;
         }
 
         void handler(voidp value){
-            plambda->handler        = value;
+            m_lambda->m_handler      = value;
         }
 
         voidp handler() const {
-            return plambda->handler;
+            return m_lambda->m_handler;
         }
 
         bool is_initialize_fail() const {
-            return uxx(plambda) == not_exist;
+            return uxx(m_lambda) == not_exist;
         }
 
         void im_initialize_fail() const {
             // 不提供 is_initialize_fail(false) 接口
-            // 会覆盖 clambda::plambda 原有指针的内容
-            plambda                 = (clambda_meta *)(not_exist);
+            // 会覆盖 clambda::m_lambda 原有指针的内容
+            m_lambda                 = (clambda_meta *)(not_exist);
         }
 
         bool is_valid() const {
-            return plambda != nullptr && uxx(plambda) != not_exist;
+            return m_lambda != nullptr && uxx(m_lambda) != not_exist;
         }
     $
 
@@ -146,25 +146,25 @@ namespace mixc::concurrency_thread::origin{
     xstruct(
         xname(thread),
         xpubb(inc::disable_copy),
-        xprif(plambda, clambda)
+        xprif(m_lambda, clambda)
     )
         thread()                = default;
         thread(thread && self) : 
-            plambda(inc::atom_swap(xref self.plambda, clambda{})){
+            m_lambda(inc::atom_swap(xref self.m_lambda, clambda{})){
         }
         thread(clambda && lambda);
        ~thread();
 
         void operator=(thread && self){
-            plambda = inc::atom_swap(xref self.plambda, clambda{});
+            m_lambda = inc::atom_swap(xref self.m_lambda, clambda{});
         }
 
         bool is_initialize_fail() const {
-            return plambda.is_initialize_fail();
+            return m_lambda.is_initialize_fail();
         }
 
         uxx id() const {
-            return inc::cast<uxx>(plambda);
+            return inc::cast<uxx>(m_lambda);
         }
 
         void resume();
