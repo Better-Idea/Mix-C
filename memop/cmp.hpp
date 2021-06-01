@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_cmp::inc
+#include"macro/xexport.hpp"
 #include"meta/is_class.hpp"
 #include"meta/is_enum.hpp"
 #include"meta/is_same.hpp"
@@ -10,7 +11,6 @@
 #include"meta/has_comparator.hpp"
 #include"meta/unsigned_type.hpp"
 #include"memop/seqlize.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_cmp::origin{

@@ -4,12 +4,12 @@
 #undef  xuser
 #define xuser mixc::memop_copy::inc
 #include"dumb/mirror.hpp"
+#include"macro/xexport.hpp"
 #include"memop/addressof.hpp"
 #include"memop/zeros.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::memop_copy::origin{
+namespace mixc::memop_copy{
     template<class a0_t, class a1_t = a0_t>
     inline void copy(a0_t * des, a1_t const & src){
         using mp = inc::mirror<a0_t> *;
@@ -60,6 +60,10 @@ namespace mixc::memop_copy::origin{
             }
         }
     }
+}
+
+namespace mixc::memop_copy::origin{
+    using mixc::memop_copy::copy;
 
     #define xgen(name,is_safe,with_opr)                                                 \
     template<class a0_t, class a1_t = a0_t>                                             \

@@ -3,9 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_seqlize::inc
-#include"memop/addressof.hpp"
+#include"define/base_type.hpp"
 #include"interface/seqptr.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
+#include"memop/addressof.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_seqlize{

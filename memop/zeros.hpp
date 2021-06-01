@@ -3,7 +3,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::memop_zeros::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_zeros{
