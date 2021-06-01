@@ -8,14 +8,15 @@
 #pragma push_macro("xusing_docker_shared_array")
 #undef  xuser
 #define xuser mixc::docker_shared_array_stacklize::inc
+#include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"docker/transmitter.hpp"
 #include"dumb/mirror.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
 #include"memop/addressof.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xusing_docker_shared_array")
 #pragma pop_macro("xuser")
 
