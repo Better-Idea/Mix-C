@@ -22,7 +22,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::define_nullref_t::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"memop/addressof.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_nullref_t{

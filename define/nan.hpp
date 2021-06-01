@@ -17,7 +17,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::define_nan::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_nan{
