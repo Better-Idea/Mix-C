@@ -21,18 +21,18 @@ namespace mixc::dumb_implicit{
     template<class a>
     xstruct(
         xtmpl(implicit, a),
-        xprif(value, a)
+        xprif(m_value, a)
     )
         template<class b>
         implicit(b const & value) : 
-            value((a)(b &)value) {}
+            m_value((a)(b &)value) {}
 
         operator a () const {
-            return value;
+            return m_value;
         }
 
         auto operator -> () const {
-            return & value;
+            return & m_value;
         }
     $
 }

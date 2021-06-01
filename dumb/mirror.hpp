@@ -24,15 +24,15 @@ namespace mixc::dumb_mirror::origin{
     template<class type_t>
     xstruct(
         xtmpl(mirror, type_t),
-        xprif(data, item_t<type_t>)
+        xprif(m_value, item_t<type_t>)
     )
-        mirror(): data{0}{}
+        mirror(): m_value{0}{}
         mirror(type_t const & value, construction_t mode){
             if (mode == construction_t::ignore){
                 this[0] = *(mirror<type_t> *)(xref value);
             }
             else{
-                xnew (data) type_t(value);
+                xnew (m_value) type_t(value);
             }
         }
 
@@ -45,19 +45,19 @@ namespace mixc::dumb_mirror::origin{
         }
 
         type_t * operator->(){
-            return (type_t *)data;
+            return (type_t *)m_value;
         }
 
         const type_t * operator->() const {
-            return (type_t *)data;
+            return (type_t *)m_value;
         }
 
         operator type_t & (){
-            return *(type_t *)data;
+            return *(type_t *)m_value;
         }
 
         operator type_t & () const {
-            return *(type_t *)data;
+            return *(type_t *)m_value;
         }
 
         constexpr uxx bytes() const {

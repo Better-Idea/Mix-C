@@ -25,19 +25,19 @@ namespace mixc::dumb_struct_type{
     template<class type_t>
     xstruct(
         xspec(struct_type, type_t, false),
-        xprif(data, type_t)
+        xprif(m_value, type_t)
     )
         template<class ... args_t>
         struct_type(args_t const & ... list) : 
-            data(list...){
+            m_value(list...){
         }
 
         operator type_t & (){
-            return data;
+            return m_value;
         }
 
         operator const type_t & () const {
-            return data;
+            return m_value;
         }
     $
 
