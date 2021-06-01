@@ -3,7 +3,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::meta_has_constructor::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::meta_has_constructor{
