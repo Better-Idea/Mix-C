@@ -4,9 +4,10 @@
 #undef  xuser
 #define xuser mixc::macro_xsv::inc
 #include"configure/switch.hpp"
+#include"define/base_type.hpp"
 #include"gc/private/token.hpp"
 #include"macro/xnew.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xsv{

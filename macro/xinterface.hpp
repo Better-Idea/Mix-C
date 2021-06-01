@@ -62,6 +62,7 @@ int main(){
 #include"macro/private/word.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/xnew.hpp"
+#include"memop/addressof.hpp"
 #include"memop/signature.hpp"
 #include"meta/has_constructor.hpp"
 #include"meta_seq/tlist.hpp"

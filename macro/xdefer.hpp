@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xdefer::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
 #include"macro/xlink.hpp"
 #pragma pop_macro("xuser")
 

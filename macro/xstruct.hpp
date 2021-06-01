@@ -356,23 +356,23 @@ private:
 #define xpriget_prosetx(name,...)                   __getset__(private  , protected , name, __VA_ARGS__) __VA_ARGS__ 
 #define xpriget_prisetx(name,...)                   __getset__(private  , private   , name, __VA_ARGS__) __VA_ARGS__ 
 
-#define xpubget_pubset(name,...)                    xpubget_pubsetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xpubget_proset(name,...)                    xpubget_prosetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xpubget_priset(name,...)                    xpubget_prisetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xproget_pubset(name,...)                    xproget_pubsetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xproget_proset(name,...)                    xproget_prosetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xproget_priset(name,...)                    xproget_prisetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xpriget_pubset(name,...)                    xpriget_pubsetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xpriget_proset(name,...)                    xpriget_prosetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
-#define xpriget_priset(name,...)                    xpriget_prisetx(name, decltype(the_t::p ## name) __VA_ARGS__)  xr { return the_t::p ## name; } xw { the_t::p ## name = value; }
+#define xpubget_pubset(name,...)                    xpubget_pubsetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xpubget_proset(name,...)                    xpubget_prosetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xpubget_priset(name,...)                    xpubget_prisetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xproget_pubset(name,...)                    xproget_pubsetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xproget_proset(name,...)                    xproget_prosetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xproget_priset(name,...)                    xproget_prisetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xpriget_pubset(name,...)                    xpriget_pubsetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xpriget_proset(name,...)                    xpriget_prosetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
+#define xpriget_priset(name,...)                    xpriget_prisetx(name, decltype(the_t::m_ ## name) __VA_ARGS__)  xr { return the_t::m_ ## name; } xw { the_t::m_ ## name = value; }
 
 #define xpubsetx(name,...)                          __set__(public      , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) xw
 #define xprosetx(name,...)                          __set__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) xw
 #define xprisetx(name,...)                          __set__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) xw
 
-#define xpubset(name,...)                           xpubsetx(name, __VA_ARGS__) { the_t::p ## name = value; }
-#define xproset(name,...)                           xprosetx(name, __VA_ARGS__) { the_t::p ## name = value; }
-#define xpriset(name,...)                           xprisetx(name, __VA_ARGS__) { the_t::p ## name = value; }
+#define xpubset(name,...)                           xpubsetx(name, __VA_ARGS__) { the_t::m_ ## name = value; }
+#define xproset(name,...)                           xprosetx(name, __VA_ARGS__) { the_t::m_ ## name = value; }
+#define xpriset(name,...)                           xprisetx(name, __VA_ARGS__) { the_t::m_ ## name = value; }
 
 #define xpubgetx(name,...)                          __get__(public      , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
 #define xprogetx(name,...)                          __get__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) __VA_ARGS__ xr
@@ -382,9 +382,9 @@ private:
 #define xprogetx_constexpr(name,...)                __get__(protected   , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) constexpr __VA_ARGS__ xr
 #define xprigetx_constexpr(name,...)                __get__(private     , name, __VA_ARGS__) private: xlink2(__, ignore__(__COUNTER__)) xlink2(__, ignore__(__COUNTER__)) constexpr __VA_ARGS__ xr
 
-#define xpubget(name,...)                           xpubgetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
-#define xproget(name,...)                           xprogetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
-#define xpriget(name,...)                           xprigetx(name, decltype(the_t::p ## name) __VA_ARGS__) { return the_t::p ## name; }
+#define xpubget(name,...)                           xpubgetx(name, decltype(the_t::m_ ## name) __VA_ARGS__) { return the_t::m_ ## name; }
+#define xproget(name,...)                           xprogetx(name, decltype(the_t::m_ ## name) __VA_ARGS__) { return the_t::m_ ## name; }
+#define xpriget(name,...)                           xprigetx(name, decltype(the_t::m_ ## name) __VA_ARGS__) { return the_t::m_ ## name; }
 
 // 指示 value 属于属性范式的一部分，是个弱关键字
 #define value                                       value

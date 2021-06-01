@@ -3,6 +3,8 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xtypeid::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_belong_to.hpp"
 #include"meta/is_class.hpp"
 #include"meta/is_same.hpp"
@@ -10,7 +12,6 @@
 #include"meta/remove_ref.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/vlist.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xtypeid{
