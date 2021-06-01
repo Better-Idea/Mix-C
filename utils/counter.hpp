@@ -4,20 +4,21 @@
 #undef  xuser
 #define xuser mixc::utils_counter::inc
 #include"define/base_type.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_counter::origin{
     xstruct(
         xname(counter),
-        xprif(value, uxx)
+        xprif(m_value, uxx)
     )
         constexpr counter(uxx value = 0) : 
-            value(value){
+            m_value(value){
         }
 
         operator uxx () const {
-            return value++;
+            return m_value++;
         }
     $
 }

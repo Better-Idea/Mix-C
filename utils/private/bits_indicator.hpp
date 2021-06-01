@@ -11,10 +11,11 @@
 #undef  xuser
 #define xuser mixc::utils_bit_indicator::inc
 #include"concurrency/lock/atom_swap.hpp"
+#include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
+#include"macro/xexport.hpp"
 #include"memop/zeros.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #include"utils/private/adapter.bits_indicator.hpp"
 #pragma pop_macro("xuser")
@@ -91,13 +92,13 @@ namespace mixc::utils_bit_indicator{
     xstruct(
         xspec(bit_indicator_t, final_t),
         xpubb(inc::disable_copy),
-        xprif(pbmp          , uxx *),
-        xprif(pheight       , uxx),
-        xprif(psize         , uxx),
-        xprif(ptotal_bits   , uxx)
+        xprif(m_bmp          , uxx *),
+        xprif(m_height       , uxx),
+        xprif(m_size         , uxx),
+        xprif(m_total_bits   , uxx)
     )
         bit_indicator_t() : 
-            pbmp(nullptr), pheight(0), psize(0), ptotal_bits(0){}
+            m_bmp(nullptr), m_height(0), m_size(0), m_total_bits(0){}
 
         /* 函数：构造函数（外部分配内存）
          * 参数：
@@ -112,17 +113,17 @@ namespace mixc::utils_bit_indicator{
 
             // 先设置，之后 total_bits 会被修改
             the.total_bits(total_bits);
-            the.pheight = 0;
-            the.psize   = 0;
+            the.m_height = 0;
+            the.m_size   = 0;
 
             do{
                 total_bits         = total_bits / inc::bwidth + (total_bits % inc::bwidth != 0);
-                buf[the.pheight]   = total_bits;
-                the.pheight       += 1;
-                the.psize         += total_bits;
+                buf[the.m_height]  = total_bits;
+                the.m_height      += 1;
+                the.m_size         += total_bits;
             }while(total_bits > 1);
 
-            the.size(psize);
+            the.size(m_size);
             the.bmp(
                 alloc(cost_count())
             );
@@ -159,7 +160,7 @@ namespace mixc::utils_bit_indicator{
             }
 
             auto bytes = cost_bytes();
-            auto ptr   = inc::atom_swap<uxx *>(& pbmp, nullptr);
+            auto ptr   = inc::atom_swap<uxx *>(& m_bmp, nullptr);
 
             if (ptr != nullptr){
                 inc::free(ptr - the.height(), bytes);
@@ -169,21 +170,21 @@ namespace mixc::utils_bit_indicator{
         /* 属性：位图树的高度 */
         xproget(height)
         xproget_prisetx(size, uxx)
-            xr{ return the.psize >> 1; }
+            xr{ return the.m_size >> 1; }
             xw{ 
-                the.psize &= 1;
-                the.psize |= value << 1;
+                the.m_size &= 1;
+                the.m_size |= value << 1;
             }
 
         /* 属性：位图树存放位图的首地址 */
         xproget_prisetx(bmp, uxx *)
-            xr{ return the.pbmp; }
-            xw{ the.pbmp = value + the.height(); }
+            xr{ return the.m_bmp; }
+            xw{ the.m_bmp = value + the.height(); }
 
         /* 属性：是否需要在析构时释放内存 */
         xpriget_prisetx(need_free, bool)
-            xr{ return the.psize & 1; }
-            xw{ the.psize = value ? the.psize | 1 : the.psize & (uxx(-1) << 1); }
+            xr{ return the.m_size & 1; }
+            xw{ the.m_size = value ? the.m_size | 1 : the.m_size & (uxx(-1) << 1); }
 
         /* 属性：位图树每一级的元素个数
          * 补充：lut[0] 表示第一级位图字的个数，对于 64bit 系统一个字有 64bit
@@ -191,7 +192,7 @@ namespace mixc::utils_bit_indicator{
          *       该属性的每一个元素分别指示了每次层一共有多少个字
          */
         xprogetx(level_lut, uxx *){
-            return the.pbmp - the.height();
+            return the.m_bmp - the.height();
         }
 
         /* 属性：动态内存部分一共有多少个字 */

@@ -13,13 +13,13 @@ namespace mixc::utils_bits::origin{
     template<class type_t, class bit_t = bool>
     xstruct(
         xtmpl(bits, type_t),
-        xprif(data, type_t)
+        xprif(m_value, type_t)
     )
         constexpr bits() : bits(0){}
-        constexpr bits(type_t const & value) : data(value){}
+        constexpr bits(type_t const & value) : m_value(value){}
 
         inc::bits_bind<type_t, bit_t> operator [](uxx index) const {
-            return inc::bits_bind<type_t, bit_t>(xref data, index);
+            return inc::bits_bind<type_t, bit_t>(xref m_value, index);
         }
 
         uxx length() const {
@@ -27,7 +27,7 @@ namespace mixc::utils_bits::origin{
         }
 
         operator type_t & () const {
-            return data;
+            return m_value;
         }
     $
 

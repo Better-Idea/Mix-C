@@ -5,24 +5,25 @@
 #define xuser mixc::utils_tick::inc
 #include"define/base_type.hpp"
 #include"instruction/time_stamp.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_tick::origin{
     xstruct(
         xname(tick),
-        xprif(value, u64)
+        xprif(m_value, u64)
     )
-        tick() : value(0ULL){
+        tick() : m_value(0ULL){
             restart();
         }
 
         void restart(){
-            value = inc::time_stamp();
+            m_value = inc::time_stamp();
         }
 
         operator u64 () const {
-            u64 clocks = inc::time_stamp() - value;
+            u64 clocks = inc::time_stamp() - m_value;
             return clocks;
         }
     $

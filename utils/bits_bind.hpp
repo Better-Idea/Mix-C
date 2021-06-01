@@ -3,15 +3,17 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::utils_bits_bind::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_bits_bind{
     template<class type_t, class bit_t = bool>
     xstruct(
         xtmpl(bits_bind, type_t, bit_t),
-        xprif(ptr,  type_t *),
-        xprif(mask, type_t)
+        xprif(m_ptr,  type_t *),
+        xprif(m_mask, type_t)
     )
         bits_bind() : bits_bind(nullptr, 0) {}
         bits_bind(type_t * bits, uxx index){
@@ -19,13 +21,13 @@ namespace mixc::utils_bits_bind{
         }
 
         bit_t operator = (bit_t value){
-            ptr[0]      = value ? ptr[0] | mask : ptr[0] & ~mask;
+            m_ptr[0]    = value ? m_ptr[0] | m_mask : m_ptr[0] & ~m_mask;
             return value;
         }
 
         void bind(type_t * bits, uxx index){
-            ptr         = bits;
-            mask        = type_t(1) << index;
+            m_ptr       = bits;
+            m_mask      = type_t(1) << index;
         }
 
         void swap_value(bits_bind value){
@@ -36,7 +38,7 @@ namespace mixc::utils_bits_bind{
         }
 
         operator bit_t(){
-            return bit_t((ptr[0] & mask) != 0);
+            return bit_t((m_ptr[0] & m_mask) != 0);
         }
     $
 }

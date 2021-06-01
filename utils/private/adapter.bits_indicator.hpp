@@ -10,11 +10,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::utils_adapter_bit_indicator::inc
+#include"define/base_type.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"interface/unified_seq.hpp"
+#include"macro/xexport.hpp"
 #include"memop/zeros.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::utils_adapter_bit_indicator::origin{
