@@ -16,6 +16,7 @@
 #include"docker/hashmap.hpp"
 #include"gc/private/token.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 

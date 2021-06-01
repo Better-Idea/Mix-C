@@ -13,6 +13,8 @@ search_list 期初是一个只有根类型 root_t 的集合。
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_private_collect::inc
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
 #include"meta_seq/tdistinct_append.hpp"
 #include"meta_seq/tfilter.hpp"
 #include"meta_seq/tin.hpp"
@@ -21,7 +23,6 @@ search_list 期初是一个只有根类型 root_t 的集合。
 #include"meta_seq/tpop_by.hpp"
 #include"meta_seq/tselector_key.hpp"
 #include"meta_seq/tselector_val.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_collect{

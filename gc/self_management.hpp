@@ -10,7 +10,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_self_management::inc
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_self_management{

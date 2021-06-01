@@ -8,9 +8,11 @@
 #include"concurrency/lock/atom_fetch_or.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_sub.hpp"
+#include"define/base_type.hpp"
 #include"dumb/struct_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/is_same.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_token::origin{
@@ -20,54 +22,53 @@ namespace mixc::gc_private_token::origin{
 
     xstruct(
         xname(token),
-        xprof(record, uxx)
+        xprof(m_record, uxx)
     )
-        token(uxx) : record(step) { }
+        token(uxx) : m_record(step) { }
 
         constexpr uxx  this_length() const { return uxx(0); }
         constexpr void this_length(uxx) const { }
 
         bool in_gc_queue() const {
-            return inc::atom_load(& record) & bit_in_gc_queue;
+            return inc::atom_load(& m_record) & bit_in_gc_queue;
         }
 
         bool in_gc_queue(bool value) {
             if (value){
-                return (inc::atom_fetch_or(& record, bit_in_gc_queue) & bit_in_gc_queue) != 0;
+                return (inc::atom_fetch_or(& m_record, bit_in_gc_queue) & bit_in_gc_queue) != 0;
             }
             else{
-                return (inc::atom_fetch_and(& record, ~bit_in_gc_queue) & bit_in_gc_queue) != 0;
+                return (inc::atom_fetch_and(& m_record, ~bit_in_gc_queue) & bit_in_gc_queue) != 0;
             }
         }
 
         uxx owners() const {
-            return inc::atom_load(& record) >> shift_to_get_owners;
+            return inc::atom_load(& m_record) >> shift_to_get_owners;
         }
 
         uxx owners_increase() const {
-            return inc::atom_add(& record, step) >> shift_to_get_owners;
+            return inc::atom_add(& m_record, step) >> shift_to_get_owners;
         }
 
         uxx owners_decrease() const {
-            return inc::atom_sub(& record, step) >> shift_to_get_owners;
+            return inc::atom_sub(& m_record, step) >> shift_to_get_owners;
         }
     $
 
     xstruct(
         xname(token_plus),
-        xpubb(token)
+        xpubb(token),
+        xpubf(m_length, uxx)
     )
-        mutable uxx length;
-
         token_plus(uxx length) : 
-            token(0), length(length) { }
+            token(0), m_length(length) { }
 
         uxx this_length() const {
-            return length;
+            return m_length;
         }
 
         void this_length(uxx value) const {
-            length = value;
+            m_length = value;
         }
     $
 

@@ -8,11 +8,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_private_make_guide::inc
+#include"define/base_type.hpp"
 #include"gc/private/collect.hpp"
 #include"gc/private/routing.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_class.hpp"
 #include"meta_seq/tlist.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_make_guide{

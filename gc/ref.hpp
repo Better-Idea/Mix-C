@@ -5,6 +5,7 @@
 #define xuser mixc::gc_ref::inc
 #include"concurrency/lock/atom_swap.hpp"
 #include"configure/switch.hpp"
+#include"define/base_type.hpp"
 #include"define/nullref.hpp"
 #include"dumb/dummy_type.hpp"
 #include"dumb/init_by.hpp"
@@ -16,6 +17,8 @@
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_callback.hpp"
 #include"macro/xdebug.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xis_nullptr.hpp"
 #include"memop/addressof.hpp"
@@ -23,7 +26,6 @@
 #include"meta/is_same.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tkv.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -31,8 +33,8 @@ namespace mixc::gc_ref{
     using namespace inc;
 
     // 代替 nullptr 作为空对象
-    inline uxx                 empty_mem[32];
-    inline voidp               empty_mem_ptr       = empty_mem;
+    inline uxx                 g_empty_mem[32];
+    inline voidp               g_empty_mem_ptr       = g_empty_mem;
 
     template<
         class final_t, 
@@ -65,7 +67,7 @@ namespace mixc::gc_ref{
         static constexpr bool has_array     = not is_same<void, item_t>;
 
         static token_mix_t * null(){
-            return (token_mix_t *)empty_mem_ptr;
+            return (token_mix_t *)g_empty_mem_ptr;
         }
 
         template<class guide_t>

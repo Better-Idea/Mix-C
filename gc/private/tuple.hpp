@@ -3,8 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_private_tuple::inc
+#include"define/base_type.hpp"
 #include"gc/self_management.hpp"
 #include"macro/xdebug.hpp"
+#include"macro/xexport.hpp"
 #include"meta/is_based_on.hpp"
 #include"meta/remove_const.hpp"
 #include"meta/remove_membership.hpp"
@@ -12,7 +14,6 @@
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tlist.hpp"
 #include"meta_seq/vlist.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_tuple{
