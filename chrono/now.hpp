@@ -6,7 +6,7 @@
 #include"chrono/date.hpp"
 #include"chrono/datetime.hpp"
 #include"chrono/time.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_now{

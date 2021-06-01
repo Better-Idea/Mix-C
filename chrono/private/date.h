@@ -4,8 +4,9 @@
 #undef  xuser
 #define xuser mixc::chrono_private_date::inc
 #include"chrono/private/lookup_table.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/cmp.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_day::origin{
@@ -36,10 +37,10 @@ namespace mixc::chrono_private_date::origin{
 
     template<class final_t, class field_t>
     xstruct(
-        xtmpl(date  , final_t, field_t),
-        xproc(pday  , 5 , field_t),
-        xproc(pmonth, 4 , field_t),
-        xproc(pyear , 23, field_t)  // 按照字节序用于比较
+        xtmpl(date   , final_t, field_t),
+        xproc(m_day  , 5 , field_t),
+        xproc(m_month, 4 , field_t),
+        xproc(m_year , 23, field_t)  // 按照字节序用于比较
     )
 
         date(date const &) = default;
@@ -56,7 +57,7 @@ namespace mixc::chrono_private_date::origin{
         }
 
         date(field_t year = 0, field_t month = 0, field_t day = 0) :
-            pday(day), pmonth(month), pyear(year){
+            m_day(day), m_month(month), m_year(year){
         }
 
         bool is_valid() const {

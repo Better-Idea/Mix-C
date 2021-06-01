@@ -3,9 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::chrono_private_time::inc
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/seqlize.hpp"
 #include"memop/cmp.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_time::origin{
@@ -14,10 +15,10 @@ namespace mixc::chrono_private_time::origin{
     template<class final_t, class field_t = u32>
     xstruct(
         xtmpl(time, final_t, field_t),
-        xproc(pmilisecond, 10                      , field_t),  // 低位
-        xproc(psecond    , 6                       , field_t),
-        xproc(pminute    , 6                       , field_t),
-        xproc(phour      , sizeof(field_t) * 8 - 22, field_t)   // 高位，按比较的顺序
+        xproc(m_milisecond, 10                      , field_t),  // 低位
+        xproc(m_second    , 6                       , field_t),
+        xproc(m_minute    , 6                       , field_t),
+        xproc(m_hour      , sizeof(field_t) * 8 - 22, field_t)   // 高位，按比较的顺序
     )
         template<class, class> friend struct time;
 
@@ -30,28 +31,28 @@ namespace mixc::chrono_private_time::origin{
         }
 
         time(field_t hour = 0, field_t minute = 0, field_t second = 0, field_t milisecond = 0) :
-            pmilisecond(milisecond),
-            psecond(second),
-            pminute(minute),
-            phour(hour){
+            m_milisecond(milisecond),
+            m_second(second),
+            m_minute(minute),
+            m_hour(hour){
         }
 
         template<class finalx_t , class f>
         time(time<finalx_t, f> const & value) : 
             time(
-                value.phour,
-                value.pminute,
-                value.psecond,
-                value.pmilisecond
+                value.m_hour,
+                value.m_minute,
+                value.m_second,
+                value.m_milisecond
             ){
         }
 
         bool is_valid(uxx max_second = 59) const {
-            return pminute <= 59 and psecond <= max_second and pmilisecond <= 999;
+            return m_minute <= 59 and m_second <= max_second and m_milisecond <= 999;
         }
 
         bool is_valid_24h_clock(uxx max_second = 59) const {
-            return phour <= 23 and is_valid(max_second);
+            return m_hour <= 23 and is_valid(max_second);
         }
 
         ixx compare(the_t const & value) const {
@@ -75,20 +76,20 @@ namespace mixc::chrono_private_time::origin{
         xpubget_pubsetx(total_milisecond, u64)
             xr{
                 auto ms = 
-                    u64(pmilisecond) + 
-                    u64(psecond) * (1000) + 
-                    u64(pminute) * (60 * 1000) + 
-                    u64(phour)   * (60 * 60 * 1000);
+                    u64(m_milisecond) + 
+                    u64(m_second) * (1000) + 
+                    u64(m_minute) * (60 * 1000) + 
+                    u64(m_hour)   * (60 * 60 * 1000);
                 return ms;
             }
             xw{
-                phour       = (value / (60 * 60 * 1000));
+                m_hour       = (value / (60 * 60 * 1000));
                 value      %= (60 * 60 * 1000);
-                pminute     = (value / (60 * 1000));
+                m_minute     = (value / (60 * 1000));
                 value      %= (60 * 1000);
-                psecond     = (value / (1000));
+                m_second     = (value / (1000));
                 value      %= (1000);
-                pmilisecond = (value);
+                m_milisecond = (value);
             }
     $
 }

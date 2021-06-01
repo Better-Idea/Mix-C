@@ -4,8 +4,9 @@
 #undef  xuser
 #define xuser mixc::chrono_private_day::inc
 #include"chrono/private/lookup_table.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"meta/has_constructor.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_date::origin{
@@ -19,10 +20,10 @@ namespace mixc::chrono_private_day::inc{
 namespace mixc::chrono_private_day::origin{
     xstruct(
         xname(day),
-        xprif(pvalue, ixx)
+        xprif(m_value, ixx)
     )
         day(ixx value = 0) : 
-            pvalue(value){}
+            m_value(value){}
 
         template<class finalx_t , class fieldx>
         day(inc::date<finalx_t, fieldx> value){
@@ -32,19 +33,19 @@ namespace mixc::chrono_private_day::origin{
             auto a = y % 400;
             auto b = a % 100;
             auto c = value.is_leap() ? inc::sum_leap[m] : inc::sum_normal[m];
-            pvalue = y * 365 + y / 400 * 97 + a / 100 * 24 + b / 4 + c + d - 1;
+            m_value = y * 365 + y / 400 * 97 + a / 100 * 24 + b / 4 + c + d - 1;
         }
 
         operator ixx & (){
-            return pvalue;
+            return m_value;
         }
 
         operator ixx const & () const {
-            return pvalue;
+            return m_value;
         }
 
         day operator = (ixx value){
-            pvalue = value;
+            m_value = value;
             return the;
         }
 
@@ -55,7 +56,7 @@ namespace mixc::chrono_private_day::origin{
             constexpr u32 b = 100 * 365 + 24; // 完整的 100 年共有的天数
             constexpr u32 c = 4   * 365 + 1;  // 完整的 4   年共有的天数
 
-            auto v0 = pvalue + 1;
+            auto v0 = m_value + 1;
             auto p0 = v0 / a * 400;
             auto p1 = v0 % a;
             auto p2 = p1 / b * 100;

@@ -6,8 +6,9 @@
 #include"chrono/private/date.hpp"
 #include"chrono/private/time.hpp"
 #include"chrono/private/day.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/cmp.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::chrono_private_datetime::inc{
