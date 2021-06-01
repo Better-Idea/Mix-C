@@ -3,15 +3,17 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_private_ranger::inc
+#include"define/base_type.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"interface/initializer_list.hpp"
 #include"interface/seqptr.hpp"
 #include"macro/xalign.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"meta/is_origin_array.hpp"
 #include"meta/is_origin_arrayx.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser") 
 
 namespace mixc::interface_private_ranger{
@@ -44,10 +46,10 @@ namespace mixc::interface_private_ranger{
 
     xstruct(
         xname(ranger_base),
-        xprof(ptr, voidp  ),
-        xprof(itr, voidp *),
-        xprof(len, uxx    ),
-        xprof(ofs, uxx    )
+        xprof(m_ptr, voidp  ),
+        xprof(m_itr, voidp *),
+        xprof(m_len, uxx    ),
+        xprof(m_ofs, uxx    )
     )
     private:
         using final_t = the_t;
@@ -55,62 +57,62 @@ namespace mixc::interface_private_ranger{
 
         template<class object, class return_type>
         static return_type & pos(ranger_base * this_ptr, uxx index){
-            return (*(object *)this_ptr->ptr)[this_ptr->ofs + index];
+            return (*(object *)this_ptr->m_ptr)[this_ptr->m_ofs + index];
         }
 
         template<class object, class return_type>
         static return_type & neg(ranger_base * this_ptr, uxx index){
-            return (*(object *)this_ptr->ptr)[this_ptr->ofs - index];
+            return (*(object *)this_ptr->m_ptr)[this_ptr->m_ofs - index];
         }
 
         template<class return_type>
         static return_type & posx(ranger_base * this_ptr, uxx index){
-            return ((return_type *)this_ptr->ptr)[this_ptr->ofs + index];
+            return ((return_type *)this_ptr->m_ptr)[this_ptr->m_ofs + index];
         }
 
         template<class return_type>
         static return_type & negx(ranger_base * this_ptr, uxx index){
-            return ((return_type *)this_ptr->ptr)[this_ptr->ofs - index];
+            return ((return_type *)this_ptr->m_ptr)[this_ptr->m_ofs - index];
         }
 
     protected:
         void turn_positive_order() {
-            itr = (voidp *)(uxx(itr) & ~mask);
+            m_itr = (voidp *)(uxx(m_itr) & ~mask);
         }
 
         void turn_negtive_order() {
-            itr = (voidp *)(uxx(itr) | sizeof(uxx));
+            m_itr = (voidp *)(uxx(m_itr) | sizeof(uxx));
         }
 
         template<class item_t>
         item_t & access(uxx index) const {
             using invoke_t = item_t &(*)(ranger_base const *, uxx);
-            return invoke_t(*itr)(this, index);
+            return invoke_t(*m_itr)(this, index);
         }
 
     private:
         template<class object_t>
         void init(object_t const * ptr, uxx len){
-            this->ptr       = (object_t *)ptr;
-            this->itr       = (voidp *)helper<object_t>::itrs;
-            this->len       = (uxx)len;
-            this->ofs       = (0);
+            this->m_ptr     = (object_t *)ptr;
+            this->m_itr     = (voidp *)helper<object_t>::itrs;
+            this->m_len     = (uxx)len;
+            this->m_ofs     = (0);
         }
 
     public:
         template<class item_t>
         ranger_base(item_t * seq, uxx len){
             init(seq, len);
-            itr[0]          = voidp(& posx<item_t>);
-            itr[1]          = voidp(& negx<item_t>);
+            m_itr[0]        = voidp(& posx<item_t>);
+            m_itr[1]        = voidp(& negx<item_t>);
         }
 
         template<has_indexer_length_pair seq_t>
         ranger_base(seq_t const & seq){
             init(xref seq, seq.length());
             using item_t    = inc::item_origin_of<seq_t>;
-            itr[0]          = voidp(& pos<seq_t, item_t>);
-            itr[1]          = voidp(& neg<seq_t, item_t>);
+            m_itr[0]        = voidp(& pos<seq_t, item_t>);
+            m_itr[1]        = voidp(& neg<seq_t, item_t>);
         }
 
         template<inc::is_origin_array seq_t>
@@ -119,15 +121,15 @@ namespace mixc::interface_private_ranger{
         }
 
         xpubgetx(is_positive_order, bool) {
-            return (uxx(itr) & mask) == 0;
+            return (uxx(m_itr) & mask) == 0;
         }
 
         xpubgetx(is_negtive_order, bool) {
-            return (uxx(itr) & mask) != 0;
+            return (uxx(m_itr) & mask) != 0;
         }
 
         xpubgetx(length, uxx) {
-            return len;
+            return m_len;
         }
 
         xpubgetx(is_support_logic_inverse, bool){
@@ -173,13 +175,13 @@ namespace mixc::interface_private_ranger{
 
         final_t backward(uxx offset) const {
             if (the_t r = the; is_positive_order()){
-                r.ofs += offset;
-                r.len -= offset;
+                r.m_ofs += offset;
+                r.m_len -= offset;
                 return r;
             }
             else{
-                r.ofs -= offset;
-                r.len -= offset;
+                r.m_ofs -= offset;
+                r.m_len -= offset;
                 return r;
             }
         }
@@ -195,23 +197,23 @@ namespace mixc::interface_private_ranger{
 
             if (is_positive_order()){ // 正序
                 if (i.left() <= i.right()){ // 正序
-                    r.ofs += i.left();
-                    r.len  = i.right() - i.left() + 1;
+                    r.m_ofs += i.left();
+                    r.m_len  = i.right() - i.left() + 1;
                 }
                 else{ // 反序
-                    r.ofs += i.left();
-                    r.len  = i.left() - i.right() + 1;
+                    r.m_ofs += i.left();
+                    r.m_len  = i.left() - i.right() + 1;
                     r.turn_negtive_order();
                 }
             }
             else{ // 反序
                 if (i.left() <= i.right()){ // 反序 & 正序 -> 反序
-                    r.ofs -= i.left();
-                    r.len  = i.right() - i.left() + 1;
+                    r.m_ofs -= i.left();
+                    r.m_len  = i.right() - i.left() + 1;
                 }
                 else{ // 反序 & 反序 -> 正序
-                    r.ofs -= i.left();
-                    r.len  = i.left() - i.right() + 1;
+                    r.m_ofs -= i.left();
+                    r.m_len  = i.left() - i.right() + 1;
                     r.turn_positive_order();
                 }
             }

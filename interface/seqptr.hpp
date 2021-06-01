@@ -3,13 +3,15 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_private_seqptr::inc
+#include"define/base_type.hpp"
 #include"docker/private/adapter.array_access.hpp"
 #include"interface/initializer_list.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"meta/is_initializer_listx.hpp"
 #include"meta/is_origin_arrayx.hpp"
 #include"meta/item_origin_of.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_private_seqptr{
@@ -32,18 +34,18 @@ namespace mixc::interface_private_seqptr{
     template<class item_type>
     xstruct(
         xtmpl(seqptr, item_type),
-        xprif(ptr,  item_type *),
-        xprif(len,  uxx)
+        xprif(m_ptr,  item_type *),
+        xprif(m_len,  uxx)
     )
     public:
         using item_t            = item_type;
         using final_t           = inc::adapter_array_access<the_t>;
     public:
         constexpr seqptr(the_t const & self) : 
-            ptr(self.ptr), len(self.len){}
+            m_ptr(self.m_ptr), m_len(self.m_len){}
 
         constexpr seqptr(item_t const * ptr, uxx len) : 
-            ptr((item_t *)ptr), len(len){}
+            m_ptr((item_t *)ptr), m_len(len){}
 
         constexpr seqptr(inc::initializer_list<item_t> const & seq) :
             seqptr(seq.begin(), seq.size()){
@@ -62,31 +64,31 @@ namespace mixc::interface_private_seqptr{
         }
 
         operator item_t *(){
-            return ptr;
+            return m_ptr;
         }
 
         operator item_t const *() const{
-            return ptr;
+            return m_ptr;
         }
 
         item_t & operator[](uxx index){
-            return ptr[index];
+            return m_ptr[index];
         }
 
         item_t const & operator [](uxx index) const {
-            return ptr[index];
+            return m_ptr[index];
         }
 
         final_t backward(uxx offset) const {
-            return the_t(ptr + offset, len - offset);
+            return the_t(m_ptr + offset, m_len - offset);
         }
 
         final_t forward(uxx offset) const {
-            return the_t(ptr - offset, len + offset);
+            return the_t(m_ptr - offset, m_len + offset);
         }
 
         xpubgetx(length, uxx){
-            return len;
+            return m_len;
         }
 
         xpubgetx(is_support_logic_inverse, bool){
@@ -99,7 +101,7 @@ namespace mixc::interface_private_seqptr{
             the_t r = the;
             i.normalize(the.length());
 
-            return the_t(ptr + i.left(), i.right() - i.left() + 1);
+            return the_t(m_ptr + i.left(), i.right() - i.left() + 1);
         }
     $
 }

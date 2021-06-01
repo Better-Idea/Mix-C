@@ -3,8 +3,9 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::interface_can_free::inc
+#include"define/base_type.hpp"
 #include"interface/can_callback.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::interface_can_free::origin{
