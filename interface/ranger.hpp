@@ -9,6 +9,7 @@
 #include"interface/seqptr.hpp"
 #include"macro/xalign.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"meta/is_origin_array.hpp"
@@ -22,7 +23,7 @@ namespace mixc::interface_private_ranger{
     template<class seq_t, class item_t>
     concept has_indexer_length_pairx = requires(seq_t seq, item_t * ptr, uxx length){
         // 为了兼容 msvc 16.8 以下版本：使用 seq.operator item_t & []() 会出现编译器内部错误
-        ptr     = xref seq[uxx(0)];
+        ptr     = xref(seq[uxx(0)]);
         length  = seq.length();
     };
 
@@ -109,7 +110,7 @@ namespace mixc::interface_private_ranger{
 
         template<has_indexer_length_pair seq_t>
         ranger_base(seq_t const & seq){
-            init(xref seq, seq.length());
+            init(xref(seq), seq.length());
             using item_t    = inc::item_origin_of<seq_t>;
             m_itr[0]        = voidp(& pos<seq_t, item_t>);
             m_itr[1]        = voidp(& neg<seq_t, item_t>);

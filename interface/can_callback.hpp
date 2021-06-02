@@ -5,6 +5,7 @@
 #define xuser mixc::interface_can_callback::inc
 #include"macro/xinterface.hpp"
 #include"macro/xis_nullptr.hpp"
+#include"macro/xref.hpp"
 #include"memop/signature.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
@@ -31,9 +32,9 @@ namespace mixc::interface_can_callback::origin{
                     return (*this_ptr)(list...);
                 }
             };
-            
-            this_ptr    = xref this_ref;
-            this_func   = func_t(xref closure::shell);
+
+            this_ptr    = xref(this_ref);
+            this_func   = func_t(xref(closure::shell));
         }
 
         constexpr icallback(){}
