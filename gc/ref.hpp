@@ -18,10 +18,10 @@
 #include"interface/can_callback.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xis_nullptr.hpp"
-#include"memop/addressof.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/is_same.hpp"
 #include"meta_seq/tin.hpp"
@@ -160,7 +160,7 @@ namespace mixc::gc_ref{
 
         meta(the_t && object) : 
             mem(
-                atom_swap(xref object.mem, null())
+                atom_swap(xref(object.mem), null())
             ){
         }
     protected:
@@ -291,12 +291,12 @@ namespace mixc::gc_ref{
             token_mix_t * m;
 
             // 先夺取 object.mem
-            m                       = inc::atom_swap(xref object.mem, the_t::null());
+            m                       = inc::atom_swap(xref(object.mem), the_t::null());
 
             // 即使其他线程也想与 the.mem 交换
             // 后交换的线程会把先交换的内容挤出来放到 m 中
             // 由 old 析构
-            m                       = inc::atom_swap(xref the.mem, m);
+            m                       = inc::atom_swap(xref(the.mem), m);
             old.mem                 = m;
             return thex;
         }
@@ -323,7 +323,7 @@ namespace mixc::gc_ref{
             // 表示[内析构]直接执行而不推送到自身的 gc_que 队列中
             // 这么做保证了释放的顺序，同时避免了 gc_que 存满时的死锁
             if (not inc::l_in_release){
-                gc_push(ptr, xref the_t::release<guide, need_gc>);
+                gc_push(ptr, xref(the_t::release<guide, need_gc>));
                 process_message();
                 return thex;
             }

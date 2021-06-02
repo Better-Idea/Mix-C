@@ -7,6 +7,7 @@
 #include"gc/self_management.hpp"
 #include"macro/xdebug.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"meta/is_based_on.hpp"
 #include"meta/remove_const.hpp"
 #include"meta/remove_membership.hpp"
@@ -39,7 +40,7 @@ namespace mixc::gc_private_tuple{
             bool can_arrive_root        = false;
 
             if constexpr (tin<guide_t, origin>){
-                auto field              = xref ((root_t *)this)->*a0_v;
+                auto field              = xref(((root_t *)this)->*a0_v);
 
                 if constexpr (is_based_on<self_management, origin>){
                     can_arrive_root    |= field->template routing<guide_t>();
@@ -92,7 +93,7 @@ namespace mixc::gc_private_tuple{
             }
             else{
                 for(uxx i = 0; i < list.length(); i++){
-                    can_arrive_root |= tuplep(xref list[i])->template routing<guide_t>();
+                    can_arrive_root |= tuplep(xref(list[i]))->template routing<guide_t>();
                 }
             }
             return can_arrive_root;

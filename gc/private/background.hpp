@@ -16,6 +16,7 @@
 #include"docker/hashmap.hpp"
 #include"gc/private/token.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
@@ -93,7 +94,7 @@ namespace mixc::gc_private_background::origin{
 
     inline void gc_execute(){
         while(true){
-            auto i_push         = inc::atom_load(xref i_push_gc_que);
+            auto i_push         = inc::atom_load(xref(i_push_gc_que));
             auto i_pop          = i_pop_gc_que;
             auto dis            = i_push - i_pop_gc_que;
 
@@ -107,7 +108,7 @@ namespace mixc::gc_private_background::origin{
             }
 
             // 等待超时就响应一下
-            if (inc::atom_load(xref pending_count) == 0 and dis < xgc_queue_threshold){
+            if (inc::atom_load(xref(pending_count)) == 0 and dis < xgc_queue_threshold){
                 inc::thread_self::suspend(64/*ms*/);
             }
 
@@ -126,13 +127,13 @@ namespace mixc::gc_private_background::origin{
             // 批量让引用计数器减一
             while(i != i_begin){
                 i              -= 1;
-                item            = xref gc_que[i & gc_queue_depth_mask];
+                item            = xref(gc_que[i & gc_queue_depth_mask]);
 
                 // mem 为 nullptr 指示当前元素在对应的线程中还未完成设置
                 while(true){
-                    if (mem = inc::atom_load(xref item->mem); mem != nullptr){
+                    if (mem = inc::atom_load(xref(item->mem)); mem != nullptr){
                         // 加载一次 release 让当前 cpu 可见
-                        release = inc::atom_load(xref item->release);
+                        release = inc::atom_load(xref(item->release));
                         mem->owners_decrease();
                         break;
                     }
@@ -148,7 +149,7 @@ namespace mixc::gc_private_background::origin{
             }
 
             while(i != i_end){
-                item            = xref gc_que[i & gc_queue_depth_mask];
+                item            = xref(gc_que[i & gc_queue_depth_mask]);
                 i              += 1;
                 i_pop          += 1;
                 release         = item->release;
@@ -169,10 +170,10 @@ namespace mixc::gc_private_background::origin{
 
                 // 需要先置空，再设置 i_pop_gc_que
                 // 只有下一次读到 mem 值不为 nullptr 时才响应
-                inc::atom_store(xref item->mem, nullptr);
+                inc::atom_store(xref(item->mem, nullptr));
 
                 // 让 gc_que 立即腾出可用的空间
-                inc::atom_store(xref i_pop_gc_que, i_pop);
+                inc::atom_store(xref(i_pop_gc_que, i_pop));
             }
 
             // 然后做释放内存等耗时操作
@@ -186,26 +187,26 @@ namespace mixc::gc_private_background::origin{
     }
 
     inline void gc_sync(){
-        inc::atom_add(xref pending_count, 1);
+        inc::atom_add(xref(pending_count), 1);
         gc_thread.resume();
 
         // 如果 gc 还未处理完该 mem 就自旋等待
-        while(inc::atom_load(xref gc_que[l_i_wait].mem) == l_wait_mem){
+        while(inc::atom_load(xref(gc_que[l_i_wait].mem)) == l_wait_mem){
             inc::thread_self::yield();
         }
 
-        inc::atom_sub(xref pending_count, 1);
+        inc::atom_sub(xref(pending_count), 1);
     }
 
     // 注意：mem 不能为 nullptr
     inline void gc_push(inc::token * mem, release_invoke release){
-        uxx i_push              = inc::atom_fetch_add(xref i_push_gc_que, 1);
+        uxx i_push              = inc::atom_fetch_add(xref(i_push_gc_que), 1);
         uxx i_pop               = 0;
         uxx i                   = 0;
         uxx dis                 = 0;
 
         while(true){
-            i_pop               = inc::atom_load(xref i_pop_gc_que);
+            i_pop               = inc::atom_load(xref(i_pop_gc_que));
             i                   = i_push & gc_queue_depth_mask;
             dis                 = i_push - i_pop;
 
@@ -223,8 +224,8 @@ namespace mixc::gc_private_background::origin{
         l_wait_mem              = mem;
 
         // 后设置 mem，该字段不为 nullptr 指示当前元素设置完成
-        inc::atom_store(xref gc_que[i].release, release);
-        inc::atom_store(xref gc_que[i].mem, mem);
+        inc::atom_store(xref(gc_que[i].release), release);
+        inc::atom_store(xref(gc_que[i].mem), mem);
 
         if (i == xgc_queue_threshold){
             gc_thread.resume();
