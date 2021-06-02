@@ -9,7 +9,10 @@
 #include"lang/cxx.hpp"
 #include"instruction/index_of_last_set.hpp"
 #include"memop/copy.hpp"
-#include"mixc.hpp"
+#include"define/base_type.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xref.hpp"
+#include"macro/xstruct.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -146,10 +149,10 @@ namespace mixc::draft_file_system{
 
             inc::copy_with_operator(header.name, disk_name, len);
 
-            write_block(page_of_root_dir, xref root_dir, sizeof(root_dir));
-            write_block(page_of_allocator, xref allocator, sizeof(allocator));
-            write_block(page_of_entry, xref entry, sizeof(entry));
-            write_block(page_of_file_system_header, xref header, sizeof(header));
+            write_block(page_of_root_dir, xref(root_dir), sizeof(root_dir));
+            write_block(page_of_allocator, xref(allocator), sizeof(allocator));
+            write_block(page_of_entry, xref(entry), sizeof(entry));
+            write_block(page_of_file_system_header, xref(header), sizeof(header));
             return success;
         }
 

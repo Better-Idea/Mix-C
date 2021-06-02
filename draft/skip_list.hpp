@@ -3,6 +3,7 @@
 #include"define/base_type.hpp"
 #include"memop/swap.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xref.hpp"
 #include"utils/allocator.hpp"
 
 namespace xuser{
@@ -125,12 +126,12 @@ namespace xuser{
             }
 
             // 说明是插入到末尾(相当于追加，那么 i 一定等于 1)
-            auto pair                           = find<path_record>(xref i, xref path_ptr);
+            auto pair                           = find<path_record>(xref(i), xref(path_ptr));
             insert_point                        = pair.item_ptr;
             cur_skip_node                       = pair.cur_skip_node;
 
             if (i == 0){
-                swap(xref insert_point->value, xref new_item->value);
+                swap(xref(insert_point->value), xref(new_item->value));
                 new_item->next                  = insert_point->next;
             }
 
@@ -219,10 +220,10 @@ namespace xuser{
                 }
 
                 // 若为 true 说明已经在 root 层插入了新节点
-                if (path_ptr -= 1; path_ptr < xref path[0]){
+                if (path_ptr -= 1; path_ptr < xref(path[0])){
                     return;
                 }
-                if (path_ptr == xref path[0]){
+                if (path_ptr == xref(path[0])){
                     if (state != is_normal_space){
                         state                      += 1;
                         return;
@@ -250,7 +251,7 @@ namespace xuser{
         }
 
         item_t & operator[](uxx index){
-            item_node * item = find(xref index).item_ptr;
+            item_node * item = find(xref(index)).item_ptr;
             return item->value;
         }
 
