@@ -27,7 +27,7 @@ namespace xuser{
 
         void push(){
             barrier.lock<opr::push>([&](){
-                atom_add<uxx>(xref counter, 1);
+                atom_add<uxx>(xref(counter), 1);
             });
         }
 
