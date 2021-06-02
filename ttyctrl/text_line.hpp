@@ -8,8 +8,9 @@
 #include"define/base_type.hpp"
 #include"docker/shared_array.hpp"
 #include"macro/xexport.hpp"
-#include"macro/xstruct.hpp"
 #include"macro/xindex_rollback.hpp"
+#include"macro/xref.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
 #pragma pop_macro("xuser")
@@ -136,7 +137,7 @@ namespace mixc::ttyctrl_text_line{
                 ::length{new_length}
             };
             inc::copy(compact, the.m_text, compact.length());
-            the.m_text.swap(xref compact);
+            the.m_text.swap(xref(compact));
         }
     $
 }
