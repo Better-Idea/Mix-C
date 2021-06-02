@@ -8,6 +8,7 @@
 #include"lang/cxx/strcat.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xref.hpp"
 #include"macro/xwarning.hpp"
 #include"memop/copy.hpp"
 #include"utils/allocator.hpp"
@@ -109,7 +110,7 @@ namespace mixc::io_dir::origin{
             cpp::copy(root + path.length(), "\\*", 3);
             auto fd         = FindFirstFileA(root, entry);
             return fd;
-        })(path, xref entry);
+        })(path, xref(entry));
 
         if (fd == INVALID_HANDLE_VALUE){
             return;
@@ -121,7 +122,7 @@ namespace mixc::io_dir::origin{
 
         #define xentry_name     (entry.cFileName)
         #define xis_dir         (0 != (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-        #define xhas_next       (FindNextFileA(fd, xref entry) != 0)
+        #define xhas_next       (FindNextFileA(fd, xref(entry)) != 0)
 
         #elif xis_linux
         struct

@@ -7,6 +7,7 @@
 #include"dumb/disable_copy.hpp"
 #include"interface/can_callback.hpp"
 #include"macro/xitr_foreach.hpp"
+#include"macro/xref.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
@@ -34,7 +35,7 @@ namespace mixc::io_dir::origin{
                 loop_t state    = loop_t::go_on;
 
                 dir::foreach_template(for_file, path, [&](asciis name){
-                    state       = inc::itr_switch<mode_v>(xref index, invoke, name);
+                    state       = inc::itr_switch<mode_v>(xref(index), invoke, name);
                     return state;
                 });
             }

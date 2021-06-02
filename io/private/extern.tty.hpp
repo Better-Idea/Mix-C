@@ -42,6 +42,7 @@ c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
 #include"macro/xdebug_fail.hpp"
+#include"macro/xref.hpp"
 #include"memop/copy.hpp"
 #include"utils/allocator.hpp"
 #include"utils/init_list.hpp"
@@ -457,7 +458,7 @@ namespace mixc::io_private_tty::origin{
                     read_length -= 1;
                 }
             #elif xis_windows 
-                if (ReadConsoleA(h_stdin, buffer_current, buffer_rest, LPDWORD(xref read_length), NULL);
+                if (ReadConsoleA(h_stdin, buffer_current, buffer_rest, LPDWORD(xref(read_length)), NULL);
                     buffer_current[read_length - 1] == '\n'){
                     read_length -= read_length > 1 ? 2 : 1;
                 }
