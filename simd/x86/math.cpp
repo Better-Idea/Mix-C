@@ -3,6 +3,7 @@
 #include"intrin.h"
 #include"math/const.hpp"
 #include"math/sin.hpp"
+#include"macro/xref.hpp"
 #include"memop/swap.hpp"
 #include"meta/is_same.hpp"
 
@@ -130,7 +131,7 @@ inline void swap_bytes(item_t * buffer,item_t const * source, uxx length){
             auto end        = u08p(buffer + i + 1) - 1;
 
             for(uxx i = 0; i < sizeof(item_t) / 2; i++){
-                swap(xref begin[i], xref end[uxx(0) - i]);
+                swap(xref(begin[i]), xref(end[uxx(0) - i]));
             }
         }
     };

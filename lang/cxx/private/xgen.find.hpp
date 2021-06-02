@@ -13,7 +13,7 @@ struct meta : base_t {
     requires(mode_v != inc::itr_miss_match)
     uxx xa_name(item_t value, func_t const & match) const {
         return inc::xa_name<item_t, mode_v>
-            ::invoke(thex, final_t{xref value, 1}, match, inc::default_compare<item_t>);
+            ::invoke(thex, final_t{xref(value), 1}, match, inc::default_compare<item_t>);
     }
 
     template<
@@ -31,7 +31,7 @@ struct meta : base_t {
         func_t  const & match
     ) const {
         return inc::xa_name<item_t, mode_v>
-            ::invoke(thex, final_t{xref value, 1}, match, compare);
+            ::invoke(thex, final_t{xref(value), 1}, match, compare);
     }
 
     template<
@@ -110,7 +110,7 @@ struct meta : base_t {
         cmp_t   const & compare = inc::default_compare<item_t>
     ) const {
         return inc::find_mix<item_t, xa_find_mix_type>
-            ::invoke(thex, final_t{xref value, 1}, n_th, compare);
+            ::invoke(thex, final_t{xref(value), 1}, n_th, compare);
     }
 
     template<

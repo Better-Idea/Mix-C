@@ -16,6 +16,7 @@
 #include"docker/transmitter.hpp"
 #include"lang/cxx/compare.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xref.hpp"
 #include"math/numeration_t.hpp"
 #include"math/exp10.hpp"
 #include"math/expr10.hpp"
@@ -120,7 +121,7 @@ namespace mixc::lang_cxx_parse{
                 }
 
                 // 得到整数部分
-                result          = part(result, xref cur);
+                result          = part(result, xref(cur));
                 miss_digital    = cur == token;
 
                 // 得到小数部分
@@ -159,7 +160,7 @@ namespace mixc::lang_cxx_parse{
                         token   += 1;
                     }
 
-                    exp = part(exp, xref cur);
+                    exp = part(exp, xref(cur));
 
                     if (token == cur){
                         cur = token_tmp - 1; // 回滚到字符 'e' or 'E' 之前一个字符

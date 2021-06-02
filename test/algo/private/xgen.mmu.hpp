@@ -29,7 +29,7 @@ meta.counter = 0;
 for(uxx i = 0; i < xa_initial_length * 32; i++){
     for(uxx j = 0; j <= i; j++){
         meta.value = j;
-        var::push(xref table, xref length, meta, alloc, free);
+        var::push(xref(table), xref(length), meta, alloc, free);
         xfail_ifne(j + 1, length);
     }
     for(uxx j = 0; j <= i; j++){
@@ -37,7 +37,7 @@ for(uxx i = 0; i < xa_initial_length * 32; i++){
         xfail_ifne(j, current.value);
     }
 
-    var::clear(xref table, xref length, free);
+    var::clear(xref(table), xref(length), free);
     xfail_ifne(i + 1, meta.counter);
     xfail_ifne(cost, used_bytes());
     meta.counter = 0;
@@ -46,7 +46,7 @@ for(uxx i = 0; i < xa_initial_length * 32; i++){
 for(uxx i = 0; i < xa_initial_length * 32; i++){
     for(uxx j = 0; j <= i; j++){
         meta.value = j;
-        var::push(xref table, xref length, meta, alloc, free);
+        var::push(xref(table), xref(length), meta, alloc, free);
     }
     for(uxx j = 0; j <= i; j++){
         auto & current = var::access(table, j);
@@ -56,14 +56,14 @@ for(uxx i = 0; i < xa_initial_length * 32; i++){
     auto destroy_count = i + 1;
 
     for(uxx j = 0, k = length / 2; j < k; j++){
-        var::pop(xref table, xref length, xref meta, alloc, free);
+        var::pop(xref(table), xref(length), xref(meta), alloc, free);
         xfail_ifne(1, meta.counter);
         xfail_ifne(length, meta.value);
         meta.counter    = 0;
         destroy_count  -= 1;
     }
 
-    var::clear(xref table, xref length, free);
+    var::clear(xref(table), xref(length), free);
     xfail_ifne(destroy_count, meta.counter);
     xfail_ifne(cost, used_bytes());
     meta.counter = 0;
@@ -71,11 +71,11 @@ for(uxx i = 0; i < xa_initial_length * 32; i++){
 
 for(uxx i = 0; i < xa_initial_length * 32; i++){
     meta.value = i;
-    var::push(xref table, xref length, meta, alloc, free);
+    var::push(xref(table), xref(length), meta, alloc, free);
 }
 
 while(length != 0){
-    var::pop(xref table, xref length, xref meta, alloc, free);
+    var::pop(xref(table), xref(length), xref(meta), alloc, free);
     xfail_ifne(length, meta.value);
     xfail_ifne(1, meta.counter);
     meta.counter = 0;

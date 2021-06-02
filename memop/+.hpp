@@ -1,4 +1,3 @@
-#include"memop/addressof.hpp"
 #include"memop/bit.hpp"
 #include"memop/cast.hpp"
 #include"memop/cmp.hpp"

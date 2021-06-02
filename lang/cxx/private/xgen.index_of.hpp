@@ -9,7 +9,7 @@ struct meta : base_t {
     template<class cmp_t = default_cmp_t>
     requires(inc::can_compare<cmp_t, item_t>)
     uxx xa_name(item_t value, cmp_t const & compare = inc::default_compare<item_t>) const {
-        return the.xlink2(xa_name, _char)(final_t{xref value, 1}, compare);
+        return the.xlink2(xa_name, _char)(final_t{xref(value), 1}, compare);
     }
 
     template<

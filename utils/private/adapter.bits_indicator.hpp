@@ -15,6 +15,7 @@
 #include"instruction/index_of_last_set.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"memop/zeros.hpp"
 #pragma pop_macro("xuser")
 
@@ -52,7 +53,7 @@ namespace mixc::utils_adapter_bit_indicator::origin{
         uxx j = 0;
 
         while(true){
-            if (j = index >> step_exp; invoke(xref bmp[j], uxx(1) << (index & bmask))){
+            if (j = index >> step_exp; invoke(xref(bmp[j]), uxx(1) << (index & bmask))){
                 break;
             }
             if (i + 1 == height){

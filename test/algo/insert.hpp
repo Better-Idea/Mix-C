@@ -4,9 +4,10 @@
 #undef  xuser
 #define xuser mixc::test_algo_insert::inc
 #include"algo/insert.hpp"
+#include"define/base_type.hpp"
 #include"docker/array.hpp"
 #include"macro/xassert.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::test_algo_insert{

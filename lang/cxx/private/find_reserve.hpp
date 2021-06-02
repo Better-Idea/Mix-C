@@ -8,6 +8,7 @@
 #include"lang/cxx/index_of_last.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xitr_foreach.hpp"
 #pragma pop_macro("xuser")
 
@@ -31,7 +32,7 @@ namespace mixc::lang_cxx_private_find_reserve::origin{
                 if (i = cur.index_of_last(value, compare); i == not_exist){
                     break;
                 }
-                if (inc::itr_switch<mode_v>(xref index, match, i) == loop_t::finish){
+                if (inc::itr_switch<mode_v>(xref(index), match, i) == loop_t::finish){
                     break;
                 }
             }

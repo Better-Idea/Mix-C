@@ -16,6 +16,7 @@
 #include"lang/cxx.hpp"
 #include"macro/xdebug_fail.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"
@@ -191,7 +192,7 @@ namespace mixc::lang_cxx_ph{
             auto total      = (uxx)0;
 
             inc::cxx<item_t>(deformation(), n, lut, [&](uxx length) {
-                return operation<item_t>(length, xref head, xref total, alloc);
+                return operation<item_t>(length, xref(head), xref(total), alloc);
             });
             return { head - base_t::offset_to_head, total };
         }
@@ -380,7 +381,7 @@ namespace mixc::lang_cxx_ph{
             if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
                 length     += fmt.length();
                 buf         = base_t::template align<item_t>(
-                    length, xref the.length/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
+                    length, xref(the).length/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
                 );
 
                 buf        += length;
@@ -391,7 +392,7 @@ namespace mixc::lang_cxx_ph{
             }
             else{
                 buf         = base_t::template align<item_t>(
-                    length, xref the.length/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
+                    length, xref(the.length)/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
                 );
                 buf        += length;
             }
@@ -415,7 +416,7 @@ namespace mixc::lang_cxx_ph::origin::ph{
 
         template<class item_t>
         inc::cxx<item_t> format(inc::cxx<item_t> fmt, inc::ialloc<item_t> const & alloc){
-            inc::copy(xref base_t::alloc, alloc);
+            inc::copy(xref(base_t::alloc), alloc);
             item_t * ptr    = fmt.length() == 0 ? 
                 base_t::template combine<item_t>(0) :
                 base_t::template combine<item_t>(0, fmt);
@@ -425,7 +426,7 @@ namespace mixc::lang_cxx_ph::origin::ph{
 
         template<class item_t>
         inc::cxx<item_t> format(inc::ialloc<item_t> const & alloc){
-            inc::copy(xref base_t::alloc, alloc);
+            inc::copy(xref(base_t::alloc), alloc);
             item_t * ptr    = base_t::template combine<item_t>(0);
             ptr            -= base_t::offset_to_head;
             return { ptr, base_t::length };

@@ -9,6 +9,7 @@
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"math/min.hpp"
 #include"memop/cmp.hpp"
 #include"memop/swap.hpp"
@@ -60,7 +61,7 @@ namespace mixc::math_statistics_topk::origin{
             kref[i] = inc::heap_root::pop(kref, i + 1, kref[i]);
         }
         if (mode == topk_with::asc_sort) for (uxx i = 0; i < len / 2; i++){
-            inc::swap(xref kref[i], xref kref[len - i - 1]);
+            inc::swap(xref(kref[i]), xref(kref[len - i - 1]));
         }
         return kref;
     }

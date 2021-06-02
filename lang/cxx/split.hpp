@@ -20,6 +20,7 @@
 #include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/copy.hpp"
 #include"meta/has_cast.hpp"
@@ -81,7 +82,7 @@ namespace mixc::lang_cxx_split{
 
     public:
         cxx_split_info(cxx_split_info && self){
-            inc::copy(xref the, self);
+            inc::copy(xref(the), self);
         }
 
         xpubget(segment_count)
@@ -144,7 +145,7 @@ namespace mixc::lang_cxx_split{
             if (info.m_table = table; uxx(keep_empty_entries)){
                 the.find(value, compare, [&](uxx index){
                     last.m_length   = index - last.m_index;
-                    var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
+                    var_array::push(xref(info.m_table), xref(info.m_segment_count), last, allocx, freex);
                     info.m_empty_entries_count
                                    += 1;
 
@@ -155,14 +156,14 @@ namespace mixc::lang_cxx_split{
 
                     last.m_index    = index;
                     last.m_length   = 0;
-                    var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
+                    var_array::push(xref(info.m_table), xref(info.m_segment_count), last, allocx, freex);
                     last.m_index   += length;
                 });
             }
             else{
                 the.find(value, compare, [&](uxx index){
                     if (last.m_length = index - last.m_index; last.m_length != 0){
-                        var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
+                        var_array::push(xref(info.m_table), xref(info.m_segment_count), last, allocx, freex);
                     }
                     info.m_empty_entries_count
                                    += 1;
@@ -172,12 +173,12 @@ namespace mixc::lang_cxx_split{
 
             if (last.m_index + 1 < the.length()){
                 last.m_length       = the.length() - last.m_index;
-                var_array::push(xref info.m_table, xref info.m_segment_count, last, allocx, freex);
+                var_array::push(xref(info.m_table), xref(info.m_segment_count), last, allocx, freex);
             }
 
             info.m_content          = (item_t *)the;
             invoke(inc::move(info));
-            var_array::clear(xref info.m_table, xref info.m_segment_count, freex);
+            var_array::clear(xref(info.m_table), xref(info.m_segment_count), freex);
         }
     };
 

@@ -13,6 +13,7 @@
 #include"lang/cxx/strlize.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
 #include"math/min.hpp"
@@ -46,12 +47,12 @@ namespace mixc::lang_cxx_logger_helper{
                 auto   item             = (inc::cxx<item_t>{ value });
                 auto & target           = (inc::cast<match>(this->value));
                 this->length            = (item.length());
-                this->fmt               = (xref mix::template logger_helper<match>);
+                this->fmt               = (xref(mix::template logger_helper<match>));
                 target                  = (asciis(item));
             }
             else{
                 auto & target           = (inc::cast<match>(this->value));
-                this->fmt               = (xref mix::template logger_helper<match>);
+                this->fmt               = (xref(mix::template logger_helper<match>));
                 target                  = (match)(object_t &)(value);
             }
         }

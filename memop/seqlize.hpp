@@ -6,7 +6,7 @@
 #include"define/base_type.hpp"
 #include"interface/seqptr.hpp"
 #include"macro/xexport.hpp"
-#include"memop/addressof.hpp"
+#include"macro/xref.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::memop_seqlize{
@@ -16,7 +16,7 @@ namespace mixc::memop_seqlize{
         #define xgen(unsigned_t)                                                \
         if constexpr (sizeof(type_t) % sizeof(unsigned_t) == 0){                \
             return inc::seqptr<unsigned_t>(                                     \
-                (unsigned_t *)(xref value), sizeof(type_t) / sizeof(unsigned_t) \
+                (unsigned_t *)(xref(value)), sizeof(type_t) / sizeof(unsigned_t)\
             );                                                                  \
         } else
 

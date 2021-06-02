@@ -14,7 +14,7 @@
 #include"dumb/mirror.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
-#include"memop/addressof.hpp"
+#include"macro/xref.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
 #pragma pop_macro("xusing_docker_shared_array")
@@ -38,7 +38,7 @@ namespace mixc::docker_shared_array_stacklize {
 
         void clear() {
             the_t old_array;
-            base_t::swap(xref old_array);
+            base_t::swap(xref(old_array));
 
             if (not old_array.is_empty()){
                 for(uxx i = 0; i < old_array.length(); i++) {
@@ -72,11 +72,11 @@ namespace mixc::docker_shared_array_stacklize {
                 );
 
                 inc::copy(new_array, the, len);
-                the.swap(xref new_array);
+                the.swap(xref(new_array));
                 inc::cast<mirror_without_destroy>(new_array).~mirror_without_destroy();
             }
 
-            item_t * cur = xref the[len];
+            item_t * cur = xref(the[len]);
             xnew (cur)item_t(value);
         }
 
@@ -92,7 +92,7 @@ namespace mixc::docker_shared_array_stacklize {
                 };
 
                 inc::copy(new_array, the, i);
-                the.swap(xref new_array);
+                the.swap(xref(new_array));
             }
             else{
                 the[i].~item_t();

@@ -20,6 +20,7 @@
 #include"macro/xdebug+.hpp"
 #include"macro/xdefer.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xref.hpp"
 #include"utils/allocator.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
@@ -129,7 +130,7 @@ namespace mixc::utils_private_tiny_allocator{
 
         auto try_push(){
             struct { uxx self_id; bool wait_change_owners; } i;
-            uxx mask            = inc::atom_fetch_add(xref state, new_push);
+            uxx mask            = (inc::atom_fetch_add(xref(state), new_push));
             i.self_id           = (mask & mask_to_get_self_id);
             i.wait_change_owners= (mask & wait_change_owners) != 0;
             return i;
@@ -137,38 +138,38 @@ namespace mixc::utils_private_tiny_allocator{
 
         void wait_escaped_finish(){
             // 等到所有[逃逸线程]完成操作
-            while(inc::atom_load(xref i_finished) + new_push < i_new_owner){
+            while(inc::atom_load(xref(i_finished)) + new_push < i_new_owner){
                 inc::thread_self::yield();
             }
         }
 
         void raise_change_owners(){
-            inc::atom_store(xref i_new_owner, not_exist);
+            inc::atom_store(xref(i_new_owner), not_exist);
             auto fetch          = inc::atom_fetch_or(
-                xref state, wait_change_owners
+                xref(state), wait_change_owners
             );
             auto new_owner      = fetch & mask_to_get_self_id;
 
             // 让以下字段的改动对其他线程可见
-            inc::atom_load(xref alive_pages);
-            inc::atom_load(xref used_bytes);
-            inc::atom_load(xref alive_object);
+            inc::atom_load(xref(alive_pages));
+            inc::atom_load(xref(used_bytes));
+            inc::atom_load(xref(alive_object));
 
             // 之前的字段设置完毕，可以设置 i_new_owner，其他线程可能在等待它被赋予新值
-            inc::atom_store(xref i_new_owner, new_owner);
+            inc::atom_store(xref(i_new_owner), new_owner);
         }
 
         void async_push(voidp mem, uxx bytes){
             auto self               = node_freep(mem);
             auto prev               = node_freep(nullptr);
-            inc::atom_store(xref self->next, nullptr);
-            inc::atom_store(xref self->bytes, bytes);
-            prev                    = inc::atom_swap(xref async_tail, self);
-            inc::atom_store(xref prev->next, self);
-            inc::atom_fetch_add(xref i_async_push, 1);
+            inc::atom_store(xref(self->next), nullptr);
+            inc::atom_store(xref(self->bytes), bytes);
+            prev                    = inc::atom_swap(xref(async_tail), self);
+            inc::atom_store(xref(prev->next), self);
+            inc::atom_fetch_add(xref(i_async_push), 1);
 
             // 完成推送，最后设置该字段
-            inc::atom_fetch_add(xref i_finished, 1);
+            inc::atom_fetch_add(xref(i_finished), 1);
         }
 
         tap             owner{};
@@ -181,7 +182,7 @@ namespace mixc::utils_private_tiny_allocator{
         uxx             used_bytes{};
         uxx             alive_object{};
         node_free       async_head{};
-        node_free     * async_tail = xref async_head;
+        node_free     * async_tail = xref(async_head);
     } * tiny_tokenp;
 
     typedef struct page_header{
@@ -203,13 +204,13 @@ namespace mixc::utils_private_tiny_allocator{
         // 标记占用
         void set(uxx index){
             index += 1;
-            inc::bit_test_and_set(xref bmp[index >> 3], index & 0x7);
+            inc::bit_test_and_set(xref(bmp[index >> 3]), index & 0x7);
         }
 
         // 标记空闲
         void reset(uxx index){
             index += 1;
-            inc::bit_test_and_reset(xref bmp[index >> 3], index & 0x7);
+            inc::bit_test_and_reset(xref(bmp[index >> 3]), index & 0x7);
         }
 
         uxx index_of(nodep node){
@@ -311,15 +312,15 @@ namespace mixc::utils_private_tiny_allocator::origin{
 
         tiny_allocator(){
             token                   = tiny_tokenp(inc::malloc(sizeof(tiny_token)));
-            inc::atom_store(xref token->owner, this);
+            inc::atom_store(xref(token->owner), this);
         }
 
         ~tiny_allocator(){
             // 如果其他线程归还所有分配的内存就自行析构
-            if (inc::atom_load(xref token->i_async_push) == token->alive_object){
+            if (inc::atom_load(xref(token->i_async_push)) == token->alive_object){
                 for(auto head = token->async_head.next; head != nullptr;){
-                    auto next       = inc::atom_load(xref head->next);
-                    auto bytes      = inc::atom_load(xref head->bytes);
+                    auto next       = inc::atom_load(xref(head->next));
+                    auto bytes      = inc::atom_load(xref(head->bytes));
                     this->free_core(head, bytes);
                     head            = next;
                 }
@@ -410,49 +411,49 @@ namespace mixc::utils_private_tiny_allocator::origin{
             // 出于并发性能考虑，在转移所有者时，我们不会更改 [故主] 的 page->token
             // 所以有下面峰回路转的加载操作
             else{
-                o_token             = inc::atom_load(xref head->token);
-                owner               = inc::atom_load(xref o_token->owner);
-                o_token             = inc::atom_load(xref owner->token);
+                o_token             = inc::atom_load(xref(head->token));
+                owner               = inc::atom_load(xref(o_token->owner));
+                o_token             = inc::atom_load(xref(owner->token));
             }
 
             using tap               = tiny_allocator *;
             auto i                  = o_token->try_push();
             auto inherit            = [&](){
                 // 更改所有者
-                auto o_owner        = inc::atom_swap(xref o_token->owner, this);
+                auto o_owner        = inc::atom_swap(xref(o_token->owner), this);
                 auto list           = head;
 
                 // 其他相关线程可能会等待该位复位
                 // 本来在这之前需要改变 [故主] 所有 page->token
                 // 但如果 [故主] 遗留的 page 较多会导致所有向 [故主] 归还内存的线程都被阻塞
                 // 直到 o_token->state 中的 wait_change_owners 位被复位
-                inc::atom_fetch_and(xref o_token->state, ~wait_change_owners);
+                inc::atom_fetch_and(xref(o_token->state), ~wait_change_owners);
                 this->merge(o_owner);
                 this->free_core(ptr, bytes);
 
                 // 原子操作读取方可在带缓存的 cpu 中读到改动
-                token->used_bytes  += inc::atom_load(xref o_token->used_bytes);
-                token->alive_pages += inc::atom_load(xref o_token->alive_pages);
-                token->alive_object+= inc::atom_load(xref o_token->alive_object);
+                token->used_bytes  += inc::atom_load(xref(o_token->used_bytes));
+                token->alive_pages += inc::atom_load(xref(o_token->alive_pages));
+                token->alive_object+= inc::atom_load(xref(o_token->alive_object));
 
                 // 等到所有[逃逸线程]完成操作
                 o_token->wait_escaped_finish();
 
-                auto head           = inc::atom_load(xref o_token->async_head.next);
+                auto head           = inc::atom_load(xref(o_token->async_head.next));
                 auto next           = node_freep{};
                 auto bytes          = uxx{};
-                inc::atom_fetch_add(xref o_token->i_finished, new_push);
+                inc::atom_fetch_add(xref(o_token->i_finished), new_push);
 
                 while(head != nullptr){
-                    bytes           = inc::atom_load(xref head->bytes);
-                    next            = inc::atom_load(xref head->next);
+                    bytes           = inc::atom_load(xref(head->bytes));
+                    next            = inc::atom_load(xref(head->next));
                     this->free_core(head, bytes);
                     head            = next;
                 }
             };
 
             if (i.wait_change_owners){
-                while(inc::atom_load(xref o_token->i_new_owner) == not_exist){
+                while(inc::atom_load(xref(o_token->i_new_owner)) == not_exist){
                     inc::thread_self::yield();
                 }
 
@@ -461,13 +462,13 @@ namespace mixc::utils_private_tiny_allocator::origin{
                     return;
                 }
 
-                while(inc::atom_load(xref o_token->state) & wait_change_owners){
+                while(inc::atom_load(xref(o_token->state)) & wait_change_owners){
                     inc::thread_self::yield();
                 }
 
                 // 重新加载
-                owner               = inc::atom_load(xref token->owner);
-                o_token             = inc::atom_load(xref owner->token);
+                owner               = inc::atom_load(xref(token->owner));
+                o_token             = inc::atom_load(xref(owner->token));
             }
 
             // 推送给所属的线程
@@ -483,8 +484,8 @@ namespace mixc::utils_private_tiny_allocator::origin{
     private:
         void async_pop(){
             auto free_size          = 0;
-            auto phead              = xref token->async_head;
-            auto head               = inc::atom_load(xref phead->next);
+            auto phead              = xref(token->async_head);
+            auto head               = inc::atom_load(xref(phead->next));
             auto next               = node_freep{};
             auto bytes              = uxx{};
             auto i                  = uxx{};
@@ -494,19 +495,19 @@ namespace mixc::utils_private_tiny_allocator::origin{
             }
 
             xdefer{
-                inc::atom_sub(xref token->i_async_push, i);
+                inc::atom_sub(xref(token->i_async_push), i);
             };
 
             while(true){
                 if (next = head->next; next == nullptr){
-                    next            = inc::atom_load(xref head->next);
+                    next            = inc::atom_load(xref(head->next));
                 }
                 if (next == nullptr){
                     phead->next     = head;
                     return;
                 }
 
-                bytes               = inc::atom_load(xref head->bytes);
+                bytes               = inc::atom_load(xref(head->bytes));
                 this->free_core(head, bytes);
                 head                = next;
             }

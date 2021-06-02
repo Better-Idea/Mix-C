@@ -8,6 +8,7 @@
 #include"lang/cxx/index_of_first.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"meta/is_cxx.hpp"
 #pragma pop_macro("xuser")
@@ -42,7 +43,7 @@ namespace mixc::lang_cxx_private_find::origin{
                 offset         += i;
                 match_count    += 1;
 
-                if (inc::itr_switch<mode_v>(xref index, match, offset) == loop_t::finish){
+                if (inc::itr_switch<mode_v>(xref(index), match, offset) == loop_t::finish){
                     break;
                 }
             }

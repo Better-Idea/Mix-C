@@ -4,6 +4,7 @@
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_sub.hpp"
 #include"concurrency/lock/atom_load.hpp"
+#include"macro/xref.hpp"
 
 #if xuse_libc_malloc
 #include<malloc.h>
@@ -17,8 +18,8 @@ namespace mixc::utils_allocator{
     }
 
     extern voidp tiny_alloc(uxx bytes){
-        inc::atom_add(xref pused_bytes, bytes);
-        inc::atom_add(xref palive_object, 1);
+        inc::atom_add(xref(pused_bytes), bytes);
+        inc::atom_add(xref(palive_object), 1);
 
         // 按 16 字节对齐
         bytes                   = (bytes + 0xf) & ~0xf;
@@ -26,19 +27,19 @@ namespace mixc::utils_allocator{
     }
 
     extern void tiny_free(voidp ptr, uxx bytes){
-        inc::atom_sub(xref pused_bytes, bytes);
-        inc::atom_sub(xref palive_object, 1);
+        inc::atom_sub(xref(pused_bytes), bytes);
+        inc::atom_sub(xref(palive_object), 1);
         ::free(ptr);
     }
 }
 
 namespace mixc::utils_allocator::origin{
     extern uxx used_bytes(){
-        return inc::atom_load(xref pused_bytes);
+        return inc::atom_load(xref(pused_bytes));
     }
 
     extern uxx alive_object(){
-        return inc::atom_load(xref palive_object);
+        return inc::atom_load(xref(palive_object));
     }
 }
 #else

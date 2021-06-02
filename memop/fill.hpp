@@ -5,6 +5,7 @@
 #define xuser mixc::memop_fill::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"memop/copy.hpp"
 #pragma pop_macro("xuser")
 
@@ -16,7 +17,7 @@ namespace mixc::memop_fill{
                 target[i] = (a1_t &)source;
             }
             else{
-                inc::copy(xref target[i], source);
+                inc::copy(xref(target[i]), source);
             }
         }
     }

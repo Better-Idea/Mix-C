@@ -7,6 +7,7 @@
 #include"dumb/place_holder.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xlink.hpp"
 #include"utils/init_list.hpp"
 #pragma pop_macro("xuser")
@@ -50,7 +51,7 @@ namespace mixc::macro_xassert::origin{
 
         template<class lambda_t>
         test_item(lambda_t const &):
-            inc::init_listx<priority_v>(xref wrap<lambda_t>::invoke){
+            inc::init_listx<priority_v>(xref(wrap<lambda_t>::invoke)){
         }
     };
 }

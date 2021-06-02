@@ -12,6 +12,7 @@
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xref.hpp"
 #include"math/expr10.hpp"
 #include"math/exp10.hpp"
 #include"meta/is_number.hpp"
@@ -484,7 +485,7 @@ namespace mixc::lang_cxx_parse_json{
                 }
             };
             auto fetch                      = [&](){
-                if (json_string = parse_number(xref cur_lv[0]->value.u, xref type, json_string); 
+                if (json_string = parse_number(xref(cur_lv[0]->value.u), xref(type), json_string); 
                     type != json_type_t::unknwon){
                     cur_lv[0]->type(type);
                 }
@@ -591,7 +592,7 @@ namespace mixc::lang_cxx_parse_json{
                     c                       = json_string[0]; 
 
                     // 未到栈底
-                    if (cur_lv != xref stack[0]){
+                    if (cur_lv != xref(stack[0])){
                         if (c == '}' or c == ']'){
                             ; // pass
                         }
