@@ -7,6 +7,7 @@
 #include"graphic/private/addressing.hpp"
 #include"graphic/private/try_paint_result_t.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"memop/swap.hpp"
@@ -44,7 +45,7 @@ namespace mixc::extern_gui_paint_masker_plus::origin {
 
         template<class callback>
         void mask(callback const & clean){
-            inc::swap(xref idc_a, xref idc_b);
+            inc::swap(xref(idc_a), xref(idc_b));
             uxx start = idc_a->pop_first();
             uxx mid   = start;
             uxx end   = 0;
