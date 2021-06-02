@@ -44,6 +44,7 @@ namespace mixc::instruction_mod{
             };
 
             for(uxx rest_bits = 64;;){
+                #undef min
                 uxx i           = inc::index_of_last_set(a.high); 
                 i               = 63 - i;
                 i               = inc::min(i, rest_bits);
