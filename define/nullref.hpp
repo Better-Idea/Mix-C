@@ -24,7 +24,7 @@
 #define xuser mixc::define_nullref_t::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
-#include"memop/addressof.hpp"
+#include"macro/xref.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::define_nullref_t{
@@ -32,7 +32,7 @@ namespace mixc::define_nullref_t{
         xname(nullref_t)
     )
         template<class type_t> bool operator == (type_t const & value) const {
-            auto ptr = inc::addressof(value);
+            auto ptr = xref(value);
             return voidp(ptr) == this;
         }
 
