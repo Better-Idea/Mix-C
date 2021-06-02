@@ -10,6 +10,7 @@
 #include"interface/can_callback.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/cast.hpp"
 #include"meta/is_empty_class.hpp"
@@ -150,13 +151,13 @@ namespace mixc::concurrency_thread::origin{
     )
         thread()                = default;
         thread(thread && self) : 
-            m_lambda(inc::atom_swap(xref self.m_lambda, clambda{})){
+            m_lambda(inc::atom_swap(xref(self.m_lambda), clambda{})){
         }
         thread(clambda && lambda);
        ~thread();
 
         void operator=(thread && self){
-            m_lambda = inc::atom_swap(xref self.m_lambda, clambda{});
+            m_lambda = inc::atom_swap(xref(self.m_lambda), clambda{});
         }
 
         bool is_initialize_fail() const {

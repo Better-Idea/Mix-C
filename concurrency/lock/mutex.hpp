@@ -11,6 +11,7 @@
 #include"concurrency/thread_self.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
+#include"macro/xref.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
 
@@ -24,7 +25,7 @@ namespace mixc::lock_mutex::origin{
         mutex() : item(false){}
 
         lock_state_t try_lock() const {
-            return inc::atom_swap(xref item, true) == true ?
+            return inc::atom_swap(xref(item), true) == true ?
                 lock_state_t::blocked : lock_state_t::accept;
         }
 
@@ -35,7 +36,7 @@ namespace mixc::lock_mutex::origin{
         }
 
         void unlock() const {
-            inc::atom_swap(xref item, false);
+            inc::atom_swap(xref(item), false);
         }
 
         template<class callback_t>

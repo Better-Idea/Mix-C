@@ -6,6 +6,7 @@
 #include"concurrency/thread_self.hpp"
 #include"configure/switch.hpp"
 #include"gc/private/background.hpp"
+#include"macro/xref.hpp"
 #include"utils/init_list.hpp"
 
 #if xis_windows
@@ -59,7 +60,7 @@ namespace mixc::concurrency_thread_self::origin{
             ReleaseSemaphore(is_main ? h_for_suspend : the_thread.semaphore_for_suspend(), 1, nullptr);
         #elif xis_linux
             pthread_mutex_unlock(
-                is_main ? xref h_for_suspend : (pthread_mutex_t *)the_thread.semaphore_for_suspend()
+                is_main ? xref(h_for_suspend) : (pthread_mutex_t *)the_thread.semaphore_for_suspend()
             );
         #else
             #error "pending"
@@ -77,7 +78,7 @@ namespace mixc::concurrency_thread_self::origin{
             );
         #elif xis_linux
             auto mutex = is_main ? 
-                xref h_for_suspend : (pthread_mutex_t *)l_lambda.semaphore_for_suspend();
+                xref(h_for_suspend) : (pthread_mutex_t *)l_lambda.semaphore_for_suspend();
 
             if (timeout == not_exist){
                 pthread_mutex_lock(mutex);
@@ -89,7 +90,7 @@ namespace mixc::concurrency_thread_self::origin{
             time.tv_nsec += timeout % 1000 * 1'000'000;
             time.tv_sec  += timeout / 1000 + time.tv_nsec / 1'000'000'000;
             time.tv_nsec %= 1'000'000'000;
-            pthread_mutex_timedlock(mutex, xref time);
+            pthread_mutex_timedlock(mutex, xref(time));
         #endif
     }
 

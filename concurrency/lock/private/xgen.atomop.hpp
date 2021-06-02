@@ -3,8 +3,8 @@
 #define xuser xlink2(mixc::concurrency_lock_, xa_name)::inc
 #include"configure/platform.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xlink.hpp"
-#include"memop/addressof.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
 
@@ -31,9 +31,9 @@ namespace xlink2(mixc::concurrency_lock_, xa_name)::origin{
         u0_t t;
 
         #if xis_msvc_native
-            t       = atom(up_t(left), u0_t(*(u1_t *)(a1_t *)(xref right)));
+            t       = atom(up_t(left), u0_t(*(u1_t *)(a1_t *)(xref(right))));
         #else
-            t       = xa_namex(up_t(left), u0_t(*(u1_t *)(a1_t *)(xref right)), 5/*最高级别限制的原子操作*/);
+            t       = xa_namex(up_t(left), u0_t(*(u1_t *)(a1_t *)(xref(right))), 5/*最高级别限制的原子操作*/);
         #endif
 
         return *(a0_t *)& t;

@@ -32,6 +32,7 @@
 #include"instruction/index_of_first_set.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
+#include"macro/xref.hpp"
 #include"meta/fit_bits.hpp"
 #include"meta/is_same.hpp"
 #include"meta_seq/tget.hpp"
@@ -198,12 +199,12 @@ namespace mixc::lock_policy_barrier{
                 }
 
                 uxx candicate = uxx(1) << index;
-                uxx old       = atom_fetch_or<bits_t>(xref m_state, bits_t(candicate));
+                uxx old       = atom_fetch_or<bits_t>(xref(m_state), bits_t(candicate));
 
                 // 存在互斥操作
                 if ((old & mutex) != 0){
                     if ((old & candicate) == 0) {
-                        atom_and<bits_t>(xref m_state, bits_t(~candicate));
+                        atom_and<bits_t>(xref(m_state), bits_t(~candicate));
                     }
                     return not_exist;
                 }
@@ -214,14 +215,14 @@ namespace mixc::lock_policy_barrier{
             }
             else{
                 // 当前位被占用，无法操作
-                uxx old = atom_fetch_or<bits_t>(xref m_state, bits_t(raw::master));
+                uxx old = atom_fetch_or<bits_t>(xref(m_state), bits_t(raw::master));
                 if (old & raw::master){
                     return not_exist;
                 }
 
                 // 后判断互斥操作，因为此处的 operation_v 可以与自己互斥
                 if (old & mutex){
-                    atom_and<bits_t>(xref m_state, bits_t(~raw::master));
+                    atom_and<bits_t>(xref(m_state), bits_t(~raw::master));
                     return not_exist;
                 }
                 else{
@@ -255,7 +256,7 @@ namespace mixc::lock_policy_barrier{
 
         template<auto operation_v>
         void unlock(uxx channel) const {
-            atom_and<bits_t>(xref m_state, bits_t(~channel));
+            atom_and<bits_t>(xref(m_state), bits_t(~channel));
         }
     $
 

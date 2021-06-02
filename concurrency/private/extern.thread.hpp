@@ -11,6 +11,7 @@
 #include"configure/platform.hpp"
 #include"define/base_type.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xref.hpp"
 #include"macro/xvolatile.hpp"
 #include"memop/cast.hpp"
 #include"utils/allocator.hpp"
@@ -181,7 +182,7 @@ namespace mixc::concurrency_thread::origin{
     }
 
     thread::~thread(){
-        if (auto h = inc::atom_swap<clambda>(xref the.m_lambda, clambda{}); 
+        if (auto h = inc::atom_swap<clambda>(xref(the.m_lambda), clambda{}); 
             h.is_valid() and not h.is_detached()){
 
             #if xis_windows
