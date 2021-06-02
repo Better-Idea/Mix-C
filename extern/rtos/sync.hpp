@@ -8,6 +8,7 @@
 #include"extern/rtos/conf.hpp"
 #include"extern/rtos/task.hpp"
 #include"instruction/bit_test_and_set.hpp"
+#include"macro/xref.hpp"
 #include"meta/fit_bits.hpp"
 #pragma pop_macro("xuser")
 
@@ -37,7 +38,7 @@ namespace mixc::extern_rtos_sync::origin{
                     this->blocked_table     = table_lv0;
                 }
 
-                if (inc::bit_test_and_set(xref this->bmp, i)){
+                if (inc::bit_test_and_set(xref(this->bmp), i)){
                     auto page               = this->blocked_table[i0];
                     auto head               = page[i1];
                     auto prev               = head->prev;

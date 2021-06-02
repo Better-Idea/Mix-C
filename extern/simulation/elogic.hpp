@@ -5,10 +5,11 @@
 #define xuser mixc::elogic::inc
 #include"docker/queue.hpp"
 #include"macro/private/xlist.hpp"
+#include"macro/xexport.hpp"
+#include"macro/xref.hpp"
+#include"macro/xstruct.hpp"
 #include"memop/signature.hpp"
 #include"memop/swap.hpp"
-#include"mixc.hpp"
-#include"mixc.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::elogic::origin{
@@ -134,7 +135,7 @@ namespace mixc::elogic::origin{
     }
 
     inline void tick_run(){
-        inc::swap(xref que_active, xref que_pile);
+        inc::swap(xref(que_active), xref(que_pile));
         while(not que_active.is_empty()){
             que_active.pop().broadcast();
         }
@@ -327,4 +328,4 @@ namespace mixc::elogic::origin{
 
 #endif
 
-xexport(mixc::elogic::elogic)
+xexport_space(mixc::elogic)

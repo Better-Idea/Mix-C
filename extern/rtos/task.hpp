@@ -7,6 +7,7 @@
 #include"extern/rtos/conf.hpp"
 #include"extern/rtos/memory.hpp"
 #include"macro/xcheck_binary_aligned.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
 #include"utils/bits_indicator.hpp"
 #pragma pop_macro("xuser")
@@ -244,18 +245,18 @@ namespace mixc::extern_rtos_task::origin{
 
     xstruct(
         xname(task_config),
-        xprif(pstack_scale, uxx),
-        xprif(parg_ptr,     voidp),
-        xprif(pcallback,    callback_t),
-        xprif(ppriority,    u08)
+        xprif(m_stack_scale, uxx),
+        xprif(m_arg_ptr,     voidp),
+        xprif(m_callback,    callback_t),
+        xprif(m_priority,    u08)
     )
         using final_t = task_config;
 
         task_config():
-            pstack_scale(inc::conf::default_scale_of_stack),
-            ppriority(inc::conf::default_priority),
-            pcallback(& do_nothing),
-            parg_ptr(nullptr){
+            m_stack_scale(inc::conf::default_scale_of_stack),
+            m_arg_ptr(nullptr),
+            m_callback(& do_nothing),
+            m_priority(inc::conf::default_priority){
         }
 
         xpubget_pubset(stack_scale)

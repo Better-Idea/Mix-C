@@ -11,7 +11,7 @@
 #include"instruction/index_of_first_set.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
-#include"memop/addressof.hpp"
+#include"macro/xref.hpp"
 #include"memop/zeros.hpp"
 #include"meta/has_constructor.hpp"
 #pragma pop_macro("xuser")
@@ -107,13 +107,13 @@ namespace mixc::extern_rtos_memory{
         // 标记占用
         void set(uxx index){
             index += 1;
-            inc::bit_test_and_set(xref bmp_area()[index >> 3], index & 0x7);
+            inc::bit_test_and_set(xref(bmp_area()[index >> 3]), index & 0x7);
         }
 
         // 标记空闲
         void reset(uxx index){
             index += 1;
-            inc::bit_test_and_reset(xref bmp_area()[index >> 3], index & 0x7);
+            inc::bit_test_and_reset(xref(bmp_area()[index >> 3]), index & 0x7);
         }
 
         uxx index_of(nodep node){
@@ -182,11 +182,11 @@ namespace mixc::extern_rtos_memory{
         }
 
         bool test_and_reset(uxx index){
-            return inc::bit_test_and_reset(xref area, index);
+            return inc::bit_test_and_reset(xref(area), index);
         }
 
         bool test_and_set(uxx index){
-            return inc::bit_test_and_set(xref area, index);
+            return inc::bit_test_and_set(xref(area), index);
         }
     private:
         u64 area = 0;
@@ -405,7 +405,7 @@ namespace mixc::extern_rtos_memory::origin{
 
             // first 作为分配出去的块，rest 作为剩下的块放回
             if (page->mark_in_use(first, expect_blocks); real_blocks > expect_blocks){
-                auto rest           = xref first[expect_blocks];
+                auto rest           = xref(first[expect_blocks]);
                 auto rest_blocks    = real_blocks - expect_blocks;
                 this->put_back(page, rest, rest_blocks);
             }

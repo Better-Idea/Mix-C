@@ -11,8 +11,17 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_isa_cpu::origin::inc
+#include"define/base_type.hpp"
 #include"configure/platform.hpp"
+#include"instruction/add.hpp"
+#include"instruction/index_of_last_set.hpp"
+#include"instruction/mul.hpp"
+#include"instruction/shift_left.hpp"
+#include"instruction/shift_right.hpp"
+#include"instruction/sub.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xdefer.hpp"
+#include"macro/xref.hpp"
 #include"math/const.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
@@ -20,13 +29,6 @@
 #include"meta/is_float.hpp"
 #include"meta/is_integer.hpp"
 #include"meta/is_signed.hpp"
-#include"instruction/add.hpp"
-#include"instruction/index_of_last_set.hpp"
-#include"instruction/mul.hpp"
-#include"instruction/shift_left.hpp"
-#include"instruction/shift_right.hpp"
-#include"instruction/sub.hpp"
-#include"mixc.hpp"
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
@@ -120,34 +122,28 @@ namespace mixc::extern_isa_cpu::origin{
         ldq             = lddx   + 2,
         ldqx            = ldq    + 2,
 
-        // 读取栈内存
-        // 栈按 8 字节对齐存取
-        ldkq            = ldqx   + 2,
-        ldkqx           = ldkq   + 2,
-        ldks            = ldkqx  + 2,
-        ldkf            = ldks   + 2,
-
         // 内存读取
         // f32 <- mf32
         // f64 <- mf64
-        lds             = ldkf   + 2,
+        lds             = ldqx   + 2,
         ldf             = lds    + 2,
+
+        // 内存读取（带 null 值校验）
+        lddz            = ldf    + 2,
+        ldqz            = lddz   + 2,
 
         // 写入内存
         // u08/i08      -> mu08
         // u16/i16      -> mu16
         // u32/i32/f32  -> mu32
         // u64/i64/f64  -> mu64
-        stb             = ldf    + 2 + 2 * 2, // 保留 2x2 空位
+        stb             = ldqz   + 2,
         stw             = stb    + 2,
         std             = stw    + 2,
         stq             = std    + 2,
 
-        // 写入栈内存
-        stkq            = stq    + 2, 
-
         // 基础逻辑运算
-        band            = stkq   + 2 + 3 * 2, // 保留 3x2 空位
+        band            = stq    + 2,
         bor             = band   + 4,
         bxor            = bor    + 4,
         bnand           = bxor   + 4,
@@ -427,7 +423,7 @@ namespace mixc::extern_isa_cpu::origin{
         bits_group(bits_t value = 0) : bits(value){}
 
         bits_delegate operator [](uxx index){
-            return bits_delegate(xref bits, index * bits_v);
+            return bits_delegate(xref(bits), index * bits_v);
         }
     };
 
@@ -1511,7 +1507,7 @@ namespace mixc::extern_isa_cpu::origin{
                 }
 
                 if (c4_t(ins.opc) == c4ia){
-                    inc::swap(xref ra, xref rb);
+                    inc::swap(xref(ra), xref(rb));
                 }
             }
 

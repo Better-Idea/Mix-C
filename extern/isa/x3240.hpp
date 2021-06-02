@@ -3,9 +3,10 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::extern_mmu_x3240::inc
+#include"define/base_type.hpp"
 #include"docker/bits_indicator.hpp"
 #include"instruction/count_of_set.hpp"
-#include"mixc.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::extern_mmu_x3240::origin{
