@@ -12,6 +12,7 @@
 #include"interface/unified_seq.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
+#include"macro/xref.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
@@ -98,11 +99,11 @@ namespace mixc::algo_heap_root{
 
             // 小根堆 父节点要小于左右节点 所以要找子节点中较小者
             if (compare(left, right) > 0){
-                select      = xref right;
+                select      = xref(right);
                 left_index += 1;
             }
             else{
-                select      = xref left;
+                select      = xref(left);
             }
 
             // 较小的子节点大于等于插入 就不用再下移了

@@ -7,6 +7,7 @@
 #include"interface/unified_seq.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xindex_rollback.hpp"
+#include"macro/xref.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
@@ -19,7 +20,7 @@ namespace mixc::algo_remove{
         auto r = range.right();             \
                                             \
         if (l > r){                         \
-            inc::swap(xref l, xref r);      \
+            inc::swap(xref(l), xref(r));    \
         }
 
     template<class seq_tar_t, can_interval interval_t>

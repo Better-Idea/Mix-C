@@ -57,8 +57,8 @@ namespace mixc::algo_distinct::origin{
         for(uxx i = 0, ii = 0; i < seq.length(); i++){
             // 注意：
             // hashmap_set_result_t    r;
-            // auto key = xref range[i]; // 错误0：获取指针导致 key 在 map 中始终是唯一的，实际上需要获取值
-            // map.set(key, ii, xref r); // 错误1：覆盖 key 对应的 ii，导致索引被覆盖
+            // auto key = xref(range[i]); // 错误0：获取指针导致 key 在 map 中始终是唯一的，实际上需要获取值
+            // map.set(key, ii, xref(r)); // 错误1：覆盖 key 对应的 ii，导致索引被覆盖
             // 
             // // 如果之前不存在
             // if (r != hashmap_set_result_t::override){

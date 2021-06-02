@@ -8,6 +8,7 @@
 #include"interface/unified_seq.hpp"
 #include"macro/xcmp.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"math/const.hpp"
 #include"memop/swap.hpp"
 #include"meta/item_origin_of.hpp"
@@ -33,7 +34,7 @@ namespace mixc::algo_sort{
         inc::bits_indicator<256> idc;
 
         auto map = [&](uxx index){
-            u08 hex = (u08p(xref r[index + offset])[i_v]);
+            u08 hex = (u08p(xref(r[index + offset]))[i_v]);
 
             if constexpr (not inc::is_float<item_t>){ // 整数
                 u08 idx = hex ^ type_v ^ mode_v;
@@ -84,7 +85,7 @@ namespace mixc::algo_sort{
             // xhint(idx, ofs)
 
             if (j != ofs){
-                inc::swap(xref r[j + offset], xref r[ofs + offset]);
+                inc::swap(xref(r[j + offset]), xref(r[ofs + offset]));
             }
             else{
                 j      += 1;
@@ -116,7 +117,7 @@ namespace mixc::algo_sort{
                         mode_v == (mode_des);
 
                 if ((r[t + offset] > r[t + offset + 1]) ^ (xor_condition)){
-                    inc::swap(xref r[t + offset], xref r[t + offset + 1]);
+                    inc::swap(xref(r[t + offset]), xref(r[t + offset + 1]));
                 }
             }
             // TODO：else if (new_length < small_length) ========================================================================

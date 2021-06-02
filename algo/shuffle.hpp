@@ -5,8 +5,8 @@
 #define xuser mixc::algo_shuffle::inc
 #include"interface/unified_seq.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"math/random.hpp"
-#include"memop/addressof.hpp"
 #include"memop/swap.hpp"
 #pragma pop_macro("xuser")
 
@@ -28,8 +28,7 @@ namespace mixc::algo_shuffle{
             b %= length;
 
             inc::swap(
-                xref seq[a],
-                xref seq[b]
+                xref(seq[a]), xref(seq[b])
             );
         }
         else for(; i < length; i++){
@@ -37,8 +36,7 @@ namespace mixc::algo_shuffle{
             b = inc::random<uxx>() % length;
 
             inc::swap(
-                xref seq[a],
-                xref seq[b]
+                xref(seq[a]), xref(seq[b])
             );
         }
     }

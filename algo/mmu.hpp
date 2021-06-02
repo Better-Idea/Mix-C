@@ -82,6 +82,7 @@
 #include"interface/can_alloc.hpp"
 #include"interface/can_free.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xnew.hpp"
 #include"memop/copy.hpp"
 #pragma pop_macro("xuser")
@@ -223,7 +224,7 @@ namespace mixc::algo_mmu::origin {
                 return;
             }
             else{
-                xnew (xref tab[i_page][len & mask]) item_t(value);
+                xnew (xref(tab[i_page][len & mask])) item_t(value);
                 len                    += (1);
             }
         }
@@ -318,7 +319,7 @@ namespace mixc::algo_mmu::origin {
          */
         template<class item_t>
         inline static void clear(item_t *** page_table_ptr, uxx * length, inc::ifree<void> free){
-            auto   len                  = inc::atom_swap<uxx>(xref length[0], 0);
+            auto   len                  = inc::atom_swap<uxx>(xref(length[0]), 0);
             auto & tab                  = (page_table_ptr[0]);
 
             if (len == 0){

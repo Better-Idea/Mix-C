@@ -18,7 +18,7 @@
 #include"instruction/count_of_set.hpp"
 #include"interface/seqptr.hpp"
 #include"macro/xexport.hpp"
-#include"memop/addressof.hpp"
+#include"macro/xref.hpp"
 #include"meta/is_origin_array.hpp"
 #include"meta/is_same.hpp"
 #pragma pop_macro("xuser")
@@ -70,7 +70,7 @@ namespace mixc::algo_hash::origin{
             return hash(voidp(value), i / sizeof(uxx), i % sizeof(uxx), seed);
         }
         else{
-            return hash(inc::addressof(value), sizeof(type_t) / sizeof(uxx), sizeof(type_t) % sizeof(uxx), seed);
+            return hash(xref(value), sizeof(type_t) / sizeof(uxx), sizeof(type_t) % sizeof(uxx), seed);
         }
     }
 }
