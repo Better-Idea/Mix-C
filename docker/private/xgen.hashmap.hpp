@@ -95,7 +95,7 @@ xstruct(
         // 由于首元是数组中的一个元素，是不能单独释放的
         // 所以让 cur 和 cur_next 中的内容交换一下
         else if (cur_next != nullptr){
-            inc::swap(xref cur[0], xref cur_next[0]);
+            inc::swap(xref(cur[0]), xref(cur_next[0]));
             cur            = cur_next;
             can_release[0] = true;
         }
@@ -185,7 +185,7 @@ public:
         m_lines(inc::align(start_capcity)), 
         m_count(0), 
         m_seed(seed),
-        m_nodes(the_t::alloc(xref m_bmp, m_lines)) {
+        m_nodes(the_t::alloc(xref(m_bmp), m_lines)) {
     }
 protected:
     ~xarg_name(){
@@ -198,11 +198,11 @@ protected:
         loop_t state = loop_t::go_on;
 
         for(uxx i = uxx(-1), index = 0; not_exist != (i = m_bmp.index_of_first_set(i + 1));){
-            for(auto cur = xref m_nodes[i]; cur != nullptr; cur = cur->next){
+            for(auto cur = xref(m_nodes[i]); cur != nullptr; cur = cur->next){
                 #ifdef xarg_has_val_t
-                    state = inc::itr_switch<mode_v>(xref index, invoke, (key_t &)cur->key, (val_t &)cur->val);
+                    state = inc::itr_switch<mode_v>(xref(index), invoke, (key_t &)cur->key, (val_t &)cur->val);
                 #else
-                    state = inc::itr_switch<mode_v>(xref index, invoke, (key_t &)cur->key);
+                    state = inc::itr_switch<mode_v>(xref(index), invoke, (key_t &)cur->key);
                 #endif
 
                 if (state == loop_t::finish){
@@ -231,7 +231,7 @@ public:
         auto   index      = addressing(key);
         auto   can_relase = false;
         auto & node       = m_nodes[index];
-        auto & item       = node.take_out(key, xref can_relase);
+        auto & item       = node.take_out(key, xref(can_relase));
 
         xdefer{
             if (state != nullptr) {
@@ -250,7 +250,7 @@ public:
         inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item;
 
         if (can_relase){
-            inc::free_with_destroy(xref item);
+            inc::free_with_destroy(xref(item));
         }
         if (node.is_empty()){
             m_bmp.reset(index);
@@ -348,7 +348,7 @@ private:
     void resize(uxx capcity){
         the_t new_hash_map{ capcity, m_seed };
         the.resize_to(new_hash_map);
-        inc::swap(xref new_hash_map, xref the);
+        inc::swap(xref(new_hash_map), xref(the));
     }
 
     // 该函数用于 hashmap 内部扩容和压缩
@@ -359,7 +359,7 @@ private:
         }
 
         for(uxx i; not_exist != (i = m_bmp.pop_first());){
-            auto   old_head    = xref m_nodes[i];
+            auto   old_head    = xref(m_nodes[i]);
             auto   cur         = old_head->next;
             auto   index       = map.addressing(old_head->key);
             auto & new_head    = map.m_nodes[index];
@@ -431,7 +431,7 @@ private:
                 nodes = inc::alloc<node_t>(bytes);
 
                 for (uxx i = 0; i < node_count; i++){
-                    xnew (xref nodes[i]) node_t();
+                    xnew (xref(nodes[i])) node_t();
                 }
                 return uxxp(nodes + node_count);
             }

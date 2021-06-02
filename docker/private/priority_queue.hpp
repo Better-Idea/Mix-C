@@ -10,6 +10,7 @@
 #include"dumb/mirror.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xis_nullptr.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/cast.hpp"
 #pragma pop_macro("xuser")
@@ -32,7 +33,7 @@ namespace mixc::docker_priority_queue {
             m_items(initial_capacity){}
 
         void clear() {
-            the_t{}.m_items.swap(xref m_items);
+            the_t{}.m_items.swap(xref(m_items));
         }
 
         void push(item_t const & value) {

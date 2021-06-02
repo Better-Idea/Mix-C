@@ -63,7 +63,7 @@ namespace mixc::docker_single_linked_node::origin {
         }
 
         nodep swap_top(nodep value) const {
-            nodep masked_top = inc::atom_swap<nodep>(xref m_top, masked(value));
+            nodep masked_top = inc::atom_swap<nodep>(xref(m_top), masked(value));
             return origin(masked_top);
         }
     $

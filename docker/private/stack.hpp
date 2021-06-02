@@ -118,7 +118,7 @@ namespace mixc::docker_stack{
                 uxx    index = 0;
 
                 while(cur != nullptr){
-                    if (inc::itr_switch<mode_v>(xref index, invoke, *cur) == loop_t::finish){
+                    if (inc::itr_switch<mode_v>(xref(index), invoke, *cur) == loop_t::finish){
                         break;
                     }
                     cur = cur->next;

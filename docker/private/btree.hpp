@@ -13,6 +13,7 @@
 #include"dumb/move.hpp"
 #include"instruction/index_of_first_set.hpp"
 #include"macro/xexport.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/swap.hpp"
 #include"utils/allocator.hpp"
@@ -78,7 +79,7 @@ namespace mixc::docker_btree{
 
                 // 该组最后一个元素挪出去后，就空出一个空间，该空间可以用来存插入的元素
                 i_free                      = group->indexer.get(15/*最后一个*/);
-                inc::swap(xref m, (m_t *)(xref group->item[i_free]));
+                inc::swap(xref(m), (m_t *)(xref(group->item[i_free])));
                 group->indexer.insert(i_offset, i_free);
 
                 // 之后每次都是把上次挪出去的最后一个元素插入到下一组的第一个位置
@@ -114,7 +115,7 @@ namespace mixc::docker_btree{
                 i_free                      = group->indexer.get(i_move);
                 group->indexer.remove(i_move);
                 group->indexer.set(15, i_free);
-                inc::swap(xref m, (m_t *)(xref group->item[i_free]));
+                inc::swap(xref(m), (m_t *)(xref(group->item[i_free])));
             }
 
             if (free_last){
@@ -252,7 +253,7 @@ namespace mixc::docker_btree{
         void clear(){
             auto cur                        = null();
 
-            if (cur = inc::atom_swap(xref root, cur); cur == null()){
+            if (cur = inc::atom_swap(xref(root), cur); cur == null()){
                 return;
             }
 
@@ -263,7 +264,7 @@ namespace mixc::docker_btree{
             i_path_ptr[0]                   = 0;
             path_ptr[0]                     = cur->bottom;
 
-            while(path_ptr >= xref path[0]){
+            while(path_ptr >= xref(path[0])){
                 auto i                      = (i_path_ptr[0]);
                 auto arrive_end             = (i == 8);
                 auto arrive_item_level      = (false);
@@ -364,7 +365,7 @@ namespace mixc::docker_btree{
                new_node                    = (path_node *)new_item;
             }
 
-            while(path_ptr != xref path[0]){
+            while(path_ptr != xref(path[0])){
                iofsg_ptr                  -= 1;
                path_ptr                   -= 1;
                iofs                        = iofsg_ptr[0];
@@ -374,8 +375,8 @@ namespace mixc::docker_btree{
                auto node_temp              = new_node;
 
                while(iofs < 8 and node_temp != nullptr){
-                   inc::swap(xref parent->offset[iofs], xref offset); 
-                   inc::swap(xref parent->bottom[iofs], xref node_temp);
+                   inc::swap(xref(parent->offset[iofs]), xref(offset)); 
+                   inc::swap(xref(parent->bottom[iofs]), xref(node_temp));
                    iofs                   += 1;
                }
 
@@ -482,7 +483,7 @@ namespace mixc::docker_btree{
             if (auto vals = unmark(cur); vals->talk_out(i, value) != is_empty){
                 return;
             }
-            else for(bool once = true; path_ptr != xref path[0]; ){
+            else for(bool once = true; path_ptr != xref(path[0]); ){
                 iofsg_ptr                  -= 1;
                 path_ptr                   -= 1;
                 iofs                        = iofsg_ptr[0];
@@ -500,8 +501,8 @@ namespace mixc::docker_btree{
                 }
 
                 while(iofs < 7 and parent->bottom[iofs + 1] != nullptr){
-                    inc::swap(xref parent->offset[iofs], xref parent->offset[iofs + 1]); 
-                    inc::swap(xref parent->bottom[iofs], xref parent->bottom[iofs + 1]);
+                    inc::swap(xref(parent->offset[iofs]), xref(parent->offset[iofs + 1]));
+                    inc::swap(xref(parent->bottom[iofs]), xref(parent->bottom[iofs + 1]));
                     iofs                   += 1;
                 }
 

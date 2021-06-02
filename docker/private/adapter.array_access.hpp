@@ -78,7 +78,7 @@ namespace mixc::docker_adapter_array_access {
             uxx    index = 0;
 
             for(;; l += step){
-                if (inc::itr_switch<mode_v>(xref index, invoke, the[l]) == loop_t::finish or l == r){
+                if (inc::itr_switch<mode_v>(xref(index), invoke, the[l]) == loop_t::finish or l == r){
                     break;
                 }
             }

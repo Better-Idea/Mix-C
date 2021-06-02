@@ -141,7 +141,7 @@ namespace mixc::docker_queue {
 
                 do{
                     cur         = cur->next;
-                }while(inc::itr_switch<mode_v>(xref index, invoke, *cur) != loop_t::finish and cur != top);
+                }while(inc::itr_switch<mode_v>(xref(index), invoke, *cur) != loop_t::finish and cur != top);
             });
         }
     public:
