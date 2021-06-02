@@ -6,8 +6,8 @@
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
-#include"memop/addressof.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::dumb_mirror{
@@ -29,7 +29,7 @@ namespace mixc::dumb_mirror::origin{
         mirror(): m_value{0}{}
         mirror(type_t const & value, construction_t mode){
             if (mode == construction_t::ignore){
-                this[0] = *(mirror<type_t> *)(xref value);
+                this[0] = *(mirror<type_t> *)(xref(value));
             }
             else{
                 xnew (m_value) type_t(value);
