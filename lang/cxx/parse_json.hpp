@@ -13,7 +13,7 @@
 #include"interface/can_alloc.hpp"
 #include"macro/xnew.hpp"
 #include"macro/xref.hpp"
-#include"math/expr10.hpp"
+#include"math/exp10r.hpp"
 #include"math/exp10.hpp"
 #include"meta/is_number.hpp"
 #include"meta/more_fit.hpp"
@@ -336,7 +336,7 @@ namespace mixc::lang_cxx_parse_json{
             type[0]             = json_type_t::jfloat;
             json_string        += 1;
             deci                = static_cast<f64>(fetch_number(& i));
-            deci                = inc::expr10_unsafe(i) * deci + real;
+            deci                = inc::exp10r_unsafe(i) * deci + real;
         }
         if (json_string[0] == 'e' or json_string[0] == 'E'){
             json_string        += 1;
@@ -347,7 +347,7 @@ namespace mixc::lang_cxx_parse_json{
                 type[0]         = json_type_t::unknwon;
                 return json_string;
             }
-            deci               *= is_neg_exp ? inc::expr10(exp) : inc::exp10(exp);
+            deci               *= is_neg_exp ? inc::exp10r(exp) : inc::exp10(exp);
         }
 
         if (type[0] == json_type_t::jfloat){

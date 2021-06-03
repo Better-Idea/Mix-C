@@ -19,7 +19,7 @@
 #include"macro/xref.hpp"
 #include"math/numeration_t.hpp"
 #include"math/exp10.hpp"
-#include"math/expr10.hpp"
+#include"math/exp10r.hpp"
 #include"meta/is_float.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -166,7 +166,7 @@ namespace mixc::lang_cxx_parse{
                         cur = token_tmp - 1; // 回滚到字符 'e' or 'E' 之前一个字符
                     }
                     else if (is_neg_exp){
-                        result *= inc::expr10(exp);
+                        result *= inc::exp10r(exp);
                     }
                     else{
                         result *= inc::exp10(exp);

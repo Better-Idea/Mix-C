@@ -11,7 +11,7 @@
 #include"math/exp10.hpp"
 #include"math/expe.hpp"
 #include"math/exper.hpp"
-#include"math/expr10.hpp"
+#include"math/exp10r.hpp"
 #include"math/index_system.hpp"
 #include"math/ln.hpp"
 #include"math/log.hpp"

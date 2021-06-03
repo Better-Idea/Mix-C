@@ -20,7 +20,7 @@
 #include"math/max.hpp"
 #include"math/numeration_t.hpp"
 #include"math/exp10.hpp"
-#include"math/expr10.hpp"
+#include"math/exp10r.hpp"
 #include"math/const.hpp"
 #include"memop/copy.hpp"
 #include"memop/fill.hpp"
@@ -159,7 +159,7 @@ namespace mixc::lang_cxx_strlize{
                 buf_exp[0]      = '-';
             }
             else if (exp > 0){
-                m              *= inc::expr10_unsafe(uxx(exp));
+                m              *= inc::exp10r_unsafe(uxx(exp));
             }
 
             if (m != 0 and m < 1.0){
@@ -174,7 +174,7 @@ namespace mixc::lang_cxx_strlize{
 
             // 如果是科学计数法则
             if (is_scientific_notation){
-                m              += inc::expr10_unsafe(pce - exp) * 0.5;
+                m              += inc::exp10r_unsafe(pce - exp) * 0.5;
             }
 
             if (exp < 0){
