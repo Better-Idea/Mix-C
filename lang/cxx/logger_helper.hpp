@@ -125,7 +125,7 @@ namespace mixc::lang_cxx_logger_helper{
             auto rest_push              = length - can_push;
 
             if constexpr (inc::is_base_char<decltype(value)>){
-                ptr                     = xref value;
+                ptr                     = xref(value);
             }
             else{
                 ptr                     = value;
@@ -143,7 +143,7 @@ namespace mixc::lang_cxx_logger_helper{
             current                     = table[i_tab];
             end                         = current + line_size;
             line_size                  *= 2;
-            inc::copy_with_operator_unsafe(current, xref ptr[can_push], rest_push);
+            inc::copy_with_operator_unsafe(current, xref(ptr[can_push]), rest_push);
             current                    += rest_push;
         };
 

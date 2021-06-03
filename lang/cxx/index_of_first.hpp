@@ -17,6 +17,7 @@
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xlink.hpp"
+#include"macro/xref.hpp"
 #include"meta/has_cast.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -54,7 +55,7 @@ namespace mixc::lang_cxx_index_of_first{
                 return not_exist;
             }
             while(true){
-                if (index = origin.index_of_first_char(the_t{xref value[miss], 1}, compare); 
+                if (index = origin.index_of_first_char(the_t{xref(value[miss]), 1}, compare); 
                     index == not_exist){
                     break;
                 }

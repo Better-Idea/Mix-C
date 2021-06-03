@@ -20,7 +20,7 @@ namespace mixc::macro_xsv{
             return (item_t *)(info + 1);
         }
         uxx length() const {
-            return info->length;
+            return info->m_length;
         }
     };
 }

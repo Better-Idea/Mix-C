@@ -62,7 +62,7 @@ int main(){
 #include"macro/private/word.hpp"
 #include"macro/private/xlist.hpp"
 #include"macro/xnew.hpp"
-#include"memop/addressof.hpp"
+#include"macro/xref.hpp"
 #include"memop/signature.hpp"
 #include"meta/has_constructor.hpp"
 #include"meta_seq/tlist.hpp"
@@ -81,7 +81,7 @@ namespace mixc::macro_xinterface{
 
         template<class object_t>
         constexpr this_call_pair(object_t const & this_ref) : 
-            this_ptr(xref this_ref), 
+            this_ptr(xref(this_ref)), 
             func_table(s_func_table<object_t, func_list_t::__func_length>){
         }
 
