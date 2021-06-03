@@ -381,7 +381,7 @@ namespace mixc::lang_cxx_ph{
             if constexpr (not inc::is_same<decltype(nullptr), fmt_t>){
                 length     += fmt.length();
                 buf         = base_t::template align<item_t>(
-                    length, xref(the).length/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
+                    length, xref(the.length)/*获取实际分配长度*/, inc::cast<inc::ialloc<item_t>>(alloc)
                 );
 
                 buf        += length;
