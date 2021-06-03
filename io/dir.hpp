@@ -6,10 +6,10 @@
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_callback.hpp"
+#include"macro/xexport.hpp"
 #include"macro/xitr_foreach.hpp"
 #include"macro/xref.hpp"
 #include"lang/cxx.hpp"
-#include"macro/xexport.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_dir::origin{
