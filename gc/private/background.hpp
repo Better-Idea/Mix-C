@@ -170,10 +170,10 @@ namespace mixc::gc_private_background::origin{
 
                 // 需要先置空，再设置 i_pop_gc_que
                 // 只有下一次读到 mem 值不为 nullptr 时才响应
-                inc::atom_store(xref(item->mem, nullptr));
+                inc::atom_store(xref(item->mem), nullptr);
 
                 // 让 gc_que 立即腾出可用的空间
-                inc::atom_store(xref(i_pop_gc_que, i_pop));
+                inc::atom_store(xref(i_pop_gc_que), i_pop);
             }
 
             // 然后做释放内存等耗时操作
