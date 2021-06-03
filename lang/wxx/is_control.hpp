@@ -24,7 +24,7 @@ namespace mixc::lang_wxx_is_control{
             // 9f 1001 1111
             // 7f 0111 1111
             // 1f 0001 1111
-            return the.data <= 0x1f or (0x7f <= the.data and the.data <= 0x9f);
+            return the.m_value <= 0x1f or (0x7f <= the.m_value and the.m_value <= 0x9f);
         }
     };
 

@@ -21,7 +21,7 @@ namespace mixc::lang_wxx_is_lower_hex{
         using the_t = core<type>;
 
         bool is_lower_hex() const {
-            return ('0' <= the.data and the.data <= '9' ) or ('a' <= the.data and the.data <= 'f');
+            return ('0' <= the.m_value and the.m_value <= '9' ) or ('a' <= the.m_value and the.m_value <= 'f');
         }
     };
 

@@ -21,7 +21,7 @@ namespace mixc::lang_wxx_is_upper{
         using the_t = core<type>;
 
         bool is_upper() const {
-            return 'A' <= the.data and the.data <= 'Z';
+            return 'A' <= the.m_value and the.m_value <= 'Z';
         }
     };
 

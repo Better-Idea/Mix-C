@@ -23,7 +23,7 @@ namespace mixc::lang_wxx_to_lower{
 
         type to_lower() const {
             auto dvalue = 'A' - 'a';
-            return the.is_upper() ? the.data - dvalue : the.data;
+            return the.is_upper() ? the.m_value - dvalue : the.m_value;
         }
     };
 

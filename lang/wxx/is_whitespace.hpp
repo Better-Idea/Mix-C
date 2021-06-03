@@ -22,14 +22,14 @@ namespace mixc::lang_wxx_is_whitespace{
 
         bool is_whitespace() const {
             return
-                the.data == 0x09 or
-                the.data == 0x0a or
-                the.data == 0x0b or
-                the.data == 0x0c or
-                the.data == 0x0d or
-                the.data == 0x20 or
-                the.data == 0x85 or
-                the.data == 0xa0;
+                the.m_value == 0x09 or
+                the.m_value == 0x0a or
+                the.m_value == 0x0b or
+                the.m_value == 0x0c or
+                the.m_value == 0x0d or
+                the.m_value == 0x20 or
+                the.m_value == 0x85 or
+                the.m_value == 0xa0;
         }
     };
 

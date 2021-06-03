@@ -25,7 +25,7 @@ namespace mixc::lang_wxx_length_if_as_utf8{
         uxx length_if_as_utf8() const {
             // 无符号类型 char 可能为有符号类型（平台差异）
             // 我们这里要求 char * 配置成 utf8 字符串 ====================================
-            auto u = inc::unsigned_type<type>(the.data);
+            auto u = inc::unsigned_type<type>(the.m_value);
 
             // ascii 码只有一个字节
             if (u < 0x80){

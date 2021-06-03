@@ -11,7 +11,7 @@ namespace mixc::lang_wxx{
     template<class final_t, class type>
     xstruct(
         xtmpl(wxx, final_t, type),
-        xprif(m_value, type)
+        xprof(m_value, type)
     )
         constexpr wxx() : m_value('\0'){};
         constexpr wxx(wxx const &) = default;

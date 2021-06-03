@@ -21,7 +21,7 @@ namespace mixc::lang_wxx_is_lower{
         using the_t = core<type>;
 
         bool is_lower() const {
-            return 'a' <= the.data and the.data <= 'z';
+            return 'a' <= the.m_value and the.m_value <= 'z';
         }
     };
 

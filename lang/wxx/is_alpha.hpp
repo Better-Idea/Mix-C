@@ -23,7 +23,7 @@ namespace mixc::lang_wxx_is_alpha{
         bool is_alpha() const {
             // 0x41 0100 0001
             // 0x61 0110 0001
-            auto mask = the.data | 0x20;
+            auto mask = the.m_value | 0x20;
             return 'a' <= mask && mask <= 'z';
         }
     };

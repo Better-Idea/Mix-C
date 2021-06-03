@@ -21,8 +21,8 @@ namespace mixc::lang_wxx_is_hex{
         using the_t = core<type>;
 
         bool is_hex() const {
-            auto mask = the.data | 0x20;
-            return ('0' <= the.data and the.data <= '9') or ('a' <= mask and mask <= 'f');
+            auto mask = the.m_value | 0x20;
+            return ('0' <= the.m_value and the.m_value <= '9') or ('a' <= mask and mask <= 'f');
         }
     };
 
