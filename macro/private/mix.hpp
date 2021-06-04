@@ -33,13 +33,14 @@ namespace mixc::macro_private_mix::origin{
     };
 
     struct mix{
+        using cvc = const void *;
         union{
             f64          f;
             u64          u;
             i64          i;
             char         c;
             asciis       s;
-            void *       v;
+            cvc          v;
         };
 
         uxx              slen = not_exist;
@@ -53,7 +54,7 @@ namespace mixc::macro_private_mix::origin{
                 u08,    u16,    u32,    u64,  bool,
                 f32,    f64,
                 asciis,
-                voidp,
+                cvc,
                 char
             >;
 
