@@ -27,6 +27,20 @@ namespace mixc::algo_heap_root{
         inc::can_compare<cmp_t, item_t> == true                                     \
     )
 
+    // 可以重写
+    // 模板类+成员函数
+    // template<> inline void change_position<timer_item *>::operator()
+    // 静态函数
+    // inline void change_position()
+    // 这里用模板类代替模板函数，可以在命名空间写错时报错
+    // 因为特化有 template<> 存在
+    template<class item_t>
+    struct change_position{
+        void operator()(item_t const & item, uxx index){
+            ;
+        }
+    };
+
     /* 函数：大小根堆压栈操作
      * 参数：
      * - seq 为满足 can_unified_seqlize 约束的序列类型
@@ -62,8 +76,10 @@ namespace mixc::algo_heap_root{
             }
 
             seq[i]          = parent;
+            change_position<item_t>{}(seq[i], i);
         }
         seq[i]              = insert;
+        change_position<item_t>{}(seq[i], i);
     }
 
     /* 函数：大小根堆弹栈操作
@@ -112,6 +128,7 @@ namespace mixc::algo_heap_root{
             }
 
             seq[i]          = (select[0]);
+            change_position<item_t>{}(seq[i], i);
             i               = (left_index);
             left_index      = (left_index << 1) + 1;
         }
@@ -119,10 +136,12 @@ namespace mixc::algo_heap_root{
         // left_index 可能会等于 len，所以这里需要判断一下才能确认是否存在左节点
         if (left_index < len and compare(seq[left_index], insert_value) < 0){
             seq[i]          = seq[left_index];
+            change_position<item_t>{}(seq[i], i);
             i               = left_index;
         }
 
         seq[i]              = insert_value;
+        change_position<item_t>{}(seq[i], i);
         return wanted;
     }
 }
