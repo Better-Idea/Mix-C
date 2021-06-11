@@ -10,8 +10,8 @@ namespace mixc::extern_gui_private_virtual_screen::origin{
     void virtual_screen::configure(voidp hwnd){
         BITMAPINFOHEADER bmih{};
         bmih.biSize             = sizeof(BITMAPINFOHEADER);
-        bmih.biWidth            = the.pwidth;
-        bmih.biHeight           = the.pheight;
+        bmih.biWidth            = the.m_width;
+        bmih.biHeight           = the.m_height;
         bmih.biPlanes           = 1;
         bmih.biBitCount         = 24;
         bmih.biCompression      = BI_RGB;
@@ -25,14 +25,14 @@ namespace mixc::extern_gui_private_virtual_screen::origin{
         dbmi.bmiHeader          = bmih;
 
         voidp   bits            = nullptr;
-        the.phdc                = GetDC(HWND(hwnd));
-        the.pmhdc               = CreateCompatibleDC(HDC(the.phdc));
-        the.phbmp               = CreateDIBSection(HDC(the.phdc), & dbmi, DIB_RGB_COLORS, & bits, NULL, 0);
-        the.pbuffer             = inc::rgbp(bits);
-        SelectObject(HDC(the.pmhdc), the.phbmp);
+        the.m_hdc               = GetDC(HWND(hwnd));
+        the.m_mhdc              = CreateCompatibleDC(HDC(the.m_hdc));
+        the.m_hbmp              = CreateDIBSection(HDC(the.m_hdc), & dbmi, DIB_RGB_COLORS, & bits, NULL, 0);
+        the.m_buffer            = inc::rgbp(bits);
+        SelectObject(HDC(the.m_mhdc), the.m_hbmp);
     }
 
     void virtual_screen::flush(){
-        BitBlt(HDC(the.phdc), 0, 0, the.pwidth, the.pheight, HDC(the.pmhdc), 0, 0, SRCCOPY);
+        BitBlt(HDC(the.m_hdc), 0, 0, the.m_width, the.m_height, HDC(the.m_mhdc), 0, 0, SRCCOPY);
     }
 }
