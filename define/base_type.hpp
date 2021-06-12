@@ -36,6 +36,16 @@
     using w16p     = char16_t  *;
     using voidp    = void *;
     using byte     = u08;
+    using ci08p    = const i08 *;
+    using ci16p    = const i16 *;
+    using ci32p    = const i32 *;
+    using ci64p    = const i64 *;
+    using cu08p    = const u08 *;
+    using cu16p    = const u16 *;
+    using cu32p    = const u32 *;
+    using cu64p    = const u64 *;
+    using cf32p    = const f32 *;
+    using cf64p    = const f64 *;
     
     #ifndef size_t
         using size_t = decltype(sizeof(0));
