@@ -13,7 +13,7 @@
 #include"interface/can_alloc.hpp"
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
-#include"lang/cxx/private/uri.hpp"
+#include"lang/cxx/private/lut.uri.hpp"
 #include"lang/cxx/encode_first_as.hpp"
 #include"lang/cxx.hpp"
 #include"lang/wxx/length_if_as_utf8.hpp"
