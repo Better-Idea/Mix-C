@@ -13,6 +13,7 @@
 #include"interface/can_alloc_seq.hpp"
 #include"lang/cxx/private/parse_base64x.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xexport.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
