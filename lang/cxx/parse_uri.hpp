@@ -11,16 +11,16 @@
 #define xuser mixc::lang_cxx_parse_uri::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc_seq.hpp"
-#include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
+#include"lang/cxx/private/lut.uri.hpp"
 #include"lang/cxx/private/parse_xxx_result.hpp"
-#include"lang/cxx/private/uri.hpp"
 #include"lang/cxx/encode_first_as.hpp"
 #include"lang/cxx.hpp"
 #include"lang/wxx/is_hex.hpp"
 #include"lang/wxx/length_if_as_utf8.hpp"
 #include"lang/wxx/parse_hex.hpp"
 #include"lang/wxx.hpp"
+#include"macro/xexport.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xusing_lang_cxx")
@@ -94,7 +94,7 @@ namespace mixc::lang_cxx_parse_uri{
 
                 for(items[0] = first; i + 3 <= end; i += 3){
                     auto token      = char(the[i + 0]);
-                    auto wh          = char(the[i + 1]);
+                    auto wh         = char(the[i + 1]);
                     auto wl         = char(the[i + 2]);
 
                     if (token != '%'){
@@ -130,10 +130,10 @@ namespace mixc::lang_cxx_parse_uri{
 
         template<inc::can_alloc_seq alloc_t>
         auto parse_uri(alloc_t const & alloc){
-            using ret_t     = decltype(alloc(0));
-            using seq_t     = inc::unified_seq<ret_t>;
-            auto allocx     = inc::ialloc_seq<seq_t>(alloc);
-            return the.parse_uri(inc::uri, allocx);
+            using ret_t             = decltype(alloc(0));
+            using seq_t             = inc::unified_seq<ret_t>;
+            auto allocx             = inc::ialloc_seq<seq_t>(alloc);
+            return the.parse_uri(origin::uri, allocx);
         }
     };
 }
