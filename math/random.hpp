@@ -19,6 +19,7 @@ namespace mixc::math_random::inc{
         constexpr u64 change_period = 0x3f;
 
         // 由于线程会有不同的栈，所以这里可以补充随机性
+        // 星星还是那个星星，月亮还是那个月亮，由于仰望者站的位置不同，所以领会的含义不同
         uxx dummy;
         uxx addition    = uxx(& dummy);
 
