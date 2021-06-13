@@ -15,6 +15,7 @@
 #include"interface/unified_seq.hpp"
 #include"lang/cxx/private/base64.hpp"
 #include"lang/cxx.hpp"
+#include"meta/item_origin_of.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -77,7 +78,8 @@ namespace mixc::lang_cxx_base64lize{
         template<class seq_t, class alloc_t>
         requires(
             inc::can_unified_seqlize<seq_t> and
-            inc::can_alloc<alloc_t, item_t>
+            inc::can_alloc<alloc_t, item_t> and
+            sizeof(inc::item_origin_of<seq_t>) == 1
         )
         meta(seq_t const & seq, inc::base64_t mode, alloc_t const & alloc){
             auto source     = inc::unified_seq<seq_t>(seq);
@@ -86,8 +88,8 @@ namespace mixc::lang_cxx_base64lize{
 
         template<class alloc_t>
         requires(inc::can_alloc<alloc_t, item_t>)
-        meta(item_t const * seq, inc::base64_t mode, alloc_t const & alloc){
-            auto source     = inc::seqptr<item_t>(base_t{seq});
+        meta(asciis seq, inc::base64_t mode, alloc_t const & alloc){
+            auto source     = inc::seqptr<char>(inc::cxx<char>{seq});
             the.base64lize(source, mode, alloc);
         }
     };
