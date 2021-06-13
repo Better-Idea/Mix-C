@@ -13,7 +13,7 @@
 #include"interface/can_alloc_seq.hpp"
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
-#include"lang/cxx/private/base64.hpp"
+#include"lang/cxx/private/lut.base64x.hpp"
 #include"lang/cxx/private/parse_xxx_result.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
