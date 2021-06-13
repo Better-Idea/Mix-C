@@ -1,15 +1,15 @@
-#ifndef xpack_lang_cxx_private_uri
-#define xpack_lang_cxx_private_uri
+#ifndef xpack_lang_cxx_private_lut_uri
+#define xpack_lang_cxx_private_lut_uri
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lang_cxx_private_uri::inc
+#define xuser mixc::lang_cxx_private_lut_uri::inc
 #include"define/base_type.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xref.hpp"
 #include"utils/bits_bind.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::lang_cxx_private_uri::origin{
+namespace mixc::lang_cxx_private_lut_uri::origin{
     struct uri_t{
     private:
         enum{
@@ -46,11 +46,11 @@ namespace mixc::lang_cxx_private_uri::origin{
     }
 }
 
-namespace mixc::lang_cxx_private_uri::lookup{
+namespace mixc::lang_cxx_private_lut_uri::lookup{
     constexpr origin::uri_t uri = origin::make_uri_lut();
 }
 
 #endif
 
-xexport_spacex(lookup, mixc::lang_cxx_private_uri::lookup)
-xexport_space (mixc::lang_cxx_private_uri::origin)
+xexport_spacex(lookup, mixc::lang_cxx_private_lut_uri::lookup)
+xexport_space (mixc::lang_cxx_private_lut_uri::origin)
