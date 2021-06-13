@@ -2,57 +2,41 @@
 #include"lang/private/cxx.hpp"
 #endif
 
-#ifndef xpack_lang_cxx_parse_base64
-#define xpack_lang_cxx_parse_base64
+#ifndef xpack_lang_cxx_private_parse_base64x
+#define xpack_lang_cxx_private_parse_base64x
 #pragma push_macro("xuser")
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_parse_base64::inc
+#define xuser mixc::lang_cxx_private_parse_base64x::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc_seq.hpp"
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"lang/cxx/private/base64.hpp"
+#include"lang/cxx/private/parse_xxx_result.hpp"
 #include"lang/cxx.hpp"
+#include"macro/xexport.hpp"
 #include"meta/remove_ref.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
-namespace mixc::lang_cxx_parse_base64::origin{
+namespace mixc::lang_cxx_private_parse_base64x::origin{
     template<class seq_t>
-    struct parse_base64_result : seq_t{
-        parse_base64_result(seq_t const & self):
-            seq_t(self){
-        }
-
-        parse_base64_result(uxx index_of_error) : 
-            seq_t("", 0), m_index_of_error(index_of_error){
-        }
-
-        bool is_parse_error() const {
-            return m_index_of_error != not_exist;
-        }
-
-        uxx index_of_error() const {
-            return m_index_of_error;
-        }
-    private:
-        uxx m_index_of_error    = not_exist;
-    };
+    using parse_base64x_result  = inc::parse_xxx_result<seq_t>;
 
     using namespace inc::lookup;
 }
 
-namespace mixc::lang_cxx_parse_base64{
+namespace mixc::lang_cxx_private_parse_base64x{
     template<class item_t>
     struct core {
         using the_t = inc::cxx<item_t>;
 
         template<class alloc_t>
-        auto parse_base64(cu08p lut, alloc_t const & alloc){
+        auto parse_base64x(cu08p lut, alloc_t const & alloc) const {
             using seq_t         = decltype(alloc(0));
-            using result_t      = origin::parse_base64_result<seq_t>;
+            using result_t      = origin::parse_base64x_result<seq_t>;
             using buffer_item_t = inc::remove_ref<decltype(alloc(0)[0])>;
             auto skip           = uxx(0);
             auto len            = the.length();
@@ -123,23 +107,23 @@ namespace mixc::lang_cxx_parse_base64{
         using the_t = core<item_t>;
 
         template<inc::can_alloc_seq alloc_t>
-        auto parse(inc::base64_t mode, alloc_t const & alloc){
+        auto parse(inc::base64_t mode, alloc_t const & alloc) const {
             using ret_t     = decltype(alloc(0));
             using seq_t     = inc::unified_seq<ret_t>;
             auto allocx     = inc::ialloc_seq<seq_t>(alloc);
-            return the.parse_base64(mode, allocx);
+            return the.parse_base64x(mode, allocx);
         }
     };
 }
 
 #endif
 
-namespace mixc::lang_cxx_parse_base64::xuser{
+namespace mixc::lang_cxx_private_parse_base64x::xuser{
     template<class final_t, class item_t>
     using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
-xexport_space(mixc::lang_cxx_parse_base64::origin)
+xexport_space(mixc::lang_cxx_private_parse_base64x::origin)
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx ::mixc::lang_cxx_parse_base64::xuser
+#define xusing_lang_cxx ::mixc::lang_cxx_private_parse_base64x::xuser
