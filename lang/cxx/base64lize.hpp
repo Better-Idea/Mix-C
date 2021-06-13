@@ -61,7 +61,7 @@ namespace mixc::lang_cxx_base64lize{
                     temp      <<= 6;
                 }
 
-                if (lut != lookup::base64url) while(j & 0x3){
+                if (lut != lookup::base64uri) while(j & 0x3){
                     buffer[j++] = '=';
                 }
             }
