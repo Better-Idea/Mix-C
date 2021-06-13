@@ -2,13 +2,13 @@
 #include"lang/private/cxx.hpp"
 #endif
 
-#ifndef xpack_lang_cxx_urlize
-#define xpack_lang_cxx_urlize
+#ifndef xpack_lang_cxx_urilize
+#define xpack_lang_cxx_urilize
 #pragma push_macro("xuser")
 #pragma push_macro("xusing_lang_cxx")
 #undef  xusing_lang_cxx
 #undef  xuser
-#define xuser mixc::lang_cxx_urlize::inc
+#define xuser mixc::lang_cxx_urilize::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"interface/seqptr.hpp"
@@ -25,7 +25,7 @@
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
-namespace mixc::lang_cxx_urlize::inc{
+namespace mixc::lang_cxx_urilize::inc{
     struct url_t{
     private:
         enum{
@@ -63,17 +63,17 @@ namespace mixc::lang_cxx_urlize::inc{
     }
 }
 
-namespace mixc::lang_cxx_urlize::lookup{
+namespace mixc::lang_cxx_urilize::lookup{
     constexpr inc::url_t url = inc::make_url_lut();
 }
 
-namespace mixc::lang_cxx_urlize{
+namespace mixc::lang_cxx_urilize{
     template<class item_t>
     struct core {
         using the_t = inc::cxx<item_t>;
 
         template<class seq_t, class alloc_t>
-        auto urlize(seq_t const & seq, inc::url_t const & need_convert, alloc_t const & alloc){
+        auto urilize(seq_t const & seq, inc::url_t const & need_convert, alloc_t const & alloc){
             using char_t            = inc::char_type<decltype(seq[0])>;
             using unsigned_t        = inc::unsigned_type<char_t>;
             auto total_length       = uxx(0);
@@ -133,26 +133,26 @@ namespace mixc::lang_cxx_urlize{
         )
         meta(seq_t const & seq, inc::url_t mode, alloc_t const & alloc){
             auto source     = inc::unified_seq<seq_t>(seq);
-            the.urlize(source, mode, alloc);
+            the.urilize(source, mode, alloc);
         }
 
         template<inc::is_base_char base_char_t, class alloc_t>
         requires(inc::can_alloc<alloc_t, item_t>)
         meta(base_char_t const * seq, inc::url_t mode, alloc_t const & alloc){
             auto source     = inc::seqptr<base_char_t>(inc::cxx<base_char_t>{seq});
-            the.urlize(source, mode, alloc);
+            the.urilize(source, mode, alloc);
         }
     };
 }
 
 #endif
 
-namespace mixc::lang_cxx_urlize::xuser{
+namespace mixc::lang_cxx_urilize::xuser{
     template<class final_t, class item_t>
     using cxx = meta<final_t, xusing_lang_cxx::cxx<final_t, item_t>, item_t>;
 }
 
-xexport_space(mixc::lang_cxx_urlize::lookup)
+xexport_space(mixc::lang_cxx_urilize::lookup)
 
 #undef  xusing_lang_cxx
-#define xusing_lang_cxx ::mixc::lang_cxx_urlize::xuser
+#define xusing_lang_cxx ::mixc::lang_cxx_urilize::xuser
