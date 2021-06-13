@@ -13,7 +13,7 @@
 #include"interface/can_alloc.hpp"
 #include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
-#include"lang/cxx/private/base64.hpp"
+#include"lang/cxx/private/lut.base64x.hpp"
 #include"lang/cxx.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xusing_lang_cxx")
