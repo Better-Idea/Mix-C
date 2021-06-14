@@ -11,7 +11,6 @@
 #define xuser mixc::lang_cxx_base64lize::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
-#include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"lang/cxx/private/lut.base64x.hpp"
 #include"lang/cxx.hpp"
@@ -83,13 +82,6 @@ namespace mixc::lang_cxx_base64lize{
         )
         meta(seq_t const & seq, inc::base64_t mode, alloc_t const & alloc){
             auto source     = inc::unified_seq<seq_t>(seq);
-            the.base64lize(source, mode, alloc);
-        }
-
-        template<class alloc_t>
-        requires(inc::can_alloc<alloc_t, item_t>)
-        meta(asciis seq, inc::base64_t mode, alloc_t const & alloc){
-            auto source     = inc::seqptr<char>(inc::cxx<char>{seq});
             the.base64lize(source, mode, alloc);
         }
     };

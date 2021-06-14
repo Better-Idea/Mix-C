@@ -11,7 +11,6 @@
 #define xuser mixc::lang_cxx_urilize::inc
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
-#include"interface/seqptr.hpp"
 #include"interface/unified_seq.hpp"
 #include"lang/cxx/private/lut.uri.hpp"
 #include"lang/cxx/encode_first_as.hpp"
@@ -20,7 +19,6 @@
 #include"lang/wxx.hpp"
 #include"macro/xref.hpp"
 #include"meta/char_type.hpp"
-#include"meta/is_base_char.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
@@ -95,13 +93,6 @@ namespace mixc::lang_cxx_urilize{
         )
         meta(seq_t const & seq, inc::uri_t const & mode, alloc_t const & alloc){
             auto source     = inc::unified_seq<seq_t>(seq);
-            the.urilize(source, mode, alloc);
-        }
-
-        template<inc::is_base_char base_char_t, class alloc_t>
-        requires(inc::can_alloc<alloc_t, item_t>)
-        meta(base_char_t const * seq, inc::uri_t const & mode, alloc_t const & alloc){
-            auto source     = inc::seqptr<base_char_t>(inc::cxx<base_char_t>{seq});
             the.urilize(source, mode, alloc);
         }
     };
