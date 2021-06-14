@@ -11,6 +11,7 @@
 #include"math/index_system.hpp"
 #include"meta/is_initializer_listx.hpp"
 #include"meta/is_origin_arrayx.hpp"
+#include"meta/is_origin_stringx.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
@@ -52,8 +53,17 @@ namespace mixc::interface_private_seqptr{
         }
 
         template<class seq_t>
-        requires(inc::is_origin_arrayx<seq_t, item_t>)
-        constexpr seqptr(seq_t const & list) : 
+        requires(inc::is_origin_stringx<seq_t, item_t>)
+        constexpr seqptr(seq_t & list) : 
+            seqptr(list, sizeof(seq_t) / sizeof(list[0]) - 1){
+        }
+
+        template<class seq_t>
+        requires(
+            inc::is_origin_arrayx<seq_t, item_t> and
+            inc::is_origin_stringx<seq_t, item_t> == false
+        )
+        constexpr seqptr(seq_t & list) : 
             seqptr(list, sizeof(seq_t) / sizeof(list[0])){
         }
 

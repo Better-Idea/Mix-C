@@ -14,6 +14,7 @@
 #include"math/index_system.hpp"
 #include"meta/is_origin_array.hpp"
 #include"meta/is_origin_arrayx.hpp"
+#include"meta/is_origin_stringx.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser") 
 
@@ -161,9 +162,18 @@ namespace mixc::interface_private_ranger{
         }
 
         template<class seq_t>
-        requires(can_rangerlizex<seq_t, item_t>)
-        constexpr ranger(seq_t const & list) : 
-            ranger_base(list){
+        requires(inc::is_origin_stringx<seq_t, item_t>)
+        constexpr ranger(seq_t & list) : 
+            ranger(list, sizeof(seq_t) / sizeof(list[0]) - 1){
+        }
+
+        template<class seq_t>
+        requires(
+            inc::is_origin_arrayx<seq_t, item_t> and
+            inc::is_origin_stringx<seq_t, item_t> == false
+        )
+        constexpr ranger(seq_t & list) : 
+            ranger(list, sizeof(seq_t) / sizeof(list[0])){
         }
 
         item_t & operator[](uxx index){
