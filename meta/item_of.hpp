@@ -34,9 +34,7 @@ namespace mixc::meta_item_of{
 
     template<class seq_t>
     using item_of = typename meta<
-        inc::remove_const<
-            inc::remove_ref<seq_t>
-        >
+        inc::remove_ref<seq_t>
     >::result;
 }
 
