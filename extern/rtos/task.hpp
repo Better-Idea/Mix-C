@@ -19,7 +19,7 @@ namespace mixc::extern_rtos_sync::origin{
 }
 
 namespace mixc::extern_rtos_task::origin{
-    using callback_t = void(*)(voidp);
+    using callback_t = void(*)(voidp arg, inc::conf::stdop_t operation);
 
     typedef struct task_id_t{
         u64 number : 48;    // 每创建一个任务 number 就会加 1，该字段不会回收
@@ -154,8 +154,8 @@ namespace mixc::extern_rtos_task::origin{
         }
 
         void remove_for(tcp_t task, task_state_t state){
-            uxx     priority= task->priority_current;
-            tcp_t & head            = slot[];
+            uxx     priority        = task->priority_current;
+            tcp_t & head            = slot[priority];
             tcp_t   prev            = task->prev;
             tcp_t   next            = task->next;
 
@@ -245,10 +245,10 @@ namespace mixc::extern_rtos_task::origin{
 
     xstruct(
         xname(task_config),
-        xprif(m_stack_scale, uxx),
-        xprif(m_arg_ptr,     voidp),
-        xprif(m_callback,    callback_t),
-        xprif(m_priority,    u08)
+        xprof(m_stack_scale, uxx),
+        xprof(m_arg_ptr,     voidp),
+        xprof(m_callback,    callback_t),
+        xprof(m_priority,    u08)
     )
         using final_t = task_config;
 
@@ -264,7 +264,7 @@ namespace mixc::extern_rtos_task::origin{
         xpubget_pubset(callback)
         xpubget_pubset(arg_ptr)
     private:
-        static void do_nothing(voidp){
+        static void do_nothing(voidp, inc::conf::stdop_t){
             ;
         }
     $
