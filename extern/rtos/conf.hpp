@@ -67,6 +67,7 @@ namespace mixc::extern_rtos_conf::origin{
     constexpr uxx hz_of_task_tick_counter = 65536;
     constexpr uxx unit_of_stack = 32;           // 32byte 
     constexpr uxx max_task_count = 64;
+    constexpr uxx max_timer_count = max_task_count * 2;
     constexpr uxx default_scale_of_stack = 2048 / unit_of_stack;
     constexpr uxx default_priority = uxx(priority_of_task_t::normal);
     constexpr uxx default_exit_code = 0;
@@ -92,6 +93,11 @@ namespace mixc::extern_rtos_conf::origin{
     enum class critical_exit_t{
         last_time,
         backtrack,
+    };
+
+    enum class stdop_t{
+        start       = 0,    // 执行功能逻辑 + 释放逻辑
+        cancel      = 1,    // 执行释放逻辑
     };
 
     // 注意：!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
