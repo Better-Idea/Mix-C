@@ -1,8 +1,8 @@
-#ifndef xpack_multi_barrier
-#define xpack_multi_barrier
+#ifndef xpack_concurrency_lock_multi_barrier
+#define xpack_concurrency_lock_multi_barrier
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::multi_barrier::inc
+#define xuser mixc::concurrency_lock_multi_barrier::inc
 #include"concurrency/lock/atom_fetch_add.hpp"
 #include"concurrency/lock/atom_fetch_sub.hpp"
 #include"concurrency/lock_state_t.hpp"
@@ -10,7 +10,7 @@
 #include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::multi_barrier::origin{
+namespace mixc::concurrency_lock_multi_barrier::origin{
     using inc::lock_state_t;
 
     constexpr uxx primer_number_key[] = {
@@ -44,4 +44,4 @@ namespace mixc::multi_barrier::origin{
 
 #endif
 
-xexport_space(mixc::multi_barrier::origin)
+xexport_space(mixc::concurrency_lock_multi_barrier::origin)
