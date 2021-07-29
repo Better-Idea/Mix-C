@@ -16,13 +16,12 @@ namespace mixc::concurrency_lock_atom_swap{
 
         #if xis_os32
         #else
-        extern u64 atom_swap(u64p a, u64 b);
+        extern u64 atom(u64p a, u64 b);
         #endif
     #endif
 }
 
 namespace mixc::concurrency_lock_atom_swap::origin{
-
     template<class type_t>
     inline type_t atom_swap(type_t * left, type_t right){
         // function equals to 
