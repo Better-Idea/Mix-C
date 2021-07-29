@@ -1,8 +1,8 @@
-#ifndef xpack_lock_mutex
-#define xpack_lock_mutex
+#ifndef xpack_concurrency_lock_mutex
+#define xpack_concurrency_lock_mutex
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_mutex::inc
+#define xuser mixc::concurrency_lock_mutex::inc
 #include"define/base_type.hpp"
 #include"concurrency/lock/atom_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
@@ -15,7 +15,7 @@
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::lock_mutex::origin{
+namespace mixc::concurrency_lock_mutex::origin{
     using inc::lock_state_t;
 
     xstruct(
@@ -80,4 +80,4 @@ namespace mixc::lock_mutex::origin{
 
 #endif
 
-xexport_space(mixc::lock_mutex::origin)
+xexport_space(mixc::concurrency_lock_mutex::origin)
