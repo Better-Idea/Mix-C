@@ -1,15 +1,15 @@
-#ifndef xpack_lock_builtin_lock
-#define xpack_lock_builtin_lock
+#ifndef xpack_concurrency_lock_builtin_lock
+#define xpack_concurrency_lock_builtin_lock
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_builtin_lock::inc
+#define xuser mixc::concurrency_lock_builtin_lock::inc
 #include"define/base_type.hpp"
 #include"concurrency/lock/mutex.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::lock_builtin_lock::origin{
+namespace mixc::concurrency_lock_builtin_lock::origin{
     xstruct(
         xname(with_lwmutex)
     )
@@ -35,4 +35,4 @@ namespace mixc::lock_builtin_lock::origin{
 
 #endif
 
-xexport_space(mixc::lock_builtin_lock::origin)
+xexport_space(mixc::concurrency_lock_builtin_lock::origin)
