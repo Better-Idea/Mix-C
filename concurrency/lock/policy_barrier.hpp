@@ -21,11 +21,11 @@
 // - 如果同步区耗时不足以忽略同步带来的开销，那么即使该同步区可以并发，也请做如下设置：
 //   when<do_sth_v>::can<do_sth_v, do_sth_else...>::concurrency<1>
 // - 对于一个耗时较长且可以并发的同步区，可以给一个较大的并发值
-#ifndef xpack_lock_policy_barrier
-#define xpack_lock_policy_barrier
+#ifndef xpack_concurrency_lock_policy_barrier
+#define xpack_concurrency_lock_policy_barrier
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::lock_policy_barrier::inc
+#define xuser mixc::concurrency_lock_policy_barrier::inc
 #include"concurrency/lock/atom_and.hpp"
 #include"concurrency/lock/atom_fetch_or.hpp"
 #include"concurrency/thread_self.hpp"
@@ -41,7 +41,7 @@
 #include"meta_seq/vlist.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::lock_policy_barrier{
+namespace mixc::concurrency_lock_policy_barrier{
     using namespace inc;
 
     template<class raw_data_list_t, class share_list_t>
@@ -279,12 +279,12 @@ namespace mixc::lock_policy_barrier{
     using policy_barrier = decltype(configure<first_t, rules_t...>());
 }
 
-namespace mixc::lock_policy_barrier::origin{
-    using mixc::lock_policy_barrier::policy_barrier;
-    using mixc::lock_policy_barrier::force_machine_word;
-    using mixc::lock_policy_barrier::when;
+namespace mixc::concurrency_lock_policy_barrier::origin{
+    using mixc::concurrency_lock_policy_barrier::policy_barrier;
+    using mixc::concurrency_lock_policy_barrier::force_machine_word;
+    using mixc::concurrency_lock_policy_barrier::when;
 }
 
 #endif
 
-xexport_space(mixc::lock_policy_barrier::origin)
+xexport_space(mixc::concurrency_lock_policy_barrier::origin)
