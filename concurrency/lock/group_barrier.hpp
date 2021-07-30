@@ -112,7 +112,7 @@ namespace mixc::concurrency_lock_group_barrier::origin{
 
     private:
         operator uxx &() const {
-            return inc::cast<uxx>(*this);
+            return *uxxp(this);
         }
 
         template<uxx operation_v>
