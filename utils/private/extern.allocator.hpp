@@ -75,6 +75,7 @@ namespace mixc::utils_allocator::origin{
 #endif
 
 #include<malloc.h>
+#include<windows.h>
 
 namespace mixc::utils_allocator::origin{
     extern voidp malloc(uxx bytes){

@@ -1,3 +1,6 @@
+// 内存必须先初始化，可以不按字母顺序包含，该头文件存在 thread_local 变量待初始化
+#include"utils/private/extern.allocator.hpp"
+
 #include"concurrency/private/extern.atom.hpp"
 #include"concurrency/private/extern.thread.hpp"
 #include"concurrency/private/extern.thread_self.hpp"
@@ -12,7 +15,6 @@
 #include"math/private/extern.ln.hpp"
 #include"math/private/extern.sqrt.hpp"
 #include"math/private/extern.trigo+.hpp"
-#include"utils/private/extern.allocator.hpp"
 
 // #include"draft/gui_seed.hpp"
 
