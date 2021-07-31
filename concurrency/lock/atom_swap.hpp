@@ -3,7 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::concurrency_lock_atom_swap::inc
-#include"configure/switch.hpp"
+#include"configure/platform.hpp"
 #include"macro/xexport.hpp"
 #include"meta/unsigned_type.hpp"
 #pragma pop_macro("xuser")
