@@ -409,7 +409,7 @@ namespace mixc::io_private_tty::origin{
     void cursor_visiable(bool value){
         CONSOLE_CURSOR_INFO info;
         info.bVisible       = value;
-        info.dwSize         = cursor_width;
+        info.dwSize         = DWORD(cursor_width);
         SetConsoleCursorInfo(h_stdout, & info);
     }
 
@@ -454,7 +454,7 @@ namespace mixc::io_private_tty::origin{
                     read_length -= 1;
                 }
             #elif xis_windows 
-                if (ReadConsoleA(h_stdin, buffer_current, buffer_rest, LPDWORD(xref(read_length)), NULL);
+                if (ReadConsoleA(h_stdin, buffer_current, DWORD(buffer_rest), LPDWORD(xref(read_length)), NULL);
                     buffer_current[read_length - 1] == '\n'){
                     read_length -= read_length > 1 ? 2 : 1;
                 }
