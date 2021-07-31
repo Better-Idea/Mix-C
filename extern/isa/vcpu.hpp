@@ -6,11 +6,11 @@
  * 
  * 当进行跨段调用时，需要进行冗余的寄存器类型设置以避免计算错误，因为外来的参数需要默认当作不可信的。
  */
-#ifndef xpack_extern_isa_cpu
-#define xpack_extern_isa_cpu
+#ifndef xpack_extern_isa_vcpu
+#define xpack_extern_isa_vcpu
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::extern_isa_cpu::origin::inc
+#define xuser mixc::extern_isa_vcpu::origin::inc
 #include"define/base_type.hpp"
 #include"configure/platform.hpp"
 #include"instruction/add.hpp"
@@ -32,7 +32,7 @@
 #include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::extern_isa_cpu::origin{
+namespace mixc::extern_isa_vcpu::origin{
     enum cmd_t : u08{
         // 带比较的转移指令
         cifeq           ,
@@ -559,12 +559,12 @@ namespace mixc::extern_isa_cpu::origin{
         }
     };
 
-    struct cpu_t;
+    struct vcpu_t;
 
-    inline voidp cast(void(cpu_t::* func)()){
+    inline voidp cast(void(vcpu_t::* func)()){
         union {
             voidp          mem;
-            void (cpu_t::* call)();
+            void (vcpu_t::* call)();
         } u;
 
         u.call = func;
@@ -590,14 +590,14 @@ namespace mixc::extern_isa_cpu::origin{
         return val.ri64;
     }
 
-    struct cpu_t{
+    struct vcpu_t{
     public:
-        cpu_t(uxx bytes) : 
+        vcpu_t(uxx bytes) : 
             ram(inc::alloc<u08>(inc::memory_size{bytes})){
 
             #define xgen(start,end,func)                                    \
                 for(uxx i = uxx(cmd_t::start); i < uxx(cmd_t::end); i++)    \
-                    cmd[i] = cast(& cpu_t::func);
+                    cmd[i] = cast(& vcpu_t::func);
 
             xgen(cifeq, ciflt +1, asm_cif)
             xgen(ifeq , jmp   +1, asm_if)
@@ -612,10 +612,8 @@ namespace mixc::extern_isa_cpu::origin{
             // xgen(wrpri, wrpri +1, )
 
             xgen(ldb  , ldqx  +1, asm_ld)
-            xgen(ldkq , ldkf  +1, asm_ldk)
             xgen(lds  , ldf   +1, asm_ld)
             xgen(stb  , stq   +1, asm_st)
-            xgen(stkq , stkq  +2, asm_stk)
             xgen(band , band  +4, asm_band)
             xgen(bor  , bor   +4, asm_bor)
             xgen(bxor , bxor  +4, asm_bxor)
@@ -649,7 +647,7 @@ namespace mixc::extern_isa_cpu::origin{
         }
 
     private:
-        using the_t     = cpu_t;
+        using the_t     = vcpu_t;
 
         u08p    ram{};                                  // 内存起始地址
         imm_t   rim{};                                  // 立即数寄存器
@@ -890,11 +888,7 @@ namespace mixc::extern_isa_cpu::origin{
             // 向下跳转
             // 不允许跨段跳转
             if (not contiguous){
-                pc.offset  += u32(
-                    offset >= 0 ? 
-                    offset + 1 :    // 跳到下下条指令（this->exec 执行该指令后，指向下一条指令，所以这里只要 +1）
-                    offset - 2      // 跳到上上条指令
-                ) * sizeof(ins_t);
+                pc.offset  += u32(offset) * sizeof(ins_t);
             }
         }
 
@@ -1535,8 +1529,10 @@ namespace mixc::extern_isa_cpu::origin{
             rim.load(im, 12/*bits*/);
         }
     };
+
+    
 }
 
 #endif
 
-xexport_space(mixc::extern_isa_cpu::origin)
+xexport_space(mixc::extern_isa_vcpu::origin)
