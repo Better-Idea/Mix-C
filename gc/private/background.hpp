@@ -52,7 +52,14 @@ namespace mixc::gc_private_background::origin{
     )
         free_node *         previous;
         inc::memory_size    bytes;
-    };
+    $;
+
+    xstruct(
+        xname(gc_exit_raiser),
+        xpubf(exit, bool)
+    )
+        ~gc_exit_raiser();
+    $;
 
     using free_nodep            = free_node *;
 
@@ -90,10 +97,20 @@ namespace mixc::gc_private_background::origin{
 
     inline uxx                  pending_count;
 
+    // gc 退出触发器，当全局析构时触发
+    inline gc_exit_raiser       gc_exit;
+
     inline inc::thread          gc_thread;
 
+    inline gc_exit_raiser::~gc_exit_raiser() {
+        for(inc::atom_store(xref(exit), true), gc_thread.resume();
+            inc::atom_load(xref(gc_exit.exit)); 
+            inc::thread_self::yield()){
+        }
+    }
+
     inline void gc_execute(){
-        while(true){
+        while(inc::atom_load(xref(gc_exit.exit)) == false){
             auto i_push         = inc::atom_load(xref(i_push_gc_que));
             auto i_pop          = i_pop_gc_que;
             auto dis            = i_push - i_pop_gc_que;
@@ -184,6 +201,8 @@ namespace mixc::gc_private_background::origin{
             }
             gc_map.clear();
         }
+
+        inc::atom_store(xref(gc_exit.exit), false);
     }
 
     inline void gc_sync(){
