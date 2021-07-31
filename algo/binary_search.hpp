@@ -22,15 +22,17 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::algo_binary_search{
-    /* 函数：二分匹配模板
-     * 参数：
-     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(uxx index)
-     *   其中 index 为当前参与比较的元素的索引
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - result_t 结构
+    /**
+     * @brief 
+     * 二分匹配模板
+     * @tparam compare_invoke_t 
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param length 被搜索序列的元素个数
+     * @param compare 
+     * 其中 index 为当前参与比较的元素的索引
+     * 如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * @return auto result_t
      */
     template<class compare_invoke_t>
     inline auto match_core(uxx length, compare_invoke_t const & compare) {
@@ -102,16 +104,17 @@ namespace mixc::algo_binary_search{
             inc::item_origin_of<seq_t>  const & value,                                  \
             cmp_t                       const & compare = inc::default_compare<item_t>)
 
-    /* 函数：二分匹配模板
-     * 参数：
-     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
-     * - value 为期望被搜到的值
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(item_t const & current, item_t const & wanted)
-     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - result_t 结构
+    /**
+     * @brief 
+     * 二分匹配模板
+     * 如果参与比较的元素大于参考值则返回正数，若小于则返回负数，相等则返回零
+     * @tparam seq_t 满足 can_unified_seqlize 约束的序列类型
+     * @tparam cmp_t 
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param seq 被搜索的序列
+     * @param value 参考值
+     * @return auto result_t
      */
     xheader(auto, match_template) {
         inc::unified_seq<seq_t> list{seq};
@@ -127,47 +130,47 @@ namespace mixc::algo_binary_search::origin{
 }
 
 namespace mixc::algo_binary_search::origin::binary_search{
-    /* 函数：在升序序列中寻找刚好匹配搜索值的索引
-     * 参数：
-     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
-     * - value 为期望被搜到的值
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(item_t const & current, item_t const & wanted)
-     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+    /**
+     * @brief 
+     * 在升序序列中寻找【刚好匹配】搜索值的索引
+     * @tparam seq_t 满足 can_unified_seqlize 约束的序列类型
+     * @tparam cmp_t 
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param seq 被搜索的序列
+     * @param value 参考值
+     * @return 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
      */
     xheader(uxx, match) {
         return match_template(seq, value, compare).match;
     }
 
-    /* 函数：在升序序列中寻找不小于搜索值的索引
-     * 参数：
-     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
-     * - value 为期望被搜到的值
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(item_t const & current, item_t const & wanted)
-     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+    /**
+     * @brief 
+     * 在升序序列中寻找【大于等于】搜索值的索引
+     * @tparam seq_t 满足 can_unified_seqlize 约束的序列类型
+     * @tparam cmp_t 
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param seq 被搜索的序列
+     * @param value 参考值
+     * @return 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
      */
     xheader(uxx, greater_equals) {
         auto result = match_template(seq, value, compare);
         return result.match == not_exist ? result.grater_than_target : result.match;
     }
 
-    /* 函数：在升序序列中寻找不大于搜索值的索引
-     * 参数：
-     * - seq 为被搜索序列，该类型需要满足 can_unified_seqlize 约束
-     * - value 为期望被搜到的值
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(item_t const & current, item_t const & wanted)
-     *   其中 item_t 是 seq 序列元素的类型，current 为当前参与二分查找的元素，wanted 为期望被搜到的值
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+    /**
+     * @brief 
+     * 在升序序列中寻找【小于等于】搜索值的索引
+     * @tparam seq_t 满足 can_unified_seqlize 约束的序列类型
+     * @tparam cmp_t 
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param seq 被搜索的序列
+     * @param value 参考值
+     * @return 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
      */
     xheader(uxx, less_equals){
         auto result = match_template(seq, value, compare);
@@ -183,44 +186,50 @@ namespace mixc::algo_binary_search::origin::binary_search{
         )                                                                       \
         inline uxx name(uxx length, callback_t const & compare)
 
-    /* 函数：在升序序列中寻找刚好匹配搜索值的索引
-     * 参数：
-     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(uxx index)
-     *   其中 index 为当前参与比较的元素的索引
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+    /**
+     * @brief 
+     * 在升序序列中寻找【刚好匹配】搜索值的索
+     * @tparam callback_t  
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param length 被搜索序列的元素个数
+     * @param compare 
+     * 其中 index 为当前参与比较的元素的索引
+     * 如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * @return 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
      */
     xheader(match) {
         return match_core(length, compare).match;
     }
 
-    /* 函数：在升序序列中寻找不小于搜索值的索引
-     * 参数：
-     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(uxx index)
-     *   其中 index 为当前参与比较的元素的索引
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+    /**
+     * @brief 
+     * 在升序序列中寻找【大于等于】搜索值的索
+     * @tparam callback_t  
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param length 被搜索序列的元素个数
+     * @param compare 
+     * 其中 index 为当前参与比较的元素的索引
+     * 如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * @return 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
      */
     xheader(greater_equals) {
         auto result = match_core(length, compare);
         return result.match == not_exist ? result.grater_than_target : result.match;
     }
 
-    /* 函数：在升序序列中寻找不大于搜索值的索引
-     * 参数：
-     * - length 为被搜索序列，该类型需要满足 can_unified_seqlize 约束的长度
-     * - compare 为参与匹配的回调函数，期望签名如下：
-     *      ixx operator()(uxx index)
-     *   其中 index 为当前参与比较的元素的索引
-     *   如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
-     * 返回：
-     * - 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
+    /**
+     * @brief 
+     * 在升序序列中寻找【小于等于】搜索值的索
+     * @tparam callback_t  
+     * 参与匹配的回调函数，期望签名如下：
+     * ixx operator()(uxx index)
+     * @param length 被搜索序列的元素个数
+     * @param compare 
+     * 其中 index 为当前参与比较的元素的索引
+     * 如果参与比较的元素大于目标值则返回正数，若小于则返回负数，相等则返回零
+     * @return 期望值在 seq 中对应的索引，如果不存在则返回 not_exist
      */
     xheader(less_equals) {
         auto result = match_core(length, compare);
