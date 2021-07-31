@@ -33,17 +33,19 @@ namespace mixc::lang_cxx_encode_first_as{
     xstruct(
         xtmpl(encode_first_as_result, item_t)
     )
+        using final_t = the_t;
+
         encode_first_as_result(encode_first_as_result_t value, uxx skip_to_next) :
             c08{0},
             plength(0),
-            pskip_to_next(skip_to_next),
+            pskip_to_next(u08(skip_to_next)),
             pstate(u08(value)){
         }
 
         encode_first_as_result(item_t const * value, uxx length, uxx skip_to_next) :
             c08{0},
-            plength(length),
-            pskip_to_next(skip_to_next),
+            plength(u08(length)),
+            pskip_to_next(u08(skip_to_next)),
             pstate(u08(encode_first_as_result_t::success)){
 
             for(uxx i = 0; i < length; i++){
@@ -62,8 +64,6 @@ namespace mixc::lang_cxx_encode_first_as{
         item_t & operator[](uxx index){
             return ((item_t *)the.c08)[index];
         }
-
-        using final_t = the_t;
 
         xpubgetx(length, uxx){
             return plength;
@@ -131,12 +131,12 @@ namespace mixc::lang_cxx_encode_first_as{
                 }
 
                 if (length == 1){
-                    w32 = char32_t(word);
+                    w32 = char32_t((u32)word);
                 }
                 else{
-                    u08 rest_bits = (length - 1) * 6/*utf-8 剩余的每个字节实际有效位数*/;
-                    u08 first_bits = (7 - length);
-                    u08 mask = (1 << first_bits) - 1;
+                    u08 rest_bits = u08(length - 1) * 6/*utf-8 剩余的每个字节实际有效位数*/;
+                    u08 first_bits = u08(7 - length);
+                    u08 mask = u08((1 << first_bits) - 1);
                     w32 = char32_t(u08(word) & mask) << rest_bits;
 
                     for(uxx i = 1; i < length; i++){
