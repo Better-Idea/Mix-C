@@ -169,7 +169,7 @@ namespace mixc::utils_private_tiny_allocator{
             inc::atom_fetch_add(xref(i_async_push), 1);
 
             // 完成推送，最后设置该字段
-            inc::atom_fetch_add(xref(i_finished), 1);
+            inc::atom_fetch_add(xref(i_finished), new_push);
         }
 
         tap             owner{};
@@ -310,12 +310,11 @@ namespace mixc::utils_private_tiny_allocator::origin{
     struct tiny_allocator : tiny_allocator_header{
         friend tiny_token;
 
-        tiny_allocator(){
-            token                   = tiny_tokenp(inc::malloc(sizeof(tiny_token)));
-            inc::atom_store(xref(token->owner), this);
-        }
-
         ~tiny_allocator(){
+            if (token == nullptr) {
+                return;
+            }
+
             // 如果其他线程归还所有分配的内存就自行析构
             if (inc::atom_load(xref(token->i_async_push)) == token->alive_object){
                 for(auto head = token->async_head.next; head != nullptr;){
@@ -354,7 +353,16 @@ namespace mixc::utils_private_tiny_allocator::origin{
                 return nullptr;
             }
 
-            auto i_expect            = (bytes - 1) / scale_one;
+            // 注意：=============================================================================
+            // 需要使用 xnew 通过构造函数初始化
+            // 由于 tiny_allocator 是以 thread_local 变量的方式存在全局
+            // 如果在它构造前有其他全局变量在初始化时调用 tiny_allocator::alloc 可能出现未定义行为
+            if (token == nullptr){
+                token               = xnew(inc::malloc(sizeof(tiny_token))) tiny_token();
+                inc::atom_store(xref(token->owner), this);
+            }
+
+            auto i_expect           = (bytes - 1) / scale_one;
 
             // 超出管理范畴
             if (i_expect >= blocks_per_page){
