@@ -10,6 +10,12 @@ namespace mixc::configure_init_order::origin{
         // 控制台初始化模块
         the_io_private_tty  = 16,
 
+        // GC 单元
+        the_gc,
+
+        // 内存回收单元
+        the_mem,
+
         // 单元测试模块
         the_test,
     };
