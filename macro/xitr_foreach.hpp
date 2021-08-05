@@ -45,21 +45,22 @@ namespace mixc::macro_iterator{
 
     template<auto mode_v, class invoke_t, class ... args_t>
     inline loop_t itr_switch(uxx * index, invoke_t const & invoke, args_t const & ... args){
+        // 将 args const & ... 转换成 args & ...
         if constexpr (mode_v == (itr_reduced)){
-            invoke(args...);
+            invoke((args_t &)args...);
             return loop_t::go_on;
         }
         if constexpr (mode_v == (itr_has_index)){
-            invoke(index[0], args...);
+            invoke(index[0], (args_t &)args...);
             index[0]   += 1;
             return loop_t::go_on;
         }
         if constexpr (mode_v == (itr_has_loop_control)){
-            return invoke(args...);
+            return invoke((args_t &)args...);
         }
         if constexpr (mode_v == (itr_has_loop_control | itr_has_index)){
             loop_t
-            state       = invoke(index[0], args...);
+            state       = invoke(index[0], (args_t &)args...);
             index[0]   += 1;
             return state;
         }
