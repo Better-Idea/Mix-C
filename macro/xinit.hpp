@@ -1,15 +1,15 @@
-#ifndef xpack_utils_init_list
-#define xpack_utils_init_list
+#ifndef xpack_macro_init_list
+#define xpack_macro_init_list
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::utils_init_list::inc
+#define xuser mixc::macro_init_list::inc
 #include"define/base_type.hpp"
 #include"macro/xcstyle.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xlink.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::utils_init_list{
+namespace mixc::macro_init_list{
     using invoke_t = void(*)();
     struct init_list;
 
@@ -72,9 +72,9 @@ namespace mixc::utils_init_list{
     };
 }
 
-namespace mixc::utils_init_list::origin{
-    using mixc::utils_init_list::init_list;
-    using mixc::utils_init_list::init_listx;
+namespace mixc::macro_init_list::origin{
+    using mixc::macro_init_list::init_list;
+    using mixc::macro_init_list::init_listx;
 
     inline void init_list_execute(){
         for(init_list * head = top; head != nullptr; head = head->next_level){
@@ -88,8 +88,11 @@ namespace mixc::utils_init_list::origin{
 // 只允许在全局添加初始化函数
 // 实际初始化会被推迟到 main 中执行
 #define xinit(...)                                              \
-    inline ::mixc::utils_init_list::init_listx<__VA_ARGS__>     \
+    inline ::mixc::macro_init_list::init_listx<__VA_ARGS__>     \
     xlink2(__init_list, __COUNTER__) = xcstyle() -> void
 #endif
 
-xexport_space(mixc::utils_init_list::origin)
+xexport_space(mixc::macro_init_list::origin)
+
+// 初始化顺序
+#include"configure/init_order.hpp"
