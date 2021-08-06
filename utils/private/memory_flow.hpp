@@ -1,8 +1,8 @@
-#ifndef xpack_utils_private_tiny_allocator
-#define xpack_utils_private_tiny_allocator
+#ifndef xpack_utils_private_memory_flow
+#define xpack_utils_private_memory_flow
 #pragma push_macro("xuser") 
 #undef  xuser
-#define xuser mixc::utils_private_tiny_allocator::inc
+#define xuser mixc::utils_private_memory_flow::inc
 #include"configure/platform.hpp"
 #include"concurrency/lock/atom_fetch_add.hpp"
 #include"concurrency/lock/atom_fetch_and.hpp"
@@ -15,7 +15,6 @@
 #include"concurrency/lock/atom_swap.hpp"
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
-#include"configure/init_order.hpp"
 #include"define/base_type.hpp"
 #include"instruction/bit_test.hpp"
 #include"instruction/bit_test_and_set.hpp"
@@ -24,18 +23,18 @@
 #include"macro/xdebug+.hpp"
 #include"macro/xdefer.hpp"
 #include"macro/xnew.hpp"
+#include"macro/xinit.hpp"
 #include"macro/xref.hpp"
 #include"memop/cast.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #include"utils/bits_indicator.hpp"
-#include"utils/init_list.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::utils_private_tiny_allocator::origin{
-    struct tiny_allocator;
+namespace mixc::utils_private_memory_flow::origin{
+    struct memory_flow;
 }
 
-namespace mixc::utils_private_tiny_allocator{
+namespace mixc::utils_private_memory_flow{
     typedef struct node{
         node      * prev;
         node      * next;
@@ -109,12 +108,24 @@ namespace mixc::utils_private_tiny_allocator{
 
     using indicator_t = inc::bits_indicator<scale>;
 
+    struct meta_token;
+    struct base_info{
+        uxx             i_enter{};
+        uxx             i_exit{};
+        node_free       head{};
+        node_free     * tail = & head;
+        meta_token    * owner{};
+        uxx             used_bytes{};
+        uxx             active_object_count{};
+        uxx             async_returned{};
+    };
+
     struct page_header;
-    struct meta_token{
-        using tap               = origin::tiny_allocator *;
+    struct meta_token : private base_info{
+        using tap               = origin::memory_flow *;
 
         meta_token(meta_token * owner){
-            inc::atom_store(xref(this->owner), owner);
+            inc::atom_store(xref(owner), owner);
         }
 
         void raise_change_ownership(meta_token * back_owner) {
@@ -125,9 +136,7 @@ namespace mixc::utils_private_tiny_allocator{
                 // 等待早于该线程的其他线程完成推送任务
                 if (inc::atom_load(xref(i_exit)) == current){
                     inc::atom_store(xref(owner), back_owner);   // 先设置 owner
-                    if (xref(this->head) != this->tail) {
-                        back_owner->push_async_core(this);
-                    }
+                    back_owner->push_async_core(this);
                     inc::atom_fetch_xor(xref(i_enter), 1);      // 后清除 i_enter bit0
                     break;
                 }
@@ -154,6 +163,10 @@ namespace mixc::utils_private_tiny_allocator{
         }
 
         void push_async_core(meta_token * old_token){
+            if (xref(this->head) == this->tail) {
+                return;
+            }
+
             inc::atom_fetch_add(xref(used_bytes), old_token->used_bytes);
             inc::atom_fetch_add(xref(active_object_count), old_token->active_object_count);
             inc::atom_fetch_add(xref(async_returned), old_token->async_returned);
@@ -234,21 +247,12 @@ namespace mixc::utils_private_tiny_allocator{
             return all_returned;
         }
 
-    private:
-        uxx             i_enter{};
-        uxx             i_exit{};
-        node_free       head{};
-        node_free     * tail = & head;
-        meta_token    * owner{};
-        uxx             used_bytes{};
-        uxx             active_object_count{};
-        uxx             async_returned{};
     public:
         uxx             pages{};
+        uxx             skip_count{};
         indicator_t     slot{};
         indicator_t     slot_plus{};
-        uxx             skip_count              = 0;
-        page_header   * page_list               = nullptr;
+        page_header   * page_list{};
         node          * free_list_array[scale];
         node          * free_list_array_plus[scale];
     };
@@ -337,7 +341,7 @@ namespace mixc::utils_private_tiny_allocator{
         page_header               * prev{};
         page_header               * next{};
         meta_token                * token{};
-        uxx                         active_return{};
+        uxx                         thread_id{};
     } * page_headerp;
 
     enum : uxx{
@@ -357,8 +361,8 @@ namespace mixc::utils_private_tiny_allocator{
     static_assert((page_bytes & (page_bytes - 1)) == 0);
 }
 
-namespace mixc::utils_private_tiny_allocator::origin{
-    struct tiny_allocator{
+namespace mixc::utils_private_memory_flow::origin{
+    struct memory_flow{
     private:
         static inline
         meta_token * back;
@@ -370,12 +374,13 @@ namespace mixc::utils_private_tiny_allocator::origin{
         friend meta_token;
         friend page_header;
 
-        ~tiny_allocator(){
+        ~memory_flow(){
             if (token == nullptr) {
                 return;
             }
 
-            if (auto all_returned = token->is_all_returned(); all_returned){
+            if (auto all_returned = 
+                token->is_all_returned(); all_returned){
                 token->handler_async_returned(all_returned, [this](voidp ptr, uxx bytes){
                     this->free_core(ptr, bytes);
                 });
@@ -400,10 +405,10 @@ namespace mixc::utils_private_tiny_allocator::origin{
 
             // 注意：=============================================================================
             // 需要使用 xnew 通过构造函数初始化
-            // 由于 tiny_allocator 是以 thread_local 变量的方式存在全局
-            // 如果在它构造前有其他全局变量在初始化时调用 tiny_allocator::alloc 可能出现未定义行为
+            // 由于 memory_flow 是以 thread_local 变量的方式存在全局
+            // 如果在它构造前有其他全局变量在初始化时调用 memory_flow::alloc 可能出现未定义行为
             if (token == nullptr){
-                token               = (meta_token *)inc::malloc(sizeof(meta_token));
+                token               = (meta_token *)inc::memory::malloc(sizeof(meta_token));
                 token               = (xnew(token) meta_token(token));
             }
 
@@ -411,10 +416,10 @@ namespace mixc::utils_private_tiny_allocator::origin{
 
             // 超出管理范畴
             if (i_expect >= blocks_per_page){
-                return inc::malloc((i_expect + 1) * scale_one);
+                return inc::memory::malloc((i_expect + 1) * scale_one);
             }
 
-            // 只对 tiny_allocator 管理的内存计数
+            // 只对 memory_flow 管理的内存计数
             token->alloc_counting(bytes);
 
             // slot 中置位位表示空闲的块
@@ -441,7 +446,7 @@ namespace mixc::utils_private_tiny_allocator::origin{
 
             // 超出管理的大小
             if (i_expect >= blocks_per_page){
-                inc::mfree(ptr);
+                inc::memory::mfree(ptr);
                 return;
             }
 
@@ -481,7 +486,7 @@ namespace mixc::utils_private_tiny_allocator::origin{
             auto   left             = (head->left_free_block_of(current));
             auto   right            = (head->right_free_block_of(current, free_size));
 
-            // 只对 tiny_allocator 管理的内存计数
+            // 只对 memory_flow 管理的内存计数
             if (token->free_counting(bytes),
                 head->mark_free(current, i_expect + 1); left.begin != nullptr){
                 head->mark_free(left.begin, left.length);
@@ -522,9 +527,9 @@ namespace mixc::utils_private_tiny_allocator::origin{
 
             inc::atom_fetch_sub(xref(token->pages), 1);
 
-            if (page->~page_header(), inc::mfree_aligned(page); next == page){
+            if (page->~page_header(), inc::memory::mfree_aligned(page); next == page){
                 token->~meta_token();
-                inc::mfree(token);
+                inc::memory::mfree(token);
                 inc::atom_store(xref(token), nullptr);
                 return;
             }
@@ -537,7 +542,7 @@ namespace mixc::utils_private_tiny_allocator::origin{
         }
 
         voidp origin_alloc(uxx i_expect){
-            auto meta               = inc::malloc_aligned(page_bytes, page_align_size);
+            auto meta               = inc::memory::malloc_aligned(page_bytes, page_align_size);
             auto page               = xnew(meta) page_header(token);
             auto first              = page->first_block();
 
@@ -587,7 +592,7 @@ namespace mixc::utils_private_tiny_allocator::origin{
                 auto require_blocks     = i_expect + 1;
                 auto rest               = current + require_blocks;
                 auto rest_size          = total_blocks - require_blocks;
-                xdebug(im_utils_tiny_allocator_split, current, rest, total_blocks, require_blocks, rest_size);
+                xdebug(im_utils_memory_flow_split, current, rest, total_blocks, require_blocks, rest_size);
                 xdebug_fail(rest_size > total_blocks);
                 append(rest, rest_size);
             }
@@ -595,7 +600,7 @@ namespace mixc::utils_private_tiny_allocator::origin{
         }
 
         void append(node * block, uxx index, indicator_t & slot, node ** free_list_array){
-            xdebug(im_utils_tiny_allocator_append, index, slot.get(index));
+            xdebug(im_utils_memory_flow_append, index, slot.get(index));
 
             if (slot.get(index) == 0){
                 slot.set(index);
@@ -626,7 +631,7 @@ namespace mixc::utils_private_tiny_allocator::origin{
         void remove(nodep block, uxx index, indicator_t & slot, nodep * free_list){
             auto next = block->next;
             auto prev = block->prev;
-            xdebug(im_utils_tiny_allocator_remove, block, next, index);
+            xdebug(im_utils_memory_flow_remove, block, next, index);
 
             if (next == block){
                 slot.reset(index);
@@ -656,15 +661,16 @@ namespace mixc::utils_private_tiny_allocator::origin{
     };
 
     inline void mem_execute(){
-        auto back = inc::malloc(sizeof(meta_token));
-        xnew(back) meta_token((meta_token *)back);
-        inc::atom_store(xref(tiny_allocator::back), back);
+        // 只使用其中一部分
+        auto && info    = base_info{};
+        auto    meta    = xnew(& info) meta_token((meta_token *)& info);
+        inc::atom_store(xref(memory_flow::back), meta);
 
         while(true){
-            tiny_allocator::back->handler_async_returned([](voidp ptr, uxx bytes){
-                auto   page     = tiny_allocator::get_page_header_by(ptr);
+            memory_flow::back->handler_async_returned([](voidp ptr, uxx bytes){
+                auto   page     = memory_flow::get_page_header_by(ptr);
                 auto   token    = inc::atom_load(xref(page->token));
-                auto & mem      = inc::cast<tiny_allocator>(token);
+                auto & mem      = inc::cast<memory_flow>(token);
                 mem.free_core(ptr, bytes);
             });
             inc::thread_self::sleep(1);
@@ -682,4 +688,4 @@ namespace mixc::utils_private_tiny_allocator::origin{
 
 #endif
 
-xexport_space(mixc::utils_private_tiny_allocator::origin)
+xexport_space(mixc::utils_private_memory_flow::origin)
