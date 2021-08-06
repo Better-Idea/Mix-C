@@ -1,5 +1,5 @@
 #undef  xuser
-#define xuser mixc::utils_allocator::inc
+#define xuser mixc::utils_memory::inc
 #include"configure/switch.hpp"
 #include"concurrency/lock/atom_add.hpp"
 #include"concurrency/lock/atom_sub.hpp"
@@ -9,49 +9,46 @@
 #if xuse_libc_malloc
 #include<malloc.h>
 
-namespace mixc::utils_allocator{
-    inline uxx pused_bytes      = 0;
-    inline uxx palive_object = 0;
-
-    extern void tiny_process_message(){
-        ;
-    }
+namespace mixc::utils_memory{
+    inline uxx g_used_bytes;
+    inline uxx g_alive_object;
+    inline uxx g_alive_pages;
 
     extern voidp tiny_alloc(uxx bytes){
-        inc::atom_add(xref(pused_bytes), bytes);
-        inc::atom_add(xref(palive_object), 1);
+        inc::atom_add(xref(g_used_bytes), bytes);
+        inc::atom_add(xref(g_alive_object), 1);
 
         // 按 16 字节对齐
-        bytes                   = (bytes + 0xf) & ~0xf;
+        bytes           = (bytes + 0xf) & ~0xf;
         return ::malloc(bytes);
     }
 
     extern void tiny_free(voidp ptr, uxx bytes){
-        inc::atom_sub(xref(pused_bytes), bytes);
-        inc::atom_sub(xref(palive_object), 1);
+        inc::atom_sub(xref(g_used_bytes), bytes);
+        inc::atom_sub(xref(g_alive_object), 1);
         ::free(ptr);
     }
 }
 
-namespace mixc::utils_allocator::origin{
+namespace mixc::utils_memory::origin{
     extern uxx used_bytes(){
-        return inc::atom_load(xref(pused_bytes));
+        return inc::atom_load(xref(g_used_bytes));
     }
 
     extern uxx alive_object(){
-        return inc::atom_load(xref(palive_object));
+        return inc::atom_load(xref(g_alive_object));
     }
 }
 #else
 
-#include"utils/private/tiny_allocator.hpp"
+#include"utils/private/memory_flow.hpp"
 
-namespace mixc::utils_allocator{
-    inline thread_local inc::tiny_allocator mem;
+namespace mixc::utils_memory{
+    inline thread_local inc::memory_flow mem;
 
-    extern void tiny_process_message(){
-        mem.process_message();
-    }
+    inline uxx g_used_bytes;
+    inline uxx g_alive_object;
+    inline uxx g_alive_pages;
 
     extern voidp tiny_alloc(uxx bytes){
         return mem.alloc(bytes);
@@ -62,13 +59,17 @@ namespace mixc::utils_allocator{
     }
 }
 
-namespace mixc::utils_allocator::origin{
+namespace mixc::utils_memory::origin{
     extern uxx used_bytes(){
         return mem.used_bytes();
     }
 
     extern uxx alive_object(){
         return mem.alive_object();
+    }
+
+    extern uxx alive_pages(){
+        return inc::atom_load(xref(g_alive_pages));
     }
 }
 
@@ -77,7 +78,7 @@ namespace mixc::utils_allocator::origin{
 #include<malloc.h>
 #include<windows.h>
 
-namespace mixc::utils_allocator::origin{
+namespace mixc::utils_memory::origin{
     extern voidp malloc(uxx bytes){
         // 按 16 字节对齐
         bytes                   = (bytes + 0xf) & ~0xf;
@@ -85,6 +86,8 @@ namespace mixc::utils_allocator::origin{
     }
 
     extern voidp malloc_aligned(uxx bytes, uxx align_bytes){
+        inc::atom_add(xref(g_alive_pages), 1);
+
         #if xis_windows
             return ::_mm_malloc(bytes, align_bytes);
         #endif
@@ -99,6 +102,8 @@ namespace mixc::utils_allocator::origin{
     }
 
     extern void mfree_aligned(voidp ptr){
+        inc::atom_sub(xref(g_alive_pages), 1);
+
         #if xis_windows
             ::_mm_free(ptr);
         #endif
