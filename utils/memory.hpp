@@ -1,30 +1,30 @@
-#ifndef xpack_utils_allocator
-#define xpack_utils_allocator
+#ifndef xpack_utils_memory
+#define xpack_utils_memory
 #pragma push_macro("xuser")
 #undef  xuser
-#define xuser mixc::utils_allocator::inc
+#define xuser mixc::utils_memory::inc
 #include"macro/xdebug.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xtypeid.hpp"
 #include"macro/xnew.hpp"
 #pragma pop_macro("xuser")
 
-namespace mixc::utils_allocator{
-    extern void  tiny_process_message();
+namespace mixc::utils_memory{
     extern voidp tiny_alloc(uxx bytes);
     extern void  tiny_free(voidp ptr, uxx bytes);
 }
 
-namespace mixc::utils_allocator::origin{
-    struct memory_size{
-        explicit memory_size(uxx size) : 
-            size(size){
+namespace mixc::utils_memory::origin::memory{
+    struct size{
+        explicit size(uxx value) : 
+            value(value){
         }
+
         operator uxx (){
-            return size;
+            return value;
         }
     private:
-        uxx size;
+        uxx value;
     };
 
     extern voidp malloc(uxx bytes);
@@ -33,7 +33,7 @@ namespace mixc::utils_allocator::origin{
     extern void  mfree_aligned(voidp ptr);
 
     template<class type, class ... args_t>
-    inline type * alloc_with_initial(memory_size bytes, args_t const & ... list){
+    inline type * alloc_with_initial(size bytes, args_t const & ... list){
         auto ptr = (type *)tiny_alloc(bytes);
         xdebug(im_alloc_with_initial, xtypeid(type).name, ptr, bytes);
         return xnew(ptr) type(list...);
@@ -41,11 +41,11 @@ namespace mixc::utils_allocator::origin{
 
     template<class type, class ... args_t>
     inline type * alloc_with_initial(args_t const & ... list){
-        return alloc_with_initial<type>(memory_size(sizeof(type)), list...);
+        return alloc_with_initial<type>(size(sizeof(type)), list...);
     }
 
     template<class type>
-    inline type * alloc(memory_size bytes){
+    inline type * alloc(size bytes){
         auto ptr = (type *)tiny_alloc(bytes);
         xdebug(im_alloc, xtypeid(type).name, ptr, bytes);
         return ptr;
@@ -53,52 +53,48 @@ namespace mixc::utils_allocator::origin{
 
     template<class type>
     inline type * alloc(){
-        return alloc<type>(memory_size(sizeof(type)));
+        return alloc<type>(size(sizeof(type)));
     }
 
     template<class type>
-    inline void free(type const * ptr, memory_size bytes){
+    inline void free(type const * ptr, size bytes){
         xdebug(im_free, xtypeid(type).name, ptr, bytes);
         tiny_free((type *)ptr, bytes);
     }
 
     template<class type>
     inline void free(type const * ptr){
-        free(ptr, memory_size(sizeof(type)));
+        free(ptr, size(sizeof(type)));
     }
 
     template<class type>
-    inline void free_with_destroy(type const * ptr, memory_size bytes){
+    inline void free_with_destroy(type const * ptr, size bytes){
         ptr->~type();
         free(ptr, bytes);
     }
 
     template<class type>
     inline void free_with_destroy(type const * ptr){
-        free_with_destroy(ptr, memory_size(sizeof(type)));
+        free_with_destroy(ptr, size(sizeof(type)));
     }
 
     template<class type>
     constexpr auto default_alloc = [](uxx bytes) -> type * {
-        return alloc<type>(memory_size{bytes});
+        return alloc<type>(size{bytes});
     };
 
     template<class type>
     constexpr auto default_free = [](type * ptr, uxx bytes){
-        free(ptr, memory_size{bytes});
+        free(ptr, size{bytes});
     };
-
-    inline void process_message(){
-        tiny_process_message();
-    }
 
     extern uxx used_bytes();
     extern uxx alive_object();
 }
 
-#define xmemory_sizeof(...)       \
-    ::mixc::utils_allocator::origin::memory_size{ sizeof(__VA_ARGS__) }
+#define xsizeof(...)       \
+    ::mixc::utils_memory::origin::size{ sizeof(__VA_ARGS__) }
 
 #endif
 
-xexport_space(mixc::utils_allocator::origin)
+xexport_space(mixc::utils_memory::origin)
