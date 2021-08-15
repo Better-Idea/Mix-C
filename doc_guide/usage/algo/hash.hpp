@@ -4,7 +4,7 @@
 #include"mixc.hpp"
 #include"utils/counter.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     counter demo = 0;
 
@@ -66,5 +66,4 @@ int run(){
         xhint(hash(a));
         xhint(hash(b));
     }
-    return 0;
-}
+};

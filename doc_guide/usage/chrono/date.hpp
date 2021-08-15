@@ -4,7 +4,7 @@
 #include"mixc.hpp"
 #include"utils/counter.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     counter demo = 0;
 
@@ -301,5 +301,4 @@ int run(){
 
         xhint(a == b, a != b, a > b, a >= b, a < b, a <= b);
     }
-    return 0;
-}
+};

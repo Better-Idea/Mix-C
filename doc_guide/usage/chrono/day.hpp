@@ -4,7 +4,7 @@
 #include"mixc.hpp"
 #include"utils/counter.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     counter demo = 0;
 
@@ -28,5 +28,4 @@ int run(){
 
         xhint(new_date.year(), new_date.month(), new_date.day());
     }
-    return 0;
-}
+};

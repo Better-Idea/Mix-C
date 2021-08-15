@@ -3,7 +3,7 @@
 #include"lang/cxx.hpp"
 #include"mixc.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
 
     auto alloc = [](uxx length){
@@ -47,5 +47,4 @@ int run(){
 
     xhint(s);
     xhint(v);
-    return 0;
-}
+};

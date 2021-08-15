@@ -4,7 +4,7 @@
 #include"mixc.hpp"
 #include"utils/counter.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     counter demo = 0;
 
@@ -120,5 +120,4 @@ int run(){
         // binary_search::less_equals 和 binary_search::greater_equals 也具有类似的操作
         // 这里就不赘述
     }
-    return 0;
-}
+};

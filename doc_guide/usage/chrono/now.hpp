@@ -6,7 +6,7 @@
 #include"mixc.hpp"
 #include"utils/counter.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     counter demo = 0;
 
@@ -52,5 +52,4 @@ int run(){
         // 当然这样类似的问题都是需要注意的，最好一次性获取所有的属性
         xhint(now.date().year(), now.date().month(), now.date().day());
     }
-    return 0;
-}
+};
