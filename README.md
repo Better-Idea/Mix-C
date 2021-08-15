@@ -5,7 +5,7 @@
 ## 推荐点
 该项目有诸多亮点，包括但不限于以下：
 - 内存管理算法，让 4KB 以下的小内存的分配与回收效率有超过三倍的提升，性能超越 google 的 tcmalloc，并有效的减少了内存碎片。该算法已从 old/ 旧代码中迁移完毕并增强了原有功能。  
-https://github.com/Better-Idea/Mix-C/blob/master/utils/private/tiny_allocator.hpp
+https://github.com/Better-Idea/Mix-C/blob/master/utils/private/memory_flow.hpp
 
 - 策略锁：功能比读写锁更完整、更通用化。同步开销和自旋锁相当，可配置且能有效的管理线程并发和同步，同时避免了传统读写锁可能出现的线程饥饿问题。  
 https://github.com/Better-Idea/Mix-C/blob/master/concurrency/lock/policy_barrier.hpp  
