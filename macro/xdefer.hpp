@@ -20,11 +20,12 @@ namespace mixc::macro_xdefer {
 
     struct sugar{
         template<class lambda_t>
-        auto operator * (lambda_t const & relase){
-            return defer{ relase };
+        auto operator * (lambda_t const & release){
+            return defer{ release };
         }
     };
 }
 
-#define xdefer      [[maybe_unused]] auto && xlink2(__mixc_defer, __LINE__) = ::mixc::macro_xdefer::sugar() * [&]()
+#define xdefer          [[maybe_unused]] auto && xlink2(__mixc_defer, __LINE__) = ::mixc::macro_xdefer::sugar() * [&]()
+#define xdefer_global   [[maybe_unused]] inline auto && xlink2(__mixc_defer, __LINE__) = ::mixc::macro_xdefer::sugar() * []()
 #endif
