@@ -50,7 +50,7 @@ namespace xuser{
 
 char path[1024];
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     tty.write_line("please input the mix-c project full root path");
     tty.read_line([](uxx length){
@@ -87,5 +87,4 @@ int run(){
         "utils/enum/",
         "test/algo/",
     });
-    return 0;
-}
+};
