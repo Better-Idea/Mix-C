@@ -17,6 +17,7 @@
 #include"instruction/index_of_last_set.hpp"
 #include"interface/can_callback.hpp"
 #include"macro/xdebug.hpp"
+#include"macro/xdefer.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
@@ -26,15 +27,23 @@
 #include"meta/is_same.hpp"
 #include"meta_seq/tin.hpp"
 #include"meta_seq/tkv.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
+#include"concurrency/thread_self.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_ref{
     using namespace inc;
 
     // 代替 nullptr 作为空对象
-    inline uxx                 g_empty_mem[32];
-    inline voidp               g_empty_mem_ptr       = g_empty_mem;
+    inline uxx                  g_empty_mem[32];
+    inline voidp                g_empty_mem_ptr = g_empty_mem;
+
+    // 当前[潜质类型]的出度入度差
+    // 如果该[潜质类型]可以通过子节点再次回到自身且 degree_dvalue 为 0 则表示可以进行[内析构]
+    inline uxx                  g_degree_dvalue;
+
+    // gc 遍历时的根节点
+    inline voidp                g_root;
 
     template<
         class final_t, 
@@ -43,12 +52,7 @@ namespace mixc::gc_ref{
         bool  is_array_v, 
         bool  is_binary_aligned_alloc_v
     >
-    xstruct(
-        xtmpl(meta, final_t, item_t, attribute_t, is_array_v, is_binary_aligned_alloc_v),
-        xpubb(self_management),
-        xasso(attribute_t),
-        xasso(item_t)
-    )
+    struct meta : public self_management { using the_t = meta<final_t, item_t, attribute_t, is_array_v, is_binary_aligned_alloc_v> ; private: enum{ __start = 70 + 1 }; static constexpr auto __my_name = "meta" ; static inline uxx __my_class_id = __class_id++; static constexpr asciis __my_field_name[] = { "", "", "" }; template<class, class> friend struct ::mixc::macro_xtypeid::__typeid; template<class> friend struct ::mixc::gc_private_tuple::tuple; template<uxx __end> void operator()(__dph<__end>); template<uxx __foo> static decltype(nullptr) __field_name(__dph<__foo>); public: using base_list = __bl< void , self_management >; using member_list_partial = __mlp< nullptr , & __fak<attribute_t>::item , & __fak<item_t>::item >; using member_list = __dfc< meta<final_t, item_t, attribute_t, is_array_v, is_binary_aligned_alloc_v> , self_management >;
     private:
         static auto configure(){
             if constexpr (is_array_v){
@@ -77,77 +81,77 @@ namespace mixc::gc_ref{
             auto ptr                = the.mem;
             auto can_arrive_root    = false;
 
-            // 无法通向 root
+            // 无法通向 g_root
             if (ptr == null()){
                 return false;
             }
 
-            xdebug(im_gc_meta_routing, ptr, xtypeid(attribute_t).name, ptr->owners(), the.length());
+            xdebug(im_gc_meta_routing, ptr, xtypeid(attribute_t).name, ptr->owners(), ptr->visited(), the.length());
 
             // 我们把经过的节点存下来
             // 如果是首次经过就让它遍历成员节点
-            // 如果该节点可以通往 root，那么曾经拜访过该节点的附和节点也可以通往根节点
+            // 如果该节点可以通往 g_root，那么曾经拜访过该节点的附和节点也可以通往根节点
             // 实际过程如下：
-            // root --> 此节点 --> 附和节点 -> 此节点
+            // g_root --> 此节点 --> 附和节点 -> 此节点
             //             |
-            //             +-----> 其他节点 -> root
-            // 在此时附和节点不能确定此节点是否还存在可以通往 root 的路径，所以指示暂时的让此节点的 visited 访问计数器加一
+            //             +-----> 其他节点 -> g_root
+            // 在此时附和节点不能确定此节点是否还存在可以通往 g_root 的路径，所以指示暂时的让此节点的 visited 访问计数器加一
             // 而计数汇总的工作则是交给此节点来完成
-            inc::gc_info_t & info   = inc::gc_map.get(ptr); 
-            inc::gc_info_t   gi;
-
-            if (info != nullref){
-                if (info.can_arrive_root){
+            if (ptr->is_visited()){
+                if (ptr->can_arrive_root()){
                     xdebug(im_gc_meta_routing, "can_arrive_root");
 
-                    // 这里必须设置 degree_dvalue -= 1 而不是 visited += 1
+                    // 这里必须设置 g_degree_dvalue -= 1 而不是 visited += 1
                     // 因为后续可能不一定会有关于该节点的 owners - visited
-                    degree_dvalue -= 1;
+                    g_degree_dvalue-= 1;
                     return true;
                 }
                 else{
-                    info.visited   += 1;
-                    xdebug(im_gc_meta_routing, info.visited);
+                    uxx visited     = ptr->new_visited();
+                    xdebug(im_gc_meta_routing, visited);
                     return false;
                 }
             }
 
             // 从非根节点开始计算
-            gi.can_arrive_root      = ptr == root;
-            gi.visited              = ptr != root;
-            ptr->in_gc_queue(false);
-            inc::gc_map.set(ptr, gi);
+            if (ptr == g_root){
+                ptr->visit_root();
+                ptr->can_arrive_root(true);
+            }
+            else {
+                ptr->new_visited();
+            }
+
             xdebug(im_gc_meta_routing, ptr, "set to gc_map");
 
             // 如果数组元素 item_t 属于 guide_t 类型集合，那么就遍历数组元素
             if constexpr (tin<guide_t, item_t>){
-                can_arrive_root    |= tuple<void>::template routing<guide_t>(the, the.length());
+                can_arrive_root     = tuple<void>::template routing<guide_t>(the, the.length());
             }
-            
+
             // 如果 attribute_t 属于 guide_t 类型集合，就遍历该对象的字段
             if constexpr (tin<guide_t, attribute_t>){
                 attribute_t * attr  = ptr; // 里氏转换
-                can_arrive_root    |= tuplep(attr)->template routing<guide_t>();
+                can_arrive_root     = tuplep(attr)->template routing<guide_t>();
             }
 
             if (can_arrive_root){
-                inc::gc_info_t & gi = inc::gc_map.get(ptr); 
-                inc::degree_dvalue += ptr->owners() - gi.visited;
-                gi.can_arrive_root  = true;
+                g_degree_dvalue    += ptr->owners() - ptr->visited();
+                ptr->can_arrive_root(true);
             }
             return can_arrive_root;
         }
 
         template<class guide_t>
         bool can_release(){
-            inc::root               = mem;
-            inc::degree_dvalue      = 0;
+            g_root                  = mem;
+            g_degree_dvalue         = 0;
 
-            // 只有可以再次回到根节点 degree_dvalue 的值才有意义
+            // 只有可以再次回到根节点 g_degree_dvalue 的值才有意义
             if (not the.template routing<guide_t>()){
                 return false;
             }
-            return inc::degree_dvalue == 0;
+            return g_degree_dvalue == 0;
         }
     public:
         meta() : mem(null()) { }
@@ -215,28 +219,35 @@ namespace mixc::gc_ref{
             auto mem                = (token_mix_t *)ptr;
             auto old                = (the_t *)& mem;
             auto owners             = (mem->owners());
+            auto can_release        = (false);
+
+            xdefer{
+                if (can_release == false){
+                    return;
+                }
+
+                // 如果可以释放
+                // 设置 thread_local 变量 l_in_release 
+                // 让成员变量析构操作不再推送到 gc_thread
+                inc::l_in_release   = true;
+                mem->under_release(true);
+                the_t::free_with_destroy(mem);
+                inc::l_in_release   = false;
+            };
 
             // 只要计数器为 0 就可以直接释放
             // 有些[潜质类型]可能不存在环，但是此时计数器为 0
             if (owners == 0){
-                inc::l_in_release   = true;
-                the_t::free_with_destroy(mem);
-                inc::l_in_release   = false;
+                can_release         = true;
                 return;
             }
 
             if constexpr (not need_gc_v){
                 ; // pass
             }
-            // 如果可以释放
-            // 设置 thread_local 变量 l_in_release 
-            // 让成员变量析构操作不再推送到 gc_thread
             else if (old->template can_release<guide_t>()){
-                auto & gi           = inc::gc_map.get(mem);
-                inc::l_in_release   = true;
-                gi.can_arrive_root  = false;
-                the_t::free_with_destroy(mem);
-                inc::l_in_release   = false;
+                can_release         = true;
+                return;
             }
         }
     public:
@@ -305,15 +316,16 @@ namespace mixc::gc_ref{
             using guide             = decltype(make_guide<final_t>());
             using thep              = the_t *;
             constexpr bool need_gc  = guide::length != 0;
+            bool           ready    = false;
             token_mix_t *  ptr      = the_t::null();
             the_t       *  old;
             uxx            owners;
 
-            if (ptr = atom_swap(& mem, ptr); ptr == the_t::null()) {
+            if (ptr = atom_swap(xref(mem), ptr); ptr == the_t::null()) {
                 return thex;
             }
             else{
-                old                 = thep(& ptr);
+                old                 = thep(xref(ptr));
             }
 
             // l_in_release 是一个 thread_local 变量
@@ -323,37 +335,49 @@ namespace mixc::gc_ref{
             // 表示[内析构]直接执行而不推送到自身的 gc_que 队列中
             // 这么做保证了释放的顺序，同时避免了 gc_que 存满时的死锁
             if (not inc::l_in_release){
-                gc_push(ptr, xref(the_t::release<guide, need_gc>));
-                process_message();
+                inc::memory::handle_async_memory_event();
+                gc_push(ptr, & the_t::release<guide, need_gc>);
                 return thex;
             }
 
+            if (ptr->under_release()) {
+                return thex;
+            }
+
+            // 后续代码 return 时执行
+            xdefer{
+                if (not ready) {
+                    return;
+                }
+
+                ptr->under_release(true);
+                the_t::free_with_destroy(ptr);
+            };
+
             // 对于[平凡类型]只要计数器为 0 就可以[内析构]
             if constexpr (not need_gc){
-                if (owners = ptr->owners_decrease(); owners == 0){
-                    the_t::free_with_destroy(ptr);
-                }
+                owners              = ptr->owners_decrease();
+                ready               = owners == 0;
+                return thex;
             }
+
+            // 如果 gc 经过了该节点，且它可以抵达根节点
+            if (ready = ptr->can_arrive_root(); ready) {
+                return thex;
+            }
+
+            // 已访问但不可达
+            if (ptr->is_visited()){
+                return thex;
+            }
+
             // 此节点可能不属于当前[类型环]
             // 遍历子节点，如果可以释放就执行[内析构]操作
-            else if (auto & i = inc::gc_map.get(ptr); i == nullref){
-                if (owners = ptr->owners_decrease(); owners == 0){
-                    the_t::free_with_destroy(ptr);
-                }
-                else if (old->template can_release<guide>()){
-                    auto  & gi          = inc::gc_map.get(ptr);
-                    gi.can_arrive_root  = false; // 避免重入
-                    the_t::free_with_destroy(ptr);
-                }
-            }
-            // 如果 gc 经过了该节点，且它可以抵达根节点
             else {
-                if (i.can_arrive_root){
-                    i.can_arrive_root   = false; // 避免重入
-                    the_t::free_with_destroy(ptr);
-                }
+                owners              = ptr->owners_decrease();
+                ready               = owners == 0 or old->template can_release<guide>();
+                return thex;
             }
-            return thex;
         }
 
         bool operator == (the_t const & object) const {
@@ -412,14 +436,14 @@ namespace mixc::gc_ref{
             return length;
         }
 
-        static inc::memory_size size(uxx length) {
+        static inc::memory::size size(uxx length) {
             if constexpr (has_array){
-                return inc::memory_size(
+                return inc::memory::size(
                     sizeof(token_mix_t) + length * sizeof(item_t)
                 );
             }
             else{
-                return inc::memory_size(
+                return inc::memory::size(
                     sizeof(token_mix_t)
                 );
             }
@@ -429,7 +453,7 @@ namespace mixc::gc_ref{
         static auto alloc(uxx length, init_by<args_t...> const & init) {
             // 这里只初始化不带属性的部分（引用计数器（*必选）、数组长度（*可选））
             auto real_length    = (the_t::real(length));
-            auto mem            = (token_mix_t *)inc::alloc_with_initial<typename token_mix_t::base_t>(
+            auto mem            = (token_mix_t *)inc::memory::alloc_with_initial<typename token_mix_t::base_t>(
                 the_t::size(real_length), length
             );
 
@@ -446,12 +470,9 @@ namespace mixc::gc_ref{
 
             // 添加到释放列表，在完成一轮 gc 后再释放
             // 避免在对下一个和 mem 指向相同元素 gc 的时候，访问了释放的内存
-            // 注意：这里修改该 mem 中的内容，也相当于间接调用了 in_gc_queue(false)
-            auto node       = free_nodep(mem);
             auto length     = the_t::real(mem->this_length());
-            node->bytes     = the_t::size(length);
-            node->previous  = free_list;
-            free_list       = node;
+            auto bytes      = the_t::size(length);
+            g_free_list     = mem->prepare_release(g_free_list, bytes);
         }
     $
 
