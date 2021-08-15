@@ -7,7 +7,7 @@
 #include"lang/cxx/clone.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_private_path_buffer::origin{
@@ -29,7 +29,7 @@ namespace mixc::io_private_path_buffer::origin{
                         ptr += length + 1;
                     }
                     else{
-                        p = inc::alloc<char>(inc::memory_size{length + 1});
+                        p = inc::memory::alloc<char>(inc::memory::size{length + 1});
                     }
 
                     p[length] = '\0';
@@ -47,7 +47,7 @@ namespace mixc::io_private_path_buffer::origin{
             if (buf <= p and p < end){
                 return;
             }
-            inc::free(voidp(p), inc::memory_size{path.length() + 1});
+            inc::memory::free(voidp(p), inc::memory::size{path.length() + 1});
         }
     };
 }

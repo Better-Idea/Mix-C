@@ -9,7 +9,6 @@
 #include"lang/cxx/encode_item_as.hpp"
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
-#include"utils/allocator.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::io_private_tty::origin{

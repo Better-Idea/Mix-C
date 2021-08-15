@@ -35,17 +35,16 @@ c+s+a   p2 38 50    p2 38 51    p2 38 52    p2 38 53    p1 35 3b 38 7e   p1 37 3
 #define xuser mixc::io_private_tty::inc
 #include<stdio.h>
 #include"configure/switch.hpp"
-#include"configure/init_order.hpp"
 #include"define/base_type.hpp"
 #include"interface/can_alloc.hpp"
 #include"io/private/tty.hpp"
 #include"io/private/tty_color_t.hpp"
 #include"io/private/tty_key.hpp"
 #include"macro/xdebug_fail.hpp"
+#include"macro/xinit.hpp"
 #include"macro/xref.hpp"
 #include"memop/copy.hpp"
-#include"utils/allocator.hpp"
-#include"utils/init_list.hpp"
+#include"utils/memory.hpp"
 
 #if xis_windows
 #include<windows.h>
@@ -426,13 +425,13 @@ namespace mixc::io_private_tty::origin{
         uxx     dummy;
 
         auto inner_alloc = [](uxx bytes){
-            return (char *)inc::alloc<u08>(inc::memory_size{bytes});
+            return (char *)inc::memory::alloc<u08>(inc::memory::size{bytes});
         };
         auto inner_free = [&](voidp ptr, uxx bytes){
             if (stack_buffer == ptr){
                 return;
             }
-            inc::free(ptr, inc::memory_size{bytes});
+            inc::memory::free(ptr, inc::memory::size{bytes});
         };
 
         #if xis_linux || xis_mac

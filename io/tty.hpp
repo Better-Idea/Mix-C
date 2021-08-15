@@ -13,7 +13,7 @@
 #include"lang/cxx.hpp"
 #include"macro/xexport.hpp"
 #include"meta/has_cast.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 
 #undef  xuser
 #define xuser mixc::io_tty::ext
@@ -62,8 +62,8 @@ namespace mixc::io_tty{
                     auto ptr         = buf_stack;
 
                     if (length >= sizeof(buf_stack) / sizeof(buf_stack[0])){
-                        ptr = buf_heap = inc::alloc<char>(
-                            inc::memory_size(length + 1)
+                        ptr = buf_heap = inc::memory::alloc<char>(
+                            inc::memory::size(length + 1)
                         );
                     }
                     ptr[length] = '\0';
@@ -79,7 +79,7 @@ namespace mixc::io_tty{
             }
 
             if (inc::print_core(asciis(content), content.length()); buf_heap != nullptr){
-                inc::free(buf_heap, inc::memory_size(content.length() + 1));
+                inc::memory::free(buf_heap, inc::memory::size(content.length() + 1));
             }
         }
 

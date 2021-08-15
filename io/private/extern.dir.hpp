@@ -11,7 +11,7 @@
 #include"macro/xref.hpp"
 #include"macro/xwarning.hpp"
 #include"memop/copy.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 
 namespace mixc::io_dir::cpp{
     using namespace mixc::io_private_dir::inc;
@@ -177,7 +177,7 @@ namespace mixc::io_dir::origin{
             auto ptr        = buf;
 
             if (length >= sizeof(buf) - 1){
-                ptr         = cpp::alloc<char>(cpp::memory_size{length + 1});
+                ptr         = cpp::memory::alloc<char>(cpp::memory::size{length + 1});
             }
 
             ptr[length]     = '\0';
@@ -188,7 +188,7 @@ namespace mixc::io_dir::origin{
             bstate_t::success : bstate_t::fail;
 
         if (mkdir.operator char *() != buf){
-            cpp::free<char>((char *)mkdir, cpp::memory_size{mkdir.length() + 1});
+            cpp::memory::free<char>((char *)mkdir, cpp::memory::size{mkdir.length() + 1});
         }
 
         #elif xis_linux
