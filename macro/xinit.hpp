@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_init_list::inc
+#include"configure/init_order.hpp"
 #include"define/base_type.hpp"
 #include"macro/xcstyle.hpp"
 #include"macro/xexport.hpp"
@@ -13,54 +14,18 @@ namespace mixc::macro_init_list{
     using invoke_t = void(*)();
     struct init_list;
 
-    inline init_list * top              = nullptr;
+    inline init_list * g_init_list[inc::the_end];
 
     struct init_list{
-        init_list * next_level; // 更低优先级节点
-        init_list * next_item;  // 平级节点
-        uxx         priority;   // 值越大优先级越低
+        init_list * next;       // 平级节点
         invoke_t    invoke;
 
         init_list(uxx priority, invoke_t invoke) : 
-            next_level(nullptr),
-            next_item(nullptr),
-            priority(priority),
+            next(nullptr),
             invoke(invoke){
-            
-            if (top == nullptr){
-                top                     = this;
-                return;
-            }
 
-            init_list * current         = top;
-            init_list * next            = top->next_level;
-            
-            while(priority > current->priority){
-                if (next == nullptr or priority < next->priority){
-                    this->next_level    = current->next_level;
-                    current->next_level = this;
-                    return;
-                }
-                if (priority == next->priority){
-                    this->next_item     = current;
-                    this->next_level    = current->next_level;
-                    return;
-                }
-
-                current                 = next;
-                next                    = next->next_level;
-            }
-
-            if (priority == top->priority){
-                this->next_item         = top;
-                this->next_level        = top->next_level;
-                top                     = this;
-            }
-            // priority < top->priority
-            else{
-                this->next_level        = top;
-                top                     = this;
-            }
+            this->next              = g_init_list[priority];
+            g_init_list[priority]   = this;
         }
     };
 
@@ -77,8 +42,8 @@ namespace mixc::macro_init_list::origin{
     using mixc::macro_init_list::init_listx;
 
     inline void init_list_execute(){
-        for(init_list * head = top; head != nullptr; head = head->next_level){
-            for(init_list * current = head; current != nullptr; current = current->next_item){
+        for(uxx i = 0; i < inc::the_end; i++){
+            for(auto current = g_init_list[i]; current != nullptr; current = current->next){
                 current->invoke();
             }
         }
@@ -87,9 +52,10 @@ namespace mixc::macro_init_list::origin{
 
 // 只允许在全局添加初始化函数
 // 实际初始化会被推迟到 main 中执行
+// 注意：这里使用 __LINE__ 而不是 __COUNTER__ 避免在不同的 .cpp 编译目录下出现不同的副本
 #define xinit(...)                                              \
     inline ::mixc::macro_init_list::init_listx<__VA_ARGS__>     \
-    xlink2(__init_list, __COUNTER__) = xcstyle() -> void
+    xlink2(__init_list, __LINE__) = xcstyle() -> void
 #endif
 
 xexport_space(mixc::macro_init_list::origin)
