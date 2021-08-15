@@ -14,7 +14,7 @@
 #include"macro/xstruct.hpp"
 #include"memop/cast.hpp"
 #include"meta/is_empty_class.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::concurrency_thread{
@@ -56,9 +56,9 @@ namespace mixc::concurrency_thread{
             };
 
             auto args_bytes         = inc::is_empty_class<lambda_t> ? 0 : sizeof(lambda_t);
-            auto total_bytes        = inc::memory_size{ args_bytes + sizeof(clambda_meta) };
+            auto total_bytes        = inc::memory::size{ args_bytes + sizeof(clambda_meta) };
 
-            if (m_lambda = inc::alloc<clambda_meta>(total_bytes);
+            if (m_lambda = inc::memory::alloc<clambda_meta>(total_bytes);
                 m_lambda == nullptr){
                 im_initialize_fail();
                 return;
@@ -87,7 +87,7 @@ namespace mixc::concurrency_thread{
             auto call               = m_lambda->m_release;
             auto args               = m_lambda + 1;
             call(args);
-            inc::free(m_lambda, inc::memory_size{m_lambda->m_bytes});
+            inc::memory::free(m_lambda, inc::memory::size{m_lambda->m_bytes});
             m_lambda                 = nullptr;
         }
 
