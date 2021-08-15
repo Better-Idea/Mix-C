@@ -8,16 +8,25 @@ namespace mixc::configure_init_order::origin{
         the_concurrency_thread_self,
 
         // 控制台初始化模块
-        the_io_private_tty  = 16,
-
-        // GC 单元
-        the_gc,
+        the_io_private_tty,
 
         // 内存回收单元
         the_mem,
 
+        // GC 可回收对象筛选单元
+        the_gc_filter,
+
+        // GC 内存释放单元
+        the_gc_release,
+
         // 单元测试模块
         the_test,
+
+        // 主函数
+        the_main,
+        
+        // 必须放在最后，表示初始化优先级个数
+        the_end,
     };
 }
 
