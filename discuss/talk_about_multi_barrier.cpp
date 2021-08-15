@@ -8,7 +8,7 @@
 volatile uxx            counter = 0;
 xuser::multi_barrier    mutex;
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
 
     auto add = [](voidp key){
@@ -31,5 +31,4 @@ int run(){
     }
 
     xhint(counter);
-    return 0;
-}
+};

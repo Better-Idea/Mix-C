@@ -3,13 +3,14 @@
 #include"docker/array.hpp"
 #include"math/random.hpp"
 #include"memop/fill.hpp"
-#include"utils/allocator.hpp"
+#include"mixc.hpp"
+#include"utils/memory.hpp"
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     struct pair{ u08p ptr; uxx size; };
     static array<pair, 1024 * 100> record;
-    xhint(used_bytes());
+    xhint(memory::used_bytes());
 
     for(uxx i = 0; i < record.length(); ){
         auto mode           = uxx(random<u08>() % (3));
@@ -25,22 +26,22 @@ int run(){
             auto index      = uxx(random<uxx>() % i);
             pt              = record[index];
             record[index]   = record[--i];
-            xuser::free(pt.ptr, memory_size{pt.size});
+            xuser::memory::free(pt.ptr, memory::size{pt.size});
         }
         else{
-            pr.ptr          = xuser::alloc<u08>(memory_size{bytes});
+            pr.ptr          = xuser::memory::alloc<u08>(memory::size{bytes});
             pr.size         = bytes;
             record[i++]     = pr;
             xuser::fill(pr.ptr, 0xff, bytes); // 写脏
         }
     }
 
-    xhint(used_bytes());
+    xhint(memory::used_bytes());
 
     for(uxx i = 0; i < record.length(); i++){
         auto pr             = record[i];
-        xuser::free(pr.ptr, memory_size{pr.size});
+        xuser::memory::free(pr.ptr, memory::size{pr.size});
     }
-    xhint(used_bytes());
-    return 0;
-}
+
+    xhint(memory::used_bytes());
+};

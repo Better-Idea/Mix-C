@@ -5,6 +5,7 @@
 #include"concurrency/lock/policy_barrier.hpp"
 #include"concurrency/thread.hpp"
 #include"macro/xhint.hpp"
+#include"mixc.hpp"
 
 namespace xuser{
     // 操作列表
@@ -44,7 +45,7 @@ namespace xuser{
     };
 }
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     uxx     step = 1000000;
     uxx     sum  = step * 4;
@@ -80,5 +81,4 @@ int run(){
     }
 
     xhint(mod.counter);
-    return 0;
-}
+};

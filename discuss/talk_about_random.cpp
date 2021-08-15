@@ -5,6 +5,7 @@
 #include"io/tty.hpp"
 #include"math/const.hpp"
 #include"math/random.hpp"
+#include"mixc.hpp"
 
 namespace xuser{
     f64                  sum;
@@ -14,7 +15,7 @@ namespace xuser{
     array<uxx, 2>        count_of {};
 }
 
-int run(){
+xinit(xuser::the_main){
     using namespace xuser;
     uxx max         = 1024 * 1024;
     uxx old         = 0;
@@ -87,5 +88,4 @@ int run(){
     }
 
     tty.write_line();
-    return 0;
-}
+};

@@ -15,7 +15,7 @@ xstruct(
     xpubf(name, asciis)
 ) $
 
-int run(){
+xinit(xuser::the_main){
     foo f;
     f.sex   = 'M';
     f.age   = 24;
@@ -24,5 +24,4 @@ int run(){
     xtypeid(foo).foreach_fields(f, [](uxx i, asciis name, auto const & value){
         xuser::tty.write_line(name, ':', value);
     });
-    return 0;
-}
+};
