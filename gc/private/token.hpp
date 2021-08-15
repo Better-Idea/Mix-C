@@ -16,30 +16,115 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_token::origin{
-    constexpr uxx shift_to_get_owners   = 1;
+    constexpr uxx shift_to_get_owners   = 0;
     constexpr uxx step                  = uxx(1 << shift_to_get_owners);
-    constexpr uxx bit_in_gc_queue       = 1 << 0;
+    constexpr uxx addition_bits         = 3;
+    constexpr uxx visited_bits          = sizeof(uxx) * 8 - addition_bits;
 
     xstruct(
         xname(token),
-        xprof(m_record, uxx)
+        xprof(m_record, uxx),
+        xpubc(m_visited, visited_bits, uxx),
+        xpubc(m_can_arrive_root, 1, uxx),
+        xpubc(m_under_release, 1, volatile uxx),
+        xpubc(m_in_queue, 1, volatile uxx) // 使用 volvatle 限制内存必须写入，在 g++-10 中， -O2 似乎优化掉了这个
     )
-        token(uxx) : m_record(step) { }
+        token(uxx) : 
+            m_record(step),
+            m_visited(0),
+            m_can_arrive_root(0),
+            m_under_release(0),
+            m_in_queue(0){
+        }
 
         constexpr uxx  this_length() const { return uxx(0); }
         constexpr void this_length(uxx) const { }
 
-        bool in_gc_queue() const {
-            return inc::atom_load(& m_record) & bit_in_gc_queue;
+    private:
+        static inline uxx   g_base = 0;
+        static inline uxx   g_top = 0;
+
+        static uxx ajust_top(){
+            // 高 3bit 不使用，避免 new_visited() 给 m_visited 赋值时溢出成 0
+            auto value  = g_top & (uxx(-1) >> addition_bits); 
+            return value;
+        }
+    public:
+        xstruct(
+            xname(free_node),
+            xprif(m_prev, free_node *),
+            xpric(m_bytes, visited_bits, uxx)
+        )
+            using final_t = free_node;
+            using free_nodep = free_node *;
+            friend token;
+
+            xpubget_priset(prev);
+            xpubget_pubset(bytes);
+        $;
+
+        using free_nodep = free_node *;
+
+        free_node * prepare_release(free_node * prev, uxx bytes){
+            auto self       = free_nodep(this);
+            self->prev(prev);
+            self->bytes(bytes);
+            return self;
         }
 
-        bool in_gc_queue(bool value) {
-            if (value){
-                return (inc::atom_fetch_or(& m_record, bit_in_gc_queue) & bit_in_gc_queue) != 0;
+        static void new_term(){
+            // TODO:处理溢出的情况
+            g_top      += g_top ? 1 : 2;
+            g_top       = ajust_top();
+            g_base      = g_top;
+        }
+
+        void visit_root(){
+            m_visited   = g_base;
+        }
+
+        uxx new_visited(){
+            if (not is_visited()){
+                m_visited  = g_base;
             }
-            else{
-                return (inc::atom_fetch_and(& m_record, ~bit_in_gc_queue) & bit_in_gc_queue) != 0;
-            }
+
+            // TODO:处理溢出的情况
+            m_visited  += 1; 
+            g_top      += g_top < m_visited;
+            g_top       = ajust_top();
+            return visited();
+        }
+
+        uxx visited(){
+            return m_visited - g_base;
+        }
+
+        bool is_visited(){
+            return m_visited >= g_base;
+        }
+
+        void can_arrive_root(bool value){
+            m_can_arrive_root = value;
+        }
+
+        bool can_arrive_root(){
+            return is_visited() and m_can_arrive_root;
+        }
+
+        bool under_release() {
+            return m_under_release;
+        }
+
+        void under_release(bool value) {
+            m_under_release = value;
+        }
+
+        bool in_gc_queue() const {
+            return m_in_queue;
+        }
+
+        void in_gc_queue(bool value) {
+            m_in_queue      = value;
         }
 
         uxx owners() const {
