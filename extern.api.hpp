@@ -6,7 +6,7 @@
 #include"concurrency/thread.hpp"
 #include"dumb/move.hpp"
 #include"gc/private/background.hpp"
-#include"utils/init_list.hpp"
+#include"macro/xinit.hpp"
 #undef  xuser
 
 #include"concurrency/private/extern.atom.hpp"
@@ -23,20 +23,13 @@
 #include"math/private/extern.ln.hpp"
 #include"math/private/extern.sqrt.hpp"
 #include"math/private/extern.trigo+.hpp"
-#include"utils/private/extern.allocator.hpp"
+#include"utils/private/extern.memory.hpp"
 
 // #include"draft/gui_seed.hpp"
 #undef  xuser
 #define xuser mixc::powerful_cat
 
-extern int run();
-
 int main(){
     xuser::init_list_execute();
-    xuser::gc_thread = xuser::thread(xdetached{
-        xuser::gc_execute();
-    });
-
-    auto state = run();
-    return state;
+    return 0;
 }
