@@ -16,7 +16,7 @@
 #include"interface/can_alloc.hpp"
 #include"macro/xexport.hpp"
 #include"memop/zeros.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #include"utils/private/adapter.bits_indicator.hpp"
 #pragma pop_macro("xuser")
 
@@ -144,8 +144,8 @@ namespace mixc::utils_bit_indicator{
          */
         bit_indicator_t(uxx total_bits) : 
             bit_indicator_t(total_bits, [](uxx length){
-                return inc::alloc<uxx>(
-                    inc::memory_size{
+                return inc::memory::alloc<uxx>(
+                    inc::memory::size{
                         sizeof(uxx) * length
                     }
                 );
@@ -163,7 +163,7 @@ namespace mixc::utils_bit_indicator{
             auto ptr   = inc::atom_swap<uxx *>(& m_bmp, nullptr);
 
             if (ptr != nullptr){
-                inc::free(ptr - the.height(), bytes);
+                inc::memory::free(ptr - the.height(), bytes);
             }
         }
 
@@ -201,8 +201,8 @@ namespace mixc::utils_bit_indicator{
         }
 
         /* 属性：动态内存部分一共包含多少个字节 */
-        xpubgetx(cost_bytes, inc::memory_size){
-            return inc::memory_size(cost_count() * sizeof(uxx));
+        xpubgetx(cost_bytes, inc::memory::size){
+            return inc::memory::size(cost_count() * sizeof(uxx));
         }
 
         /* 属性：位图可访问的总位数 */

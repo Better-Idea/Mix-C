@@ -10,13 +10,14 @@
 #include<malloc.h>
 
 namespace mixc::utils_memory{
-    inline uxx g_used_bytes;
-    inline uxx g_alive_object;
     inline uxx g_alive_pages;
+    inline thread_local uxx l_used_bytes;
+    inline thread_local uxx l_alive_object;
+    inline thread_local uxx l_alive_pages;
 
     extern voidp tiny_alloc(uxx bytes){
-        inc::atom_add(xref(g_used_bytes), bytes);
-        inc::atom_add(xref(g_alive_object), 1);
+        l_used_bytes   += bytes;
+        l_alive_object += 1;
 
         // 按 16 字节对齐
         bytes           = (bytes + 0xf) & ~0xf;
@@ -24,19 +25,23 @@ namespace mixc::utils_memory{
     }
 
     extern void tiny_free(voidp ptr, uxx bytes){
-        inc::atom_sub(xref(g_used_bytes), bytes);
-        inc::atom_sub(xref(g_alive_object), 1);
+        l_used_bytes   += bytes;
+        l_alive_object += 1;
         ::free(ptr);
     }
 }
 
-namespace mixc::utils_memory::origin{
+namespace mixc::utils_memory::origin::memory{
     extern uxx used_bytes(){
-        return inc::atom_load(xref(g_used_bytes));
+        return inc::atom_load(xref(l_used_bytes));
     }
 
     extern uxx alive_object(){
-        return inc::atom_load(xref(g_alive_object));
+        return inc::atom_load(xref(l_alive_object));
+    }
+
+    extern void handle_async_memory_event(){
+        ;
     }
 }
 #else
@@ -45,10 +50,6 @@ namespace mixc::utils_memory::origin{
 
 namespace mixc::utils_memory{
     inline thread_local inc::memory_flow mem;
-
-    inline uxx g_used_bytes;
-    inline uxx g_alive_object;
-    inline uxx g_alive_pages;
 
     extern voidp tiny_alloc(uxx bytes){
         return mem.alloc(bytes);
@@ -59,7 +60,9 @@ namespace mixc::utils_memory{
     }
 }
 
-namespace mixc::utils_memory::origin{
+namespace mixc::utils_memory::origin::memory{
+    inline uxx g_alive_pages;
+
     extern uxx used_bytes(){
         return mem.used_bytes();
     }
@@ -68,8 +71,8 @@ namespace mixc::utils_memory::origin{
         return mem.alive_object();
     }
 
-    extern uxx alive_pages(){
-        return inc::atom_load(xref(g_alive_pages));
+    extern void handle_async_memory_event(){
+        mem.handle_async_memory_event();
     }
 }
 
@@ -78,7 +81,11 @@ namespace mixc::utils_memory::origin{
 #include<malloc.h>
 #include<windows.h>
 
-namespace mixc::utils_memory::origin{
+namespace mixc::utils_memory::origin::memory{
+    extern uxx alive_pages(){
+        return inc::atom_load(xref(g_alive_pages));
+    }
+
     extern voidp malloc(uxx bytes){
         // 按 16 字节对齐
         bytes                   = (bytes + 0xf) & ~0xf;
