@@ -125,7 +125,7 @@ namespace mixc::utils_private_memory_flow{
         using tap               = origin::memory_flow *;
 
         meta_token(meta_token * owner){
-            inc::atom_store(xref(owner), owner);
+            inc::atom_store(xref(this->owner), owner);
         }
 
         void raise_change_ownership(meta_token * back_owner) {
@@ -163,13 +163,10 @@ namespace mixc::utils_private_memory_flow{
         }
 
         void push_async_core(meta_token * old_token){
-            if (xref(this->head) == this->tail) {
+            if (xref(old_token->head) == old_token->tail) {
                 return;
             }
 
-            inc::atom_fetch_add(xref(used_bytes), old_token->used_bytes);
-            inc::atom_fetch_add(xref(active_object_count), old_token->active_object_count);
-            inc::atom_fetch_add(xref(async_returned), old_token->async_returned);
             auto prev               = inc::atom_swap(xref(this->tail), old_token->tail);
             inc::atom_store(xref(prev->next), old_token->head.next);
         }
@@ -421,6 +418,7 @@ namespace mixc::utils_private_memory_flow::origin{
 
             // 只对 memory_flow 管理的内存计数
             token->alloc_counting(bytes);
+            this->async_pop_lazily();
 
             // slot 中置位位表示空闲的块
             // 选择最接近但不小于所需大小的块
@@ -469,7 +467,7 @@ namespace mixc::utils_private_memory_flow::origin{
             }
         }
 
-        void process_message(){
+        void handle_async_memory_event(){
             if (this->token == nullptr) {
                 return;
             }
