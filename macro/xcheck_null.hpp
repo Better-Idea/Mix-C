@@ -63,7 +63,7 @@ void foo(ax * arg){
 // 只要修改这个参数就可以改变链式级数
 uxx max_level = 16;
 
-int run(){
+xinit(xuser::the_main){
    auto gen_line = [](uxx level, asciis pad = " ") {
        for(uxx i = 0; i < level; i++) {
            xuser::tty.write(
@@ -92,8 +92,7 @@ int run(){
 
    xuser::tty.write_line("        return (__target_t)__\v; \\", xuser::ph::v{ max_level - 1 }.r(2, '0'));
    xuser::tty.write_line("})())");
-   return 0;
-}
+};
 */
 
 #endif

@@ -3,13 +3,12 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::macro_xassert::inc
-#include"configure/init_order.hpp"
 #include"dumb/place_holder.hpp"
 #include"macro/private/log.hpp"
 #include"macro/xexport.hpp"
-#include"macro/xref.hpp"
+#include"macro/xinit.hpp"
 #include"macro/xlink.hpp"
-#include"utils/init_list.hpp"
+#include"macro/xref.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::macro_xassert::origin{
