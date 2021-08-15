@@ -26,7 +26,7 @@
 #include"meta/has_cast.hpp"
 #include"meta/is_cxx.hpp"
 #include"meta/item_origin_of.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -125,7 +125,7 @@ namespace mixc::lang_cxx_split{
                     return buffer;
                 }
                 else{
-                    return inc::alloc<void>(inc::memory_size{bytes});
+                    return inc::memory::alloc<void>(inc::memory::size{bytes});
                 }
             };
 
@@ -133,7 +133,7 @@ namespace mixc::lang_cxx_split{
                 if (ptr == voidp(buffer)){
                     return;
                 }
-                inc::free(ptr, inc::memory_size{bytes});
+                inc::memory::free(ptr, inc::memory::size{bytes});
             };
 
             uxx length              = 1/*字符数组*/;

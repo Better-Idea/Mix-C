@@ -17,7 +17,7 @@
 #include"lang/cxx/find.hpp"
 #include"lang/cxx.hpp"
 #include"memop/copy.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -50,7 +50,7 @@ namespace mixc::lang_cxx_replace{
                     return buffer;
                 }
                 else{
-                    return inc::alloc<void>(inc::memory_size{bytes});
+                    return inc::memory::alloc<void>(inc::memory::size{bytes});
                 }
             };
 
@@ -58,7 +58,7 @@ namespace mixc::lang_cxx_replace{
                 if (ptr == voidp(buffer)){
                     return;
                 }
-                inc::free(ptr, inc::memory_size{bytes});
+                inc::memory::free(ptr, inc::memory::size{bytes});
             };
 
             the.find(old_value, compare, [&](uxx index){

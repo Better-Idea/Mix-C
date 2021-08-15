@@ -25,7 +25,7 @@
 #include"meta/more_fit.hpp"
 #include"meta_seq/tget.hpp"
 #include"meta_seq/tlist.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xusing_lang_cxx")
 #pragma pop_macro("xuser")
 
@@ -138,7 +138,7 @@ namespace mixc::lang_cxx_logger_helper{
                 return;
             }
 
-            table[i_tab += 1]           = inc::alloc<item_t>(inc::memory_size{ line_size });
+            table[i_tab += 1]           = inc::memory::alloc<item_t>(inc::memory::size{ line_size });
             table[i_tab + 1]            = nullptr;
             current                     = table[i_tab];
             end                         = current + line_size;
@@ -220,7 +220,7 @@ namespace mixc::lang_cxx_logger_helper{
                     }
                     if (sizeof(bufi) / sizeof(bufi[0]) < length){
                         need_free       = true;
-                        return inc::alloc<item_t>(inc::memory_size{ length });
+                        return inc::memory::alloc<item_t>(inc::memory::size{ length });
                     }
                     else{
                         return bufi;
@@ -236,7 +236,7 @@ namespace mixc::lang_cxx_logger_helper{
                     push('\"', one_char);
                 }
                 if (push(asciis(str), str.length()); need_free){
-                    inc::free(asciis(str), inc::memory_size{ str.length() });
+                    inc::memory::free(asciis(str), inc::memory::size{ str.length() });
                 }
                 if (items->is_string()) {
                     push('\"', one_char);
@@ -263,7 +263,7 @@ namespace mixc::lang_cxx_logger_helper{
             }
 
             if (i != 0){
-                inc::free(table[i], inc::memory_size{last_size});
+                inc::memory::free(table[i], inc::memory::size{last_size});
             }
         }
         return cxx{ result, total_length };

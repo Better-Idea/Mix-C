@@ -31,7 +31,7 @@ namespace mixc::lang_cxx_private_lut_base64x::origin{
 #define xuser mixc::powerful_cat
 #include"io/tty.hpp"
 
-int run(){
+xinit(xuser::the_main){
     for(u08 i = '\0'; i < 255; i++){
         if ('A' <= i and i <= 'Z'){
             xuser::tty.write("\v, ", xuser::ph::zx{u08(i - 'A')});
@@ -53,8 +53,7 @@ int run(){
         }
     }
     xuser::tty.write_line("0xff, ");
-    return 0;
-}
+};
 */
 
 namespace mixc::lang_cxx_private_lut_base64x{
