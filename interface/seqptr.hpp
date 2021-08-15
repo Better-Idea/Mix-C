@@ -4,7 +4,7 @@
 #undef  xuser
 #define xuser mixc::interface_private_seqptr::inc
 #include"define/base_type.hpp"
-#include"docker/private/adapter.array_access.hpp"
+#include"docker/private/adapter_array_access.hpp"
 #include"interface/initializer_list.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xstruct.hpp"
