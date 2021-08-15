@@ -14,7 +14,7 @@
 #include"macro/xref.hpp"
 #include"macro/xvolatile.hpp"
 #include"memop/cast.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 
 #if xis_windows
 #include<windows.h>
@@ -64,7 +64,7 @@ namespace mixc::concurrency_thread{
                 CloseHandle(lambda.semaphore_for_suspend());
             #else
                 pthread_mutex_destroy((pthread_mutex_t *)lambda.semaphore_for_suspend());
-                inc::free(lambda.semaphore_for_suspend(), xmemory_sizeof(pthread_mutex_t));
+                inc::memory::free(lambda.semaphore_for_suspend(), xsizeof(pthread_mutex_t));
             #endif
 
             lambda.release();
@@ -146,7 +146,7 @@ namespace mixc::concurrency_thread::origin{
             auto conf               = pthread_attr_t{};
             auto handler            = pthread_t{};
             auto mutex_attr         = pthread_mutexattr_t{};
-            auto mutex              = inc::alloc<pthread_mutex_t>();
+            auto mutex              = inc::memory::alloc<pthread_mutex_t>();
             auto arg                = inc::cast<voidp>(lambda);
 
             if (mutex == nullptr){
@@ -164,7 +164,7 @@ namespace mixc::concurrency_thread::origin{
             // fail
             if (pthread_create(& handler, & conf, & thread_entry, arg) != 0){
                 pthread_mutex_destroy(mutex);
-                inc::free(mutex, xmemory_sizeof(pthread_mutex_t));
+                inc::memory::free(mutex, xsizeof(pthread_mutex_t));
                 return;
             }
             else{
@@ -200,7 +200,7 @@ namespace mixc::concurrency_thread::origin{
             #elif xis_linux
                 pthread_join(pthread_t(h.handler()), nullptr);
                 pthread_mutex_destroy((pthread_mutex_t *)h.semaphore_for_suspend());
-                inc::free(h.semaphore_for_suspend(), xmemory_sizeof(pthread_mutex_t));
+                inc::memory::free(h.semaphore_for_suspend(), xsizeof(pthread_mutex_t));
             #endif
 
             h.release();

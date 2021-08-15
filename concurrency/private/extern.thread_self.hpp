@@ -1,13 +1,12 @@
 #undef  xuser
 #define xuser mixc::concurrency_thread_self::inc
 #include"configure/platform.hpp"
-#include"configure/init_order.hpp"
+#include"configure/switch.hpp"
 #include"concurrency/thread.hpp"
 #include"concurrency/thread_self.hpp"
-#include"configure/switch.hpp"
 #include"gc/private/background.hpp"
+#include"macro/xinit.hpp"
 #include"macro/xref.hpp"
-#include"utils/init_list.hpp"
 
 #if xis_windows
 #include<windows.h>
@@ -24,7 +23,7 @@ namespace mixc::concurrency_thread{
     #endif
 
     #if xis_linux
-    extern void init_mutex(pthread_mutex_t * mutex);
+        extern void init_mutex(pthread_mutex_t * mutex);
     #endif
 }
 
