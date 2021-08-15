@@ -90,6 +90,8 @@ namespace mixc::utils_memory::origin::memory{
 
     extern uxx used_bytes();
     extern uxx alive_object();
+    extern uxx alive_pages();
+    extern void handle_async_memory_event();
 }
 
 #define xsizeof(...)       \
