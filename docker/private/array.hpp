@@ -11,7 +11,7 @@
 #undef  xuser
 #define xuser mixc::docker_array::inc
 #include"concurrency/lock/atom_swap.hpp"
-#include"docker/private/adapter.array_access.hpp"
+#include"docker/private/adapter_array_access.hpp"
 #include"define/base_type.hpp"
 #include"dumb/disable_copy.hpp"
 #include"interface/can_alloc.hpp"
@@ -27,7 +27,7 @@
 #include"meta/remove_ptr.hpp"
 #include"meta/remove_ref.hpp"
 #include"meta_seq/vlist.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_array{
@@ -166,7 +166,7 @@ namespace mixc::docker_array{
             inc::has_cast<item_initial_invokex, initial_invoke>
         )
         array_t(::length capacity, initial_invoke const & initial):
-            array_t(capacity, inc::default_alloc<void>, initial){
+            array_t(capacity, inc::memory::default_alloc<void>, initial){
             the.need_free(true);
         }
 
@@ -196,7 +196,7 @@ namespace mixc::docker_array{
         requires(... and inc::has_cast<item_t, args_t>)
         array_t(args_t const & ... list) : 
             m_items(
-                create(::length{ sizeof...(args_t) }, inc::default_alloc<void>)
+                create(::length{ sizeof...(args_t) }, inc::memory::default_alloc<void>)
             ){
 
             struct item_ref{
@@ -216,14 +216,14 @@ namespace mixc::docker_array{
 
             auto   old_ptr  = empty_array_ptr();
             auto & old      = inc::cast<the_t>(old_ptr);
-            old.m_items        = inc::atom_swap(& m_items, old.m_items);
+            old.m_items     = inc::atom_swap(& m_items, old.m_items);
 
             if (not old.need_free()){
                 return;
             }
 
-            inc::free(
-                old.header(), inc::memory_size{
+            inc::memory::free(
+                old.header(), inc::memory::size{
                     sizeof(uxx) + old.length() * sizeof(item_t)
                 }
             );

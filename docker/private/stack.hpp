@@ -14,7 +14,7 @@
 #include"macro/xitr_foreach.hpp"
 #include"macro/xstruct.hpp"
 #include"meta/is_attached_lock.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_stack{

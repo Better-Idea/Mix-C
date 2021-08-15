@@ -7,7 +7,7 @@
 #include"concurrency/lock/atom_swap.hpp"
 #include"configure/platform.hpp"
 #include"define/base_type.hpp"
-#include"docker/private/adapter.array_access.hpp"
+#include"docker/private/adapter_array_access.hpp"
 #include"dumb/disable_copy.hpp"
 #include"dumb/mirror.hpp"
 #include"dumb/move.hpp"
@@ -16,7 +16,7 @@
 #include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
 #include"memop/swap.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #include"utils/bits_indexer.hpp"
 
 #if xis_msvc_native
@@ -67,8 +67,8 @@ namespace mixc::docker_btree{
 
             for(uxx i = i_group; i <= i_group_max; i++){
                 if (groups[i] == nullptr){
-                    groups[i]               = inc::alloc_with_initial<item_node>(
-                        inc::memory_size{sizeof(item_node)}
+                    groups[i]               = inc::memory::alloc_with_initial<item_node>(
+                        inc::memory::size{sizeof(item_node)}
                     );
                     group                   = groups[i];
                     i                       = group_max;    // 当前组为空时，那么就无需再往后挪元素了
@@ -119,7 +119,7 @@ namespace mixc::docker_btree{
             }
 
             if (free_last){
-                inc::free(groups[i_group_max], inc::memory_size{
+                inc::memory::free(groups[i_group_max], inc::memory::size{
                     sizeof(item_node)
                 });
                 groups[i_group_max]         = nullptr;
@@ -136,8 +136,8 @@ namespace mixc::docker_btree{
 
         item_group * split(){
             // brother 节点用于插入到当前节点的前面
-            item_group<item_t> * brother    = inc::alloc_with_initial<item_group>(
-                inc::memory_size{sizeof(item_group<item_t>)}
+            item_group<item_t> * brother    = inc::memory::alloc_with_initial<item_group>(
+                inc::memory::size{sizeof(item_group<item_t>)}
             );
 
             // group_max * length 为存满时的元素个数
@@ -169,7 +169,7 @@ namespace mixc::docker_btree{
             }
 
             for(uxx i = 0; i < page; i++){
-                inc::free(groups[i], inc::memory_size{
+                inc::memory::free(groups[i], inc::memory::size{
                     sizeof(item_node)
                 });
                 groups[i]                   = nullptr;
@@ -228,19 +228,19 @@ namespace mixc::docker_btree{
         }
 
         static item_node * alloc_item_node(){
-            // TODO: inc::alloc_with_initial 暂时还不支持超过 16 字节的对齐内存分配
+            // TODO: inc::memory::alloc_with_initial 暂时还不支持超过 16 字节的对齐内存分配
             // 目前该接口使用 AVX 在 5M 数据随机插入性能 大约有 7% 的性能差距
             // 测试       ：5M 数据随机插入 | 读取
             // 32Byte 对齐：提升约 7%       | 提升约 7%
-            return inc::alloc_with_initial<item_node>(
-                inc::memory_size{sizeof(item_node)}
+            return inc::memory::alloc_with_initial<item_node>(
+                inc::memory::size{sizeof(item_node)}
             );
             // return new item_node;
         }
 
         static path_node * alloc_path_node(){
-            return inc::alloc_with_initial<path_node>(
-                inc::memory_size{sizeof(path_node)}
+            return inc::memory::alloc_with_initial<path_node>(
+                inc::memory::size{sizeof(path_node)}
             );
             // return new path_node;
         }
@@ -275,7 +275,7 @@ namespace mixc::docker_btree{
                     arrive_end              = (cur == nullptr);
                 }
                 if (arrive_end){
-                    inc::free((path_node *)path_ptr[0]); // 要释放的大小为 sizeof(path_node)
+                    inc::memory::free((path_node *)path_ptr[0]); // 要释放的大小为 sizeof(path_node)
                     i_path_ptr             -= 1;
                     path_ptr               -= 1;
                     continue;
@@ -293,7 +293,7 @@ namespace mixc::docker_btree{
                 else{
                     auto vals               = unmark(cur);
                     vals->clear();
-                    inc::free(vals);
+                    inc::memory::free(vals);
                 }
             }
         }
@@ -492,11 +492,11 @@ namespace mixc::docker_btree{
                 if (once){
                     once                    = false;
                     vals                    = unmark(parent->items[iofs]);
-                    inc::free(vals);
+                    inc::memory::free(vals);
                     parent->items[iofs]     = nullptr;
                 }
                 else{
-                    inc::free(parent->bottom[iofs]);
+                    inc::memory::free(parent->bottom[iofs]);
                     parent->bottom[iofs]    = nullptr;
                 }
 
@@ -512,7 +512,7 @@ namespace mixc::docker_btree{
             }
 
             if (length() == 0){
-                inc::free(root);
+                inc::memory::free(root);
                 root                        = null();
             }
         }

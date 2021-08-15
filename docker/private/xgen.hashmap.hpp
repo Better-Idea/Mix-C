@@ -49,7 +49,7 @@ xstruct(
                 return hashmap_set_result_t::override;
             }
             if (cur->next == nullptr){
-                cur->next   = inc::alloc_with_initial<the_t>(key xarg_val, inc::construction_t::execute);
+                cur->next   = inc::memory::alloc_with_initial<the_t>(key xarg_val, inc::construction_t::execute);
                 return hashmap_set_result_t::success;
             }
         }
@@ -122,7 +122,7 @@ xstruct(
             #endif
 
             next      = next->next;
-            inc::free(temp);
+            inc::memory::free(temp);
         }
 
         key_t * k = the.key.operator->();
@@ -250,7 +250,7 @@ public:
         inc::transmitter<xarg_item_t> r = (xarg_item_t &)item.xarg_item;
 
         if (can_relase){
-            inc::free_with_destroy(xref(item));
+            inc::memory::free_with_destroy(xref(item));
         }
         if (node.is_empty()){
             m_bmp.reset(index);
@@ -365,14 +365,14 @@ private:
             auto & new_head    = map.m_nodes[index];
 
             // 旧的 hashmap 首元不可以当作普通节点一样挂到新的 hashmap 中
-            // 因为它是数组中的一个元素，而不是通过 inc::alloc 分配得到的独立节点
+            // 因为它是数组中的一个元素，而不是通过 inc::memory::alloc 分配得到的独立节点
             if (new_head.is_empty()){
                 new_head       = old_head[0];
                 new_head.next  = nullptr;
                 map.m_bmp.set(index);
             }
             // 只有首元
-            else if (auto next = inc::alloc_with_initial<node_t>(*old_head); new_head.next == nullptr){
+            else if (auto next = inc::memory::alloc_with_initial<node_t>(*old_head); new_head.next == nullptr){
                 new_head.next  = next;
                 next->next     = nullptr;
             }
@@ -392,7 +392,7 @@ private:
                     node       = cur[0];
                     node.next  = nullptr;
                     map.m_bmp.set(index);
-                    inc::free(cur);
+                    inc::memory::free(cur);
                 }
                 else if (node.next == nullptr){
                     node.next  = cur;
@@ -413,7 +413,7 @@ private:
     }
 
     void free() {
-        inc::free(m_nodes, inc::memory_size(
+        inc::memory::free(m_nodes, inc::memory::size(
             m_lines * sizeof(node_t) + m_bmp.cost_bytes()
         ));
         m_nodes = nullptr;
@@ -424,11 +424,11 @@ private:
 
         xnew (bmp) inc::bits_indicator<>(node_count,
             [&](uxx length) -> uxx * {
-                auto bytes = inc::memory_size(
+                auto bytes = inc::memory::size(
                     node_count * sizeof(node_t) + sizeof(uxx) * length
                 );
 
-                nodes = inc::alloc<node_t>(bytes);
+                nodes = inc::memory::alloc<node_t>(bytes);
 
                 for (uxx i = 0; i < node_count; i++){
                     xnew (xref(nodes[i])) node_t();

@@ -4,11 +4,11 @@
 #undef  xuser
 #define xuser mixc::docker_page_array::inc
 #include"algo/mmu.hpp"
-#include"docker/private/adapter.array_access.hpp"
+#include"docker/private/adapter_array_access.hpp"
 #include"interface/ranger.hpp"
 #include"macro/xcheck_binary_aligned.hpp"
 #include"meta/is_same.hpp"
-#include"utils/allocator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_page_array{

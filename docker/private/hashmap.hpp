@@ -21,8 +21,8 @@
 #include"memop/swap.hpp"
 #include"meta/has_cmp_equal.hpp"
 #include"meta/remove_ptr.hpp"
-#include"utils/allocator.hpp"
 #include"utils/bits_indicator.hpp"
+#include"utils/memory.hpp"
 #pragma pop_macro("xuser")
 
 namespace mixc::docker_hashmap{
