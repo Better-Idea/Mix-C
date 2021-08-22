@@ -8,6 +8,7 @@
 #include"utils/memory.hpp"
 #include"utils/counter.hpp"
 #include"mixc.hpp"
+#include"utils/tick.hpp"
 
 namespace xuser{
     struct ax;
@@ -72,7 +73,7 @@ namespace xuser{
 inline void wait(){
     using namespace xuser;
     //thread_self::gc_sync();     // 等待垃圾收集完成
-    //thread_self::sleep(256);     // 等待内存释放
+    //thread_self::sleep(256);    // 等待内存释放
 }
 
 #define xtest_memory_lack   1
@@ -206,46 +207,44 @@ uxx times = 0;
 xinit(xuser::the_main){
     using namespace xuser;
 
-    for(volatile int i = 0; i < 100000; i = i + 1){
-        ;
-    }
-
     #if xtest_memory_lack
     xhint("go", memory::alive_object(), memory::used_bytes());
+    auto max_flow = 6;
+    auto max_per_term = 128'000'000;
 
     auto invoke = [&](){
-        for(uxx i = 0; i < 1'000'000; i++){
+        for(uxx i = 0; i < max_per_term; i++){
             closure();
             atom_fetch_add(xref(times), 1);
         }
     };
 
-    thread t0(xdetached{
-        invoke();
-    });
 
-    thread t1(xdetached{
-        invoke();
-    });
-
-    thread t2(xdetached{
-        invoke();
-    });
+    for(uxx i = 0; i < max_flow; i++){
+        thread go(xdetached{
+            invoke();
+        });
+    }
     
     #else
 
     xhint(memory::alive_object(), memory::used_bytes(), atom_load(xref(times)));
 
-    //closure();
+    // closure();
     for (uxx i = 0; i < 1; i++) {
         closure();
         atom_add(xref(times), 1);
     }
-    
+
     #endif
 
-    while(true) {
-        xhint(memory::alive_object(), memory::used_bytes(), memory::alive_pages(), atom_load(xref(times)));
+    uxx last = 0;
+    uxx step = 0;
+
+    while(max_flow * max_per_term != times) {
+        step = atom_load(xref(times)) - last;
+        last = atom_load(xref(times));
+        xhint(step, memory::alive_pages(), atom_load(xref(times)));
         thread_self::sleep(1000);
     }
 };
