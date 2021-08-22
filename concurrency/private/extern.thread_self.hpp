@@ -38,7 +38,12 @@ namespace mixc::concurrency_thread_self::origin{
     xinit(inc::the_concurrency_thread_self){
         #if xis_windows
             // 用 mutex 无法阻塞主线程
-            h_for_suspend   = CreateSemaphoreA(nullptr, 0, 1, nullptr);
+            h_for_suspend   = CreateSemaphoreA(
+                nullptr, 
+                xthread_limit - 1/*初始值*/, 
+                xthread_limit/*最大值*/, 
+                nullptr
+            );
         #elif xis_linux
             mixc::concurrency_thread::init_mutex(& h_for_suspend);
         #else

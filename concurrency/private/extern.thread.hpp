@@ -16,6 +16,9 @@
 #include"memop/cast.hpp"
 #include"utils/memory.hpp"
 
+#include"concurrency/lock/atom_fetch_add.hpp"
+#include"mixc.hpp"
+
 #if xis_windows
 #include<windows.h>
 #define xapi            WINAPI
@@ -107,29 +110,38 @@ namespace mixc::concurrency_thread::origin{
             if (is_detached) {
                 ; // pass
             }
+            // 这里暂时只要初值为 0，最大值为 1 就好了
             else if (lambda.semaphore_for_join(CreateSemaphoreA(nullptr/*不带名称*/, 0/*初始值*/, 1/*最大值*/, nullptr));
                 lambda.semaphore_for_join() == nullptr){
                 return;
             }
 
-            if (lambda.semaphore_for_suspend(CreateSemaphoreA(nullptr/*不带名称*/, 0/*初始值*/, 1/*最大值*/, nullptr));
+            // 支持多次唤醒
+            if (lambda.semaphore_for_suspend(
+                    CreateSemaphoreA(
+                        nullptr/*不带名称*/, 
+                        xthread_limit - 1/*初始值*/, 
+                        xthread_limit/*最大值*/, 
+                        nullptr
+                    )
+                );
                 lambda.semaphore_for_suspend() == nullptr){
                 CloseHandle(lambda.semaphore_for_join());
                 return;
             }
 
-            lambda.handler(
-                CreateThread(
-                    nullptr,
-                    aligned_stack_size, 
-                    & thread_entry, 
-                    inc::cast<voidp>(lambda), 
-                    CREATE_SUSPENDED/*不立即运行，等待句柄设置完全*/, 
-                    nullptr
-                )
-            );
+            if (lambda.handler(
+                    CreateThread(
+                        nullptr,
+                        aligned_stack_size, 
+                        & thread_entry, 
+                        inc::cast<voidp>(lambda), 
+                        CREATE_SUSPENDED/*不立即运行，等待句柄设置完全*/, 
+                        nullptr
+                    )
+                );
+                lambda.handler() == nullptr){
 
-            if (lambda.handler() == nullptr){
                 if (not is_detached){ // 顺带释放信号量句柄
                     CloseHandle(lambda.semaphore_for_join());
                 }
@@ -143,6 +155,7 @@ namespace mixc::concurrency_thread::origin{
             }
 
         #elif xis_linux
+            // TODO thread_self::suspend 使用整数信号量 ====================
             auto conf               = pthread_attr_t{};
             auto handler            = pthread_t{};
             auto mutex_attr         = pthread_mutexattr_t{};
