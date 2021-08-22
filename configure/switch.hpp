@@ -6,9 +6,10 @@
 #define xuse_xdebug_fail            1
 #define xuse_xdebug_short_path      1
 
-#define xuse_libc_malloc            0
+#define xuse_mixc_allocator         1
 
-#define xgc_queue_threshold         (xgc_queue_depth / 64)
+// 要求按 2 进制对齐
+#define xgc_queue_threshold         (xgc_filter_queue_depth / 64)
 
 // 在 xon 后面的枚举是启用 xdebug 打印的
 #define xon         xlink2(__enable, __COUNTER__)       = 0
@@ -25,7 +26,7 @@ enum : int{
         im_docker_hashmap_set,
         im_docker_hashmap_get,
 
-    // utils/tiny_allocator
+    // utils/memory_flow
     xon,
     xoff,
         im_utils_tiny_allocator_free,
