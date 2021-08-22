@@ -2,6 +2,7 @@
 #include"macro/xdebug+.hpp"
 #include"macro/xexport.hpp"
 #include"macro/xhint.hpp"
+#include"macro/xinit.hpp"
 #include"macro/xinterface.hpp"
 #include"macro/xref.hpp"
 #include"macro/xstruct.hpp"
