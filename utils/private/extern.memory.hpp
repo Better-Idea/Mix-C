@@ -6,46 +6,7 @@
 #include"concurrency/lock/atom_load.hpp"
 #include"macro/xref.hpp"
 
-#if xuse_libc_malloc
-#include<malloc.h>
-
-namespace mixc::utils_memory{
-    inline uxx g_alive_pages;
-    inline thread_local uxx l_used_bytes;
-    inline thread_local uxx l_alive_object;
-    inline thread_local uxx l_alive_pages;
-
-    extern voidp tiny_alloc(uxx bytes){
-        l_used_bytes   += bytes;
-        l_alive_object += 1;
-
-        // 按 16 字节对齐
-        bytes           = (bytes + 0xf) & ~0xf;
-        return ::malloc(bytes);
-    }
-
-    extern void tiny_free(voidp ptr, uxx bytes){
-        l_used_bytes   += bytes;
-        l_alive_object += 1;
-        ::free(ptr);
-    }
-}
-
-namespace mixc::utils_memory::origin::memory{
-    extern uxx used_bytes(){
-        return inc::atom_load(xref(l_used_bytes));
-    }
-
-    extern uxx alive_object(){
-        return inc::atom_load(xref(l_alive_object));
-    }
-
-    extern void handle_async_memory_event(){
-        ;
-    }
-}
-#else
-
+#if xuse_mixc_allocator
 #include"utils/private/memory_flow.hpp"
 
 namespace mixc::utils_memory{
@@ -70,16 +31,46 @@ namespace mixc::utils_memory::origin::memory{
     extern uxx alive_object(){
         return mem.alive_object();
     }
+}
 
-    extern void handle_async_memory_event(){
-        mem.handle_async_memory_event();
+#else
+
+#include<malloc.h>
+
+namespace mixc::utils_memory{
+    inline uxx g_alive_pages;
+    inline thread_local uxx l_used_bytes;
+    inline thread_local uxx l_alive_object;
+    inline thread_local uxx l_alive_pages;
+
+    extern voidp tiny_alloc(uxx bytes){
+        // 按 16 字节对齐
+        l_used_bytes   += (bytes);
+        l_alive_object += 1;
+        bytes           = (bytes + 0xf) & ~0xf;
+        return ::malloc(bytes);
+    }
+
+    extern void tiny_free(voidp ptr, uxx bytes){
+        l_used_bytes   -= (bytes);
+        l_alive_object -= 1;
+        ::free(ptr);
+    }
+}
+
+namespace mixc::utils_memory::origin::memory{
+    extern uxx used_bytes(){
+        return l_used_bytes;
+    }
+
+    extern uxx alive_object(){
+        return l_alive_object;
     }
 }
 
 #endif
 
 #include<malloc.h>
-#include<windows.h>
 
 namespace mixc::utils_memory::origin::memory{
     extern uxx alive_pages(){
