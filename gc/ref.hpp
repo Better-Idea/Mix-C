@@ -3,6 +3,7 @@
 #pragma push_macro("xuser")
 #undef  xuser
 #define xuser mixc::gc_ref::inc
+#include"concurrency/lock/atom_store.hpp"
 #include"concurrency/lock/atom_swap.hpp"
 #include"configure/switch.hpp"
 #include"define/base_type.hpp"
@@ -178,7 +179,8 @@ namespace mixc::gc_ref{
 
         template<class initial_invoke_t, class ... args_t>
         void init(::length length, init_by<args_t...> const & init_attr, initial_invoke_t const & init_ary) {
-            mem                     = the_t::alloc(length, init_attr);
+            auto value              = the_t::alloc(length, init_attr);
+            inc::atom_store(xref(mem), value);
 
             for(uxx i = 0; i < length; i++) {
                 if constexpr (inc::has_cast<item_initial_invoke, initial_invoke_t>){
@@ -201,7 +203,8 @@ namespace mixc::gc_ref{
                 item_ref(converted_item_t const & value) : value(value){}
             } items[] = {first, rest...};
 
-            mem                     = the_t::alloc(1 + sizeof...(rest), init_attr);
+            auto value              = the_t::alloc(1 + sizeof...(rest), init_attr);
+            inc::atom_store(xref(mem), value);
 
             for(uxx i = 0, count = 1 + sizeof...(rest); i < count; i++) {
                 xnew(mem->item_ptr(i)) converted_item_t(items[i].value);
@@ -211,7 +214,8 @@ namespace mixc::gc_ref{
         template<class ... args_t>
         requires(can_init<attribute_t, init_by<args_t...>> == true)
         void init_ptr(init_by<args_t...> const & init) {
-            mem                     = the_t::alloc(::length(0), init);
+            auto value              = the_t::alloc(::length(0), init);
+            inc::atom_store(xref(mem), value);
         }
 
         template<class guide_t, bool need_gc_v>
@@ -335,7 +339,6 @@ namespace mixc::gc_ref{
             // 表示[内析构]直接执行而不推送到自身的 gc_que 队列中
             // 这么做保证了释放的顺序，同时避免了 gc_que 存满时的死锁
             if (not inc::l_in_release){
-                inc::memory::handle_async_memory_event();
                 gc_push(ptr, & the_t::release<guide, need_gc>);
                 return thex;
             }
@@ -472,7 +475,7 @@ namespace mixc::gc_ref{
             // 避免在对下一个和 mem 指向相同元素 gc 的时候，访问了释放的内存
             auto length     = the_t::real(mem->this_length());
             auto bytes      = the_t::size(length);
-            g_free_list     = mem->prepare_release(g_free_list, bytes);
+            g_free_list     = xref(free_nodep(mem)->prev(g_free_list).bytes(bytes));
         }
     $
 
