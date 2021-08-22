@@ -8,6 +8,7 @@
 #include"concurrency/lock/atom_fetch_or.hpp"
 #include"concurrency/lock/atom_load.hpp"
 #include"concurrency/lock/atom_sub.hpp"
+#include"concurrency/lock/atom_store.hpp"
 #include"define/base_type.hpp"
 #include"dumb/struct_type.hpp"
 #include"macro/xexport.hpp"
@@ -16,25 +17,28 @@
 #pragma pop_macro("xuser")
 
 namespace mixc::gc_private_token::origin{
-    constexpr uxx shift_to_get_owners   = 0;
-    constexpr uxx step                  = uxx(1 << shift_to_get_owners);
-    constexpr uxx addition_bits         = 3;
-    constexpr uxx visited_bits          = sizeof(uxx) * 8 - addition_bits;
+    constexpr uxx shift_to_get_owners       = (0);
+    constexpr uxx step                      = (uxx(1) << shift_to_get_owners);
+    constexpr uxx addition_bits             = (3);
+    constexpr uxx visited_bits              = (sizeof(uxx) * 8 - addition_bits);
+    constexpr uxx mask_to_get_addtion_bits  = (uxx(1) << addition_bits) - 1;
 
     xstruct(
         xname(token),
         xprof(m_record, uxx),
-        xpubc(m_visited, visited_bits, uxx),
-        xpubc(m_can_arrive_root, 1, uxx),
+        xpubc(m_can_arrive_root, 1, volatile uxx),
         xpubc(m_under_release, 1, volatile uxx),
-        xpubc(m_in_queue, 1, volatile uxx) // 使用 volvatle 限制内存必须写入，在 g++-10 中， -O2 似乎优化掉了这个
+        xpubc(m_in_queue, 1, volatile uxx), // 使用 volvatle 限制内存必须写入，在 g++-10 中， -O2 似乎优化掉了这个
+        xpubc(m_visited, visited_bits, uxx)
     )
         token(uxx) : 
             m_record(step),
-            m_visited(0),
             m_can_arrive_root(0),
             m_under_release(0),
-            m_in_queue(0){
+            m_in_queue(0),
+            m_visited(0){
+            inc::atom_store(xref(m_record), step);
+            inc::atom_store(xref(m_record) + 1, 0);
         }
 
         constexpr uxx  this_length() const { return uxx(0); }
@@ -51,26 +55,17 @@ namespace mixc::gc_private_token::origin{
         }
     public:
         xstruct(
-            xname(free_node),
+            xname(free_node), // 该结构内存布局和 token 保持一致
             xprif(m_prev, free_node *),
+            xpric(m_reserved, addition_bits, uxx),
             xpric(m_bytes, visited_bits, uxx)
         )
-            using final_t = free_node;
-            using free_nodep = free_node *;
-            friend token;
-
-            xpubget_priset(prev);
+            using final_t       = free_node;
+            xpubget_pubset(prev);
             xpubget_pubset(bytes);
         $;
 
         using free_nodep = free_node *;
-
-        free_node * prepare_release(free_node * prev, uxx bytes){
-            auto self       = free_nodep(this);
-            self->prev(prev);
-            self->bytes(bytes);
-            return self;
-        }
 
         static void new_term(){
             // TODO:处理溢出的情况
