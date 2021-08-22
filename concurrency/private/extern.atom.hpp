@@ -59,4 +59,24 @@
 #define xa_addition
 #include"concurrency/private/xgen.atomop.hpp"
 
+#include<emmintrin.h>
+
+namespace mixc::concurrency_lock_cache_load::origin{
+    extern void cache_load(){
+        _mm_lfence();
+    }
+}
+
+namespace mixc::concurrency_lock_cache_store::origin{
+    extern void cache_store(){
+        _mm_sfence();
+    }
+}
+
+namespace mixc::concurrency_lock_cache_exchange::origin{
+    extern void cache_exchange(){
+        _mm_mfence();
+    }
+}
+
 #endif
