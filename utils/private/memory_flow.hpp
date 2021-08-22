@@ -109,6 +109,7 @@ namespace mixc::utils_private_memory_flow{
     using indicator_t = inc::bits_indicator<scale>;
 
     struct meta_token;
+    struct page_header;
     struct base_info{
         uxx             i_enter{};
         uxx             i_exit{};
@@ -120,7 +121,9 @@ namespace mixc::utils_private_memory_flow{
         uxx             async_returned{};
     };
 
-    struct page_header;
+    inline inc::thread      g_mem_thread;
+    inline meta_token     * g_back;
+
     struct meta_token : private base_info{
         using tap               = origin::memory_flow *;
 
@@ -136,6 +139,7 @@ namespace mixc::utils_private_memory_flow{
                 // 等待早于该线程的其他线程完成推送任务
                 if (inc::atom_load(xref(i_exit)) == current){
                     inc::atom_store(xref(owner), back_owner);   // 先设置 owner
+                    g_mem_thread.resume();
                     back_owner->push_async_core(this);
                     inc::atom_fetch_xor(xref(i_enter), 1);      // 后清除 i_enter bit0
                     break;
@@ -158,7 +162,10 @@ namespace mixc::utils_private_memory_flow{
             }
 
             auto token              = inc::atom_load(xref(owner));
-            token->push_async_core(mem, bytes);
+            
+            if (token->push_async_core(mem, bytes) == 128 and token == g_back){
+                g_mem_thread.resume();
+            }
             inc::atom_fetch_add(xref(i_exit), 2);
         }
 
@@ -171,14 +178,14 @@ namespace mixc::utils_private_memory_flow{
             inc::atom_store(xref(prev->next), old_token->head.next);
         }
 
-        void push_async_core(voidp mem, uxx bytes) {
+        uxx push_async_core(voidp mem, uxx bytes) {
             auto self               = node_freep(mem);
             auto prev               = node_freep(nullptr);
             inc::atom_store(xref(self->next), nullptr);
             inc::atom_store(xref(self->bytes), bytes);
             prev                    = inc::atom_swap(xref(this->tail), self);
             inc::atom_store(xref(prev->next), self);
-            inc::atom_fetch_add(xref(async_returned), 1);
+            return inc::atom_fetch_add(xref(async_returned), 1);
         }
 
         void alloc_counting(uxx bytes){
@@ -361,8 +368,6 @@ namespace mixc::utils_private_memory_flow{
 namespace mixc::utils_private_memory_flow::origin{
     struct memory_flow{
     private:
-        static inline
-        meta_token * back;
         meta_token * token;
 
         friend void mem_execute();
@@ -383,7 +388,7 @@ namespace mixc::utils_private_memory_flow::origin{
                 });
             }
             else{
-                token->raise_change_ownership(inc::atom_load(xref(back)));
+                token->raise_change_ownership(g_back);
             }
         }
 
@@ -659,26 +664,22 @@ namespace mixc::utils_private_memory_flow::origin{
     };
 
     inline void mem_execute(){
-        // 只使用其中一部分
-        auto && info    = base_info{};
-        auto    meta    = xnew(& info) meta_token((meta_token *)& info);
-        inc::atom_store(xref(memory_flow::back), meta);
-
         while(true){
-            memory_flow::back->handler_async_returned([](voidp ptr, uxx bytes){
+            inc::thread_self::suspend(64);
+            g_back->handler_async_returned([](voidp ptr, uxx bytes){
                 auto   page     = memory_flow::get_page_header_by(ptr);
                 auto   token    = inc::atom_load(xref(page->token));
                 auto & mem      = inc::cast<memory_flow>(token);
                 mem.free_core(ptr, bytes);
             });
-            inc::thread_self::sleep(1);
         }
     }
 
-    inline inc::thread      mem_thread;
-
     xinit(inc::the_mem){
-        mem_thread = inc::thread(xdetached{
+        static meta_token info{ & info };
+        inc::atom_store(xref(g_back), & info);
+
+        g_mem_thread = inc::thread(xdetached{
             mem_execute();
         });
     };
