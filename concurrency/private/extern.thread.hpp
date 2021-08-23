@@ -120,7 +120,7 @@ namespace mixc::concurrency_thread::origin{
             if (lambda.semaphore_for_suspend(
                     CreateSemaphoreA(
                         nullptr/*不带名称*/, 
-                        xthread_limit - 1/*初始值*/, 
+                        0/*初始值*/, 
                         xthread_limit/*最大值*/, 
                         nullptr
                     )

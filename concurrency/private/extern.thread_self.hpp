@@ -40,7 +40,7 @@ namespace mixc::concurrency_thread_self::origin{
             // 用 mutex 无法阻塞主线程
             h_for_suspend   = CreateSemaphoreA(
                 nullptr, 
-                xthread_limit - 1/*初始值*/, 
+                0/*初始值*/, 
                 xthread_limit/*最大值*/, 
                 nullptr
             );
