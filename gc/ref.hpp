@@ -127,13 +127,13 @@ namespace mixc::gc_ref{
 
             // 如果数组元素 item_t 属于 guide_t 类型集合，那么就遍历数组元素
             if constexpr (tin<guide_t, item_t>){
-                can_arrive_root     = tuple<void>::template routing<guide_t>(the, the.length());
+                can_arrive_root    |= tuple<void>::template routing<guide_t>(the, the.length());
             }
 
             // 如果 attribute_t 属于 guide_t 类型集合，就遍历该对象的字段
             if constexpr (tin<guide_t, attribute_t>){
                 attribute_t * attr  = ptr; // 里氏转换
-                can_arrive_root     = tuplep(attr)->template routing<guide_t>();
+                can_arrive_root    |= tuplep(attr)->template routing<guide_t>();
             }
 
             if (can_arrive_root){
