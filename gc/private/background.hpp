@@ -244,12 +244,10 @@ namespace mixc::gc_private_background::origin{
                 auto current    = free_nodep{};
 
                 // 如果遇到退出标志，可以立即退出，因为纯内存释放操作可以不用在系统退出时执行
-                if (free_list = inc::atom_swap(xref(g_free_list_queue[i_queue]), free_list); 
-                    free_list == nullptr){
-                    if (inc::thread_self::suspend();
-                        inc::atom_load(xref(g_gc_exit))){
-                        break;
-                    }
+                // 由于 suspend 只会让挂起信号量 -1，而 filter 线程可以多次调用 resume 让信号量多次 +1
+                if (inc::thread_self::suspend();
+                    inc::atom_load(xref(g_gc_exit))){
+                    break;
                 }
 
                 inc::cache_load();
