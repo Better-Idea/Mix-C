@@ -18,6 +18,10 @@ namespace mixc::chrono_private_day::inc{
 }
 
 namespace mixc::chrono_private_day::origin{
+    /**
+     * @brief 
+     * 天数，可以为负数，两个 date<> 的差 依赖此性质
+     */
     xstruct(
         xname(day),
         xprif(m_value, ixx)
@@ -25,8 +29,15 @@ namespace mixc::chrono_private_day::origin{
         day(ixx value = 0) : 
             m_value(value){}
 
-        template<class finalx_t , class fieldx>
-        day(inc::date<finalx_t, fieldx> value){
+        /**
+         * @brief
+         * 将日期转换成天数
+         * @tparam finalx_t value 最终类型
+         * @tparam fieldx_t value 存放年月日变量对应的类型
+         * @param value 日期
+         */
+        template<class finalx_t , class fieldx_t>
+        day(inc::date<finalx_t, fieldx_t> value){
             auto y = value.year() - 1;
             auto m = value.month() - 1;
             auto d = value.day();
@@ -49,6 +60,11 @@ namespace mixc::chrono_private_day::origin{
             return the;
         }
 
+        /**
+         * @brief 
+         * 将天数转回日期
+         * @tparam final_date_t 存在通过 年月日 构造的类型
+         */
         template<class final_date_t>
         requires(inc::has_constructor<final_date_t, void(u32, u32, u32)>)
         operator final_date_t() const {
