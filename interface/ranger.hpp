@@ -14,7 +14,9 @@
 #include"math/index_system.hpp"
 #include"meta/is_origin_array.hpp"
 #include"meta/is_origin_arrayx.hpp"
+#include"meta/is_origin_string.hpp"
 #include"meta/is_origin_stringx.hpp"
+#include"meta/is_same.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser") 
 
@@ -148,6 +150,31 @@ namespace mixc::interface_private_ranger{
         using item_t    = item_type;
         using final_t   = inc::adapter_array_access<the_t>;
 
+        template<inc::is_origin_array seq_t>
+        requires(
+            // 这里不使用 is_origin_array，因为对于原始数组可能会约束失败
+            inc::is_same<
+                inc::item_origin_of<seq_t>, item_t
+            > and
+
+            // 避免和字符串约束冲突
+            inc::is_origin_stringx<seq_t, item_t> == false
+        )
+        // 这里不使用 is_origin_stringx，因为对于原始数组可能会约束失败
+        constexpr ranger(seq_t const & ary) : 
+            ranger(ary, sizeof(seq_t) / sizeof(ary[0])){}
+
+        template<inc::is_origin_string seq_t>
+        requires(
+            // 这里不使用 is_origin_stringx，因为对于原始数组可能会约束失败
+            inc::is_same<
+                inc::item_origin_of<seq_t>, item_t
+            >
+        )
+        constexpr ranger(seq_t const & list) : 
+            ranger(list, sizeof(seq_t) / sizeof(list[0]) - 1){
+        }
+
         constexpr ranger(the_t const &) = default;
 
         constexpr ranger(item_t const * ptr, uxx len) :
@@ -159,21 +186,6 @@ namespace mixc::interface_private_ranger{
 
         constexpr ranger(inc::seqptr<item_t> const & seq) :
             ranger(seq, seq.length()){
-        }
-
-        template<class seq_t>
-        requires(inc::is_origin_stringx<seq_t, item_t>)
-        constexpr ranger(seq_t & list) : 
-            ranger(list, sizeof(seq_t) / sizeof(list[0]) - 1){
-        }
-
-        template<class seq_t>
-        requires(
-            inc::is_origin_arrayx<seq_t, item_t> and
-            inc::is_origin_stringx<seq_t, item_t> == false
-        )
-        constexpr ranger(seq_t & list) : 
-            ranger(list, sizeof(seq_t) / sizeof(list[0])){
         }
 
         item_t & operator[](uxx index){

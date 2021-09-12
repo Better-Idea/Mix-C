@@ -10,8 +10,11 @@
 #include"macro/xstruct.hpp"
 #include"math/index_system.hpp"
 #include"meta/is_initializer_listx.hpp"
+#include"meta/is_origin_array.hpp"
 #include"meta/is_origin_arrayx.hpp"
+#include"meta/is_origin_string.hpp"
 #include"meta/is_origin_stringx.hpp"
+#include"meta/is_same.hpp"
 #include"meta/item_origin_of.hpp"
 #pragma pop_macro("xuser")
 
@@ -45,26 +48,36 @@ namespace mixc::interface_private_seqptr{
         constexpr seqptr(the_t const & self) : 
             m_ptr(self.m_ptr), m_len(self.m_len){}
 
+        template<inc::is_origin_array seq_t>
+        requires(
+            // 这里不使用 is_origin_array，因为对于原始数组可能会约束失败
+            inc::is_same<
+                inc::item_origin_of<seq_t>, item_t
+            > and
+
+            // 避免和字符串约束冲突
+            inc::is_origin_stringx<seq_t, item_t> == false
+        )
+        // 这里不使用 is_origin_stringx，因为对于原始数组可能会约束失败
+        constexpr seqptr(seq_t const & ary) : 
+            seqptr(ary, sizeof(seq_t) / sizeof(ary[0])){}
+
+        template<inc::is_origin_string seq_t>
+        requires(
+            // 这里不使用 is_origin_stringx，因为对于原始数组可能会约束失败
+            inc::is_same<
+                inc::item_origin_of<seq_t>, item_t
+            >
+        )
+        constexpr seqptr(seq_t const & list) : 
+            seqptr(list, sizeof(seq_t) / sizeof(list[0]) - 1){
+        }
+
         constexpr seqptr(item_t const * ptr, uxx len) : 
             m_ptr((item_t *)ptr), m_len(len){}
 
         constexpr seqptr(inc::initializer_list<item_t> const & seq) :
             seqptr(seq.begin(), seq.size()){
-        }
-
-        template<class seq_t>
-        requires(inc::is_origin_stringx<seq_t, item_t>)
-        constexpr seqptr(seq_t & list) : 
-            seqptr(list, sizeof(seq_t) / sizeof(list[0]) - 1){
-        }
-
-        template<class seq_t>
-        requires(
-            inc::is_origin_arrayx<seq_t, item_t> and
-            inc::is_origin_stringx<seq_t, item_t> == false
-        )
-        constexpr seqptr(seq_t & list) : 
-            seqptr(list, sizeof(seq_t) / sizeof(list[0])){
         }
 
         template<class seq_t>
