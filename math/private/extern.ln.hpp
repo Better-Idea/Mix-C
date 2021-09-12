@@ -42,6 +42,11 @@ namespace mixc::math_ln{
             auto add    = pair[1];
             m          *= mdiv;
             sum        += add;
+
+            // 浮点误差，理论上 m 应该始终不小于 1
+            if (m < 1.0){
+                break;
+            }
         }
 
         // 由 ln'(x) = 1/x 可知 ln(1 + x) = x when x -> 1/inf 

@@ -52,6 +52,11 @@ namespace mixc::math_sqrt::origin{
             auto mul    = pair[1];
             m          *= mdiv;
             right      *= mul;
+
+            // 浮点误差，理论上 m 应该始终不小于 1
+            if (m < 1.0){
+                break;
+            }
         }
 
         // left -> 1 + 0.5 * (x - 1) when x -> 1
