@@ -6,16 +6,17 @@
 #define xuse_xdebug_fail            1
 #define xuse_xdebug_short_path      1
 
-#define xuse_mixc_allocator         1
-
 // 要求按 2 进制对齐
 #define xgc_queue_threshold         (xgc_filter_queue_depth / 64)
 
+#define __xlink(a,b)    a ## b
+#define __xlink2(a,b)   __xlink(a, b)
+
 // 在 xon 后面的枚举是启用 xdebug 打印的
-#define xon         xlink2(__enable, __COUNTER__)       = 0
+#define xon         __xlink2(__enable, __LINE__)       = 0
 
 // 在 xoff 后面的枚举是禁用 xdebug 打印的
-#define xoff        xlink2(__disable, __COUNTER__)      = -100000000
+#define xoff        __xlink2(__disable, __LINE__)      = -100000000
 
 enum : int{
     // docker/private/hashmap.hpp
