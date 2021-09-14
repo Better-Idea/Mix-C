@@ -147,6 +147,7 @@ namespace mixc::algo_heap_root{
 }
 
 namespace mixc::algo_heap_root::origin{
+    using inc::default_compare;
     using inc::default_compare_neg;
 }
 
