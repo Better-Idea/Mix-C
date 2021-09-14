@@ -9,12 +9,12 @@
 
 xuser::virtual_screen vscreen;
 
-extern void (*display)();
+void vdisplay(xuser::virtual_screen & vscreen);
 
 LRESULT CALLBACK event(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
     switch(message){
     case WM_LBUTTONUP:
-        display();
+        vdisplay(vscreen);
         break;
     default:
         return DefWindowProc(hwnd, message, wParam, lParam);
@@ -48,8 +48,8 @@ int WINAPI WinMain(
         return 0;
     }
 
-    auto width  = (480);
-    auto height = (320);
+    auto width  = (600);
+    auto height = (800);
     auto x      = (GetSystemMetrics(SM_CXSCREEN) - width ) / 2;
     auto y      = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
 
