@@ -198,7 +198,7 @@ struct filehub{
                 // owner_id 在哈希链表中是递增的，下一个 owner_id 大于前一个 owner_id
                 // 如果当前 owner_id > parent.id 则表示没找到匹配项
                 // 因为后面的 owner_id 都会大于 parent.id
-                if (owner_id < parent.id){
+                if (owner_id > parent.id){
                     break;
                 }
                 else{
