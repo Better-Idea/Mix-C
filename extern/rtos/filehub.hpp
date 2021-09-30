@@ -1,12 +1,9 @@
 #define xuser   mixc::powerful_cat
 #include"algo/hash.hpp"
 #include"define/base_type.hpp"
-#include"extern/rtos/task.hpp"
-#include"lang/cxx/compare_fastly.hpp"
 #include"lang/cxx/find.hpp"
 #include"lang/cxx/index_of_last.hpp"
 #include"lang/cxx.hpp"
-#include"math/index_system.hpp"
 #include"memop/cast.hpp"
 #include"memop/copy.hpp"
 #include"memop/swap.hpp"
@@ -15,7 +12,7 @@
 #define xread(block,field,...)                              \
     this->meta_partion_read(                                \
         block,                                              \
-        __VA_ARGS__ + offsetof(& meta_base_header::field),  \
+        __VA_ARGS__ + offsetof(& meta_dir_header::field),   \
         xref(field),                                        \
         sizeof(field)                                       \
     )
@@ -23,7 +20,7 @@
 #define xwrite(block,field,...)                             \
     this->meta_partion_write(                               \
         block,                                              \
-        __VA_ARGS__ + offsetof(& meta_base_header::field),  \
+        __VA_ARGS__ + offsetof(& meta_dir_header::field),   \
         xref(field),                                        \
         sizeof(field)                                       \
     )
@@ -203,7 +200,6 @@ struct filehub{
         auto name_length        = u08{};
         auto next               = aid{};
         auto prev               = aid{};
-        auto is_dir             = name[-1] == '/';
         auto i                  = this->hash(name, parent.id);
         auto head               = this->meta_hash_area_read(i);
 
@@ -268,8 +264,9 @@ struct filehub{
 
         // 如果不存在该目录/文件时创建
         // 创建时需要将当前目录/文件添加到父目录下
+        auto is_dir             = name[-1] == '/';
         auto offset             = is_dir ? uxx{} : 
-            offsetof(meta_dir_header::file_list) - offsetof(meta_dir_header::dir_list);
+            offsetof(& meta_dir_header::file_list) - offsetof(& meta_dir_header::dir_list);
         auto new_item           = this->alloc_block();
         auto left               = aid{};
         auto right              = new_item;
@@ -282,7 +279,7 @@ struct filehub{
 
         // 当 is_dir = true 时，此时 offset 为 0，dir_list 表示子目录链表
         // 当 is_dir = false 时，此时 offset 不为 0，dir_list + offset 指向 file_list，表示当前目录文件列表
-        if (xread(parent, dir_list, offset); dir_list.is_exist()){
+        if (xread(parent.image, dir_list, offset); dir_list.is_exist()){
             xread(dir_list, left);
             xread(dir_list, total);     // 先读取 total
             xwrite(dir_list, right);    // 再写入 right，避免写入 right 后覆盖 total 值
@@ -327,16 +324,18 @@ struct filehub{
 
         // 将 meta 刷新到磁盘
         // 如果需要插入到链表表首
-        if (this->meta_partion_write(new_item, 0, & meta, sizeof(meta)); head == prev){
+        if (this->meta_partion_write(new_item, 0, & meta, sizeof(meta)); head.block == prev.block){
             this->meta_hash_area_write(i, new_item);
         }
+        // 追加到链表上
         else{
             next                = new_item;
             xwrite(prev, next);
         }
 
+        // 新节点作为链表尾元
         dir_list                = new_item;
-        xwrite(parent, dir_list, offset);
+        xwrite(parent.image, dir_list, offset);
 
         return mem_handler{
             .image = new_item,
@@ -344,10 +343,10 @@ struct filehub{
         };
     }
 
-    void open_file(inc::c08 path, bool open_create = false){
+    mem_handler open_file(inc::c08 path, bool open_create = false){
         // 至少包含一个 '/' 和一个字符的名称
         if (path.length() <= 2){
-            return;
+            return mem_handler{};
         }
 
         auto i_end              = path.index_of_last('/');
@@ -356,14 +355,24 @@ struct filehub{
         // 缺失文件名
         // path 不存在 '/' 或者存在于最后一个字符
         if (i_end >= path.length() - 1){
-            return;
+            return mem_handler{};
         }
 
         // 可能没有目录直接到文件   /file
         // 可能经过目录再到文件     /dir/.../file
-        auto folder_path        = inc::c08{path}.length(i_end);
+        auto folder_path        = inc::c08{path}.length(i_end + 1);
         auto file_name          = inc::c08{path}.backward(i_end + 1);
-        auto parent             = this->open_dir(folder_path, open_create);
+
+        if (file_name.length() >= max_name_length){
+            return mem_handler{};
+        }
+
+        if (auto parent = this->open_dir(folder_path, open_create); parent.is_exist()){
+            return this->open(parent, file_name, open_create);
+        }
+        else{
+            return mem_handler{};
+        }
     }
 
     mem_handler open_dir(inc::c08 path, bool open_create = false){
@@ -396,10 +405,10 @@ struct filehub{
 
         path.find('/', [&](uxx index){
             if (i_end           = index, 
-                folder          = inc::c08{path}.backward(i_begin).length(i_end - i_begin);
-                folder.is_empty() == false
+                folder          = inc::c08{path}.backward(i_begin).length(i_end - i_begin + 1/*保留末尾 '/' */);
+                i_end != i_begin
             ){
-                parent          = this->open_dir(parent, folder, open_create);
+                parent          = this->open(parent, folder, open_create);
             }
 
             i_begin             = i_end + 1;    // 跳到 '/' 后边一个位置
@@ -453,10 +462,3 @@ private:
     aid     m_hash_area;
 };
 
-void main(){
-    
-}
-
-/*
-
-*/
