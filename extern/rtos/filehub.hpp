@@ -56,7 +56,16 @@ struct meta_base_header{
     u32     owner_id;
     aid     next;
     u32     self_id;
-    aid     top;
+    aid     left;
+
+    // 当前节点不是子目录/文件列表尾元时，该联合体表示 right，下一个节点
+    // 否则表示 total，当前链表的长度
+    union{
+        aid right;
+        u32 total;
+    };
+
+    aid     prev;
 
     mct     create_time;
     u08     write_times;
@@ -65,26 +74,13 @@ private:
 
 public:
     u08     name_length;
-    u08     name[23];
+    u08     name[15];
     aid     name_next;
 };
 
 struct meta_name_block{
     u08     name[bytes_of_block - sizeof(aid)];
     aid     name_next;
-};
-
-struct meta_aid_block{
-    enum{
-        max_items = (bytes_of_block - sizeof(aid)) / sizeof(aid)
-    };
-
-    aid     item_next;
-    aid     item[max_items - 1];
-
-    // 约定：
-    // 该字段也是 item[] 的一部分，在 item 未存满时用于存放链表元素总数
-    aid     total_count; 
 };
 
 struct meta_file_header : meta_base_header{
@@ -95,14 +91,20 @@ private:
 };
 
 struct meta_dir_header : meta_base_header{
-    aid     file_list_tail;
-    aid     dir_list_tail;
+    aid     file_list;
+    aid     dir_list;
 private:
     u32     reserved;
 };
 
 struct meta_multi_table{
-    aid     items[16];
+    aid     items[15];
+
+    // 约定：
+    // 该字段也是 item[] 的一部分，在 item 未存满时用于存放链表元素总数
+    // meta_multi_table::items 指向下一级 meta_multi_table
+    // 只有最上级 meta_multi_table 存在 total_count
+    u32     total_count;
 };
 
 typedef struct block_range{
@@ -159,6 +161,14 @@ struct filehub{
 
     }
 
+    aid meta_hash_area_read(uxx index){
+
+    }
+
+    void meta_hash_area_write(uxx index, aid value){
+
+    }
+
     void meta_partion_read(aid block, uxx offset, void * buffer, uxx bytes){
         
     }
@@ -177,33 +187,37 @@ struct filehub{
         
     }
 
-    template<class create_subpath_t>
-    mem_handler open(mem_handler parent, inc::c08 name, bool open_create, create_subpath_t const & create){
+    mem_handler open(mem_handler parent, inc::c08 name, bool open_create){
         // TODO：
         if (name.length() >= max_name_length){
 
         }
 
-        auto is_dir             = name[-1] == '/';
+        // 场景：
+        // 1.当前 hash 首节点无元素
+        // 2.当前 hash 首节点有元素，插入到链表表首
+        // 3.当前 hash 首节点有元素，插入到链表表中
+        // 4.当前 hash 首节点有元素，插入到链表表尾
         auto owner_id           = u32{};
         auto self_id            = u32{};
         auto name_length        = u08{};
+        auto next               = aid{};
+        auto prev               = aid{};
+        auto is_dir             = name[-1] == '/';
         auto i                  = this->hash(name, parent.id);
-        auto next               = aid{ m_hash_area.block + i };
+        auto head               = this->meta_hash_area_read(i);
 
-        for(; next.is_exist(); xread(next, next)){
+        for(next = head; next.is_exist(); prev = next, xread(next, next)){
             // 初次判断，如果当前节点的所有者不是 parent，就找下一个元素
-            if (xread(next, owner_id); owner_id != parent.id){
-                // 约定：
-                // owner_id 在哈希链表中是递增的，下一个 owner_id 大于前一个 owner_id
-                // 如果当前 owner_id > parent.id 则表示没找到匹配项
-                // 因为后面的 owner_id 都会大于 parent.id
-                if (owner_id > parent.id){
-                    break;
-                }
-                else{
-                    continue;
-                }
+            // 约定：
+            // owner_id 在哈希链表中是递增的，下一个 owner_id 大于前一个 owner_id
+            // 如果当前 owner_id > parent.id 则表示没找到匹配项
+            // 因为后面的 owner_id 都会大于 parent.id
+            if (xread(next, owner_id); owner_id < parent.id){
+                continue;
+            }
+            else if (owner_id < parent.id){
+                break;
             }
 
             // 如果名称长度不匹配就不用再与比较名称了
@@ -254,18 +268,34 @@ struct filehub{
 
         // 如果不存在该目录/文件时创建
         // 创建时需要将当前目录/文件添加到父目录下
-        auto mab                = meta_aid_block{};
-        auto meta               = meta_dir_header{};
+        auto offset             = is_dir ? uxx{} : 
+            offsetof(meta_dir_header::file_list) - offsetof(meta_dir_header::dir_list);
         auto new_item           = this->alloc_block();
+        auto left               = aid{};
+        auto right              = new_item;
+        auto dir_list           = aid{};
+        auto total              = u32{};
+        auto meta               = meta_dir_header{};
         meta.owner_id           = parent.id;
         meta.next               = next;
         meta.self_id            = this->new_id();
-        meta.top                = top;
+
+        // 当 is_dir = true 时，此时 offset 为 0，dir_list 表示子目录链表
+        // 当 is_dir = false 时，此时 offset 不为 0，dir_list + offset 指向 file_list，表示当前目录文件列表
+        if (xread(parent, dir_list, offset); dir_list.is_exist()){
+            xread(dir_list, left);
+            xread(dir_list, total);     // 先读取 total
+            xwrite(dir_list, right);    // 再写入 right，避免写入 right 后覆盖 total 值
+        }
+
+        meta.left               = dir_list;
+        meta.total              = total + 1;
+        meta.prev               = prev;
         meta.create_time        = this->now();
         meta.write_times        = 0;
         meta.name_length        = name.length();
         meta.name_next          = aid{};
-        
+
         if (name.length() <= sizeof(meta_base_header::name)){
             inc::copy_unsafe(meta.name, name, name.length());
         }
@@ -295,75 +325,19 @@ struct filehub{
             }
         }
 
-        if (is_dir){
-            auto dir_list_tail  = aid{};
-            auto item_next      = aid{};
-            auto item           = new_item;
-            auto total_count    = aid{};
-            meta.file_list_tail = aid{};
-            meta.dir_list_tail  = aid{};
-
-            // 读取父节点子文件夹链表
-            // 如果不存在就创建
-            if (xread(parent, dir_list_tail);
-                dir_list_tail.is_exist() == false
-            ){
-                dir_list_tail   = this->alloc_block();
-                total_count.any = 1;
-                total_count.block
-                                = 1;
-                xwrite(dir_list_tail, item_next);
-                xwrite(dir_list_tail, item);
-                xwrite(dir_list_tail, total_count);
-                xwrite(parent, dir_list_tail);
-            }
-            else{
-                // 先读取 total_count，因为它是 item[] 的一部分
-                // 先写入 item[] 会将 total_count 覆盖
-                xread(dir_list_tail, total_count);
-                xwrite(dir_list_tail, item, sizeof(item) * total_count.any);
-                total_count.any++;
-                total_count.block++;
-            }
-
-            // 如果 dir_list_tail 节点已经写满了，就创建一个新的 tail 节点来存放 total_count 信息
-            if (dir_list_tail.any == meta_aid_block::max_items){
-                auto new_tail   = this->alloc_block();
-                item_next       = dir_list_tail;
-                item_next.any   = 0;
-                dir_list_tail   = new_tail;
-                xwrite(new_tail, item_next);
-                xwrite(new_tail, total_count);
-                xwrite(parent, dir_list_tail);
-            }
-            else{
-                xwrite(dir_list_tail, total_count);
-            }
+        // 将 meta 刷新到磁盘
+        // 如果需要插入到链表表首
+        if (this->meta_partion_write(new_item, 0, & meta, sizeof(meta)); head == prev){
+            this->meta_hash_area_write(i, new_item);
         }
         else{
-            auto & file         = inc::cast<meta_dir_header>(meta);
-            auto file_list_tail = aid{};
-
-            if (xread(parent, file_list_tail); 
-                file_list_tail.is_exist() == false
-            ){
-                file_list_tail  = this->alloc_block();
-                xwrite(parent, file_list_tail);
-            }
+            next                = new_item;
+            xwrite(prev, next);
         }
+
+        dir_list                = new_item;
+        xwrite(parent, dir_list, offset);
         return new_item;
-    }
-
-    mem_handler open_file(mem_handler parent, inc::c08 name, bool open_create = false){
-        return this->open(parent, name, open_create, [&](){
-            
-        });
-    }
-
-    mem_handler open_dir(mem_handler parent, inc::c08 name, bool open_create = false){
-        return this->open(parent, name, open_create, [&](aid next, aid top){
-            
-        });
     }
 
     void open_file(inc::c08 path, bool open_create = false){
