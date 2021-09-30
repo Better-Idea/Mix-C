@@ -337,7 +337,11 @@ struct filehub{
 
         dir_list                = new_item;
         xwrite(parent, dir_list, offset);
-        return new_item;
+
+        return mem_handler{
+            .image = new_item,
+            .id = meta.self_id,
+        };
     }
 
     void open_file(inc::c08 path, bool open_create = false){
